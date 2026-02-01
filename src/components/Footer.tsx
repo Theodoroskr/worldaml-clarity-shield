@@ -22,8 +22,8 @@ const footerLinks = {
   ],
   resources: [
     { href: "/support", label: "Support" },
+    { href: "/faq", label: "FAQ" },
     { href: "/blog", label: "Blog" },
-    { href: "/compliance-hub", label: "Compliance Hub" },
     { href: "/status", label: "System Status" },
   ],
 };
@@ -37,7 +37,7 @@ export const Footer = () => {
           <div className="col-span-2">
             <Logo size="md" />
             <p className="mt-4 text-body-sm text-text-secondary max-w-xs">
-              Enterprise-grade AML compliance infrastructure for regulated businesses worldwide.
+              API-first compliance platform for KYC, KYB, AML screening, ongoing monitoring and risk assessment.
             </p>
           </div>
 
