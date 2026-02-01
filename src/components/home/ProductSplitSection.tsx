@@ -41,7 +41,7 @@ export const ProductSplitSection = () => {
           {products.map((product) => (
             <div
               key={product.title}
-              className="p-8 rounded-lg border border-divider bg-card"
+              className="p-8 rounded-lg border border-divider bg-card border-l-4 border-l-accent"
             >
               <h3 className="text-subheadline text-navy mb-3">
                 {product.title}

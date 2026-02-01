@@ -18,8 +18,8 @@ export const TrustArchitectureSection = () => {
           <ul className="space-y-4">
             {trustPoints.map((point) => (
               <li key={point} className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-navy/5 flex items-center justify-center mt-0.5">
-                  <Check className="w-4 h-4 text-navy" />
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center mt-0.5">
+                  <Check className="w-4 h-4 text-accent" />
                 </div>
                 <span className="text-body text-text-secondary">{point}</span>
               </li>
