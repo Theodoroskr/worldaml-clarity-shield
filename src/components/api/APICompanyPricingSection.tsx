@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Check, Zap, Shield, Building2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 const sharedFeatures = [
   "Individual AML screening",
@@ -59,6 +61,8 @@ const plans = [
 ];
 
 export const APICompanyPricingSection = () => {
+  const [isAnnual, setIsAnnual] = useState(true);
+
   return (
     <section className="py-20 lg:py-28 bg-secondary/30">
       <div className="container-enterprise">
@@ -72,7 +76,7 @@ export const APICompanyPricingSection = () => {
         </div>
 
         {/* Shared Features */}
-        <div className="max-w-2xl mx-auto mb-12">
+        <div className="max-w-2xl mx-auto mb-8">
           <p className="text-body-sm font-medium text-foreground text-center mb-4">
             Included in all plans:
           </p>
@@ -84,6 +88,34 @@ export const APICompanyPricingSection = () => {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Billing Toggle */}
+        <div className="flex items-center justify-center gap-3 mb-12">
+          <span
+            className={`text-body-sm font-medium transition-colors ${
+              !isAnnual ? "text-foreground" : "text-muted-foreground"
+            }`}
+          >
+            Monthly
+          </span>
+          <Switch
+            checked={isAnnual}
+            onCheckedChange={setIsAnnual}
+            aria-label="Toggle billing period"
+          />
+          <span
+            className={`text-body-sm font-medium transition-colors ${
+              isAnnual ? "text-foreground" : "text-muted-foreground"
+            }`}
+          >
+            Annual
+          </span>
+          {isAnnual && (
+            <span className="ml-1 px-2 py-0.5 bg-primary/10 text-primary text-body-xs font-medium rounded-full">
+              Save up to 17%
+            </span>
+          )}
         </div>
 
         {/* Pricing Cards */}
@@ -125,24 +157,25 @@ export const APICompanyPricingSection = () => {
                     <>
                       <div className="flex items-baseline gap-1">
                         <span className="text-display-xs font-bold text-foreground">
-                          {plan.annualPrice}
+                          {isAnnual ? plan.annualPrice : plan.monthlyPrice}
                         </span>
                         <span className="text-body-sm text-muted-foreground">
                           /month
                         </span>
                       </div>
                       <p className="text-body-sm text-muted-foreground mt-1">
-                        {plan.annualTotal} billed annually
+                        {isAnnual
+                          ? `${plan.annualTotal} billed annually`
+                          : "Billed monthly"}
                       </p>
-                      <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-primary/10 rounded text-body-sm">
-                        <span className="text-primary font-medium">
-                          Save {plan.monthlySavings}/mo
-                        </span>
-                        <span className="text-muted-foreground">vs monthly</span>
-                      </div>
-                      <p className="text-body-sm text-muted-foreground mt-2">
-                        Or {plan.monthlyPrice}/month billed monthly
-                      </p>
+                      {isAnnual && (
+                        <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-primary/10 rounded text-body-sm">
+                          <span className="text-primary font-medium">
+                            Save {plan.monthlySavings}/mo
+                          </span>
+                          <span className="text-muted-foreground">vs monthly</span>
+                        </div>
+                      )}
                     </>
                   ) : (
                     <div className="text-display-xs font-bold text-foreground">
