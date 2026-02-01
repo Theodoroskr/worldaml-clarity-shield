@@ -3,6 +3,10 @@ import { ArrowRight, Shield, Users, Globe, Award } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import iso9001Badge from "@/assets/iso-9001-badge.png";
+import iso27001Badge from "@/assets/iso-27001-badge.png";
+import iso22301Badge from "@/assets/iso-22301-badge.png";
+import infocreditLogo from "@/assets/infocredit-logo.png";
 
 const values = [
   {
@@ -24,6 +28,27 @@ const values = [
     icon: Award,
     title: "Excellence",
     description: "We pursue excellence in everything we do, from API design to customer support.",
+  },
+];
+
+const certifications = [
+  {
+    badge: iso9001Badge,
+    standard: "ISO 9001:2015",
+    name: "Quality System",
+    alt: "ISO 9001:2015 Quality System Certification",
+  },
+  {
+    badge: iso27001Badge,
+    standard: "ISO 27001:2022",
+    name: "Information Security Management System",
+    alt: "ISO 27001:2022 Information Security Management System Certification",
+  },
+  {
+    badge: iso22301Badge,
+    standard: "ISO 22301:2019",
+    name: "Business Continuity Management System",
+    alt: "ISO 22301:2019 Business Continuity Management System Certification",
   },
 ];
 
@@ -49,6 +74,38 @@ const About = () => {
                 of building robust AML programs, WorldAML combines deep regulatory expertise with 
                 modern engineering to deliver enterprise-grade compliance infrastructure.
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Part of InfoCredit Group */}
+        <section className="section-padding bg-surface-subtle">
+          <div className="container-enterprise">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                <div className="flex-shrink-0">
+                  <a 
+                    href="https://www.infocreditgroup.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <img 
+                      src={infocreditLogo} 
+                      alt="InfoCredit Group" 
+                      className="h-12 md:h-16 w-auto"
+                    />
+                  </a>
+                </div>
+                <div>
+                  <h2 className="text-subheadline text-navy mb-3">Part of InfoCredit Group</h2>
+                  <p className="text-body text-text-secondary">
+                    WorldAML is a product of InfoCredit Group Ltd, a leading provider of business intelligence 
+                    and compliance solutions. With decades of experience in credit risk management and regulatory 
+                    compliance, InfoCredit Group brings deep expertise in data quality, regulatory frameworks, 
+                    and enterprise-grade infrastructure to the WorldAML platform.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -94,8 +151,38 @@ const About = () => {
           </div>
         </section>
 
-        {/* Stats */}
+        {/* ISO Certifications */}
         <section className="section-padding bg-surface-subtle">
+          <div className="container-enterprise">
+            <div className="text-center mb-12">
+              <h2 className="text-headline text-navy mb-4">Certified Management Systems</h2>
+              <p className="text-body-lg text-text-secondary max-w-2xl mx-auto">
+                Our commitment to quality, security, and business continuity is backed by internationally 
+                recognized certifications.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {certifications.map((cert) => (
+                <div
+                  key={cert.standard}
+                  className="p-6 rounded-lg border border-divider bg-card text-center"
+                >
+                  <img 
+                    src={cert.badge} 
+                    alt={cert.alt}
+                    className="h-16 md:h-20 w-auto mx-auto mb-4"
+                  />
+                  <h3 className="text-body font-semibold text-navy mb-1">{cert.standard}</h3>
+                  <p className="text-body-sm text-text-secondary">{cert.name}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Stats */}
+        <section className="section-padding bg-background">
           <div className="container-enterprise">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
               {[
@@ -114,7 +201,7 @@ const About = () => {
         </section>
 
         {/* CTA */}
-        <section className="section-padding bg-background">
+        <section className="section-padding bg-surface-subtle">
           <div className="container-enterprise">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-headline text-navy mb-4">Join Our Team</h2>
