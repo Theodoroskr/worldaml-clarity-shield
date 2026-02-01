@@ -38,9 +38,9 @@ export const LogoIcon = ({ className, size = "md" }: { className?: string; size?
 // Full logo with wordmark
 export const Logo = ({ className, iconOnly = false, size = "md" }: LogoProps) => {
   const textSizeMap = {
-    sm: "text-lg",
-    md: "text-xl",
-    lg: "text-2xl",
+    sm: { world: "text-sm", aml: "text-base" },
+    md: { world: "text-base", aml: "text-lg" },
+    lg: { world: "text-lg", aml: "text-xl" },
   };
 
   if (iconOnly) {
@@ -50,9 +50,14 @@ export const Logo = ({ className, iconOnly = false, size = "md" }: LogoProps) =>
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <LogoIcon size={size} className="text-navy" />
-      <span className={cn("font-semibold tracking-tight text-navy", textSizeMap[size])}>
-        World<span className="font-bold">AML</span>
-      </span>
+      <div className="flex flex-col leading-none">
+        <span className={cn("font-semibold tracking-tight text-navy", textSizeMap[size].world)}>
+          World
+        </span>
+        <span className={cn("font-bold tracking-tight text-navy", textSizeMap[size].aml)}>
+          AML
+        </span>
+      </div>
     </div>
   );
 };
