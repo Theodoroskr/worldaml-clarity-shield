@@ -8,43 +8,43 @@ const industries = [
   {
     icon: Building2,
     title: "Banks & EMIs",
-    description: "Full regulatory compliance for traditional banking and electronic money institutions. Meet your obligations under AML directives with comprehensive screening and monitoring.",
-    features: ["Customer Due Diligence", "Transaction Monitoring", "Regulatory Reporting"],
+    description: "Full regulatory compliance via a single API-first platform. KYC onboarding, AML screening and ongoing monitoring integrated into your core banking systems.",
+    features: ["KYC/KYB Onboarding", "AML Screening", "Ongoing Monitoring"],
     link: "/industries/banking",
   },
   {
     icon: Wallet,
     title: "Fintechs",
-    description: "Scalable AML solutions that grow with your business. Fast integration, flexible APIs, and pricing that makes sense for high-growth companies.",
-    features: ["API-First Integration", "Scalable Infrastructure", "Startup-Friendly Pricing"],
+    description: "Scalable compliance platform that grows with your business. Embed KYC/KYB, screening and monitoring directly into your product via API.",
+    features: ["API-First Integration", "Scalable Platform", "Growth-Friendly Pricing"],
     link: "/industries/fintech",
   },
   {
     icon: Bitcoin,
     title: "Crypto & Digital Assets",
-    description: "VASP compliance made simple. Cryptocurrency address screening, FATF travel rule support, and specialized risk scoring for digital asset businesses.",
-    features: ["Wallet Screening", "Travel Rule Support", "VASP Compliance"],
+    description: "VASP compliance via API. KYC onboarding, wallet screening, FATF travel rule support and risk-based decisioning for digital asset businesses.",
+    features: ["KYC Onboarding", "Wallet Screening", "Travel Rule Support"],
     link: "/industries/crypto",
   },
   {
     icon: Gamepad2,
     title: "Gaming & Gambling",
-    description: "Player verification and ongoing monitoring for regulated gaming operators. Meet licensing requirements while providing seamless player experiences.",
-    features: ["Player Verification", "Self-Exclusion Checks", "Source of Funds"],
+    description: "Player KYC verification and ongoing AML monitoring for regulated gaming operators. API or platform UI workflows for seamless player experiences.",
+    features: ["Player KYC", "Ongoing Monitoring", "Source of Funds"],
     link: "/industries/gaming",
   },
   {
     icon: Scale,
     title: "Legal & Fiduciary",
-    description: "Client due diligence for law firms, trust companies, and corporate service providers. Protect your practice and meet professional obligations.",
-    features: ["Client Screening", "Matter-Level Checks", "Audit Documentation"],
+    description: "Client KYC/KYB onboarding and AML screening for law firms, trust companies and corporate service providers. Full audit trail via API or platform.",
+    features: ["Client KYC/KYB", "AML Screening", "Audit Documentation"],
     link: "/industries/legal",
   },
   {
     icon: CreditCard,
     title: "Payment Providers",
-    description: "Transaction monitoring and merchant screening for PSPs and acquirers. Identify high-risk merchants and suspicious transaction patterns.",
-    features: ["Merchant Screening", "Transaction Analysis", "Chargeback Prevention"],
+    description: "Merchant KYB onboarding, AML screening and transaction monitoring for PSPs and acquirers. Embed compliance directly into your merchant workflows.",
+    features: ["Merchant KYB", "AML Screening", "Risk Monitoring"],
     link: "/industries/payments",
   },
 ];
@@ -62,8 +62,9 @@ const Industries = () => {
                 Industry Solutions
               </h1>
               <p className="text-body-lg text-text-secondary">
-                WorldAML serves regulated businesses across the financial services spectrum. 
-                Our flexible platform adapts to your specific compliance requirements and workflows.
+                WorldAML is an API-first compliance platform serving regulated businesses across 
+                the financial services spectrum. Integrate KYC/KYB onboarding, AML screening 
+                and monitoring directly into your systems, or use our platform UI.
               </p>
             </div>
           </div>

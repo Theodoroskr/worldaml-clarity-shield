@@ -18,13 +18,13 @@ export const HeroSection = () => {
           
           {/* Headline */}
           <h1 className="text-display-lg text-navy mb-6 animate-slide-up text-balance">
-            Enterprise-Grade AML Compliance, Delivered via API
+            Enterprise-Grade KYC, KYB & AML Compliance Platform, Delivered via API
           </h1>
           
           {/* Subheadline */}
           <p className="text-body-lg text-text-secondary max-w-2xl mb-8 animate-fade-in-delay">
-            Real-time sanctions screening, risk assessment, and continuous monitoring. 
-            A single API for global AML compliance that scales with your business.
+            A single, API-first platform for KYC and KYB onboarding, real-time AML screening, 
+            continuous monitoring and risk-based decisioning — built for regulated organisations.
           </p>
           
           {/* CTAs */}

@@ -12,17 +12,17 @@ import {
 const plans = [
   {
     name: "WorldAML Basic",
-    description: "For startups and small businesses getting started with AML compliance.",
+    description: "For startups and small businesses getting started with compliance. Full API access included.",
     price: "Contact Sales",
     priceSubtext: "Billed annually, prepaid",
     features: [
-      { text: "AML Screening API", included: true },
-      { text: "Global Sanctions Coverage", included: true },
-      { text: "PEP Screening", included: true },
+      { text: "Full Platform API Access", included: true },
+      { text: "Basic KYC Onboarding", included: true },
+      { text: "AML Screening (Sanctions & PEP)", included: true },
       { text: "Basic Adverse Media", included: true },
       { text: "Ongoing Monitoring", included: false, tooltip: "Available in Compliance plan" },
-      { text: "Risk Assessment Tools", included: false },
-      { text: "ID Verification", included: false },
+      { text: "KYB Business Onboarding", included: false },
+      { text: "Risk Assessment & Decisioning", included: false },
       { text: "Dedicated Support", included: false },
     ],
     cta: "Contact Sales",
@@ -30,17 +30,17 @@ const plans = [
   },
   {
     name: "WorldAML Compliance",
-    description: "For growing regulated businesses with full compliance requirements.",
+    description: "Full platform access for growing regulated businesses. Complete compliance lifecycle via API.",
     price: "Contact Sales",
     priceSubtext: "Billed annually, prepaid",
     features: [
-      { text: "AML Screening API", included: true },
-      { text: "Global Sanctions Coverage", included: true },
-      { text: "PEP Screening", included: true },
+      { text: "Full Platform API Access", included: true },
+      { text: "KYC & KYB Onboarding", included: true },
+      { text: "AML Screening (Full Coverage)", included: true },
       { text: "Advanced Adverse Media", included: true },
       { text: "Ongoing Monitoring", included: true },
-      { text: "Risk Assessment Tools", included: true },
-      { text: "ID Verification Basic", included: true },
+      { text: "Risk Assessment & Decisioning", included: true },
+      { text: "Document Verification", included: true },
       { text: "Priority Support", included: true },
     ],
     cta: "Contact Sales",
@@ -49,12 +49,12 @@ const plans = [
   },
   {
     name: "WorldAML Enterprise",
-    description: "For large-scale operations with custom requirements and dedicated SLAs.",
+    description: "Full platform with custom SLAs and dedicated support. API and UI access for your entire organisation.",
     price: "Custom",
     priceSubtext: "Tailored to your needs",
     features: [
       { text: "Everything in Compliance", included: true },
-      { text: "Custom Integration Support", included: true },
+      { text: "Custom API Integration Support", included: true },
       { text: "Dedicated Account Manager", included: true },
       { text: "Custom SLA with Defined Response Times", included: true },
       { text: "On-Premise Deployment Option", included: true },
@@ -80,8 +80,9 @@ const Pricing = () => {
                 Simple, Transparent Pricing
               </h1>
               <p className="text-body-lg text-text-secondary mb-8">
-                Choose the plan that fits your compliance needs. All plans are billed 
-                annually and include full API access with predictable pricing.
+                Choose the plan that fits your compliance needs. All plans include full API 
+                access to the WorldAML compliance platform — KYC/KYB onboarding, AML screening, 
+                monitoring and risk assessment.
               </p>
             </div>
           </div>
