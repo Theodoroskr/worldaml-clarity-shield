@@ -1,22 +1,23 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, FileText, Code } from "lucide-react";
+import { ArrowRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const codeExample = `// Screen an individual for AML risk
-const response = await fetch('https://api.worldaml.com/v1/screen/individual', {
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    name: "John Smith",
-    dateOfBirth: "1985-03-15",
-    nationality: "GB"
-  })
-});
-
-const { riskScore, matches, monitoring } = await response.json();`;
+const codeExample = `// Screen an entity for AML risk
+const response = await fetch(
+  'https://api.worldaml.com/v1/screen',
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer YOUR_API_KEY',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      name: "Acme Holdings Ltd",
+      type: "company",
+      jurisdiction: "GB"
+    })
+  }
+);`;
 
 export const APIHeroSection = () => {
   return (
@@ -24,16 +25,15 @@ export const APIHeroSection = () => {
       <div className="container-enterprise">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 text-caption font-medium text-teal bg-teal/10 rounded-full">
-              <Code className="w-3.5 h-3.5" />
-              API-First Infrastructure
-            </div>
+            <p className="text-caption font-medium text-accent mb-4">
+              WorldAML API
+            </p>
             <h1 className="text-display text-navy mb-6">
-              Enterprise AML Screening & Monitoring, Delivered via API
+              AML Screening & Monitoring Infrastructure for Developers
             </h1>
             <p className="text-body-lg text-text-secondary mb-8">
-              Embed real-time AML screening, ongoing monitoring and risk assessment for 
-              individuals and companies into your onboarding and compliance workflows.
+              Embed real-time AML screening, ongoing monitoring and risk assessment 
+              for individuals and companies into your compliance workflows.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild>
@@ -63,6 +63,7 @@ export const APIHeroSection = () => {
                 <div className="w-3 h-3 rounded-full bg-red-500/60" />
                 <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
                 <div className="w-3 h-3 rounded-full bg-green-500/60" />
+                <span className="ml-2 text-caption text-slate-light/60">Request</span>
               </div>
               <pre className="text-body-sm text-slate-light overflow-x-auto">
                 <code>{codeExample}</code>
