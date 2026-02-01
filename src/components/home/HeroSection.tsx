@@ -10,9 +10,40 @@ const NetworkGlobeVisual = () => (
     xmlns="http://www.w3.org/2000/svg"
     className="w-full h-full"
   >
+    <style>
+      {`
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 1; r: 5; }
+          50% { opacity: 0.7; r: 8; }
+        }
+        @keyframes pulse-ring {
+          0% { opacity: 0.4; r: 8; }
+          100% { opacity: 0; r: 24; }
+        }
+        @keyframes connection-flow {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.6; }
+        }
+        @keyframes node-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.6; }
+        }
+        .center-node { animation: pulse-glow 3s ease-in-out infinite; }
+        .pulse-ring { animation: pulse-ring 3s ease-out infinite; }
+        .primary-connection { animation: connection-flow 4s ease-in-out infinite; }
+        .secondary-connection { animation: connection-flow 4s ease-in-out infinite 0.5s; }
+        .tertiary-connection { animation: connection-flow 4s ease-in-out infinite 1s; }
+        .secondary-node { animation: node-pulse 4s ease-in-out infinite 0.3s; }
+        .tertiary-node { animation: node-pulse 4s ease-in-out infinite 0.6s; }
+      `}
+    </style>
+    
     {/* Outer globe circle */}
     <circle cx="200" cy="200" r="150" stroke="currentColor" strokeWidth="1" className="text-navy/20" />
     <circle cx="200" cy="200" r="120" stroke="currentColor" strokeWidth="0.5" className="text-navy/10" />
+    
+    {/* Center pulse ring */}
+    <circle cx="200" cy="200" r="8" className="fill-accent/20 pulse-ring" />
     
     {/* Network nodes - distributed globally */}
     {/* Core nodes */}
@@ -20,19 +51,21 @@ const NetworkGlobeVisual = () => (
     <circle cx="200" cy="320" r="4" className="fill-navy" />
     <circle cx="80" cy="200" r="4" className="fill-navy" />
     <circle cx="320" cy="200" r="4" className="fill-navy" />
-    <circle cx="200" cy="200" r="5" className="fill-accent" />
+    
+    {/* Center node with glow */}
+    <circle cx="200" cy="200" r="5" className="fill-accent center-node" />
     
     {/* Secondary nodes */}
-    <circle cx="130" cy="120" r="3.5" className="fill-navy" />
-    <circle cx="270" cy="120" r="3.5" className="fill-navy" />
-    <circle cx="130" cy="280" r="3.5" className="fill-navy" />
-    <circle cx="270" cy="280" r="3.5" className="fill-navy" />
+    <circle cx="130" cy="120" r="3.5" className="fill-navy secondary-node" />
+    <circle cx="270" cy="120" r="3.5" className="fill-navy secondary-node" />
+    <circle cx="130" cy="280" r="3.5" className="fill-navy secondary-node" />
+    <circle cx="270" cy="280" r="3.5" className="fill-navy secondary-node" />
     
     {/* Tertiary nodes */}
-    <circle cx="160" cy="160" r="2.5" className="fill-navy/70" />
-    <circle cx="240" cy="160" r="2.5" className="fill-navy/70" />
-    <circle cx="160" cy="240" r="2.5" className="fill-navy/70" />
-    <circle cx="240" cy="240" r="2.5" className="fill-navy/70" />
+    <circle cx="160" cy="160" r="2.5" className="fill-navy/70 tertiary-node" />
+    <circle cx="240" cy="160" r="2.5" className="fill-navy/70 tertiary-node" />
+    <circle cx="160" cy="240" r="2.5" className="fill-navy/70 tertiary-node" />
+    <circle cx="240" cy="240" r="2.5" className="fill-navy/70 tertiary-node" />
     
     {/* Outer edge nodes */}
     <circle cx="110" cy="170" r="2" className="fill-navy/50" />
@@ -45,22 +78,22 @@ const NetworkGlobeVisual = () => (
     <circle cx="230" cy="300" r="2" className="fill-navy/50" />
     
     {/* Primary connections to center */}
-    <line x1="200" y1="80" x2="200" y2="200" stroke="currentColor" strokeWidth="0.8" className="text-navy/30" />
-    <line x1="200" y1="200" x2="200" y2="320" stroke="currentColor" strokeWidth="0.8" className="text-navy/30" />
-    <line x1="80" y1="200" x2="200" y2="200" stroke="currentColor" strokeWidth="0.8" className="text-navy/30" />
-    <line x1="200" y1="200" x2="320" y2="200" stroke="currentColor" strokeWidth="0.8" className="text-navy/30" />
+    <line x1="200" y1="80" x2="200" y2="200" stroke="currentColor" strokeWidth="0.8" className="text-navy/30 primary-connection" />
+    <line x1="200" y1="200" x2="200" y2="320" stroke="currentColor" strokeWidth="0.8" className="text-navy/30 primary-connection" />
+    <line x1="80" y1="200" x2="200" y2="200" stroke="currentColor" strokeWidth="0.8" className="text-navy/30 primary-connection" />
+    <line x1="200" y1="200" x2="320" y2="200" stroke="currentColor" strokeWidth="0.8" className="text-navy/30 primary-connection" />
     
     {/* Diagonal connections to center */}
-    <line x1="130" y1="120" x2="200" y2="200" stroke="currentColor" strokeWidth="0.6" className="text-navy/25" />
-    <line x1="270" y1="120" x2="200" y2="200" stroke="currentColor" strokeWidth="0.6" className="text-navy/25" />
-    <line x1="130" y1="280" x2="200" y2="200" stroke="currentColor" strokeWidth="0.6" className="text-navy/25" />
-    <line x1="270" y1="280" x2="200" y2="200" stroke="currentColor" strokeWidth="0.6" className="text-navy/25" />
+    <line x1="130" y1="120" x2="200" y2="200" stroke="currentColor" strokeWidth="0.6" className="text-navy/25 secondary-connection" />
+    <line x1="270" y1="120" x2="200" y2="200" stroke="currentColor" strokeWidth="0.6" className="text-navy/25 secondary-connection" />
+    <line x1="130" y1="280" x2="200" y2="200" stroke="currentColor" strokeWidth="0.6" className="text-navy/25 secondary-connection" />
+    <line x1="270" y1="280" x2="200" y2="200" stroke="currentColor" strokeWidth="0.6" className="text-navy/25 secondary-connection" />
     
     {/* Secondary connections */}
-    <line x1="160" y1="160" x2="200" y2="200" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
-    <line x1="240" y1="160" x2="200" y2="200" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
-    <line x1="160" y1="240" x2="200" y2="200" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
-    <line x1="240" y1="240" x2="200" y2="200" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
+    <line x1="160" y1="160" x2="200" y2="200" stroke="currentColor" strokeWidth="0.5" className="text-navy/20 tertiary-connection" />
+    <line x1="240" y1="160" x2="200" y2="200" stroke="currentColor" strokeWidth="0.5" className="text-navy/20 tertiary-connection" />
+    <line x1="160" y1="240" x2="200" y2="200" stroke="currentColor" strokeWidth="0.5" className="text-navy/20 tertiary-connection" />
+    <line x1="240" y1="240" x2="200" y2="200" stroke="currentColor" strokeWidth="0.5" className="text-navy/20 tertiary-connection" />
     
     {/* Outer ring connections */}
     <line x1="200" y1="80" x2="270" y2="120" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
