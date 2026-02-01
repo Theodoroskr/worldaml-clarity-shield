@@ -13,6 +13,9 @@ import About from "./pages/About";
 import GetStarted from "./pages/GetStarted";
 import FAQ from "./pages/FAQ";
 import News from "./pages/News";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import AccessYourData from "./pages/AccessYourData";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +37,9 @@ const App = () => (
           <Route path="/get-started" element={<GetStarted />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/news" element={<News />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/access-your-data" element={<AccessYourData />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
