@@ -3,6 +3,7 @@ import { Logo } from "./Logo";
 import iso9001Badge from "@/assets/iso-9001-badge.png";
 import iso27001Badge from "@/assets/iso-27001-badge.png";
 import iso22301Badge from "@/assets/iso-22301-badge.png";
+import infocreditLogo from "@/assets/infocredit-logo.png";
 
 const footerLinks = {
   product: [
@@ -66,17 +67,21 @@ export const Footer = () => {
             </p>
             
             {/* InfoCredit Group Badge */}
-            <a 
-              href="https://www.infocreditgroup.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 mt-6 px-3 py-2 bg-white border border-divider rounded-md hover:border-slate transition-colors group"
-            >
-              <span className="text-caption text-text-tertiary">A product of</span>
-              <span className="font-semibold text-sm text-navy group-hover:text-accent transition-colors">
-                InfoCredit Group
-              </span>
-            </a>
+            <div className="mt-6">
+              <p className="text-caption text-text-tertiary mb-2">A product of</p>
+              <a 
+                href="https://www.infocreditgroup.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block hover:opacity-80 transition-opacity"
+              >
+                <img 
+                  src={infocreditLogo} 
+                  alt="InfoCredit Group" 
+                  className="h-6 w-auto"
+                />
+              </a>
+            </div>
           </div>
 
           {/* Product */}
