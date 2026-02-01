@@ -2,22 +2,22 @@ const stats = [
   {
     value: "200+",
     label: "Jurisdictions Covered",
-    description: "Global sanctions and watchlist coverage",
+    description: "Global sanctions, watchlists, and PEP sources",
   },
   {
     value: "50M+",
-    label: "Profiles Monitored",
-    description: "PEPs, sanctions, and adverse media",
+    label: "Profiles in Database",
+    description: "PEPs, sanctions, adverse media entities",
   },
   {
     value: "99.9%",
-    label: "API Uptime",
-    description: "Enterprise-grade reliability",
+    label: "Platform Uptime",
+    description: "Enterprise-grade SLA commitment",
   },
   {
     value: "<200ms",
-    label: "Average Response",
-    description: "Real-time screening results",
+    label: "Median Response Time",
+    description: "Real-time screening via REST API",
   },
 ];
 
