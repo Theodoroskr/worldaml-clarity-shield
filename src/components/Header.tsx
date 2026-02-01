@@ -9,6 +9,7 @@ const navLinks = [
   { href: "/api", label: "WorldAML API" },
   { href: "/industries", label: "Industries" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/news", label: "News" },
   { href: "/support", label: "Support" },
   { href: "/about", label: "About" },
 ];
@@ -47,7 +48,9 @@ export const Header = () => {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/login">Log In</Link>
+              <a href="https://suite.worldaml.com/login" target="_blank" rel="noopener noreferrer">
+                Log In
+              </a>
             </Button>
             <Button size="sm" asChild>
               <Link to="/get-started">Get Started</Link>
@@ -85,9 +88,14 @@ export const Header = () => {
               ))}
               <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-divider">
                 <Button variant="outline" asChild>
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <a 
+                    href="https://suite.worldaml.com/login" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     Log In
-                  </Link>
+                  </a>
                 </Button>
                 <Button asChild>
                   <Link to="/get-started" onClick={() => setMobileMenuOpen(false)}>
