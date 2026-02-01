@@ -2,6 +2,12 @@ import { Shield, Activity, AlertTriangle, UserCheck } from "lucide-react";
 
 const modules = [
   {
+    icon: UserCheck,
+    title: "KYC & KYB Onboarding",
+    description: "Streamlined customer and business onboarding with document verification, identity checks, and corporate registry lookups. API or UI-driven workflows.",
+    features: ["Individual KYC", "Business KYB", "Document Verification"],
+  },
+  {
     icon: Shield,
     title: "AML Screening",
     description: "Real-time screening against global sanctions lists, PEP databases, and adverse media sources. Comprehensive coverage across 200+ jurisdictions.",
@@ -10,20 +16,14 @@ const modules = [
   {
     icon: Activity,
     title: "Ongoing Monitoring",
-    description: "Continuous surveillance of your customer base with instant alerts on status changes. Stay compliant without manual checks.",
+    description: "Continuous surveillance of your customer base with instant alerts on status changes. Automated re-screening without manual intervention.",
     features: ["Real-time Alerts", "Batch Processing", "Custom Rules"],
   },
   {
     icon: AlertTriangle,
     title: "Risk Assessment",
-    description: "Automated risk scoring with configurable rules engine. Make informed decisions with transparent, explainable risk factors.",
+    description: "Automated risk scoring with configurable rules engine. Make informed decisions with transparent, explainable risk factors and audit trails.",
     features: ["Risk Scoring", "Rules Engine", "Audit Trail"],
-  },
-  {
-    icon: UserCheck,
-    title: "ID Verification Basic",
-    description: "Document verification and identity checks to complete your compliance workflow. Streamlined onboarding for your customers.",
-    features: ["Document Check", "Liveness Detection", "Database Lookup"],
   },
 ];
 
@@ -34,12 +34,12 @@ export const ProductModulesSection = () => {
         {/* Section header */}
         <div className="max-w-2xl mb-16">
           <h2 className="text-headline text-navy mb-4">
-            Complete AML Infrastructure
+            API-First Compliance Platform
           </h2>
           <p className="text-body-lg text-text-secondary">
-            Four integrated modules that cover the full AML compliance lifecycle, 
-            from customer onboarding to ongoing monitoring. Use them together or 
-            independently based on your regulatory requirements.
+            Four integrated modules covering the full compliance lifecycle — from KYC/KYB 
+            onboarding to ongoing monitoring. Each module can be consumed independently via 
+            API or combined into a unified compliance workflow through our platform UI.
           </p>
         </div>
 

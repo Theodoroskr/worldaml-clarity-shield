@@ -51,14 +51,15 @@ const APIPage = () => {
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 text-caption font-medium text-teal bg-teal/10 rounded-full">
                   <Code className="w-3.5 h-3.5" />
-                  Developer-First API
+                  Full Platform Access via API
                 </div>
                 <h1 className="text-display text-navy mb-6">
                   WorldAML API
                 </h1>
                 <p className="text-body-lg text-text-secondary mb-8">
-                  A single, RESTful API for all your AML compliance needs. Screen customers, 
-                  monitor changes, and assess risk with simple, well-documented endpoints.
+                  The WorldAML API exposes all platform capabilities, allowing teams to embed 
+                  KYC/KYB onboarding, AML screening, ongoing monitoring and risk decisioning 
+                  directly into their systems.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button size="lg" asChild>
@@ -100,8 +101,9 @@ const APIPage = () => {
             <div className="text-center mb-16">
               <h2 className="text-headline text-navy mb-4">Built for Developers</h2>
               <p className="text-body-lg text-text-secondary max-w-2xl mx-auto">
-                Clean, consistent API design with comprehensive documentation, 
-                SDKs for popular languages, and sandbox environments for testing.
+                Clean, consistent API design exposing the full platform lifecycle. 
+                Comprehensive documentation, SDKs for popular languages, and sandbox 
+                environments for testing.
               </p>
             </div>
 
@@ -128,16 +130,16 @@ const APIPage = () => {
             <div className="max-w-3xl mx-auto">
               <h2 className="text-headline text-navy mb-4 text-center">Core Endpoints</h2>
               <p className="text-body-lg text-text-secondary mb-12 text-center">
-                Simple, intuitive endpoints for every compliance workflow.
+                Full platform lifecycle accessible via RESTful endpoints.
               </p>
 
               <div className="space-y-4">
                 {[
-                  { method: "POST", path: "/v1/screening/check", desc: "Run a screening check" },
-                  { method: "GET", path: "/v1/screening/{id}", desc: "Get screening result" },
-                  { method: "POST", path: "/v1/monitoring/subscribe", desc: "Add to monitoring" },
-                  { method: "GET", path: "/v1/monitoring/alerts", desc: "List monitoring alerts" },
-                  { method: "POST", path: "/v1/risk/assess", desc: "Calculate risk score" },
+                  { method: "POST", path: "/v1/onboarding/kyc", desc: "KYC customer onboarding" },
+                  { method: "POST", path: "/v1/onboarding/kyb", desc: "KYB business onboarding" },
+                  { method: "POST", path: "/v1/screening/check", desc: "Run AML screening check" },
+                  { method: "POST", path: "/v1/monitoring/subscribe", desc: "Add to ongoing monitoring" },
+                  { method: "POST", path: "/v1/risk/assess", desc: "Risk assessment & decisioning" },
                 ].map((endpoint) => (
                   <div
                     key={endpoint.path}
