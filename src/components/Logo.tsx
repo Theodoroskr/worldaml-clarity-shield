@@ -6,7 +6,7 @@ interface LogoProps {
   size?: "sm" | "md" | "lg";
 }
 
-// Wire Globe icon - minimal latitude/longitude lines
+// Network Globe icon - nodes and connections suggesting global data infrastructure
 export const LogoIcon = ({ className, size = "md" }: { className?: string; size?: "sm" | "md" | "lg" }) => {
   const sizeMap = {
     sm: "w-6 h-6",
@@ -21,16 +21,39 @@ export const LogoIcon = ({ className, size = "md" }: { className?: string; size?
       xmlns="http://www.w3.org/2000/svg"
       className={cn(sizeMap[size], className)}
     >
-      {/* Outer circle */}
-      <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="1.8" />
-      {/* Vertical meridian (center) */}
-      <ellipse cx="16" cy="16" rx="5" ry="12" stroke="currentColor" strokeWidth="1.5" />
-      {/* Horizontal equator */}
-      <line x1="4" y1="16" x2="28" y2="16" stroke="currentColor" strokeWidth="1.5" />
-      {/* Upper latitude line */}
-      <ellipse cx="16" cy="10" rx="10" ry="2.5" stroke="currentColor" strokeWidth="1.3" />
-      {/* Lower latitude line */}
-      <ellipse cx="16" cy="22" rx="10" ry="2.5" stroke="currentColor" strokeWidth="1.3" />
+      {/* Outer circle - the globe boundary */}
+      <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="1.5" />
+      
+      {/* Network nodes - strategic positions */}
+      <circle cx="16" cy="6" r="1.3" fill="currentColor" /> {/* Top */}
+      <circle cx="16" cy="26" r="1.3" fill="currentColor" /> {/* Bottom */}
+      <circle cx="6" cy="16" r="1.3" fill="currentColor" /> {/* Left */}
+      <circle cx="26" cy="16" r="1.3" fill="currentColor" /> {/* Right */}
+      <circle cx="16" cy="16" r="1.5" fill="currentColor" /> {/* Center */}
+      <circle cx="10" cy="10" r="1.2" fill="currentColor" /> {/* Top-left */}
+      <circle cx="22" cy="10" r="1.2" fill="currentColor" /> {/* Top-right */}
+      <circle cx="10" cy="22" r="1.2" fill="currentColor" /> {/* Bottom-left */}
+      <circle cx="22" cy="22" r="1.2" fill="currentColor" /> {/* Bottom-right */}
+      
+      {/* Network connections - thin lines between nodes */}
+      <line x1="16" y1="6" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
+      <line x1="16" y1="16" x2="16" y2="26" stroke="currentColor" strokeWidth="0.8" />
+      <line x1="6" y1="16" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
+      <line x1="16" y1="16" x2="26" y2="16" stroke="currentColor" strokeWidth="0.8" />
+      <line x1="10" y1="10" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
+      <line x1="22" y1="10" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
+      <line x1="10" y1="22" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
+      <line x1="22" y1="22" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
+      
+      {/* Outer ring connections */}
+      <line x1="16" y1="6" x2="22" y2="10" stroke="currentColor" strokeWidth="0.6" />
+      <line x1="16" y1="6" x2="10" y2="10" stroke="currentColor" strokeWidth="0.6" />
+      <line x1="26" y1="16" x2="22" y2="10" stroke="currentColor" strokeWidth="0.6" />
+      <line x1="26" y1="16" x2="22" y2="22" stroke="currentColor" strokeWidth="0.6" />
+      <line x1="16" y1="26" x2="22" y2="22" stroke="currentColor" strokeWidth="0.6" />
+      <line x1="16" y1="26" x2="10" y2="22" stroke="currentColor" strokeWidth="0.6" />
+      <line x1="6" y1="16" x2="10" y2="22" stroke="currentColor" strokeWidth="0.6" />
+      <line x1="6" y1="16" x2="10" y2="10" stroke="currentColor" strokeWidth="0.6" />
     </svg>
   );
 };
@@ -38,9 +61,9 @@ export const LogoIcon = ({ className, size = "md" }: { className?: string; size?
 // Full logo with wordmark
 export const Logo = ({ className, iconOnly = false, size = "md" }: LogoProps) => {
   const textSizeMap = {
-    sm: { world: "text-sm", aml: "text-base" },
-    md: { world: "text-base", aml: "text-lg" },
-    lg: { world: "text-lg", aml: "text-xl" },
+    sm: "text-lg",
+    md: "text-xl",
+    lg: "text-2xl",
   };
 
   if (iconOnly) {
@@ -48,13 +71,13 @@ export const Logo = ({ className, iconOnly = false, size = "md" }: LogoProps) =>
   }
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center gap-2.5", className)}>
       <LogoIcon size={size} className="text-navy" />
-      <div className="flex flex-col leading-none">
-        <span className={cn("font-semibold tracking-tight text-navy", textSizeMap[size].world)}>
+      <div className="flex items-baseline gap-0.5">
+        <span className={cn("font-normal tracking-tight text-navy", textSizeMap[size])}>
           World
         </span>
-        <span className={cn("font-bold tracking-tight text-navy", textSizeMap[size].aml)}>
+        <span className={cn("font-semibold tracking-tight text-navy", textSizeMap[size])}>
           AML
         </span>
       </div>
