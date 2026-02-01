@@ -1,44 +1,43 @@
 
 
-## Add Billing Toggle to API Pricing Section
+## Stack Logo Text Vertically
 
 ### Overview
-Add an interactive toggle switch above the pricing cards that allows users to switch between viewing monthly and annual pricing. The toggle will default to annual (the recommended option) and dynamically update the displayed prices on all plan cards.
+Update the Logo component to display "World" and "AML" as two words stacked vertically, creating a more distinctive brand mark similar to enterprise compliance brands.
 
-### Visual Design
+### Current vs. New Layout
 
 ```text
-                    Monthly  [●═══○]  Annual
-                              ↑
-                         Save up to 17%
+CURRENT:                    NEW:
+[Globe] WorldAML            [Globe] World
+                                    AML
 ```
-
-The toggle will be centered below the section header, with "Monthly" and "Annual" labels on either side and a savings badge when annual is selected.
 
 ### Implementation Details
 
-**File to modify:** `src/components/api/APICompanyPricingSection.tsx`
+**File to modify:** `src/components/Logo.tsx`
 
 **Changes:**
 
-1. **Add React state** to track billing period (`useState` with `'annual'` as default)
+1. **Update the text layout** from a single inline span to a stacked flex column:
+   - "World" on the first line (semibold)
+   - "AML" on the second line (bold)
 
-2. **Add toggle UI** between the shared features section and pricing cards:
-   - Use the existing `Switch` component from `@/components/ui/switch`
-   - "Monthly" label on the left, "Annual" on the right
-   - Show "Save up to 17%" badge next to Annual when selected
+2. **Adjust typography sizing** for the stacked format:
+   - Reduce individual line text sizes slightly to maintain compact appearance
+   - Tighter line-height (leading-tight) for cohesive look
 
-3. **Update pricing card display logic:**
-   - When **Annual** is selected: Show `annualPrice` as main price with "billed annually" note
-   - When **Monthly** is selected: Show `monthlyPrice` as main price with "billed monthly" note
-   - Hide the "Save €X/mo vs monthly" badge when monthly is selected (no longer relevant)
-   - Hide the "Or €X/month billed monthly" line when monthly is selected
+3. **Update flex alignment** so the globe icon centers vertically with the stacked text
 
-4. **Enterprise card** remains unchanged (always shows "Custom pricing")
+### Visual Result
 
-### User Experience
-- Default to annual billing (better value, aligned with business goals)
-- Smooth visual transition when toggling
-- Clear indication of which billing period is active
-- Savings messaging only appears when it's relevant (annual view)
+The logo will display as:
+- Globe icon on the left
+- "World" text (semibold) on the upper right
+- "AML" text (bold) directly below "World"
+
+### Technical Notes
+- Uses `flex-col` for vertical stacking of text
+- Applies `leading-none` or `leading-tight` to minimize gap between words
+- Maintains existing size variants (sm, md, lg) with adjusted proportions
 
