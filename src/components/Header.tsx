@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/api", label: "WorldAML API" },
+  { href: "/suite", label: "WorldAML Suite" },
   { href: "/industries", label: "Industries" },
   { href: "/pricing", label: "Pricing" },
   { href: "/news", label: "News" },
