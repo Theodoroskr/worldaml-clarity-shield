@@ -6,7 +6,7 @@ interface LogoProps {
   size?: "sm" | "md" | "lg";
 }
 
-// Abstract connected nodes icon - represents global compliance network
+// Wire Globe icon - minimal latitude/longitude lines
 export const LogoIcon = ({ className, size = "md" }: { className?: string; size?: "sm" | "md" | "lg" }) => {
   const sizeMap = {
     sm: "w-6 h-6",
@@ -21,24 +21,16 @@ export const LogoIcon = ({ className, size = "md" }: { className?: string; size?
       xmlns="http://www.w3.org/2000/svg"
       className={cn(sizeMap[size], className)}
     >
-      {/* Shield-grid hybrid: protective shape with connected nodes */}
-      {/* Outer shield path */}
-      <path
-        d="M16 2L4 7V15C4 22.18 9.12 28.76 16 30C22.88 28.76 28 22.18 28 15V7L16 2Z"
-        fill="currentColor"
-        opacity="0.1"
-      />
-      {/* Connected nodes forming a network within shield */}
-      <circle cx="16" cy="10" r="2.5" fill="currentColor" />
-      <circle cx="10" cy="17" r="2.5" fill="currentColor" />
-      <circle cx="22" cy="17" r="2.5" fill="currentColor" />
-      <circle cx="16" cy="24" r="2.5" fill="currentColor" />
-      {/* Connection lines */}
-      <path d="M16 12.5V21.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M14 11.5L11.5 15.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M18 11.5L20.5 15.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M12.5 17L13.5 21.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M19.5 17L18.5 21.5" stroke="currentColor" strokeWidth="1.5" />
+      {/* Outer circle */}
+      <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="1.8" />
+      {/* Vertical meridian (center) */}
+      <ellipse cx="16" cy="16" rx="5" ry="12" stroke="currentColor" strokeWidth="1.5" />
+      {/* Horizontal equator */}
+      <line x1="4" y1="16" x2="28" y2="16" stroke="currentColor" strokeWidth="1.5" />
+      {/* Upper latitude line */}
+      <ellipse cx="16" cy="10" rx="10" ry="2.5" stroke="currentColor" strokeWidth="1.3" />
+      {/* Lower latitude line */}
+      <ellipse cx="16" cy="22" rx="10" ry="2.5" stroke="currentColor" strokeWidth="1.3" />
     </svg>
   );
 };
