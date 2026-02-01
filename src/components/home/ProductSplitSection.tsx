@@ -5,26 +5,28 @@ import { Button } from "@/components/ui/button";
 const products = [
   {
     title: "WorldAML API",
-    description: "AML screening and ongoing monitoring for individuals and companies, delivered via API.",
+    subtitle: "For developers and engineering teams",
+    description: "Embed AML screening and ongoing monitoring directly into your onboarding and compliance workflows.",
     features: [
       "Individual & company screening",
       "Sanctions, PEP & adverse media",
-      "Ongoing AML monitoring",
-      "Audit-ready outputs",
+      "Ongoing monitoring via webhooks",
+      "Audit-ready JSON outputs",
     ],
-    cta: "Explore WorldAML API",
+    cta: "Explore the API",
     href: "/api",
   },
   {
     title: "WorldAML Suite",
-    description: "A complete AML compliance platform covering onboarding, screening and ongoing risk management.",
+    subtitle: "For compliance teams and MLROs",
+    description: "A complete compliance platform for managing onboarding, screening, monitoring and risk assessment.",
     features: [
-      "KYC & KYB onboarding",
-      "AML screening & monitoring",
-      "Risk assessment & oversight",
-      "Built for compliance teams",
+      "KYC & KYB onboarding workflows",
+      "AML screening & case management",
+      "Risk-based decisioning tools",
+      "Compliance dashboard & reporting",
     ],
-    cta: "Explore WorldAML Suite",
+    cta: "Explore the Platform",
     href: "/suite",
   },
 ];
@@ -33,9 +35,14 @@ export const ProductSplitSection = () => {
   return (
     <section className="section-padding bg-background">
       <div className="container-enterprise">
-        <h2 className="text-headline text-navy mb-12 text-center">
-          Two Ways to Use WorldAML
-        </h2>
+        <div className="max-w-3xl mx-auto text-center mb-12">
+          <h2 className="text-headline text-navy mb-4">
+            Two Ways to Use WorldAML
+          </h2>
+          <p className="text-body text-text-secondary">
+            Consume individual modules via API, or use the full platform for end-to-end compliance management.
+          </p>
+        </div>
         
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {products.map((product) => (
@@ -43,9 +50,12 @@ export const ProductSplitSection = () => {
               key={product.title}
               className="p-8 rounded-lg border border-divider bg-card border-l-4 border-l-accent"
             >
-              <h3 className="text-subheadline text-navy mb-3">
+              <h3 className="text-subheadline text-navy mb-1">
                 {product.title}
               </h3>
+              <p className="text-caption text-accent mb-4">
+                {product.subtitle}
+              </p>
               <p className="text-body text-text-secondary mb-6">
                 {product.description}
               </p>
