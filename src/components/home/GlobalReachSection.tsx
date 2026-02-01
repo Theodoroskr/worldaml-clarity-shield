@@ -27,8 +27,8 @@ export const GlobalReachSection = () => {
                 key={point.label}
                 className="flex flex-col items-center text-center p-4"
               >
-                <div className="w-12 h-12 rounded-full bg-navy/5 flex items-center justify-center mb-3">
-                  <point.icon className="w-5 h-5 text-navy" />
+                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-3">
+                  <point.icon className="w-5 h-5 text-accent" />
                 </div>
                 <span className="text-body-sm text-text-secondary">{point.label}</span>
               </div>

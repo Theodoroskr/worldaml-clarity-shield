@@ -44,7 +44,7 @@ export const HowItWorksSection = () => {
               )}
               
               <div className="relative z-10 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-navy/5 text-navy mb-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 text-accent mb-4">
                   <step.icon className="w-7 h-7" />
                 </div>
                 <div className="text-caption font-medium text-text-tertiary mb-2">
