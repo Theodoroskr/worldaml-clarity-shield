@@ -25,7 +25,7 @@ export const SuiteCTASection = () => {
             <Button 
               size="lg" 
               variant="outline" 
-              className="border-slate-light text-white hover:bg-white/10"
+              className="border-white/50 bg-transparent text-white hover:bg-white/10 [&>svg]:text-white"
               asChild
             >
               <Link to="/get-started?demo=true">
