@@ -15,6 +15,7 @@ import FAQ from "./pages/FAQ";
 import News from "./pages/News";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Cookies from "./pages/Cookies";
 import AccessYourData from "./pages/AccessYourData";
 import NotFound from "./pages/NotFound";
 
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/news" element={<News />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/cookies" element={<Cookies />} />
           <Route path="/access-your-data" element={<AccessYourData />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

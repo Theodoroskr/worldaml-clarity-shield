@@ -40,6 +40,19 @@ export const Footer = () => {
             <p className="mt-4 text-body-sm text-text-secondary max-w-xs">
               API-first compliance platform for KYC, KYB, AML screening, ongoing monitoring and risk assessment.
             </p>
+            
+            {/* InfoCredit Group Badge */}
+            <a 
+              href="https://www.infocreditgroup.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 mt-6 px-3 py-2 bg-white border border-divider rounded-md hover:border-slate transition-colors group"
+            >
+              <span className="text-caption text-text-tertiary">A product of</span>
+              <span className="font-semibold text-sm text-navy group-hover:text-accent transition-colors">
+                InfoCredit Group
+              </span>
+            </a>
           </div>
 
           {/* Product */}
@@ -125,12 +138,15 @@ export const Footer = () => {
             </a>
             . All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 md:gap-6 flex-wrap justify-center">
             <Link to="/privacy" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
               Privacy Policy
             </Link>
             <Link to="/terms" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
               Terms of Service
+            </Link>
+            <Link to="/cookies" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
+              Cookie Policy
             </Link>
             <Link to="/access-your-data" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
               Access Your Data
