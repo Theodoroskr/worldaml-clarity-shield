@@ -1,102 +1,44 @@
 
 
-# Client-Side RSS Integration Plan
+## Add Billing Toggle to API Pricing Section
 
-## Overview
-Add live RSS feed fetching to the News page using a free RSS-to-JSON proxy service (rss2json.com). No backend required - works entirely in the browser.
+### Overview
+Add an interactive toggle switch above the pricing cards that allows users to switch between viewing monthly and annual pricing. The toggle will default to annual (the recommended option) and dynamically update the displayed prices on all plan cards.
 
----
-
-## How It Works
+### Visual Design
 
 ```text
-RSS Feed (XML) → rss2json.com API → JSON → NewsCard[]
+                    Monthly  [●═══○]  Annual
+                              ↑
+                         Save up to 17%
 ```
 
-The proxy service converts XML feeds to JSON and handles CORS, so we can fetch directly from the browser.
+The toggle will be centered below the section header, with "Monthly" and "Annual" labels on either side and a savings badge when annual is selected.
 
----
+### Implementation Details
 
-## Implementation
+**File to modify:** `src/components/api/APICompanyPricingSection.tsx`
 
-### 1. Create RSS Service (`src/services/rssService.ts`)
+**Changes:**
 
-A utility to fetch and parse RSS feeds:
+1. **Add React state** to track billing period (`useState` with `'annual'` as default)
 
-```text
-- Fetch from: https://api.rss2json.com/v1/api.json?rss_url={FEED_URL}
-- Map RSS items to NewsItem format
-- Handle errors gracefully
-- Cache results to avoid rate limits
-```
+2. **Add toggle UI** between the shared features section and pricing cards:
+   - Use the existing `Switch` component from `@/components/ui/switch`
+   - "Monthly" label on the left, "Annual" on the right
+   - Show "Save up to 17%" badge next to Annual when selected
 
-**Feed sources to include:**
-| Source | RSS URL | Category |
-|--------|---------|----------|
-| FATF | fatf-gafi.org/rss.xml | Regulatory Updates |
-| OFAC | ofac.treasury.gov/rss.xml | Sanctions & Enforcement |
-| FCA | fca.org.uk/news/rss.xml | AML & Financial Crime |
-| FinCEN | fincen.gov/rss.xml | Regulatory Updates |
+3. **Update pricing card display logic:**
+   - When **Annual** is selected: Show `annualPrice` as main price with "billed annually" note
+   - When **Monthly** is selected: Show `monthlyPrice` as main price with "billed monthly" note
+   - Hide the "Save €X/mo vs monthly" badge when monthly is selected (no longer relevant)
+   - Hide the "Or €X/month billed monthly" line when monthly is selected
 
-### 2. Create Custom Hook (`src/hooks/useRSSFeeds.ts`)
+4. **Enterprise card** remains unchanged (always shows "Custom pricing")
 
-React hook to manage RSS data:
-- Fetch from multiple feeds on mount
-- Merge and sort by date
-- Combine with sample/fallback data
-- Handle loading and error states
-
-### 3. Update News Page (`src/pages/News.tsx`)
-
-- Use `useRSSFeeds` hook instead of static data
-- Show loading skeleton while fetching
-- Fall back to sample data if feeds fail
-- Display "Live" badge for real-time items
-
----
-
-## Technical Details
-
-### RSS-to-JSON API
-- **Service:** rss2json.com (free tier: 10,000 requests/day)
-- **No API key required** for basic usage
-- **CORS enabled** - works from browser
-
-### Data Mapping
-```text
-RSS Item → NewsItem
-─────────────────────
-title → title
-link → sourceUrl
-pubDate → publishedAt
-description → summary (truncated)
-feed.title → source
-```
-
-### Category Assignment
-Items are categorised based on their source feed:
-- FATF, FinCEN, EBA feeds → "Regulatory Updates"
-- OFAC feeds → "Sanctions & Enforcement"
-- FCA, INTERPOL feeds → "AML & Financial Crime"
-- DFSA, SAMA feeds → "GCC Regulatory Updates"
-
----
-
-## Files Summary
-
-| Action | File |
-|--------|------|
-| Create | `src/services/rssService.ts` |
-| Create | `src/hooks/useRSSFeeds.ts` |
-| Modify | `src/pages/News.tsx` |
-
----
-
-## Limitations (Good to Know)
-
-- **Rate limits:** Free tier allows 10,000 requests/day (plenty for a marketing site)
-- **Feed availability:** Some regulators may block proxy requests; fallback to sample data handles this
-- **No deduplication:** Client-side only, so duplicates may appear if user refreshes frequently
-
-This approach is perfect for demonstrating live data without infrastructure cost.
+### User Experience
+- Default to annual billing (better value, aligned with business goals)
+- Smooth visual transition when toggling
+- Clear indication of which billing period is active
+- Savings messaging only appears when it's relevant (annual view)
 
