@@ -56,6 +56,10 @@ const faqs = [
     answer: "Counter-Terrorism Financing (CTF) refers to measures designed to prevent the funding of terrorist activities. CTF obligations are closely linked to AML requirements, and regulated organisations must implement controls to detect and report suspicious activities that may relate to terrorism financing. WorldAML supports CTF compliance through screening, monitoring and risk assessment capabilities."
   },
   {
+    question: "Does WorldAML support adverse media monitoring?",
+    answer: "Yes. WorldAML supports adverse media screening and ongoing monitoring as part of its AML and risk assessment framework. The platform continuously monitors curated global media sources, including structured news feeds, and applies entity matching and risk classification to detect emerging financial crime and reputational risks in a risk-based manner."
+  },
+  {
     question: "Does WorldAML support ongoing AML monitoring?",
     answer: "Yes. WorldAML provides continuous monitoring of customer portfolios against sanctions, PEP and adverse media databases. When a customer's status changes — such as being added to a sanctions list or identified as a PEP — organisations are alerted automatically, enabling timely review and action in accordance with regulatory expectations."
   },
