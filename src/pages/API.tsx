@@ -7,37 +7,40 @@ import { Button } from "@/components/ui/button";
 const features = [
   {
     icon: Zap,
-    title: "Lightning Fast",
-    description: "Sub-200ms response times for real-time screening without blocking your user flows.",
-  },
-  {
-    icon: Lock,
-    title: "Secure by Design",
-    description: "SOC 2 Type II certified with end-to-end encryption and GDPR compliance.",
+    title: "Real-Time Screening",
+    description: "Screen individuals and companies against sanctions, PEPs, and warnings in milliseconds.",
   },
   {
     icon: Globe,
     title: "Global Coverage",
-    description: "200+ jurisdictions covered with sanctions, PEPs, and adverse media data.",
+    description: "Comprehensive sanctions lists, PEP databases, and adverse media sources worldwide.",
+  },
+  {
+    icon: Lock,
+    title: "Secure by Design",
+    description: "Enterprise-grade security with encrypted data transfer and GDPR compliance.",
   },
   {
     icon: Clock,
-    title: "99.9% Uptime",
-    description: "Enterprise-grade reliability with SLA guarantees for mission-critical compliance.",
+    title: "AML Data Delivery",
+    description: "Bulk data access and delivery for integration into your own systems and workflows.",
   },
 ];
 
-const codeExample = `// Screen a customer against all databases
-const response = await worldaml.screening.check({
-  name: "John Smith",
-  dateOfBirth: "1985-03-15",
-  nationality: "US",
-  databases: ["sanctions", "pep", "adverseMedia"]
+const codeExample = `// Screen an individual against all databases
+const response = await fetch('https://api.worldaml.com/v1/screen', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer YOUR_API_KEY' },
+  body: JSON.stringify({
+    name: "John Smith",
+    dateOfBirth: "1985-03-15",
+    databases: ["sanctions", "pep", "warnings"]
+  })
 });
 
-// Response includes match details and risk score
-console.log(response.matches);
-console.log(response.riskScore);`;
+// Response includes match details
+const data = await response.json();
+console.log(data.matches);`;
 
 const APIPage = () => {
   return (
@@ -51,15 +54,15 @@ const APIPage = () => {
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 text-caption font-medium text-teal bg-teal/10 rounded-full">
                   <Code className="w-3.5 h-3.5" />
-                  Full Platform Access via API
+                  REST API
                 </div>
                 <h1 className="text-display text-navy mb-6">
                   WorldAML API
                 </h1>
                 <p className="text-body-lg text-text-secondary mb-8">
-                  The WorldAML API exposes all platform capabilities, allowing teams to embed 
-                  KYC/KYB onboarding, AML screening, ongoing monitoring and risk decisioning 
-                  directly into their systems.
+                  The WorldAML API is a REST interface for AML screening of individuals and 
+                  companies. Access sanctions, PEPs, warnings and adverse media data — plus 
+                  AML Data Delivery for bulk data access and integration.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button size="lg" asChild>
@@ -69,10 +72,10 @@ const APIPage = () => {
                     </Link>
                   </Button>
                   <Button size="lg" variant="outline" asChild>
-                    <Link to="/documentation">
+                    <a href="https://worldaml.readme.io/reference/introduction" target="_blank" rel="noopener noreferrer">
                       <FileJson className="mr-2 h-4 w-4" />
                       API Reference
-                    </Link>
+                    </a>
                   </Button>
                 </div>
               </div>
@@ -130,16 +133,17 @@ const APIPage = () => {
             <div className="max-w-3xl mx-auto">
               <h2 className="text-headline text-navy mb-4 text-center">Core Endpoints</h2>
               <p className="text-body-lg text-text-secondary mb-12 text-center">
-                Full platform lifecycle accessible via RESTful endpoints.
+                Screen individuals and companies against global AML databases.
               </p>
 
               <div className="space-y-4">
                 {[
-                  { method: "POST", path: "/v1/onboarding/kyc", desc: "KYC customer onboarding" },
-                  { method: "POST", path: "/v1/onboarding/kyb", desc: "KYB business onboarding" },
-                  { method: "POST", path: "/v1/screening/check", desc: "Run AML screening check" },
-                  { method: "POST", path: "/v1/monitoring/subscribe", desc: "Add to ongoing monitoring" },
-                  { method: "POST", path: "/v1/risk/assess", desc: "Risk assessment & decisioning" },
+                  { method: "POST", path: "/v1/screen/individual", desc: "Screen an individual" },
+                  { method: "POST", path: "/v1/screen/company", desc: "Screen a company" },
+                  { method: "GET", path: "/v1/sanctions", desc: "Query sanctions lists" },
+                  { method: "GET", path: "/v1/pep", desc: "Query PEP databases" },
+                  { method: "GET", path: "/v1/warnings", desc: "Query warnings & adverse media" },
+                  { method: "GET", path: "/v1/data-delivery", desc: "AML Data Delivery bulk access" },
                 ].map((endpoint) => (
                   <div
                     key={endpoint.path}
