@@ -23,6 +23,7 @@ const footerLinks = {
   resources: [
     { href: "/support", label: "Support" },
     { href: "/faq", label: "FAQ" },
+    { href: "/news", label: "News & Updates" },
     { href: "/blog", label: "Blog" },
     { href: "/status", label: "System Status" },
   ],
