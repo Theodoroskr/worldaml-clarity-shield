@@ -21,16 +21,24 @@ export const LogoIcon = ({ className, size = "md" }: { className?: string; size?
       xmlns="http://www.w3.org/2000/svg"
       className={cn(sizeMap[size], className)}
     >
-      {/* Abstract grid/network representing global compliance */}
-      <rect x="2" y="2" width="12" height="12" rx="2" fill="currentColor" />
-      <rect x="18" y="2" width="12" height="12" rx="2" fill="currentColor" opacity="0.7" />
-      <rect x="2" y="18" width="12" height="12" rx="2" fill="currentColor" opacity="0.7" />
-      <rect x="18" y="18" width="12" height="12" rx="2" fill="currentColor" opacity="0.4" />
-      {/* Connecting lines */}
-      <path d="M14 8H18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M8 14V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M24 14V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M14 24H18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      {/* Shield-grid hybrid: protective shape with connected nodes */}
+      {/* Outer shield path */}
+      <path
+        d="M16 2L4 7V15C4 22.18 9.12 28.76 16 30C22.88 28.76 28 22.18 28 15V7L16 2Z"
+        fill="currentColor"
+        opacity="0.1"
+      />
+      {/* Connected nodes forming a network within shield */}
+      <circle cx="16" cy="10" r="2.5" fill="currentColor" />
+      <circle cx="10" cy="17" r="2.5" fill="currentColor" />
+      <circle cx="22" cy="17" r="2.5" fill="currentColor" />
+      <circle cx="16" cy="24" r="2.5" fill="currentColor" />
+      {/* Connection lines */}
+      <path d="M16 12.5V21.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M14 11.5L11.5 15.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M18 11.5L20.5 15.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M12.5 17L13.5 21.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M19.5 17L18.5 21.5" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );
 };

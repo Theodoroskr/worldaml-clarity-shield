@@ -46,12 +46,16 @@ export const HeroSection = () => {
           {/* Trust indicators */}
           <div className="mt-12 pt-8 border-t border-divider animate-fade-in-delay" style={{ animationDelay: "0.3s" }}>
             <p className="text-caption text-text-tertiary mb-4">Powering compliance for</p>
-            <div className="flex flex-wrap items-center gap-8 opacity-60">
+            <div className="flex flex-wrap items-center gap-8 opacity-60 mb-6">
               <span className="text-body font-semibold text-navy">Major European Bank</span>
               <span className="text-body font-semibold text-navy">Global Fintech</span>
               <span className="text-body font-semibold text-navy">Tier-1 Payment Provider</span>
               <span className="text-body font-semibold text-navy">Leading Crypto Exchange</span>
             </div>
+            {/* Regulatory alignment indicator */}
+            <p className="text-caption text-text-tertiary">
+              Designed to support FATF, EBA, FCA and FinCEN-aligned AML frameworks
+            </p>
           </div>
         </div>
       </div>

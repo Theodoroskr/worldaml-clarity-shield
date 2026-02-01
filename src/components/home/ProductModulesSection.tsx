@@ -37,8 +37,9 @@ export const ProductModulesSection = () => {
             Complete AML Infrastructure
           </h2>
           <p className="text-body-lg text-text-secondary">
-            Four integrated modules that cover your entire compliance lifecycle. 
-            Use them together or independently based on your needs.
+            Four integrated modules that cover the full AML compliance lifecycle, 
+            from customer onboarding to ongoing monitoring. Use them together or 
+            independently based on your regulatory requirements.
           </p>
         </div>
 
