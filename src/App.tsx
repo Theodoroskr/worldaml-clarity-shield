@@ -13,6 +13,7 @@ import About from "./pages/About";
 import GetStarted from "./pages/GetStarted";
 import FAQ from "./pages/FAQ";
 import News from "./pages/News";
+import Demo from "./pages/Demo";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Cookies from "./pages/Cookies";
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/get-started" element={<GetStarted />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/news" element={<News />} />
+          <Route path="/demo" element={<Demo />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/cookies" element={<Cookies />} />
