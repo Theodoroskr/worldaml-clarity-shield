@@ -24,7 +24,7 @@ export const APICTASection = () => {
             <Button 
               size="lg" 
               variant="outline" 
-              className="border-slate-light text-white hover:bg-white/10"
+              className="border-white/30 bg-transparent text-white hover:bg-white/10"
               asChild
             >
               <a 
