@@ -4,6 +4,7 @@ import { APIHeroSection } from "@/components/api/APIHeroSection";
 import { WhatIsAPISection } from "@/components/api/WhatIsAPISection";
 import { CustomerScreeningSection } from "@/components/api/CustomerScreeningSection";
 import { CompanyScreeningSection } from "@/components/api/CompanyScreeningSection";
+import { APICompanyPricingSection } from "@/components/api/APICompanyPricingSection";
 import { OngoingMonitoringSection } from "@/components/api/OngoingMonitoringSection";
 import { RiskAssessmentSection } from "@/components/api/RiskAssessmentSection";
 import { TechnicalSpecsSection } from "@/components/api/TechnicalSpecsSection";
@@ -20,6 +21,7 @@ const APIPage = () => {
         <WhatIsAPISection />
         <CustomerScreeningSection />
         <CompanyScreeningSection />
+        <APICompanyPricingSection />
         <OngoingMonitoringSection />
         <RiskAssessmentSection />
         <TechnicalSpecsSection />
