@@ -114,7 +114,16 @@ export const Footer = () => {
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-divider flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-caption text-text-tertiary">
-            © {new Date().getFullYear()} WorldAML. All rights reserved.
+            © {new Date().getFullYear()} WorldAML. A product of{" "}
+            <a 
+              href="https://www.infocreditgroup.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-text-secondary transition-colors"
+            >
+              InfoCredit Group Ltd
+            </a>
+            . All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link to="/privacy" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
@@ -123,8 +132,8 @@ export const Footer = () => {
             <Link to="/terms" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
               Terms of Service
             </Link>
-            <Link to="/cookies" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
-              Cookie Policy
+            <Link to="/access-your-data" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
+              Access Your Data
             </Link>
           </div>
         </div>
