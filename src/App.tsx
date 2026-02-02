@@ -9,6 +9,7 @@ import Pricing from "./pages/Pricing";
 import Platform from "./pages/Platform";
 import PlatformSuite from "./pages/PlatformSuite";
 import PlatformAPI from "./pages/PlatformAPI";
+import PlatformSecurity from "./pages/PlatformSecurity";
 import DataSources from "./pages/DataSources";
 import WorldCompliance from "./pages/WorldCompliance";
 import WorldComplianceEUME from "./pages/WorldComplianceEUME";
@@ -18,6 +19,10 @@ import BridgerXG from "./pages/BridgerXG";
 import BridgerXGEUME from "./pages/BridgerXGEUME";
 import BridgerXGUKIE from "./pages/BridgerXGUKIE";
 import BridgerXGNA from "./pages/BridgerXGNA";
+import Regions from "./pages/Regions";
+import RegionEUME from "./pages/RegionEUME";
+import RegionUKIE from "./pages/RegionUKIE";
+import RegionNA from "./pages/RegionNA";
 import Industries from "./pages/Industries";
 import Support from "./pages/Support";
 import About from "./pages/About";
@@ -48,6 +53,7 @@ const App = () => (
             <Route path="/platform" element={<Platform />} />
             <Route path="/platform/suite" element={<PlatformSuite />} />
             <Route path="/platform/api" element={<PlatformAPI />} />
+            <Route path="/platform/security" element={<PlatformSecurity />} />
             
             {/* Data Sources (Lane 2) */}
             <Route path="/data-sources" element={<DataSources />} />
@@ -59,6 +65,12 @@ const App = () => (
             <Route path="/data-sources/bridger-xg/eu-me" element={<BridgerXGEUME />} />
             <Route path="/data-sources/bridger-xg/uk-ie" element={<BridgerXGUKIE />} />
             <Route path="/data-sources/bridger-xg/na" element={<BridgerXGNA />} />
+            
+            {/* Regions */}
+            <Route path="/regions" element={<Regions />} />
+            <Route path="/regions/eu-me" element={<RegionEUME />} />
+            <Route path="/regions/uk-ie" element={<RegionUKIE />} />
+            <Route path="/regions/na" element={<RegionNA />} />
             
             {/* Preserved pages */}
             <Route path="/industries" element={<Industries />} />

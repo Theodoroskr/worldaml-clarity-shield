@@ -20,6 +20,7 @@ const navLinks = [
       { href: "/platform", label: "Overview" },
       { href: "/platform/suite", label: "WorldAML Suite" },
       { href: "/platform/api", label: "WorldAML API" },
+      { href: "/platform/security", label: "Security" },
     ],
   },
   {
@@ -32,8 +33,8 @@ const navLinks = [
     ],
   },
   { href: "/pricing", label: "Pricing" },
+  { href: "/regions", label: "Regions" },
   { href: "/about", label: "About" },
-  { href: "/support", label: "Support" },
 ];
 
 export const Header = () => {
