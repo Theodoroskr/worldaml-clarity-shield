@@ -213,7 +213,7 @@ const Pricing = () => {
                             </div>
                           </div>
                           <Button variant="outline" asChild className="w-full">
-                            <Link to="/data-sources/worldcompliance">
+                            <Link to="/data-sources/worldcompliance/pricing">
                               View Regional Pricing
                               <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
