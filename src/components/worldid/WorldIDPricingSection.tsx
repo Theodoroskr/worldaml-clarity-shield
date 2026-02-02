@@ -1,6 +1,10 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const pricingPlans = [
   {
@@ -13,6 +17,7 @@ const pricingPlans = [
     cta: "Start small",
     footnote: "Includes document verification, selfie & liveness, API access",
     featured: false,
+    hasCheckout: true,
   },
   {
     name: "Growth",
@@ -25,6 +30,7 @@ const pricingPlans = [
     cta: "Choose Growth",
     footnote: "Advanced liveness, fraud checks, priority processing",
     featured: true,
+    hasCheckout: true,
   },
   {
     name: "Scale",
@@ -33,9 +39,10 @@ const pricingPlans = [
     billing: "Billed annually",
     annual: "€12,000 per year (€1,000/month)",
     volume: "Up to 1,200 verifications per month",
-    cta: "Talk to sales",
+    cta: "Choose Scale",
     footnote: "SLA, automation, webhooks, high-volume support",
     featured: false,
+    hasCheckout: true,
   },
   {
     name: "Enterprise",
@@ -47,10 +54,49 @@ const pricingPlans = [
     cta: "Request enterprise pricing",
     footnote: "Dedicated setup, private cloud, enterprise compliance",
     featured: false,
+    hasCheckout: false,
   },
 ];
 
 const WorldIDPricingSection = () => {
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handleCheckout = async (planName: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to subscribe to a plan.",
+        variant: "destructive",
+      });
+      navigate(`/login?redirect=/products/worldid&plan=${planName.toLowerCase()}`);
+      return;
+    }
+
+    setLoadingPlan(planName);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-worldid-checkout", {
+        body: { plan: planName.toLowerCase() },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast({
+        title: "Checkout failed",
+        description: error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
   return (
     <section id="pricing" className="section-padding bg-background">
       <div className="container-enterprise">
@@ -100,15 +146,26 @@ const WorldIDPricingSection = () => {
                 </div>
                 
                 {/* CTA button */}
-                <Button 
-                  className="w-full mb-4" 
-                  variant={plan.featured ? "accent" : "outline"}
-                  asChild
-                >
-                  <Link to={`/contact-sales?product=worldid&plan=${plan.name.toLowerCase()}`}>
-                    {plan.cta}
-                  </Link>
-                </Button>
+                {plan.hasCheckout ? (
+                  <Button 
+                    className="w-full mb-4" 
+                    variant={plan.featured ? "accent" : "outline"}
+                    onClick={() => handleCheckout(plan.name)}
+                    disabled={loadingPlan === plan.name}
+                  >
+                    {loadingPlan === plan.name ? "Loading..." : plan.cta}
+                  </Button>
+                ) : (
+                  <Button 
+                    className="w-full mb-4" 
+                    variant="outline"
+                    asChild
+                  >
+                    <Link to={`/contact-sales?product=worldid&plan=${plan.name.toLowerCase()}`}>
+                      {plan.cta}
+                    </Link>
+                  </Button>
+                )}
                 
                 {/* Footnote - very small, muted */}
                 <p className="text-[11px] text-muted-foreground leading-tight">
