@@ -6,30 +6,26 @@ import iso22301Badge from "@/assets/iso-22301-badge.png";
 import infocreditLogo from "@/assets/infocredit-logo.png";
 
 const footerLinks = {
-  product: [
-    { href: "/api", label: "WorldAML API" },
+  platform: [
+    { href: "/platform", label: "Platform Overview" },
+    { href: "/platform/suite", label: "WorldAML Suite" },
+    { href: "/platform/api", label: "WorldAML API" },
     { href: "/pricing", label: "Pricing" },
-    { href: "/documentation", label: "Documentation" },
-    { href: "/changelog", label: "Changelog" },
   ],
-  solutions: [
-    { href: "/industries/banking", label: "Banking" },
-    { href: "/industries/fintech", label: "Fintech" },
-    { href: "/industries/crypto", label: "Crypto & Gaming" },
-    { href: "/industries/legal", label: "Legal & Fiduciary" },
+  dataSources: [
+    { href: "/data-sources", label: "Data Sources Overview" },
+    { href: "/data-sources/worldcompliance", label: "WorldCompliance®" },
+    { href: "/data-sources/bridger-xg", label: "Bridger Insight XG®" },
   ],
   company: [
     { href: "/about", label: "About" },
-    { href: "/careers", label: "Careers" },
-    { href: "/contact", label: "Contact" },
-    { href: "/press", label: "Press" },
-  ],
-  resources: [
     { href: "/support", label: "Support" },
     { href: "/faq", label: "FAQ" },
-    { href: "/news", label: "News & Updates" },
-    { href: "/blog", label: "Blog" },
-    { href: "/status", label: "System Status" },
+    { href: "/news", label: "News" },
+  ],
+  resources: [
+    { href: "https://worldaml.readme.io", label: "API Documentation", external: true },
+    { href: "https://suite.worldaml.com", label: "Access Suite", external: true },
   ],
 };
 
@@ -63,12 +59,12 @@ export const Footer = () => {
           <div className="col-span-2">
             <Logo size="md" />
             <p className="mt-4 text-body-sm text-text-secondary max-w-xs">
-              API-first compliance platform for KYC, KYB, AML screening, ongoing monitoring and risk assessment.
+              Financial crime screening infrastructure for regulated organisations.
             </p>
             
             {/* InfoCredit Group Badge */}
             <div className="mt-6">
-              <p className="text-caption text-text-tertiary mb-2">A product of</p>
+              <p className="text-caption text-text-tertiary mb-2">Operated by</p>
               <a 
                 href="https://www.infocreditgroup.com" 
                 target="_blank" 
@@ -84,11 +80,11 @@ export const Footer = () => {
             </div>
           </div>
 
-          {/* Product */}
+          {/* Platform */}
           <div>
-            <h4 className="font-semibold text-body-sm text-navy mb-4">Product</h4>
+            <h4 className="font-semibold text-body-sm text-navy mb-4">Platform</h4>
             <ul className="space-y-3">
-              {footerLinks.product.map((link) => (
+              {footerLinks.platform.map((link) => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
@@ -101,11 +97,11 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* Solutions */}
+          {/* Data Sources */}
           <div>
-            <h4 className="font-semibold text-body-sm text-navy mb-4">Solutions</h4>
+            <h4 className="font-semibold text-body-sm text-navy mb-4">Data Sources</h4>
             <ul className="space-y-3">
-              {footerLinks.solutions.map((link) => (
+              {footerLinks.dataSources.map((link) => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
@@ -141,12 +137,23 @@ export const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-body-sm text-text-secondary hover:text-navy transition-colors"
-                  >
-                    {link.label}
-                  </Link>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-body-sm text-text-secondary hover:text-navy transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      to={link.href}
+                      className="text-body-sm text-text-secondary hover:text-navy transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -173,33 +180,47 @@ export const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-8 pt-8 border-t border-divider flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-caption text-text-tertiary">
-            © {new Date().getFullYear()} WorldAML. A product of{" "}
-            <a 
-              href="https://www.infocreditgroup.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:text-text-secondary transition-colors"
-            >
-              InfoCredit Group Ltd
-            </a>
-            . All rights reserved.
-          </p>
-          <div className="flex items-center gap-4 md:gap-6 flex-wrap justify-center">
-            <Link to="/privacy" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
-              Privacy Policy
-            </Link>
-            <Link to="/terms" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
-              Terms of Service
-            </Link>
-            <Link to="/cookies" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
-              Cookie Policy
-            </Link>
-            <Link to="/access-your-data" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
-              Access Your Data
-            </Link>
+        {/* Attribution & Legal */}
+        <div className="mt-8 pt-8 border-t border-divider">
+          <div className="text-center mb-6">
+            <p className="text-caption text-text-tertiary mb-2">
+              WorldAML is operated by Infocredit Group, an authorized regional partner of LexisNexis Risk Solutions.
+            </p>
+            <p className="text-caption text-text-tertiary mb-2">
+              LexisNexis and related product names are trademarks of LexisNexis Risk Solutions and are used under authorization.
+            </p>
+            <p className="text-caption text-text-tertiary">
+              Product availability and service scope may vary by jurisdiction.
+            </p>
+          </div>
+          
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-caption text-text-tertiary">
+              © {new Date().getFullYear()} WorldAML. Operated by{" "}
+              <a 
+                href="https://www.infocreditgroup.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-text-secondary transition-colors"
+              >
+                Infocredit Group Ltd
+              </a>
+              . All rights reserved.
+            </p>
+            <div className="flex items-center gap-4 md:gap-6 flex-wrap justify-center">
+              <Link to="/privacy" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
+                Terms of Service
+              </Link>
+              <Link to="/cookies" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
+                Cookie Policy
+              </Link>
+              <Link to="/access-your-data" className="text-caption text-text-tertiary hover:text-text-secondary transition-colors">
+                Access Your Data
+              </Link>
+            </div>
           </div>
         </div>
       </div>
