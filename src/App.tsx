@@ -17,6 +17,7 @@ import WorldCompliancePricing from "./pages/WorldCompliancePricing";
 import WorldComplianceEUME from "./pages/WorldComplianceEUME";
 import WorldComplianceUKIE from "./pages/WorldComplianceUKIE";
 import WorldComplianceNA from "./pages/WorldComplianceNA";
+import ResourcesDataCoverage from "./pages/ResourcesDataCoverage";
 import BridgerXG from "./pages/BridgerXG";
 import BridgerXGEUME from "./pages/BridgerXGEUME";
 import BridgerXGUKIE from "./pages/BridgerXGUKIE";
@@ -56,6 +57,7 @@ const App = () => (
             
             {/* Data Sources (Lane 2) */}
             <Route path="/data-sources" element={<DataSources />} />
+            <Route path="/data-sources/resources" element={<ResourcesDataCoverage />} />
             <Route path="/data-sources/worldcompliance" element={<WorldCompliance />} />
             <Route path="/data-sources/worldcompliance/demo" element={<WorldComplianceDemo />} />
             <Route path="/data-sources/worldcompliance/pricing" element={<WorldCompliancePricing />} />
