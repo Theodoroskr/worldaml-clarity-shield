@@ -1,15 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, User, Building2, LogOut } from "lucide-react";
+import { Loader2, User, Building2, LogOut, CreditCard } from "lucide-react";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const { user, profile, isLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const [isManagingSubscription, setIsManagingSubscription] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -20,6 +23,24 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
+  };
+
+  const handleManageSubscription = async () => {
+    setIsManagingSubscription(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error opening customer portal:', error);
+      toast.error('Unable to open subscription management. You may not have an active subscription.');
+    } finally {
+      setIsManagingSubscription(false);
+    }
   };
 
   if (isLoading) {
@@ -80,9 +101,24 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-text-secondary">No active subscriptions</p>
-                <Button className="mt-4 w-full" variant="outline" onClick={() => navigate("/pricing")}>
-                  View Plans
-                </Button>
+                <div className="mt-4 space-y-2">
+                  <Button className="w-full" variant="outline" onClick={() => navigate("/pricing")}>
+                    View Plans
+                  </Button>
+                  <Button 
+                    className="w-full" 
+                    variant="secondary" 
+                    onClick={handleManageSubscription}
+                    disabled={isManagingSubscription}
+                  >
+                    {isManagingSubscription ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <CreditCard className="mr-2 h-4 w-4" />
+                    )}
+                    Manage Subscription
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
