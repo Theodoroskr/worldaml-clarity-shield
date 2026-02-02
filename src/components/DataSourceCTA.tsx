@@ -19,7 +19,7 @@ export const DataSourceCTA = ({
           <h2 className="text-3xl font-semibold text-white mb-4">
             Get Started with {productName}®
           </h2>
-          <p className="text-lg text-slate-light max-w-2xl mx-auto">
+          <p className="text-lg text-white/70 max-w-2xl mx-auto">
             Choose how you'd like to proceed. Our team is ready to help you find 
             the right solution for your compliance needs.
           </p>
@@ -29,14 +29,14 @@ export const DataSourceCTA = ({
           {/* Request Demo */}
           <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
             <CardContent className="p-6 text-center">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-teal/20 text-teal-light mb-4">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-teal/20 text-teal mb-4">
                 <Calendar className="w-7 h-7" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">Request a Demo</h3>
-              <p className="text-sm text-slate-light mb-6">
+              <p className="text-sm text-white/60 mb-6">
                 See the platform in action with a personalized walkthrough from our team.
               </p>
-              <Button className="w-full bg-teal hover:bg-teal-dark text-white" asChild>
+              <Button className="w-full bg-teal hover:bg-teal/80 text-white border-0" asChild>
                 <Link to="/demo">
                   Schedule Demo
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -48,14 +48,14 @@ export const DataSourceCTA = ({
           {/* Contact Sales */}
           <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
             <CardContent className="p-6 text-center">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-teal/20 text-teal-light mb-4">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-teal/20 text-teal mb-4">
                 <MessageSquare className="w-7 h-7" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">Talk to Sales</h3>
-              <p className="text-sm text-slate-light mb-6">
+              <p className="text-sm text-white/60 mb-6">
                 Discuss your requirements and get a custom quote tailored to your needs.
               </p>
-              <Button variant="outline" className="w-full border-white/30 text-white hover:bg-white/10" asChild>
+              <Button className="w-full bg-transparent border border-white/30 text-white hover:bg-white/10" asChild>
                 <Link to="/get-started">
                   Contact Us
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -67,14 +67,14 @@ export const DataSourceCTA = ({
           {/* Documentation */}
           <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
             <CardContent className="p-6 text-center">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-teal/20 text-teal-light mb-4">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-teal/20 text-teal mb-4">
                 <FileText className="w-7 h-7" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">View Resources</h3>
-              <p className="text-sm text-slate-light mb-6">
+              <p className="text-sm text-white/60 mb-6">
                 Explore documentation, integration guides, and technical specifications.
               </p>
-              <Button variant="outline" className="w-full border-white/30 text-white hover:bg-white/10" asChild>
+              <Button className="w-full bg-transparent border border-white/30 text-white hover:bg-white/10" asChild>
                 <Link to="/platform/api">
                   View Docs
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -85,7 +85,7 @@ export const DataSourceCTA = ({
         </div>
         
         {/* Trust line */}
-        <p className="text-center text-sm text-slate-muted mt-10">
+        <p className="text-center text-sm text-white/50 mt-10">
           Powered by LexisNexis Risk Solutions • Delivered by Infocredit Group
         </p>
       </div>
