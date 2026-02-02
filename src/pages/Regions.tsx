@@ -44,10 +44,14 @@ const Regions = () => {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-navy/5 text-navy mb-6">
                 <Globe className="w-6 h-6" />
               </div>
-              <h1 className="text-navy mb-6">Regional Availability</h1>
+              <h1 className="text-navy mb-6">LexisNexis Data Sources — Regional Pricing</h1>
               <p className="text-body-lg text-text-secondary">
-                WorldAML services are available in selected jurisdictions through Infocredit Group, 
-                an authorized regional partner of LexisNexis Risk Solutions.
+                Regional pricing and currency options for LexisNexis Risk Solutions data sources 
+                (WorldCompliance® and Bridger Insight XG®). Delivered and supported by Infocredit Group.
+              </p>
+              <p className="text-body-sm text-text-tertiary mt-4">
+                Note: Regional selection applies only to LexisNexis data source pricing. 
+                The WorldAML Platform is available globally without regional restrictions.
               </p>
             </div>
           </div>
@@ -56,7 +60,7 @@ const Regions = () => {
         {/* Region Selection */}
         <section className="section-padding bg-background">
           <div className="container-enterprise">
-            <h2 className="text-2xl text-navy mb-8">Select Your Region</h2>
+            <h2 className="text-2xl text-navy mb-8">Select Region for LexisNexis Pricing</h2>
             <div className="grid md:grid-cols-3 gap-6 max-w-5xl">
               {regions.map((r) => (
                 <Card 
@@ -106,10 +110,10 @@ const Regions = () => {
           <div className="container-enterprise">
             <div className="bg-white border border-divider rounded-lg p-6 max-w-3xl">
               <p className="text-body-sm text-text-tertiary">
-                <strong>Important:</strong> Product availability, pricing, and service scope 
-                vary by jurisdiction. Some products may require verification, eligibility 
-                assessment, or contractual approval before access can be granted. Please 
-                select your region for jurisdiction-specific information.
+                <strong>Important:</strong> Regional pricing applies to LexisNexis data sources 
+                (WorldCompliance® and Bridger Insight XG®) only. The WorldAML Platform and API 
+                are available globally. Some products may require verification, eligibility 
+                assessment, or contractual approval before access can be granted.
               </p>
             </div>
           </div>
