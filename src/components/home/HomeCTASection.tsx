@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Calendar, MessageSquare } from "lucide-react";
+import { ArrowRight, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const HomeCTASection = () => {
@@ -26,16 +26,6 @@ export const HomeCTASection = () => {
                 <Calendar className="mr-2 h-5 w-5" />
                 Request a Demo
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline-light" 
-              asChild
-            >
-              <Link to="/contact-sales">
-                <MessageSquare className="mr-2 h-5 w-5" />
-                Talk to Sales
               </Link>
             </Button>
           </div>
