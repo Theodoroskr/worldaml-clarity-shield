@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LaneBadge } from "@/components/LaneBadge";
@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
-import { ArrowRight, Users, Info, Minus, Plus } from "lucide-react";
+import { ArrowRight, Users, Info, Minus, Plus, MapPin } from "lucide-react";
+import { useRegion } from "@/contexts/RegionContext";
 
 interface RegionPricing {
   id: string;
@@ -55,8 +56,16 @@ const calculateUserPrice = (basePrice: number, userNumber: number): number => {
 };
 
 const WorldCompliancePricing = () => {
+  const { region: detectedRegion, isLoading } = useRegion();
   const [selectedRegion, setSelectedRegion] = useState("eu-me");
   const [userCount, setUserCount] = useState(1);
+
+  // Set initial region based on detection
+  useEffect(() => {
+    if (!isLoading && detectedRegion) {
+      setSelectedRegion(detectedRegion);
+    }
+  }, [detectedRegion, isLoading]);
 
   const currentRegion = regions.find((r) => r.id === selectedRegion) || regions[0];
 
@@ -111,13 +120,21 @@ const WorldCompliancePricing = () => {
         <section className="py-16 bg-slate-50">
           <div className="container mx-auto px-4">
             <Tabs value={selectedRegion} onValueChange={setSelectedRegion} className="max-w-4xl mx-auto">
-              <TabsList className="grid w-full grid-cols-3 mb-8">
-                {regions.map((region) => (
-                  <TabsTrigger key={region.id} value={region.id} className="text-sm">
-                    {region.name}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+              <div className="flex items-center justify-between mb-6">
+                <TabsList className="grid grid-cols-3">
+                  {regions.map((region) => (
+                    <TabsTrigger key={region.id} value={region.id} className="text-sm">
+                      {region.name}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {selectedRegion === detectedRegion && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-slate-100 px-3 py-1.5 rounded-full">
+                    <MapPin className="h-3 w-3" />
+                    <span>Detected region</span>
+                  </div>
+                )}
+              </div>
 
               {regions.map((region) => (
                 <TabsContent key={region.id} value={region.id}>
