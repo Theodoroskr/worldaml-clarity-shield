@@ -134,7 +134,7 @@ export const NewHeroSection = () => {
   return (
     <section className="section-padding bg-surface-subtle relative overflow-hidden">
       {/* Animated Globe Background - Desktop only */}
-      <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-[0.25] pointer-events-none -mr-32">
+      <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-[700px] h-[700px] opacity-[0.4] pointer-events-none -mr-20">
         <NetworkGlobeVisual />
       </div>
 
