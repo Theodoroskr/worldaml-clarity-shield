@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package } from "lucide-react";
@@ -6,14 +7,17 @@ const bundles = [
   {
     name: "Onboarding Pack",
     includes: "WorldID + Sanctions + PEPs",
+    slug: "onboarding",
   },
   {
     name: "Regulated Pack",
     includes: "WorldID + Sanctions + PEPs + Adverse Media",
+    slug: "regulated",
   },
   {
     name: "Full Compliance Pack",
     includes: "WorldID + Screening + Ongoing Monitoring",
+    slug: "full-compliance",
   },
 ];
 
@@ -39,8 +43,10 @@ const WorldIDBundleSection = () => {
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-sm text-text-secondary mb-4">{bundle.includes}</p>
-                <Button variant="outline" className="w-full">
-                  Get bundle pricing
+                <Button variant="outline" className="w-full" asChild>
+                  <Link to={`/contact-sales?product=worldid&bundle=${bundle.slug}`}>
+                    Get bundle pricing
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
