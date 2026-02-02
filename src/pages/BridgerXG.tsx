@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { LaneBadge } from "@/components/LaneBadge";
 import { useRegion } from "@/contexts/RegionContext";
 import TrustedByLogos from "@/components/TrustedByLogos";
+import DataSourceCTA from "@/components/DataSourceCTA";
 import lexisNexisLogo from "@/assets/lexisnexis-risk-solutions-logo.png";
 import { 
   productStats, 
@@ -203,6 +204,9 @@ const BridgerXG = () => {
         <TrustedByLogos 
           description="The world's leading brands trust Bridger Insight® XG to help simplify AML, ABC, and CFT compliance."
         />
+
+        {/* CTA Section */}
+        <DataSourceCTA productName="Bridger Insight XG" variant="bridger" />
 
         {/* Region Selection */}
         <section className="section-padding bg-surface-subtle">
