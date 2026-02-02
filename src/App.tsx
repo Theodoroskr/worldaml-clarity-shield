@@ -28,6 +28,7 @@ import Industries from "./pages/Industries";
 import Support from "./pages/Support";
 import About from "./pages/About";
 import GetStarted from "./pages/GetStarted";
+import ContactSales from "./pages/ContactSales";
 import FAQ from "./pages/FAQ";
 import News from "./pages/News";
 import Demo from "./pages/Demo";
@@ -79,6 +80,7 @@ const App = () => (
             <Route path="/support" element={<Support />} />
             <Route path="/about" element={<About />} />
             <Route path="/get-started" element={<GetStarted />} />
+            <Route path="/contact-sales" element={<ContactSales />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/news" element={<News />} />
             <Route path="/demo" element={<Demo />} />
