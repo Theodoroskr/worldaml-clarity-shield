@@ -1,0 +1,260 @@
+import { useState, useMemo } from "react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { LaneBadge } from "@/components/LaneBadge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Link } from "react-router-dom";
+import { ArrowRight, Users, Info, Minus, Plus } from "lucide-react";
+
+interface RegionPricing {
+  id: string;
+  name: string;
+  currency: string;
+  symbol: string;
+  basePrice: number;
+  disclaimer: string;
+}
+
+const regions: RegionPricing[] = [
+  {
+    id: "eu-me",
+    name: "Europe & Middle East",
+    currency: "EUR",
+    symbol: "€",
+    basePrice: 3000,
+    disclaimer: "Access activation subject to verification. Availability may vary by jurisdiction.",
+  },
+  {
+    id: "uk-ie",
+    name: "United Kingdom & Ireland",
+    currency: "EUR",
+    symbol: "€",
+    basePrice: 3200,
+    disclaimer: "Access subject to verification and contractual approval.",
+  },
+  {
+    id: "na",
+    name: "North America",
+    currency: "USD",
+    symbol: "$",
+    basePrice: 4900,
+    disclaimer: "Availability subject to eligibility assessment.",
+  },
+];
+
+const calculateUserPrice = (basePrice: number, userNumber: number): number => {
+  if (userNumber === 1) return basePrice;
+  let price = basePrice;
+  for (let i = 2; i <= userNumber; i++) {
+    price = price * 0.9;
+  }
+  return Math.round(price);
+};
+
+const WorldCompliancePricing = () => {
+  const [selectedRegion, setSelectedRegion] = useState("eu-me");
+  const [userCount, setUserCount] = useState(1);
+
+  const currentRegion = regions.find((r) => r.id === selectedRegion) || regions[0];
+
+  const userPrices = useMemo(() => {
+    const prices: number[] = [];
+    for (let i = 1; i <= userCount; i++) {
+      prices.push(calculateUserPrice(currentRegion.basePrice, i));
+    }
+    return prices;
+  }, [currentRegion.basePrice, userCount]);
+
+  const totalPrice = useMemo(() => {
+    return userPrices.reduce((sum, price) => sum + price, 0);
+  }, [userPrices]);
+
+  const exampleTotals = useMemo(() => {
+    const examples = [];
+    for (let users = 1; users <= 3; users++) {
+      let total = 0;
+      for (let i = 1; i <= users; i++) {
+        total += calculateUserPrice(currentRegion.basePrice, i);
+      }
+      examples.push({ users, total });
+    }
+    return examples;
+  }, [currentRegion.basePrice]);
+
+  const formatPrice = (price: number) => {
+    return `${currentRegion.symbol}${price.toLocaleString()}`;
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="bg-background-dark text-white py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center">
+              <LaneBadge lane="data-source" className="mb-6 mx-auto" />
+              <h1 className="text-3xl md:text-4xl font-bold mb-4">
+                Pricing — WorldCompliance® Online Screening
+              </h1>
+              <p className="text-lg text-slate-300">
+                Pricing varies by jurisdiction, currency, and service scope.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Region Selector & Pricing */}
+        <section className="py-16 bg-slate-50">
+          <div className="container mx-auto px-4">
+            <Tabs value={selectedRegion} onValueChange={setSelectedRegion} className="max-w-4xl mx-auto">
+              <TabsList className="grid w-full grid-cols-3 mb-8">
+                {regions.map((region) => (
+                  <TabsTrigger key={region.id} value={region.id} className="text-sm">
+                    {region.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              {regions.map((region) => (
+                <TabsContent key={region.id} value={region.id}>
+                  <div className="grid md:grid-cols-2 gap-8">
+                    {/* Pricing Table */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Per-User Pricing</CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          Base price: {region.symbol}{region.basePrice.toLocaleString()} / year
+                        </p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center py-2 border-b">
+                            <span className="text-sm">1st user</span>
+                            <span className="font-medium">{region.symbol}{region.basePrice.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between items-center py-2 border-b">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">2nd user</span>
+                              <span className="text-xs text-muted-foreground">(10% discount)</span>
+                            </div>
+                            <span className="font-medium">{region.symbol}{calculateUserPrice(region.basePrice, 2).toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between items-center py-2 border-b">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">3rd user</span>
+                              <span className="text-xs text-muted-foreground">(10% discount)</span>
+                            </div>
+                            <span className="font-medium">{region.symbol}{calculateUserPrice(region.basePrice, 3).toLocaleString()}</span>
+                          </div>
+                        </div>
+
+                        <Separator />
+
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-muted-foreground">Total Examples</p>
+                          {exampleTotals.map(({ users, total }) => (
+                            <div key={users} className="flex justify-between text-sm">
+                              <span>{users} user{users > 1 ? "s" : ""}</span>
+                              <span>{region.symbol}{total.toLocaleString()}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Calculator */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Users className="h-5 w-5" />
+                          Calculate Your Total
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-center gap-4">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setUserCount(Math.max(1, userCount - 1))}
+                            disabled={userCount <= 1}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <div className="text-center">
+                            <span className="text-4xl font-bold">{userCount}</span>
+                            <p className="text-sm text-muted-foreground">user{userCount > 1 ? "s" : ""}</p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setUserCount(Math.min(10, userCount + 1))}
+                            disabled={userCount >= 10}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="space-y-2 bg-slate-100 p-4 rounded-lg">
+                          {userPrices.map((price, index) => (
+                            <div key={index} className="flex justify-between text-sm">
+                              <span>User {index + 1}:</span>
+                              <span>{formatPrice(price)}</span>
+                            </div>
+                          ))}
+                          <Separator className="my-2" />
+                          <div className="flex justify-between font-semibold">
+                            <span>Total:</span>
+                            <span>{formatPrice(totalPrice)} / year</span>
+                          </div>
+                        </div>
+
+                        <Button asChild className="w-full" variant="accent">
+                          <Link to="/contact-sales">
+                            Buy WorldCompliance Online
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
+
+                        <p className="text-xs text-muted-foreground text-center">
+                          {region.disclaimer}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
+          </div>
+        </section>
+
+        {/* Global Pricing Note */}
+        <section className="py-12 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto">
+              <Card className="border-slate-200">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-3">
+                    <Info className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      <p>Pricing applies to WorldCompliance® Online Screening only.</p>
+                      <p>Additional users receive a progressive per-user discount.</p>
+                      <p>WorldAML Platform, WorldAML API, and enterprise screening engines are priced separately.</p>
+                      <p>Pricing, availability, and service scope vary by jurisdiction.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default WorldCompliancePricing;
