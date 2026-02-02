@@ -137,27 +137,43 @@ const Pricing = () => {
           </div>
         </section>
 
-        <Separator className="mx-auto max-w-3xl" />
+        {/* Section Divider */}
+        <div className="bg-navy py-6">
+          <div className="container-enterprise">
+            <div className="flex items-center justify-center gap-4">
+              <div className="h-px bg-white/20 flex-1 max-w-32" />
+              <p className="text-white/80 text-sm font-medium uppercase tracking-wider">
+                Data Source Pricing
+              </p>
+              <div className="h-px bg-white/20 flex-1 max-w-32" />
+            </div>
+          </div>
+        </div>
 
-        {/* Section 2: Data Sources */}
+        {/* Section 2: LexisNexis Data Sources */}
         <section className="section-padding bg-background">
           <div className="container-enterprise">
-            <div className="max-w-3xl mx-auto">
-              <LaneBadge lane="data-source" className="mb-6" />
-              <h2 className="text-2xl text-navy mb-4">Data Sources</h2>
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center gap-3 mb-6">
+                <LaneBadge lane="data-source" />
+                <span className="text-xs font-medium px-2 py-1 rounded bg-slate-100 text-slate-600">
+                  Powered by LexisNexis Risk Solutions
+                </span>
+              </div>
+              <h2 className="text-2xl text-navy mb-4">LexisNexis Data Products</h2>
               <p className="text-body text-text-secondary mb-8">
-                Screening data is provided by LexisNexis Risk Solutions. 
-                Pricing varies by product and region.
+                Screening data and matching engines are provided by LexisNexis Risk Solutions. 
+                Pricing varies by product, region, and volume.
               </p>
 
-              <div className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
                 {/* WorldCompliance */}
-                <Card className="border-teal/20">
+                <Card className="border-l-4 border-l-teal border-divider">
                   <CardHeader>
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <CardTitle>WorldCompliance®</CardTitle>
                       <span className="text-xs font-medium px-2 py-1 rounded-full bg-teal/10 text-teal">
-                        Online Purchase Available
+                        Online Purchase
                       </span>
                     </div>
                     <CardDescription>
@@ -165,21 +181,21 @@ const Pricing = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid sm:grid-cols-3 gap-4 mb-6">
-                      <div className="p-4 rounded-lg bg-surface-subtle">
-                        <p className="text-body-sm font-medium text-navy mb-1">EU & Middle East</p>
-                        <p className="text-caption text-text-tertiary">EUR / AED pricing</p>
+                    <div className="space-y-2 mb-6">
+                      <div className="flex items-center justify-between text-body-sm">
+                        <span className="text-text-secondary">EU & Middle East</span>
+                        <span className="text-navy font-medium">EUR / AED</span>
                       </div>
-                      <div className="p-4 rounded-lg bg-surface-subtle">
-                        <p className="text-body-sm font-medium text-navy mb-1">UK & Ireland</p>
-                        <p className="text-caption text-text-tertiary">GBP / EUR pricing</p>
+                      <div className="flex items-center justify-between text-body-sm">
+                        <span className="text-text-secondary">UK & Ireland</span>
+                        <span className="text-navy font-medium">GBP / EUR</span>
                       </div>
-                      <div className="p-4 rounded-lg bg-surface-subtle">
-                        <p className="text-body-sm font-medium text-navy mb-1">North America</p>
-                        <p className="text-caption text-text-tertiary">USD pricing</p>
+                      <div className="flex items-center justify-between text-body-sm">
+                        <span className="text-text-secondary">North America</span>
+                        <span className="text-navy font-medium">USD</span>
                       </div>
                     </div>
-                    <Button variant="outline" asChild className="w-full sm:w-auto">
+                    <Button variant="outline" asChild className="w-full">
                       <Link to="/data-sources/worldcompliance">
                         View Regional Pricing
                         <ArrowRight className="ml-2 h-4 w-4" />
@@ -189,7 +205,7 @@ const Pricing = () => {
                 </Card>
 
                 {/* Bridger Insight XG */}
-                <Card className="border-teal/20">
+                <Card className="border-l-4 border-l-navy border-divider">
                   <CardHeader>
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <CardTitle>Bridger Insight XG®</CardTitle>
@@ -203,9 +219,9 @@ const Pricing = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-body-sm text-text-secondary mb-6">
-                      Pricing is provided on request. Enterprise deployment includes dedicated implementation support.
+                      Pricing is provided on request. Enterprise deployment includes dedicated implementation support and custom SLAs.
                     </p>
-                    <Button variant="outline" asChild className="w-full sm:w-auto">
+                    <Button variant="outline" asChild className="w-full">
                       <Link to="/data-sources/bridger-xg">
                         Request Demo
                         <ArrowRight className="ml-2 h-4 w-4" />
