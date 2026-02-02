@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, MapPin, Database, CheckCircle2 } from "lucide-react";
+import { ArrowRight, MapPin, CheckCircle2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LaneBadge } from "@/components/LaneBadge";
 import { useRegion } from "@/contexts/RegionContext";
+import TrustedByLogos from "@/components/TrustedByLogos";
 import { 
   databaseStats, 
   riskCategories, 
@@ -191,8 +192,13 @@ const WorldCompliance = () => {
           </div>
         </section>
 
+        {/* Trusted By */}
+        <TrustedByLogos 
+          description="Trusted by leading financial institutions, fintechs, and compliance teams worldwide using LexisNexis solutions."
+        />
+
         {/* Region Selection */}
-        <section className="section-padding bg-background">
+        <section className="section-padding bg-surface-subtle">
           <div className="container-enterprise">
             <h2 className="text-2xl text-navy mb-4">Select Your Region</h2>
             <p className="text-text-secondary mb-8 max-w-2xl">
