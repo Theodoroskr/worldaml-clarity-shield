@@ -1,6 +1,5 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import AnnouncementBar from "@/components/AnnouncementBar";
 import NewHeroSection from "@/components/home/NewHeroSection";
 import StatsSection from "@/components/home/StatsSection";
 import HowItWorksSection from "@/components/home/HowItWorksSection";
@@ -11,7 +10,6 @@ import HomeCTASection from "@/components/home/HomeCTASection";
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
       <Header />
       <main className="flex-1">
         <NewHeroSection />
