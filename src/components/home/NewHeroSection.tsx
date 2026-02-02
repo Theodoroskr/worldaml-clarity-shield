@@ -167,8 +167,8 @@ export const NewHeroSection = () => {
           </p>
         </div>
 
-        {/* Two-Column Product Split */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        {/* Three-Column Product Split */}
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {/* Lane 1 - WorldAML Platform */}
           <Card className="border-navy/10 hover:border-navy/20 transition-colors">
             <CardHeader>
@@ -180,15 +180,41 @@ export const NewHeroSection = () => {
                   WorldAML Platform
                 </span>
               </div>
-              <CardTitle className="text-xl text-navy">WorldAML Platform & API</CardTitle>
-              <CardDescription className="text-text-secondary">
+              <CardTitle className="text-lg text-navy">WorldAML Platform & API</CardTitle>
+              <CardDescription className="text-text-secondary text-sm">
                 Unified UI, APIs, workflows, and governance for managing financial crime screening.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button asChild className="w-full">
+              <Button asChild className="w-full" size="sm">
                 <Link to="/platform">
-                  Request Platform Access
+                  Request Access
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* WorldID - Digital Identity */}
+          <Card className="border-accent/20 hover:border-accent/30 transition-colors">
+            <CardHeader>
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-accent/5 text-accent mb-4">
+                <LogoIcon size="md" />
+              </div>
+              <div className="inline-flex items-center gap-2 mb-2">
+                <span className="text-xs font-medium px-2 py-1 rounded-full border border-accent/20 bg-accent/5 text-accent">
+                  Identity Verification
+                </span>
+              </div>
+              <CardTitle className="text-lg text-navy">WorldID</CardTitle>
+              <CardDescription className="text-text-secondary text-sm">
+                Digital identity verification with document authentication and biometric liveness detection.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="accent" asChild className="w-full" size="sm">
+                <Link to="/products/worldid">
+                  Explore WorldID
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -206,14 +232,14 @@ export const NewHeroSection = () => {
                   Data Source: LexisNexis
                 </span>
               </div>
-              <CardTitle className="text-xl text-navy">LexisNexis Screening Solutions</CardTitle>
-              <CardDescription className="text-text-secondary">
-                <span className="block mb-1">WorldCompliance®</span>
+              <CardTitle className="text-lg text-navy">Screening Solutions</CardTitle>
+              <CardDescription className="text-text-secondary text-sm">
+                <span className="block">WorldCompliance®</span>
                 <span className="block">Bridger Insight XG®</span>
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" asChild className="w-full">
+              <Button variant="outline" asChild className="w-full" size="sm">
                 <Link to="/data-sources">
                   View Data Sources
                   <ArrowRight className="ml-2 h-4 w-4" />
