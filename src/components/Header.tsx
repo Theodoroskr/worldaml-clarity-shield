@@ -33,7 +33,6 @@ const navLinks = [
     ],
   },
   { href: "/pricing", label: "Pricing" },
-  { href: "/regions", label: "Regions" },
   { href: "/about", label: "About" },
 ];
 
