@@ -16,9 +16,11 @@ const footerLinks = {
     { href: "/data-sources", label: "Data Sources Overview" },
     { href: "/data-sources/worldcompliance", label: "WorldCompliance®" },
     { href: "/data-sources/bridger-xg", label: "Bridger Insight XG®" },
+    { href: "/data-sources/resources", label: "Resources & Data Coverage" },
   ],
   company: [
     { href: "/about", label: "About" },
+    { href: "/contact-sales", label: "Contact Sales" },
     { href: "/support", label: "Support" },
     { href: "/faq", label: "FAQ" },
     { href: "/news", label: "News" },
@@ -26,6 +28,7 @@ const footerLinks = {
   resources: [
     { href: "https://worldaml.readme.io", label: "API Documentation", external: true },
     { href: "https://suite.worldaml.com", label: "Access Suite", external: true },
+    { href: "/demo", label: "Request Demo" },
   ],
 };
 

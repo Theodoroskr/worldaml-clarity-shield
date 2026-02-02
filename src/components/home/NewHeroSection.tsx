@@ -146,11 +146,25 @@ export const NewHeroSection = () => {
           <h1 className="text-navy mb-6 text-balance">
             WorldAML — Financial Crime Screening Infrastructure
           </h1>
-          <p className="text-body-lg text-text-secondary mb-8 max-w-3xl mx-auto">
+          <p className="text-body-lg text-text-secondary mb-6 max-w-3xl mx-auto">
             A unified platform and API layer for orchestrating financial crime screening 
             using approved third-party data sources.
           </p>
-          <p className="text-body text-text-tertiary border-t border-divider pt-6 mt-6">
+          
+          {/* Secondary CTAs */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+            <Button variant="default" size="lg" asChild>
+              <Link to="/demo">
+                Request a Demo
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" asChild>
+              <Link to="/contact-sales">Talk to Sales</Link>
+            </Button>
+          </div>
+          
+          <p className="text-body-sm text-text-tertiary border-t border-divider pt-6 mt-4">
             WorldAML integrates trusted screening technologies, including LexisNexis Risk Solutions, 
             and is delivered and supported by Infocredit Group.
           </p>
