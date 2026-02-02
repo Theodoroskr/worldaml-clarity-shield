@@ -1,13 +1,11 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, MapPin, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, BookOpen } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LaneBadge } from "@/components/LaneBadge";
-import { useRegion } from "@/contexts/RegionContext";
 import TrustedByLogos from "@/components/TrustedByLogos";
-import DataSourceCTA from "@/components/DataSourceCTA";
 import lexisNexisLogo from "@/assets/lexisnexis-risk-solutions-logo.png";
 import { 
   databaseStats, 
@@ -17,29 +15,7 @@ import {
   complianceStandards 
 } from "@/data/worldcompliance";
 
-const regions = [
-  {
-    id: "eu-me",
-    name: "EU & Middle East",
-    description: "EUR / AED pricing. Subscription packages by search volume.",
-    href: "/data-sources/worldcompliance/eu-me",
-  },
-  {
-    id: "uk-ie",
-    name: "UK & Ireland",
-    description: "GBP / EUR pricing. Enhanced verification required.",
-    href: "/data-sources/worldcompliance/uk-ie",
-  },
-  {
-    id: "na",
-    name: "North America",
-    description: "USD pricing. Eligibility assessment required.",
-    href: "/data-sources/worldcompliance/na",
-  },
-];
-
 const WorldCompliance = () => {
-  const { region } = useRegion();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -86,20 +62,30 @@ const WorldCompliance = () => {
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 mb-6">
                 <Button asChild variant="accent">
-                  <Link to="/data-sources/worldcompliance/pricing">
-                    View Pricing
+                  <Link to="/data-sources/worldcompliance/demo">
+                    Request Demo
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
                   <Link to="/contact-sales">
-                    Contact Sales
+                    Talk to Sales
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </div>
+
+              {/* Resources Link */}
+              <Link 
+                to="/data-sources/resources" 
+                className="inline-flex items-center gap-2 text-teal hover:text-teal-dark transition-colors"
+              >
+                <BookOpen className="w-4 h-4" />
+                <span className="text-body-sm font-medium">View Resources & Data Coverage</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         </section>
@@ -212,51 +198,6 @@ const WorldCompliance = () => {
         <TrustedByLogos 
           description="Trusted by leading financial institutions, fintechs, and compliance teams worldwide using LexisNexis solutions."
         />
-
-        {/* CTA Section */}
-        <DataSourceCTA productName="WorldCompliance" variant="worldcompliance" />
-
-        {/* Region Selection */}
-        <section className="section-padding bg-surface-subtle">
-          <div className="container-enterprise">
-            <h2 className="text-2xl text-navy mb-4">Select Your Region</h2>
-            <p className="text-text-secondary mb-8 max-w-2xl">
-              WorldAML products are available globally with no country restrictions. 
-              Select your region below for localised pricing, currency options, and dedicated support contacts.
-            </p>
-            <div className="grid md:grid-cols-3 gap-6 max-w-5xl">
-              {regions.map((r) => (
-                <Card 
-                  key={r.id} 
-                  className={`border-divider hover:border-teal/30 transition-colors ${
-                    r.id === region ? "ring-2 ring-teal/30" : ""
-                  }`}
-                >
-                  <CardHeader>
-                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-teal/5 text-teal mb-4">
-                      <MapPin className="w-5 h-5" />
-                    </div>
-                    <CardTitle className="text-lg">{r.name}</CardTitle>
-                    {r.id === region && (
-                      <span className="text-xs text-teal bg-teal/10 px-2 py-1 rounded-full w-fit">
-                        Your detected region
-                      </span>
-                    )}
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <CardDescription>{r.description}</CardDescription>
-                    <Button variant="outline" asChild className="w-full">
-                      <Link to={r.href}>
-                        View Details & Pricing
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* Disclaimer */}
         <section className="py-8 bg-surface-subtle border-t border-divider">
