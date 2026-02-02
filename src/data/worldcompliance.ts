@@ -22,6 +22,19 @@ export const databaseStats = {
   regulatoryLaws: "100+",
 };
 
+export const pricingModel = {
+  type: "Subscription-based",
+  perUser: true,
+  unlimitedSearches: true,
+  description: "Per-user subscription with unlimited searches",
+};
+
+export const productOverview = {
+  tagline: "One-stop Sanctions, PEPs and Adverse Media solution",
+  description: "WorldCompliance™ Online Search Tool enables you to manually screen prospective clients and perform enhanced due diligence.",
+  useCase: "The Online Search Tool allows users to perform initial due diligence by screening potential clients, agents and business partners through the industry-leading WorldCompliance™ database.",
+};
+
 export const riskCategories = [
   {
     icon: Shield,
