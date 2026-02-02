@@ -70,9 +70,14 @@ const WorldCompliance = () => {
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
+                  <Link to="/data-sources/worldcompliance/pricing">
+                    View Pricing
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="ghost">
                   <Link to="/contact-sales">
                     Talk to Sales
-                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </div>
