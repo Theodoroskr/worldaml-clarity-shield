@@ -15,6 +15,13 @@ import {
 
 const navLinks = [
   {
+    label: "Products",
+    href: "/products",
+    children: [
+      { href: "/products/worldid", label: "WorldID" },
+    ],
+  },
+  {
     label: "Platform",
     href: "/platform",
     children: [
