@@ -1,13 +1,11 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight, BookOpen } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LaneBadge } from "@/components/LaneBadge";
-import { useRegion } from "@/contexts/RegionContext";
 import TrustedByLogos from "@/components/TrustedByLogos";
-import DataSourceCTA from "@/components/DataSourceCTA";
 import lexisNexisLogo from "@/assets/lexisnexis-risk-solutions-logo.png";
 import { 
   productStats, 
@@ -17,29 +15,7 @@ import {
   screeningCapabilities
 } from "@/data/bridgerxg";
 
-const regions = [
-  {
-    id: "eu-me",
-    name: "EU & Middle East",
-    cta: "Request Demo",
-    href: "/data-sources/bridger-xg/eu-me",
-  },
-  {
-    id: "uk-ie",
-    name: "UK & Ireland",
-    cta: "Request Demo",
-    href: "/data-sources/bridger-xg/uk-ie",
-  },
-  {
-    id: "na",
-    name: "North America",
-    cta: "Contact Sales",
-    href: "/data-sources/bridger-xg/na",
-  },
-];
-
 const BridgerXG = () => {
-  const { region } = useRegion();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -83,11 +59,37 @@ const BridgerXG = () => {
                   <p className="text-2xl font-bold text-navy">{productStats.topUSBanks}</p>
                   <p className="text-body-sm text-text-tertiary">Top US Banks</p>
                 </div>
-                <div className="bg-white border border-divider rounded-lg p-4 text-center">
+              <div className="bg-white border border-divider rounded-lg p-4 text-center">
                   <p className="text-2xl font-bold text-navy">{productStats.customers}</p>
                   <p className="text-body-sm text-text-tertiary">Customers</p>
                 </div>
               </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap gap-4 mb-6">
+                <Button asChild variant="accent">
+                  <Link to="/contact-sales">
+                    Request Demo
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/contact-sales">
+                    Talk to Sales
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Resources Link */}
+              <Link 
+                to="/data-sources/resources" 
+                className="inline-flex items-center gap-2 text-teal hover:text-teal-dark transition-colors"
+              >
+                <BookOpen className="w-4 h-4" />
+                <span className="text-body-sm font-medium">View Resources & Data Coverage</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         </section>
@@ -204,51 +206,6 @@ const BridgerXG = () => {
         <TrustedByLogos 
           description="The world's leading brands trust Bridger Insight® XG to help simplify AML, ABC, and CFT compliance."
         />
-
-        {/* CTA Section */}
-        <DataSourceCTA productName="Bridger Insight XG" variant="bridger" />
-
-        {/* Region Selection */}
-        <section className="section-padding bg-surface-subtle">
-          <div className="container-enterprise">
-            <h2 className="text-2xl text-navy mb-4">Select Your Region</h2>
-            <p className="text-text-secondary mb-8 max-w-2xl">
-              WorldAML products are available globally with no country restrictions. 
-              Select your region for localised pricing, currency options, and dedicated support.
-            </p>
-            <div className="grid md:grid-cols-3 gap-6 max-w-5xl">
-              {regions.map((r) => (
-                <Card 
-                  key={r.id} 
-                  className={`border-divider hover:border-teal/30 transition-colors ${
-                    r.id === region ? "ring-2 ring-teal/30" : ""
-                  }`}
-                >
-                  <CardHeader>
-                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-teal/5 text-teal mb-4">
-                      <MapPin className="w-5 h-5" />
-                    </div>
-                    <CardTitle className="text-lg">{r.name}</CardTitle>
-                    {r.id === region && (
-                      <span className="text-xs text-teal bg-teal/10 px-2 py-1 rounded-full w-fit">
-                        Your detected region
-                      </span>
-                    )}
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <CardDescription>Enterprise deployment with dedicated implementation support.</CardDescription>
-                    <Button variant="outline" asChild className="w-full">
-                      <Link to={r.href}>
-                        {r.cta}
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* Disclaimer */}
         <section className="py-8 bg-white border-t border-divider">
