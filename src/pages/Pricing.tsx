@@ -1,11 +1,53 @@
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { LaneBadge } from "@/components/LaneBadge";
+
+const apiPlans = [
+  {
+    name: "Starter",
+    price: "€99",
+    period: "/month",
+    description: "For startups and small businesses",
+    features: [
+      "Up to 2,000 monitored entities",
+      "Full API access",
+      "Ongoing monitoring included",
+      "Email support",
+    ],
+    highlight: false,
+  },
+  {
+    name: "Compliance",
+    price: "€495",
+    period: "/month",
+    description: "For growing regulated businesses",
+    features: [
+      "Up to 10,000 monitored entities",
+      "Enhanced monitoring",
+      "Priority support",
+      "Custom webhooks",
+    ],
+    highlight: true,
+  },
+  {
+    name: "Enterprise",
+    price: "Custom",
+    period: "",
+    description: "For large-scale operations",
+    features: [
+      "Unlimited monitored entities",
+      "Dedicated account manager",
+      "SLA guarantees",
+      "Custom integrations",
+    ],
+    highlight: false,
+  },
+];
 
 const Pricing = () => {
   return (
@@ -28,37 +70,69 @@ const Pricing = () => {
         {/* Section 1: WorldAML Platform & API */}
         <section className="section-padding bg-surface-subtle">
           <div className="container-enterprise">
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               <LaneBadge lane="platform" className="mb-6" />
-              <h2 className="text-2xl text-navy mb-4">WorldAML Platform & API</h2>
+              <h2 className="text-2xl text-navy mb-4">WorldAML API Pricing</h2>
               <p className="text-body text-text-secondary mb-8">
-                Pricing is provided on request based on access model, volume, and jurisdiction. 
-                The WorldAML platform provides unified workflows, governance, and API access for 
-                managing financial crime screening across approved data sources.
+                Simple, transparent pricing with annual billing. All plans include full API access 
+                and audit-ready screening reports. Unused checks roll over within your subscription period.
               </p>
               
-              <Card className="border-divider">
-                <CardHeader>
-                  <CardTitle>Custom Pricing</CardTitle>
-                  <CardDescription>
-                    Tailored to your organisation's requirements, user volume, and deployment preferences.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-body-sm text-text-secondary mb-6">
-                    <li>• Full platform API access</li>
-                    <li>• Workflow orchestration and governance</li>
-                    <li>• Audit trails and reporting</li>
-                    <li>• Dedicated onboarding support</li>
-                  </ul>
-                  <Button asChild className="w-full sm:w-auto">
-                    <Link to="/get-started">
-                      Contact Sales
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="grid md:grid-cols-3 gap-6 mb-8">
+                {apiPlans.map((plan) => (
+                  <Card 
+                    key={plan.name} 
+                    className={`relative ${plan.highlight ? 'border-teal border-2 shadow-lg' : 'border-divider'}`}
+                  >
+                    {plan.highlight && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                        <span className="bg-teal text-white text-xs font-medium px-3 py-1 rounded-full">
+                          Most Popular
+                        </span>
+                      </div>
+                    )}
+                    <CardHeader>
+                      <CardTitle className="text-navy">{plan.name}</CardTitle>
+                      <CardDescription>{plan.description}</CardDescription>
+                      <div className="mt-4">
+                        <span className="text-3xl font-bold text-navy">{plan.price}</span>
+                        <span className="text-text-secondary">{plan.period}</span>
+                        {plan.price !== "Custom" && (
+                          <p className="text-caption text-text-tertiary mt-1">billed annually</p>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-3 mb-6">
+                        {plan.features.map((feature) => (
+                          <li key={feature} className="flex items-start gap-2">
+                            <Check className="w-4 h-4 text-teal flex-shrink-0 mt-0.5" />
+                            <span className="text-body-sm text-text-secondary">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <Button 
+                        asChild 
+                        className="w-full"
+                        variant={plan.highlight ? "default" : "outline"}
+                      >
+                        <Link to="/get-started">
+                          {plan.price === "Custom" ? "Contact Sales" : "Get Started"}
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="p-4 rounded-lg bg-navy/5 border border-navy/10 text-center">
+                <p className="text-body-sm text-text-secondary">
+                  <span className="font-semibold text-navy">Usage Rollover:</span> Unused checks 
+                  roll over month-to-month within the same 12-month subscription period and expire 
+                  at the end of the term.
+                </p>
+              </div>
             </div>
           </div>
         </section>
