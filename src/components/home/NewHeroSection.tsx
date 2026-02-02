@@ -3,10 +3,142 @@ import { ArrowRight, Shield, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+// Abstract Network Globe visual component
+const NetworkGlobeVisual = () => (
+  <svg
+    viewBox="0 0 400 400"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-full h-full"
+  >
+    <style>
+      {`
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 1; r: 5; }
+          50% { opacity: 0.7; r: 8; }
+        }
+        @keyframes pulse-ring {
+          0% { opacity: 0.4; r: 8; }
+          100% { opacity: 0; r: 24; }
+        }
+        @keyframes connection-flow {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.6; }
+        }
+        @keyframes node-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.6; }
+        }
+        .center-node { animation: pulse-glow 3s ease-in-out infinite; }
+        .pulse-ring { animation: pulse-ring 3s ease-out infinite; }
+        .primary-connection { animation: connection-flow 4s ease-in-out infinite; }
+        .secondary-connection { animation: connection-flow 4s ease-in-out infinite 0.5s; }
+        .tertiary-connection { animation: connection-flow 4s ease-in-out infinite 1s; }
+        .secondary-node { animation: node-pulse 4s ease-in-out infinite 0.3s; }
+        .tertiary-node { animation: node-pulse 4s ease-in-out infinite 0.6s; }
+      `}
+    </style>
+    
+    {/* Outer globe circle */}
+    <circle cx="200" cy="200" r="150" stroke="currentColor" strokeWidth="1" className="text-navy/20" />
+    <circle cx="200" cy="200" r="120" stroke="currentColor" strokeWidth="0.5" className="text-navy/10" />
+    
+    {/* Center pulse ring */}
+    <circle cx="200" cy="200" r="8" className="fill-accent/20 pulse-ring" />
+    
+    {/* Network nodes - distributed globally */}
+    {/* Core nodes */}
+    <circle cx="200" cy="80" r="4" className="fill-navy" />
+    <circle cx="200" cy="320" r="4" className="fill-navy" />
+    <circle cx="80" cy="200" r="4" className="fill-navy" />
+    <circle cx="320" cy="200" r="4" className="fill-navy" />
+    
+    {/* Center node with glow */}
+    <circle cx="200" cy="200" r="5" className="fill-accent center-node" />
+    
+    {/* Secondary nodes */}
+    <circle cx="130" cy="120" r="3.5" className="fill-navy secondary-node" />
+    <circle cx="270" cy="120" r="3.5" className="fill-navy secondary-node" />
+    <circle cx="130" cy="280" r="3.5" className="fill-navy secondary-node" />
+    <circle cx="270" cy="280" r="3.5" className="fill-navy secondary-node" />
+    
+    {/* Tertiary nodes */}
+    <circle cx="160" cy="160" r="2.5" className="fill-navy/70 tertiary-node" />
+    <circle cx="240" cy="160" r="2.5" className="fill-navy/70 tertiary-node" />
+    <circle cx="160" cy="240" r="2.5" className="fill-navy/70 tertiary-node" />
+    <circle cx="240" cy="240" r="2.5" className="fill-navy/70 tertiary-node" />
+    
+    {/* Outer edge nodes */}
+    <circle cx="110" cy="170" r="2" className="fill-navy/50" />
+    <circle cx="290" cy="170" r="2" className="fill-navy/50" />
+    <circle cx="110" cy="230" r="2" className="fill-navy/50" />
+    <circle cx="290" cy="230" r="2" className="fill-navy/50" />
+    <circle cx="170" cy="100" r="2" className="fill-navy/50" />
+    <circle cx="230" cy="100" r="2" className="fill-navy/50" />
+    <circle cx="170" cy="300" r="2" className="fill-navy/50" />
+    <circle cx="230" cy="300" r="2" className="fill-navy/50" />
+    
+    {/* Primary connections to center */}
+    <line x1="200" y1="80" x2="200" y2="200" stroke="currentColor" strokeWidth="0.8" className="text-navy/30 primary-connection" />
+    <line x1="200" y1="200" x2="200" y2="320" stroke="currentColor" strokeWidth="0.8" className="text-navy/30 primary-connection" />
+    <line x1="80" y1="200" x2="200" y2="200" stroke="currentColor" strokeWidth="0.8" className="text-navy/30 primary-connection" />
+    <line x1="200" y1="200" x2="320" y2="200" stroke="currentColor" strokeWidth="0.8" className="text-navy/30 primary-connection" />
+    
+    {/* Diagonal connections to center */}
+    <line x1="130" y1="120" x2="200" y2="200" stroke="currentColor" strokeWidth="0.6" className="text-navy/25 secondary-connection" />
+    <line x1="270" y1="120" x2="200" y2="200" stroke="currentColor" strokeWidth="0.6" className="text-navy/25 secondary-connection" />
+    <line x1="130" y1="280" x2="200" y2="200" stroke="currentColor" strokeWidth="0.6" className="text-navy/25 secondary-connection" />
+    <line x1="270" y1="280" x2="200" y2="200" stroke="currentColor" strokeWidth="0.6" className="text-navy/25 secondary-connection" />
+    
+    {/* Secondary connections */}
+    <line x1="160" y1="160" x2="200" y2="200" stroke="currentColor" strokeWidth="0.5" className="text-navy/20 tertiary-connection" />
+    <line x1="240" y1="160" x2="200" y2="200" stroke="currentColor" strokeWidth="0.5" className="text-navy/20 tertiary-connection" />
+    <line x1="160" y1="240" x2="200" y2="200" stroke="currentColor" strokeWidth="0.5" className="text-navy/20 tertiary-connection" />
+    <line x1="240" y1="240" x2="200" y2="200" stroke="currentColor" strokeWidth="0.5" className="text-navy/20 tertiary-connection" />
+    
+    {/* Outer ring connections */}
+    <line x1="200" y1="80" x2="270" y2="120" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
+    <line x1="200" y1="80" x2="130" y2="120" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
+    <line x1="320" y1="200" x2="270" y2="120" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
+    <line x1="320" y1="200" x2="270" y2="280" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
+    <line x1="200" y1="320" x2="270" y2="280" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
+    <line x1="200" y1="320" x2="130" y2="280" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
+    <line x1="80" y1="200" x2="130" y2="280" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
+    <line x1="80" y1="200" x2="130" y2="120" stroke="currentColor" strokeWidth="0.5" className="text-navy/20" />
+    
+    {/* Cross connections for density */}
+    <line x1="130" y1="120" x2="270" y2="120" stroke="currentColor" strokeWidth="0.3" className="text-navy/15" />
+    <line x1="130" y1="280" x2="270" y2="280" stroke="currentColor" strokeWidth="0.3" className="text-navy/15" />
+    <line x1="130" y1="120" x2="130" y2="280" stroke="currentColor" strokeWidth="0.3" className="text-navy/15" />
+    <line x1="270" y1="120" x2="270" y2="280" stroke="currentColor" strokeWidth="0.3" className="text-navy/15" />
+    
+    {/* Tertiary to secondary connections */}
+    <line x1="160" y1="160" x2="130" y2="120" stroke="currentColor" strokeWidth="0.3" className="text-navy/15" />
+    <line x1="240" y1="160" x2="270" y2="120" stroke="currentColor" strokeWidth="0.3" className="text-navy/15" />
+    <line x1="160" y1="240" x2="130" y2="280" stroke="currentColor" strokeWidth="0.3" className="text-navy/15" />
+    <line x1="240" y1="240" x2="270" y2="280" stroke="currentColor" strokeWidth="0.3" className="text-navy/15" />
+    
+    {/* Edge node connections */}
+    <line x1="110" y1="170" x2="130" y2="120" stroke="currentColor" strokeWidth="0.25" className="text-navy/10" />
+    <line x1="110" y1="230" x2="130" y2="280" stroke="currentColor" strokeWidth="0.25" className="text-navy/10" />
+    <line x1="290" y1="170" x2="270" y2="120" stroke="currentColor" strokeWidth="0.25" className="text-navy/10" />
+    <line x1="290" y1="230" x2="270" y2="280" stroke="currentColor" strokeWidth="0.25" className="text-navy/10" />
+    <line x1="170" y1="100" x2="200" y2="80" stroke="currentColor" strokeWidth="0.25" className="text-navy/10" />
+    <line x1="230" y1="100" x2="200" y2="80" stroke="currentColor" strokeWidth="0.25" className="text-navy/10" />
+    <line x1="170" y1="300" x2="200" y2="320" stroke="currentColor" strokeWidth="0.25" className="text-navy/10" />
+    <line x1="230" y1="300" x2="200" y2="320" stroke="currentColor" strokeWidth="0.25" className="text-navy/10" />
+  </svg>
+);
+
 export const NewHeroSection = () => {
   return (
-    <section className="section-padding bg-surface-subtle">
-      <div className="container-enterprise">
+    <section className="section-padding bg-surface-subtle relative overflow-hidden">
+      {/* Animated Globe Background - Desktop only */}
+      <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-[0.12] pointer-events-none -mr-32">
+        <NetworkGlobeVisual />
+      </div>
+
+      <div className="container-enterprise relative z-10">
         {/* Hero Header */}
         <div className="text-center max-w-4xl mx-auto mb-16">
           <h1 className="text-navy mb-6 text-balance">
