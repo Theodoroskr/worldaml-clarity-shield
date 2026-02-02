@@ -165,6 +165,26 @@ const Pricing = () => {
                         </Link>
                       </Button>
                     </div>
+
+                    {/* WorldID Pricing Note */}
+                    <div className="mt-6 p-6 rounded-lg border border-divider bg-card">
+                      <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                        <h3 className="text-lg font-semibold text-navy">WorldID</h3>
+                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-teal/10 text-teal">
+                          Identity Verification
+                        </span>
+                      </div>
+                      <p className="text-body-sm text-text-secondary mb-4">
+                        Digital identity verification with document authentication, biometric liveness detection, 
+                        and face matching. Starting from €1,800/year.
+                      </p>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to="/products/worldid#pricing">
+                          View WorldID Pricing
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 
