@@ -1,5 +1,10 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, MapPin, CheckCircle2, Building2 } from "lucide-react";
+import { ArrowRight, MapPin, CheckCircle2 } from "lucide-react";
+
+// Client logos
+import bankOfCyprusLogo from "@/assets/clients/bank-of-cyprus.png";
+import argusFxLogo from "@/assets/clients/argus-fx.png";
+import big4Logos from "@/assets/clients/big4-logos.png";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -203,16 +208,53 @@ const BridgerXG = () => {
         {/* Trusted By */}
         <section className="section-padding bg-background">
           <div className="container-enterprise">
-            <div className="max-w-3xl">
-              <h2 className="text-2xl text-navy mb-6">Trusted by Industry Leaders</h2>
-              <p className="text-text-secondary mb-6">
+            <div className="text-center max-w-4xl mx-auto mb-10">
+              <h2 className="text-2xl text-navy mb-4">Trusted by Industry Leaders</h2>
+              <p className="text-text-secondary">
                 The world's leading brands trust Bridger Insight® XG to help simplify AML, 
                 ABC, and CFT compliance, secure their reputation, and stay focused on core business.
               </p>
-              <div className="space-y-3">
-                {trustedBy.map((item) => (
-                  <div key={item} className="flex items-center gap-3 bg-white border border-divider rounded-lg p-3">
-                    <CheckCircle2 className="w-5 h-5 text-teal flex-shrink-0" />
+            </div>
+            
+            {/* Big 4 & Advisory Firms */}
+            <div className="mb-10">
+              <p className="text-body-sm text-text-tertiary text-center mb-6 uppercase tracking-wider">
+                Advisory & Audit Firms
+              </p>
+              <div className="flex justify-center">
+                <img 
+                  src={big4Logos} 
+                  alt="KPMG, EY, PWC, Grant Thornton, RSM" 
+                  className="max-h-12 w-auto opacity-80 hover:opacity-100 transition-opacity"
+                />
+              </div>
+            </div>
+
+            {/* Financial Institutions */}
+            <div className="mb-10">
+              <p className="text-body-sm text-text-tertiary text-center mb-6 uppercase tracking-wider">
+                Financial Institutions & Fintechs
+              </p>
+              <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+                <img 
+                  src={bankOfCyprusLogo} 
+                  alt="Bank of Cyprus" 
+                  className="h-10 w-auto opacity-80 hover:opacity-100 transition-opacity"
+                />
+                <img 
+                  src={argusFxLogo} 
+                  alt="Argus FX" 
+                  className="h-8 w-auto opacity-80 hover:opacity-100 transition-opacity"
+                />
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-10 pt-8 border-t border-divider">
+              <div className="flex flex-wrap justify-center gap-8 text-center">
+                {trustedBy.slice(0, 3).map((item) => (
+                  <div key={item} className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-teal flex-shrink-0" />
                     <span className="text-body-sm text-text-secondary">{item}</span>
                   </div>
                 ))}
