@@ -12,7 +12,9 @@ import {
   riskCategories, 
   benefits, 
   searchFeatures,
-  complianceStandards 
+  complianceStandards,
+  pricingModel,
+  productOverview
 } from "@/data/worldcompliance";
 
 const WorldCompliance = () => {
@@ -39,11 +41,17 @@ const WorldCompliance = () => {
                 </p>
               </div>
 
-              <p className="text-body-lg text-text-secondary mb-6">
-                WorldCompliance® Online Search Tool enables compliance professionals to manually 
-                screen prospective clients and perform enhanced due diligence through the 
-                industry-leading WorldCompliance™ database.
+              <p className="text-body-lg text-text-secondary mb-4">
+                {productOverview.description} {productOverview.useCase}
               </p>
+
+              {/* Pricing Model Highlight */}
+              <div className="inline-flex items-center gap-2 bg-teal/10 border border-teal/20 rounded-full px-4 py-2 mb-6">
+                <CheckCircle2 className="w-4 h-4 text-teal" />
+                <span className="text-body-sm font-medium text-teal-dark">
+                  {pricingModel.type} · Per User · Unlimited Searches
+                </span>
+              </div>
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-4 mb-8">
