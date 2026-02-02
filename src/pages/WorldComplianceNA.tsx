@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LaneBadge } from "@/components/LaneBadge";
+import { Logo } from "@/components/Logo";
+import { FreeTrialForm } from "@/components/forms/FreeTrialForm";
 import { databaseStats, riskCategories, searchFeatures } from "@/data/worldcompliance";
 
 const WorldComplianceNA = () => {
@@ -15,58 +17,58 @@ const WorldComplianceNA = () => {
         {/* Hero Section */}
         <section className="section-padding bg-surface-subtle">
           <div className="container-enterprise">
-            <div className="max-w-3xl">
-              <LaneBadge lane="data-source" className="mb-6" />
-              <h1 className="text-navy mb-4">WorldCompliance® Online Search Tool</h1>
-              <p className="text-xl text-teal-dark font-medium mb-6">
-                North America Region
-              </p>
-              
-              {/* Attribution Block */}
-              <div className="bg-white border border-divider rounded-lg p-4 mb-8">
-                <p className="text-body-sm text-text-secondary mb-1">
-                  <strong>Powered by</strong> LexisNexis Risk Solutions
+            <div className="grid lg:grid-cols-2 gap-12 items-start">
+              {/* Left Column - Content */}
+              <div>
+                <LaneBadge lane="data-source" className="mb-6" />
+                <h1 className="text-navy mb-4">WorldCompliance® Online Search Tool</h1>
+                <p className="text-xl text-teal-dark font-medium mb-6">
+                  North America Region
                 </p>
-                <p className="text-body-sm text-text-tertiary">
-                  <strong>Delivered and supported by</strong> Infocredit Group
+                
+                {/* Attribution Block */}
+                <div className="bg-white border border-divider rounded-lg p-4 mb-8">
+                  <p className="text-body-sm text-text-secondary mb-1">
+                    <strong>Powered by</strong> LexisNexis Risk Solutions
+                  </p>
+                  <p className="text-body-sm text-text-tertiary">
+                    <strong>Delivered and supported by</strong> Infocredit Group
+                  </p>
+                </div>
+
+                <p className="text-body-lg text-text-secondary mb-6">
+                  WorldCompliance® provides North American institutions with comprehensive 
+                  sanctions, PEP, and adverse media screening through the industry-leading 
+                  database containing {databaseStats.profiles} detailed profiles.
                 </p>
-              </div>
+                
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                  <div className="bg-white border border-divider rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-navy">{databaseStats.profiles}</p>
+                    <p className="text-body-sm text-text-tertiary">Profiles</p>
+                  </div>
+                  <div className="bg-white border border-divider rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-navy">{databaseStats.riskCategories}</p>
+                    <p className="text-body-sm text-text-tertiary">Risk Categories</p>
+                  </div>
+                  <div className="bg-white border border-divider rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-navy">USD</p>
+                    <p className="text-body-sm text-text-tertiary">Pricing</p>
+                  </div>
+                </div>
 
-              <p className="text-body-lg text-text-secondary mb-6">
-                WorldCompliance® provides North American institutions with comprehensive 
-                sanctions, PEP, and adverse media screening through the industry-leading 
-                database containing {databaseStats.profiles} detailed profiles.
-              </p>
-              
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <div className="bg-white border border-divider rounded-lg p-4 text-center">
-                  <p className="text-2xl font-bold text-navy">{databaseStats.profiles}</p>
-                  <p className="text-body-sm text-text-tertiary">Profiles</p>
-                </div>
-                <div className="bg-white border border-divider rounded-lg p-4 text-center">
-                  <p className="text-2xl font-bold text-navy">{databaseStats.riskCategories}</p>
-                  <p className="text-body-sm text-text-tertiary">Risk Categories</p>
-                </div>
-                <div className="bg-white border border-divider rounded-lg p-4 text-center">
-                  <p className="text-2xl font-bold text-navy">USD</p>
-                  <p className="text-body-sm text-text-tertiary">Pricing</p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-4">
-                <Button asChild size="lg">
-                  <Link to="/get-started">
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    Buy WorldCompliance Online
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild size="lg">
+                <Button variant="outline" asChild>
                   <Link to="/data-sources/worldcompliance">
                     View Full Product Details
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
+              </div>
+
+              {/* Right Column - Free Trial Form */}
+              <div className="lg:sticky lg:top-24">
+                <FreeTrialForm region="na" />
               </div>
             </div>
           </div>
@@ -168,20 +170,19 @@ const WorldComplianceNA = () => {
           </div>
         </section>
 
-        {/* Pricing CTA */}
+        {/* WorldAML Platform CTA */}
         <section className="section-padding bg-navy">
-          <div className="container-enterprise text-center">
-            <h2 className="text-2xl text-white mb-4">Get Started Today</h2>
-            <p className="text-white/80 mb-8 max-w-2xl mx-auto">
-              Subscribe to WorldCompliance® Online Search Tool. Eligibility assessment 
-              and contractual approval required for North American customers.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
+          <div className="container-enterprise">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="text-center md:text-left">
+                <Logo size="lg" showTagline className="mb-4 justify-center md:justify-start [&_*]:text-white [&_.text-text-tertiary]:text-white/70" />
+                <p className="text-white/80 max-w-xl">
+                  Access WorldCompliance® through the WorldAML Platform for unified workflow 
+                  management, case handling, and compliance reporting.
+                </p>
+              </div>
               <Button variant="secondary" size="lg" asChild>
-                <Link to="/get-started">Buy WorldCompliance Online</Link>
-              </Button>
-              <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10" asChild>
-                <Link to="/pricing">View Pricing</Link>
+                <Link to="/platform">Explore WorldAML Platform</Link>
               </Button>
             </div>
           </div>
