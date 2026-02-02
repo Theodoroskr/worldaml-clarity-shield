@@ -21,10 +21,6 @@ import BridgerXG from "./pages/BridgerXG";
 import BridgerXGEUME from "./pages/BridgerXGEUME";
 import BridgerXGUKIE from "./pages/BridgerXGUKIE";
 import BridgerXGNA from "./pages/BridgerXGNA";
-import Regions from "./pages/Regions";
-import RegionEUME from "./pages/RegionEUME";
-import RegionUKIE from "./pages/RegionUKIE";
-import RegionNA from "./pages/RegionNA";
 import Industries from "./pages/Industries";
 import Support from "./pages/Support";
 import About from "./pages/About";
@@ -71,11 +67,6 @@ const App = () => (
             <Route path="/data-sources/bridger-xg/uk-ie" element={<BridgerXGUKIE />} />
             <Route path="/data-sources/bridger-xg/na" element={<BridgerXGNA />} />
             
-            {/* Regions */}
-            <Route path="/regions" element={<Regions />} />
-            <Route path="/regions/eu-me" element={<RegionEUME />} />
-            <Route path="/regions/uk-ie" element={<RegionUKIE />} />
-            <Route path="/regions/na" element={<RegionNA />} />
             
             {/* Preserved pages */}
             <Route path="/industries" element={<Industries />} />
