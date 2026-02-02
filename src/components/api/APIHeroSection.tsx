@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LaneBadge } from "@/components/LaneBadge";
 
-const codeExample = `// Screen an entity for AML risk
+const codeExample = `// Screen an entity via WorldAML API
 const response = await fetch(
   'https://api.worldaml.com/v1/screen',
   {
@@ -25,15 +26,18 @@ export const APIHeroSection = () => {
       <div className="container-enterprise">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div>
-            <p className="text-caption font-medium text-accent mb-4">
+            <LaneBadge lane="platform" className="mb-6" />
+            <h1 className="text-display text-navy mb-4">
               WorldAML API
-            </p>
-            <h1 className="text-display text-navy mb-6">
-              AML Screening & Monitoring Infrastructure for Developers
             </h1>
+            <p className="text-body-lg text-teal font-medium mb-6">
+              AML Screening & Monitoring via a Unified API Layer
+            </p>
             <p className="text-body-lg text-text-secondary mb-8">
-              Embed real-time AML screening, ongoing monitoring and risk assessment 
-              for individuals and companies into your compliance workflows.
+              WorldAML API provides programmatic access to AML screening and ongoing 
+              monitoring for individuals and companies through a single, unified 
+              integration layer. Designed for regulated institutions that need to embed 
+              screening and monitoring directly into onboarding and customer lifecycle systems.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild>
@@ -49,7 +53,7 @@ export const APIHeroSection = () => {
                   rel="noopener noreferrer"
                 >
                   <FileText className="mr-2 h-4 w-4" />
-                  View Documentation
+                  View API Documentation
                 </a>
               </Button>
             </div>
