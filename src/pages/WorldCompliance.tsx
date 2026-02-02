@@ -84,6 +84,22 @@ const WorldCompliance = () => {
                   <p className="text-body-sm text-text-tertiary">AML/CTF Laws Covered</p>
                 </div>
               </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap gap-4">
+                <Button asChild variant="accent">
+                  <Link to="/data-sources/worldcompliance/pricing">
+                    View Pricing
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/contact-sales">
+                    Contact Sales
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </section>
