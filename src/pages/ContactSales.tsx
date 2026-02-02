@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, Check, Send } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -24,6 +24,12 @@ const products = [
     category: "Platform",
   },
   {
+    id: "worldid",
+    name: "WorldID",
+    description: "Digital identity verification with document authentication and liveness detection",
+    category: "Platform",
+  },
+  {
     id: "worldcompliance",
     name: "WorldCompliance®",
     description: "Global screening data from LexisNexis Risk Solutions",
@@ -39,6 +45,7 @@ const products = [
 
 const ContactSales = () => {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [formData, setFormData] = useState({
@@ -49,6 +56,30 @@ const ContactSales = () => {
     jobTitle: "",
     message: "",
   });
+
+  // Pre-select product based on URL params
+  useEffect(() => {
+    const productParam = searchParams.get("product");
+    const planParam = searchParams.get("plan");
+    const bundleParam = searchParams.get("bundle");
+    
+    if (productParam === "worldid") {
+      setSelectedProducts(["worldid"]);
+      
+      // Add context to message if plan or bundle specified
+      if (planParam) {
+        setFormData(prev => ({
+          ...prev,
+          message: `Interested in WorldID ${planParam.charAt(0).toUpperCase() + planParam.slice(1)} plan.`
+        }));
+      } else if (bundleParam) {
+        setFormData(prev => ({
+          ...prev,
+          message: `Interested in WorldID ${bundleParam.replace("-", " ")} bundle.`
+        }));
+      }
+    }
+  }, [searchParams]);
 
   const handleProductToggle = (productId: string) => {
     setSelectedProducts((prev) =>
