@@ -12,6 +12,11 @@ export const DataSourceCTA = ({
   productName = "WorldCompliance",
   variant = "worldcompliance"
 }: DataSourceCTAProps) => {
+  // Determine the demo link based on variant
+  const demoLink = variant === "worldcompliance" 
+    ? "/data-sources/worldcompliance/demo" 
+    : "/demo";
+
   return (
     <section className="section-padding bg-navy">
       <div className="container-enterprise">
@@ -37,7 +42,7 @@ export const DataSourceCTA = ({
                 See the platform in action with a personalized walkthrough from our team.
               </p>
               <Button className="w-full bg-teal hover:bg-teal/80 text-white border-0" asChild>
-                <Link to="/demo">
+                <Link to={demoLink}>
                   Schedule Demo
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
