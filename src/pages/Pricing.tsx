@@ -1,71 +1,11 @@
 import { Link } from "react-router-dom";
-import { Check, ArrowRight, HelpCircle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
-const plans = [
-  {
-    name: "WorldAML Basic",
-    description: "For startups and small businesses getting started with compliance. Full API access included.",
-    price: "Contact Sales",
-    priceSubtext: "Billed annually, prepaid",
-    features: [
-      { text: "Full Platform API Access", included: true },
-      { text: "Basic KYC Onboarding", included: true },
-      { text: "AML Screening (Sanctions & PEP)", included: true },
-      { text: "Basic Adverse Media", included: true },
-      { text: "Ongoing Monitoring", included: false, tooltip: "Available in Compliance plan" },
-      { text: "KYB Business Onboarding", included: false },
-      { text: "Risk Assessment & Decisioning", included: false },
-      { text: "Dedicated Support", included: false },
-    ],
-    cta: "Contact Sales",
-    highlight: false,
-  },
-  {
-    name: "WorldAML Compliance",
-    description: "Full platform access for growing regulated businesses. Complete compliance lifecycle via API.",
-    price: "Contact Sales",
-    priceSubtext: "Billed annually, prepaid",
-    features: [
-      { text: "Full Platform API Access", included: true },
-      { text: "KYC & KYB Onboarding", included: true },
-      { text: "AML Screening (Full Coverage)", included: true },
-      { text: "Advanced Adverse Media", included: true },
-      { text: "Ongoing Monitoring", included: true },
-      { text: "Risk Assessment & Decisioning", included: true },
-      { text: "Document Verification", included: true },
-      { text: "Priority Support", included: true },
-    ],
-    cta: "Contact Sales",
-    highlight: true,
-    badge: "Most Popular",
-  },
-  {
-    name: "WorldAML Enterprise",
-    description: "Full platform with custom SLAs and dedicated support. API and UI access for your entire organisation.",
-    price: "Custom",
-    priceSubtext: "Tailored to your needs",
-    features: [
-      { text: "Everything in Compliance", included: true },
-      { text: "Custom API Integration Support", included: true },
-      { text: "Dedicated Account Manager", included: true },
-      { text: "Custom SLA with Defined Response Times", included: true },
-      { text: "On-Premise Deployment Option", included: true },
-      { text: "Advanced Analytics & Reporting", included: true },
-      { text: "Custom Rules Engine", included: true },
-      { text: "24/7 Priority Support", included: true },
-    ],
-    cta: "Talk to Sales",
-    highlight: false,
-  },
-];
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { LaneBadge } from "@/components/LaneBadge";
 
 const Pricing = () => {
   return (
@@ -76,140 +16,158 @@ const Pricing = () => {
         <section className="section-padding bg-background">
           <div className="container-enterprise">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-display text-navy mb-6">
-                Simple, Transparent Pricing
-              </h1>
-              <p className="text-body-lg text-text-secondary mb-8">
-                Choose the plan that fits your compliance needs. All plans include full API 
-                access to the WorldAML compliance platform — KYC/KYB onboarding, AML screening, 
-                monitoring and risk assessment.
+              <h1 className="text-navy mb-6">Pricing</h1>
+              <p className="text-body-lg text-text-secondary">
+                Pricing structure varies by product type and jurisdiction. 
+                Select the relevant section below for details.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Pricing cards */}
-        <section className="pb-16 md:pb-24 bg-background">
+        {/* Section 1: WorldAML Platform & API */}
+        <section className="section-padding bg-surface-subtle">
           <div className="container-enterprise">
-            <div className="grid lg:grid-cols-3 gap-8">
-              {plans.map((plan) => (
-                <div
-                  key={plan.name}
-                  className={`relative rounded-xl border p-8 flex flex-col ${
-                    plan.highlight
-                      ? "border-navy bg-navy/[0.02] ring-1 ring-navy"
-                      : "border-divider bg-card"
-                  }`}
-                >
-                  {/* Badge */}
-                  {plan.badge && (
-                    <div className="absolute -top-3 left-8">
-                      <span className="inline-flex px-3 py-1 text-caption font-semibold text-primary-foreground bg-navy rounded-full">
-                        {plan.badge}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Header */}
-                  <div className="mb-6">
-                    <h3 className="text-title text-navy mb-2">{plan.name}</h3>
-                    <p className="text-body-sm text-text-secondary">{plan.description}</p>
-                  </div>
-
-                  {/* Price */}
-                  <div className="mb-8">
-                    <div className="text-headline text-navy">{plan.price}</div>
-                    <div className="text-body-sm text-text-tertiary">{plan.priceSubtext}</div>
-                  </div>
-
-                  {/* Features */}
-                  <ul className="space-y-4 mb-8 flex-1">
-                    {plan.features.map((feature) => (
-                      <li key={feature.text} className="flex items-start gap-3">
-                        <div
-                          className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 ${
-                            feature.included ? "bg-teal/10" : "bg-secondary"
-                          }`}
-                        >
-                          <Check
-                            className={`w-3 h-3 ${
-                              feature.included ? "text-teal" : "text-text-tertiary"
-                            }`}
-                          />
-                        </div>
-                        <span
-                          className={`text-body-sm ${
-                            feature.included ? "text-text-primary" : "text-text-tertiary"
-                          }`}
-                        >
-                          {feature.text}
-                          {feature.tooltip && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <HelpCircle className="inline-block w-3.5 h-3.5 ml-1 text-text-tertiary cursor-help" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{feature.tooltip}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                        </span>
-                      </li>
-                    ))}
+            <div className="max-w-3xl mx-auto">
+              <LaneBadge lane="platform" className="mb-6" />
+              <h2 className="text-2xl text-navy mb-4">WorldAML Platform & API</h2>
+              <p className="text-body text-text-secondary mb-8">
+                Pricing is provided on request based on access model, volume, and jurisdiction. 
+                The WorldAML platform provides unified workflows, governance, and API access for 
+                managing financial crime screening across approved data sources.
+              </p>
+              
+              <Card className="border-divider">
+                <CardHeader>
+                  <CardTitle>Custom Pricing</CardTitle>
+                  <CardDescription>
+                    Tailored to your organisation's requirements, user volume, and deployment preferences.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-body-sm text-text-secondary mb-6">
+                    <li>• Full platform API access</li>
+                    <li>• Workflow orchestration and governance</li>
+                    <li>• Audit trails and reporting</li>
+                    <li>• Dedicated onboarding support</li>
                   </ul>
-
-                  {/* CTA */}
-                  <Button
-                    className="w-full"
-                    variant={plan.highlight ? "default" : "outline"}
-                    asChild
-                  >
-                    <Link to="/contact">
-                      {plan.cta}
+                  <Button asChild className="w-full sm:w-auto">
+                    <Link to="/get-started">
+                      Contact Sales
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
-                </div>
-              ))}
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
 
-        {/* Rollover notice */}
-        <section className="pb-16 md:pb-24 bg-background">
+        <Separator className="mx-auto max-w-3xl" />
+
+        {/* Section 2: Data Sources */}
+        <section className="section-padding bg-background">
           <div className="container-enterprise">
             <div className="max-w-3xl mx-auto">
-              <div className="p-6 rounded-lg bg-surface-subtle border border-divider">
-                <h3 className="text-body font-semibold text-navy mb-2">Usage Rollover Policy</h3>
-                <p className="text-body-sm text-text-secondary">
-                  Unused checks roll over month-to-month within the same 12-month subscription 
-                  period and expire at the end of the term. This ensures you get full value from 
-                  your annual commitment while maintaining predictable budgeting.
-                </p>
+              <LaneBadge lane="data-source" className="mb-6" />
+              <h2 className="text-2xl text-navy mb-4">Data Sources</h2>
+              <p className="text-body text-text-secondary mb-8">
+                Screening data is provided by LexisNexis Risk Solutions. 
+                Pricing varies by product and region.
+              </p>
+
+              <div className="space-y-6">
+                {/* WorldCompliance */}
+                <Card className="border-teal/20">
+                  <CardHeader>
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <CardTitle>WorldCompliance®</CardTitle>
+                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-teal/10 text-teal">
+                        Online Purchase Available
+                      </span>
+                    </div>
+                    <CardDescription>
+                      Search-based screening for individuals and companies across global sanctions, PEPs, and adverse media.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid sm:grid-cols-3 gap-4 mb-6">
+                      <div className="p-4 rounded-lg bg-surface-subtle">
+                        <p className="text-body-sm font-medium text-navy mb-1">EU & Middle East</p>
+                        <p className="text-caption text-text-tertiary">EUR / AED pricing</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-surface-subtle">
+                        <p className="text-body-sm font-medium text-navy mb-1">UK & Ireland</p>
+                        <p className="text-caption text-text-tertiary">GBP / EUR pricing</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-surface-subtle">
+                        <p className="text-body-sm font-medium text-navy mb-1">North America</p>
+                        <p className="text-caption text-text-tertiary">USD pricing</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" asChild className="w-full sm:w-auto">
+                      <Link to="/data-sources/worldcompliance">
+                        View Regional Pricing
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Bridger Insight XG */}
+                <Card className="border-teal/20">
+                  <CardHeader>
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <CardTitle>Bridger Insight XG®</CardTitle>
+                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-navy/10 text-navy">
+                        Enterprise Only
+                      </span>
+                    </div>
+                    <CardDescription>
+                      Enterprise-grade screening solution with advanced matching algorithms and batch processing.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-body-sm text-text-secondary mb-6">
+                      Pricing is provided on request. Enterprise deployment includes dedicated implementation support.
+                    </p>
+                    <Button variant="outline" asChild className="w-full sm:w-auto">
+                      <Link to="/data-sources/bridger-xg">
+                        Request Demo
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
         </section>
 
-        {/* FAQ Preview */}
-        <section className="section-padding bg-surface-subtle">
+        {/* Disclaimer */}
+        <section className="py-8 bg-surface-subtle border-t border-divider">
+          <div className="container-enterprise">
+            <p className="text-body-sm text-text-tertiary text-center max-w-3xl mx-auto">
+              Pricing, availability, and service scope vary by jurisdiction and delivery entity. 
+              Contact us for a detailed quote based on your specific requirements.
+            </p>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="section-padding bg-background">
           <div className="container-enterprise">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-headline text-navy mb-4">Have Questions?</h2>
-              <p className="text-body-lg text-text-secondary mb-8">
-                Our team is ready to help you find the right plan for your compliance needs.
+              <h2 className="text-2xl text-navy mb-4">Have Questions?</h2>
+              <p className="text-body text-text-secondary mb-8">
+                Our team is ready to help you find the right solution for your compliance needs.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild>
-                  <Link to="/contact">
-                    Talk to Sales
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link to="/support">View Support Options</Link>
-                </Button>
-              </div>
+              <Button asChild size="lg">
+                <Link to="/get-started">
+                  Contact Sales
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
           </div>
         </section>

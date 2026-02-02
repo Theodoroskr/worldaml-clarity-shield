@@ -61,18 +61,11 @@ const About = () => {
         <section className="section-padding bg-background">
           <div className="container-enterprise">
             <div className="max-w-3xl">
-              <h1 className="text-display text-navy mb-6">
-                About WorldAML
-              </h1>
-              <p className="text-body-lg text-text-secondary mb-6">
-                We're on a mission to make AML compliance accessible, efficient, and reliable 
-                for regulated businesses of all sizes. Our platform helps companies meet their 
-                compliance obligations while focusing on what they do best.
-              </p>
-              <p className="text-body text-text-secondary">
-                Founded by compliance and technology professionals who understood the challenges 
-                of building robust AML programs, WorldAML combines deep regulatory expertise with 
-                modern engineering to deliver enterprise-grade compliance infrastructure.
+              <h1 className="text-navy mb-6">About WorldAML</h1>
+              <p className="text-body-lg text-text-secondary">
+                WorldAML is a financial crime screening platform operated by Infocredit Group. 
+                The platform provides unified access to approved screening technologies and data 
+                sources for regulated institutions across multiple jurisdictions.
               </p>
             </div>
           </div>
@@ -97,12 +90,12 @@ const About = () => {
                   </a>
                 </div>
                 <div>
-                  <h2 className="text-subheadline text-navy mb-3">Part of InfoCredit Group</h2>
+                  <h2 className="text-2xl text-navy mb-3">Operated by Infocredit Group</h2>
                   <p className="text-body text-text-secondary">
-                    WorldAML is a product of InfoCredit Group Ltd, a leading provider of business intelligence 
-                    and compliance solutions. With decades of experience in credit risk management and regulatory 
-                    compliance, InfoCredit Group brings deep expertise in data quality, regulatory frameworks, 
-                    and enterprise-grade infrastructure to the WorldAML platform.
+                    Infocredit Group is an authorized regional partner of LexisNexis Risk Solutions. 
+                    With decades of experience in business intelligence and regulatory compliance, 
+                    Infocredit Group delivers, supports, and onboards customers across the EU, 
+                    Middle East, UK, Ireland, and North America.
                   </p>
                 </div>
               </div>
@@ -110,31 +103,51 @@ const About = () => {
           </div>
         </section>
 
-        {/* Mission */}
-        <section className="section-padding bg-navy">
+        {/* What We Do */}
+        <section className="section-padding bg-background">
           <div className="container-enterprise">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-headline text-primary-foreground mb-6">Our Mission</h2>
-              <p className="text-body-lg text-slate-light">
-                "To provide the compliance infrastructure that enables regulated businesses 
-                to operate with confidence, protecting the financial system from abuse while 
-                enabling legitimate commerce to thrive."
-              </p>
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl text-navy mb-6">What We Do</h2>
+              <div className="space-y-6 text-body text-text-secondary">
+                <p>
+                  WorldAML provides two distinct offerings:
+                </p>
+                <div className="pl-6 border-l-2 border-navy/20 space-y-4">
+                  <div>
+                    <p className="font-semibold text-navy">WorldAML Platform</p>
+                    <p className="text-body-sm text-text-secondary">
+                      A technology platform providing unified UI, APIs, workflows, and governance 
+                      for managing financial crime screening workflows.
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-navy">Data Sources</p>
+                    <p className="text-body-sm text-text-secondary">
+                      Access to trusted screening solutions from LexisNexis Risk Solutions, 
+                      including WorldCompliance® and Bridger Insight XG®.
+                    </p>
+                  </div>
+                </div>
+                <p className="text-body-sm text-text-tertiary italic">
+                  Note: WorldAML does not own or generate sanctions, PEP, or adverse media data. 
+                  Screening data is provided by third-party data sources.
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Values */}
-        <section className="section-padding bg-background">
+        <section className="section-padding bg-surface-subtle">
           <div className="container-enterprise">
-            <div className="text-center mb-16">
-              <h2 className="text-headline text-navy mb-4">Our Values</h2>
-              <p className="text-body-lg text-text-secondary max-w-2xl mx-auto">
-                These principles guide everything we do, from product development to customer relationships.
+            <div className="text-center mb-12">
+              <h2 className="text-2xl text-navy mb-4">Our Values</h2>
+              <p className="text-body text-text-secondary max-w-2xl mx-auto">
+                These principles guide how we serve our customers and partners.
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
               {values.map((value) => (
                 <div
                   key={value.title}
@@ -152,13 +165,13 @@ const About = () => {
         </section>
 
         {/* ISO Certifications */}
-        <section className="section-padding bg-surface-subtle">
+        <section className="section-padding bg-background">
           <div className="container-enterprise">
             <div className="text-center mb-12">
-              <h2 className="text-headline text-navy mb-4">Certified Management Systems</h2>
-              <p className="text-body-lg text-text-secondary max-w-2xl mx-auto">
-                Our commitment to quality, security, and business continuity is backed by internationally 
-                recognized certifications.
+              <h2 className="text-2xl text-navy mb-4">Certified Management Systems</h2>
+              <p className="text-body text-text-secondary max-w-2xl mx-auto">
+                Our commitment to quality, security, and business continuity is backed by 
+                internationally recognized certifications.
               </p>
             </div>
 
@@ -181,43 +194,23 @@ const About = () => {
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="section-padding bg-background">
-          <div className="container-enterprise">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-              {[
-                { value: "500+", label: "Customers Worldwide" },
-                { value: "200+", label: "Jurisdictions Covered" },
-                { value: "50M+", label: "Screenings Monthly" },
-                { value: "24/7", label: "Global Support" },
-              ].map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <div className="text-display text-navy mb-2">{stat.value}</div>
-                  <div className="text-body text-text-secondary">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* CTA */}
         <section className="section-padding bg-surface-subtle">
           <div className="container-enterprise">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-headline text-navy mb-4">Join Our Team</h2>
-              <p className="text-body-lg text-text-secondary mb-8">
-                We're always looking for talented people who share our passion for 
-                building great products and serving our customers.
+              <h2 className="text-2xl text-navy mb-4">Get in Touch</h2>
+              <p className="text-body text-text-secondary mb-8">
+                Contact us to learn more about our platform and data source offerings.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button asChild>
-                  <Link to="/careers">
-                    View Open Positions
+                  <Link to="/get-started">
+                    Contact Sales
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link to="/contact">Contact Us</Link>
+                  <Link to="/support">Support</Link>
                 </Button>
               </div>
             </div>
