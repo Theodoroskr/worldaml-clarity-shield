@@ -19,7 +19,13 @@ interface RegionPricing {
   disclaimer: string;
 }
 
-const regions: RegionPricing[] = [
+interface CurrencyOption {
+  currency: string;
+  symbol: string;
+  basePrice: number;
+}
+
+const regions: (RegionPricing & { currencies?: CurrencyOption[] })[] = [
   {
     id: "eu-me",
     name: "Europe & Middle East",
@@ -31,9 +37,13 @@ const regions: RegionPricing[] = [
   {
     id: "uk-ie",
     name: "United Kingdom & Ireland",
-    currency: "EUR",
-    symbol: "€",
-    basePrice: 3200,
+    currency: "GBP",
+    symbol: "£",
+    basePrice: 2700,
+    currencies: [
+      { currency: "GBP", symbol: "£", basePrice: 2700 },
+      { currency: "EUR", symbol: "€", basePrice: 3200 },
+    ],
     disclaimer: "Access subject to verification and contractual approval.",
   },
   {
@@ -58,6 +68,7 @@ const calculateUserPrice = (basePrice: number, userNumber: number): number => {
 const WorldCompliancePricing = () => {
   const { region: detectedRegion, isLoading } = useRegion();
   const [selectedRegion, setSelectedRegion] = useState("eu-me");
+  const [selectedCurrency, setSelectedCurrency] = useState<string>("GBP");
   const [userCount, setUserCount] = useState(1);
 
   // Set initial region based on detection
@@ -68,14 +79,25 @@ const WorldCompliancePricing = () => {
   }, [detectedRegion, isLoading]);
 
   const currentRegion = regions.find((r) => r.id === selectedRegion) || regions[0];
+  
+  // Get active pricing based on currency selection for UK-IE
+  const activePricing = useMemo(() => {
+    if (currentRegion.currencies && selectedRegion === "uk-ie") {
+      const currencyOption = currentRegion.currencies.find(c => c.currency === selectedCurrency);
+      if (currencyOption) {
+        return { symbol: currencyOption.symbol, basePrice: currencyOption.basePrice };
+      }
+    }
+    return { symbol: currentRegion.symbol, basePrice: currentRegion.basePrice };
+  }, [currentRegion, selectedRegion, selectedCurrency]);
 
   const userPrices = useMemo(() => {
     const prices: number[] = [];
     for (let i = 1; i <= userCount; i++) {
-      prices.push(calculateUserPrice(currentRegion.basePrice, i));
+      prices.push(calculateUserPrice(activePricing.basePrice, i));
     }
     return prices;
-  }, [currentRegion.basePrice, userCount]);
+  }, [activePricing.basePrice, userCount]);
 
   const totalPrice = useMemo(() => {
     return userPrices.reduce((sum, price) => sum + price, 0);
@@ -86,15 +108,15 @@ const WorldCompliancePricing = () => {
     for (let users = 1; users <= 3; users++) {
       let total = 0;
       for (let i = 1; i <= users; i++) {
-        total += calculateUserPrice(currentRegion.basePrice, i);
+        total += calculateUserPrice(activePricing.basePrice, i);
       }
       examples.push({ users, total });
     }
     return examples;
-  }, [currentRegion.basePrice]);
+  }, [activePricing.basePrice]);
 
   const formatPrice = (price: number) => {
-    return `${currentRegion.symbol}${price.toLocaleString()}`;
+    return `${activePricing.symbol}${price.toLocaleString()}`;
   };
 
   return (
@@ -138,34 +160,53 @@ const WorldCompliancePricing = () => {
 
               {regions.map((region) => (
                 <TabsContent key={region.id} value={region.id}>
+                  {/* Currency Selector for UK-IE */}
+                  {region.currencies && (
+                    <div className="flex items-center gap-2 mb-6">
+                      <span className="text-sm text-muted-foreground">Currency:</span>
+                      <div className="flex gap-2">
+                        {region.currencies.map((curr) => (
+                          <Button
+                            key={curr.currency}
+                            variant={selectedCurrency === curr.currency ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setSelectedCurrency(curr.currency)}
+                          >
+                            {curr.symbol} {curr.currency}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="grid md:grid-cols-2 gap-8">
                     {/* Pricing Table */}
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-lg">Per-User Pricing</CardTitle>
                         <p className="text-sm text-muted-foreground">
-                          Base price: {region.symbol}{region.basePrice.toLocaleString()} / year
+                          Base price: {activePricing.symbol}{activePricing.basePrice.toLocaleString()} / year
                         </p>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="space-y-3">
                           <div className="flex justify-between items-center py-2 border-b">
                             <span className="text-sm">1st user</span>
-                            <span className="font-medium">{region.symbol}{region.basePrice.toLocaleString()}</span>
+                            <span className="font-medium">{activePricing.symbol}{activePricing.basePrice.toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between items-center py-2 border-b">
                             <div className="flex items-center gap-2">
                               <span className="text-sm">2nd user</span>
                               <span className="text-xs text-muted-foreground">(10% discount)</span>
                             </div>
-                            <span className="font-medium">{region.symbol}{calculateUserPrice(region.basePrice, 2).toLocaleString()}</span>
+                            <span className="font-medium">{activePricing.symbol}{calculateUserPrice(activePricing.basePrice, 2).toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between items-center py-2 border-b">
                             <div className="flex items-center gap-2">
                               <span className="text-sm">3rd user</span>
                               <span className="text-xs text-muted-foreground">(10% discount)</span>
                             </div>
-                            <span className="font-medium">{region.symbol}{calculateUserPrice(region.basePrice, 3).toLocaleString()}</span>
+                            <span className="font-medium">{activePricing.symbol}{calculateUserPrice(activePricing.basePrice, 3).toLocaleString()}</span>
                           </div>
                         </div>
 
@@ -176,7 +217,7 @@ const WorldCompliancePricing = () => {
                           {exampleTotals.map(({ users, total }) => (
                             <div key={users} className="flex justify-between text-sm">
                               <span>{users} user{users > 1 ? "s" : ""}</span>
-                              <span>{region.symbol}{total.toLocaleString()}</span>
+                              <span>{activePricing.symbol}{total.toLocaleString()}</span>
                             </div>
                           ))}
                         </div>
