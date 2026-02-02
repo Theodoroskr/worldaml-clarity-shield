@@ -41,6 +41,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import WorldID from "./pages/WorldID";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -84,6 +85,9 @@ const App = () => (
                 <Route path="/data-sources/bridger-xg/eu-me" element={<BridgerXGEUME />} />
                 <Route path="/data-sources/bridger-xg/uk-ie" element={<BridgerXGUKIE />} />
                 <Route path="/data-sources/bridger-xg/na" element={<BridgerXGNA />} />
+                
+                {/* Products */}
+                <Route path="/products/worldid" element={<WorldID />} />
                 
                 
                 {/* Preserved pages */}
