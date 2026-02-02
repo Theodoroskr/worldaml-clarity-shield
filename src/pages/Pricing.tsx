@@ -239,8 +239,8 @@ const Pricing = () => {
                             Pricing is provided on request. Enterprise deployment includes dedicated implementation support and custom SLAs.
                           </p>
                           <Button variant="outline" asChild className="w-full">
-                            <Link to="/data-sources/bridger-xg">
-                              Request Demo
+                            <Link to="/contact-sales">
+                              Contact Sales
                               <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
                           </Button>
