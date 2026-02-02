@@ -1,28 +1,11 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CreditCard, Search, Globe, AlertTriangle } from "lucide-react";
+import { ArrowRight, CreditCard, CheckCircle2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LaneBadge } from "@/components/LaneBadge";
-
-const features = [
-  {
-    icon: Search,
-    title: "Sanctions Screening",
-    description: "Global sanctions lists including OFAC, EU, UN, and regional watchlists.",
-  },
-  {
-    icon: Globe,
-    title: "PEP Screening",
-    description: "Politically Exposed Persons across multiple jurisdictions and levels.",
-  },
-  {
-    icon: AlertTriangle,
-    title: "Adverse Media",
-    description: "Negative news and high-risk media coverage from global sources.",
-  },
-];
+import { databaseStats, riskCategories, searchFeatures } from "@/data/worldcompliance";
 
 const WorldComplianceEUME = () => {
   return (
@@ -34,7 +17,10 @@ const WorldComplianceEUME = () => {
           <div className="container-enterprise">
             <div className="max-w-3xl">
               <LaneBadge lane="data-source" className="mb-6" />
-              <h1 className="text-navy mb-6">WorldCompliance® Online Screening</h1>
+              <h1 className="text-navy mb-4">WorldCompliance® Online Search Tool</h1>
+              <p className="text-xl text-teal-dark font-medium mb-6">
+                EU & Middle East Region
+              </p>
               
               {/* Attribution Block */}
               <div className="bg-white border border-divider rounded-lg p-4 mb-8">
@@ -46,12 +32,28 @@ const WorldComplianceEUME = () => {
                 </p>
               </div>
 
-              <p className="text-body-lg text-text-secondary mb-8">
-                Search-based screening for individuals and companies across global sanctions, 
-                PEPs, and adverse media. Available for EU & Middle East customers with 
-                subscription packages by search volume.
+              <p className="text-body-lg text-text-secondary mb-6">
+                One-stop solution for sanctions, PEPs, and adverse media checks. Manually screen 
+                prospective clients and perform enhanced due diligence through the industry-leading 
+                WorldCompliance™ database containing {databaseStats.profiles} detailed profiles.
               </p>
               
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                <div className="bg-white border border-divider rounded-lg p-4 text-center">
+                  <p className="text-2xl font-bold text-navy">{databaseStats.profiles}</p>
+                  <p className="text-body-sm text-text-tertiary">Profiles</p>
+                </div>
+                <div className="bg-white border border-divider rounded-lg p-4 text-center">
+                  <p className="text-2xl font-bold text-navy">{databaseStats.riskCategories}</p>
+                  <p className="text-body-sm text-text-tertiary">Risk Categories</p>
+                </div>
+                <div className="bg-white border border-divider rounded-lg p-4 text-center">
+                  <p className="text-2xl font-bold text-navy">EUR / AED</p>
+                  <p className="text-body-sm text-text-tertiary">Pricing</p>
+                </div>
+              </div>
+
               <div className="flex flex-wrap gap-4">
                 <Button asChild size="lg">
                   <Link to="/get-started">
@@ -59,20 +61,48 @@ const WorldComplianceEUME = () => {
                     Buy WorldCompliance Online
                   </Link>
                 </Button>
+                <Button variant="outline" asChild size="lg">
+                  <Link to="/data-sources/worldcompliance">
+                    View Full Product Details
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Features */}
+        {/* Risk Categories */}
         <section className="section-padding bg-background">
           <div className="container-enterprise">
             <h2 className="text-2xl text-navy mb-8">Screening Coverage</h2>
-            <div className="grid md:grid-cols-3 gap-6 max-w-4xl">
-              {features.map((feature) => (
-                <Card key={feature.title} className="border-divider">
-                  <CardHeader>
-                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-teal/5 text-teal mb-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {riskCategories.slice(0, 6).map((category) => (
+                <Card key={category.title} className="border-divider">
+                  <CardHeader className="pb-3">
+                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-teal/5 text-teal mb-3">
+                      <category.icon className="w-5 h-5" />
+                    </div>
+                    <CardTitle className="text-lg">{category.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription>{category.description}</CardDescription>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Key Features */}
+        <section className="section-padding bg-surface-subtle">
+          <div className="container-enterprise">
+            <h2 className="text-2xl text-navy mb-8">Search Technology</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {searchFeatures.map((feature) => (
+                <Card key={feature.title} className="border-divider bg-white">
+                  <CardHeader className="pb-3">
+                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-navy/5 text-navy mb-3">
                       <feature.icon className="w-5 h-5" />
                     </div>
                     <CardTitle className="text-lg">{feature.title}</CardTitle>
@@ -86,19 +116,52 @@ const WorldComplianceEUME = () => {
           </div>
         </section>
 
-        {/* Pricing Info */}
-        <section className="section-padding bg-surface-subtle">
+        {/* Commercial Terms */}
+        <section className="section-padding bg-background">
           <div className="container-enterprise">
-            <div className="max-w-2xl mx-auto text-center">
-              <h2 className="text-2xl text-navy mb-4">Pricing</h2>
-              <p className="text-body text-text-secondary mb-6">
-                Subscription packages available with EUR / AED pricing based on search volume.
-              </p>
-              <Button asChild>
-                <Link to="/pricing">
-                  View Pricing
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+            <div className="max-w-2xl">
+              <h2 className="text-2xl text-navy mb-6">Commercial Terms — EU & Middle East</h2>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-navy">Online Purchase Enabled</p>
+                    <p className="text-body-sm text-text-secondary">Subscribe directly through our platform</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-navy">Subscription Packages</p>
+                    <p className="text-body-sm text-text-secondary">Flexible packages based on search volume requirements</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-navy">EUR / AED Pricing</p>
+                    <p className="text-body-sm text-text-secondary">Regional pricing in Euro and UAE Dirham</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing CTA */}
+        <section className="section-padding bg-navy">
+          <div className="container-enterprise text-center">
+            <h2 className="text-2xl text-white mb-4">Get Started Today</h2>
+            <p className="text-white/80 mb-8 max-w-2xl mx-auto">
+              Subscribe to WorldCompliance® Online Search Tool with flexible packages 
+              designed for your screening volume requirements.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Button variant="secondary" size="lg" asChild>
+                <Link to="/get-started">Buy WorldCompliance Online</Link>
+              </Button>
+              <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10" asChild>
+                <Link to="/pricing">View Pricing</Link>
               </Button>
             </div>
           </div>
@@ -107,8 +170,10 @@ const WorldComplianceEUME = () => {
         {/* Disclaimer */}
         <section className="py-8 bg-white border-t border-divider">
           <div className="container-enterprise">
-            <p className="text-body-sm text-text-tertiary text-center">
-              Access activation subject to verification. Availability may vary by jurisdiction.
+            <p className="text-body-sm text-text-tertiary text-center max-w-3xl mx-auto">
+              Access activation subject to verification. Availability may vary by jurisdiction 
+              within the EU and Middle East region. WorldCompliance® is a trademark of 
+              LexisNexis Risk Solutions.
             </p>
           </div>
         </section>
