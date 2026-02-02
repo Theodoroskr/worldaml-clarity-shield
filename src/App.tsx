@@ -39,6 +39,8 @@ import AccessYourData from "./pages/AccessYourData";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,10 +58,12 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/pricing" element={<Pricing />} />
                 
-                {/* Auth Routes */}
+{/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 
                 {/* Platform (Lane 1) */}
                 <Route path="/platform" element={<Platform />} />
