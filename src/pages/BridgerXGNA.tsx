@@ -241,7 +241,7 @@ const BridgerXGNA = () => {
               Speak with our North American compliance specialists to discuss your requirements 
               and see customized account and payment screening in action.
             </p>
-            <Button variant="secondary" size="lg" asChild>
+            <Button variant="accent" size="lg" asChild>
               <Link to="/get-started">Contact Sales</Link>
             </Button>
           </div>

@@ -157,7 +157,7 @@ const PlatformSecurity = () => {
               Request detailed security documentation, penetration test summaries, or 
               arrange a security assessment call with our team.
             </p>
-            <Button variant="secondary" size="lg" asChild>
+            <Button variant="accent" size="lg" asChild>
               <Link to="/get-started">Request Security Pack</Link>
             </Button>
           </div>

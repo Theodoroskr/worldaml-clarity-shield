@@ -15,6 +15,9 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "text-text-secondary hover:bg-secondary hover:text-navy",
         link: "text-teal underline-offset-4 hover:underline",
+        // CTA variants for dark backgrounds
+        accent: "bg-teal text-white hover:bg-teal-dark shadow-sm",
+        "outline-light": "border border-white/30 bg-transparent text-white hover:bg-white/10",
       },
       size: {
         default: "h-10 px-5 py-2",

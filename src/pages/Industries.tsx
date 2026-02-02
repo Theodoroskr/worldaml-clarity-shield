@@ -120,7 +120,7 @@ const Industries = () => {
                 WorldAML supports compliance requirements across many regulated sectors. 
                 Talk to our team to discuss your specific needs.
               </p>
-              <Button size="lg" variant="secondary" asChild>
+              <Button size="lg" variant="accent" asChild>
                 <Link to="/contact">
                   Contact Sales
                   <ArrowRight className="ml-2 h-4 w-4" />

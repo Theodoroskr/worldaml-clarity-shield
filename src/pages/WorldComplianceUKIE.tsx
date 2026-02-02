@@ -181,7 +181,7 @@ const WorldComplianceUKIE = () => {
                   management, case handling, and compliance reporting.
                 </p>
               </div>
-              <Button variant="secondary" size="lg" asChild>
+              <Button variant="accent" size="lg" asChild>
                 <Link to="/platform">Explore WorldAML Platform</Link>
               </Button>
             </div>

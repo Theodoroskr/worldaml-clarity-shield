@@ -148,7 +148,7 @@ const RegionEUME = () => {
               Contact our regional team to discuss your requirements and receive 
               jurisdiction-specific guidance.
             </p>
-            <Button variant="secondary" size="lg" asChild>
+            <Button variant="accent" size="lg" asChild>
               <Link to="/get-started">Contact Regional Team</Link>
             </Button>
           </div>

@@ -27,13 +27,13 @@ export const FinalCTASection = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-teal hover:bg-teal-dark text-white" asChild>
+              <Button size="lg" variant="accent" asChild>
                 <Link to="/get-started">
                   Get Started Now
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10" asChild>
+              <Button size="lg" variant="outline-light" asChild>
                 <Link to="/platform">
                   Explore Platform
                 </Link>

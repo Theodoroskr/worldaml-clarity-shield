@@ -201,7 +201,7 @@ const BridgerXGEUME = () => {
               Take an in-depth demo with our compliance specialists to see customized 
               account and payment screening in action.
             </p>
-            <Button variant="secondary" size="lg" asChild>
+            <Button variant="accent" size="lg" asChild>
               <Link to="/get-started">Request Demo</Link>
             </Button>
           </div>

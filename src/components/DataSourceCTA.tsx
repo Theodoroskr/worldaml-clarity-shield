@@ -41,7 +41,7 @@ export const DataSourceCTA = ({
               <p className="text-sm text-white/60 mb-6">
                 See the platform in action with a personalized walkthrough from our team.
               </p>
-              <Button className="w-full bg-teal hover:bg-teal/80 text-white border-0" asChild>
+              <Button variant="accent" className="w-full" asChild>
                 <Link to={demoLink}>
                   Schedule Demo
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -60,7 +60,7 @@ export const DataSourceCTA = ({
               <p className="text-sm text-white/60 mb-6">
                 Discuss your requirements and get a custom quote tailored to your needs.
               </p>
-              <Button className="w-full bg-transparent border border-white/30 text-white hover:bg-white/10" asChild>
+              <Button variant="outline-light" className="w-full" asChild>
                 <Link to="/get-started">
                   Contact Us
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -79,7 +79,7 @@ export const DataSourceCTA = ({
               <p className="text-sm text-white/60 mb-6">
                 Explore documentation, integration guides, and technical specifications.
               </p>
-              <Button className="w-full bg-transparent border border-white/30 text-white hover:bg-white/10" asChild>
+              <Button variant="outline-light" className="w-full" asChild>
                 <Link to="/platform/api">
                   View Docs
                   <ArrowRight className="ml-2 h-4 w-4" />
