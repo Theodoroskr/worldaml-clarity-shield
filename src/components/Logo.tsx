@@ -4,6 +4,7 @@ interface LogoProps {
   className?: string;
   iconOnly?: boolean;
   size?: "sm" | "md" | "lg";
+  showTagline?: boolean;
 }
 
 // Network Globe icon - nodes and connections suggesting global data infrastructure
@@ -58,12 +59,18 @@ export const LogoIcon = ({ className, size = "md" }: { className?: string; size?
   );
 };
 
-// Full logo with wordmark
-export const Logo = ({ className, iconOnly = false, size = "md" }: LogoProps) => {
+// Full logo with wordmark and optional tagline
+export const Logo = ({ className, iconOnly = false, size = "md", showTagline = false }: LogoProps) => {
   const textSizeMap = {
     sm: "text-lg",
     md: "text-xl",
     lg: "text-2xl",
+  };
+
+  const taglineSizeMap = {
+    sm: "text-[9px]",
+    md: "text-[10px]",
+    lg: "text-xs",
   };
 
   if (iconOnly) {
@@ -73,13 +80,23 @@ export const Logo = ({ className, iconOnly = false, size = "md" }: LogoProps) =>
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
       <LogoIcon size={size} className="text-navy" />
-      <div className="flex items-baseline gap-0.5">
-        <span className={cn("font-normal tracking-tight text-navy", textSizeMap[size])}>
-          World
-        </span>
-        <span className={cn("font-semibold tracking-tight text-navy", textSizeMap[size])}>
-          AML
-        </span>
+      <div className="flex flex-col">
+        <div className="flex items-baseline gap-0.5">
+          <span className={cn("font-normal tracking-tight text-navy", textSizeMap[size])}>
+            World
+          </span>
+          <span className={cn("font-semibold tracking-tight text-navy", textSizeMap[size])}>
+            AML
+          </span>
+        </div>
+        {showTagline && (
+          <span className={cn(
+            "text-text-tertiary tracking-wide uppercase leading-tight",
+            taglineSizeMap[size]
+          )}>
+            Financial Crime Screening Infrastructure
+          </span>
+        )}
       </div>
     </div>
   );

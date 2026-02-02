@@ -57,9 +57,9 @@ export const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
           {/* Logo and tagline */}
           <div className="col-span-2">
-            <Logo size="md" />
+            <Logo size="md" showTagline />
             <p className="mt-4 text-body-sm text-text-secondary max-w-xs">
-              Financial crime screening infrastructure for regulated organisations.
+              Unified screening platform for regulated organisations worldwide.
             </p>
             
             {/* InfoCredit Group Badge */}
