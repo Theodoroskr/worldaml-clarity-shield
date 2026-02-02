@@ -15,18 +15,13 @@ export const APICTASection = () => {
             provide sandbox credentials, documentation, and technical support.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" asChild>
+            <Button size="lg" variant="accent" asChild>
               <Link to="/get-started">
                 Request API Access
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-white/30 bg-transparent text-white hover:bg-white/10"
-              asChild
-            >
+            <Button size="lg" variant="outline-light" asChild>
               <a 
                 href="https://worldaml.readme.io" 
                 target="_blank" 

@@ -16,19 +16,14 @@ export const SuiteCTASection = () => {
             for your organisation.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" asChild>
+            <Button size="lg" variant="accent" asChild>
               <Link to="/get-started">
                 Get Started
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-white/50 bg-transparent text-white hover:bg-white/10 [&>svg]:text-white"
-              asChild
-            >
-              <Link to="/get-started?demo=true">
+            <Button size="lg" variant="outline-light" asChild>
+              <Link to="/demo">
                 <Play className="mr-2 h-4 w-4" />
                 Request Demo
               </Link>
