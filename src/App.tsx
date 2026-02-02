@@ -12,6 +12,7 @@ import PlatformAPI from "./pages/PlatformAPI";
 import PlatformSecurity from "./pages/PlatformSecurity";
 import DataSources from "./pages/DataSources";
 import WorldCompliance from "./pages/WorldCompliance";
+import WorldComplianceDemo from "./pages/WorldComplianceDemo";
 import WorldComplianceEUME from "./pages/WorldComplianceEUME";
 import WorldComplianceUKIE from "./pages/WorldComplianceUKIE";
 import WorldComplianceNA from "./pages/WorldComplianceNA";
@@ -58,6 +59,7 @@ const App = () => (
             {/* Data Sources (Lane 2) */}
             <Route path="/data-sources" element={<DataSources />} />
             <Route path="/data-sources/worldcompliance" element={<WorldCompliance />} />
+            <Route path="/data-sources/worldcompliance/demo" element={<WorldComplianceDemo />} />
             <Route path="/data-sources/worldcompliance/eu-me" element={<WorldComplianceEUME />} />
             <Route path="/data-sources/worldcompliance/uk-ie" element={<WorldComplianceUKIE />} />
             <Route path="/data-sources/worldcompliance/na" element={<WorldComplianceNA />} />
