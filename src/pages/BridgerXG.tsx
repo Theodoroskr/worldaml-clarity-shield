@@ -213,8 +213,8 @@ const BridgerXG = () => {
           <div className="container-enterprise">
             <h2 className="text-2xl text-navy mb-4">Select Your Region</h2>
             <p className="text-text-secondary mb-8 max-w-2xl">
-              Bridger Insight® XG is available on an enterprise basis with dedicated 
-              implementation support. Select your region to request a demo or contact sales.
+              WorldAML products are available globally with no country restrictions. 
+              Select your region for localised pricing, currency options, and dedicated support.
             </p>
             <div className="grid md:grid-cols-3 gap-6 max-w-5xl">
               {regions.map((r) => (
@@ -256,8 +256,7 @@ const BridgerXG = () => {
             <p className="text-body-sm text-text-tertiary text-center max-w-4xl mx-auto">
               Bridger Insight® XG is a trademark of LexisNexis Risk Solutions. Performance 
               metrics based on LexisNexis Risk Solutions internal testing and proof of concept 
-              studies. Actual results may vary. Available on an enterprise basis with pricing 
-              provided on request.
+              studies. Actual results may vary. Enterprise pricing provided on request.
             </p>
           </div>
         </section>
