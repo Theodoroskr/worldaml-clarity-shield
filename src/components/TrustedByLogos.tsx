@@ -20,7 +20,7 @@ interface TrustedByLogosProps {
   showBig4?: boolean;
 }
 
-const clientLogos = [
+const financialLogos = [
   { src: societeGeneraleLogo, alt: "Societe Generale" },
   { src: qfcraLogo, alt: "Qatar Financial Centre Regulatory Authority" },
   { src: maltaBusinessRegistryLogo, alt: "Malta Business Registry" },
@@ -31,10 +31,13 @@ const clientLogos = [
   { src: finxpLogo, alt: "FinXP" },
   { src: kaizenLogo, alt: "Kaizen" },
   { src: leverateLogo, alt: "Leverate" },
-  { src: allwynLogo, alt: "Allwyn" },
-  { src: eagleGamingLogo, alt: "Eagle Gaming" },
   { src: spotOptionLogo, alt: "Spot Option" },
   { src: horizonExchangeLogo, alt: "Horizon Exchange" },
+];
+
+const gamingLogos = [
+  { src: allwynLogo, alt: "Allwyn" },
+  { src: eagleGamingLogo, alt: "Eagle Gaming" },
 ];
 
 export const TrustedByLogos = ({ 
@@ -66,8 +69,8 @@ export const TrustedByLogos = ({
           </div>
         )}
 
-        {/* Rolling Logo Marquee */}
-        <div className="relative">
+        {/* Rolling Logo Marquee - Financial */}
+        <div className="relative mb-10">
           <p className="text-body-sm text-text-tertiary text-center mb-6 uppercase tracking-wider">
             Financial Institutions, Fintechs & Corporates
           </p>
@@ -80,7 +83,7 @@ export const TrustedByLogos = ({
           <div className="flex overflow-hidden">
             <div className="flex animate-marquee items-center">
               {/* First set of logos */}
-              {clientLogos.map((logo, index) => (
+              {financialLogos.map((logo, index) => (
                 <div key={`first-${index}`} className="flex-shrink-0 mx-8">
                   <img 
                     src={logo.src} 
@@ -90,7 +93,7 @@ export const TrustedByLogos = ({
                 </div>
               ))}
               {/* Duplicate set for seamless loop */}
-              {clientLogos.map((logo, index) => (
+              {financialLogos.map((logo, index) => (
                 <div key={`second-${index}`} className="flex-shrink-0 mx-8">
                   <img 
                     src={logo.src} 
@@ -100,6 +103,23 @@ export const TrustedByLogos = ({
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Gaming Section */}
+        <div>
+          <p className="text-body-sm text-text-tertiary text-center mb-6 uppercase tracking-wider">
+            Gaming & Entertainment
+          </p>
+          <div className="flex justify-center items-center gap-12">
+            {gamingLogos.map((logo, index) => (
+              <img 
+                key={index}
+                src={logo.src} 
+                alt={logo.alt} 
+                className="h-10 w-auto opacity-70 hover:opacity-100 transition-opacity"
+              />
+            ))}
           </div>
         </div>
       </div>
