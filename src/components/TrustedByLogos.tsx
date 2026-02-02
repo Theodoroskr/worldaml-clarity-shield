@@ -1,3 +1,4 @@
+import big4Logos from "@/assets/clients/big4-logos.png";
 import societeGeneraleLogo from "@/assets/clients/societe-generale.png";
 import qfcraLogo from "@/assets/clients/qfcra.png";
 import maltaBusinessRegistryLogo from "@/assets/clients/malta-business-registry.png";
@@ -8,10 +9,15 @@ import payablLogo from "@/assets/clients/payabl.png";
 import finxpLogo from "@/assets/clients/finxp.png";
 import kaizenLogo from "@/assets/clients/kaizen.png";
 import leverateLogo from "@/assets/clients/leverate.png";
+import allwynLogo from "@/assets/clients/allwyn.png";
+import eagleGamingLogo from "@/assets/clients/eagle-gaming.png";
+import spotOptionLogo from "@/assets/clients/spot-option.png";
+import horizonExchangeLogo from "@/assets/clients/horizon-exchange.png";
 
 interface TrustedByLogosProps {
   title?: string;
   description?: string;
+  showBig4?: boolean;
 }
 
 const clientLogos = [
@@ -25,34 +31,76 @@ const clientLogos = [
   { src: finxpLogo, alt: "FinXP" },
   { src: kaizenLogo, alt: "Kaizen" },
   { src: leverateLogo, alt: "Leverate" },
+  { src: allwynLogo, alt: "Allwyn" },
+  { src: eagleGamingLogo, alt: "Eagle Gaming" },
+  { src: spotOptionLogo, alt: "Spot Option" },
+  { src: horizonExchangeLogo, alt: "Horizon Exchange" },
 ];
 
 export const TrustedByLogos = ({ 
   title = "Trusted by Industry Leaders",
   description = "Trusted by leading financial institutions, fintechs, and compliance teams worldwide.",
+  showBig4 = true
 }: TrustedByLogosProps) => {
   return (
-    <section className="section-padding bg-background">
+    <section className="section-padding bg-background overflow-hidden">
       <div className="container-enterprise">
         <div className="text-center max-w-3xl mx-auto mb-10">
           <h2 className="text-2xl text-navy mb-4">{title}</h2>
           <p className="text-text-secondary">{description}</p>
         </div>
 
-        {/* Static Logo Grid */}
-        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 lg:gap-16">
-          {clientLogos.map((logo, index) => (
-            <div 
-              key={index}
-              className="flex items-center justify-center h-12"
-            >
+        {/* Big 4 Advisory Firms */}
+        {showBig4 && (
+          <div className="mb-10">
+            <p className="text-body-sm text-text-tertiary text-center mb-6 uppercase tracking-wider">
+              Advisory & Audit Firms
+            </p>
+            <div className="flex justify-center">
               <img 
-                src={logo.src} 
-                alt={logo.alt} 
-                className="max-h-10 w-auto opacity-70 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
+                src={big4Logos} 
+                alt="KPMG, EY, PWC, Grant Thornton, RSM" 
+                className="max-h-10 w-auto opacity-70 hover:opacity-100 transition-opacity"
               />
             </div>
-          ))}
+          </div>
+        )}
+
+        {/* Rolling Logo Marquee */}
+        <div className="relative">
+          <p className="text-body-sm text-text-tertiary text-center mb-6 uppercase tracking-wider">
+            Financial Institutions, Fintechs & Corporates
+          </p>
+          
+          {/* Gradient overlays */}
+          <div className="absolute left-0 top-6 bottom-0 w-24 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-6 bottom-0 w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+          
+          {/* Scrolling container */}
+          <div className="flex overflow-hidden">
+            <div className="flex animate-marquee items-center">
+              {/* First set of logos */}
+              {clientLogos.map((logo, index) => (
+                <div key={`first-${index}`} className="flex-shrink-0 mx-8">
+                  <img 
+                    src={logo.src} 
+                    alt={logo.alt} 
+                    className="h-10 w-auto opacity-70"
+                  />
+                </div>
+              ))}
+              {/* Duplicate set for seamless loop */}
+              {clientLogos.map((logo, index) => (
+                <div key={`second-${index}`} className="flex-shrink-0 mx-8">
+                  <img 
+                    src={logo.src} 
+                    alt={logo.alt} 
+                    className="h-10 w-auto opacity-70"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
