@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { LaneBadge } from "@/components/LaneBadge";
 import { useRegion } from "@/contexts/RegionContext";
 import TrustedByLogos from "@/components/TrustedByLogos";
+import DataSourceCTA from "@/components/DataSourceCTA";
 import lexisNexisLogo from "@/assets/lexisnexis-risk-solutions-logo.png";
 import { 
   databaseStats, 
@@ -195,6 +196,9 @@ const WorldCompliance = () => {
         <TrustedByLogos 
           description="Trusted by leading financial institutions, fintechs, and compliance teams worldwide using LexisNexis solutions."
         />
+
+        {/* CTA Section */}
+        <DataSourceCTA productName="WorldCompliance" variant="worldcompliance" />
 
         {/* Region Selection */}
         <section className="section-padding bg-surface-subtle">
