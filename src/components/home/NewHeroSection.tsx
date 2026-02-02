@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Shield } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { LogoIcon } from "@/components/Logo";
 import lexisNexisLogo from "@/assets/lexisnexis-risk-solutions-logo.png";
 
 // Abstract Network Globe visual component
@@ -161,7 +162,7 @@ export const NewHeroSection = () => {
           <Card className="border-navy/10 hover:border-navy/20 transition-colors">
             <CardHeader>
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-navy/5 text-navy mb-4">
-                <Shield className="w-6 h-6" />
+                <LogoIcon size="md" />
               </div>
               <div className="inline-flex items-center gap-2 mb-2">
                 <span className="text-xs font-medium px-2 py-1 rounded-full border border-navy/20 bg-navy/5 text-navy">
