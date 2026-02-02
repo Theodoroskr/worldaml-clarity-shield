@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LaneBadge } from "@/components/LaneBadge";
+import lexisNexisLogo from "@/assets/lexisnexis-risk-solutions-logo.png";
 
 const dataSources = [
   {
@@ -33,7 +34,10 @@ const DataSources = () => {
           <div className="container-enterprise">
             <div className="max-w-3xl">
               <LaneBadge lane="data-source" className="mb-6" />
-              <h1 className="text-navy mb-6">Data Sources</h1>
+              <div className="flex items-center gap-4 mb-6">
+                <h1 className="text-navy">Data Sources</h1>
+                <img src={lexisNexisLogo} alt="LexisNexis Risk Solutions" className="h-10 object-contain" />
+              </div>
               <p className="text-body-lg text-text-secondary mb-8">
                 WorldAML connects regulated institutions to trusted financial crime screening solutions. 
                 Data sources remain attributed to their respective providers and are accessed through 

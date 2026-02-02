@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { LaneBadge } from "@/components/LaneBadge";
 import { useRegion } from "@/contexts/RegionContext";
 import TrustedByLogos from "@/components/TrustedByLogos";
+import lexisNexisLogo from "@/assets/lexisnexis-risk-solutions-logo.png";
 import { 
   productStats, 
   keyBenefits, 
@@ -55,9 +56,7 @@ const BridgerXG = () => {
               
               {/* Attribution Block */}
               <div className="bg-white border border-divider rounded-lg p-4 mb-8">
-                <p className="text-body-sm text-text-secondary mb-1">
-                  <strong>Powered by</strong> LexisNexis Risk Solutions
-                </p>
+                <img src={lexisNexisLogo} alt="LexisNexis Risk Solutions" className="h-8 object-contain mb-3" />
                 <p className="text-body-sm text-text-tertiary">
                   <strong>Delivered and implemented by</strong> Infocredit Group
                 </p>

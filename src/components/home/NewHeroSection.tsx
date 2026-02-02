@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Shield, Database } from "lucide-react";
+import { ArrowRight, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import lexisNexisLogo from "@/assets/lexisnexis-risk-solutions-logo.png";
 
 // Abstract Network Globe visual component
 const NetworkGlobeVisual = () => (
@@ -185,8 +186,8 @@ export const NewHeroSection = () => {
           {/* Lane 2 - Data Sources */}
           <Card className="border-teal/20 hover:border-teal/30 transition-colors">
             <CardHeader>
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-teal/5 text-teal mb-4">
-                <Database className="w-6 h-6" />
+              <div className="inline-flex items-center justify-center h-12 mb-4">
+                <img src={lexisNexisLogo} alt="LexisNexis Risk Solutions" className="h-10 object-contain" />
               </div>
               <div className="inline-flex items-center gap-2 mb-2">
                 <span className="text-xs font-medium px-2 py-1 rounded-full border border-teal/20 bg-teal/5 text-teal">
