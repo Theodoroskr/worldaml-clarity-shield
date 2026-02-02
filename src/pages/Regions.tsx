@@ -57,28 +57,20 @@ const Regions = () => {
           </div>
         </section>
 
-        {/* Region Selection */}
+        {/* Detected Region */}
         <section className="section-padding bg-background">
           <div className="container-enterprise">
-            <h2 className="text-2xl text-navy mb-8">Select Region for LexisNexis Pricing</h2>
-            <div className="grid md:grid-cols-3 gap-6 max-w-5xl">
-              {regions.map((r) => (
-                <Card 
-                  key={r.id} 
-                  className={`border-divider hover:border-navy/30 transition-colors ${
-                    r.id === region ? "ring-2 ring-navy/20" : ""
-                  }`}
-                >
+            <div className="max-w-md">
+              {regions.filter(r => r.id === region).map((r) => (
+                <Card key={r.id} className="border-divider">
                   <CardHeader>
                     <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-navy/5 text-navy mb-4">
                       <MapPin className="w-5 h-5" />
                     </div>
                     <CardTitle className="text-lg">{r.name}</CardTitle>
-                    {r.id === region && (
-                      <span className="text-xs text-navy bg-navy/10 px-2 py-1 rounded-full w-fit">
-                        Your detected region
-                      </span>
-                    )}
+                    <span className="text-xs text-navy bg-navy/10 px-2 py-1 rounded-full w-fit">
+                      Detected region
+                    </span>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <CardDescription>{r.description}</CardDescription>
@@ -94,7 +86,7 @@ const Regions = () => {
                     </div>
                     <Button variant="outline" asChild className="w-full">
                       <Link to={r.href}>
-                        View Region Details
+                        View Pricing
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
