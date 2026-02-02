@@ -13,6 +13,7 @@ import allwynLogo from "@/assets/clients/allwyn.png";
 import eagleGamingLogo from "@/assets/clients/eagle-gaming.png";
 import spotOptionLogo from "@/assets/clients/spot-option.png";
 import horizonExchangeLogo from "@/assets/clients/horizon-exchange.png";
+import campeonGamingLogo from "@/assets/clients/campeon-gaming.jpeg";
 
 interface TrustedByLogosProps {
   title?: string;
@@ -29,7 +30,6 @@ const financialLogos = [
   { src: jccPaymentSystemsLogo, alt: "JCC Payment Systems" },
   { src: payablLogo, alt: "Payabl" },
   { src: finxpLogo, alt: "FinXP" },
-  { src: kaizenLogo, alt: "Kaizen" },
   { src: leverateLogo, alt: "Leverate" },
   { src: spotOptionLogo, alt: "Spot Option" },
   { src: horizonExchangeLogo, alt: "Horizon Exchange" },
@@ -38,6 +38,8 @@ const financialLogos = [
 const gamingLogos = [
   { src: allwynLogo, alt: "Allwyn" },
   { src: eagleGamingLogo, alt: "Eagle Gaming" },
+  { src: kaizenLogo, alt: "Kaizen Gaming" },
+  { src: campeonGamingLogo, alt: "Campeon Gaming" },
 ];
 
 export const TrustedByLogos = ({ 
