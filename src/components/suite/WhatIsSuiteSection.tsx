@@ -1,25 +1,25 @@
 import { Users, Building2, Shield, RefreshCw } from "lucide-react";
 
-const capabilities = [
+const modules = [
   {
     icon: Users,
-    title: "KYC Onboarding",
-    description: "Verify individuals with integrated identity checks and AML screening.",
+    title: "KYC – Individuals",
+    description: "Customer onboarding screening with sanctions, PEP, and adverse media checks.",
   },
   {
     icon: Building2,
-    title: "KYB Onboarding",
-    description: "Onboard businesses with UBO identification and corporate verification.",
+    title: "KYB – Companies",
+    description: "Business entity screening with UBO and related party verification.",
   },
   {
     icon: Shield,
     title: "AML Screening",
-    description: "Screen against sanctions, PEPs, and adverse media with case management.",
+    description: "Manual and automated screening with monitoring alerts and review workflows.",
   },
   {
     icon: RefreshCw,
-    title: "Ongoing Monitoring",
-    description: "Continuous risk monitoring throughout the customer lifecycle.",
+    title: "Risk Assessment",
+    description: "Customer and entity risk categorisation aligned to AML requirements.",
   },
 ];
 
@@ -28,17 +28,20 @@ export const WhatIsSuiteSection = () => {
     <section className="section-padding bg-surface-subtle">
       <div className="container-enterprise">
         <div className="max-w-3xl mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-caption font-medium text-navy bg-navy/5 rounded-full">
+            Platform Overview
+          </div>
           <h2 className="text-headline text-navy mb-4">What is WorldAML Suite?</h2>
           <p className="text-body-lg text-text-secondary">
-            WorldAML Suite is a ready-to-use compliance platform designed for compliance 
-            teams, MLROs, and regulated organisations. It covers the full compliance 
-            lifecycle from initial onboarding through to ongoing monitoring and risk 
-            management — in a single, unified platform.
+            WorldAML Suite provides a clean, compliance-focused interface for core 
+            AML workflows. Designed for compliance teams, MLROs, and regulated 
+            organisations that need structured workflows with clear separation 
+            between platform and data sources.
           </p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {capabilities.map((item) => (
+          {modules.map((item) => (
             <div
               key={item.title}
               className="p-6 rounded-lg border border-divider bg-card"

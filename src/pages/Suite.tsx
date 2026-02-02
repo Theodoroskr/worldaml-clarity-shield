@@ -5,12 +5,9 @@ import { WhatIsSuiteSection } from "@/components/suite/WhatIsSuiteSection";
 import { KYCOnboardingSection } from "@/components/suite/KYCOnboardingSection";
 import { KYBOnboardingSection } from "@/components/suite/KYBOnboardingSection";
 import { AMLScreeningSection } from "@/components/suite/AMLScreeningSection";
-import { SuiteMonitoringSection } from "@/components/suite/SuiteMonitoringSection";
 import { RiskDecisioningSection } from "@/components/suite/RiskDecisioningSection";
-import { ComplianceOversightSection } from "@/components/suite/ComplianceOversightSection";
-import { SuiteAPIAccessSection } from "@/components/suite/SuiteAPIAccessSection";
-import { SuiteWhoItsForSection } from "@/components/suite/SuiteWhoItsForSection";
-import { SuiteAPIIntegrationSection } from "@/components/suite/SuiteAPIIntegrationSection";
+import { SuiteLogsAuditSection } from "@/components/suite/SuiteLogsAuditSection";
+import { SuiteIntegrationSection } from "@/components/suite/SuiteIntegrationSection";
 import { SuiteCTASection } from "@/components/suite/SuiteCTASection";
 
 const Suite = () => {
@@ -23,12 +20,9 @@ const Suite = () => {
         <KYCOnboardingSection />
         <KYBOnboardingSection />
         <AMLScreeningSection />
-        <SuiteMonitoringSection />
         <RiskDecisioningSection />
-        <ComplianceOversightSection />
-        <SuiteAPIAccessSection />
-        <SuiteWhoItsForSection />
-        <SuiteAPIIntegrationSection />
+        <SuiteLogsAuditSection />
+        <SuiteIntegrationSection />
         <SuiteCTASection />
       </main>
       <Footer />

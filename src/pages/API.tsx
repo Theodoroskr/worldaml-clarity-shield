@@ -2,14 +2,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { APIHeroSection } from "@/components/api/APIHeroSection";
 import { WhatIsAPISection } from "@/components/api/WhatIsAPISection";
-import { CustomerScreeningSection } from "@/components/api/CustomerScreeningSection";
-import { CompanyScreeningSection } from "@/components/api/CompanyScreeningSection";
-import { APICompanyPricingSection } from "@/components/api/APICompanyPricingSection";
-import { OngoingMonitoringSection } from "@/components/api/OngoingMonitoringSection";
-import { RiskAssessmentSection } from "@/components/api/RiskAssessmentSection";
-import { TechnicalSpecsSection } from "@/components/api/TechnicalSpecsSection";
-import { WhoItsForSection } from "@/components/api/WhoItsForSection";
-import { SuiteIntegrationSection } from "@/components/api/SuiteIntegrationSection";
+import { RiskLogicSection } from "@/components/api/RiskLogicSection";
+import { APIArchitectureSection } from "@/components/api/APIArchitectureSection";
+import { GovernanceAuditSection } from "@/components/api/GovernanceAuditSection";
+import { APIUseCasesSection } from "@/components/api/APIUseCasesSection";
 import { APICTASection } from "@/components/api/APICTASection";
 
 const APIPage = () => {
@@ -19,14 +15,10 @@ const APIPage = () => {
       <main className="flex-1">
         <APIHeroSection />
         <WhatIsAPISection />
-        <CustomerScreeningSection />
-        <CompanyScreeningSection />
-        <APICompanyPricingSection />
-        <OngoingMonitoringSection />
-        <RiskAssessmentSection />
-        <TechnicalSpecsSection />
-        <WhoItsForSection />
-        <SuiteIntegrationSection />
+        <RiskLogicSection />
+        <APIArchitectureSection />
+        <GovernanceAuditSection />
+        <APIUseCasesSection />
         <APICTASection />
       </main>
       <Footer />
