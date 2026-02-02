@@ -22,6 +22,24 @@ export const LogoIcon = ({ className, size = "md" }: { className?: string; size?
       xmlns="http://www.w3.org/2000/svg"
       className={cn(sizeMap[size], className)}
     >
+      <style>
+        {`
+          @keyframes pulse-center {
+            0%, 100% { opacity: 1; r: 1.5; }
+            50% { opacity: 0.7; r: 2; }
+          }
+          @keyframes fade-connection {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+          }
+          .center-pulse { animation: pulse-center 2s ease-in-out infinite; }
+          .conn-1 { animation: fade-connection 3s ease-in-out infinite; }
+          .conn-2 { animation: fade-connection 3s ease-in-out 0.5s infinite; }
+          .conn-3 { animation: fade-connection 3s ease-in-out 1s infinite; }
+          .conn-4 { animation: fade-connection 3s ease-in-out 1.5s infinite; }
+        `}
+      </style>
+      
       {/* Outer circle - the globe boundary */}
       <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="1.5" />
       
@@ -30,31 +48,31 @@ export const LogoIcon = ({ className, size = "md" }: { className?: string; size?
       <circle cx="16" cy="26" r="1.3" fill="currentColor" /> {/* Bottom */}
       <circle cx="6" cy="16" r="1.3" fill="currentColor" /> {/* Left */}
       <circle cx="26" cy="16" r="1.3" fill="currentColor" /> {/* Right */}
-      <circle cx="16" cy="16" r="1.5" fill="currentColor" /> {/* Center */}
+      <circle cx="16" cy="16" r="1.5" fill="currentColor" className="center-pulse" /> {/* Center - animated */}
       <circle cx="10" cy="10" r="1.2" fill="currentColor" /> {/* Top-left */}
       <circle cx="22" cy="10" r="1.2" fill="currentColor" /> {/* Top-right */}
       <circle cx="10" cy="22" r="1.2" fill="currentColor" /> {/* Bottom-left */}
       <circle cx="22" cy="22" r="1.2" fill="currentColor" /> {/* Bottom-right */}
       
-      {/* Network connections - thin lines between nodes */}
-      <line x1="16" y1="6" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
-      <line x1="16" y1="16" x2="16" y2="26" stroke="currentColor" strokeWidth="0.8" />
-      <line x1="6" y1="16" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
-      <line x1="16" y1="16" x2="26" y2="16" stroke="currentColor" strokeWidth="0.8" />
-      <line x1="10" y1="10" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
-      <line x1="22" y1="10" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
-      <line x1="10" y1="22" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
-      <line x1="22" y1="22" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
+      {/* Network connections - thin lines between nodes with staggered animations */}
+      <line x1="16" y1="6" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" className="conn-1" />
+      <line x1="16" y1="16" x2="16" y2="26" stroke="currentColor" strokeWidth="0.8" className="conn-3" />
+      <line x1="6" y1="16" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" className="conn-2" />
+      <line x1="16" y1="16" x2="26" y2="16" stroke="currentColor" strokeWidth="0.8" className="conn-4" />
+      <line x1="10" y1="10" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" className="conn-1" />
+      <line x1="22" y1="10" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" className="conn-2" />
+      <line x1="10" y1="22" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" className="conn-3" />
+      <line x1="22" y1="22" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" className="conn-4" />
       
       {/* Outer ring connections */}
-      <line x1="16" y1="6" x2="22" y2="10" stroke="currentColor" strokeWidth="0.6" />
-      <line x1="16" y1="6" x2="10" y2="10" stroke="currentColor" strokeWidth="0.6" />
-      <line x1="26" y1="16" x2="22" y2="10" stroke="currentColor" strokeWidth="0.6" />
-      <line x1="26" y1="16" x2="22" y2="22" stroke="currentColor" strokeWidth="0.6" />
-      <line x1="16" y1="26" x2="22" y2="22" stroke="currentColor" strokeWidth="0.6" />
-      <line x1="16" y1="26" x2="10" y2="22" stroke="currentColor" strokeWidth="0.6" />
-      <line x1="6" y1="16" x2="10" y2="22" stroke="currentColor" strokeWidth="0.6" />
-      <line x1="6" y1="16" x2="10" y2="10" stroke="currentColor" strokeWidth="0.6" />
+      <line x1="16" y1="6" x2="22" y2="10" stroke="currentColor" strokeWidth="0.6" className="conn-2" />
+      <line x1="16" y1="6" x2="10" y2="10" stroke="currentColor" strokeWidth="0.6" className="conn-1" />
+      <line x1="26" y1="16" x2="22" y2="10" stroke="currentColor" strokeWidth="0.6" className="conn-3" />
+      <line x1="26" y1="16" x2="22" y2="22" stroke="currentColor" strokeWidth="0.6" className="conn-4" />
+      <line x1="16" y1="26" x2="22" y2="22" stroke="currentColor" strokeWidth="0.6" className="conn-1" />
+      <line x1="16" y1="26" x2="10" y2="22" stroke="currentColor" strokeWidth="0.6" className="conn-2" />
+      <line x1="6" y1="16" x2="10" y2="22" stroke="currentColor" strokeWidth="0.6" className="conn-3" />
+      <line x1="6" y1="16" x2="10" y2="10" stroke="currentColor" strokeWidth="0.6" className="conn-4" />
     </svg>
   );
 };
