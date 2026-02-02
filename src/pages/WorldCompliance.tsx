@@ -205,8 +205,8 @@ const WorldCompliance = () => {
           <div className="container-enterprise">
             <h2 className="text-2xl text-navy mb-4">Select Your Region</h2>
             <p className="text-text-secondary mb-8 max-w-2xl">
-              Pricing, availability, and commercial terms vary by region. Select your region 
-              below for specific details and purchasing options.
+              WorldAML products are available globally with no country restrictions. 
+              Select your region below for localised pricing, currency options, and dedicated support contacts.
             </p>
             <div className="grid md:grid-cols-3 gap-6 max-w-5xl">
               {regions.map((r) => (
@@ -246,8 +246,8 @@ const WorldCompliance = () => {
         <section className="py-8 bg-surface-subtle border-t border-divider">
           <div className="container-enterprise">
             <p className="text-body-sm text-text-tertiary text-center max-w-3xl mx-auto">
-              WorldCompliance® is a trademark of LexisNexis Risk Solutions. Product availability, 
-              pricing, and service scope vary by jurisdiction. Access activation is subject to 
+              WorldCompliance® is a trademark of LexisNexis Risk Solutions. Pricing and 
+              commercial terms may vary by region. Access activation is subject to 
               verification and contractual approval.
             </p>
           </div>
