@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -102,8 +103,11 @@ const WorldIDPricingSection = () => {
                 <Button 
                   className="w-full mb-4" 
                   variant={plan.featured ? "accent" : "outline"}
+                  asChild
                 >
-                  {plan.cta}
+                  <Link to={`/contact-sales?product=worldid&plan=${plan.name.toLowerCase()}`}>
+                    {plan.cta}
+                  </Link>
                 </Button>
                 
                 {/* Footnote - very small, muted */}

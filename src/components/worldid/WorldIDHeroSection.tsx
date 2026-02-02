@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ExternalLink } from "lucide-react";
 
@@ -32,9 +33,11 @@ const WorldIDHeroSection = () => {
           </ul>
           
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <Button size="lg" variant="accent" className="gap-2">
-              Start verification
-              <ArrowRight className="w-4 h-4" />
+            <Button size="lg" variant="accent" className="gap-2" asChild>
+              <Link to="/contact-sales?product=worldid">
+                Start verification
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </Button>
             <Button 
               size="lg" 

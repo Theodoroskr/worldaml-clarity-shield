@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ExternalLink } from "lucide-react";
 
@@ -12,9 +13,11 @@ const WorldIDStickyCTA = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button className="gap-2" variant="accent">
-              Start verification
-              <ArrowRight className="w-4 h-4" />
+            <Button className="gap-2" variant="accent" asChild>
+              <Link to="/contact-sales?product=worldid">
+                Start verification
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </Button>
             <Button 
               className="gap-2" 
