@@ -10,6 +10,7 @@ const footerLinks = {
     { href: "/platform", label: "Platform Overview" },
     { href: "/platform/suite", label: "WorldAML Suite" },
     { href: "/platform/api", label: "WorldAML API" },
+    { href: "/products/worldid", label: "WorldID" },
     { href: "/pricing", label: "Pricing" },
   ],
   dataSources: [

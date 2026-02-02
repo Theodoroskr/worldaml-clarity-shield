@@ -29,6 +29,19 @@ const products = [
     cta: "Explore the Platform",
     href: "/suite",
   },
+  {
+    title: "WorldID",
+    subtitle: "For regulated onboarding",
+    description: "Digital identity verification with document authentication, biometric liveness, and structured identity data.",
+    features: [
+      "Government ID verification",
+      "Selfie & liveness detection",
+      "OCR data extraction",
+      "Clear decision outcomes",
+    ],
+    cta: "Explore WorldID",
+    href: "/products/worldid",
+  },
 ];
 
 export const ProductSplitSection = () => {
@@ -37,18 +50,18 @@ export const ProductSplitSection = () => {
       <div className="container-enterprise">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h2 className="text-headline text-navy mb-4">
-            Two Ways to Use WorldAML
+            The WorldAML Platform
           </h2>
           <p className="text-body text-text-secondary">
-            Consume individual modules via API, or use the full platform for end-to-end compliance management.
+            Three products for complete compliance coverage — from identity verification to ongoing monitoring.
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {products.map((product) => (
             <div
               key={product.title}
-              className="p-8 rounded-lg border border-divider bg-card border-l-4 border-l-accent"
+              className="p-6 rounded-lg border border-divider bg-card border-l-4 border-l-accent"
             >
               <h3 className="text-subheadline text-navy mb-1">
                 {product.title}
@@ -56,15 +69,15 @@ export const ProductSplitSection = () => {
               <p className="text-caption text-accent mb-4">
                 {product.subtitle}
               </p>
-              <p className="text-body text-text-secondary mb-6">
+              <p className="text-body-sm text-text-secondary mb-6">
                 {product.description}
               </p>
               
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-2 mb-6">
                 {product.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3">
+                  <li key={feature} className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-accent flex-shrink-0" />
-                    <span className="text-body-sm text-text-secondary">{feature}</span>
+                    <span className="text-caption text-text-secondary">{feature}</span>
                   </li>
                 ))}
               </ul>
