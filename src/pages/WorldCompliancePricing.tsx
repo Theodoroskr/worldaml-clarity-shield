@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Link } from "react-router-dom";
-import { ArrowRight, Users, Info, Minus, Plus, MapPin } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowRight, Users, Info, Minus, Plus, MapPin, Loader2 } from "lucide-react";
 import { useRegion } from "@/contexts/RegionContext";
-
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 interface RegionPricing {
   id: string;
   name: string;
@@ -67,9 +69,12 @@ const calculateUserPrice = (basePrice: number, userNumber: number): number => {
 
 const WorldCompliancePricing = () => {
   const { region: detectedRegion, isLoading } = useRegion();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [selectedRegion, setSelectedRegion] = useState("eu-me");
   const [selectedCurrency, setSelectedCurrency] = useState<string>("GBP");
   const [userCount, setUserCount] = useState(1);
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 
   // Set initial region based on detection
   useEffect(() => {
@@ -77,6 +82,46 @@ const WorldCompliancePricing = () => {
       setSelectedRegion(detectedRegion);
     }
   }, [detectedRegion, isLoading]);
+
+  const handleCheckout = async () => {
+    if (!user) {
+      toast.error("Please sign in to purchase", {
+        description: "You need to be logged in to complete your purchase.",
+        action: {
+          label: "Sign In",
+          onClick: () => navigate("/login"),
+        },
+      });
+      return;
+    }
+
+    setIsCheckoutLoading(true);
+    try {
+      const currency = currentRegion.currencies 
+        ? selectedCurrency 
+        : currentRegion.currency;
+
+      const { data, error } = await supabase.functions.invoke('create-worldcompliance-checkout', {
+        body: {
+          userCount,
+          currency,
+          region: currentRegion.name,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error("Checkout failed", {
+        description: "There was an error processing your request. Please try again.",
+      });
+    } finally {
+      setIsCheckoutLoading(false);
+    }
+  };
 
   const currentRegion = regions.find((r) => r.id === selectedRegion) || regions[0];
   
@@ -270,11 +315,23 @@ const WorldCompliancePricing = () => {
                           </div>
                         </div>
 
-                        <Button asChild className="w-full" variant="accent">
-                          <Link to="/contact-sales">
-                            Buy WorldCompliance Online
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </Link>
+                        <Button 
+                          className="w-full" 
+                          variant="accent"
+                          onClick={handleCheckout}
+                          disabled={isCheckoutLoading}
+                        >
+                          {isCheckoutLoading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              Buy WorldCompliance Online
+                              <ArrowRight className="ml-2 h-4 w-4" />
+                            </>
+                          )}
                         </Button>
 
                         <p className="text-xs text-muted-foreground text-center">
