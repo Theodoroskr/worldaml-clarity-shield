@@ -22,7 +22,7 @@ export const HomeCTASection = () => {
               asChild
               className="group"
             >
-              <Link to="/demo">
+              <Link to="/contact-sales">
                 <Calendar className="mr-2 h-5 w-5" />
                 Request a Demo
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
