@@ -10,6 +10,7 @@ import { LaneBadge } from "@/components/LaneBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import WorldCompliancePricingCalculator from "@/components/pricing/WorldCompliancePricingCalculator";
 
 const apiPlans = [
   {
@@ -337,51 +338,24 @@ const Pricing = () => {
                         Powered by LexisNexis Risk Solutions
                       </span>
                     </div>
-                    <h2 className="text-2xl text-navy mb-4">LexisNexis Data Products</h2>
-                    <p className="text-body text-text-secondary mb-8">
-                      Screening data and matching engines are provided by LexisNexis Risk Solutions. 
-                      Pricing varies by product, region, and volume.
-                    </p>
+                    
+                    {/* WorldCompliance Section with Full Calculator */}
+                    <div className="mb-10">
+                      <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+                        <h2 className="text-2xl text-navy">WorldCompliance® Online</h2>
+                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-teal/10 text-teal">
+                          Online Purchase
+                        </span>
+                      </div>
+                      <p className="text-body text-text-secondary mb-6">
+                        Search-based screening for individuals and companies across global sanctions, PEPs, and adverse media.
+                        Progressive per-user discounts apply.
+                      </p>
+                      <WorldCompliancePricingCalculator />
+                    </div>
 
-                    <div className="grid md:grid-cols-2 gap-6 mb-8">
-                      {/* WorldCompliance */}
-                      <Card className="border-l-4 border-l-teal border-divider">
-                        <CardHeader>
-                          <div className="flex items-center justify-between flex-wrap gap-2">
-                            <CardTitle>WorldCompliance®</CardTitle>
-                            <span className="text-xs font-medium px-2 py-1 rounded-full bg-teal/10 text-teal">
-                              Online Purchase
-                            </span>
-                          </div>
-                          <CardDescription>
-                            Search-based screening for individuals and companies across global sanctions, PEPs, and adverse media.
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2 mb-6">
-                            <div className="flex items-center justify-between text-body-sm">
-                              <span className="text-text-secondary">EU & Middle East</span>
-                              <span className="text-navy font-medium">EUR / AED</span>
-                            </div>
-                            <div className="flex items-center justify-between text-body-sm">
-                              <span className="text-text-secondary">UK & Ireland</span>
-                              <span className="text-navy font-medium">GBP / EUR</span>
-                            </div>
-                            <div className="flex items-center justify-between text-body-sm">
-                              <span className="text-text-secondary">North America</span>
-                              <span className="text-navy font-medium">USD</span>
-                            </div>
-                          </div>
-                          <Button variant="outline" asChild className="w-full">
-                            <Link to="/data-sources/worldcompliance/pricing">
-                              View Regional Pricing
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </CardContent>
-                      </Card>
-
-                      {/* Bridger Insight XG */}
+                    {/* Bridger Insight XG */}
+                    <div className="mb-8">
                       <Card className="border-l-4 border-l-navy border-divider">
                         <CardHeader>
                           <div className="flex items-center justify-between flex-wrap gap-2">
