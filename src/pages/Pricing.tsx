@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Layers, Fingerprint, Database } from "lucide-react";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -234,12 +234,28 @@ const Pricing = () => {
           <div className="container-enterprise">
             <div className="max-w-5xl mx-auto text-center">
               <h1 className="text-navy mb-6">Pricing</h1>
-              <p className="text-body-lg text-text-secondary mb-12">
+              <p className="text-body-lg text-text-secondary mb-8">
                 Pricing structure varies by product type and jurisdiction.
               </p>
               
+              {/* Anchor Jump Links */}
+              <div className="flex items-center justify-center gap-3 mb-12 flex-wrap">
+                <a href="#worldaml" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-divider bg-background text-sm font-medium text-navy hover:bg-secondary hover:border-slate-muted transition-all">
+                  <Layers className="w-4 h-4" />
+                  WorldAML API
+                </a>
+                <a href="#worldid" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-divider bg-background text-sm font-medium text-navy hover:bg-secondary hover:border-slate-muted transition-all">
+                  <Fingerprint className="w-4 h-4" />
+                  WorldID
+                </a>
+                <a href="#lexisnexis" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-divider bg-background text-sm font-medium text-navy hover:bg-secondary hover:border-slate-muted transition-all">
+                  <Database className="w-4 h-4" />
+                  LexisNexis Data
+                </a>
+              </div>
+              
               {/* WorldAML Section */}
-              <div className="mb-12">
+              <div id="worldaml" className="mb-12 scroll-mt-24">
                 <div className="bg-surface-subtle rounded-xl p-6 md:p-8 lg:p-10 text-left">
                     <LaneBadge lane="platform" className="mb-6" />
                     <h2 className="text-2xl text-navy mb-4">WorldAML API Pricing</h2>
@@ -314,7 +330,7 @@ const Pricing = () => {
               </div>
 
               {/* WorldID Section */}
-              <div className="mb-12">
+              <div id="worldid" className="mb-12 scroll-mt-24">
                 <div className="bg-surface-subtle rounded-xl p-6 md:p-8 lg:p-10 text-left">
                   <div className="flex items-center gap-3 mb-6 flex-wrap">
                     <LaneBadge lane="platform" />
@@ -396,7 +412,7 @@ const Pricing = () => {
               </div>
 
               {/* LexisNexis Section */}
-              <div className="mb-12">
+              <div id="lexisnexis" className="mb-12 scroll-mt-24">
                 <div className="bg-surface-subtle rounded-xl p-6 md:p-8 lg:p-10 text-left">
                   <div className="flex items-center gap-3 mb-6 flex-wrap">
                     <LaneBadge lane="data-source" />
