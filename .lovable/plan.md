@@ -1,66 +1,44 @@
 
-# Plan: WorldAML API Pricing Checkout Flow
 
-## What Changes
-The "Get Started" / "Get API Access" buttons on the WorldAML API pricing cards will now check if the user is logged in. If not, they redirect to login/register. If logged in, they initiate a Stripe checkout session.
+## Pricing Page: Public "Starting From" + Full Details After Login
 
-## Steps
+### What Changes
 
-### 1. Create Stripe Products and Prices
-Create two Stripe products for the WorldAML API plans:
-- **Starter**: EUR 99/month billed annually (EUR 1,188/year)
-- **Compliance**: EUR 495/month billed annually (EUR 5,940/year)
-- Enterprise remains "Contact Sales" (no checkout)
+**Public view (logged out):**
+- Show one card per product (WorldAML API, WorldID, LexisNexis) with:
+  - Product name and short description
+  - "Starting from" price (e.g., "Starting from EUR 99/month")
+  - 2-3 key highlights (bullet points)
+  - CTA button: "Sign up to view full pricing"
+- Keep the anchor jump links at the top
+- JSON-LD structured data remains with "starting from" offers
 
-### 2. Create Edge Function: `create-worldaml-checkout`
-A new backend function (modeled on the existing WorldID checkout function) that:
-- Authenticates the user via their session token
-- Looks up or creates a Stripe customer by email
-- Creates a Stripe checkout session in subscription mode with the correct price ID
-- Returns the checkout URL
+**Authenticated view (logged in):**
+- Show the full pricing cards with all tiers, features, and Stripe checkout buttons (current layout)
+- WorldAML: Starter, Compliance, Enterprise
+- WorldID: Starter, Growth, Scale, Enterprise
+- LexisNexis: Full interactive regional calculator
 
-### 3. Update Pricing Page (`src/pages/Pricing.tsx`)
-Modify the WorldAML tab to:
-- Replace the static `<Link to="/get-started">` buttons with onClick handlers
-- If user is **not logged in**: show a toast and redirect to `/login?redirect=/pricing`
-- If user is **logged in**: call the `create-worldaml-checkout` edge function and open the Stripe checkout in a new tab
-- Enterprise plan still links to `/contact-sales`
-- Add loading state on buttons during checkout
+### Technical Approach
 
-### 4. Update Standalone Component (`APICompanyPricingSection.tsx`)
-Apply the same auth-gated checkout logic to this component (used on the API product page) so both locations behave consistently.
+**File: `src/pages/Pricing.tsx`**
 
-## Technical Details
+1. Use the existing `useAuth()` hook to check login state
+2. Conditionally render:
+   - If `!user`: simplified "starting from" cards with register/login CTA
+   - If `user`: full pricing sections (current code, unchanged)
+3. CTA buttons for logged-out users link to `/signup?redirect=/pricing`
 
-### Edge Function Structure
-```text
-supabase/functions/create-worldaml-checkout/index.ts
-```
-- Price ID mapping: `{ starter: "price_xxx", compliance: "price_yyy" }`
-- Mode: `subscription`
-- Success URL: `/dashboard?subscription=success&product=worldaml`
-- Cancel URL: `/pricing?canceled=true`
+### No backend changes needed
+- Auth context already exists
+- Stripe checkout already gates on auth
+- No new tables or edge functions required
 
-### Frontend Flow
-```text
-User clicks "Get Started"
-  --> Not logged in?
-      --> Toast: "Sign in required"
-      --> Navigate to /login?redirect=/pricing
-  --> Logged in?
-      --> Call create-worldaml-checkout with plan name
-      --> Open returned Stripe URL in new tab
-```
+### Summary of sections
 
-## Files to Create/Modify
+| Product | Public Price Shown | Full Detail Trigger |
+|---|---|---|
+| WorldAML API | Starting from EUR 99/month | Login |
+| WorldID | Starting from EUR 1.50/IDV | Login |
+| LexisNexis | Starting from EUR 75/user/month | Login |
 
-| File | Action |
-|------|--------|
-| `supabase/functions/create-worldaml-checkout/index.ts` | Create |
-| `src/pages/Pricing.tsx` | Modify (WorldAML tab buttons) |
-| `src/components/api/APICompanyPricingSection.tsx` | Modify (same checkout logic) |
-
-## Notes
-- Stripe products/prices will be created using the Stripe tools before writing the edge function, so real price IDs are embedded in code
-- The STRIPE_SECRET_KEY is already configured
-- Enterprise plan remains a static link to Contact Sales
