@@ -140,12 +140,92 @@ const Pricing = () => {
     }
   };
 
+  const pricingStructuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Product",
+        "name": "WorldAML API - Starter",
+        "description": "AML screening API for startups and small businesses. Up to 2,000 monitored entities with full API access and ongoing monitoring.",
+        "brand": { "@type": "Brand", "name": "WorldAML" },
+        "offers": {
+          "@type": "Offer",
+          "price": "1188",
+          "priceCurrency": "EUR",
+          "priceValidUntil": "2027-12-31",
+          "availability": "https://schema.org/OnlineOnly",
+          "url": "https://www.worldaml.com/pricing"
+        }
+      },
+      {
+        "@type": "Product",
+        "name": "WorldAML API - Compliance",
+        "description": "AML screening API for growing regulated businesses. Up to 10,000 monitored entities with enhanced monitoring and priority support.",
+        "brand": { "@type": "Brand", "name": "WorldAML" },
+        "offers": {
+          "@type": "Offer",
+          "price": "5940",
+          "priceCurrency": "EUR",
+          "priceValidUntil": "2027-12-31",
+          "availability": "https://schema.org/OnlineOnly",
+          "url": "https://www.worldaml.com/pricing"
+        }
+      },
+      {
+        "@type": "Product",
+        "name": "WorldID - Starter",
+        "description": "Digital identity verification with document authentication and biometric liveness. Up to 100 verifications per month.",
+        "brand": { "@type": "Brand", "name": "WorldAML" },
+        "offers": {
+          "@type": "Offer",
+          "price": "1800",
+          "priceCurrency": "EUR",
+          "priceValidUntil": "2027-12-31",
+          "availability": "https://schema.org/OnlineOnly",
+          "url": "https://www.worldaml.com/pricing"
+        }
+      },
+      {
+        "@type": "Product",
+        "name": "WorldID - Growth",
+        "description": "Digital identity verification for growing businesses. Up to 400 verifications per month at €1.00 per IDV.",
+        "brand": { "@type": "Brand", "name": "WorldAML" },
+        "offers": {
+          "@type": "Offer",
+          "price": "4800",
+          "priceCurrency": "EUR",
+          "priceValidUntil": "2027-12-31",
+          "availability": "https://schema.org/OnlineOnly",
+          "url": "https://www.worldaml.com/pricing"
+        }
+      },
+      {
+        "@type": "Product",
+        "name": "WorldID - Scale",
+        "description": "High-volume identity verification. Up to 1,200 verifications per month at €0.83 per IDV.",
+        "brand": { "@type": "Brand", "name": "WorldAML" },
+        "offers": {
+          "@type": "Offer",
+          "price": "12000",
+          "priceCurrency": "EUR",
+          "priceValidUntil": "2027-12-31",
+          "availability": "https://schema.org/OnlineOnly",
+          "url": "https://www.worldaml.com/pricing"
+        }
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
         title="Pricing"
         description="Transparent pricing for WorldAML API, WorldID identity verification, and LexisNexis screening data. Annual billing with volume-based discounts."
         canonical="/pricing"
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingStructuredData) }}
       />
       <Header />
       <main className="flex-1">
