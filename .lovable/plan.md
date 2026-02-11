@@ -1,104 +1,66 @@
 
-# Plan: Embed WorldCompliance Pricing Calculator in LexisNexis Tab
+# Plan: WorldAML API Pricing Checkout Flow
 
-## Overview
-Replace the current link-based WorldCompliance card in the LexisNexis tab with the full interactive pricing calculator from the dedicated pricing page. This eliminates the need for users to navigate away to see actual prices and complete checkout.
+## What Changes
+The "Get Started" / "Get API Access" buttons on the WorldAML API pricing cards will now check if the user is logged in. If not, they redirect to login/register. If logged in, they initiate a Stripe checkout session.
 
-## Current State
-- **Pricing page** (`/pricing`): LexisNexis tab shows a summary card with "View Regional Pricing" link
-- **Dedicated page** (`/data-sources/worldcompliance/pricing`): Contains full calculator with region tabs, user count selector, price breakdown, and Stripe checkout
+## Steps
 
-## Implementation Approach
+### 1. Create Stripe Products and Prices
+Create two Stripe products for the WorldAML API plans:
+- **Starter**: EUR 99/month billed annually (EUR 1,188/year)
+- **Compliance**: EUR 495/month billed annually (EUR 5,940/year)
+- Enterprise remains "Contact Sales" (no checkout)
 
-### Step 1: Create a Reusable WorldCompliance Pricing Component
-Extract the calculator logic from `WorldCompliancePricing.tsx` into a new component:
+### 2. Create Edge Function: `create-worldaml-checkout`
+A new backend function (modeled on the existing WorldID checkout function) that:
+- Authenticates the user via their session token
+- Looks up or creates a Stripe customer by email
+- Creates a Stripe checkout session in subscription mode with the correct price ID
+- Returns the checkout URL
 
-**New file**: `src/components/pricing/WorldCompliancePricingCalculator.tsx`
+### 3. Update Pricing Page (`src/pages/Pricing.tsx`)
+Modify the WorldAML tab to:
+- Replace the static `<Link to="/get-started">` buttons with onClick handlers
+- If user is **not logged in**: show a toast and redirect to `/login?redirect=/pricing`
+- If user is **logged in**: call the `create-worldaml-checkout` edge function and open the Stripe checkout in a new tab
+- Enterprise plan still links to `/contact-sales`
+- Add loading state on buttons during checkout
 
-This component will include:
-- Region tabs (Europe & Middle East, UK & Ireland, North America)
-- Currency selector for UK-IE region
-- User count selector (+/- buttons, 1-10 users)
-- Per-user pricing breakdown with progressive discounts
-- Total calculation display
-- Checkout button with authentication check
-- Regional disclaimers
-
-### Step 2: Update the LexisNexis Tab in Pricing Page
-Replace the current WorldCompliance summary card with the embedded calculator component.
-
-**Modified file**: `src/pages/Pricing.tsx`
-
-Changes:
-- Import the new calculator component
-- Replace the WorldCompliance card in the LexisNexis tab with the full calculator
-- Keep the Bridger Insight XG card as-is (enterprise only, contact sales)
-
-### Step 3: Simplify the Dedicated Pricing Page (Optional)
-The dedicated `/data-sources/worldcompliance/pricing` page can either:
-- Redirect to `/pricing?tab=lexisnexis`
-- Or use the same component for consistency
-
-## Visual Layout
-
-```text
-LexisNexis Tab
-├── Data Source Badge + LexisNexis Attribution
-├── WorldCompliance® Section
-│   ├── Region Tabs: [EU & ME] [UK & IE] [North America]
-│   ├── Currency Selector (UK-IE only)
-│   ├── Two-Column Layout:
-│   │   ├── Left: Per-User Pricing Table
-│   │   │   ├── 1st user: €3,000
-│   │   │   ├── 2nd user: €2,700 (10% off)
-│   │   │   └── 3rd user: €2,430 (10% off)
-│   │   └── Right: Calculator
-│   │       ├── User Count: [−] 3 [+]
-│   │       ├── Breakdown: User 1/2/3 prices
-│   │       ├── Total: €8,130/year
-│   │       └── [Buy WorldCompliance Online] CTA
-│   └── Disclaimer text
-└── Bridger Insight XG® Card (unchanged)
-    └── [Contact Sales] CTA
-```
+### 4. Update Standalone Component (`APICompanyPricingSection.tsx`)
+Apply the same auth-gated checkout logic to this component (used on the API product page) so both locations behave consistently.
 
 ## Technical Details
 
-### Pricing Logic (preserved from existing implementation)
-```typescript
-const calculateUserPrice = (basePrice: number, userNumber: number): number => {
-  if (userNumber === 1) return basePrice;
-  let price = basePrice;
-  for (let i = 2; i <= userNumber; i++) {
-    price = price * 0.9; // 10% progressive discount
-  }
-  return Math.round(price);
-};
+### Edge Function Structure
+```text
+supabase/functions/create-worldaml-checkout/index.ts
 ```
+- Price ID mapping: `{ starter: "price_xxx", compliance: "price_yyy" }`
+- Mode: `subscription`
+- Success URL: `/dashboard?subscription=success&product=worldaml`
+- Cancel URL: `/pricing?canceled=true`
 
-### Regional Base Prices
-| Region | Currency | Base Price |
-|--------|----------|------------|
-| EU & Middle East | EUR | €3,000 |
-| UK & Ireland | GBP | £2,700 |
-| UK & Ireland | EUR | €3,200 |
-| North America | USD | $4,900 |
-
-### Dependencies
-- Uses existing edge function: `create-worldcompliance-checkout`
-- Uses existing hooks: `useRegion`, `useAuth`
-- Uses existing Supabase client
+### Frontend Flow
+```text
+User clicks "Get Started"
+  --> Not logged in?
+      --> Toast: "Sign in required"
+      --> Navigate to /login?redirect=/pricing
+  --> Logged in?
+      --> Call create-worldaml-checkout with plan name
+      --> Open returned Stripe URL in new tab
+```
 
 ## Files to Create/Modify
 
 | File | Action |
 |------|--------|
-| `src/components/pricing/WorldCompliancePricingCalculator.tsx` | Create |
-| `src/pages/Pricing.tsx` | Modify |
+| `supabase/functions/create-worldaml-checkout/index.ts` | Create |
+| `src/pages/Pricing.tsx` | Modify (WorldAML tab buttons) |
+| `src/components/api/APICompanyPricingSection.tsx` | Modify (same checkout logic) |
 
-## Edge Cases Handled
-- Unauthenticated users: Toast notification with sign-in prompt
-- Region detection: Auto-selects detected region with badge indicator
-- Currency switching: UK-IE region supports both GBP and EUR
-- Loading states: Checkout button shows spinner during processing
-- User count limits: Enforced 1-10 range
+## Notes
+- Stripe products/prices will be created using the Stripe tools before writing the edge function, so real price IDs are embedded in code
+- The STRIPE_SECRET_KEY is already configured
+- Enterprise plan remains a static link to Contact Sales
