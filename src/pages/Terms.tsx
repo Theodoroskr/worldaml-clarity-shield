@@ -1,9 +1,15 @@
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const Terms = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Terms of Service"
+        description="WorldAML terms of service governing use of the platform, API, and screening data services."
+        canonical="/terms"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero */}

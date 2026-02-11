@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Shield, Users, Globe, Award } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,11 @@ const certifications = [
 const About = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="About"
+        description="WorldAML is a financial crime screening platform operated by Infocredit Group, an authorised regional partner of LexisNexis Risk Solutions."
+        canonical="/about"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero */}

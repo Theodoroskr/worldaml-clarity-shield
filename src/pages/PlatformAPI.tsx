@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { APIHeroSection } from "@/components/api/APIHeroSection";
@@ -11,6 +12,11 @@ import { APICTASection } from "@/components/api/APICTASection";
 const PlatformAPI = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Compliance API"
+        description="Integrate AML screening, KYC/KYB onboarding, and ongoing monitoring into your systems via the WorldAML RESTful API."
+        canonical="/platform/api"
+      />
       <Header />
       <main className="flex-1">
         <APIHeroSection />

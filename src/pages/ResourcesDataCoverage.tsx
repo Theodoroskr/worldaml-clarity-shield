@@ -9,6 +9,7 @@ import {
   FileCheck,
   Globe
 } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -127,6 +128,11 @@ const dataCategories = [
 const ResourcesDataCoverage = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Resources & Data Coverage"
+        description="Explore the data coverage behind LexisNexis screening solutions including sanctions, PEPs, adverse media, enforcement actions, and watchlists."
+        canonical="/data-sources/resources"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}

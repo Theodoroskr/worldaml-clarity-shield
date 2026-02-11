@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { SuiteHeroSection } from "@/components/suite/SuiteHeroSection";
@@ -13,6 +14,11 @@ import { SuiteCTASection } from "@/components/suite/SuiteCTASection";
 const PlatformSuite = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Compliance Suite"
+        description="WorldAML Suite provides KYC/KYB onboarding, AML screening, risk decisioning, audit trails, and compliance reporting in one unified platform."
+        canonical="/platform/suite"
+      />
       <Header />
       <main className="flex-1">
         <SuiteHeroSection />

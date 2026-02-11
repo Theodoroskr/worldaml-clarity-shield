@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Shield, Lock, Eye, FileCheck, Server, Users } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,11 @@ const securityFeatures = [
 const PlatformSecurity = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Platform Security"
+        description="WorldAML security architecture including SOC 2 Type II, ISO 27001, encryption, access controls, and compliance for regulated financial institutions."
+        canonical="/platform/security"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}

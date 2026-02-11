@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO title="Sign In" description="Sign in to your WorldAML account." noindex />
       <Header />
       <main className="flex-1 flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md">

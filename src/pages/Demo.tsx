@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import DemoHeroSection from "@/components/demo/DemoHeroSection";
@@ -10,6 +11,11 @@ import DemoCTASection from "@/components/demo/DemoCTASection";
 const Demo = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Platform Demo"
+        description="Explore the WorldAML compliance platform. See how KYC, KYB, AML screening, and ongoing monitoring work in a live interactive demo."
+        canonical="/demo"
+      />
       <Header />
       <main className="flex-1">
         <DemoHeroSection />

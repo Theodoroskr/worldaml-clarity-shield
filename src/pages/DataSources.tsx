@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Database, Shield } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,11 @@ const dataSources = [
 const DataSources = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Data Sources"
+        description="Access trusted screening data from LexisNexis Risk Solutions including WorldCompliance® and Bridger Insight XG® for AML, sanctions, and PEP screening."
+        canonical="/data-sources"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}

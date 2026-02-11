@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, BookOpen } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,11 @@ const BridgerXG = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Bridger Insight XG®"
+        description="Bridger Insight XG® by LexisNexis is an enterprise-grade screening and decisioning engine with advanced matching algorithms and batch processing."
+        canonical="/data-sources/bridger-xg"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, BookOpen } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,11 @@ const WorldCompliance = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="WorldCompliance® Online"
+        description="WorldCompliance® by LexisNexis provides search-based screening across 9.2M+ risk profiles, 500+ sanctions lists, and PEP coverage in 240+ countries."
+        canonical="/data-sources/worldcompliance"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}

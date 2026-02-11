@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, Check, Send } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -161,6 +162,11 @@ const ContactSales = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Contact Sales"
+        description="Contact the WorldAML sales team for pricing, demos, and product information on AML screening, KYC, KYB and identity verification solutions."
+        canonical="/contact-sales"
+      />
       <Header />
       <main className="flex-1">
         <section className="section-padding bg-background">

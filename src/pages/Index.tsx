@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NewHeroSection from "@/components/home/NewHeroSection";
@@ -10,6 +11,11 @@ import HomeCTASection from "@/components/home/HomeCTASection";
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="AML Sanctions, PEP & Adverse Media Screening Platform"
+        description="Enterprise-grade financial crime screening infrastructure. KYC, KYB, AML sanctions screening, PEP checks, adverse media monitoring for regulated organisations."
+        canonical="/"
+      />
       <Header />
       <main className="flex-1">
         <NewHeroSection />

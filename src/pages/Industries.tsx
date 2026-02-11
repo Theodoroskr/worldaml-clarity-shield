@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Building2, Wallet, Bitcoin, Gamepad2, Scale, CreditCard } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,11 @@ const industries = [
 const Industries = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Industries"
+        description="AML compliance solutions for banks, fintechs, payment providers, crypto businesses, gaming operators, and legal services. API-first platform for all regulated sectors."
+        canonical="/industries"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero */}

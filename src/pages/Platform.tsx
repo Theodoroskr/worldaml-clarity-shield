@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Workflow, Shield, FileSearch, BarChart3 } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,11 @@ const capabilities = [
 const Platform = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Platform Overview"
+        description="WorldAML platform provides unified UI and API layer for orchestrating financial crime screening workflows using approved third-party data sources."
+        canonical="/platform"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}

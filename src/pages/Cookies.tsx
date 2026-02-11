@@ -1,9 +1,15 @@
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const Cookies = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Cookie Policy"
+        description="WorldAML cookie policy explaining how we use cookies and similar technologies on our website."
+        canonical="/cookies"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero */}

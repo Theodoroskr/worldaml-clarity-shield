@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ExternalLink } from "lucide-react";
@@ -6,6 +7,11 @@ import { Button } from "@/components/ui/button";
 const AccessYourData = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Access Your Data"
+        description="Exercise your data access rights under GDPR. Request access to, correction, or deletion of your personal data held by WorldAML."
+        canonical="/access-your-data"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero */}
