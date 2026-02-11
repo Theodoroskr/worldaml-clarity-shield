@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LaneBadge } from "@/components/LaneBadge";
@@ -166,6 +167,11 @@ const WorldCompliancePricing = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="WorldCompliance® Pricing"
+        description="WorldCompliance® Online pricing with progressive per-user discounts. Annual subscription with unlimited searches for sanctions, PEP, and adverse media screening."
+        canonical="/data-sources/worldcompliance/pricing"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}

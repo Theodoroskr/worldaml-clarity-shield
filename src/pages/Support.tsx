@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, FileText, MessageCircle, Phone, Mail, Clock, BookOpen } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,11 @@ const supportChannels = [
 const Support = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Support"
+        description="WorldAML support and resources. Documentation, live chat, phone support, and dedicated account management for compliance teams."
+        canonical="/support"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero */}

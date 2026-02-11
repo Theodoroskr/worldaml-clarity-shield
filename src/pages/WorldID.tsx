@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LaneBadge from "@/components/LaneBadge";
@@ -17,6 +18,11 @@ import WorldIDStickyCTA from "@/components/worldid/WorldIDStickyCTA";
 const WorldID = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="WorldID - Identity Verification"
+        description="Digital identity verification with document authentication, biometric liveness detection, and face matching. Verify customers in seconds via API."
+        canonical="/products/worldid"
+      />
       <Header />
       <main className="flex-grow relative">
         <LaneBadge lane="platform" />

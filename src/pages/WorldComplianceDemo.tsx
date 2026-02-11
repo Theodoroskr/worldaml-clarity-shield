@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LaneBadge } from "@/components/LaneBadge";
@@ -17,6 +18,11 @@ const features = [
 const WorldComplianceDemo = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="WorldCompliance® Demo"
+        description="Request a free demo of WorldCompliance® Online. Screen against 9.2M+ risk profiles, 500+ sanctions lists, and PEP data across 240+ countries."
+        canonical="/data-sources/worldcompliance/demo"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}

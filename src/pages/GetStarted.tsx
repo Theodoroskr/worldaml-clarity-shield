@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check, Building2, Code } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,11 @@ const GetStarted = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Get Started"
+        description="Request access to the WorldAML compliance platform. Set up your account for AML screening, KYC/KYB onboarding, and ongoing monitoring."
+        canonical="/get-started"
+      />
       <Header />
       <main className="flex-1">
         <section className="section-padding bg-background">

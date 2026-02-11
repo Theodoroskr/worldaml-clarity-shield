@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO title="Dashboard" description="Manage your WorldAML account and subscriptions." noindex />
       <Header />
       <main className="flex-1 py-12">
         <div className="container-enterprise">

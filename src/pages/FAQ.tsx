@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -90,6 +91,11 @@ const faqStructuredData = {
 const FAQ = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="FAQ"
+        description="Frequently asked questions about AML screening, KYC, KYB, sanctions lists, PEPs, and how the WorldAML compliance platform works."
+        canonical="/faq"
+      />
       {/* Structured Data for SEO */}
       <script
         type="application/ld+json"

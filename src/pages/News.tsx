@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,11 @@ const News = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="News"
+        description="Latest compliance news, regulatory updates, and industry insights on AML, sanctions, PEP screening, and financial crime prevention."
+        canonical="/news"
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
