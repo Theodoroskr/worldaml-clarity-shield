@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Check, Zap, Shield, Building2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const sharedFeatures = [
   "Individual AML screening",
@@ -62,6 +65,42 @@ const plans = [
 
 export const APICompanyPricingSection = () => {
   const [isAnnual, setIsAnnual] = useState(true);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleCheckout = async (planName: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to subscribe to a plan.",
+        variant: "destructive",
+      });
+      navigate(`/login?redirect=/pricing&plan=${planName.toLowerCase()}`);
+      return;
+    }
+
+    setLoadingPlan(planName);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-worldaml-checkout", {
+        body: { plan: planName.toLowerCase() },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast({
+        title: "Checkout failed",
+        description: error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <section className="py-20 lg:py-28 bg-secondary/30">
@@ -211,14 +250,21 @@ export const APICompanyPricingSection = () => {
 
                 {/* CTA */}
                 <div className="mt-auto">
-                  <Button
-                    size="lg"
-                    variant={plan.highlighted ? "default" : "outline"}
-                    className="w-full"
-                    asChild
-                  >
-                    <Link to={plan.ctaLink}>{plan.cta}</Link>
-                  </Button>
+                  {plan.name === "Enterprise" ? (
+                    <Button size="lg" variant="outline" className="w-full" asChild>
+                      <Link to={plan.ctaLink}>{plan.cta}</Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      size="lg"
+                      variant={plan.highlighted ? "default" : "outline"}
+                      className="w-full"
+                      onClick={() => handleCheckout(plan.name)}
+                      disabled={loadingPlan === plan.name}
+                    >
+                      {loadingPlan === plan.name ? "Loading..." : plan.cta}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
