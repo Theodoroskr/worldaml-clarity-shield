@@ -104,7 +104,7 @@ const Pricing = () => {
   const navigate = useNavigate();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
-  const handleWorldIDCheckout = async (planName: string) => {
+  const handleCheckout = async (planName: string, product: "worldid" | "worldaml") => {
     if (!user) {
       toast({
         title: "Sign in required",
@@ -115,9 +115,11 @@ const Pricing = () => {
       return;
     }
 
-    setLoadingPlan(planName);
+    const key = `${product}-${planName}`;
+    setLoadingPlan(key);
     try {
-      const { data, error } = await supabase.functions.invoke("create-worldid-checkout", {
+      const fnName = product === "worldid" ? "create-worldid-checkout" : "create-worldaml-checkout";
+      const { data, error } = await supabase.functions.invoke(fnName, {
         body: { plan: planName.toLowerCase() },
       });
 
@@ -223,16 +225,24 @@ const Pricing = () => {
                                 </li>
                               ))}
                             </ul>
-                            <Button 
-                              asChild 
-                              className="w-full"
-                              variant={plan.highlight ? "default" : "outline"}
-                            >
-                              <Link to={plan.price === "Custom" ? "/contact-sales" : "/get-started"}>
-                                {plan.price === "Custom" ? "Contact Sales" : "Get Started"}
+                            {plan.price === "Custom" ? (
+                              <Button asChild className="w-full" variant="outline">
+                                <Link to="/contact-sales">
+                                  Contact Sales
+                                  <ArrowRight className="ml-2 h-4 w-4" />
+                                </Link>
+                              </Button>
+                            ) : (
+                              <Button 
+                                className="w-full"
+                                variant={plan.highlight ? "default" : "outline"}
+                                onClick={() => handleCheckout(plan.name, "worldaml")}
+                                disabled={loadingPlan === `worldaml-${plan.name}`}
+                              >
+                                {loadingPlan === `worldaml-${plan.name}` ? "Loading..." : "Get Started"}
                                 <ArrowRight className="ml-2 h-4 w-4" />
-                              </Link>
-                            </Button>
+                              </Button>
+                            )}
                           </CardContent>
                         </Card>
                       ))}
@@ -300,10 +310,10 @@ const Pricing = () => {
                               <Button 
                                 className="w-full" 
                                 variant={plan.featured ? "accent" : "outline"}
-                                onClick={() => handleWorldIDCheckout(plan.name)}
-                                disabled={loadingPlan === plan.name}
+                                onClick={() => handleCheckout(plan.name, "worldid")}
+                                disabled={loadingPlan === `worldid-${plan.name}`}
                               >
-                                {loadingPlan === plan.name ? "Loading..." : plan.cta}
+                                {loadingPlan === `worldid-${plan.name}` ? "Loading..." : plan.cta}
                               </Button>
                             ) : (
                               <Button 
