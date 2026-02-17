@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      form_submissions: {
+        Row: {
+          account_type: string | null
+          company: string | null
+          country: string | null
+          created_at: string
+          email: string
+          first_name: string
+          form_type: string
+          id: string
+          industry: string | null
+          job_title: string | null
+          last_name: string
+          message: string | null
+          metadata: Json | null
+          phone: string | null
+          products: string[] | null
+          region: string | null
+        }
+        Insert: {
+          account_type?: string | null
+          company?: string | null
+          country?: string | null
+          created_at?: string
+          email: string
+          first_name: string
+          form_type: string
+          id?: string
+          industry?: string | null
+          job_title?: string | null
+          last_name: string
+          message?: string | null
+          metadata?: Json | null
+          phone?: string | null
+          products?: string[] | null
+          region?: string | null
+        }
+        Update: {
+          account_type?: string | null
+          company?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          form_type?: string
+          id?: string
+          industry?: string | null
+          job_title?: string | null
+          last_name?: string
+          message?: string | null
+          metadata?: Json | null
+          phone?: string | null
+          products?: string[] | null
+          region?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company_name: string | null

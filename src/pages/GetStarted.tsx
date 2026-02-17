@@ -10,6 +10,54 @@ import { Label } from "@/components/ui/label";
 
 const GetStarted = () => {
   const [accountType, setAccountType] = useState<"business" | "developer">("business");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    company: "",
+    password: "",
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-form`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            form_type: "get-started",
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            email: formData.email,
+            company: formData.company,
+            account_type: accountType,
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Submission failed");
+
+      // Could redirect to signup or show success
+      window.location.href = "/signup";
+    } catch (error) {
+      console.error("Submission error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -67,38 +115,42 @@ const GetStarted = () => {
               </div>
 
               {/* Form */}
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" placeholder="John" />
+                    <Input id="firstName" placeholder="John" value={formData.firstName} onChange={handleInputChange} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" placeholder="Smith" />
+                    <Input id="lastName" placeholder="Smith" value={formData.lastName} onChange={handleInputChange} />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="email">Work Email</Label>
-                  <Input id="email" type="email" placeholder="john@company.com" />
+                  <Input id="email" type="email" placeholder="john@company.com" value={formData.email} onChange={handleInputChange} />
                 </div>
 
                 {accountType === "business" && (
                   <div className="space-y-2">
                     <Label htmlFor="company">Company Name</Label>
-                    <Input id="company" placeholder="Acme Corporation" />
+                    <Input id="company" placeholder="Acme Corporation" value={formData.company} onChange={handleInputChange} />
                   </div>
                 )}
 
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" placeholder="••••••••" />
+                  <Input id="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleInputChange} />
                 </div>
 
-                <Button type="submit" className="w-full" size="lg">
-                  Create Account
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                  {isSubmitting ? "Submitting..." : (
+                    <>
+                      Create Account
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
 
                 <p className="text-caption text-text-tertiary text-center">
