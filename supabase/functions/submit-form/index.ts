@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "resend";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -36,17 +37,17 @@ Deno.serve(async (req) => {
     if (!form_type || !first_name || !last_name || !email) {
       return new Response(
         JSON.stringify({ error: "Missing required fields: form_type, first_name, last_name, email" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return new Response(
-        JSON.stringify({ error: "Invalid email address" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Invalid email address" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Store in database
@@ -73,37 +74,40 @@ Deno.serve(async (req) => {
 
     if (dbError) {
       console.error("Database insert error:", dbError);
-      return new Response(
-        JSON.stringify({ error: "Failed to save submission" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Failed to save submission" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Send email notification via Supabase's built-in SMTP (using edge function fetch to Resend or similar)
     // For now, we'll use a simple approach: log and rely on DB storage
     // Email can be sent via a webhook or external service in the future
     console.log(`📧 New ${form_type} submission from ${first_name} ${last_name} (${email}) — notify ${NOTIFY_EMAIL}`);
-    console.log("Submission details:", JSON.stringify({
-      form_type,
-      name: `${first_name} ${last_name}`,
-      email,
-      company,
-      phone,
-      country,
-      industry,
-      products,
-      message,
-    }));
-
-    return new Response(
-      JSON.stringify({ success: true, message: "Form submitted successfully" }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    console.log(
+      "Submission details:",
+      JSON.stringify({
+        form_type,
+        name: `${first_name} ${last_name}`,
+        email,
+        company,
+        phone,
+        country,
+        industry,
+        products,
+        message,
+      }),
     );
+
+    return new Response(JSON.stringify({ success: true, message: "Form submitted successfully" }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (err) {
     console.error("Submit form error:", err);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
