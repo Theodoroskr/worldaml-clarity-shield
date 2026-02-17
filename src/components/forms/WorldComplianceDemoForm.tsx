@@ -135,22 +135,43 @@ export const WorldComplianceDemoForm = () => {
   const onSubmit = async (data: WorldComplianceDemoFormData) => {
     setIsSubmitting(true);
     
-    // Simulate form submission (replace with actual API call)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
     const countryName = data.country === "OTHER" 
       ? data.otherCountry 
       : allowedCountries.find(c => c.code === data.country)?.name;
     
-    console.log("WorldCompliance demo request submitted:", { 
-      ...data, 
-      countryName,
-      product: "WorldCompliance"
-    });
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    toast.success("Thank you! We'll be in touch shortly.");
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-form`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            form_type: "demo",
+            first_name: data.firstName,
+            last_name: data.lastName,
+            email: data.workEmail,
+            phone: `${data.phoneCode} ${data.workPhone}`,
+            company: data.company,
+            country: countryName,
+            industry: data.industry,
+            message: data.comments,
+            metadata: { product: "WorldCompliance" },
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Submission failed");
+      
+      setIsSubmitted(true);
+      toast.success("Thank you! We'll be in touch shortly.");
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {

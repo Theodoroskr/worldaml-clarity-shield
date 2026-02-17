@@ -139,25 +139,53 @@ const ContactSales = () => {
 
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-form`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            form_type: "contact-sales",
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            email: formData.email,
+            company: formData.company,
+            job_title: formData.jobTitle,
+            message: formData.message,
+            products: selectedProducts,
+          }),
+        }
+      );
 
-    toast({
-      title: "Request Submitted",
-      description: "Thank you for your interest. Our team will contact you within 1-2 business days.",
-    });
+      if (!response.ok) throw new Error("Submission failed");
 
-    // Reset form
-    setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      company: "",
-      jobTitle: "",
-      message: "",
-    });
-    setSelectedProducts([]);
-    setIsSubmitting(false);
+      toast({
+        title: "Request Submitted",
+        description: "Thank you for your interest. Our team will contact you within 1-2 business days.",
+      });
+
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        company: "",
+        jobTitle: "",
+        message: "",
+      });
+      setSelectedProducts([]);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
