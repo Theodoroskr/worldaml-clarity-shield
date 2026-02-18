@@ -1,44 +1,30 @@
 
 
-## Pricing Page: Public "Starting From" + Full Details After Login
+## Add Resend Email Delivery to Form Submissions
 
-### What Changes
+### What This Does
+When someone submits a form on your site (Contact Sales, Free Trial, etc.), you'll receive a nicely formatted email notification at **info@worldaml.com** via Resend, in addition to the existing database storage.
 
-**Public view (logged out):**
-- Show one card per product (WorldAML API, WorldID, LexisNexis) with:
-  - Product name and short description
-  - "Starting from" price (e.g., "Starting from EUR 99/month")
-  - 2-3 key highlights (bullet points)
-  - CTA button: "Sign up to view full pricing"
-- Keep the anchor jump links at the top
-- JSON-LD structured data remains with "starting from" offers
+### What You Need
+A **Resend API key** — you can get one for free at [resend.com/api-keys](https://resend.com/api-keys). You'll also need a verified sending domain in Resend (or use Resend's default `onboarding@resend.dev` for testing).
 
-**Authenticated view (logged in):**
-- Show the full pricing cards with all tiers, features, and Stripe checkout buttons (current layout)
-- WorldAML: Starter, Compliance, Enterprise
-- WorldID: Starter, Growth, Scale, Enterprise
-- LexisNexis: Full interactive regional calculator
+### Steps
 
-### Technical Approach
+1. **Add the RESEND_API_KEY secret**
+   - You'll be prompted to securely enter your Resend API key
 
-**File: `src/pages/Pricing.tsx`**
+2. **Update the `submit-form` edge function** to:
+   - Initialize the Resend client with the API key
+   - After saving to the database, send a formatted HTML email to `info@worldaml.com`
+   - Include all submission details: name, email, company, phone, form type, message, products, etc.
+   - Use a `from` address like `WorldAML Forms <forms@worldaml.com>` (must match a verified domain in Resend, or use `onboarding@resend.dev` for testing)
+   - Email failures are logged but don't block the form submission (the data is already saved)
 
-1. Use the existing `useAuth()` hook to check login state
-2. Conditionally render:
-   - If `!user`: simplified "starting from" cards with register/login CTA
-   - If `user`: full pricing sections (current code, unchanged)
-3. CTA buttons for logged-out users link to `/signup?redirect=/pricing`
+3. **Test end-to-end** by submitting a form and checking your inbox
 
-### No backend changes needed
-- Auth context already exists
-- Stripe checkout already gates on auth
-- No new tables or edge functions required
+### Technical Details
 
-### Summary of sections
-
-| Product | Public Price Shown | Full Detail Trigger |
-|---|---|---|
-| WorldAML API | Starting from EUR 99/month | Login |
-| WorldID | Starting from EUR 1.50/IDV | Login |
-| LexisNexis | Starting from EUR 75/user/month | Login |
-
+- **Import**: Use `import { Resend } from "npm:resend"` (npm specifier for Deno)
+- **Sending domain**: Will default to `forms@worldaml.com`. If your domain isn't verified in Resend yet, we can temporarily use `onboarding@resend.dev`
+- **Error handling**: Email send is wrapped in try/catch — if Resend fails, the form still succeeds (data is persisted in the database)
+- **No frontend changes needed** — only the edge function is updated
