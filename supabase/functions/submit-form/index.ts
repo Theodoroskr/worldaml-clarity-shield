@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Resend } from "resend";
+import { Resend } from "npm:resend";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 const NOTIFY_EMAIL = "info@worldaml.com";
+const FROM_EMAIL = "WorldAML Forms <forms@worldaml.com>";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -80,24 +81,56 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Send email notification via Supabase's built-in SMTP (using edge function fetch to Resend or similar)
-    // For now, we'll use a simple approach: log and rely on DB storage
-    // Email can be sent via a webhook or external service in the future
-    console.log(`📧 New ${form_type} submission from ${first_name} ${last_name} (${email}) — notify ${NOTIFY_EMAIL}`);
-    console.log(
-      "Submission details:",
-      JSON.stringify({
-        form_type,
-        name: `${first_name} ${last_name}`,
-        email,
-        company,
-        phone,
-        country,
-        industry,
-        products,
-        message,
-      }),
-    );
+    // Send email notification via Resend
+    try {
+      const resendApiKey = Deno.env.get("RESEND_API_KEY");
+      if (resendApiKey) {
+        const resend = new Resend(resendApiKey);
+
+        const detailRows = [
+          ["Form Type", form_type],
+          ["Name", `${first_name} ${last_name}`],
+          ["Email", email],
+          ["Phone", phone || "—"],
+          ["Company", company || "—"],
+          ["Job Title", job_title || "—"],
+          ["Country", country || "—"],
+          ["Industry", industry || "—"],
+          ["Region", region || "—"],
+          ["Account Type", account_type || "—"],
+          ["Products", products?.join(", ") || "—"],
+          ["Message", message || "—"],
+        ]
+          .map(([label, value]) => `<tr><td style="padding:6px 12px;font-weight:600;color:#374151;">${label}</td><td style="padding:6px 12px;color:#111827;">${value}</td></tr>`)
+          .join("");
+
+        const html = `
+          <div style="font-family:sans-serif;max-width:600px;margin:0 auto;">
+            <h2 style="color:#1e3a5f;">New ${form_type} Submission</h2>
+            <table style="border-collapse:collapse;width:100%;font-size:14px;">
+              ${detailRows}
+            </table>
+            <p style="margin-top:16px;font-size:12px;color:#6b7280;">This notification was sent automatically by WorldAML Forms.</p>
+          </div>`;
+
+        const { error: emailError } = await resend.emails.send({
+          from: FROM_EMAIL,
+          to: [NOTIFY_EMAIL],
+          subject: `New ${form_type} from ${first_name} ${last_name}`,
+          html,
+        });
+
+        if (emailError) {
+          console.error("Resend email error:", emailError);
+        } else {
+          console.log(`📧 Email sent to ${NOTIFY_EMAIL} for ${form_type} submission`);
+        }
+      } else {
+        console.warn("RESEND_API_KEY not set — skipping email notification");
+      }
+    } catch (emailErr) {
+      console.error("Email send failed (non-blocking):", emailErr);
+    }
 
     return new Response(JSON.stringify({ success: true, message: "Form submitted successfully" }), {
       status: 200,
