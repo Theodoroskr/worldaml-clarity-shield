@@ -1,9 +1,25 @@
 # WorldAML Robots.txt
 User-agent: Googlebot
 Allow: /
+Disallow: /login
+Disallow: /signup
+Disallow: /dashboard
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /data-sources/worldcompliance/eu-me
+Disallow: /data-sources/worldcompliance/uk-ie
+Disallow: /data-sources/worldcompliance/na
+Disallow: /data-sources/bridger-xg/eu-me
+Disallow: /data-sources/bridger-xg/uk-ie
+Disallow: /data-sources/bridger-xg/na
 
 User-agent: Bingbot
 Allow: /
+Disallow: /login
+Disallow: /signup
+Disallow: /dashboard
+Disallow: /forgot-password
+Disallow: /reset-password
 
 User-agent: Twitterbot
 Allow: /
@@ -13,14 +29,11 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /login
+Disallow: /signup
+Disallow: /dashboard
+Disallow: /forgot-password
+Disallow: /reset-password
 
 # Sitemap location
 Sitemap: https://www.worldaml.com/sitemap.xml
-
-# Disallow regional duplicate pages (thin content)
-Disallow: /data-sources/worldcompliance/eu-me
-Disallow: /data-sources/worldcompliance/uk-ie
-Disallow: /data-sources/worldcompliance/na
-Disallow: /data-sources/bridger-xg/eu-me
-Disallow: /data-sources/bridger-xg/uk-ie
-Disallow: /data-sources/bridger-xg/na
