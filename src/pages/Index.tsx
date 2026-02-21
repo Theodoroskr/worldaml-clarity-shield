@@ -15,6 +15,19 @@ const Index = () => {
         title="AML Sanctions, PEP & Adverse Media Screening Platform"
         description="Enterprise-grade financial crime screening infrastructure. KYC, KYB, AML sanctions screening, PEP checks, adverse media monitoring for regulated organisations."
         canonical="/"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "WorldAML - AML Screening Platform",
+          "description": "Enterprise-grade financial crime screening infrastructure for regulated organisations.",
+          "url": "https://www.worldaml.com/",
+          "mainEntity": {
+            "@type": "SoftwareApplication",
+            "name": "WorldAML",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web"
+          }
+        }}
       />
       <Header />
       <main className="flex-1">

@@ -222,6 +222,10 @@ const Pricing = () => {
         title="Pricing"
         description="Transparent pricing for WorldAML API, WorldID identity verification, and LexisNexis screening data. Annual billing with volume-based discounts."
         canonical="/pricing"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Pricing", url: "/pricing" },
+        ]}
       />
       <script
         type="application/ld+json"

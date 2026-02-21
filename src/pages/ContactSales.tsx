@@ -194,6 +194,10 @@ const ContactSales = () => {
         title="Contact Sales"
         description="Contact the WorldAML sales team for pricing, demos, and product information on AML screening, KYC, KYB and identity verification solutions."
         canonical="/contact-sales"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Contact Sales", url: "/contact-sales" },
+        ]}
       />
       <Header />
       <main className="flex-1">

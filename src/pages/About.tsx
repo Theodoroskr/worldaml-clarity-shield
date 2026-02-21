@@ -60,6 +60,10 @@ const About = () => {
         title="About"
         description="WorldAML is a financial crime screening platform operated by Infocredit Group, an authorised regional partner of LexisNexis Risk Solutions."
         canonical="/about"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "About", url: "/about" },
+        ]}
       />
       <Header />
       <main className="flex-1">
