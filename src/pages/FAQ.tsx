@@ -95,11 +95,7 @@ const FAQ = () => {
         title="FAQ"
         description="Frequently asked questions about AML screening, KYC, KYB, sanctions lists, PEPs, and how the WorldAML compliance platform works."
         canonical="/faq"
-      />
-      {/* Structured Data for SEO */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+        structuredData={faqStructuredData}
       />
       
       <Header />
