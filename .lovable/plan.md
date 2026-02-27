@@ -1,30 +1,75 @@
 
+# Suggested Improvements
 
-## Add Resend Email Delivery to Form Submissions
+Below are the most impactful improvements identified across the codebase, grouped by area. These range from quick wins to larger features.
 
-### What This Does
-When someone submits a form on your site (Contact Sales, Free Trial, etc.), you'll receive a nicely formatted email notification at **info@worldaml.com** via Resend, in addition to the existing database storage.
+---
 
-### What You Need
-A **Resend API key** — you can get one for free at [resend.com/api-keys](https://resend.com/api-keys). You'll also need a verified sending domain in Resend (or use Resend's default `onboarding@resend.dev` for testing).
+## 1. SEO & Discoverability
 
-### Steps
+**Missing breadcrumbs on ~10 pages**
+Pages like `/news`, `/faq`, `/get-started`, `/demo`, `/about`, `/pricing`, `/contact-sales`, the regional WorldCompliance/BridgerXG pages, and legal pages are missing breadcrumb JSON-LD. These are low-effort and directly improve rich snippets.
 
-1. **Add the RESEND_API_KEY secret**
-   - You'll be prompted to securely enter your Resend API key
+**Missing canonical tags on the News page**
+`/news` has no `canonical` prop — crawlers may index duplicate URLs (e.g. with query strings from category filters).
 
-2. **Update the `submit-form` edge function** to:
-   - Initialize the Resend client with the API key
-   - After saving to the database, send a formatted HTML email to `info@worldaml.com`
-   - Include all submission details: name, email, company, phone, form type, message, products, etc.
-   - Use a `from` address like `WorldAML Forms <forms@worldaml.com>` (must match a verified domain in Resend, or use `onboarding@resend.dev` for testing)
-   - Email failures are logged but don't block the form submission (the data is already saved)
+**News page broken CTA link**
+The "Explore WorldAML API" button in the News CTA section links to `/api` — that route does not exist. It should link to `/platform/api`.
 
-3. **Test end-to-end** by submitting a form and checking your inbox
+**No `og:type` differentiation**
+All pages use `og:type: website`. Article-style pages like `/news` and `/faq` would benefit from `og:type: article` where appropriate.
 
-### Technical Details
+---
 
-- **Import**: Use `import { Resend } from "npm:resend"` (npm specifier for Deno)
-- **Sending domain**: Will default to `forms@worldaml.com`. If your domain isn't verified in Resend yet, we can temporarily use `onboarding@resend.dev`
-- **Error handling**: Email send is wrapped in try/catch — if Resend fails, the form still succeeds (data is persisted in the database)
-- **No frontend changes needed** — only the edge function is updated
+## 2. Navigation & UX
+
+**"Request a Demo" CTA links to `/contact-sales`, not `/demo`**
+The hero section primary CTA says "Request a Demo" but links to `/contact-sales`. This creates a mismatch. The `/demo` route exists and has a dedicated demo page — the CTA should point there, or the label should be updated to "Contact Sales".
+
+**`/products` route does not exist**
+The header nav has a "Products" dropdown that uses `/products` as the `href` — but no route is registered for `/products` in `App.tsx`. Clicking the parent label navigates to a 404. Either register the route or remove the `href`.
+
+**Missing "Industries" and "Support" in header nav**
+`Industries` and `Support` are useful trust-building pages that aren't accessible from the top navigation. They're buried in the footer. These could be added under a "Company" or "Resources" dropdown.
+
+**Mobile menu has no close-on-outside-click**
+The mobile menu only closes when a link is clicked or the X button is pressed. Tapping outside the menu panel does not close it, which is a standard UX expectation.
+
+---
+
+## 3. Performance & Code Quality
+
+**No lazy loading of route components**
+All page components are imported eagerly at the top of `App.tsx`. With 30+ pages, this inflates the initial bundle. React's `lazy()` + `Suspense` would split each page into its own chunk, reducing initial load time significantly.
+
+**`QueryClient` instantiated outside the component but inside the module**
+The `QueryClient` is created at module level — fine, but there's no `staleTime` or `gcTime` configured. This means every navigation re-fetches the same data. A sensible default (e.g. `staleTime: 5 * 60 * 1000`) would reduce redundant network calls on the News page.
+
+---
+
+## 4. Content & Trust
+
+**No `<meta name="robots">` on the `/demo` page**
+`/demo` is a public-facing demo showcase that should be indexed. It currently has no SEO component at all — it's missing a `<SEO>` tag entirely.
+
+**Homepage misses an `Industries` or social proof section**
+The homepage goes straight from stats → how it works → global reach → trusted logos → CTA. There's no mention of which industries are served. An `IndustriesSection` component exists but isn't used on the homepage, even though regulated-industry credibility is a key buying signal.
+
+---
+
+## Summary Table
+
+| Priority | Area | Change |
+|---|---|---|
+| High | Navigation | Fix `/products` 404 and "Request a Demo" CTA destination |
+| High | SEO | Add breadcrumbs + canonical to remaining pages |
+| High | Content | Fix broken `/api` link on News page CTA |
+| Medium | Performance | Add route-level code splitting with React.lazy |
+| Medium | UX | Close mobile menu on outside click |
+| Medium | Homepage | Add Industries section to homepage for trust signals |
+| Low | SEO | Set `og:type: article` on news/faq pages |
+| Low | Performance | Configure QueryClient staleTime defaults |
+
+---
+
+Which of these would you like me to implement? I can do all of them in one pass, or focus on a specific area.
