@@ -96,6 +96,10 @@ const FAQ = () => {
         description="Frequently asked questions about AML screening, KYC, KYB, sanctions lists, PEPs, and how the WorldAML compliance platform works."
         canonical="/faq"
         structuredData={faqStructuredData}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "FAQ", url: "/faq" },
+        ]}
       />
       
       <Header />

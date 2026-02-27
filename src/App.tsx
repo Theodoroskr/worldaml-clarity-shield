@@ -7,45 +7,54 @@ import { RegionProvider } from "@/contexts/RegionContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
 import ScrollToTop from "@/components/ScrollToTop";
-import Index from "./pages/Index";
-import Pricing from "./pages/Pricing";
-import Platform from "./pages/Platform";
-import PlatformSuite from "./pages/PlatformSuite";
-import PlatformAPI from "./pages/PlatformAPI";
-import PlatformSecurity from "./pages/PlatformSecurity";
-import DataSources from "./pages/DataSources";
-import WorldCompliance from "./pages/WorldCompliance";
-import WorldComplianceDemo from "./pages/WorldComplianceDemo";
-import WorldCompliancePricing from "./pages/WorldCompliancePricing";
-import WorldComplianceEUME from "./pages/WorldComplianceEUME";
-import WorldComplianceUKIE from "./pages/WorldComplianceUKIE";
-import WorldComplianceNA from "./pages/WorldComplianceNA";
-import ResourcesDataCoverage from "./pages/ResourcesDataCoverage";
-import BridgerXG from "./pages/BridgerXG";
-import BridgerXGEUME from "./pages/BridgerXGEUME";
-import BridgerXGUKIE from "./pages/BridgerXGUKIE";
-import BridgerXGNA from "./pages/BridgerXGNA";
-import Industries from "./pages/Industries";
-import Support from "./pages/Support";
-import About from "./pages/About";
-import GetStarted from "./pages/GetStarted";
-import ContactSales from "./pages/ContactSales";
-import FAQ from "./pages/FAQ";
-import News from "./pages/News";
-import Demo from "./pages/Demo";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import Cookies from "./pages/Cookies";
-import AccessYourData from "./pages/AccessYourData";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import WorldID from "./pages/WorldID";
-import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
 
-const queryClient = new QueryClient();
+const Index = lazy(() => import("./pages/Index"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const Platform = lazy(() => import("./pages/Platform"));
+const PlatformSuite = lazy(() => import("./pages/PlatformSuite"));
+const PlatformAPI = lazy(() => import("./pages/PlatformAPI"));
+const PlatformSecurity = lazy(() => import("./pages/PlatformSecurity"));
+const DataSources = lazy(() => import("./pages/DataSources"));
+const WorldCompliance = lazy(() => import("./pages/WorldCompliance"));
+const WorldComplianceDemo = lazy(() => import("./pages/WorldComplianceDemo"));
+const WorldCompliancePricing = lazy(() => import("./pages/WorldCompliancePricing"));
+const WorldComplianceEUME = lazy(() => import("./pages/WorldComplianceEUME"));
+const WorldComplianceUKIE = lazy(() => import("./pages/WorldComplianceUKIE"));
+const WorldComplianceNA = lazy(() => import("./pages/WorldComplianceNA"));
+const ResourcesDataCoverage = lazy(() => import("./pages/ResourcesDataCoverage"));
+const BridgerXG = lazy(() => import("./pages/BridgerXG"));
+const BridgerXGEUME = lazy(() => import("./pages/BridgerXGEUME"));
+const BridgerXGUKIE = lazy(() => import("./pages/BridgerXGUKIE"));
+const BridgerXGNA = lazy(() => import("./pages/BridgerXGNA"));
+const Industries = lazy(() => import("./pages/Industries"));
+const Support = lazy(() => import("./pages/Support"));
+const About = lazy(() => import("./pages/About"));
+const GetStarted = lazy(() => import("./pages/GetStarted"));
+const ContactSales = lazy(() => import("./pages/ContactSales"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const News = lazy(() => import("./pages/News"));
+const Demo = lazy(() => import("./pages/Demo"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Cookies = lazy(() => import("./pages/Cookies"));
+const AccessYourData = lazy(() => import("./pages/AccessYourData"));
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const WorldID = lazy(() => import("./pages/WorldID"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -57,6 +66,7 @@ const App = () => (
           <BrowserRouter>
             <ScrollToTop />
             <Layout>
+              <Suspense fallback={<div className="min-h-screen" />}>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/pricing" element={<Pricing />} />
@@ -109,6 +119,7 @@ const App = () => (
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </Suspense>
             </Layout>
           </BrowserRouter>
         </AuthProvider>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, LogOut, User } from "lucide-react";
 import { Logo } from "./Logo";
@@ -16,7 +16,6 @@ import {
 const navLinks = [
   {
     label: "Products",
-    href: "/products",
     children: [
       { href: "/products/worldid", label: "WorldID" },
     ],
@@ -41,18 +40,40 @@ const navLinks = [
     ],
   },
   { href: "/pricing", label: "Pricing" },
-  { href: "/about", label: "About" },
+  {
+    label: "Resources",
+    children: [
+      { href: "/industries", label: "Industries" },
+      { href: "/news", label: "News" },
+      { href: "/faq", label: "FAQ" },
+      { href: "/support", label: "Support" },
+      { href: "/about", label: "About" },
+    ],
+  },
 ];
 
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const handleSignOut = async () => {
     await signOut();
     setMobileMenuOpen(false);
   };
+
+  // Close mobile menu on outside click
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [mobileMenuOpen]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-divider bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -67,12 +88,12 @@ export const Header = () => {
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) =>
               link.children ? (
-                <DropdownMenu key={link.href}>
+                <DropdownMenu key={link.label}>
                   <DropdownMenuTrigger asChild>
                     <button
                       className={cn(
                         "px-4 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-1",
-                        location.pathname.startsWith(link.href)
+                        link.href && location.pathname.startsWith(link.href)
                           ? "text-navy bg-secondary"
                           : "text-text-secondary hover:text-navy hover:bg-secondary/50"
                       )}
@@ -100,7 +121,7 @@ export const Header = () => {
               ) : (
                 <Link
                   key={link.href}
-                  to={link.href}
+                  to={link.href!}
                   className={cn(
                     "px-4 py-2 text-body-sm font-medium transition-colors rounded-md",
                     location.pathname === link.href
@@ -154,14 +175,14 @@ export const Header = () => {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-divider animate-slide-down">
+          <div ref={mobileMenuRef} className="md:hidden py-4 border-t border-divider animate-slide-down">
             <div className="mb-4">
               <RegionSelector />
             </div>
             <nav className="flex flex-col gap-1">
               {navLinks.map((link) =>
                 link.children ? (
-                  <div key={link.href} className="space-y-1">
+                  <div key={link.label} className="space-y-1">
                     <span className="px-4 py-2 text-body-sm font-semibold text-navy block">
                       {link.label}
                     </span>
@@ -184,7 +205,7 @@ export const Header = () => {
                 ) : (
                   <Link
                     key={link.href}
-                    to={link.href}
+                    to={link.href!}
                     onClick={() => setMobileMenuOpen(false)}
                     className={cn(
                       "px-4 py-3 text-body font-medium transition-colors rounded-md",

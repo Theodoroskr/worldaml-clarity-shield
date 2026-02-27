@@ -26,6 +26,11 @@ const WorldCompliance = () => {
         title="WorldCompliance® Online"
         description="WorldCompliance® by LexisNexis provides search-based screening across 9.2M+ risk profiles, 500+ sanctions lists, and PEP coverage in 240+ countries."
         canonical="/data-sources/worldcompliance"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Data Sources", url: "/data-sources" },
+          { name: "WorldCompliance®", url: "/data-sources/worldcompliance" },
+        ]}
       />
       <Header />
       <main className="flex-1">

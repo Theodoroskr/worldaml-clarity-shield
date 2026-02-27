@@ -26,6 +26,10 @@ const News = () => {
         title="News"
         description="Latest compliance news, regulatory updates, and industry insights on AML, sanctions, PEP screening, and financial crime prevention."
         canonical="/news"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "News", url: "/news" },
+        ]}
       />
       <Header />
       <main className="flex-1">
@@ -112,7 +116,7 @@ const News = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button asChild size="lg">
-                  <Link to="/api">
+                  <Link to="/platform/api">
                     Explore WorldAML API
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
