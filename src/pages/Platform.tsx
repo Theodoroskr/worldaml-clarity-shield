@@ -37,6 +37,10 @@ const Platform = () => {
         title="Platform Overview"
         description="WorldAML platform provides unified UI and API layer for orchestrating financial crime screening workflows using approved third-party data sources."
         canonical="/platform"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Platform", url: "/platform" },
+        ]}
       />
       <Header />
       <main className="flex-1">

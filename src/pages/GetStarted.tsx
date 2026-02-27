@@ -65,6 +65,10 @@ const GetStarted = () => {
         title="Get Started"
         description="Request access to the WorldAML compliance platform. Set up your account for AML screening, KYC/KYB onboarding, and ongoing monitoring."
         canonical="/get-started"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Get Started", url: "/get-started" },
+        ]}
       />
       <Header />
       <main className="flex-1">

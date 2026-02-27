@@ -15,6 +15,10 @@ const Demo = () => {
         title="Platform Demo"
         description="Explore the WorldAML compliance platform. See how KYC, KYB, AML screening, and ongoing monitoring work in a live interactive demo."
         canonical="/demo"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Demo", url: "/demo" },
+        ]}
       />
       <Header />
       <main className="flex-1">

@@ -24,6 +24,11 @@ const BridgerXG = () => {
         title="Bridger Insight XG®"
         description="Bridger Insight XG® by LexisNexis is an enterprise-grade screening and decisioning engine with advanced matching algorithms and batch processing."
         canonical="/data-sources/bridger-xg"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Data Sources", url: "/data-sources" },
+          { name: "Bridger Insight XG®", url: "/data-sources/bridger-xg" },
+        ]}
       />
       <Header />
       <main className="flex-1">
