@@ -32,6 +32,10 @@ const DataSources = () => {
         title="Data Sources"
         description="Access trusted screening data from LexisNexis Risk Solutions including WorldCompliance® and Bridger Insight XG® for AML, sanctions, and PEP screening."
         canonical="/data-sources"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Data Sources", url: "/data-sources" },
+        ]}
       />
       <Header />
       <main className="flex-1">
