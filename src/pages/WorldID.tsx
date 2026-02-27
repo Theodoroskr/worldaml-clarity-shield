@@ -22,6 +22,11 @@ const WorldID = () => {
         title="WorldID - Identity Verification"
         description="Digital identity verification with document authentication, biometric liveness detection, and face matching. Verify customers in seconds via API."
         canonical="/products/worldid"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Products", url: "/products" },
+          { name: "WorldID", url: "/products/worldid" },
+        ]}
       />
       <Header />
       <main className="flex-grow relative">

@@ -57,6 +57,10 @@ const Industries = () => {
         title="Industries"
         description="AML compliance solutions for banks, fintechs, payment providers, crypto businesses, gaming operators, and legal services. API-first platform for all regulated sectors."
         canonical="/industries"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Industries", url: "/industries" },
+        ]}
       />
       <Header />
       <main className="flex-1">

@@ -43,6 +43,10 @@ const Support = () => {
         title="Support"
         description="WorldAML support and resources. Documentation, live chat, phone support, and dedicated account management for compliance teams."
         canonical="/support"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Support", url: "/support" },
+        ]}
       />
       <Header />
       <main className="flex-1">

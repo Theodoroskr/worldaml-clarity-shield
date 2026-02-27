@@ -16,6 +16,11 @@ const PlatformAPI = () => {
         title="Compliance API"
         description="Integrate AML screening, KYC/KYB onboarding, and ongoing monitoring into your systems via the WorldAML RESTful API."
         canonical="/platform/api"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Platform", url: "/platform" },
+          { name: "Compliance API", url: "/platform/api" },
+        ]}
       />
       <Header />
       <main className="flex-1">

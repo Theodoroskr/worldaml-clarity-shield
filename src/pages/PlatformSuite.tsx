@@ -18,6 +18,11 @@ const PlatformSuite = () => {
         title="Compliance Suite"
         description="WorldAML Suite provides KYC/KYB onboarding, AML screening, risk decisioning, audit trails, and compliance reporting in one unified platform."
         canonical="/platform/suite"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Platform", url: "/platform" },
+          { name: "Compliance Suite", url: "/platform/suite" },
+        ]}
       />
       <Header />
       <main className="flex-1">
