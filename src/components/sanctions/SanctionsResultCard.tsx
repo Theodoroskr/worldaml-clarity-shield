@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Shield, Calendar, Globe, Tag, Building2, User, Flag, Lock } from "lucide-react";
+import { Shield, Calendar, Globe, Tag, Building2, User, MapPin, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ const categoryConfig: Record<string, { icon: typeof User; label: string; color: 
   individual:   { icon: User,      label: "Individual",   color: "bg-muted text-muted-foreground border-border" },
   company:      { icon: Building2, label: "Company",      color: "bg-muted text-muted-foreground border-border" },
   organization: { icon: Building2, label: "Organisation", color: "bg-muted text-muted-foreground border-border" },
-  country:      { icon: Flag,      label: "Country",      color: "bg-muted text-muted-foreground border-border" },
+  country:      { icon: MapPin,      label: "Country",      color: "bg-muted text-muted-foreground border-border" },
 };
 
 interface Props {
