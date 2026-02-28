@@ -47,6 +47,11 @@ const PlatformSecurity = () => {
         title="Platform Security"
         description="WorldAML security architecture including SOC 2 Type II, ISO 27001, encryption, access controls, and compliance for regulated financial institutions."
         canonical="/platform/security"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Platform", url: "/platform" },
+          { name: "Security", url: "/platform/security" },
+        ]}
       />
       <Header />
       <main className="flex-1">

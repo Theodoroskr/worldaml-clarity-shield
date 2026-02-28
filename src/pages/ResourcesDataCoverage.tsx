@@ -132,6 +132,11 @@ const ResourcesDataCoverage = () => {
         title="Resources & Data Coverage"
         description="Explore the data coverage behind LexisNexis screening solutions including sanctions, PEPs, adverse media, enforcement actions, and watchlists."
         canonical="/data-sources/resources"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Data Sources", url: "/data-sources" },
+          { name: "Resources & Data Coverage", url: "/data-sources/resources" },
+        ]}
       />
       <Header />
       <main className="flex-1">

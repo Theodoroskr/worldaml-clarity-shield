@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { RegionProvider } from "@/contexts/RegionContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
@@ -104,6 +104,7 @@ const App = () => (
                 <Route path="/data-sources/bridger-xg/na" element={<BridgerXGNA />} />
                 
                 {/* Products */}
+                <Route path="/products" element={<Navigate to="/products/worldid" replace />} />
                 <Route path="/products/worldid" element={<WorldID />} />
                 
                 

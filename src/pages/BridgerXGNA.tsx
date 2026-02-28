@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,17 @@ import {
 const BridgerXGNA = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Bridger Insight XG® — North America"
+        description="Bridger Insight XG® for the North America region. Enterprise-grade screening with advanced matching algorithms, batch processing, and real-time decisioning."
+        canonical="/data-sources/bridger-xg/na"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Data Sources", url: "/data-sources" },
+          { name: "Bridger Insight XG®", url: "/data-sources/bridger-xg" },
+          { name: "North America", url: "/data-sources/bridger-xg/na" },
+        ]}
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}

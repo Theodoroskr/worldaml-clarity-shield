@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,17 @@ import { databaseStats, riskCategories, searchFeatures } from "@/data/worldcompl
 const WorldComplianceEUME = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="WorldCompliance® Online — EU & Middle East"
+        description="WorldCompliance® Online for the EU & Middle East region. Screen against 9.2M+ risk profiles, 500+ sanctions lists, and PEP data across 240+ countries."
+        canonical="/data-sources/worldcompliance/eu-me"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Data Sources", url: "/data-sources" },
+          { name: "WorldCompliance®", url: "/data-sources/worldcompliance" },
+          { name: "EU & Middle East", url: "/data-sources/worldcompliance/eu-me" },
+        ]}
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}

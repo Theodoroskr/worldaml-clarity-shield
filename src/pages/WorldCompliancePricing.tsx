@@ -171,6 +171,12 @@ const WorldCompliancePricing = () => {
         title="WorldCompliance® Pricing"
         description="WorldCompliance® Online pricing with progressive per-user discounts. Annual subscription with unlimited searches for sanctions, PEP, and adverse media screening."
         canonical="/data-sources/worldcompliance/pricing"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Data Sources", url: "/data-sources" },
+          { name: "WorldCompliance®", url: "/data-sources/worldcompliance" },
+          { name: "Pricing", url: "/data-sources/worldcompliance/pricing" },
+        ]}
       />
       <Header />
       <main className="flex-1">

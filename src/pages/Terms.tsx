@@ -9,6 +9,10 @@ const Terms = () => {
         title="Terms of Service"
         description="WorldAML terms of service governing use of the platform, API, and screening data services."
         canonical="/terms"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Terms of Service", url: "/terms" },
+        ]}
       />
       <Header />
       <main className="flex-1">
