@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert } from "lucide-react";
+import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
 import { toast } from "sonner";
 
 const Dashboard = () => {
@@ -138,6 +139,12 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Quick Tools */}
+          <div className="mt-10">
+            <h2 className="text-xl font-semibold text-navy mb-4">Quick Tools</h2>
+            <DashboardSanctionsWidget />
           </div>
         </div>
       </main>
