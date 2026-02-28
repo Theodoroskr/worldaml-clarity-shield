@@ -1,105 +1,140 @@
 
-## Funnel Improvements: Free Search → Subscription
+## End-to-End Funnel Test Plan
 
-### Current Funnel Audit
+This is a walkthrough test of all 6 funnel improvements against the live preview, covering every state from anonymous visitor through quota exhaustion.
 
-The existing flow has several conversion gaps:
+### What exists (verified by code review)
 
-**Anonymous user path:**
-1. Visits `/sanctions-check` → runs 1 free search → gets gated (locked overlay + signup CTA)
-2. Signs up → lands on `/dashboard` → can run 5 more searches
-3. After 5 searches → sees "Upgrade for unlimited" button → goes to `/contact-sales` or `/pricing`
-
-**Friction points identified:**
-- After signing up and exhausting 5 searches on the dashboard, the upgrade CTA is a small text link — easy to miss
-- The "No matches found" state has a weak upsell ("For comprehensive screening across 1,900+ lists") with no urgency or value framing
-- The remaining-search counter counts down silently — no progressive urgency as the user approaches 0
-- After exhausting quota on the dashboard widget, the form just shows an error — no inline upsell moment
-- Search history rows are passive — they don't invite re-engagement or upsell
-- The `/pricing` page has no direct reference to the free-tier experience the user just had
-- No post-signup onboarding moment that shows the user what they get with a paid plan vs. the free tier
+All 6 improvements are in the codebase. Here is what each one does and how to verify it manually:
 
 ---
 
-### Proposed Improvements (6 targeted changes)
+### Step 1 — Anonymous user runs 1 search on /sanctions-check
+
+**URL:** `/sanctions-check`
+
+**What to do:** Visit the page without being logged in. Enter a known sanctions name such as "Wagner Group" and submit.
+
+**What to verify:**
+- The search runs and returns result cards.
+- The first 2 results are visible in full.
+- Remaining results are shown as faded/locked cards.
+- A registration gate overlay appears beneath the locked results showing:
+  - "X more results hidden"
+  - "Join 500+ compliance teams already using WorldAML"
+  - A checklist: View all matches / 5 free searches / Save & export / Upgrade anytime
+  - "Create Free Account" and "Log in" buttons
+
+**What to verify if they try a second search:**
+- The search form is disabled (greyed out, pointer-events-none)
+- A full-page gate block appears: "Create a free account to continue" with the same checklist and CTA buttons
+- The form area is visually locked
+
+**Potential issue found in code:** The `isGated` state triggers after `anonSearchCount >= 1`, and this is stored in `sessionStorage`. If a user clears their session or opens a new tab, the gate resets. This is expected behaviour (not a bug).
 
 ---
 
-#### 1. Progressive urgency on the remaining-searches counter
+### Step 2 — Sign up and land on the dashboard
 
-**Where:** Dashboard widget header badge + SanctionsCheck status bar
+**URL:** `/signup` → `/dashboard`
 
-**Change:** The remaining-search pill changes color and messaging as the count drops:
-- 5–3: teal (current) — "X searches remaining"
-- 2: amber — "Only 2 searches left"
-- 1: orange — "Last free search"
-- 0: red with a lock icon + inline "Upgrade" button replacing the badge
+**What to do:** Click "Create Free Account" from the gate overlay. Complete the signup form.
 
-This is a pure UI change — no backend needed. Implemented in `DashboardSanctionsWidget.tsx` and `SanctionsCheck.tsx`.
-
----
-
-#### 2. Quota-exhausted inline upgrade panel in the dashboard widget
-
-**Where:** `DashboardSanctionsWidget.tsx`
-
-**Change:** When `remaining === 0`, instead of just disabling the form, replace the search form area with a high-contrast upgrade panel showing:
-- "You've used all 5 free searches"
-- 3 bullet feature comparisons: Free vs. WorldAML (e.g. "5 searches" → "Unlimited", "4 lists" → "1,900+ lists", "Manual only" → "Real-time monitoring + alerts")
-- Two CTA buttons: **"Talk to Sales"** (primary) and **"View Plans"** (outline)
+**What to verify after signup:**
+- User is redirected to `/dashboard` (or `/pending-approval` if the approval gate is active).
+- The "Quick Tools" section is visible at the bottom of the dashboard with the **Sanctions Quick Check** widget.
+- No remaining-searches badge is shown yet (it only appears after the first search returns a `remaining` count from the API).
 
 ---
 
-#### 3. Smarter "No matches" state — cross-sell value
+### Step 3 — Exhaust 5 searches on the dashboard widget
 
-**Where:** `SanctionsCheck.tsx` and `DashboardSanctionsWidget.tsx`
+**What to do:** Run 5 searches in the dashboard sanctions widget (e.g. "Wagner Group", "Al-Qaeda", "Sberbank", "Iran", "Putin").
 
-**Change:** The current "No matches on open-source lists" message is a weak reassurance. Replace it with a value-add callout:
-> "Clear on 4 open-source lists. WorldAML screens 1,900+ global risk lists including PEPs, adverse media, and proprietary watchlists — catch what open-source misses."
+**What to verify after each search:**
 
-Add a small icon grid (4 open-source lists = free, 1,900+ lists = paid) and a "See what you're missing →" CTA linking to `/platform/api` or `/contact-sales?product=worldaml`.
+| Search # | `remaining` returned | Badge colour & text |
+|---|---|---|
+| 1st | 4 | Teal — "4 searches remaining" |
+| 2nd | 3 | Teal — "3 searches remaining" |
+| 3rd | 2 | Amber — "Only 2 left" |
+| 4th | 1 | Orange — "Last free search" |
+| 5th | 0 | Red lock icon — "Quota reached" |
 
----
+**After the 5th search (`remaining === 0`):**
+- The search form disappears and is replaced by the **quota-exhausted upgrade panel** showing:
+  - Lock icon + "You've used all 5 free searches"
+  - Feature comparison table: Searches (5 total → Unlimited), Lists (4 open-source → 1,900+), Monitoring (Manual → Real-time alerts)
+  - "Talk to Sales" (primary) and "View Plans" (outline) buttons
+- The header badge switches to a red "Quota reached" pill
 
-#### 4. Post-search upgrade nudge in the search history panel
-
-**Where:** `SearchHistoryPanel.tsx`
-
-**Change:** Below the 5 search history rows, add a subtle "What's included in WorldAML" teaser row with 3 chips: "Unlimited searches · Real-time alerts · Audit trail" and a "Explore plans →" link. Only shown when history has at least 1 entry (the user has engaged).
-
----
-
-#### 5. Smarter gating copy for the anonymous lock wall
-
-**Where:** `SanctionsCheck.tsx` (the registration gate overlay shown after 1 anon search)
-
-**Change:** The current copy says "Create a free account to view all matches, save results, and run 5 free searches." Add urgency framing and social proof:
-- "Join 500+ compliance teams already using WorldAML"
-- Feature checklist: ✓ View all matches ✓ 5 free searches ✓ Save & export results ✓ Upgrade anytime
-
-This improves the free-to-registered conversion before we even need to sell the paid plan.
+**Potential issue found in code:** The widget only shows the quota-exhausted panel when `remaining === 0`. The `remaining` state starts as `null` (not `0`), so the upgrade panel only appears *after* the 5th search completes and the API returns `remaining: 0`. The form is NOT blocked if the user refreshes the page — the `remaining` state resets to `null` on remount, showing the form again (but the next search will return `quota_exceeded` error from the edge function). This is a **gap worth fixing**: the widget should initialise `remaining` by calling the edge function on mount to fetch the user's current quota.
 
 ---
 
-#### 6. "You've been upgraded" moment on the pricing page (contextual referral)
+### Step 4 — "No matches" cross-sell state
 
-**Where:** `/pricing` page — add a `?from=sanctions` URL param handler
+**What to do:** Search for a name unlikely to be on a sanctions list (e.g. "John Smith Apple Bakery").
 
-**Change:** When a user arrives at `/pricing?from=sanctions`, show a small highlight banner at the top:
-> "You've been using the free Sanctions Quick Check. Upgrade to WorldAML for unlimited searches across 1,900+ lists with real-time monitoring."
+**What to verify when results are empty:**
+- Green "Clear on 4 open-source lists" confirmation box appears.
+- Immediately below: a navy cross-sell callout with header "Catch what open-source misses" and chips for "PEPs & relatives", "Adverse media", "1,900+ risk lists", "Real-time alerts".
+- A "See what you're missing →" button links to `/contact-sales?from=sanctions`.
 
-This closes the loop between the experience they just had and the product they're being asked to buy. Implemented purely in `Pricing.tsx` using `useSearchParams`.
+This works on both the full `/sanctions-check` page and the dashboard widget.
 
 ---
 
-### Files to Change
+### Step 5 — Search history panel updates
 
-| File | Change |
+**What to do:** After running any searches on the dashboard, scroll to the **Recent Searches** panel below the widget.
+
+**What to verify:**
+- The last 5 searches are listed with query name, timestamp, and result count.
+- Searches with 0 results show a green "Clear" badge.
+- Searches with matches show a red "X matches" badge.
+- The panel updates immediately after each new search (the `onSearchComplete` callback triggers `historyRef.current?.refresh()`).
+- Below the history rows: the WorldAML upgrade nudge strip showing "Unlimited searches · Real-time alerts · Audit trail" and an "Explore plans →" link.
+
+---
+
+### Step 6 — Pricing page contextual banner
+
+**What to do:** From the quota-exhausted panel, click "View Plans". This navigates to `/pricing?from=sanctions`.
+
+**What to verify:**
+- A teal banner appears at the top of the pricing page (above the main content) saying:
+  > "You've been using the free Sanctions Quick Check. Upgrade to WorldAML for unlimited searches across 1,900+ lists with real-time monitoring."
+- The banner only appears when `?from=sanctions` is in the URL. Visiting `/pricing` directly shows no banner.
+
+The `fromSanctions` variable is derived from `useSearchParams()` and the banner is conditionally rendered at line 239 of `Pricing.tsx`.
+
+---
+
+### Known gaps identified during review
+
+1. **Dashboard widget quota not persisted across page refresh** — `remaining` resets to `null` on remount, so the quota-exhausted panel disappears after a page reload even if the user has 0 searches left. The next search attempt will fail with an API error rather than showing the upgrade panel gracefully. **Fix:** fetch the user's current `remaining` count from the edge function (or from `sanctions_searches` table) on widget mount.
+
+2. **No "No matches" cross-sell in the dashboard widget** — The dashboard widget's empty-results state only shows "No matches for X on 4 open-source lists" in a simple green bar, without the richer "Catch what open-source misses" callout that exists on the standalone `/sanctions-check` page. This is inconsistent — the same cross-sell value message should appear in both places.
+
+---
+
+### Files involved
+
+| File | Role |
 |---|---|
-| `src/components/sanctions/DashboardSanctionsWidget.tsx` | Progressive urgency counter, quota-exhausted upgrade panel |
-| `src/pages/SanctionsCheck.tsx` | Progressive urgency counter, smarter "No matches" state, improved anon gate copy |
-| `src/components/sanctions/SearchHistoryPanel.tsx` | Post-history upgrade nudge strip |
+| `src/pages/SanctionsCheck.tsx` | Anon gate overlay, gated search lock, progressive urgency bar, no-matches cross-sell |
+| `src/components/sanctions/DashboardSanctionsWidget.tsx` | Progressive urgency badge, quota-exhausted upgrade panel |
+| `src/components/sanctions/SearchHistoryPanel.tsx` | History rows + WorldAML upgrade nudge |
 | `src/pages/Pricing.tsx` | `?from=sanctions` contextual banner |
 
-### No database changes needed
-All improvements are frontend-only — the `sanctions_searches` table and edge function remain unchanged.
+---
+
+### Recommended fixes to implement
+
+Based on the code review, two improvements are worth making alongside this test:
+
+1. **Fix the widget quota persistence** — On mount, fetch `remaining` from the DB so the upgrade panel survives page refreshes.
+2. **Add the "Catch what open-source misses" cross-sell to the dashboard widget's no-results state** — mirrors the richer callout already on the standalone page.
+
+Would you like me to implement both of these fixes?
