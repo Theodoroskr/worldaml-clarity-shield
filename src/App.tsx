@@ -42,6 +42,8 @@ const AccessYourData = lazy(() => import("./pages/AccessYourData"));
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const PendingApproval = lazy(() => import("./pages/PendingApproval"));
+const Admin = lazy(() => import("./pages/Admin"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const WorldID = lazy(() => import("./pages/WorldID"));
@@ -75,6 +77,8 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/pending-approval" element={<PendingApproval />} />
+                <Route path="/admin" element={<Admin />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 

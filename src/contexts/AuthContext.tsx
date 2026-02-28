@@ -9,6 +9,7 @@ interface Profile {
   full_name: string | null;
   company_name: string | null;
   phone: string | null;
+  status: "pending" | "approved" | "rejected";
 }
 
 interface AuthContextType {
@@ -16,6 +17,8 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   isLoading: boolean;
+  isApproved: boolean;
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, metadata?: { full_name?: string; company_name?: string }) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -36,6 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
@@ -49,44 +53,71 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error("Error fetching profile:", error);
       return null;
     }
-    return data;
+    return data as Profile | null;
+  };
+
+  const fetchIsAdmin = async (userId: string) => {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching role:", error);
+      return false;
+    }
+    return !!data;
   };
 
   const refreshProfile = async () => {
     if (user) {
-      const profileData = await fetchProfile(user.id);
+      const [profileData, adminStatus] = await Promise.all([
+        fetchProfile(user.id),
+        fetchIsAdmin(user.id),
+      ]);
       setProfile(profileData);
+      setIsAdmin(adminStatus);
     }
   };
 
   useEffect(() => {
-    // Set up auth state listener BEFORE getting session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
-          // Use setTimeout to avoid potential race conditions
           setTimeout(async () => {
-            const profileData = await fetchProfile(currentSession.user.id);
+            const [profileData, adminStatus] = await Promise.all([
+              fetchProfile(currentSession.user.id),
+              fetchIsAdmin(currentSession.user.id),
+            ]);
             setProfile(profileData);
+            setIsAdmin(adminStatus);
           }, 0);
         } else {
           setProfile(null);
+          setIsAdmin(false);
         }
 
         setIsLoading(false);
       }
     );
 
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       setSession(initialSession);
       setUser(initialSession?.user ?? null);
 
       if (initialSession?.user) {
-        fetchProfile(initialSession.user.id).then(setProfile);
+        Promise.all([
+          fetchProfile(initialSession.user.id),
+          fetchIsAdmin(initialSession.user.id),
+        ]).then(([profileData, adminStatus]) => {
+          setProfile(profileData);
+          setIsAdmin(adminStatus);
+        });
       }
 
       setIsLoading(false);
@@ -123,7 +154,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setSession(null);
     setProfile(null);
+    setIsAdmin(false);
   };
+
+  const isApproved = profile?.status === "approved";
 
   return (
     <AuthContext.Provider
@@ -132,6 +166,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         session,
         profile,
         isLoading,
+        isApproved,
+        isAdmin,
         signIn,
         signUp,
         signOut,
