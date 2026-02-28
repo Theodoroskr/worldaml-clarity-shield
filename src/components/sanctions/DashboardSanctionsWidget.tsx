@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, Zap, ChevronDown, ChevronUp, ArrowRight, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Shield, Zap, ChevronDown, ChevronUp, ArrowRight, CheckCircle2, XCircle, AlertCircle, Lock, TrendingUp, Bell, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -96,10 +96,22 @@ export const DashboardSanctionsWidget = ({ onSearchComplete }: Props) => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {remaining !== null && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal/10 border border-teal/20 text-sm font-medium text-teal">
+            {remaining !== null && remaining > 0 && (
+              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border ${
+                remaining >= 3
+                  ? "bg-teal/10 border-teal/20 text-teal"
+                  : remaining === 2
+                  ? "bg-amber-50 border-amber-200 text-amber-700"
+                  : "bg-orange-50 border-orange-200 text-orange-700"
+              }`}>
                 <Zap className="w-3.5 h-3.5" />
-                {remaining} searches remaining
+                {remaining >= 3 ? `${remaining} searches remaining` : remaining === 2 ? "Only 2 left" : "Last free search"}
+              </div>
+            )}
+            {remaining === 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/10 border border-destructive/20 text-sm font-medium text-destructive">
+                <Lock className="w-3.5 h-3.5" />
+                Quota reached
               </div>
             )}
             <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-foreground gap-1.5">
@@ -113,8 +125,48 @@ export const DashboardSanctionsWidget = ({ onSearchComplete }: Props) => {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Search form */}
-        <SanctionsSearchForm onSearch={handleSearch} loading={loading} />
+        {/* Quota-exhausted upgrade panel */}
+        {remaining === 0 ? (
+          <div className="rounded-xl border border-navy/20 bg-navy/[0.03] p-5 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-destructive/10 border border-destructive/20">
+                <Lock className="w-4 h-4 text-destructive" />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground text-sm">You've used all 5 free searches</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Upgrade to WorldAML for unlimited access</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {[
+                { label: "Searches", free: "5 total", paid: "Unlimited" },
+                { label: "Lists screened", free: "4 open-source", paid: "1,900+" },
+                { label: "Monitoring", free: "Manual only", paid: "Real-time alerts" },
+              ].map(({ label, free, paid }) => (
+                <div key={label} className="col-span-2 flex items-center justify-between py-2 border-b border-border/60 last:border-0">
+                  <span className="text-muted-foreground">{label}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-muted-foreground/60 line-through">{free}</span>
+                    <span className="font-semibold text-teal flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />{paid}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" className="flex-1" asChild>
+                <Link to="/contact-sales?from=sanctions">Talk to Sales</Link>
+              </Button>
+              <Button size="sm" variant="outline" className="flex-1" asChild>
+                <Link to="/pricing?from=sanctions">View Plans</Link>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          /* Search form */
+          <SanctionsSearchForm onSearch={handleSearch} loading={loading} />
+        )}
 
         {/* Error state */}
         {error && (
@@ -133,10 +185,10 @@ export const DashboardSanctionsWidget = ({ onSearchComplete }: Props) => {
                 ? "bg-green-50 border-green-200 text-green-800"
                 : "bg-destructive/5 border-destructive/20 text-destructive"
             }`}>
-              {results.length === 0 ? (
+            {results.length === 0 ? (
                 <>
                   <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                  No matches found for <strong>"{lastQuery}"</strong> — not on any screened list
+                  No matches for <strong>"{lastQuery}"</strong> on 4 open-source lists
                 </>
               ) : (
                 <>
