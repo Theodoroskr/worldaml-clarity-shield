@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Shield, Zap, ChevronDown, ChevronUp, ArrowRight, CheckCircle2, XCircle, AlertCircle, Lock, TrendingUp, Bell, FileText } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Shield, Zap, ChevronDown, ChevronUp, ArrowRight, CheckCircle2, XCircle, AlertCircle, Lock, TrendingUp, Bell, FileText, Database } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,13 +29,33 @@ interface Props {
   onSearchComplete?: () => void;
 }
 
+const FREE_SEARCH_LIMIT = 5;
+
 export const DashboardSanctionsWidget = ({ onSearchComplete }: Props) => {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<SearchResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [quotaLoading, setQuotaLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
   const [lastQuery, setLastQuery] = useState("");
+
+  // On mount, count how many searches the user has done to restore quota state
+  useEffect(() => {
+    const fetchQuota = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setQuotaLoading(false); return; }
+      const { count } = await supabase
+        .from("sanctions_searches")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      const used = count ?? 0;
+      const rem = Math.max(0, FREE_SEARCH_LIMIT - used);
+      setRemaining(rem);
+      setQuotaLoading(false);
+    };
+    fetchQuota();
+  }, []);
 
   const handleSearch = async ({ name, country, type }: { name: string; country: string; type: string }) => {
     setLoading(true);
@@ -163,6 +183,8 @@ export const DashboardSanctionsWidget = ({ onSearchComplete }: Props) => {
               </Button>
             </div>
           </div>
+        ) : quotaLoading ? (
+          <div className="h-10 rounded-lg bg-muted/40 animate-pulse" />
         ) : (
           /* Search form */
           <SanctionsSearchForm onSearch={handleSearch} loading={loading} />
@@ -197,6 +219,31 @@ export const DashboardSanctionsWidget = ({ onSearchComplete }: Props) => {
                 </>
               )}
             </div>
+
+            {/* No-matches cross-sell callout */}
+            {results.length === 0 && (
+              <div className="rounded-lg border border-navy/15 bg-navy/[0.03] p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Database className="w-4 h-4 text-navy/60 flex-shrink-0" />
+                  <p className="text-sm font-semibold text-foreground">Catch what open-source misses</p>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  WorldAML screens <span className="font-semibold text-foreground">1,900+ global risk lists</span> including PEPs, adverse media, and proprietary watchlists — going far beyond the 4 free lists checked here.
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {["PEPs & relatives", "Adverse media", "1,900+ risk lists", "Real-time alerts"].map((chip) => (
+                    <span key={chip} className="inline-flex items-center px-2 py-0.5 rounded-full bg-teal/10 text-teal text-xs font-medium border border-teal/20">
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+                <Button size="sm" variant="outline" className="w-full text-xs gap-1.5" asChild>
+                  <Link to="/contact-sales?from=sanctions&interest=worldaml">
+                    See what you're missing <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </Button>
+              </div>
+            )}
 
             {/* Result cards */}
             {visibleResults.length > 0 && (
