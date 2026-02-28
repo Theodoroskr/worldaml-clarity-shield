@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, XCircle, Shield, Info, ChevronDown, Lock } from "lucide-react";
+import { CheckCircle2, XCircle, Shield, Info, ChevronDown, Lock, User, Zap } from "lucide-react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,7 +40,7 @@ interface SearchResponse {
 }
 
 export default function SanctionsCheck() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<SearchResult[] | null>(null);
@@ -178,10 +178,29 @@ export default function SanctionsCheck() {
               { label: "HMT Asset Freeze", flag: "🇬🇧" },
             ].map((s) => (
               <span key={s.label} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs text-slate-light">
-                {s.flag} {s.label}
+                <span>{s.flag}</span>{s.label}
               </span>
             ))}
           </div>
+
+          {/* ── Logged-in user status bar ── */}
+          {!isAnonymous && (
+            <div className="mt-6 inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm text-white/90">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-accent/30 border border-accent/40">
+                <User className="w-3.5 h-3.5 text-accent" />
+              </div>
+              <span className="font-medium">
+                {profile?.full_name || profile?.email || user?.email}
+              </span>
+              <span className="w-px h-4 bg-white/20" />
+              <div className="flex items-center gap-1.5 text-accent">
+                <Zap className="w-3.5 h-3.5" />
+                <span className="font-semibold">
+                  {remaining !== null ? remaining : "5"} searches remaining
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -194,9 +213,9 @@ export default function SanctionsCheck() {
           {/* Search form */}
           <div className={cn(
             "bg-card border border-border rounded-xl p-6 shadow-sm",
-            isGated && "opacity-60 pointer-events-none select-none"
+            isGated && isAnonymous && "opacity-60 pointer-events-none select-none"
           )}>
-            <SanctionsSearchForm onSearch={isGated ? () => {} : handleSearch} loading={loading} />
+            <SanctionsSearchForm onSearch={(isGated && isAnonymous) ? () => {} : handleSearch} loading={loading} />
           </div>
 
           {/* Error */}
