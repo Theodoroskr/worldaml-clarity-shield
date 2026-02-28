@@ -27,6 +27,7 @@ export type Database = {
           industry: string | null
           job_title: string | null
           last_name: string
+          lead_status: string
           message: string | null
           metadata: Json | null
           phone: string | null
@@ -45,6 +46,7 @@ export type Database = {
           industry?: string | null
           job_title?: string | null
           last_name: string
+          lead_status?: string
           message?: string | null
           metadata?: Json | null
           phone?: string | null
@@ -63,6 +65,7 @@ export type Database = {
           industry?: string | null
           job_title?: string | null
           last_name?: string
+          lead_status?: string
           message?: string | null
           metadata?: Json | null
           phone?: string | null
