@@ -11,15 +11,17 @@ import { Loader2, User, Building2, LogOut, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 
 const Dashboard = () => {
-  const { user, profile, isLoading, signOut } = useAuth();
+  const { user, profile, isLoading, isApproved, signOut } = useAuth();
   const navigate = useNavigate();
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
       navigate("/login");
+    } else if (!isLoading && user && !isApproved) {
+      navigate("/pending-approval");
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, isApproved, navigate]);
 
   const handleSignOut = async () => {
     await signOut();

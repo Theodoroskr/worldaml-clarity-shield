@@ -37,6 +37,23 @@ const Signup = () => {
         variant: "destructive",
       });
     } else {
+      // Send admin notification (non-blocking)
+      try {
+        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+        await fetch(`https://${projectId}.supabase.co/functions/v1/notify-new-signup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+          body: JSON.stringify({
+            full_name: fullName,
+            company_name: companyName,
+            email,
+            signed_up_at: new Date().toISOString(),
+          }),
+        });
+      } catch (notifyErr) {
+        console.warn("Admin notification failed (non-blocking):", notifyErr);
+      }
+
       toast({
         title: "Check your email",
         description: "We've sent you a verification link. Please check your email to complete signup.",
