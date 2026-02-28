@@ -7,11 +7,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, User, Building2, LogOut, CreditCard } from "lucide-react";
+import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 
 const Dashboard = () => {
-  const { user, profile, isLoading, isApproved, signOut } = useAuth();
+  const { user, profile, isLoading, isApproved, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
 
@@ -74,6 +74,19 @@ const Dashboard = () => {
               Sign Out
             </Button>
           </div>
+
+          {isAdmin && (
+            <div className="mb-6 p-4 rounded-lg border border-navy/20 bg-navy/5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <ShieldAlert className="h-5 w-5 text-navy" />
+                <div>
+                  <p className="font-semibold text-navy text-sm">Admin Access</p>
+                  <p className="text-text-secondary text-xs">Manage user approvals and accounts</p>
+                </div>
+              </div>
+              <Button size="sm" onClick={() => navigate("/admin")}>Go to Admin Panel</Button>
+            </div>
+          )}
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card>
