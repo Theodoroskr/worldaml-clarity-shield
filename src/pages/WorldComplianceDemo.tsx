@@ -22,6 +22,12 @@ const WorldComplianceDemo = () => {
         title="WorldCompliance® Demo"
         description="Request a free demo of WorldCompliance® Online. Screen against 9.2M+ risk profiles, 500+ sanctions lists, and PEP data across 240+ countries."
         canonical="/data-sources/worldcompliance/demo"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Data Sources", url: "/data-sources" },
+          { name: "WorldCompliance®", url: "/data-sources/worldcompliance" },
+          { name: "Demo", url: "/data-sources/worldcompliance/demo" },
+        ]}
       />
       <Header />
       <main className="flex-1">

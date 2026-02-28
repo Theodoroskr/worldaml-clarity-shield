@@ -9,6 +9,10 @@ const Privacy = () => {
         title="Privacy Policy"
         description="WorldAML privacy policy. How we collect, use, and protect your personal data in compliance with GDPR and applicable data protection laws."
         canonical="/privacy"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Privacy Policy", url: "/privacy" },
+        ]}
       />
       <Header />
       <main className="flex-1">

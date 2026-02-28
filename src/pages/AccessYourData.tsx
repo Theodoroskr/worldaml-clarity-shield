@@ -11,6 +11,10 @@ const AccessYourData = () => {
         title="Access Your Data"
         description="Exercise your data access rights under GDPR. Request access to, correction, or deletion of your personal data held by WorldAML."
         canonical="/access-your-data"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Access Your Data", url: "/access-your-data" },
+        ]}
       />
       <Header />
       <main className="flex-1">

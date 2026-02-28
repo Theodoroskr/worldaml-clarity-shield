@@ -9,6 +9,10 @@ const Cookies = () => {
         title="Cookie Policy"
         description="WorldAML cookie policy explaining how we use cookies and similar technologies on our website."
         canonical="/cookies"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Cookie Policy", url: "/cookies" },
+        ]}
       />
       <Header />
       <main className="flex-1">
