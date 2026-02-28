@@ -56,27 +56,31 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   const handleSignOut = async () => {
     await signOut();
     setMobileMenuOpen(false);
   };
 
-  // Close mobile menu on outside click
+  // Close mobile menu on outside click/tap
   useEffect(() => {
     if (!mobileMenuOpen) return;
-    const handleClick = (e: MouseEvent) => {
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
+    const handleOutside = (e: MouseEvent | TouchEvent) => {
+      if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
         setMobileMenuOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+    };
   }, [mobileMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-divider bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header ref={headerRef} className="sticky top-0 z-50 w-full border-b border-divider bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="container-enterprise">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -175,7 +179,7 @@ export const Header = () => {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div ref={mobileMenuRef} className="md:hidden py-4 border-t border-divider animate-slide-down">
+          <div className="md:hidden py-4 border-t border-divider animate-slide-down">
             <div className="mb-4">
               <RegionSelector />
             </div>
