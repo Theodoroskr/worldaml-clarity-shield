@@ -47,6 +47,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const WorldID = lazy(() => import("./pages/WorldID"));
+const BestPractices = lazy(() => import("./pages/BestPractices"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -119,6 +120,8 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/cookies" element={<Cookies />} />
                 <Route path="/access-your-data" element={<AccessYourData />} />
+                
+                <Route path="/resources/best-practices" element={<BestPractices />} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

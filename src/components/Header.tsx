@@ -45,6 +45,7 @@ const navLinks = [
     children: [
       { href: "/industries", label: "Industries" },
       { href: "/news", label: "News" },
+      { href: "/resources/best-practices", label: "Best Practices" },
       { href: "/faq", label: "FAQ" },
       { href: "/support", label: "Support" },
       { href: "/about", label: "About" },
