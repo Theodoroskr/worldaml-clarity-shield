@@ -148,6 +148,10 @@ export default function SanctionsCheck() {
       {/* Hero */}
       <section className="bg-navy section-padding-sm">
         <div className="container-enterprise max-w-4xl mx-auto text-center">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-slate-light/70 hover:text-slate-light text-xs mb-6 transition-colors">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            Back to Home
+          </Link>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/20 border border-accent/30 text-accent text-body-sm font-medium mb-5">
             <Shield className="w-3.5 h-3.5" />
             Free Open-Source Sanctions Tool
