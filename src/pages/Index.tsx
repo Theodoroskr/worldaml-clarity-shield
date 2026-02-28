@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NewHeroSection from "@/components/home/NewHeroSection";
 import StatsSection from "@/components/home/StatsSection";
+import BusinessImpactSection from "@/components/home/BusinessImpactSection";
 import HowItWorksSection from "@/components/home/HowItWorksSection";
 import GlobalReachSection from "@/components/home/GlobalReachSection";
 import TrustedByLogos from "@/components/TrustedByLogos";
@@ -33,6 +34,7 @@ const Index = () => {
       <Header />
       <main className="flex-1">
         <NewHeroSection />
+        <BusinessImpactSection />
         <StatsSection />
         <IndustriesSection />
         <HowItWorksSection />
