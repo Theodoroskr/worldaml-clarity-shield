@@ -7,6 +7,7 @@ import HowItWorksSection from "@/components/home/HowItWorksSection";
 import GlobalReachSection from "@/components/home/GlobalReachSection";
 import TrustedByLogos from "@/components/TrustedByLogos";
 import HomeCTASection from "@/components/home/HomeCTASection";
+import IndustriesSection from "@/components/home/IndustriesSection";
 
 const Index = () => {
   return (
@@ -33,6 +34,7 @@ const Index = () => {
       <main className="flex-1">
         <NewHeroSection />
         <StatsSection />
+        <IndustriesSection />
         <HowItWorksSection />
         <GlobalReachSection />
         <TrustedByLogos 
