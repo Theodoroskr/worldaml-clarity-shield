@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowRight, Check, Layers, Fingerprint, Database, Lock } from "lucide-react";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
@@ -103,7 +103,9 @@ const Pricing = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const fromSanctions = searchParams.get("from") === "sanctions";
 
   const handleCheckout = async (planName: string, product: "worldid" | "worldaml") => {
     if (!user) {
@@ -233,6 +235,27 @@ const Pricing = () => {
       />
       <Header />
       <main className="flex-1">
+        {/* Contextual banner from sanctions check */}
+        {fromSanctions && (
+          <div className="bg-teal/10 border-b border-teal/20">
+            <div className="container-enterprise py-3">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-teal/20 border border-teal/30">
+                    <ArrowRight className="w-3.5 h-3.5 text-teal" />
+                  </div>
+                  <p className="text-sm text-foreground">
+                    <span className="font-semibold">You've been using the free Sanctions Quick Check.</span>{" "}
+                    Upgrade to WorldAML for unlimited searches across 1,900+ lists with real-time monitoring.
+                  </p>
+                </div>
+                <Link to="#worldaml" className="flex-shrink-0 text-sm font-semibold text-teal hover:underline flex items-center gap-1">
+                  View WorldAML plans <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Hero */}
         <section className="section-padding bg-background">
           <div className="container-enterprise">

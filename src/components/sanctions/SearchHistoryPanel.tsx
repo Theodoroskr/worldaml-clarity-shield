@@ -2,7 +2,8 @@ import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { History, CheckCircle2, XCircle, Globe, Tag, Clock } from "lucide-react";
+import { History, CheckCircle2, XCircle, Globe, Tag, Clock, Zap, Bell, FileText, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 
 interface SearchRecord {
@@ -128,6 +129,24 @@ export const SearchHistoryPanel = forwardRef<SearchHistoryHandle>((_, ref) => {
               </div>
             );
           })}
+          {/* Upgrade nudge strip */}
+          <div className="mt-2 flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-navy/15 bg-navy/[0.03]">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-semibold text-foreground">WorldAML includes:</span>
+              {[
+                { icon: <Zap className="w-3 h-3" />, label: "Unlimited searches" },
+                { icon: <Bell className="w-3 h-3" />, label: "Real-time alerts" },
+                { icon: <FileText className="w-3 h-3" />, label: "Audit trail" },
+              ].map(({ icon, label }) => (
+                <span key={label} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal/10 text-teal text-xs font-medium">
+                  {icon}{label}
+                </span>
+              ))}
+            </div>
+            <Link to="/pricing?from=sanctions" className="flex-shrink-0 text-xs font-semibold text-teal hover:underline whitespace-nowrap flex items-center gap-1">
+              Explore plans <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
         </div>
       )}
     </CardContent>
