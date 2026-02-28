@@ -25,7 +25,11 @@ interface SearchResult {
 
 const VISIBLE_DEFAULT = 5;
 
-export const DashboardSanctionsWidget = () => {
+interface Props {
+  onSearchComplete?: () => void;
+}
+
+export const DashboardSanctionsWidget = ({ onSearchComplete }: Props) => {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<SearchResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +72,7 @@ export const DashboardSanctionsWidget = () => {
       const data = await res.json();
       setResults(data.results ?? []);
       if (typeof data.remaining === "number") setRemaining(data.remaining);
+      onSearchComplete?.();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Search failed. Please try again.");
     } finally {

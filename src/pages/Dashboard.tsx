@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,12 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert } from "lucide-react";
 import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
+import { SearchHistoryPanel, SearchHistoryHandle } from "@/components/sanctions/SearchHistoryPanel";
 import { toast } from "sonner";
 
 const Dashboard = () => {
   const { user, profile, isLoading, isApproved, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
+  const historyRef = useRef<SearchHistoryHandle>(null);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -142,9 +144,10 @@ const Dashboard = () => {
           </div>
 
           {/* Quick Tools */}
-          <div className="mt-10">
-            <h2 className="text-xl font-semibold text-navy mb-4">Quick Tools</h2>
-            <DashboardSanctionsWidget />
+          <div className="mt-10 space-y-6">
+            <h2 className="text-xl font-semibold text-navy">Quick Tools</h2>
+            <DashboardSanctionsWidget onSearchComplete={() => historyRef.current?.refresh()} />
+            <SearchHistoryPanel ref={historyRef} />
           </div>
         </div>
       </main>
