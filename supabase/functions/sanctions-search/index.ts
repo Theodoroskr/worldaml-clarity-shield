@@ -172,7 +172,7 @@ Deno.serve(async (req) => {
     }
 
     // Fuzzy match
-    const THRESHOLD = 0.78;
+    const THRESHOLD = 0.70;
     const results = SANCTIONS_DATA
       .filter(entry => {
         if (country && entry.nationality && entry.nationality !== country) return true; // still include, just lower priority
@@ -185,7 +185,7 @@ Deno.serve(async (req) => {
       })
       .filter(e => e.match_score >= THRESHOLD)
       .sort((a, b) => b.match_score - a.match_score)
-      .slice(0, 10)
+      .slice(0, 20)
       .map(e => ({
         id: e.id,
         name: e.name,
