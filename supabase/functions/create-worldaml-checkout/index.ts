@@ -7,10 +7,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const WORLDAML_PRICES: Record<string, string> = {
+const VALID_PLANS = ["starter", "compliance"] as const;
+type ValidPlan = typeof VALID_PLANS[number];
+
+const WORLDAML_PRICES: Record<ValidPlan, string> = {
   starter: "price_1SzfOKLz1lUQpGdDOeGRsgdn",
   compliance: "price_1SzfPqLz1lUQpGdDDtgsGVbp",
 };
+
+const errorResponse = (message: string, status = 400) =>
+  new Response(JSON.stringify({ error: message }), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    status,
+  });
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -23,18 +32,33 @@ serve(async (req) => {
   );
 
   try {
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return errorResponse("Authentication required", 401);
+    }
     const token = authHeader.replace("Bearer ", "");
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-
-    const { plan } = await req.json();
-
-    const priceId = WORLDAML_PRICES[plan?.toLowerCase()];
-    if (!priceId) {
-      throw new Error(`Invalid plan: ${plan}. Valid plans: starter, compliance`);
+    if (!user?.email) {
+      return errorResponse("Authentication required", 401);
     }
+
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return errorResponse("Invalid request body");
+    }
+
+    const { plan } = body as Record<string, unknown>;
+
+    // Strict whitelist validation
+    if (typeof plan !== "string" || !VALID_PLANS.includes(plan.toLowerCase() as ValidPlan)) {
+      return errorResponse("Invalid request");
+    }
+
+    const normalizedPlan = plan.toLowerCase() as ValidPlan;
+    const priceId = WORLDAML_PRICES[normalizedPlan];
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -53,7 +77,7 @@ serve(async (req) => {
       mode: "subscription",
       success_url: `${req.headers.get("origin")}/dashboard?subscription=success&product=worldaml`,
       cancel_url: `${req.headers.get("origin")}/pricing?canceled=true`,
-      metadata: { plan, product: "worldaml" },
+      metadata: { plan: normalizedPlan, product: "worldaml" },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
@@ -61,11 +85,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error("Checkout error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    console.error("[create-worldaml-checkout] Error:", error);
+    return errorResponse("Service unavailable. Please try again later.", 500);
   }
 });
