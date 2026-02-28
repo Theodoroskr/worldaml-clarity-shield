@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowRight, Search, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogoIcon } from "@/components/Logo";
 import lexisNexisLogo from "@/assets/lexisnexis-risk-solutions-logo.png";
@@ -133,6 +135,15 @@ const NetworkGlobeVisual = () => (
 );
 
 export const NewHeroSection = () => {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+
+  const handleQuickSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+    navigate(`/sanctions-check?q=${encodeURIComponent(query.trim())}`);
+  };
+
   return (
     <section className="section-padding bg-surface-subtle relative overflow-hidden">
       {/* Animated Globe Background - Desktop only */}
@@ -142,7 +153,7 @@ export const NewHeroSection = () => {
 
       <div className="container-enterprise relative z-10">
         {/* Hero Header */}
-        <div className="text-center max-w-4xl mx-auto mb-16">
+        <div className="text-center max-w-4xl mx-auto mb-10">
           <h1 className="text-navy mb-6 text-balance">
             WorldAML — Financial Crime Screening Infrastructure
           </h1>
@@ -165,6 +176,45 @@ export const NewHeroSection = () => {
             WorldAML integrates trusted screening technologies, including LexisNexis Risk Solutions, 
             and is delivered and supported by Infocredit Group.
           </p>
+        </div>
+
+        {/* ── Inline Sanctions Quick Check ── */}
+        <div className="max-w-2xl mx-auto mb-12">
+          <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+            {/* Header strip */}
+            <div className="bg-navy px-5 py-3 flex items-center gap-2">
+              <Shield className="w-4 h-4 text-accent flex-shrink-0" />
+              <span className="text-body-sm font-medium text-primary-foreground">
+                Free Sanctions Quick Check
+              </span>
+              <span className="ml-auto text-xs text-slate-light/70">
+                OFAC · EU · UN · HMT
+              </span>
+            </div>
+
+            {/* Search form */}
+            <form onSubmit={handleQuickSearch} className="p-4 flex gap-2">
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search a name, company, or organisation…"
+                className="flex-1 text-base"
+                maxLength={200}
+              />
+              <Button type="submit" disabled={!query.trim()}>
+                <Search className="w-4 h-4 mr-2" />
+                Check
+              </Button>
+            </form>
+
+            {/* Footnote */}
+            <p className="px-4 pb-3 text-xs text-muted-foreground">
+              Open-source lists only · May be delayed · Not legal advice ·{" "}
+              <Link to="/sanctions-check" className="underline hover:text-foreground">
+                Full tool →
+              </Link>
+            </p>
+          </div>
         </div>
 
         {/* Three-Column Product Split */}

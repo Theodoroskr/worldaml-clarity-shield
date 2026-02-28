@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { CheckCircle2, XCircle, Shield, Info } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { SanctionsSearchForm } from "@/components/sanctions/SanctionsSearchForm";
@@ -38,6 +39,7 @@ interface SearchResponse {
 
 export default function SanctionsCheck() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<SearchResult[] | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
@@ -54,6 +56,15 @@ export default function SanctionsCheck() {
 
   const isAnonymous = !user;
   const isGated = isAnonymous && anonSearchCount >= 1;
+
+  // Auto-run search when arriving with ?q= from homepage
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q && !results && !loading) {
+      handleSearch({ name: q, country: "", type: "" });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSearch = async (params: { name: string; country: string; type: string }) => {
     if (isGated) return; // blocked
