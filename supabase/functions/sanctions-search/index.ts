@@ -162,13 +162,8 @@ Deno.serve(async (req) => {
         });
       }
     } else {
-      // Anonymous: check session searches (just count, no strict block at edge fn — frontend handles display gate)
-      const { count } = await supabase
-        .from('sanctions_searches')
-        .select('id', { count: 'exact', head: true })
-        .eq('session_id', sessionId)
-        .is('user_id', null);
-      remaining = Math.max(0, 1 - (count ?? 0));
+      // Anonymous: no server-side block — frontend handles display gating
+      remaining = 999;
     }
 
     // Fuzzy match
@@ -201,20 +196,22 @@ Deno.serve(async (req) => {
         confidence: getConfidence(e.match_score),
       }));
 
-    // Log search
-    await supabase.from('sanctions_searches').insert({
-      session_id: sessionId,
-      user_id: userId,
-      query_name: name.trim(),
-      query_country: country || null,
-      query_type: entityType || 'individual',
-      results_count: results.length,
-    });
+    // Only log (and deduct credit) if we actually found results
+    if (results.length > 0) {
+      await supabase.from('sanctions_searches').insert({
+        session_id: sessionId,
+        user_id: userId,
+        query_name: name.trim(),
+        query_country: country || null,
+        query_type: entityType || 'individual',
+        results_count: results.length,
+      });
+    }
 
     return new Response(JSON.stringify({
       results,
       session_id: sessionId,
-      remaining: userId ? Math.max(0, remaining - 1) : remaining,
+      remaining: userId ? Math.max(0, remaining - 1) : 999,
       total_searched: SANCTIONS_DATA.length,
       disclaimer: "Open-source coverage only. Data may be delayed. Not legal advice.",
     }), {
