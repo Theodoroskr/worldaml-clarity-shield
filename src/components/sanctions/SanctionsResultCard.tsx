@@ -1,5 +1,5 @@
-import { Badge } from "@/components/ui/badge";
-import { Shield, Calendar, Globe, Tag, Building2, User, MapPin, Lock } from "lucide-react";
+import { useState } from "react";
+import { Shield, Calendar, Globe, Tag, Building2, User, MapPin, Lock, ChevronDown, ChevronUp, ExternalLink, ListChecks, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,13 @@ const categoryConfig: Record<string, { icon: typeof User; label: string; color: 
   country:      { icon: MapPin,      label: "Country",      color: "bg-muted text-muted-foreground border-border" },
 };
 
+const sourceLinks: Record<string, string> = {
+  "OFAC SDN":             "https://sanctionssearch.ofac.treas.gov/",
+  "EU Consolidated List": "https://eeas.europa.eu/topics/sanctions-policy/8442/consolidated-list-of-sanctions_en",
+  "UN Security Council":  "https://www.un.org/securitycouncil/content/un-sc-consolidated-list",
+  "HMT Asset Freeze":     "https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets",
+};
+
 interface Props {
   result: SanctionsResult;
   index: number;
@@ -46,10 +53,12 @@ interface Props {
 }
 
 export const SanctionsResultCard = ({ result, index, locked = false }: Props) => {
+  const [expanded, setExpanded] = useState(false);
   const conf = confidenceConfig[result.confidence];
   const src  = sourceConfig[result.list_source] ?? { color: "bg-muted text-muted-foreground border-border", short: "Other" };
   const cat  = categoryConfig[result.entity_type?.toLowerCase()] ?? categoryConfig["organization"];
   const CatIcon = cat.icon;
+  const sourceUrl = sourceLinks[result.list_source];
 
   return (
     <div className={cn(
@@ -100,16 +109,14 @@ export const SanctionsResultCard = ({ result, index, locked = false }: Props) =>
       {/* Body */}
       <div className={cn("p-4 space-y-3", locked && "blur-[6px] pointer-events-none")}>
         {/* Name + full source */}
-        <div className="flex items-start justify-between gap-3 flex-wrap">
-          <div className="flex items-start gap-2">
-            <Shield className={cn(
-              "w-4 h-4 flex-shrink-0 mt-0.5",
-              result.confidence === "Exact" ? "text-destructive" : "text-muted-foreground"
-            )} />
-            <div>
-              <p className="font-bold text-foreground leading-snug">{result.name}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{result.list_source}</p>
-            </div>
+        <div className="flex items-start gap-2">
+          <Shield className={cn(
+            "w-4 h-4 flex-shrink-0 mt-0.5",
+            result.confidence === "Exact" ? "text-destructive" : "text-muted-foreground"
+          )} />
+          <div>
+            <p className="font-bold text-foreground leading-snug">{result.name}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{result.list_source}</p>
           </div>
         </div>
 
@@ -130,24 +137,79 @@ export const SanctionsResultCard = ({ result, index, locked = false }: Props) =>
           {result.programs?.length > 0 && (
             <span className="flex items-center gap-1">
               <Tag className="w-3 h-3" />
-              {result.programs.join(" · ")}
+              {result.programs.slice(0, expanded ? undefined : 2).join(" · ")}
+              {!expanded && result.programs.length > 2 && (
+                <span className="text-muted-foreground"> +{result.programs.length - 2} more</span>
+              )}
             </span>
           )}
         </div>
 
-        {/* Aliases */}
+        {/* Aliases — always show at least 5, all when expanded */}
         {result.aliases?.length > 0 && (
           <div>
             <p className="text-xs text-muted-foreground mb-1.5 font-medium uppercase tracking-wide">Also known as</p>
             <div className="flex flex-wrap gap-1.5">
-              {result.aliases.slice(0, 5).map((alias) => (
+              {(expanded ? result.aliases : result.aliases.slice(0, 5)).map((alias) => (
                 <span key={alias} className="px-2 py-0.5 bg-muted rounded-md text-xs text-foreground/70 border border-border/50">
                   {alias}
                 </span>
               ))}
-              {result.aliases.length > 5 && (
-                <span className="px-2 py-0.5 text-xs text-muted-foreground">+{result.aliases.length - 5} more</span>
+              {!expanded && result.aliases.length > 5 && (
+                <button
+                  onClick={() => setExpanded(true)}
+                  className="px-2 py-0.5 text-xs text-primary hover:underline"
+                >
+                  +{result.aliases.length - 5} more
+                </button>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Expanded details */}
+        {expanded && (
+          <div className="pt-2 border-t border-border/50 space-y-3">
+            {/* All programs */}
+            {result.programs?.length > 0 && (
+              <div>
+                <p className="text-xs text-muted-foreground mb-1.5 font-medium uppercase tracking-wide flex items-center gap-1">
+                  <ListChecks className="w-3 h-3" /> Sanction Programmes
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {result.programs.map((p) => (
+                    <span key={p} className="px-2 py-0.5 bg-muted rounded-md text-xs text-foreground/70 border border-border/50">{p}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Source reference */}
+            <div>
+              <p className="text-xs text-muted-foreground mb-1.5 font-medium uppercase tracking-wide flex items-center gap-1">
+                <BookOpen className="w-3 h-3" /> Source List
+              </p>
+              <div className="flex items-center gap-2">
+                <span className={cn("inline-flex items-center px-2 py-0.5 rounded border text-xs font-medium", src.color)}>
+                  {result.list_source}
+                </span>
+                {sourceUrl && (
+                  <a
+                    href={sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                  >
+                    View official list <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Record ID */}
+            <div>
+              <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wide">Record ID</p>
+              <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded border border-border/50">{result.id}</span>
             </div>
           </div>
         )}
@@ -159,7 +221,16 @@ export const SanctionsResultCard = ({ result, index, locked = false }: Props) =>
         locked && "blur-[3px] pointer-events-none"
       )}>
         <span className="text-xs text-muted-foreground">Updated {result.list_updated}</span>
-        <span className="text-xs text-muted-foreground font-mono">ID: {result.id}</span>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+        >
+          {expanded ? (
+            <><ChevronUp className="w-3 h-3" /> Show less</>
+          ) : (
+            <><ChevronDown className="w-3 h-3" /> Show more details</>
+          )}
+        </button>
       </div>
     </div>
   );
