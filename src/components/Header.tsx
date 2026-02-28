@@ -39,6 +39,7 @@ const navLinks = [
       { href: "/data-sources/bridger-xg", label: "Bridger Insight XG®" },
     ],
   },
+  { href: "/sanctions-check", label: "Quick Check" },
   { href: "/pricing", label: "Pricing" },
   {
     label: "Resources",

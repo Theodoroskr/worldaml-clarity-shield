@@ -1,8 +1,8 @@
 const stats = [
   {
-    value: "200+",
-    label: "Jurisdictions Covered",
-    description: "Global sanctions, watchlists, and PEP sources",
+    value: "1,900+",
+    label: "Global Risk Lists",
+    description: "Sanctions, watchlists, PEPs and adverse media sources",
   },
   {
     value: "50M+",
