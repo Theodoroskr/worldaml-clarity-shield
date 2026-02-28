@@ -7,12 +7,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// WorldID price IDs by plan
-const WORLDID_PRICES: Record<string, string> = {
+const VALID_PLANS = ["starter", "growth", "scale"] as const;
+type ValidPlan = typeof VALID_PLANS[number];
+
+const WORLDID_PRICES: Record<ValidPlan, string> = {
   starter: "price_1SwUtZLz1lUQpGdDxQ0mWoDo",
   growth: "price_1SwUuHLz1lUQpGdDNJU6QgJS",
   scale: "price_1SwUw2Lz1lUQpGdDDlYU7rUu",
 };
+
+const errorResponse = (message: string, status = 400) =>
+  new Response(JSON.stringify({ error: message }), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    status,
+  });
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -25,24 +33,38 @@ serve(async (req) => {
   );
 
   try {
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return errorResponse("Authentication required", 401);
+    }
     const token = authHeader.replace("Bearer ", "");
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-
-    const { plan } = await req.json();
-    
-    const priceId = WORLDID_PRICES[plan?.toLowerCase()];
-    if (!priceId) {
-      throw new Error(`Invalid plan: ${plan}. Valid plans: starter, growth, scale`);
+    if (!user?.email) {
+      return errorResponse("Authentication required", 401);
     }
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
-      apiVersion: "2025-08-27.basil" 
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return errorResponse("Invalid request body");
+    }
+
+    const { plan } = body as Record<string, unknown>;
+
+    // Strict whitelist validation
+    if (typeof plan !== "string" || !VALID_PLANS.includes(plan.toLowerCase() as ValidPlan)) {
+      return errorResponse("Invalid request");
+    }
+
+    const normalizedPlan = plan.toLowerCase() as ValidPlan;
+    const priceId = WORLDID_PRICES[normalizedPlan];
+
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+      apiVersion: "2025-08-27.basil",
     });
 
-    // Check for existing customer
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId;
     if (customers.data.length > 0) {
@@ -52,19 +74,11 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       success_url: `${req.headers.get("origin")}/dashboard?subscription=success&product=worldid`,
       cancel_url: `${req.headers.get("origin")}/products/worldid?canceled=true`,
-      metadata: {
-        plan: plan,
-        product: "worldid",
-      },
+      metadata: { plan: normalizedPlan, product: "worldid" },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
@@ -72,11 +86,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error("Checkout error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    console.error("[create-worldid-checkout] Error:", error);
+    return errorResponse("Service unavailable. Please try again later.", 500);
   }
 });

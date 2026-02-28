@@ -7,10 +7,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
-  console.log(`[CUSTOMER-PORTAL] ${step}${detailsStr}`);
-};
+const errorResponse = (message: string, status = 400) =>
+  new Response(JSON.stringify({ error: message }), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    status,
+  });
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -18,11 +19,11 @@ serve(async (req) => {
   }
 
   try {
-    logStep("Function started");
-
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
+    if (!stripeKey) {
+      console.error("[customer-portal] Missing STRIPE_SECRET_KEY");
+      return errorResponse("Service unavailable. Please try again later.", 500);
+    }
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -31,41 +32,39 @@ serve(async (req) => {
     );
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
-    logStep("Authorization header found");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return errorResponse("Authentication required", 401);
+    }
 
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    if (userError || !userData.user?.email) {
+      console.error("[customer-portal] Auth error:", userError?.message);
+      return errorResponse("Authentication required", 401);
+    }
+
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     if (customers.data.length === 0) {
-      throw new Error("No Stripe customer found for this user");
+      return errorResponse("No active subscription found for this account.", 404);
     }
-    const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
 
+    const customerId = customers.data[0].id;
     const origin = req.headers.get("origin") || "http://localhost:3000";
+
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${origin}/dashboard`,
     });
-    logStep("Customer portal session created", { sessionId: portalSession.id, url: portalSession.url });
 
     return new Response(JSON.stringify({ url: portalSession.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR in customer-portal", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    console.error("[customer-portal] Unhandled error:", error);
+    return errorResponse("Service unavailable. Please try again later.", 500);
   }
 });
