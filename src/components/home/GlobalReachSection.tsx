@@ -1,10 +1,10 @@
 import { Globe, Users, Newspaper, Building } from "lucide-react";
 
 const coveragePoints = [
-  { icon: Globe, label: "Global sanctions coverage" },
+  { icon: Globe, label: "1,900+ global risk lists" },
   { icon: Users, label: "Politically Exposed Persons (PEPs)" },
   { icon: Newspaper, label: "Adverse media monitoring" },
-  { icon: Building, label: "GCC, EU and US regulatory intelligence" },
+  { icon: Building, label: "GCC, EU, US and UK regulatory intelligence" },
 ];
 
 export const GlobalReachSection = () => {
@@ -17,8 +17,9 @@ export const GlobalReachSection = () => {
           </h2>
           
           <p className="text-body-lg text-text-secondary text-center mb-10 max-w-2xl mx-auto">
-            WorldAML monitors global sanctions, PEPs and adverse media, incorporating regulatory 
-            and enforcement sources across Europe, the United States and the GCC region.
+            WorldAML screens against 1,900+ global risk lists — spanning sanctions, watchlists, 
+            PEPs and adverse media — with regulatory and enforcement sources across Europe, 
+            the United States, the United Kingdom and the GCC region.
           </p>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">

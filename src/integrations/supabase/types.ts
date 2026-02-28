@@ -110,6 +110,39 @@ export type Database = {
         }
         Relationships: []
       }
+      sanctions_searches: {
+        Row: {
+          created_at: string
+          id: string
+          query_country: string | null
+          query_name: string
+          query_type: string | null
+          results_count: number | null
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          query_country?: string | null
+          query_name: string
+          query_type?: string | null
+          results_count?: number | null
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          query_country?: string | null
+          query_name?: string
+          query_type?: string | null
+          results_count?: number | null
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
