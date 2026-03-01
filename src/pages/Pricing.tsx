@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowRight, Check, Layers, Fingerprint, Database, Lock } from "lucide-react";
+import { ArrowRight, Check, Layers, Fingerprint, Database, Lock, Search } from "lucide-react";
+import { CrossSellCard } from "@/components/CrossSellCard";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -501,7 +502,33 @@ const Pricing = () => {
                             <span className="font-semibold text-navy">Suite Included:</span> WorldAML Suite 
                             is included with all API plans for case management and reporting.
                           </p>
-                      </div>
+                        </div>
+
+                        {/* Cross-sell: not ready to integrate */}
+                        <div className="mt-6">
+                          <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(215_20%_50%)] mb-3">
+                            Not ready to integrate?
+                          </p>
+                          <CrossSellCard
+                            variant="default"
+                            domain="worldkycsearch.com"
+                            destPath="/signup"
+                            utmSource="worldaml.com"
+                            utmMedium="pricing-page"
+                            utmCampaign="not-ready-to-integrate"
+                            accentColor="hsl(222 47% 40%)"
+                            icon={<Search className="w-4 h-4" />}
+                            eyebrow="WorldKYC Search"
+                            headline="Start screening in minutes — no engineering needed"
+                            body="WorldKYC Search gives compliance analysts instant PEP, sanctions, and adverse media lookups through a clean web interface. No API key, no integration sprint."
+                            bullets={[
+                              "Point-and-click screening across global risk lists",
+                              "Audit trail and PDF export built in",
+                              "Upgrade to the API any time — same account",
+                            ]}
+                            ctaLabel="Try WorldKYC Search free"
+                          />
+                        </div>
                     </div>
                   </div>
 

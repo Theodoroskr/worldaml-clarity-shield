@@ -7,7 +7,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert } from "lucide-react";
+import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert, Search } from "lucide-react";
+import { CrossSellCard } from "@/components/CrossSellCard";
 import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
 import { SearchHistoryPanel, SearchHistoryHandle } from "@/components/sanctions/SearchHistoryPanel";
 import { toast } from "sonner";
@@ -148,6 +149,24 @@ const Dashboard = () => {
             <h2 className="text-xl font-semibold text-navy">Quick Tools</h2>
             <DashboardSanctionsWidget onSearchComplete={() => historyRef.current?.refresh()} />
             <SearchHistoryPanel ref={historyRef} />
+          </div>
+
+          {/* Cross-sell: add analyst seats */}
+          <div className="mt-8">
+            <CrossSellCard
+              variant="compact"
+              domain="worldkycsearch.com"
+              destPath="/team"
+              utmSource="worldaml.com"
+              utmMedium="dashboard-apikeys"
+              utmCampaign="add-analyst-seats"
+              accentColor="hsl(222 47% 40%)"
+              icon={<Search className="w-4 h-4" />}
+              eyebrow="WorldKYC Search"
+              headline="Add analyst seats — let your team screen without touching the API"
+              body="Give compliance analysts a no-code interface on worldkycsearch.com. Same underlying data, zero engineering overhead."
+              ctaLabel="Add analyst seats"
+            />
           </div>
         </div>
       </main>
