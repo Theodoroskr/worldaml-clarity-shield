@@ -49,6 +49,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const WorldID = lazy(() => import("./pages/WorldID"));
 const BestPractices = lazy(() => import("./pages/BestPractices"));
 const SanctionsCheck = lazy(() => import("./pages/SanctionsCheck"));
+const SanctionsLists = lazy(() => import("./pages/SanctionsLists"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const SuiteLayout = lazy(() => import("./pages/SuiteLayout"));
 
@@ -125,6 +126,7 @@ const App = () => (
                 <Route path="/access-your-data" element={<AccessYourData />} />
                 
                 <Route path="/resources/best-practices" element={<BestPractices />} />
+                <Route path="/resources/sanctions-lists" element={<SanctionsLists />} />
                 <Route path="/sanctions-check" element={<SanctionsCheck />} />
                 
                 <Route path="/suite-layout-preview" element={<SuiteLayout />} />

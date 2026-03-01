@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { BestPracticeCard } from "@/components/bestpractices/BestPracticeCard";
 import { bestPractices, type BestPracticeCategory } from "@/data/bestPractices";
 import { cn } from "@/lib/utils";
-import { BookOpen, ArrowRight } from "lucide-react";
+import { BookOpen, ArrowRight, ShieldCheck } from "lucide-react";
 
 type FilterCategory = "All" | BestPracticeCategory;
 
@@ -115,13 +115,16 @@ const BestPractices = () => {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" asChild>
-              <Link to="/demo">
-                Request a Demo
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
+              <Link to="/demo">Request a Demo <ArrowRight className="w-4 h-4 ml-2" /></Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
               <Link to="/platform">Explore the Platform</Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <Link to="/resources/sanctions-lists">
+                <ShieldCheck className="w-4 h-4 mr-2" />
+                View Official Sanctions Sources
+              </Link>
             </Button>
           </div>
         </div>
