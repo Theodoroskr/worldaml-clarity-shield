@@ -10,9 +10,65 @@ const corsHeaders = {
 const NOTIFY_EMAIL = "info@worldaml.com";
 const FROM_EMAIL = "WorldAML Forms <forms@worldaml.com>";
 
+// Rate limit: 5 submissions per IP per hour
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour in ms
+
+// In-memory rate limit store (per isolate; resets on cold start)
+// Key: "ip:hour-bucket" → count
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function getRateLimitKey(ip: string): string {
+  // Bucket by IP + current hour slot
+  const hourSlot = Math.floor(Date.now() / RATE_LIMIT_WINDOW_MS);
+  return `${ip}:${hourSlot}`;
+}
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
+  const key = getRateLimitKey(ip);
+  const now = Date.now();
+  const entry = rateLimitStore.get(key);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitStore.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: RATE_LIMIT_MAX - 1 };
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  entry.count += 1;
+  return { allowed: true, remaining: RATE_LIMIT_MAX - entry.count };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Extract client IP from standard headers (set by Supabase edge infra)
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown";
+
+  // Rate limit check
+  const { allowed, remaining } = checkRateLimit(ip);
+  if (!allowed) {
+    return new Response(
+      JSON.stringify({ error: "Too many requests. Please try again later." }),
+      {
+        status: 429,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          "Retry-After": "3600",
+          "X-RateLimit-Limit": String(RATE_LIMIT_MAX),
+          "X-RateLimit-Remaining": "0",
+        },
+      },
+    );
   }
 
   try {
@@ -122,11 +178,7 @@ Deno.serve(async (req) => {
 
         if (emailError) {
           console.error("Resend email error:", emailError);
-        } else {
-          console.log(`📧 Email sent to ${NOTIFY_EMAIL} for ${form_type} submission`);
         }
-      } else {
-        console.warn("RESEND_API_KEY not set — skipping email notification");
       }
     } catch (emailErr) {
       console.error("Email send failed (non-blocking):", emailErr);
@@ -134,7 +186,12 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({ success: true, message: "Form submitted successfully" }), {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+        "X-RateLimit-Limit": String(RATE_LIMIT_MAX),
+        "X-RateLimit-Remaining": String(remaining),
+      },
     });
   } catch (err) {
     console.error("Submit form error:", err);
