@@ -50,6 +50,7 @@ const WorldID = lazy(() => import("./pages/WorldID"));
 const BestPractices = lazy(() => import("./pages/BestPractices"));
 const SanctionsCheck = lazy(() => import("./pages/SanctionsCheck"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const SuiteLayout = lazy(() => import("./pages/SuiteLayout"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -126,6 +127,7 @@ const App = () => (
                 <Route path="/resources/best-practices" element={<BestPractices />} />
                 <Route path="/sanctions-check" element={<SanctionsCheck />} />
                 
+                <Route path="/suite-layout-preview" element={<SuiteLayout />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
