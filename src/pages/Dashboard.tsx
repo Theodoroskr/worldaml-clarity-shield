@@ -166,6 +166,7 @@ const Dashboard = () => {
               headline="Add analyst seats — let your team screen without touching the API"
               body="Give compliance analysts a no-code interface on worldkycsearch.com. Same underlying data, zero engineering overhead."
               ctaLabel="Add analyst seats"
+              context={{ companyName: profile?.company_name ?? undefined }}
             />
           </div>
         </div>
