@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, FileText, Info } from "lucide-react";
+import { ArrowRight, FileText, Info, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CrossSellCard } from "@/components/CrossSellCard";
 
 export const APICTASection = () => {
   return (
@@ -23,6 +24,24 @@ export const APICTASection = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* EDD cross-sell */}
+        <div className="max-w-3xl mx-auto mb-10">
+          <CrossSellCard
+            variant="inline"
+            domain="duediligenceworld.com"
+            destPath="/request"
+            utmSource="worldaml.com"
+            utmMedium="api-page-cta"
+            utmCampaign="edd-escalation"
+            accentColor="hsl(260 40% 45%)"
+            icon={<BookOpen className="w-4 h-4" />}
+            eyebrow="Due Diligence World"
+            headline="Need a narrative EDD pack for escalations?"
+            body="When your API flags a high-risk entity, our analysts produce a regulatory-grade EDD report — sourced, written, and delivered in 48–72 hours."
+            ctaLabel="Request an EDD report"
+          />
         </div>
 
         <div className="max-w-3xl mx-auto text-center">
