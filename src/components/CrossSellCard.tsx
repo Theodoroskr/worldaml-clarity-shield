@@ -43,6 +43,12 @@ interface CrossSellCardProps {
   className?: string;
 }
 
+/** Convert "hsl(H S% L%)" → "hsl(H S% L% / alpha)" */
+function withAlpha(color: string, alpha: number) {
+  // handles both "hsl(H S% L%)" and "hsl(H, S%, L%)" forms
+  return color.replace(/\)$/, ` / ${alpha})`);
+}
+
 function buildUrl({
   domain,
   destPath = "",
@@ -117,7 +123,7 @@ export function CrossSellCard({
           className
         )}
         style={{
-          borderColor: accentColor.replace(")", " / 0.2)").replace("hsl(", "hsl("),
+          borderColor: withAlpha(accentColor, 0.2),
         }}
       >
         <div
@@ -142,8 +148,8 @@ export function CrossSellCard({
           className="flex items-center gap-1.5 flex-shrink-0 text-[12px] font-semibold px-3.5 py-2 rounded-lg border transition-all hover:opacity-90"
           style={{
             color: accentColor,
-            borderColor: accentColor.replace(")", " / 0.25)").replace("hsl(", "hsl("),
-            background: accentColor.replace(")", " / 0.06)").replace("hsl(", "hsl("),
+            borderColor: withAlpha(accentColor, 0.25),
+            background: withAlpha(accentColor, 0.06),
           }}
         >
           {ctaLabel}
@@ -161,7 +167,7 @@ export function CrossSellCard({
         className
       )}
       style={{
-        borderColor: accentColor.replace(")", " / 0.2)").replace("hsl(", "hsl("),
+        borderColor: withAlpha(accentColor, 0.2),
       }}
     >
       {/* Thin colour stripe */}
