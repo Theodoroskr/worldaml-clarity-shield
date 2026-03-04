@@ -9,6 +9,35 @@ const corsHeaders = {
 const NOTIFY_EMAIL = "info@worldaml.com";
 const FROM_EMAIL = "WorldAML <forms@worldaml.com>";
 
+async function sendEmailWithRetry(resend: any, params: any, retries = 1): Promise<void> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const { error } = await resend.emails.send(params);
+      if (error) {
+        const code = (error as any)?.name || (error as any)?.code || "";
+        if (code === "rate_limit_exceeded" || (error as any)?.statusCode === 429) {
+          console.warn("⚠️ Resend rate limit exceeded — skipping admin notification.");
+          return;
+        }
+        throw error;
+      }
+      return;
+    } catch (err: any) {
+      const isRateLimit = err?.statusCode === 429 || err?.name === "rate_limit_exceeded";
+      if (isRateLimit) {
+        console.warn("⚠️ Resend rate limit exceeded — skipping admin notification.");
+        return;
+      }
+      if (attempt < retries) {
+        console.warn(`Email send attempt ${attempt + 1} failed, retrying in 1s…`, err?.message);
+        await new Promise((r) => setTimeout(r, 1000));
+      } else {
+        console.error("Email send failed (non-blocking):", err?.message ?? err);
+      }
+    }
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -86,20 +115,12 @@ Deno.serve(async (req) => {
       </div>
     `;
 
-    const { error: emailError } = await resend.emails.send({
+    await sendEmailWithRetry(resend, {
       from: FROM_EMAIL,
       to: [NOTIFY_EMAIL],
       subject: `New Registration: ${displayName} (${displayCompany}) — Action Required`,
       html,
     });
-
-    if (emailError) {
-      console.error("Resend error:", emailError);
-      return new Response(JSON.stringify({ error: "Email send failed", details: emailError }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
     console.log(`✅ Admin notification sent for new signup: ${email}`);
     return new Response(JSON.stringify({ success: true }), {

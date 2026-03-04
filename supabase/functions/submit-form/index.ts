@@ -10,6 +10,35 @@ const corsHeaders = {
 const NOTIFY_EMAIL = "info@worldaml.com";
 const FROM_EMAIL = "WorldAML Forms <forms@worldaml.com>";
 
+async function sendEmailWithRetry(resend: any, params: any, retries = 1): Promise<void> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const { error } = await resend.emails.send(params);
+      if (error) {
+        const code = (error as any)?.name || (error as any)?.code || "";
+        if (code === "rate_limit_exceeded" || (error as any)?.statusCode === 429) {
+          console.warn("⚠️ Resend rate limit exceeded — skipping email notification.");
+          return;
+        }
+        throw error;
+      }
+      return;
+    } catch (err: any) {
+      const isRateLimit = err?.statusCode === 429 || err?.name === "rate_limit_exceeded";
+      if (isRateLimit) {
+        console.warn("⚠️ Resend rate limit exceeded — skipping email notification.");
+        return;
+      }
+      if (attempt < retries) {
+        console.warn(`Email send attempt ${attempt + 1} failed, retrying in 1s…`, err?.message);
+        await new Promise((r) => setTimeout(r, 1000));
+      } else {
+        console.error("Email send failed (non-blocking):", err?.message ?? err);
+      }
+    }
+  }
+}
+
 // Rate limit: 5 submissions per IP per hour
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour in ms
@@ -169,16 +198,12 @@ Deno.serve(async (req) => {
             <p style="margin-top:16px;font-size:12px;color:#6b7280;">This notification was sent automatically by WorldAML Forms.</p>
           </div>`;
 
-        const { error: emailError } = await resend.emails.send({
+        await sendEmailWithRetry(resend, {
           from: FROM_EMAIL,
           to: [NOTIFY_EMAIL],
           subject: `New ${form_type} from ${first_name} ${last_name}`,
           html,
         });
-
-        if (emailError) {
-          console.error("Resend email error:", emailError);
-        }
       }
     } catch (emailErr) {
       console.error("Email send failed (non-blocking):", emailErr);
