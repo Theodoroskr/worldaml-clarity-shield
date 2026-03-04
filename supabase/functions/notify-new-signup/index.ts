@@ -86,20 +86,12 @@ Deno.serve(async (req) => {
       </div>
     `;
 
-    const { error: emailError } = await resend.emails.send({
+    await sendEmailWithRetry(resend, {
       from: FROM_EMAIL,
       to: [NOTIFY_EMAIL],
       subject: `New Registration: ${displayName} (${displayCompany}) — Action Required`,
       html,
     });
-
-    if (emailError) {
-      console.error("Resend error:", emailError);
-      return new Response(JSON.stringify({ error: "Email send failed", details: emailError }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
     console.log(`✅ Admin notification sent for new signup: ${email}`);
     return new Response(JSON.stringify({ success: true }), {

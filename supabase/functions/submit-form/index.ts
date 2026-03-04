@@ -169,16 +169,12 @@ Deno.serve(async (req) => {
             <p style="margin-top:16px;font-size:12px;color:#6b7280;">This notification was sent automatically by WorldAML Forms.</p>
           </div>`;
 
-        const { error: emailError } = await resend.emails.send({
+        await sendEmailWithRetry(resend, {
           from: FROM_EMAIL,
           to: [NOTIFY_EMAIL],
           subject: `New ${form_type} from ${first_name} ${last_name}`,
           html,
         });
-
-        if (emailError) {
-          console.error("Resend email error:", emailError);
-        }
       }
     } catch (emailErr) {
       console.error("Email send failed (non-blocking):", emailErr);
