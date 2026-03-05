@@ -13,13 +13,13 @@ const TMCTASection = () => {
             activity, file SARs, and satisfy examiner requirements — at scale.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" variant="secondary" asChild>
+            <Button size="lg" variant="accent" asChild>
               <Link to="/get-started">
                 Request Access
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10" asChild>
+            <Button size="lg" variant="outline-light" asChild>
               <Link to="/contact-sales">
                 <Phone className="mr-2 h-4 w-4" />
                 Talk to Sales
