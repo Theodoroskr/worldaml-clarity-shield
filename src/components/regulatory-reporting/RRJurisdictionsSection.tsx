@@ -85,7 +85,7 @@ const RRJurisdictionsSection = () => {
                   </div>
                   <div>
                     <p className="text-caption font-bold text-text-tertiary uppercase tracking-wider mb-1">Non-Compliance Risk</p>
-                    <p className="text-body-sm text-amber-700">{j.penalty}</p>
+                    <p className="text-body-sm text-[hsl(var(--warning,32_95%_44%))]">{j.penalty}</p>
                   </div>
                 </div>
               </div>
