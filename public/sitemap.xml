@@ -58,6 +58,21 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://www.worldaml.com/platform/kyc-kyb</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/platform/aml-screening</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/platform/risk-assessment</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
   
   <!-- Data Sources (Lane 2) -->
   <url>

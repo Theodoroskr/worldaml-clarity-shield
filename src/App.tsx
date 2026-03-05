@@ -17,6 +17,9 @@ const PlatformAPI = lazy(() => import("./pages/PlatformAPI"));
 const PlatformSecurity = lazy(() => import("./pages/PlatformSecurity"));
 const PlatformTransactionMonitoring = lazy(() => import("./pages/PlatformTransactionMonitoring"));
 const PlatformRegulatoryReporting = lazy(() => import("./pages/PlatformRegulatoryReporting"));
+const PlatformKYCKYB = lazy(() => import("./pages/PlatformKYCKYB"));
+const PlatformAMLScreening = lazy(() => import("./pages/PlatformAMLScreening"));
+const PlatformRiskAssessment = lazy(() => import("./pages/PlatformRiskAssessment"));
 const DataSources = lazy(() => import("./pages/DataSources"));
 const WorldCompliance = lazy(() => import("./pages/WorldCompliance"));
 const WorldComplianceDemo = lazy(() => import("./pages/WorldComplianceDemo"));
@@ -95,6 +98,9 @@ const App = () => (
                 <Route path="/platform/security" element={<PlatformSecurity />} />
                 <Route path="/platform/transaction-monitoring" element={<PlatformTransactionMonitoring />} />
                 <Route path="/platform/regulatory-reporting" element={<PlatformRegulatoryReporting />} />
+                <Route path="/platform/kyc-kyb" element={<PlatformKYCKYB />} />
+                <Route path="/platform/aml-screening" element={<PlatformAMLScreening />} />
+                <Route path="/platform/risk-assessment" element={<PlatformRiskAssessment />} />
                 
                 {/* Data Sources (Lane 2) */}
                 <Route path="/data-sources" element={<DataSources />} />
