@@ -28,6 +28,15 @@ const useCases = [
       "Velocity-based monitoring with dynamic thresholds per merchant category code (MCC), geography, and customer risk segment. Real-time inline screening for instant payment rails.",
     metrics: ["Velocity & frequency rules", "MCC-level controls", "PSD2 / EMD2 aligned"],
   },
+  {
+    icon: Gamepad2,
+    sector: "iGaming & Online Gambling Operators",
+    challenge:
+      "High-velocity micro-transactions, bonus abuse, player deposit/withdrawal cycling, and chip dumping create complex ML patterns unique to gaming accounts.",
+    solution:
+      "MGA/UKGC-aligned rule sets for gaming typologies — chip dumping detection, deposit-withdrawal velocity, multi-account pattern detection, and automated source of funds verification triggers.",
+    metrics: ["MGA & UKGC aligned", "Gaming typology rules", "SAR & STR workflow"],
+  },
 ];
 
 const TMUseCasesSection = () => {
