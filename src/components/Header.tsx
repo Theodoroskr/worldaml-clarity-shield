@@ -18,7 +18,6 @@ const navLinks = [
     label: "WorldAML Suite",
     href: "/platform",
     children: [
-      { href: "/platform", label: "Overview" },
       { href: "/platform/suite", label: "Suite" },
       { href: "/products/worldid", label: "WorldID" },
       { href: "/platform/transaction-monitoring", label: "Transaction Monitoring" },
