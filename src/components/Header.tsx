@@ -19,6 +19,9 @@ const navLinks = [
     href: "/platform",
     children: [
       { href: "/platform/suite", label: "Suite" },
+      { href: "/platform/kyc-kyb", label: "KYC & KYB" },
+      { href: "/platform/aml-screening", label: "AML Screening" },
+      { href: "/platform/risk-assessment", label: "Risk Assessment" },
       { href: "/products/worldid", label: "WorldID" },
       { href: "/platform/transaction-monitoring", label: "Transaction Monitoring" },
       { href: "/platform/regulatory-reporting", label: "Regulatory Reporting" },

@@ -9,7 +9,9 @@ const footerLinks = {
   platform: [
     { href: "/platform", label: "Platform Overview" },
     { href: "/platform/suite", label: "WorldAML Suite" },
-    { href: "/platform/api", label: "WorldAML API" },
+    { href: "/platform/kyc-kyb", label: "KYC & KYB" },
+    { href: "/platform/aml-screening", label: "AML Screening" },
+    { href: "/platform/risk-assessment", label: "Risk Assessment" },
     { href: "/platform/transaction-monitoring", label: "Transaction Monitoring" },
     { href: "/platform/regulatory-reporting", label: "Regulatory Reporting" },
     { href: "/products/worldid", label: "WorldID" },

@@ -98,6 +98,9 @@ const App = () => (
                 <Route path="/platform/security" element={<PlatformSecurity />} />
                 <Route path="/platform/transaction-monitoring" element={<PlatformTransactionMonitoring />} />
                 <Route path="/platform/regulatory-reporting" element={<PlatformRegulatoryReporting />} />
+                <Route path="/platform/kyc-kyb" element={<PlatformKYCKYB />} />
+                <Route path="/platform/aml-screening" element={<PlatformAMLScreening />} />
+                <Route path="/platform/risk-assessment" element={<PlatformRiskAssessment />} />
                 
                 {/* Data Sources (Lane 2) */}
                 <Route path="/data-sources" element={<DataSources />} />
