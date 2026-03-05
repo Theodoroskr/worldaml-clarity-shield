@@ -50,7 +50,7 @@ const TMUseCasesSection = () => {
             Every financial sector has distinct monitoring requirements. WorldAML adapts to each.
           </p>
         </div>
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-8">
           {useCases.map((uc) => (
             <div key={uc.sector} className="bg-surface-subtle border border-divider rounded-xl p-8">
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-navy/5 text-navy mb-6">
