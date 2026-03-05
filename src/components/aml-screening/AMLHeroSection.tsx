@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, ShieldSearch } from "lucide-react";
+import { ArrowRight, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LaneBadge } from "@/components/LaneBadge";
-import { Shield } from "lucide-react";
 
 const AMLHeroSection = () => {
   return (
