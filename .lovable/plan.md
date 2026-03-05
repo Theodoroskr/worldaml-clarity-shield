@@ -1,63 +1,63 @@
 
-## Add /resources/sanctions-lists to Sitemap, Footer, and Header Dropdown
+## What's missing to drive traffic — honest audit
 
-Three small, targeted edits across three files.
+This is a research/advisory answer, not an implementation task. No plan presentation needed — this is a strategic breakdown of what's actually missing.
 
----
-
-### 1. `public/sitemap.xml`
-
-Add a new `<url>` entry under the existing resources section:
-
-```xml
-<url>
-  <loc>https://www.worldaml.com/resources/sanctions-lists</loc>
-  <changefreq>monthly</changefreq>
-  <priority>0.7</priority>
-</url>
-```
-
-Placed alongside `/data-sources/resources` and `/resources/best-practices` entries.
+### What's already done well
+- Sitemap exists and covers all pages
+- robots.txt is correct
+- JSON-LD structured data on most pages
+- Canonical URLs enforced
+- Blog exists with 6 quality posts
+- Glossary + AML Regulations resource pages
+- SEO meta tags on all pages
 
 ---
 
-### 2. `src/components/Footer.tsx`
+### The 6 Traffic Gaps — ranked by impact
 
-In the `resources` array (lines 29–34), add a new entry:
+**1. CONTENT VOLUME — the biggest gap**
+The blog has only 6 posts, all from late 2024/early 2025. Google ranks content hubs, not individual articles. To rank for high-intent keywords like "AML screening software", "KYC onboarding platform", "sanctions screening API", you need:
+- Minimum 20–30 well-structured posts covering the full topic cluster
+- Fresh content published regularly (monthly minimum)
+- Missing topic clusters: transaction monitoring, adverse media, crypto VASP compliance, iGaming AML, FATCA/CRS reporting, MLRO duties, EDD vs SDD, travel rule
 
-```ts
-{ href: "/resources/sanctions-lists", label: "Sanctions Lists" },
-```
+**2. INDUSTRY LANDING PAGES — high-intent keywords unserved**
+`/industries` is a generic overview page. The 6 industry cards link to `/industries/banking`, `/industries/crypto` etc. — but **those routes don't exist**. They are dead links. Anyone searching "AML compliance for crypto exchanges" or "KYC for iGaming operators" has no landing page to find. These are extremely high-intent searches.
 
-This ensures the footer link column is crawlable by Googlebot as a plain `<a>` tag.
+**3. FAQPage JSON-LD on product pages — missing featured snippets**
+`/faq` has good content but the product pages (`/platform/aml-screening`, `/platform/kyc-kyb`, `/platform/risk-assessment`, etc.) have no FAQPage structured data. Google's "People Also Ask" boxes are a major traffic driver for compliance queries. This is low-effort, high-return.
 
----
+**4. BLOG POSTS missing from sitemap**
+The sitemap only includes 6 blog post URLs manually. As new posts are added, they won't be in the sitemap unless manually updated. The sitemap should be dynamic. Also, individual blog post URLs need `lastmod` dates for crawl prioritisation.
 
-### 3. `src/components/Header.tsx`
+**5. NO BACKLINK STRATEGY / EXTERNAL SIGNALS**
+Technical SEO is in place but Google still needs **authority signals**. The site likely has very few inbound links. Options:
+- Submit to compliance directories (ComplyAdvantage comparison sites, FinTech databases)
+- Guest posts on compliance blogs (ACAMS, Association of Certified Financial Crime Specialists)
+- Press releases for product launches
+- Partner pages with LexisNexis / InfoCredit
 
-In the `Resources` dropdown children array (lines 46–53), add:
-
-```ts
-{ href: "/resources/sanctions-lists", label: "Sanctions Lists" },
-```
-
-Placed below "Best Practices" so the group reads:
-- Industries
-- News
-- Best Practices
-- **Sanctions Lists** ← new
-- FAQ
-- Support
-- About
+**6. PAGE SPEED / CORE WEB VITALS unknown**
+The app uses `lazy()` for all routes (good), but many pages likely have large images unoptimised (client logos in `/assets/clients/`), no `loading="lazy"` on images, and no `<link rel="preconnect">` for external fonts. These affect LCP score which is a direct ranking factor.
 
 ---
 
-### Summary
+### Priority action plan (ranked)
 
-| File | Change |
-|---|---|
-| `public/sitemap.xml` | 1 new `<url>` block |
-| `src/components/Footer.tsx` | 1 new link in `resources` array |
-| `src/components/Header.tsx` | 1 new item in Resources dropdown |
+| Priority | Action | Effort | SEO Impact |
+|---|---|---|---|
+| 1 | **Build industry landing pages** — fix dead links + capture high-intent searches | Medium | Very High |
+| 2 | **Add FAQPage JSON-LD to product pages** | Low | High |
+| 3 | **Expand blog to 20+ posts** — write 3–4 new articles per topic cluster | High | Very High |
+| 4 | **Dynamic sitemap** — auto-include all blog slugs with lastmod | Low | Medium |
+| 5 | **Backlink outreach** — compliance directories, partner pages | Ongoing | High (long-term) |
+| 6 | **Image optimisation** — lazy loading, WebP, preconnect hints | Low | Medium |
 
-No new dependencies, no data changes, no routing changes needed.
+---
+
+### The honest summary
+
+The site is technically well-structured but **content-thin**. Google cannot rank a site with 6 blog posts over established compliance vendors with hundreds. The fastest wins are: (1) industry pages that fix dead links and serve intent-matched queries, (2) FAQPage schema for featured snippets, and (3) consistent blog publishing cadence.
+
+**Which would you like to build first?**
