@@ -1,4 +1,4 @@
-import { Building2, Bitcoin, CreditCard } from "lucide-react";
+import { Building2, Bitcoin, CreditCard, Gamepad2 } from "lucide-react";
 
 const useCases = [
   {
