@@ -94,6 +94,7 @@ const App = () => (
                 <Route path="/platform/api" element={<PlatformAPI />} />
                 <Route path="/platform/security" element={<PlatformSecurity />} />
                 <Route path="/platform/transaction-monitoring" element={<PlatformTransactionMonitoring />} />
+                <Route path="/platform/regulatory-reporting" element={<PlatformRegulatoryReporting />} />
                 
                 {/* Data Sources (Lane 2) */}
                 <Route path="/data-sources" element={<DataSources />} />
