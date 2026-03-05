@@ -1,63 +1,33 @@
 
-## Add /resources/sanctions-lists to Sitemap, Footer, and Header Dropdown
+## Add iGaming Regulation to Transaction Monitoring Page
 
-Three small, targeted edits across three files.
+The user confirmed Transaction Monitoring is a module of WorldAML and wants iGaming regulation added to the page. Two targeted edits required.
 
----
+### Files to edit
 
-### 1. `public/sitemap.xml`
+**`src/components/transaction-monitoring/TMRegulatorySection.tsx`**
 
-Add a new `<url>` entry under the existing resources section:
+Add 2 new framework objects to the `frameworks` array (currently 6 cards in `lg:grid-cols-3`):
 
-```xml
-<url>
-  <loc>https://www.worldaml.com/resources/sanctions-lists</loc>
-  <changefreq>monthly</changefreq>
-  <priority>0.7</priority>
-</url>
-```
+- **MGA** — Malta Gaming Authority — `iGaming / EU` — mandates AML/CFT obligations for remote gaming operators, including automated transaction monitoring, player funds monitoring, and SAR filing under the MGA's AML/CFT Implementing Procedures, aligned with EU AMLD transposition in Malta.
+- **UKGC** — UK Gambling Commission — `United Kingdom` — requires licensed gambling operators to implement transaction monitoring under the Gambling Act 2005 and LCCP Social Responsibility Code to detect unusual betting patterns, bonus abuse, and source of funds anomalies.
 
-Placed alongside `/data-sources/resources` and `/resources/best-practices` entries.
+Grid goes from 6 → 8 cards, still clean in `lg:grid-cols-3` (2 full rows + 2-card partial row). Can optionally switch to `lg:grid-cols-4` if preferred — keeping 3-column is fine.
 
 ---
 
-### 2. `src/components/Footer.tsx`
+**`src/components/transaction-monitoring/TMUseCasesSection.tsx`**
 
-In the `resources` array (lines 29–34), add a new entry:
+Add a 4th use case card for **iGaming & Online Gambling Operators**:
 
-```ts
-{ href: "/resources/sanctions-lists", label: "Sanctions Lists" },
-```
+- Import `Gamepad2` from `lucide-react` (already installed)
+- Sector: `"iGaming & Online Gambling Operators"`
+- Challenge: High-velocity micro-transactions, bonus abuse, player deposit/withdrawal cycling, and chip dumping create complex ML patterns unique to gaming accounts.
+- Solution: MGA/UKGC-aligned rule sets for gaming typologies — chip dumping detection, deposit-withdrawal velocity, multi-account pattern detection, and automated source of funds verification triggers.
+- Metrics: `["MGA & UKGC aligned", "Gaming typology rules", "SAR & STR workflow"]`
 
-This ensures the footer link column is crawlable by Googlebot as a plain `<a>` tag.
-
----
-
-### 3. `src/components/Header.tsx`
-
-In the `Resources` dropdown children array (lines 46–53), add:
-
-```ts
-{ href: "/resources/sanctions-lists", label: "Sanctions Lists" },
-```
-
-Placed below "Best Practices" so the group reads:
-- Industries
-- News
-- Best Practices
-- **Sanctions Lists** ← new
-- FAQ
-- Support
-- About
+Grid changes from `lg:grid-cols-3` (3 cards) to `md:grid-cols-2` (4 cards in 2×2 grid) for a balanced layout.
 
 ---
 
-### Summary
-
-| File | Change |
-|---|---|
-| `public/sitemap.xml` | 1 new `<url>` block |
-| `src/components/Footer.tsx` | 1 new link in `resources` array |
-| `src/components/Header.tsx` | 1 new item in Resources dropdown |
-
-No new dependencies, no data changes, no routing changes needed.
+No routing, SEO, nav, database, or other changes needed.
