@@ -133,6 +133,12 @@ const App = () => (
                 
                 {/* Preserved pages */}
                 <Route path="/industries" element={<Industries />} />
+                <Route path="/industries/banking" element={<IndustryBanking />} />
+                <Route path="/industries/fintech" element={<IndustryFintech />} />
+                <Route path="/industries/crypto" element={<IndustryCrypto />} />
+                <Route path="/industries/gaming" element={<IndustryGaming />} />
+                <Route path="/industries/legal" element={<IndustryLegal />} />
+                <Route path="/industries/payments" element={<IndustryPayments />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/get-started" element={<GetStarted />} />

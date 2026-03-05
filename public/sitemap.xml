@@ -144,6 +144,38 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+
+  <!-- Industry Landing Pages -->
+  <url>
+    <loc>https://www.worldaml.com/industries/banking</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/industries/fintech</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/industries/crypto</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/industries/gaming</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/industries/legal</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/industries/payments</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
   
   <!-- AML Regulations -->
   <url>
