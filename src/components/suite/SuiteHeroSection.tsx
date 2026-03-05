@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { LaneBadge } from "@/components/LaneBadge";
 
 const includedModules = [
-  "KYC – Individual Onboarding & Screening",
-  "KYB – Business Entity Screening",
-  "AML Screening & Monitoring",
-  "Risk Assessment & Categorisation",
-  "Logs & Audit Trail",
+  { label: "KYC – Individual Onboarding & Screening", href: "/platform/kyc-kyb" },
+  { label: "KYB – Business Entity Screening", href: "/platform/kyc-kyb" },
+  { label: "AML Screening & Monitoring", href: "/platform/aml-screening" },
+  { label: "Risk Assessment & Categorisation", href: "/platform/risk-assessment" },
+  { label: "Transaction Monitoring", href: "/platform/transaction-monitoring" },
+  { label: "Regulatory Reporting (CRS, FATCA, FINTRAC)", href: "/platform/regulatory-reporting" },
+  { label: "Logs & Audit Trail", href: "/platform/suite" },
 ];
 
 export const SuiteHeroSection = () => {
@@ -51,11 +53,13 @@ export const SuiteHeroSection = () => {
             <h3 className="text-lg font-semibold text-navy mb-6">
               Included Modules
             </h3>
-            <ul className="space-y-4">
+            <ul className="space-y-3">
               {includedModules.map((module) => (
-                <li key={module} className="flex items-start gap-3">
+                <li key={module.label} className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
-                  <span className="text-text-secondary">{module}</span>
+                  <Link to={module.href} className="text-text-secondary hover:text-navy transition-colors text-sm">
+                    {module.label}
+                  </Link>
                 </li>
               ))}
             </ul>
