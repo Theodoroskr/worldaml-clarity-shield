@@ -35,6 +35,7 @@ const footerLinks = {
     { href: "https://suite.worldaml.com", label: "Access Suite", external: true },
     { href: "/blog", label: "Compliance Blog" },
     { href: "/resources/glossary", label: "Compliance Glossary" },
+    { href: "/resources/aml-regulations", label: "AML Regulations" },
     { href: "/resources/best-practices", label: "Best Practices" },
     { href: "/resources/sanctions-lists", label: "Sanctions Lists" },
     { href: "/demo", label: "Request Demo" },
