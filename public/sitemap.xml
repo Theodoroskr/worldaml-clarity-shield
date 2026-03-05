@@ -145,6 +145,43 @@
     <priority>0.6</priority>
   </url>
   
+  <!-- Blog -->
+  <url>
+    <loc>https://www.worldaml.com/blog</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/blog/aml-compliance-checklist-2025</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/blog/kyc-vs-kyb-differences</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/blog/sanctions-screening-best-practices</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/blog/risk-based-approach-aml</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/blog/beneficial-ownership-guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.worldaml.com/blog/pep-screening-guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- Legal Pages -->
   <url>
     <loc>https://www.worldaml.com/privacy</loc>
