@@ -11,21 +11,41 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 
-const navLinks = [
+type NavChild = { href: string; label: string };
+type NavGroup = { groupLabel: string; items: NavChild[] };
+
+type NavLink =
+  | { label: string; href?: string; children: NavChild[]; groups?: never }
+  | { label: string; href?: string; groups: NavGroup[]; children?: never }
+  | { label: string; href: string; children?: never; groups?: never };
+
+const navLinks: NavLink[] = [
   {
     label: "WorldAML Suite",
     href: "/platform",
-    children: [
-      { href: "/platform/suite", label: "Suite" },
-      { href: "/platform/kyc-kyb", label: "KYC & KYB" },
-      { href: "/platform/aml-screening", label: "AML Screening" },
-      { href: "/platform/risk-assessment", label: "Risk Assessment" },
-      { href: "/products/worldid", label: "WorldID" },
-      { href: "/platform/transaction-monitoring", label: "Transaction Monitoring" },
-      { href: "/platform/regulatory-reporting", label: "Regulatory Reporting" },
-      { href: "/platform/security", label: "Security" },
+    groups: [
+      {
+        groupLabel: "Compliance Modules",
+        items: [
+          { href: "/platform/suite", label: "Suite Overview" },
+          { href: "/platform/kyc-kyb", label: "KYC & KYB" },
+          { href: "/platform/aml-screening", label: "AML Screening" },
+          { href: "/platform/risk-assessment", label: "Risk Assessment" },
+        ],
+      },
+      {
+        groupLabel: "Platform",
+        items: [
+          { href: "/platform/transaction-monitoring", label: "Transaction Monitoring" },
+          { href: "/platform/regulatory-reporting", label: "Regulatory Reporting" },
+          { href: "/products/worldid", label: "WorldID" },
+          { href: "/platform/security", label: "Security" },
+        ],
+      },
     ],
   },
   { href: "/platform/api", label: "WorldAML API" },
