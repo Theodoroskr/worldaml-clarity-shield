@@ -68,6 +68,7 @@ const navLinks: NavLink[] = [
       { href: "/resources/best-practices", label: "Best Practices" },
       { href: "/resources/sanctions-lists", label: "Sanctions Lists" },
       { href: "/blog", label: "Blog" },
+      { href: "/resources/glossary", label: "Compliance Glossary" },
       { href: "/faq", label: "FAQ" },
       { href: "/support", label: "Support" },
       { href: "/about", label: "About" },
