@@ -249,7 +249,37 @@ export const Header = () => {
             </div>
             <nav className="flex flex-col gap-1">
               {navLinks.map((link) =>
-                link.children ? (
+                link.groups ? (
+                  /* Grouped mobile section (WorldAML Suite) */
+                  <div key={link.label} className="space-y-1">
+                    <span className="px-4 py-2 text-body-sm font-semibold text-navy block">
+                      {link.label}
+                    </span>
+                    {link.groups.map((group, gi) => (
+                      <div key={group.groupLabel}>
+                        {gi > 0 && <div className="mx-4 my-1 border-t border-divider" />}
+                        <span className="px-8 py-1 text-caption font-semibold text-text-tertiary uppercase tracking-wider block">
+                          {group.groupLabel}
+                        </span>
+                        {group.items.map((child) => (
+                          <Link
+                            key={child.href}
+                            to={child.href}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={cn(
+                              "px-10 py-2 text-body-sm transition-colors rounded-md block",
+                              location.pathname === child.href
+                                ? "text-navy bg-secondary"
+                                : "text-text-secondary hover:text-navy hover:bg-secondary/50"
+                            )}
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                ) : link.children ? (
                   <div key={link.label} className="space-y-1">
                     <span className="px-4 py-2 text-body-sm font-semibold text-navy block">
                       {link.label}
