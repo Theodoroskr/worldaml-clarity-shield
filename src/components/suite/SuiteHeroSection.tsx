@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { LaneBadge } from "@/components/LaneBadge";
 
 const includedModules = [
-  "KYC – Individual Onboarding & Screening",
-  "KYB – Business Entity Screening",
-  "AML Screening & Monitoring",
-  "Risk Assessment & Categorisation",
-  "Logs & Audit Trail",
+  { label: "KYC – Individual Onboarding & Screening", href: "/platform/kyc-kyb" },
+  { label: "KYB – Business Entity Screening", href: "/platform/kyc-kyb" },
+  { label: "AML Screening & Monitoring", href: "/platform/aml-screening" },
+  { label: "Risk Assessment & Categorisation", href: "/platform/risk-assessment" },
+  { label: "Transaction Monitoring", href: "/platform/transaction-monitoring" },
+  { label: "Regulatory Reporting (CRS, FATCA, FINTRAC)", href: "/platform/regulatory-reporting" },
+  { label: "Logs & Audit Trail", href: "/platform/suite" },
 ];
 
 export const SuiteHeroSection = () => {
