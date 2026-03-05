@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogoIcon } from "@/components/Logo";
-import lexisNexisLogo from "@/assets/lexisnexis-risk-solutions-logo.png";
+
 
 // Abstract Network Globe visual component
 const NetworkGlobeVisual = () => (
