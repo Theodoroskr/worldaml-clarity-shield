@@ -15,6 +15,7 @@ const Platform = lazy(() => import("./pages/Platform"));
 const PlatformSuite = lazy(() => import("./pages/PlatformSuite"));
 const PlatformAPI = lazy(() => import("./pages/PlatformAPI"));
 const PlatformSecurity = lazy(() => import("./pages/PlatformSecurity"));
+const PlatformTransactionMonitoring = lazy(() => import("./pages/PlatformTransactionMonitoring"));
 const DataSources = lazy(() => import("./pages/DataSources"));
 const WorldCompliance = lazy(() => import("./pages/WorldCompliance"));
 const WorldComplianceDemo = lazy(() => import("./pages/WorldComplianceDemo"));
