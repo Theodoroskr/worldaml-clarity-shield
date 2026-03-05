@@ -57,6 +57,8 @@ const SanctionsCheck = lazy(() => import("./pages/SanctionsCheck"));
 const SanctionsLists = lazy(() => import("./pages/SanctionsLists"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const SuiteLayout = lazy(() => import("./pages/SuiteLayout"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
 
 const queryClient = new QueryClient({
   defaultOptions: {

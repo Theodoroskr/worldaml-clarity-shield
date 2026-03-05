@@ -33,6 +33,7 @@ const footerLinks = {
   resources: [
     { href: "https://worldaml.readme.io", label: "API Documentation", external: true },
     { href: "https://suite.worldaml.com", label: "Access Suite", external: true },
+    { href: "/blog", label: "Compliance Blog" },
     { href: "/resources/best-practices", label: "Best Practices" },
     { href: "/resources/sanctions-lists", label: "Sanctions Lists" },
     { href: "/demo", label: "Request Demo" },
