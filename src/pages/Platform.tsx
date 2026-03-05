@@ -104,7 +104,7 @@ const Platform = () => {
         {/* Product Links */}
         <section className="section-padding bg-background">
           <div className="container-enterprise">
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               <Card className="border-divider hover:border-navy/20 transition-colors">
                 <CardHeader>
                   <CardTitle>WorldAML Suite</CardTitle>
@@ -132,6 +132,22 @@ const Platform = () => {
                   <Button variant="outline" asChild className="w-full">
                     <Link to="/platform/api">
                       Explore API
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+              <Card className="border-divider hover:border-navy/20 transition-colors">
+                <CardHeader>
+                  <CardTitle>Transaction Monitoring</CardTitle>
+                  <CardDescription>
+                    Real-time AML transaction screening with rule-based alerts, typology detection, and SAR workflow.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="outline" asChild className="w-full">
+                    <Link to="/platform/transaction-monitoring">
+                      Explore TM
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
