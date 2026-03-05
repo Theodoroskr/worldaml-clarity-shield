@@ -15,23 +15,18 @@ import {
 
 const navLinks = [
   {
-    label: "Products",
-    children: [
-      { href: "/products/worldid", label: "WorldID" },
-    ],
-  },
-  {
-    label: "Platform",
+    label: "WorldAML Suite",
     href: "/platform",
     children: [
       { href: "/platform", label: "Overview" },
-      { href: "/platform/suite", label: "WorldAML Suite" },
-      { href: "/platform/api", label: "WorldAML API" },
-      { href: "/platform/security", label: "Security" },
+      { href: "/platform/suite", label: "Suite" },
+      { href: "/products/worldid", label: "WorldID" },
       { href: "/platform/transaction-monitoring", label: "Transaction Monitoring" },
       { href: "/platform/regulatory-reporting", label: "Regulatory Reporting" },
+      { href: "/platform/security", label: "Security" },
     ],
   },
+  { href: "/platform/api", label: "WorldAML API" },
   {
     label: "Data Sources",
     href: "/data-sources",
