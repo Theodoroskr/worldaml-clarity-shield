@@ -53,11 +53,13 @@ export const SuiteHeroSection = () => {
             <h3 className="text-lg font-semibold text-navy mb-6">
               Included Modules
             </h3>
-            <ul className="space-y-4">
+            <ul className="space-y-3">
               {includedModules.map((module) => (
-                <li key={module} className="flex items-start gap-3">
+                <li key={module.label} className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
-                  <span className="text-text-secondary">{module}</span>
+                  <Link to={module.href} className="text-text-secondary hover:text-navy transition-colors text-sm">
+                    {module.label}
+                  </Link>
                 </li>
               ))}
             </ul>
