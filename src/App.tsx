@@ -60,6 +60,7 @@ const SuiteLayout = lazy(() => import("./pages/SuiteLayout"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Glossary = lazy(() => import("./pages/Glossary"));
+const AMLRegulations = lazy(() => import("./pages/AMLRegulations"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
