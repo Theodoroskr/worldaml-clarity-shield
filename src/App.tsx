@@ -33,6 +33,12 @@ const BridgerXGEUME = lazy(() => import("./pages/BridgerXGEUME"));
 const BridgerXGUKIE = lazy(() => import("./pages/BridgerXGUKIE"));
 const BridgerXGNA = lazy(() => import("./pages/BridgerXGNA"));
 const Industries = lazy(() => import("./pages/Industries"));
+const IndustryBanking = lazy(() => import("./pages/IndustryBanking"));
+const IndustryFintech = lazy(() => import("./pages/IndustryFintech"));
+const IndustryCrypto = lazy(() => import("./pages/IndustryCrypto"));
+const IndustryGaming = lazy(() => import("./pages/IndustryGaming"));
+const IndustryLegal = lazy(() => import("./pages/IndustryLegal"));
+const IndustryPayments = lazy(() => import("./pages/IndustryPayments"));
 const Support = lazy(() => import("./pages/Support"));
 const About = lazy(() => import("./pages/About"));
 const GetStarted = lazy(() => import("./pages/GetStarted"));
@@ -127,6 +133,12 @@ const App = () => (
                 
                 {/* Preserved pages */}
                 <Route path="/industries" element={<Industries />} />
+                <Route path="/industries/banking" element={<IndustryBanking />} />
+                <Route path="/industries/fintech" element={<IndustryFintech />} />
+                <Route path="/industries/crypto" element={<IndustryCrypto />} />
+                <Route path="/industries/gaming" element={<IndustryGaming />} />
+                <Route path="/industries/legal" element={<IndustryLegal />} />
+                <Route path="/industries/payments" element={<IndustryPayments />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/get-started" element={<GetStarted />} />
