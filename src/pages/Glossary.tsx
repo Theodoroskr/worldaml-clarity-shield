@@ -354,8 +354,6 @@ const Glossary = () => {
                     setActiveLetter(letter);
                     setQuery("");
                     scrollLetterIntoView(letter);
-                    const el = document.getElementById(`letter-${letter}`);
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
                   className={cn(
                     "flex-shrink-0 w-9 h-9 rounded text-sm font-medium transition-colors",
