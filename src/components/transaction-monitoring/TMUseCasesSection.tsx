@@ -1,4 +1,4 @@
-import { Building2, Bitcoin, CreditCard } from "lucide-react";
+import { Building2, Bitcoin, CreditCard, Gamepad2 } from "lucide-react";
 
 const useCases = [
   {
@@ -28,6 +28,15 @@ const useCases = [
       "Velocity-based monitoring with dynamic thresholds per merchant category code (MCC), geography, and customer risk segment. Real-time inline screening for instant payment rails.",
     metrics: ["Velocity & frequency rules", "MCC-level controls", "PSD2 / EMD2 aligned"],
   },
+  {
+    icon: Gamepad2,
+    sector: "iGaming & Online Gambling Operators",
+    challenge:
+      "High-velocity micro-transactions, bonus abuse, player deposit/withdrawal cycling, and chip dumping create complex ML patterns unique to gaming accounts.",
+    solution:
+      "MGA/UKGC-aligned rule sets for gaming typologies — chip dumping detection, deposit-withdrawal velocity, multi-account pattern detection, and automated source of funds verification triggers.",
+    metrics: ["MGA & UKGC aligned", "Gaming typology rules", "SAR & STR workflow"],
+  },
 ];
 
 const TMUseCasesSection = () => {
@@ -41,7 +50,7 @@ const TMUseCasesSection = () => {
             Every financial sector has distinct monitoring requirements. WorldAML adapts to each.
           </p>
         </div>
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-8">
           {useCases.map((uc) => (
             <div key={uc.sector} className="bg-surface-subtle border border-divider rounded-xl p-8">
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-navy/5 text-navy mb-6">

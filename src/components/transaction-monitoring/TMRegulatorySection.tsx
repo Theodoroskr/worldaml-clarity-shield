@@ -41,6 +41,20 @@ const frameworks = [
     description:
       "The UAE's VARA (virtual assets) and CBUAE (banking) require transaction monitoring for virtual asset service providers and licensed financial institutions operating in the UAE.",
   },
+  {
+    acronym: "MGA",
+    name: "Malta Gaming Authority",
+    relevance: "iGaming / EU",
+    description:
+      "The MGA's AML/CFT Implementing Procedures mandate automated transaction monitoring, player funds monitoring, and SAR filing for all remote gaming operators licensed in Malta, aligned with EU AMLD transposition.",
+  },
+  {
+    acronym: "UKGC",
+    name: "UK Gambling Commission",
+    relevance: "United Kingdom",
+    description:
+      "Licensed gambling operators must implement transaction monitoring under the Gambling Act 2005 and LCCP Social Responsibility Code to detect unusual betting patterns, bonus abuse, and trigger source of funds verification.",
+  },
 ];
 
 const TMRegulatorySection = () => {
