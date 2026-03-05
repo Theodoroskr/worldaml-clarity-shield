@@ -11,21 +11,41 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 
-const navLinks = [
+type NavChild = { href: string; label: string };
+type NavGroup = { groupLabel: string; items: NavChild[] };
+
+type NavLink =
+  | { label: string; href?: string; children: NavChild[]; groups?: never }
+  | { label: string; href?: string; groups: NavGroup[]; children?: never }
+  | { label: string; href: string; children?: never; groups?: never };
+
+const navLinks: NavLink[] = [
   {
     label: "WorldAML Suite",
     href: "/platform",
-    children: [
-      { href: "/platform/suite", label: "Suite" },
-      { href: "/platform/kyc-kyb", label: "KYC & KYB" },
-      { href: "/platform/aml-screening", label: "AML Screening" },
-      { href: "/platform/risk-assessment", label: "Risk Assessment" },
-      { href: "/products/worldid", label: "WorldID" },
-      { href: "/platform/transaction-monitoring", label: "Transaction Monitoring" },
-      { href: "/platform/regulatory-reporting", label: "Regulatory Reporting" },
-      { href: "/platform/security", label: "Security" },
+    groups: [
+      {
+        groupLabel: "Compliance Modules",
+        items: [
+          { href: "/platform/suite", label: "Suite Overview" },
+          { href: "/platform/kyc-kyb", label: "KYC & KYB" },
+          { href: "/platform/aml-screening", label: "AML Screening" },
+          { href: "/platform/risk-assessment", label: "Risk Assessment" },
+        ],
+      },
+      {
+        groupLabel: "Platform",
+        items: [
+          { href: "/platform/transaction-monitoring", label: "Transaction Monitoring" },
+          { href: "/platform/regulatory-reporting", label: "Regulatory Reporting" },
+          { href: "/products/worldid", label: "WorldID" },
+          { href: "/platform/security", label: "Security" },
+        ],
+      },
     ],
   },
   { href: "/platform/api", label: "WorldAML API" },
@@ -93,7 +113,49 @@ export const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) =>
-              link.children ? (
+              link.groups ? (
+                /* Grouped two-column dropdown (WorldAML Suite) */
+                <DropdownMenu key={link.label}>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className={cn(
+                        "px-4 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-1",
+                        link.href && location.pathname.startsWith(link.href)
+                          ? "text-navy bg-secondary"
+                          : "text-text-secondary hover:text-navy hover:bg-secondary/50"
+                      )}
+                    >
+                      {link.label}
+                      <ChevronDown className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="p-3 w-auto">
+                    <div className="grid grid-cols-2 gap-x-4">
+                      {link.groups.map((group) => (
+                        <div key={group.groupLabel}>
+                          <DropdownMenuLabel className="text-caption font-semibold text-text-tertiary uppercase tracking-wider px-2 pb-1">
+                            {group.groupLabel}
+                          </DropdownMenuLabel>
+                          {group.items.map((child) => (
+                            <DropdownMenuItem key={child.href} asChild>
+                              <Link
+                                to={child.href}
+                                className={cn(
+                                  "w-full",
+                                  location.pathname === child.href && "bg-secondary"
+                                )}
+                              >
+                                {child.label}
+                              </Link>
+                            </DropdownMenuItem>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : link.children ? (
+                /* Standard single-column dropdown */
                 <DropdownMenu key={link.label}>
                   <DropdownMenuTrigger asChild>
                     <button
@@ -187,7 +249,37 @@ export const Header = () => {
             </div>
             <nav className="flex flex-col gap-1">
               {navLinks.map((link) =>
-                link.children ? (
+                link.groups ? (
+                  /* Grouped mobile section (WorldAML Suite) */
+                  <div key={link.label} className="space-y-1">
+                    <span className="px-4 py-2 text-body-sm font-semibold text-navy block">
+                      {link.label}
+                    </span>
+                    {link.groups.map((group, gi) => (
+                      <div key={group.groupLabel}>
+                        {gi > 0 && <div className="mx-4 my-1 border-t border-divider" />}
+                        <span className="px-8 py-1 text-caption font-semibold text-text-tertiary uppercase tracking-wider block">
+                          {group.groupLabel}
+                        </span>
+                        {group.items.map((child) => (
+                          <Link
+                            key={child.href}
+                            to={child.href}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={cn(
+                              "px-10 py-2 text-body-sm transition-colors rounded-md block",
+                              location.pathname === child.href
+                                ? "text-navy bg-secondary"
+                                : "text-text-secondary hover:text-navy hover:bg-secondary/50"
+                            )}
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                ) : link.children ? (
                   <div key={link.label} className="space-y-1">
                     <span className="px-4 py-2 text-body-sm font-semibold text-navy block">
                       {link.label}
