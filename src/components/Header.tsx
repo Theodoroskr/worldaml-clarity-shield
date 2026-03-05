@@ -29,6 +29,7 @@ const navLinks = [
       { href: "/platform/api", label: "WorldAML API" },
       { href: "/platform/security", label: "Security" },
       { href: "/platform/transaction-monitoring", label: "Transaction Monitoring" },
+      { href: "/platform/regulatory-reporting", label: "Regulatory Reporting" },
     ],
   },
   {

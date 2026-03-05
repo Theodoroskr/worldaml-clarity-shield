@@ -11,6 +11,7 @@ const footerLinks = {
     { href: "/platform/suite", label: "WorldAML Suite" },
     { href: "/platform/api", label: "WorldAML API" },
     { href: "/platform/transaction-monitoring", label: "Transaction Monitoring" },
+    { href: "/platform/regulatory-reporting", label: "Regulatory Reporting" },
     { href: "/products/worldid", label: "WorldID" },
     { href: "/pricing", label: "Pricing" },
   ],
