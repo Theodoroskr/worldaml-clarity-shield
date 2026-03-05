@@ -15,6 +15,7 @@ const Platform = lazy(() => import("./pages/Platform"));
 const PlatformSuite = lazy(() => import("./pages/PlatformSuite"));
 const PlatformAPI = lazy(() => import("./pages/PlatformAPI"));
 const PlatformSecurity = lazy(() => import("./pages/PlatformSecurity"));
+const PlatformTransactionMonitoring = lazy(() => import("./pages/PlatformTransactionMonitoring"));
 const DataSources = lazy(() => import("./pages/DataSources"));
 const WorldCompliance = lazy(() => import("./pages/WorldCompliance"));
 const WorldComplianceDemo = lazy(() => import("./pages/WorldComplianceDemo"));
@@ -91,6 +92,7 @@ const App = () => (
                 <Route path="/platform/suite" element={<PlatformSuite />} />
                 <Route path="/platform/api" element={<PlatformAPI />} />
                 <Route path="/platform/security" element={<PlatformSecurity />} />
+                <Route path="/platform/transaction-monitoring" element={<PlatformTransactionMonitoring />} />
                 
                 {/* Data Sources (Lane 2) */}
                 <Route path="/data-sources" element={<DataSources />} />
