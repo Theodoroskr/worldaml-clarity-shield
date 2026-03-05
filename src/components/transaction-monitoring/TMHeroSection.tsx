@@ -11,10 +11,10 @@ const TMHeroSection = () => {
           <LaneBadge lane="platform" className="mb-6" />
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal/10 text-teal text-body-sm font-medium mb-6">
             <Activity className="h-4 w-4" />
-            Real-Time AML Transaction Screening
+            WorldAML Platform Module
           </div>
           <h1 className="text-navy mb-6">
-            Transaction Monitoring Software
+            Transaction Monitoring
           </h1>
           <p className="text-body-lg text-text-secondary mb-4">
             Detect, alert, and resolve suspicious financial activity in real time. WorldAML's
@@ -23,7 +23,8 @@ const TMHeroSection = () => {
           </p>
           <p className="text-body text-text-secondary mb-8">
             From batch processing to real-time payment screening, automate your SAR workflow 
-            and keep your compliance team focused on high-priority cases.
+            and keep your compliance team focused on high-priority cases. Available as part of 
+            WorldAML Suite and via the WorldAML API.
           </p>
           <div className="flex flex-wrap gap-4">
             <Button asChild size="lg">
