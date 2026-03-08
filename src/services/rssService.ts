@@ -64,6 +64,14 @@ interface Rss2JsonResponse {
 const cache: Map<string, { data: NewsItem[]; timestamp: number }> = new Map();
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
+// Safe date parser — new Date(null) returns epoch, so we must guard explicitly
+function parsePubDate(pubDate: string | null | undefined): string {
+  if (pubDate == null || pubDate === "") return new Date().toISOString().split("T")[0];
+  const parsed = new Date(pubDate);
+  if (isNaN(parsed.getTime()) || parsed.getFullYear() < 2000) return new Date().toISOString().split("T")[0];
+  return parsed.toISOString().split("T")[0];
+}
+
 // Extract plain text from HTML
 function stripHtml(html: string): string {
   const doc = new DOMParser().parseFromString(html, "text/html");
