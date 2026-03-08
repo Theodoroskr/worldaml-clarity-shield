@@ -12,28 +12,32 @@ interface FeedConfig {
 }
 
 export const RSS_FEEDS: FeedConfig[] = [
-  {
-    url: "https://www.fatf-gafi.org/rss/fatf-news.xml",
-    source: "Financial Action Task Force",
-    category: "Regulatory Updates",
-    trustTier: "A",
-  },
-  {
-    url: "https://ofac.treasury.gov/system/files/rss/sdn_rss.xml",
-    source: "Office of Foreign Assets Control",
-    category: "Sanctions & Enforcement",
-    trustTier: "A",
-  },
+  // FCA — confirmed working, pubDate comes as null so parsePubDate handles it
   {
     url: "https://www.fca.org.uk/news/rss.xml",
     source: "Financial Conduct Authority",
     category: "AML & Financial Crime",
     trustTier: "A",
   },
+  // EBA — European Banking Authority, confirmed active feed
   {
-    url: "https://www.fincen.gov/rss-feeds",
-    source: "Financial Crimes Enforcement Network",
+    url: "https://www.eba.europa.eu/news-press/news/rss.xml",
+    source: "European Banking Authority",
     category: "Regulatory Updates",
+    trustTier: "A",
+  },
+  // ESMA — European Securities and Markets Authority
+  {
+    url: "https://www.esma.europa.eu/rss.xml",
+    source: "European Securities and Markets Authority",
+    category: "Regulatory Updates",
+    trustTier: "A",
+  },
+  // DFSA — Dubai Financial Services Authority (GCC coverage)
+  {
+    url: "https://www.dfsa.ae/rss/news",
+    source: "Dubai Financial Services Authority",
+    category: "GCC Regulatory Updates",
     trustTier: "A",
   },
 ];
