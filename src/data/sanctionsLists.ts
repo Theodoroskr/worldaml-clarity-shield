@@ -232,8 +232,136 @@ export const sanctionSections: SanctionSection[] = [
     ],
   },
   {
+    id: "gcc-apac",
+    title: "GCC & APAC Regulatory Authorities",
+    description:
+      "Financial regulatory authorities across the Gulf Cooperation Council and Asia-Pacific regions publishing sanctions, AML enforcement, and compliance measures relevant to institutions operating in these markets.",
+    sources: [
+      {
+        id: "dfsa",
+        name: "Dubai Financial Services Authority (DFSA) Sanctions",
+        jurisdiction: "UAE — DIFC",
+        description:
+          "The Dubai Financial Services Authority regulates financial services in the Dubai International Financial Centre (DIFC). The DFSA enforces UN and UAE national sanctions measures and requires authorised firms to implement AML/CFT controls including screening programmes aligned with FATF standards.",
+        officialUrl: "https://www.dfsa.ae/regulation/anti-money-laundering",
+        tag: "Regional",
+        usedByWorldAML: true,
+      },
+      {
+        id: "sama",
+        name: "Saudi Central Bank (SAMA) AML & Sanctions Framework",
+        jurisdiction: "Saudi Arabia",
+        description:
+          "The Saudi Central Bank (SAMA) issues binding AML/CFT rules for all licensed financial institutions in the Kingdom of Saudi Arabia. Regulated entities must screen against UN, EU, OFAC, and Saudi domestic designation lists and apply enhanced due diligence for transactions involving high-risk jurisdictions.",
+        officialUrl: "https://www.sama.gov.sa/en-US/RulesInstructions/Pages/AML.aspx",
+        tag: "Regional",
+        usedByWorldAML: true,
+      },
+      {
+        id: "cbuae",
+        name: "Central Bank of the UAE (CBUAE) Sanctions & AML",
+        jurisdiction: "United Arab Emirates",
+        description:
+          "The Central Bank of the UAE supervises AML/CFT compliance for all licensed financial institutions in the UAE. The CBUAE requires institutions to screen against the UAE National Terrorist List, UN Security Council consolidated lists, and OFAC SDN list, with same-day list update obligations.",
+        officialUrl: "https://www.centralbank.ae/en/regulation/aml-cft",
+        tag: "Regional",
+        usedByWorldAML: true,
+      },
+      {
+        id: "qfcra",
+        name: "Qatar Financial Centre Regulatory Authority (QFCRA)",
+        jurisdiction: "Qatar",
+        description:
+          "The QFCRA regulates financial services within the Qatar Financial Centre (QFC). It enforces UN Security Council sanctions and Qatari domestic AML/CTF obligations, requiring authorised firms to maintain robust customer screening, transaction monitoring, and suspicious activity reporting programmes.",
+        officialUrl: "https://www.qfcra.com/regulation/aml-compliance",
+        tag: "Regional",
+        usedByWorldAML: true,
+      },
+      {
+        id: "cbb-bahrain",
+        name: "Central Bank of Bahrain (CBB) AML Rulebook",
+        jurisdiction: "Bahrain",
+        description:
+          "The Central Bank of Bahrain's AML Rulebook sets out comprehensive obligations for licensed financial institutions, including customer screening against UN, OFAC, and EU sanctions lists, enhanced due diligence for PEPs, and real-time transaction monitoring requirements.",
+        officialUrl: "https://www.cbb.gov.bh/aml-and-cft-regulation/",
+        tag: "Regional",
+        usedByWorldAML: true,
+      },
+      {
+        id: "fsra-adgm",
+        name: "Financial Services Regulatory Authority (FSRA) — ADGM",
+        jurisdiction: "UAE — ADGM",
+        description:
+          "The Financial Services Regulatory Authority governs financial services in the Abu Dhabi Global Market (ADGM). The FSRA requires all regulated entities to implement AML/CFT controls aligned with FATF standards, including sanctions screening, PEP identification, and ongoing monitoring obligations.",
+        officialUrl: "https://www.adgm.com/fsra/regulation/anti-money-laundering",
+        tag: "Regional",
+        usedByWorldAML: true,
+      },
+      {
+        id: "mas-sg",
+        name: "Monetary Authority of Singapore (MAS) — Notices and Regulations",
+        jurisdiction: "Singapore",
+        description:
+          "MAS Notice 626 (Banks) and related MAS notices set out AML/CFT requirements for financial institutions in Singapore. Regulated entities must screen against MAS Targeted Financial Sanctions (TFS) lists, UN Security Council lists, and conduct enhanced due diligence for higher-risk customers.",
+        officialUrl: "https://www.mas.gov.sg/regulation/anti-money-laundering",
+        tag: "Regional",
+        usedByWorldAML: true,
+      },
+      {
+        id: "hkma",
+        name: "Hong Kong Monetary Authority (HKMA) Sanctions & AML",
+        jurisdiction: "Hong Kong",
+        description:
+          "The HKMA supervises AML/CFT compliance for banks and deposit-taking companies in Hong Kong. Institutions must comply with the Anti-Money Laundering and Counter-Terrorist Financing Ordinance (AMLO) and screen against UNSC-designated entities and persons as well as Hong Kong domestic sanctions measures.",
+        officialUrl: "https://www.hkma.gov.hk/eng/regulatory-resources/regulatory-guides/guides-and-circulars/aml-ctf/",
+        tag: "Regional",
+        usedByWorldAML: false,
+      },
+      {
+        id: "fiu-india",
+        name: "Financial Intelligence Unit India (FIU-IND)",
+        jurisdiction: "India",
+        description:
+          "FIU-IND is the central national agency responsible for receiving, analysing, and disseminating information related to suspect financial transactions in India. Financial institutions must comply with the Prevention of Money Laundering Act (PMLA) and screen against UN and OFAC designation lists.",
+        officialUrl: "https://fiuindia.gov.in",
+        tag: "AML",
+        usedByWorldAML: false,
+      },
+      {
+        id: "fic-southafrica",
+        name: "Financial Intelligence Centre (FIC) — South Africa",
+        jurisdiction: "South Africa",
+        description:
+          "South Africa's Financial Intelligence Centre implements and enforces the Financial Intelligence Centre Act (FICA). Accountable institutions must screen customers against the UN Security Council consolidated list and apply a risk-based approach to AML/CFT compliance under FICA obligations.",
+        officialUrl: "https://www.fic.gov.za/Resources/Lists/AMLLegislation",
+        tag: "AML",
+        usedByWorldAML: false,
+      },
+      {
+        id: "amf-uae",
+        name: "Arab Monetary Fund (AMF) — AML/CFT Standards",
+        jurisdiction: "Arab Region",
+        description:
+          "The Arab Monetary Fund coordinates AML/CFT policy across Arab member states and assists with FATF-aligned implementation. The AMF's AML/CFT standards inform national regulatory frameworks across the GCC and MENA region, establishing regional best practices for sanctions screening and financial crime prevention.",
+        officialUrl: "https://www.amf.org.ae/en/page/anti-money-laundering",
+        tag: "Regional",
+        usedByWorldAML: false,
+      },
+      {
+        id: "austrac",
+        name: "AUSTRAC — Australian Transaction Reports and Analysis Centre",
+        jurisdiction: "Australia",
+        description:
+          "AUSTRAC is Australia's financial intelligence agency and AML/CTF regulator. It enforces the Anti-Money Laundering and Counter-Terrorism Financing Act 2006 (AML/CTF Act), requiring reporting entities to screen against DFAT consolidated sanctions lists and file suspicious matter reports.",
+        officialUrl: "https://www.austrac.gov.au/business/core-guidance/amlctf-programs",
+        tag: "AML",
+        usedByWorldAML: false,
+      },
+    ],
+  },
+  {
     id: "regional",
-    title: "Regional Sanctions Authorities",
+    title: "EU & Other Regional Authorities",
     description:
       "National and regional supervisory authorities publishing sanctions and AML obligations relevant to their jurisdictions.",
     sources: [

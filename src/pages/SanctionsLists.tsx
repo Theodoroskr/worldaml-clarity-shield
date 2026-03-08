@@ -55,6 +55,77 @@ const jsonLd = {
   })),
 };
 
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "What is the OFAC SDN list?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The OFAC Specially Designated Nationals (SDN) List is maintained by the U.S. Treasury's Office of Foreign Assets Control. It names individuals, companies, vessels, and organisations that U.S. persons and financial institutions are prohibited from transacting with. The list covers terrorism, narcotics trafficking, weapons proliferation, and geopolitical sanctions programmes including Russia, Iran, North Korea, and Cuba.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the UN Security Council Consolidated Sanctions List?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The UN Security Council Consolidated Sanctions List contains individuals and entities subject to UN sanctions measures related to terrorism, proliferation, and international peace and security threats. It is legally binding on all UN member states and forms the global baseline for sanctions compliance — most national sanctions programmes are built on top of UN designations.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the EU Consolidated Financial Sanctions List?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The EU Consolidated Financial Sanctions List includes all persons, entities, and organisations subject to financial restrictive measures adopted by the European Union. It consolidates all EU sanctions programmes into a single list and is legally binding on all EU member states and EU-regulated institutions.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the UK OFSI sanctions list?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The UK Office of Financial Sanctions Implementation (OFSI) maintains the UK Sanctions List, which includes individuals and entities subject to financial sanctions under UK legislation. Since Brexit, the UK maintains its own autonomous sanctions list, which largely mirrors EU and UN designations but may diverge. UK-regulated firms must screen against the OFSI list independently of the EU Consolidated List.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Which sanctions lists are mandatory for banks to screen against?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The mandatory lists depend on your jurisdiction. At minimum: all financial institutions must screen against the UN Security Council Consolidated List. US-nexus institutions must also screen OFAC SDN and consolidated lists. EU-regulated firms must screen the EU Consolidated List. UK firms must screen the OFSI UK Sanctions List. GCC institutions are required to screen their national lists (CBUAE, SAMA, QFCRA) plus UN and OFAC. Most compliance programmes screen all major lists simultaneously.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the FATF grey list?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The FATF 'grey list' — formally called 'Jurisdictions under Increased Monitoring' — identifies countries with strategic deficiencies in their AML/CFT frameworks that have committed to address them. Financial institutions are expected to apply Enhanced Due Diligence (EDD) to transactions and relationships involving grey-listed jurisdictions. The FATF also maintains a 'black list' (High-Risk Jurisdictions Subject to a Call for Action) for countries with severe deficiencies.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How often are sanctions lists updated?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Major sanctions lists are updated frequently and without prior notice. OFAC can add SDN designations same-day. The EU Consolidated List is updated via Official Journal publications, often weekly or more frequently. The UN list is updated by Security Council resolutions. Firms must implement ongoing monitoring that re-screens customers whenever lists are updated — relying on periodic batch re-screening alone is insufficient.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the difference between sanctions screening and AML screening?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Sanctions screening checks whether a customer, counterparty, or transaction involves a designated individual or entity on a government watchlist — it is a binary compliance obligation. AML screening is broader and includes sanctions, PEP screening, adverse media checks, and transaction monitoring to detect suspicious activity that may indicate money laundering or terrorist financing, even if no formal designation exists.",
+      },
+    },
+  ],
+};
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function renderLinks(officialUrl: SanctionUrl) {
   if (typeof officialUrl === "string") {
@@ -156,9 +227,9 @@ const SanctionsLists = () => {
     <>
       <SEO
         title="Global Sanctions Lists & AML Data Sources | WorldAML"
-        description="Comprehensive reference of OFAC, EU, UN, OFSI, FATF and 20+ official sanctions lists and AML data sources used in compliance screening and due diligence."
+        description="Comprehensive reference of OFAC, EU, UN, OFSI, FATF and 30+ official sanctions lists and AML data sources used in compliance screening. Includes GCC and APAC authorities."
         canonical="/resources/sanctions-lists"
-        structuredData={jsonLd}
+        structuredData={[jsonLd, faqLd]}
       />
 
       {/* ── Hero ────────────────────────────────────────────────────────────── */}
@@ -205,7 +276,7 @@ const SanctionsLists = () => {
             <div className="flex flex-wrap gap-6 mt-10 pt-8 border-t border-divider">
               {[
                 { label: "Official sources", value: `${allSources.length}+` },
-                { label: "Jurisdictions covered", value: "20+" },
+                { label: "Jurisdictions covered", value: "35+" },
                 { label: "Categories", value: "7" },
                 { label: "Updated", value: "Continuously" },
               ].map((stat) => (
@@ -271,6 +342,75 @@ const SanctionsLists = () => {
         ))}
       </div>
 
+      {/* ── Jurisdiction Comparison Table ────────────────────────────────── */}
+      <section className="bg-surface-subtle border-y border-divider">
+        <div className="container-enterprise py-12 md:py-16">
+          <div className="mb-8">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-caption font-semibold px-3 py-1.5 rounded-full mb-4">
+              <Globe className="w-4 h-4" />
+              Jurisdiction Reference
+            </div>
+            <h2 className="text-h2 font-bold text-navy mb-2">
+              Mandatory Screening Lists by Jurisdiction
+            </h2>
+            <p className="text-body text-text-secondary max-w-2xl">
+              Which sanctions lists are legally required for regulated financial institutions in each major jurisdiction. Always verify with local counsel — this is a reference guide only.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <table className="w-full text-body-sm">
+              <thead>
+                <tr className="bg-navy text-white">
+                  <th className="text-left px-5 py-3.5 font-semibold min-w-[160px]">Jurisdiction</th>
+                  <th className="text-center px-4 py-3.5 font-semibold">UN SC</th>
+                  <th className="text-center px-4 py-3.5 font-semibold">OFAC SDN</th>
+                  <th className="text-center px-4 py-3.5 font-semibold">EU List</th>
+                  <th className="text-center px-4 py-3.5 font-semibold">OFSI (UK)</th>
+                  <th className="text-center px-4 py-3.5 font-semibold">National List</th>
+                  <th className="text-left px-5 py-3.5 font-semibold">Primary Regulator</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { j: "United States", un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "OFAC / FinCEN" },
+                  { j: "European Union", un: true,  ofac: false, eu: true,  ofsi: false, nat: false, reg: "National competent authorities" },
+                  { j: "United Kingdom", un: true,  ofac: false, eu: false, ofsi: true,  nat: true,  reg: "OFSI / FCA" },
+                  { j: "UAE (Mainland)", un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "CBUAE" },
+                  { j: "UAE — DIFC",     un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "DFSA" },
+                  { j: "UAE — ADGM",     un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "FSRA" },
+                  { j: "Saudi Arabia",   un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "SAMA" },
+                  { j: "Qatar (QFC)",    un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "QFCRA" },
+                  { j: "Bahrain",        un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "CBB" },
+                  { j: "Singapore",      un: true,  ofac: false, eu: false, ofsi: false, nat: true,  reg: "MAS" },
+                  { j: "Hong Kong",      un: true,  ofac: false, eu: false, ofsi: false, nat: true,  reg: "HKMA / SFC" },
+                  { j: "Australia",      un: true,  ofac: false, eu: false, ofsi: false, nat: true,  reg: "AUSTRAC / DFAT" },
+                  { j: "Canada",         un: true,  ofac: false, eu: false, ofsi: false, nat: true,  reg: "OSFI / FINTRAC" },
+                  { j: "Cyprus",         un: true,  ofac: false, eu: true,  ofsi: false, nat: false, reg: "CBC / CySEC" },
+                  { j: "Malta",          un: true,  ofac: false, eu: true,  ofsi: false, nat: false, reg: "MFSA / SMB" },
+                ].map((row, i) => (
+                  <tr key={row.j} className={i % 2 === 0 ? "bg-background" : "bg-surface-subtle"}>
+                    <td className="px-5 py-3 font-medium text-navy">{row.j}</td>
+                    {[row.un, row.ofac, row.eu, row.ofsi, row.nat].map((v, ci) => (
+                      <td key={ci} className="px-4 py-3 text-center">
+                        {v
+                          ? <span className="inline-flex justify-center"><CheckCircle2 className="w-4 h-4 text-accent" /></span>
+                          : <span className="text-muted-foreground text-xs">—</span>
+                        }
+                      </td>
+                    ))}
+                    <td className="px-5 py-3 text-text-secondary">{row.reg}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-text-tertiary mt-3">
+            ✓ = mandatory screening requirement &nbsp;|&nbsp; — = not a direct legal obligation in that jurisdiction (recommended where marked). This table is for reference only — consult local counsel for definitive obligations.
+          </p>
+        </div>
+      </section>
+
       {/* ── Bottom CTA ──────────────────────────────────────────────────────── */}
       <section className="bg-surface-subtle border-t border-divider">
         <div className="container-enterprise py-16 md:py-20 text-center">
@@ -282,7 +422,7 @@ const SanctionsLists = () => {
             Screen Against All These Lists in One API Call
           </h2>
           <p className="text-body-lg text-text-secondary mb-8 max-w-xl mx-auto">
-            WorldAML aggregates OFAC, UN, EU, OFSI, and 20+ other official sanctions lists
+            WorldAML aggregates OFAC, UN, EU, OFSI, and 30+ other official sanctions lists
             into a single real-time screening API. No manual updates, no missed designations.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
