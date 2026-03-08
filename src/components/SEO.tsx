@@ -63,12 +63,12 @@ const SEO = ({ title, description, canonical, noindex = false, breadcrumbs, stru
         </script>
       )}
 
-      {/* Custom Structured Data */}
-      {structuredData && (
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
+      {/* Custom Structured Data — supports single object or array */}
+      {structuredData && (Array.isArray(structuredData) ? structuredData : [structuredData]).map((sd, i) => (
+        <script key={i} type="application/ld+json">
+          {JSON.stringify(sd)}
         </script>
-      )}
+      ))}
     </Helmet>
   );
 };
