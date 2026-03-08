@@ -41,7 +41,7 @@ export const RSS_FEEDS: FeedConfig[] = [
 // API response types
 interface Rss2JsonItem {
   title: string;
-  pubDate: string;
+  pubDate: string | null;
   link: string;
   description: string;
   author?: string;
