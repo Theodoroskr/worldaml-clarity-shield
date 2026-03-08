@@ -422,7 +422,7 @@ const SanctionsLists = () => {
             Screen Against All These Lists in One API Call
           </h2>
           <p className="text-body-lg text-text-secondary mb-8 max-w-xl mx-auto">
-            WorldAML aggregates OFAC, UN, EU, OFSI, and 20+ other official sanctions lists
+            WorldAML aggregates OFAC, UN, EU, OFSI, and 30+ other official sanctions lists
             into a single real-time screening API. No manual updates, no missed designations.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
