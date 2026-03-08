@@ -134,7 +134,11 @@ export async function fetchRssFeed(config: FeedConfig): Promise<NewsItem[]> {
       title: item.title,
       source: config.source,
       sourceUrl: item.link,
-      publishedAt: new Date(item.pubDate).toISOString().split("T")[0],
+      publishedAt: (() => {
+        if (!item.pubDate) return new Date().toISOString().split("T")[0];
+        const parsed = new Date(item.pubDate);
+        return isNaN(parsed.getTime()) ? new Date().toISOString().split("T")[0] : parsed.toISOString().split("T")[0];
+      })(),
       category: config.category,
       tags: extractTags(item.title, item.description),
       summary: truncate(item.description),
