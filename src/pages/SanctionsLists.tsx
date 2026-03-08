@@ -342,6 +342,75 @@ const SanctionsLists = () => {
         ))}
       </div>
 
+      {/* ── Jurisdiction Comparison Table ────────────────────────────────── */}
+      <section className="bg-surface-subtle border-y border-divider">
+        <div className="container-enterprise py-12 md:py-16">
+          <div className="mb-8">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-caption font-semibold px-3 py-1.5 rounded-full mb-4">
+              <Globe className="w-4 h-4" />
+              Jurisdiction Reference
+            </div>
+            <h2 className="text-h2 font-bold text-navy mb-2">
+              Mandatory Screening Lists by Jurisdiction
+            </h2>
+            <p className="text-body text-text-secondary max-w-2xl">
+              Which sanctions lists are legally required for regulated financial institutions in each major jurisdiction. Always verify with local counsel — this is a reference guide only.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <table className="w-full text-body-sm">
+              <thead>
+                <tr className="bg-navy text-white">
+                  <th className="text-left px-5 py-3.5 font-semibold min-w-[160px]">Jurisdiction</th>
+                  <th className="text-center px-4 py-3.5 font-semibold">UN SC</th>
+                  <th className="text-center px-4 py-3.5 font-semibold">OFAC SDN</th>
+                  <th className="text-center px-4 py-3.5 font-semibold">EU List</th>
+                  <th className="text-center px-4 py-3.5 font-semibold">OFSI (UK)</th>
+                  <th className="text-center px-4 py-3.5 font-semibold">National List</th>
+                  <th className="text-left px-5 py-3.5 font-semibold">Primary Regulator</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { j: "United States", un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "OFAC / FinCEN" },
+                  { j: "European Union", un: true,  ofac: false, eu: true,  ofsi: false, nat: false, reg: "National competent authorities" },
+                  { j: "United Kingdom", un: true,  ofac: false, eu: false, ofsi: true,  nat: true,  reg: "OFSI / FCA" },
+                  { j: "UAE (Mainland)", un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "CBUAE" },
+                  { j: "UAE — DIFC",     un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "DFSA" },
+                  { j: "UAE — ADGM",     un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "FSRA" },
+                  { j: "Saudi Arabia",   un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "SAMA" },
+                  { j: "Qatar (QFC)",    un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "QFCRA" },
+                  { j: "Bahrain",        un: true,  ofac: true,  eu: false, ofsi: false, nat: true,  reg: "CBB" },
+                  { j: "Singapore",      un: true,  ofac: false, eu: false, ofsi: false, nat: true,  reg: "MAS" },
+                  { j: "Hong Kong",      un: true,  ofac: false, eu: false, ofsi: false, nat: true,  reg: "HKMA / SFC" },
+                  { j: "Australia",      un: true,  ofac: false, eu: false, ofsi: false, nat: true,  reg: "AUSTRAC / DFAT" },
+                  { j: "Canada",         un: true,  ofac: false, eu: false, ofsi: false, nat: true,  reg: "OSFI / FINTRAC" },
+                  { j: "Cyprus",         un: true,  ofac: false, eu: true,  ofsi: false, nat: false, reg: "CBC / CySEC" },
+                  { j: "Malta",          un: true,  ofac: false, eu: true,  ofsi: false, nat: false, reg: "MFSA / SMB" },
+                ].map((row, i) => (
+                  <tr key={row.j} className={i % 2 === 0 ? "bg-background" : "bg-surface-subtle"}>
+                    <td className="px-5 py-3 font-medium text-navy">{row.j}</td>
+                    {[row.un, row.ofac, row.eu, row.ofsi, row.nat].map((v, ci) => (
+                      <td key={ci} className="px-4 py-3 text-center">
+                        {v
+                          ? <span className="inline-flex justify-center"><CheckCircle2 className="w-4 h-4 text-accent" /></span>
+                          : <span className="text-muted-foreground text-xs">—</span>
+                        }
+                      </td>
+                    ))}
+                    <td className="px-5 py-3 text-text-secondary">{row.reg}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-text-tertiary mt-3">
+            ✓ = mandatory screening requirement &nbsp;|&nbsp; — = not a direct legal obligation in that jurisdiction (recommended where marked). This table is for reference only — consult local counsel for definitive obligations.
+          </p>
+        </div>
+      </section>
+
       {/* ── Bottom CTA ──────────────────────────────────────────────────────── */}
       <section className="bg-surface-subtle border-t border-divider">
         <div className="container-enterprise py-16 md:py-20 text-center">
