@@ -55,6 +55,77 @@ const jsonLd = {
   })),
 };
 
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "What is the OFAC SDN list?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The OFAC Specially Designated Nationals (SDN) List is maintained by the U.S. Treasury's Office of Foreign Assets Control. It names individuals, companies, vessels, and organisations that U.S. persons and financial institutions are prohibited from transacting with. The list covers terrorism, narcotics trafficking, weapons proliferation, and geopolitical sanctions programmes including Russia, Iran, North Korea, and Cuba.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the UN Security Council Consolidated Sanctions List?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The UN Security Council Consolidated Sanctions List contains individuals and entities subject to UN sanctions measures related to terrorism, proliferation, and international peace and security threats. It is legally binding on all UN member states and forms the global baseline for sanctions compliance — most national sanctions programmes are built on top of UN designations.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the EU Consolidated Financial Sanctions List?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The EU Consolidated Financial Sanctions List includes all persons, entities, and organisations subject to financial restrictive measures adopted by the European Union. It consolidates all EU sanctions programmes into a single list and is legally binding on all EU member states and EU-regulated institutions.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the UK OFSI sanctions list?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The UK Office of Financial Sanctions Implementation (OFSI) maintains the UK Sanctions List, which includes individuals and entities subject to financial sanctions under UK legislation. Since Brexit, the UK maintains its own autonomous sanctions list, which largely mirrors EU and UN designations but may diverge. UK-regulated firms must screen against the OFSI list independently of the EU Consolidated List.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Which sanctions lists are mandatory for banks to screen against?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The mandatory lists depend on your jurisdiction. At minimum: all financial institutions must screen against the UN Security Council Consolidated List. US-nexus institutions must also screen OFAC SDN and consolidated lists. EU-regulated firms must screen the EU Consolidated List. UK firms must screen the OFSI UK Sanctions List. GCC institutions are required to screen their national lists (CBUAE, SAMA, QFCRA) plus UN and OFAC. Most compliance programmes screen all major lists simultaneously.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the FATF grey list?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The FATF 'grey list' — formally called 'Jurisdictions under Increased Monitoring' — identifies countries with strategic deficiencies in their AML/CFT frameworks that have committed to address them. Financial institutions are expected to apply Enhanced Due Diligence (EDD) to transactions and relationships involving grey-listed jurisdictions. The FATF also maintains a 'black list' (High-Risk Jurisdictions Subject to a Call for Action) for countries with severe deficiencies.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How often are sanctions lists updated?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Major sanctions lists are updated frequently and without prior notice. OFAC can add SDN designations same-day. The EU Consolidated List is updated via Official Journal publications, often weekly or more frequently. The UN list is updated by Security Council resolutions. Firms must implement ongoing monitoring that re-screens customers whenever lists are updated — relying on periodic batch re-screening alone is insufficient.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the difference between sanctions screening and AML screening?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Sanctions screening checks whether a customer, counterparty, or transaction involves a designated individual or entity on a government watchlist — it is a binary compliance obligation. AML screening is broader and includes sanctions, PEP screening, adverse media checks, and transaction monitoring to detect suspicious activity that may indicate money laundering or terrorist financing, even if no formal designation exists.",
+      },
+    },
+  ],
+};
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function renderLinks(officialUrl: SanctionUrl) {
   if (typeof officialUrl === "string") {
