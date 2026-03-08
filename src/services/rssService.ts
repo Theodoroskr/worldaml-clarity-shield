@@ -41,7 +41,7 @@ export const RSS_FEEDS: FeedConfig[] = [
 // API response types
 interface Rss2JsonItem {
   title: string;
-  pubDate: string;
+  pubDate: string | null;
   link: string;
   description: string;
   author?: string;
@@ -63,6 +63,14 @@ interface Rss2JsonResponse {
 // Simple in-memory cache
 const cache: Map<string, { data: NewsItem[]; timestamp: number }> = new Map();
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+
+// Safe date parser — new Date(null) returns epoch, so we must guard explicitly
+function parsePubDate(pubDate: string | null | undefined): string {
+  if (pubDate == null || pubDate === "") return new Date().toISOString().split("T")[0];
+  const parsed = new Date(pubDate);
+  if (isNaN(parsed.getTime()) || parsed.getFullYear() < 2000) return new Date().toISOString().split("T")[0];
+  return parsed.toISOString().split("T")[0];
+}
 
 // Extract plain text from HTML
 function stripHtml(html: string): string {
@@ -134,11 +142,7 @@ export async function fetchRssFeed(config: FeedConfig): Promise<NewsItem[]> {
       title: item.title,
       source: config.source,
       sourceUrl: item.link,
-      publishedAt: (() => {
-        if (!item.pubDate) return new Date().toISOString().split("T")[0];
-        const parsed = new Date(item.pubDate);
-        return isNaN(parsed.getTime()) ? new Date().toISOString().split("T")[0] : parsed.toISOString().split("T")[0];
-      })(),
+      publishedAt: parsePubDate(item.pubDate),
       category: config.category,
       tags: extractTags(item.title, item.description),
       summary: truncate(item.description),
