@@ -11,7 +11,7 @@ interface SEOProps {
   canonical?: string;
   noindex?: boolean;
   breadcrumbs?: BreadcrumbItem[];
-  structuredData?: Record<string, unknown>;
+  structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const SITE_NAME = "WorldAML";
