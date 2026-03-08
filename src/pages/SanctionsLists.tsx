@@ -227,9 +227,9 @@ const SanctionsLists = () => {
     <>
       <SEO
         title="Global Sanctions Lists & AML Data Sources | WorldAML"
-        description="Comprehensive reference of OFAC, EU, UN, OFSI, FATF and 20+ official sanctions lists and AML data sources used in compliance screening and due diligence."
+        description="Comprehensive reference of OFAC, EU, UN, OFSI, FATF and 30+ official sanctions lists and AML data sources used in compliance screening. Includes GCC and APAC authorities."
         canonical="/resources/sanctions-lists"
-        structuredData={jsonLd}
+        structuredData={[jsonLd, faqLd]}
       />
 
       {/* ── Hero ────────────────────────────────────────────────────────────── */}
