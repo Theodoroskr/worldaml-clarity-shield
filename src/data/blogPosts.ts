@@ -1301,4 +1301,515 @@ export const blogPosts: BlogPost[] = [
       },
     ],
   },
+
+  // ─── NEW POST 1 ───────────────────────────────────────────────────────────
+  {
+    slug: "aml-real-estate-property-transactions",
+    title: "AML for Real Estate Agents: Obligations, Red Flags, and Compliance Workflows",
+    description:
+      "Real estate is one of the highest-risk sectors for money laundering. This guide covers AML obligations for estate agents, property transaction red flags, CDD requirements, and how to build a compliant onboarding workflow.",
+    category: "AML Compliance",
+    date: "2025-03-08",
+    readTime: 11,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Compliance Research",
+    tags: [
+      "real estate AML",
+      "property transactions",
+      "estate agents",
+      "CDD",
+      "beneficial ownership",
+      "FATF",
+      "money laundering",
+    ],
+    relatedSlugs: [
+      "aml-compliance-checklist-2025",
+      "beneficial-ownership-guide",
+      "kyc-vs-kyb-differences",
+    ],
+    content: [
+      {
+        type: "intro",
+        text: "Real estate is consistently identified by the Financial Action Task Force (FATF) as one of the most significant money laundering vulnerabilities globally. High transaction values, complex ownership structures, and the relative opacity of property markets make them attractive channels for illicit funds. For estate agents, developers, and property professionals, AML obligations are no longer optional — they are legally mandated and increasingly enforced.",
+      },
+      {
+        type: "h2",
+        text: "Why Real Estate Is High-Risk for Money Laundering",
+      },
+      {
+        type: "p",
+        text: "Property transactions are uniquely attractive for money launderers for several reasons. A single transaction can move millions of dollars in a single, relatively unremarkable deal. Unlike financial accounts, property ownership can be obscured through shell companies, nominee owners, trusts, and multi-layered corporate structures — many of which are domiciled in secrecy jurisdictions. Rental income then provides a legitimate-looking revenue stream to further integrate illicit proceeds.",
+      },
+      {
+        type: "p",
+        text: "FATF's 2022 guidance on real estate highlighted that the sector is exploited across all three stages of the money laundering cycle: placement (purchasing property with illicit cash), layering (selling and re-selling to create transaction distance), and integration (generating rental income or capital gains that appear legitimate).",
+      },
+      {
+        type: "h2",
+        text: "Who Is Regulated: Obligated Entities in Real Estate",
+      },
+      {
+        type: "ul",
+        items: [
+          "Estate agents and letting agents acting for buyers or sellers in property transactions",
+          "Property developers selling directly to the public",
+          "Lawyers and notaries facilitating property transfers",
+          "Accountants and tax advisors involved in property transactions",
+          "High-value dealers accepting large cash payments for property",
+        ],
+      },
+      {
+        type: "p",
+        text: "In the UK, estate agents are supervised by HMRC under the Money Laundering Regulations 2017 (MLRs). In the EU, obliged entities are defined under the 5th and 6th Anti-Money Laundering Directives (5AMLD/6AMLD). In the US, FinCEN Geographic Targeting Orders (GTOs) require title insurance companies in major metro areas to report all-cash transactions involving legal entities.",
+      },
+      {
+        type: "h2",
+        text: "Core AML Obligations for Estate Agents",
+      },
+      {
+        type: "ol",
+        items: [
+          "Register with your supervisory authority (e.g., HMRC in the UK) and maintain registration",
+          "Conduct a firm-wide risk assessment covering your client base, transaction types, and geographies",
+          "Implement written AML policies, controls, and procedures signed off by senior management",
+          "Appoint a nominated officer (equivalent to an MLRO) to receive internal SAR disclosures",
+          "Conduct Customer Due Diligence (CDD) on buyers and sellers before the transaction completes",
+          "Identify and verify the beneficial owners of any corporate purchasers or sellers",
+          "Screen all parties against sanctions, PEP, and adverse media databases",
+          "File Suspicious Activity Reports (SARs) when suspicion arises — before completing the transaction",
+          "Maintain all CDD records for a minimum of 5 years post-transaction",
+          "Deliver annual AML training to all relevant staff",
+        ],
+      },
+      {
+        type: "h2",
+        text: "Customer Due Diligence in Property Transactions",
+      },
+      {
+        type: "p",
+        text: "CDD in real estate must be applied to both the buyer and the seller. For individuals, this means verifying government-issued photo ID and proof of address. For corporate purchasers — which represent a disproportionate share of money laundering risk — firms must identify and verify the Ultimate Beneficial Owners (UBOs): the individuals who ultimately own or control the purchasing entity.",
+      },
+      {
+        type: "p",
+        text: "Source of funds and source of wealth verification are particularly critical in high-value transactions. Regulated firms should obtain and retain documentary evidence of where the purchase funds originated — bank statements, mortgage offers, sale proceeds documentation, or inheritance evidence. A buyer unable to provide credible source of funds documentation is a significant red flag.",
+      },
+      {
+        type: "callout",
+        text: "Enhanced Due Diligence (EDD) is required when the buyer or seller is a Politically Exposed Person (PEP), when the transaction involves a high-risk jurisdiction, or when the ownership structure is complex or opaque. EDD typically includes senior management approval, independent verification of source of funds, and enhanced ongoing monitoring.",
+      },
+      {
+        type: "h2",
+        text: "Key Red Flags in Real Estate Transactions",
+      },
+      {
+        type: "ul",
+        items: [
+          "All-cash purchases with no mortgage financing, particularly for high-value properties",
+          "Third-party payments — funds coming from a different person or entity than the buyer",
+          "Reluctance to provide source of funds documentation or identity verification",
+          "Rapid purchase and resale of the same property at similar or below-market prices",
+          "Properties purchased by shell companies, nominee owners, or through multi-jurisdictional structures",
+          "Buyers located in high-risk or sanctioned jurisdictions",
+          "Transactions involving known PEPs or their immediate family members",
+          "Price paid significantly above or below market value without credible explanation",
+          "Use of multiple lawyers or agents across different transactions to fragment oversight",
+          "Payments from cryptocurrency wallets or virtual asset service providers (VASPs)",
+        ],
+      },
+      {
+        type: "h2",
+        text: "Sanctions and PEP Screening in Property",
+      },
+      {
+        type: "p",
+        text: "Sanctions screening is non-negotiable. If a buyer is on the OFAC SDN list, the EU Consolidated Sanctions List, or the UK HM Treasury Financial Sanctions List, completing the transaction may constitute a sanctions violation regardless of whether the agent was aware. Ignorance is not a defence. Automated screening via a platform like WorldAML's AML Screening module ensures every client — individual or corporate — is checked before the transaction proceeds, with a full audit trail of every screening event.",
+      },
+      {
+        type: "h2",
+        text: "Suspicious Activity Reporting in Real Estate",
+      },
+      {
+        type: "p",
+        text: "In the UK, SARs must be submitted to the National Crime Agency (NCA) via the UKFIU portal. In the US, SARs are filed with FinCEN. Critically, in many jurisdictions a SAR must be submitted before completing a transaction if there is suspicion of money laundering — completing the transaction without consent from the FIU may constitute a money laundering offence (tipping off is also prohibited).",
+      },
+      {
+        type: "h2",
+        text: "Enforcement Trends: Rising Penalties for Non-Compliance",
+      },
+      {
+        type: "p",
+        text: "HMRC has significantly increased its enforcement activity against estate agents under the MLRs, issuing fines for failures including: inadequate CDD procedures, failure to screen for PEPs and sanctions, no written AML policies, and failure to train staff. The average fine for estate agents has risen steadily since 2020. In the US, the Financial Crimes Enforcement Network (FinCEN) has issued proposed rulemaking to extend AML programme requirements to all real estate professionals — closing a longstanding gap in the framework.",
+      },
+      {
+        type: "h2",
+        text: "Building a Compliant Property Onboarding Workflow",
+      },
+      {
+        type: "ol",
+        items: [
+          "Collect identity documentation from all parties at the point of instruction",
+          "For corporate buyers: extract UBO structure and verify each beneficial owner individually",
+          "Run all parties through sanctions, PEP, and adverse media screening before proceeding",
+          "Request and verify source of funds documentation",
+          "Apply risk scoring — low, medium, or high — based on client type, geography, and transaction characteristics",
+          "For high-risk cases: escalate to the nominated officer for EDD sign-off",
+          "Document all decisions and store records securely for 5 years post-completion",
+          "File a SAR if suspicion arises at any stage — and do not complete the transaction until you have consent if required",
+        ],
+      },
+      {
+        type: "callout",
+        text: "WorldAML's KYC/KYB onboarding module and AML Screening tools are designed to support regulated real estate professionals with automated identity verification, beneficial ownership mapping, and integrated sanctions and PEP screening — all with a full audit trail. Explore the platform at /platform/kyc-kyb and /platform/aml-screening.",
+      },
+    ],
+  },
+
+  // ─── NEW POST 2 ───────────────────────────────────────────────────────────
+  {
+    slug: "psd2-open-banking-aml-obligations",
+    title: "PSD2 and Open Banking: AML Obligations for Third-Party Providers",
+    description:
+      "PSD2 opened payment markets to new entrants — but it also extended AML obligations to Account Information Service Providers (AISPs) and Payment Initiation Service Providers (PISPs). This guide explains what is required.",
+    category: "Regulatory Updates",
+    date: "2025-03-08",
+    readTime: 10,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Compliance Research",
+    tags: [
+      "PSD2",
+      "open banking",
+      "AML",
+      "AISP",
+      "PISP",
+      "payment services",
+      "fintech compliance",
+      "EU regulation",
+    ],
+    relatedSlugs: [
+      "aml-compliance-checklist-2025",
+      "risk-based-approach-aml",
+      "transaction-monitoring-red-flags",
+    ],
+    content: [
+      {
+        type: "intro",
+        text: "The EU's Second Payment Services Directive (PSD2) fundamentally reshaped the European payments landscape by mandating open access to bank account data and enabling third parties to initiate payments on behalf of customers. While PSD2's innovation goals are well-documented, its AML implications for the new category of Third-Party Providers (TPPs) — Account Information Service Providers (AISPs) and Payment Initiation Service Providers (PISPs) — are frequently overlooked. This guide sets out what PSD2 firms must do to meet their AML obligations.",
+      },
+      {
+        type: "h2",
+        text: "PSD2 in Brief: What Changed",
+      },
+      {
+        type: "p",
+        text: "Implemented in January 2018, PSD2 required EU banks and payment account providers to open access to customer account data (with customer consent) via standardised Application Programming Interfaces (APIs). This gave rise to two new regulated payment service categories: AISPs, which aggregate and display account information from multiple banks, and PISPs, which initiate payments from customer bank accounts on behalf of merchants or users. Both categories require authorisation from a national competent authority under PSD2.",
+      },
+      {
+        type: "h2",
+        text: "How PSD2 Intersects with AML Regulations",
+      },
+      {
+        type: "p",
+        text: "PSD2 itself does not override or replace AML obligations — it adds to them. Authorised payment institutions (PIs) and electronic money institutions (EMIs) operating under PSD2 are also subject to the EU's Anti-Money Laundering Directives (4AMLD/5AMLD/6AMLD) and their national transpositions. The AML obligations apply whenever a PSD2-licensed firm falls within the definition of an 'obliged entity' under the AMLD.",
+      },
+      {
+        type: "callout",
+        text: "Important distinction: AISPs that only access account information and do not hold or move funds typically have lighter AML obligations. PISPs, which initiate payment transactions, are more likely to be classified as obliged entities under the AMLD and have full AML programme requirements.",
+      },
+      {
+        type: "h2",
+        text: "AML Obligations for PISPs",
+      },
+      {
+        type: "p",
+        text: "Payment Initiation Service Providers sit squarely within the scope of EU AML obligations when they facilitate fund transfers. Key obligations include:",
+      },
+      {
+        type: "ul",
+        items: [
+          "Customer Due Diligence (CDD) at onboarding — verify identity, screen for sanctions and PEPs",
+          "Ongoing transaction monitoring to detect unusual payment patterns",
+          "Suspicious Transaction Reporting (STR) to the national Financial Intelligence Unit (FIU)",
+          "Maintenance of a firm-wide risk assessment covering customer types, payment corridors, and product risk",
+          "Senior management approval for higher-risk customer relationships",
+          "Record-keeping for a minimum of 5 years post-transaction",
+        ],
+      },
+      {
+        type: "h2",
+        text: "The Strong Customer Authentication (SCA) and Fraud-AML Overlap",
+      },
+      {
+        type: "p",
+        text: "PSD2's Strong Customer Authentication (SCA) requirements — mandating multi-factor authentication for electronic payments — have a natural overlap with AML controls. SCA reduces the risk of unauthorised payment initiation, which is a prerequisite for many money mule schemes. However, SCA is a fraud prevention mechanism, not an AML control: it does not substitute for CDD, transaction monitoring, or SAR filing obligations. Compliance teams should ensure there is no confusion between the two frameworks in their programme design.",
+      },
+      {
+        type: "h2",
+        text: "Open Banking AML Risk Factors",
+      },
+      {
+        type: "p",
+        text: "Open banking creates new money laundering typologies that traditional bank AML models were not designed to detect. Key risk factors include:",
+      },
+      {
+        type: "ul",
+        items: [
+          "Layering via multiple AISPs: structured use of multiple account aggregators to obscure fund flows across banks",
+          "Rapid payment velocity: PISPs enabling high-frequency micro-transactions that individually fall below reporting thresholds (smurfing)",
+          "Cross-border payment corridors: PSD2 operates across 30+ EEA countries, creating complex multi-jurisdiction transaction chains",
+          "Synthetic identity fraud at onboarding: using stolen or fabricated identity data to open accounts exploited through open banking",
+          "Third-party payment abuse: directing payments through legitimate third-party PISP services to distance funds from predicate offences",
+        ],
+      },
+      {
+        type: "h2",
+        text: "Transaction Monitoring for Open Banking Providers",
+      },
+      {
+        type: "p",
+        text: "Conventional transaction monitoring rules were designed for bank accounts and card payments. Open banking providers often need to adapt or build new monitoring scenarios specific to their payment model. Relevant monitoring typologies include: rapid in-and-out transactions with no plausible commercial purpose; payments to counterparties in high-risk jurisdictions; multiple small payments to the same recipient just below reporting thresholds; and sudden changes in transaction volume or value inconsistent with a customer's profile.",
+      },
+      {
+        type: "p",
+        text: "WorldAML's Transaction Monitoring module supports custom rule-building, enabling open banking firms to deploy typology-specific scenarios alongside standard AML monitoring frameworks. Review the full capabilities at /platform/transaction-monitoring.",
+      },
+      {
+        type: "h2",
+        text: "PSR 2017 and the Travel Rule for PISPs",
+      },
+      {
+        type: "p",
+        text: "In the UK, the Payment Services Regulations 2017 (PSR 2017) transpose PSD2 into domestic law and are supervised by the Financial Conduct Authority (FCA). UK PISPs are also subject to the FATF Travel Rule (implemented in the UK under the Wire Transfer (Information on the Payer) Regulations 2017), which requires that payment firms include payer and payee information in electronic fund transfers above EUR 1,000. With the EU's Transfer of Funds Regulation (TFR) extended to crypto-asset transfers under MiCA, open banking and crypto convergence is creating new compliance complexity for multi-product PSD2 firms.",
+      },
+      {
+        type: "h2",
+        text: "PSD3 and Future AML Requirements",
+      },
+      {
+        type: "p",
+        text: "The European Commission published its PSD3 proposal in June 2023, alongside a new Payment Services Regulation (PSR). PSD3 strengthens fraud liability rules, refines open banking API standards, and aligns more closely with the forthcoming EU AML Regulation (AMLR) — which will establish a single EU AML rulebook directly applicable across member states without national transposition. PSD2-licenced firms should begin gap analysis against the AMLR now, as the new framework is expected to apply from 2027.",
+      },
+      {
+        type: "h2",
+        text: "Building an AML Programme for a PSD2 Firm",
+      },
+      {
+        type: "ol",
+        items: [
+          "Determine your regulatory perimeter: are you an AISP, PISP, or both? Are you an obliged entity under the AMLD?",
+          "Conduct a firm-wide risk assessment tailored to open banking payment typologies",
+          "Implement CDD workflows with automated identity verification and sanctions/PEP screening at onboarding",
+          "Deploy transaction monitoring with scenarios specific to your payment flows and customer behaviour",
+          "Establish an STR filing process with your national FIU",
+          "Train all relevant staff on PSD2 and AML obligations at least annually",
+          "Appoint a qualified Money Laundering Reporting Officer (MLRO) with direct access to the board",
+          "Review and update your risk assessment and monitoring rules at least annually",
+        ],
+      },
+      {
+        type: "callout",
+        text: "WorldAML provides a complete compliance stack for PSD2 firms: KYC onboarding, automated sanctions and PEP screening, real-time transaction monitoring, and regulatory reporting — all accessible via API for seamless integration into your payment platform. See /platform/suite for the full module overview.",
+      },
+    ],
+  },
+
+  // ─── NEW POST 3 ───────────────────────────────────────────────────────────
+  {
+    slug: "dora-regulation-compliance-financial-institutions",
+    title: "DORA Regulation: What Financial Institutions Need to Know About Digital Operational Resilience",
+    description:
+      "The EU's Digital Operational Resilience Act (DORA) came into force in January 2025. This guide explains DORA's requirements for financial institutions, the intersection with AML and cybersecurity, and how to build a compliant ICT risk management framework.",
+    category: "Regulatory Updates",
+    date: "2025-03-08",
+    readTime: 12,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Compliance Research",
+    tags: [
+      "DORA",
+      "digital operational resilience",
+      "ICT risk",
+      "EU regulation",
+      "financial institutions",
+      "cyber resilience",
+      "third-party risk",
+    ],
+    relatedSlugs: [
+      "aml-compliance-checklist-2025",
+      "fatca-crs-reporting-guide",
+      "risk-based-approach-aml",
+    ],
+    content: [
+      {
+        type: "intro",
+        text: "The EU's Digital Operational Resilience Act (DORA) — Regulation (EU) 2022/2554 — became applicable across all EU member states on 17 January 2025. DORA establishes a comprehensive framework for managing ICT (Information and Communications Technology) risk in the financial sector, creating binding requirements for banks, payment institutions, investment firms, insurance companies, crypto-asset service providers, and the ICT third-party providers that serve them. For compliance and technology teams, DORA represents a significant new operational obligation alongside existing AML and prudential frameworks.",
+      },
+      {
+        type: "h2",
+        text: "What Is DORA and Why Does It Exist?",
+      },
+      {
+        type: "p",
+        text: "DORA was developed in response to the increasing frequency and severity of cyber incidents affecting financial institutions and the systemic risks posed by the sector's concentration in a small number of critical technology providers. The regulation recognises that financial stability depends not only on capital adequacy and AML controls, but on the operational resilience of the digital infrastructure underpinning financial services. A systemic outage at a major cloud provider or core banking software vendor can destabilise multiple institutions simultaneously — DORA is designed to mitigate that risk.",
+      },
+      {
+        type: "h2",
+        text: "Which Entities Are in Scope?",
+      },
+      {
+        type: "p",
+        text: "DORA applies to a broad range of financial entities regulated in the EU, including:",
+      },
+      {
+        type: "ul",
+        items: [
+          "Credit institutions (banks and building societies)",
+          "Payment institutions and electronic money institutions (EMIs)",
+          "Investment firms and asset management companies",
+          "Insurance and reinsurance undertakings",
+          "Crypto-asset service providers (CASPs) authorised under MiCA",
+          "Central counterparties (CCPs) and trade repositories",
+          "ICT third-party service providers designated as 'critical' by the European Supervisory Authorities (ESAs)",
+          "Data reporting service providers and credit rating agencies",
+        ],
+      },
+      {
+        type: "p",
+        text: "Proportionality applies: microenterprises (fewer than 10 employees, turnover under EUR 2M) benefit from simplified requirements across several pillars.",
+      },
+      {
+        type: "h2",
+        text: "The Five Pillars of DORA",
+      },
+      {
+        type: "table",
+        headers: ["Pillar", "Requirements", "Key Deliverable"],
+        rows: [
+          ["ICT Risk Management", "Establish and maintain an ICT risk management framework as part of the overall risk management system", "Board-approved ICT risk policy, risk register, and control framework"],
+          ["ICT Incident Reporting", "Classify, manage, and report major ICT incidents to competent authorities within defined timelines", "Incident classification methodology; regulatory reporting to ESAs/NCAs"],
+          ["Digital Operational Resilience Testing", "Conduct regular testing including vulnerability assessments, penetration testing, and Threat-Led Penetration Testing (TLPT) for significant firms", "Annual testing programme; TLPT at least every 3 years for significant entities"],
+          ["Third-Party ICT Risk Management", "Maintain a register of all ICT third-party providers; conduct due diligence; include contractual provisions in all agreements", "Third-party ICT register; exit strategies; sub-outsourcing provisions"],
+          ["Information Sharing", "Participate in voluntary intelligence sharing arrangements on cyber threats and vulnerabilities", "Formal participation agreements with peer institutions or sector bodies"],
+        ],
+      },
+      {
+        type: "h2",
+        text: "ICT Risk Management Framework",
+      },
+      {
+        type: "p",
+        text: "At the core of DORA is the requirement for a comprehensive, board-approved ICT risk management framework. This must identify, classify, and document all ICT assets and their dependencies; establish risk tolerance levels; define detection and response processes for ICT incidents; and include a documented Business Continuity Plan (BCP) and Disaster Recovery Plan (DRP) tested at least annually.",
+      },
+      {
+        type: "p",
+        text: "The framework must be reviewed at least annually and updated after any major ICT incident. Senior management are personally accountable for approving the framework and ensuring adequate resourcing. Regulators will scrutinise whether the framework is genuinely operational or a paper exercise.",
+      },
+      {
+        type: "h2",
+        text: "ICT Incident Reporting Requirements",
+      },
+      {
+        type: "p",
+        text: "DORA introduces a three-stage incident reporting timeline for major ICT-related incidents:",
+      },
+      {
+        type: "ol",
+        items: [
+          "Initial notification: within 4 hours of classifying an incident as 'major' (and no later than 24 hours from detection)",
+          "Intermediate report: within 72 hours of initial notification, providing updated information on the incident and its impact",
+          "Final report: within 1 month of resolving the incident, including root cause analysis and remediation actions",
+        ],
+      },
+      {
+        type: "p",
+        text: "Major ICT incidents are classified based on their impact across five criteria: number of clients affected, duration, geographic spread, data loss, and economic impact. Financial institutions must maintain an internal incident log and classify all ICT incidents — not just those meeting the major incident threshold — to demonstrate a complete picture of their ICT risk landscape.",
+      },
+      {
+        type: "h2",
+        text: "Third-Party ICT Risk: The Concentration Risk Problem",
+      },
+      {
+        type: "p",
+        text: "DORA's most practically challenging pillar for many institutions is third-party ICT risk management. Firms must maintain a comprehensive register of all ICT third-party providers — from critical cloud providers to niche software vendors — and conduct proportionate due diligence on each. Contractual agreements with ICT providers must include specific provisions required by DORA, including:",
+      },
+      {
+        type: "ul",
+        items: [
+          "Full description of services and SLAs with measurable performance metrics",
+          "Audit rights for the financial entity and its regulators",
+          "Sub-outsourcing notification and approval obligations",
+          "Data portability, deletion, and return provisions",
+          "Business continuity obligations and recovery time objectives",
+          "Termination rights including provisions for performance failures or regulatory non-compliance",
+          "Exit strategy and transition assistance obligations",
+        ],
+      },
+      {
+        type: "callout",
+        text: "Concentration risk — where a large proportion of the financial sector relies on a single ICT provider — is specifically addressed by DORA's Critical Third-Party Provider (CTPP) designation framework. CTPPs are subject to direct oversight by the European Supervisory Authorities (EBA, ESMA, EIOPA), including the right to conduct on-site inspections.",
+      },
+      {
+        type: "h2",
+        text: "DORA and AML: The Intersection",
+      },
+      {
+        type: "p",
+        text: "DORA and AML compliance are distinct frameworks, but they intersect at several critical points. First, cyber incidents are increasingly linked to financial crime: ransomware attacks, account takeover fraud, and insider threats all have AML implications. Second, DORA's requirement for business continuity planning directly affects AML operations — if transaction monitoring systems or sanctions screening infrastructure goes down, the institution may be unable to meet its real-time AML obligations. Third, DORA's third-party risk requirements extend to AML technology vendors: any firm using a third-party AML screening or transaction monitoring platform must include DORA-compliant contractual provisions in that vendor relationship.",
+      },
+      {
+        type: "p",
+        text: "Compliance teams should therefore engage with their institution's DORA implementation programme, particularly around: ensuring AML platforms are included in the ICT asset register; confirming vendor contracts meet DORA's contractual requirements; and verifying that BCP/DRP plans include AML system recovery within regulatory timeframes.",
+      },
+      {
+        type: "h2",
+        text: "Threat-Led Penetration Testing (TLPT)",
+      },
+      {
+        type: "p",
+        text: "Significant financial institutions — as identified by their national competent authority — must conduct Threat-Led Penetration Testing (TLPT) at least every three years. TLPT is a sophisticated testing methodology based on real threat intelligence, where ethical hackers simulate advanced persistent threat (APT) actor techniques against live production systems. TLPT must be conducted by accredited external testers following the TIBER-EU framework published by the European Central Bank.",
+      },
+      {
+        type: "h2",
+        text: "Key Deadlines and Implementation Steps",
+      },
+      {
+        type: "ol",
+        items: [
+          "January 2025: DORA became applicable — all requirements are now binding",
+          "Immediately: Establish ICT risk management framework and assign board accountability",
+          "Immediately: Begin auditing all ICT third-party contracts for DORA compliance gaps",
+          "Q1 2025: Submit register of information on ICT third-party providers to national competent authority",
+          "Ongoing: Implement ICT incident classification and reporting processes",
+          "Annually: Conduct ICT resilience testing programme; review and update BCP/DRP",
+          "Every 3 years (significant entities): Conduct TLPT under TIBER-EU framework",
+        ],
+      },
+      {
+        type: "h2",
+        text: "Penalties for Non-Compliance",
+      },
+      {
+        type: "p",
+        text: "DORA does not prescribe a uniform penalty scale — enforcement powers remain with national competent authorities (NCAs) under their existing supervisory frameworks. However, for critical third-party providers directly overseen by the ESAs, DORA provides for periodic penalty payments of up to 1% of average daily worldwide turnover for each day of non-compliance, up to a maximum of 6 months. For financial entities, the consequences of non-compliance will be determined by national enforcement frameworks, but regulators have been explicit that DORA obligations are supervisory priorities from January 2025 onwards.",
+      },
+      {
+        type: "h2",
+        text: "How Compliance Teams Should Respond",
+      },
+      {
+        type: "ol",
+        items: [
+          "Map your institution's full ICT asset landscape, including all third-party and outsourced services",
+          "Identify gaps between existing contracts and DORA's mandatory contractual provisions",
+          "Ensure AML, sanctions screening, and transaction monitoring systems are included in ICT risk and BCP frameworks",
+          "Establish the incident classification methodology and reporting workflow before an incident occurs",
+          "Engage the board: DORA requires formal board approval and accountability for the ICT risk management framework",
+          "Coordinate with technology and procurement teams on CTPP register submissions",
+          "Plan your testing programme: DORA testing requirements are likely more rigorous than existing penetration testing cycles",
+        ],
+      },
+      {
+        type: "callout",
+        text: "WorldAML's platform is built on a DORA-ready infrastructure — hosted on ISO 27001-certified cloud infrastructure with documented SLAs, audit rights, and business continuity provisions. For institutions that use WorldAML as an AML technology provider, our contractual terms are designed to meet DORA's third-party ICT requirements. Review our security and compliance posture at /platform/security.",
+      },
+    ],
+  },
 ];
