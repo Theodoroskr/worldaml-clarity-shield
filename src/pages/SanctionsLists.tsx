@@ -276,7 +276,7 @@ const SanctionsLists = () => {
             <div className="flex flex-wrap gap-6 mt-10 pt-8 border-t border-divider">
               {[
                 { label: "Official sources", value: `${allSources.length}+` },
-                { label: "Jurisdictions covered", value: "20+" },
+                { label: "Jurisdictions covered", value: "35+" },
                 { label: "Categories", value: "7" },
                 { label: "Updated", value: "Continuously" },
               ].map((stat) => (
