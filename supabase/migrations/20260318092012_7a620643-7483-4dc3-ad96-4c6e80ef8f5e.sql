@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Deny public access to user roles" ON public.user_roles;
