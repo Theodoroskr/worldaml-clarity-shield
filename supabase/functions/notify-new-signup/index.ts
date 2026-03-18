@@ -3,11 +3,21 @@ import { Resend } from "npm:resend";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version, x-internal-secret",
 };
 
 const NOTIFY_EMAIL = "info@worldaml.com";
 const FROM_EMAIL = "WorldAML <forms@worldaml.com>";
+
+/** Escape special HTML characters to prevent HTML injection */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 async function sendEmailWithRetry(resend: any, params: any, retries = 1): Promise<void> {
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -43,6 +53,18 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Shared-secret authentication — only internal callers may invoke this function
+  const internalSecret = Deno.env.get("INTERNAL_WEBHOOK_SECRET");
+  const providedSecret = req.headers.get("x-internal-secret");
+
+  if (!internalSecret || !providedSecret || providedSecret !== internalSecret) {
+    console.warn("notify-new-signup: rejected unauthenticated request");
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { full_name, company_name, email, signed_up_at } = await req.json();
 
@@ -64,13 +86,14 @@ Deno.serve(async (req) => {
 
     const resend = new Resend(resendApiKey);
 
-    const displayName = full_name || "—";
-    const displayCompany = company_name || "—";
+    // HTML-escape all user-supplied values before interpolation
+    const displayName = escapeHtml(full_name || "—");
+    const displayCompany = escapeHtml(company_name || "—");
+    const safeEmail = escapeHtml(email);
     const signupTime = signed_up_at
       ? new Date(signed_up_at).toLocaleString("en-GB", { timeZone: "UTC", dateStyle: "long", timeStyle: "short" }) + " UTC"
       : new Date().toLocaleString("en-GB", { timeZone: "UTC", dateStyle: "long", timeStyle: "short" }) + " UTC";
 
-    const projectId = Deno.env.get("SUPABASE_URL")?.split("//")[1]?.split(".")[0] || "";
     const adminUrl = `https://worldaml-clarity-shield.lovable.app/admin`;
 
     const html = `
@@ -91,7 +114,7 @@ Deno.serve(async (req) => {
             </tr>
             <tr>
               <td style="padding:10px 14px;font-weight:600;color:#374151;">Email</td>
-              <td style="padding:10px 14px;color:#111827;"><a href="mailto:${email}" style="color:#0d9488;">${email}</a></td>
+              <td style="padding:10px 14px;color:#111827;"><a href="mailto:${safeEmail}" style="color:#0d9488;">${safeEmail}</a></td>
             </tr>
             <tr style="background:#f3f4f6;">
               <td style="padding:10px 14px;font-weight:600;color:#374151;">Company</td>
@@ -122,7 +145,7 @@ Deno.serve(async (req) => {
       html,
     });
 
-    console.log(`✅ Admin notification sent for new signup: ${email}`);
+    console.log(`✅ Admin notification sent for new signup: ${safeEmail}`);
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
