@@ -59,6 +59,14 @@ const navLinks: NavLink[] = [
     ],
   },
   { href: "/sanctions-check", label: "Quick Check" },
+  {
+    label: "Markets",
+    children: [
+      { href: "/markets/uk", label: "United Kingdom" },
+      { href: "/markets/uae", label: "United Arab Emirates" },
+      { href: "/markets/usa", label: "United States" },
+    ],
+  },
   { href: "/pricing", label: "Pricing" },
   {
     label: "Resources",
