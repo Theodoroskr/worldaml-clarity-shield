@@ -38,6 +38,7 @@ const footerLinks = {
     { href: "/resources/aml-regulations", label: "AML Regulations" },
     { href: "/resources/best-practices", label: "Best Practices" },
     { href: "/resources/sanctions-lists", label: "Sanctions Lists" },
+    { href: "/data-coverage", label: "Data Coverage" },
     { href: "/demo", label: "Request Demo" },
   ],
 };
