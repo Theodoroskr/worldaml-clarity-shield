@@ -1,43 +1,34 @@
 
 
-## Send Certificate Email via Resend on Quiz Completion
+## Promote Academy on the Landing Page
 
-### Overview
-Create a new Edge Function that sends a branded certificate email to the user when they pass a quiz. Trigger it from the existing `submitQuiz()` flow in `AcademyCourse.tsx`. Uses the existing Resend setup (same pattern as `submit-form` and `notify-new-signup`).
+### Approach
+Add a lightweight **Academy promotion section** between `GlobalReachSection` and `TrustedByLogos` — a natural content break that doesn't interrupt the core conversion flow (Hero → Impact → Stats → Industries → How It Works → Global Reach).
 
-### Changes
+### What gets built
 
-#### 1. New Edge Function: `supabase/functions/send-certificate-email/index.ts`
-- Uses `RESEND_API_KEY` from env (already configured)
-- Sends from `forms@worldaml.com` (or `noreply@worldaml.com`) to the user's email
-- Accepts: `holder_name`, `email`, `course_title`, `score`, `certificate_url`
-- HTML email template with navy/teal branding matching WorldAML style:
-  - Logo area with "WorldAML Academy"
-  - Congratulations message with course name and score
-  - CTA button linking to the certificate page
-  - LinkedIn share CTA
-  - Footer with "This is an automated certificate notification"
-- Idempotency: include `X-Entity-Ref-ID` header with certificate ID to prevent duplicates
+**New component: `src/components/home/AcademyPromoSection.tsx`**
 
-#### 2. Update `src/pages/AcademyCourse.tsx`
-- After certificate is successfully created (line ~162), invoke the new edge function:
-  ```
-  supabase.functions.invoke("send-certificate-email", {
-    body: {
-      holder_name: holderName,
-      email: user.email,
-      course_title: course.title,
-      score,
-      certificate_url: `${window.location.origin}/academy/certificate/${cert.share_token}`
-    }
-  })
-  ```
-- Fire-and-forget (don't block the UI on email delivery)
-- No error handling needed — email is a bonus, not critical path
+A compact, two-column section on a light gray (`bg-slate-50`) background:
 
-### Technical Details
-- Same Resend pattern as existing `submit-form/index.ts`
-- No database changes needed
-- No new secrets needed (`RESEND_API_KEY` already configured)
-- Email subject: "Your WorldAML Certificate — {Course Title}"
+- **Left column**: Heading ("Build Compliance Expertise"), short paragraph about CPD-accredited courses, and two stats chips ("15+ Courses" · "CPD Accredited"). CTA button: "Explore Academy →" linking to `/academy`.
+- **Right column**: 3 mini course cards (stacked or in a tight grid) showing the top courses with category badges and CPD hours — pulled from static data (no DB fetch on homepage). Icons for Foundational / Regional / Specialisation.
+
+This keeps the design consistent with the rest of the page (navy text, teal accents, clean layout) and adds zero friction to the existing sales funnel.
+
+### Page order after change
+
+1. NewHeroSection
+2. BusinessImpactSection
+3. StatsSection
+4. IndustriesSection
+5. HowItWorksSection
+6. GlobalReachSection
+7. **AcademyPromoSection** ← new
+8. TrustedByLogos
+9. HomeCTASection
+
+### Files changed
+- `src/components/home/AcademyPromoSection.tsx` — new component
+- `src/pages/Index.tsx` — import and place between GlobalReach and TrustedByLogos
 
