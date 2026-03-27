@@ -230,6 +230,12 @@ const AMLRegulations = () => {
     { id: "us-bsa", label: "🇺🇸 United States" },
     { id: "cyprus-aml", label: "🇨🇾 Cyprus" },
     { id: "malta-pmlftr", label: "🇲🇹 Malta" },
+    { id: "japan-aml", label: "🇯🇵 Japan" },
+    { id: "south-korea-aml", label: "🇰🇷 South Korea" },
+    { id: "switzerland-aml", label: "🇨🇭 Switzerland" },
+    { id: "luxembourg-aml", label: "🇱🇺 Luxembourg" },
+    { id: "cayman-islands-aml", label: "🇰🇾 Cayman Islands" },
+    { id: "jersey-aml", label: "🇯🇪 Jersey" },
   ];
 
   const filtered =
@@ -242,7 +248,7 @@ const AMLRegulations = () => {
     "@type": "ItemList",
     name: "AML Regulations by Jurisdiction",
     description:
-      "Key anti-money laundering regulations mapped by jurisdiction — EU, UK, US, FATF, Cyprus, Malta.",
+      "Key anti-money laundering regulations mapped across 12 jurisdictions — FATF, EU, UK, US, Japan, Switzerland, Luxembourg, Cyprus, Malta, South Korea, Cayman Islands, and Jersey.",
     url: "https://www.worldaml.com/resources/aml-regulations",
     itemListElement: amlRegulations.map((reg, i) => ({
       "@type": "ListItem",
@@ -257,7 +263,7 @@ const AMLRegulations = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="AML Regulations by Jurisdiction"
-        description="Comprehensive guide to key AML regulations — EU 6AMLD/AMLR, UK MLRs 2017, US BSA/FinCEN, FATF 40 Recommendations, Cyprus, and Malta. Obligations, penalties, timelines."
+        description="Compare AML regulations across 12 jurisdictions — FATF, EU, UK, US, Japan, Switzerland, Luxembourg, Cyprus, Malta, South Korea, Cayman Islands, and Jersey. Obligations, penalties, UBO thresholds, and timelines."
         canonical="/resources/aml-regulations"
         breadcrumbs={[
           { name: "Home", url: "/" },
@@ -278,9 +284,20 @@ const AMLRegulations = () => {
               <h1 className="text-display-sm md:text-display font-bold text-navy mb-5">
                 AML Regulations by Jurisdiction
               </h1>
-              <p className="text-body-lg text-text-secondary mb-6">
-                A reference guide to the key anti-money laundering and counter-terrorist financing frameworks in force globally — covering obligations, beneficial ownership thresholds, sanctions requirements, penalty regimes, and regulatory timelines.
+              <p className="text-body-lg text-text-secondary mb-4">
+                A reference guide to twelve key anti-money laundering and counter-terrorist financing frameworks — covering obligations, beneficial ownership thresholds, sanctions requirements, penalty regimes, and regulatory timelines across 12 jurisdictions.
               </p>
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-body-sm mb-6">
+                <Link to="/platform/aml-screening" className="text-brand-teal hover:text-navy font-medium transition-colors inline-flex items-center gap-1">
+                  <Shield className="h-3.5 w-3.5" /> AML Screening Platform
+                </Link>
+                <Link to="/resources/glossary" className="text-brand-teal hover:text-navy font-medium transition-colors inline-flex items-center gap-1">
+                  <Globe className="h-3.5 w-3.5" /> Compliance Glossary
+                </Link>
+                <Link to="/free-aml-check" className="text-brand-teal hover:text-navy font-medium transition-colors inline-flex items-center gap-1">
+                  <ArrowRight className="h-3.5 w-3.5" /> Free Sanctions Check
+                </Link>
+              </div>
               <div className="flex flex-wrap gap-3">
                 {amlRegulations.map((r) => (
                   <a
@@ -338,7 +355,7 @@ const AMLRegulations = () => {
                   Side-by-Side Comparison
                 </h2>
                 <p className="text-body text-text-secondary">
-                  Key requirements across all six frameworks at a glance.
+                  Key requirements across all twelve frameworks at a glance.
                 </p>
               </div>
               <div className="overflow-x-auto rounded-2xl border border-divider">
@@ -355,6 +372,12 @@ const AMLRegulations = () => {
                         { label: "🇺🇸 US", key: "us" },
                         { label: "🇨🇾 Cyprus", key: "cyprus" },
                         { label: "🇲🇹 Malta", key: "malta" },
+                        { label: "🇯🇵 Japan", key: "japan" },
+                        { label: "🇰🇷 S. Korea", key: "southKorea" },
+                        { label: "🇨🇭 Switzerland", key: "switzerland" },
+                        { label: "🇱🇺 Luxembourg", key: "luxembourg" },
+                        { label: "🇰🇾 Cayman", key: "cayman" },
+                        { label: "🇯🇪 Jersey", key: "jersey" },
                       ].map((col) => (
                         <th
                           key={col.key}
@@ -377,7 +400,7 @@ const AMLRegulations = () => {
                         <td className="px-5 py-4 font-medium text-navy align-top">
                           {row.aspect}
                         </td>
-                        {(["fatf", "eu", "uk", "us", "cyprus", "malta"] as const).map(
+                        {(["fatf", "eu", "uk", "us", "cyprus", "malta", "japan", "southKorea", "switzerland", "luxembourg", "cayman", "jersey"] as const).map(
                           (key) => (
                             <td
                               key={key}
