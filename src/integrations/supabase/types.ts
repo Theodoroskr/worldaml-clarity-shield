@@ -484,6 +484,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      submit_quiz_and_issue_certificate: {
+        Args: { _answers: Json; _course_id: string; _holder_name: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
