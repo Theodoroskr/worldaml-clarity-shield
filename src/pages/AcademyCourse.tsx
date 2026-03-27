@@ -114,83 +114,65 @@ const AcademyCourse = () => {
 
   const submitQuiz = async () => {
     if (!questions || !user || !course) return;
-    const correct = questions.filter((q) => quizAnswers[q.id] === q.correct_index).length;
-    const score = Math.round((correct / questions.length) * 100);
-    setQuizScore(score);
-    setQuizSubmitted(true);
 
-    const passed = score >= PASS_THRESHOLD;
+    setGenerating(true);
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("user_id", user.id)
+        .single();
 
-    await supabase.from("academy_progress").upsert(
-      {
-        user_id: user.id,
-        course_id: course.id,
-        completed_modules: completedModules,
-        quiz_score: score,
-        quiz_passed: passed,
-        completed_at: passed ? new Date().toISOString() : null,
-      },
-      { onConflict: "user_id,course_id" }
-    );
+      const holderName = profile?.full_name || user.email || "Learner";
 
-    if (passed) {
-      // Generate certificate
-      setGenerating(true);
-      try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("user_id", user.id)
-          .single();
+      // Submit answers to server-side validation function
+      const { data, error } = await supabase.rpc("submit_quiz_and_issue_certificate", {
+        _course_id: course.id,
+        _answers: quizAnswers,
+        _holder_name: holderName,
+      });
 
-        const holderName = profile?.full_name || user.email || "Learner";
+      if (error) throw error;
 
-        const { data: cert, error } = await supabase
-          .from("academy_certificates")
-          .upsert(
-            {
-              user_id: user.id,
-              course_id: course.id,
-              holder_name: holderName,
-              score,
-            },
-            { onConflict: "user_id,course_id" }
-          )
-          .select()
-          .single();
+      const result = data as { passed: boolean; score: number; certificate_id?: string; share_token?: string };
+      setQuizScore(result.score);
+      setQuizSubmitted(true);
 
-        if (!error && cert) {
-          toast({
-            title: "🎉 Certificate Earned!",
-            description: "Congratulations! You can now download or share your certificate.",
-          });
+      if (result.passed && result.share_token) {
+        toast({
+          title: "🎉 Certificate Earned!",
+          description: "Congratulations! You can now download or share your certificate.",
+        });
 
-          // Fire-and-forget certificate email
-          const certUrl = `${window.location.origin}/academy/certificate/${cert.share_token}`;
-          supabase.functions.invoke("send-certificate-email", {
-            body: {
-              holder_name: holderName,
-              email: user.email,
-              course_title: course.title,
-              score,
-              certificate_url: certUrl,
-              certificate_id: cert.id,
-            },
-          }).catch(() => {});
+        // Fire-and-forget certificate email
+        const certUrl = `${window.location.origin}/academy/certificate/${result.share_token}`;
+        supabase.functions.invoke("send-certificate-email", {
+          body: {
+            holder_name: holderName,
+            email: user.email,
+            course_title: course.title,
+            score: result.score,
+            certificate_url: certUrl,
+            certificate_id: result.certificate_id,
+          },
+        }).catch(() => {});
 
-          navigate(`/academy/certificate/${cert.share_token}`);
-        }
-      } catch {
-        // Cert might already exist
-      } finally {
-        setGenerating(false);
+        navigate(`/academy/certificate/${result.share_token}`);
+      } else {
+        toast({
+          title: "Not quite!",
+          description: `You scored ${result.score}%. You need ${PASS_THRESHOLD}% to pass. Try again!`,
+          variant: "destructive",
+        });
       }
-    } else {
+    } catch {
       toast({
-        title: "Not quite!",
-        description: `You scored ${score}%. You need ${PASS_THRESHOLD}% to pass. Try again!`,
+        title: "Error",
+        description: "Failed to submit quiz. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setGenerating(false);
     }
   };
 
