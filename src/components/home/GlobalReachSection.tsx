@@ -13,13 +13,13 @@ export const GlobalReachSection = () => {
       <div className="container-enterprise">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-headline text-navy mb-6 text-center">
-            Global Coverage, Local Relevance
+            Screen Globally. Comply Locally.
           </h2>
           
           <p className="text-body-lg text-text-secondary text-center mb-10 max-w-2xl mx-auto">
-            WorldAML screens against 1,900+ global risk lists — spanning sanctions, watchlists, 
-            PEPs and adverse media — with regulatory and enforcement sources across Europe, 
-            the United States, the United Kingdom and the GCC region.
+            WorldAML covers 1,900+ risk lists across sanctions, watchlists, PEPs, and adverse 
+            media — with deep regulatory intelligence for the UK, EU, US, and GCC. 
+            One platform, every jurisdiction.
           </p>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
