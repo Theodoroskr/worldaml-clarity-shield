@@ -1,22 +1,45 @@
 
 
-## Fix "Try Free Check" Button in Sticky Bottom CTA
+## Update Certificate Page: "WorldAML Academy" Branding + CPD Hours
 
 ### Problem
-The "Try Free Check" button in the sticky bottom bar is nearly invisible. It uses `variant="outline"` which applies `bg-background text-navy` (white background, dark navy text). The custom className overrides attempt (`text-primary-foreground`, `border-white/20`) conflict with the variant's base styles, resulting in a broken appearance on the dark navy bar.
+The certificate page currently shows the generic WorldAML logo (via `<Logo />` component) rather than "WorldAML Academy" branding, and it doesn't display the CPD hours earned for the course.
 
-### Fix
-In `src/components/StickyBottomCTA.tsx`, change the "Try Free Check" button from `variant="outline"` with manual overrides to `variant="outline-light"` — a variant that already exists in the button system specifically for dark backgrounds (`border border-white/30 bg-transparent text-white hover:bg-white/10`). Remove the now-unnecessary custom className overrides.
+### Changes — Single file: `src/pages/AcademyCertificate.tsx`
 
-**Before:**
-```tsx
-<Button size="sm" variant="outline" asChild className="border-white/20 text-primary-foreground hover:bg-white/10 flex-1 sm:flex-none">
+1. **Replace `<Logo />` with "WorldAML Academy" text branding**
+   - Remove the `<Logo>` component import and usage
+   - Replace with a styled heading: "WorldAML Academy" in navy with a smaller "Compliance Education & Certification" tagline beneath — matching the email template style
+
+2. **Add CPD hours to the certificate body**
+   - The `academy_courses` table already has a `cpd_hours` column (joined via `academy_courses(*)`)
+   - Add a CPD hours badge below the score line, e.g.: "This course is accredited for **{n} CPD Hour(s)**"
+   - Also add CPD hours to the verification footer row (alongside "Verified", "Issued", "ID")
+
+### Visual result on the certificate card:
+
+```text
+┌──────────────────────────────────────┐
+│         WorldAML Academy             │
+│  Compliance Education & Certification│
+│  ──────────────────────────────────  │
+│      Certificate of Completion       │
+│        {Course Title}                │
+│                                      │
+│      This certifies that             │
+│        John Doe                      │
+│                                      │
+│   completed ... with a score of 92%  │
+│                                      │
+│   ✓ Verified  |  Issued: 27 Mar 2026 │
+│   📘 2 CPD Hours  |  ID: ABC123      │
+│                                      │
+│  WorldAML Academy — worldaml.com     │
+└──────────────────────────────────────┘
 ```
 
-**After:**
-```tsx
-<Button size="sm" variant="outline-light" asChild className="flex-1 sm:flex-none">
-```
-
-Single file change, one line.
+### Technical Details
+- `course.cpd_hours` is already available from the existing query (`select("*, academy_courses(*)")`)
+- No database changes needed
+- Single file edit
 
