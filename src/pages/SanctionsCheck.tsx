@@ -7,7 +7,8 @@ import { SanctionsSearchForm } from "@/components/sanctions/SanctionsSearchForm"
 import { SanctionsResultCard } from "@/components/sanctions/SanctionsResultCard";
 import { SanctionsDisclaimerBanner } from "@/components/sanctions/SanctionsDisclaimerBanner";
 import SEO from "@/components/SEO";
-import { LogoIcon } from "@/components/Logo";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -140,25 +141,17 @@ export default function SanctionsCheck() {
   const lockedCount = isAnonymous ? lockedResults.length : 0;
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <SEO
         title="Sanctions Quick Check | WorldAML"
         description="Free open-source sanctions screening tool. Check names against OFAC, EU, UN, and HMT sanctions lists instantly."
       />
+      <Header />
+      <main className="flex-1">
 
       {/* Hero */}
       <section className="bg-navy section-padding-sm">
         <div className="container-enterprise max-w-4xl mx-auto text-center">
-          {/* Mini brand header */}
-          <div className="flex justify-center mb-8">
-            <Link to="/" className="inline-flex items-center gap-2.5 group">
-              <LogoIcon size="sm" className="text-white/90 group-hover:text-white transition-colors" />
-              <div className="flex items-baseline gap-0.5">
-                <span className="font-normal tracking-tight text-white/90 group-hover:text-white text-lg transition-colors">World</span>
-                <span className="font-semibold tracking-tight text-white/90 group-hover:text-white text-lg transition-colors">AML</span>
-              </div>
-            </Link>
-          </div>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/20 border border-accent/30 text-accent text-body-sm font-medium mb-5">
             <Shield className="w-3.5 h-3.5" />
             Free Open-Source Sanctions Tool
@@ -519,6 +512,8 @@ export default function SanctionsCheck() {
           </p>
         </div>
       </section>
-    </>
+      </main>
+      <Footer />
+    </div>
   );
 }

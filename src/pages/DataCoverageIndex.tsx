@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import SEO from "@/components/SEO";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { coverageData, regions, type Region, categorizeSource } from "@/data/worldComplianceSources";
 
 const DataCoverageIndex = () => {
@@ -39,7 +41,7 @@ const DataCoverageIndex = () => {
   };
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <SEO
         title="Global AML Screening Data Coverage"
         description="Explore WorldAML's global regulatory and screening coverage across 200+ jurisdictions. View sanctions lists, PEP data, law enforcement, and financial regulators by country."
@@ -50,6 +52,8 @@ const DataCoverageIndex = () => {
           { name: "Data Coverage", url: "/data-coverage" },
         ]}
       />
+      <Header />
+      <main className="flex-1">
 
       {/* Hero */}
       <section className="bg-navy text-white py-16 md:py-24">
@@ -170,7 +174,9 @@ const DataCoverageIndex = () => {
           </div>
         </div>
       </section>
-    </>
+      </main>
+      <Footer />
+    </div>
   );
 };
 
