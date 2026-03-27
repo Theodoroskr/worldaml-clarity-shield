@@ -80,7 +80,16 @@ const PartnerDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO title="Partner Dashboard — WorldAML" description="Track your referrals, conversions, and commissions." noindex />
+      <SEO
+        title="Partner Dashboard — WorldAML"
+        description="Track your referrals, conversions, and commissions."
+        noindex
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Partner Program", url: "/partners" },
+          { name: "Dashboard", url: "/partners/dashboard" },
+        ]}
+      />
       <Header />
       <main className="flex-1 py-12">
         <div className="container-enterprise">
