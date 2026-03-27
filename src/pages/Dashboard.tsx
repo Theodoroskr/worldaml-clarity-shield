@@ -142,9 +142,29 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Quick Tools */}
+            {/* Academy Card */}
+            <Card className="border-teal/20 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("/academy")}>
+              <CardHeader>
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-teal/10 text-teal mb-2">
+                  <GraduationCap className="h-5 w-5" />
+                </div>
+                <CardTitle>WorldAML Academy</CardTitle>
+                <CardDescription>Courses, quizzes & certificates</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-text-secondary mb-4">
+                  Build your compliance expertise and earn shareable certificates.
+                </p>
+                <div className="flex gap-2">
+                  <Button className="flex-1" size="sm" onClick={(e) => { e.stopPropagation(); navigate("/academy"); }}>
+                    <GraduationCap className="mr-2 h-4 w-4" />
+                    Browse Courses
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
           <div className="mt-10 space-y-6">
             <h2 className="text-xl font-semibold text-navy">Quick Tools</h2>
             <DashboardSanctionsWidget onSearchComplete={() => historyRef.current?.refresh()} />
