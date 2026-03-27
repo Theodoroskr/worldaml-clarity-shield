@@ -165,7 +165,7 @@ export const NewHeroSection = () => {
           {/* Secondary CTAs */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
             <Button variant="default" size="lg" asChild>
-              <Link to="/demo">
+              <Link to="/contact-sales">
                 Request a Demo
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
