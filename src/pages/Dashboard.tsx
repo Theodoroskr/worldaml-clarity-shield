@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert, Search } from "lucide-react";
+import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert, Search, GraduationCap, Award } from "lucide-react";
 import { CrossSellCard } from "@/components/CrossSellCard";
 import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
 import { SearchHistoryPanel, SearchHistoryHandle } from "@/components/sanctions/SearchHistoryPanel";
