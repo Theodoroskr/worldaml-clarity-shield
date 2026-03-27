@@ -68,6 +68,7 @@ const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Glossary = lazy(() => import("./pages/Glossary"));
 const AMLRegulations = lazy(() => import("./pages/AMLRegulations"));
 const MarketPage = lazy(() => import("./pages/MarketPage"));
+const FreeAMLCheck = lazy(() => import("./pages/FreeAMLCheck"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -157,6 +158,7 @@ const App = () => (
                 <Route path="/resources/glossary" element={<Glossary />} />
                 <Route path="/resources/aml-regulations" element={<AMLRegulations />} />
                 <Route path="/sanctions-check" element={<SanctionsCheck />} />
+                <Route path="/free-aml-check" element={<FreeAMLCheck />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 
