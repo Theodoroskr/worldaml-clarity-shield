@@ -5,10 +5,11 @@ import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Award, Download, Linkedin, Twitter, Share2, ArrowLeft, CheckCircle } from "lucide-react";
-import { BookOpen } from "lucide-react";
+import { Award, Linkedin, Share2, ArrowLeft, CheckCircle, BookOpen, ExternalLink, Copy } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+
+const PUBLISHED_ORIGIN = "https://worldaml-clarity-shield.lovable.app";
 
 const AcademyCertificate = () => {
   const { token } = useParams();
@@ -27,23 +28,34 @@ const AcademyCertificate = () => {
     },
   });
 
-  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const course = cert?.academy_courses as any;
+  const certificateUrl = `${PUBLISHED_ORIGIN}/academy/certificate/${token}`;
+  const shareText = course ? `I just earned my "${course.title}" certificate from WorldAML Academy! 🎓` : "";
 
   const shareLinkedIn = () => {
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
-    window.open(url, "_blank", "width=600,height=400");
+    const url = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(certificateUrl)}&title=${encodeURIComponent(shareText)}`;
+    window.open(url, "_blank", "noopener,noreferrer,width=600,height=500");
   };
 
-  const shareTwitter = () => {
-    const text = `I just earned my "${course?.title}" certificate from WorldAML Academy! 🎓`;
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
-    window.open(url, "_blank", "width=600,height=400");
+  const shareX = () => {
+    const url = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(certificateUrl)}`;
+    window.open(url, "_blank", "noopener,noreferrer,width=600,height=400");
   };
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(shareUrl);
-    toast({ title: "Link copied!", description: "Certificate link copied to clipboard." });
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(certificateUrl);
+      toast({ title: "Link copied!", description: "Certificate link copied to clipboard." });
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement("textarea");
+      textarea.value = certificateUrl;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      toast({ title: "Link copied!", description: "Certificate link copied to clipboard." });
+    }
   };
 
   if (isLoading) {
@@ -79,7 +91,6 @@ const AcademyCertificate = () => {
         title={`${cert.holder_name} — ${course?.title} Certificate | WorldAML Academy`}
         description={`${cert.holder_name} earned the ${course?.title} certificate from WorldAML Academy with a score of ${cert.score}%.`}
         canonical={`/academy/certificate/${token}`}
-        
       />
       <Header />
       <main className="flex-1">
@@ -89,8 +100,8 @@ const AcademyCertificate = () => {
               <ArrowLeft className="h-4 w-4" /> Back to Academy
             </Link>
 
-            {/* Certificate Card */}
             <div className="max-w-3xl mx-auto">
+              {/* Certificate Card */}
               <div className="relative rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-white via-secondary/20 to-white p-8 md:p-12 text-center shadow-lg">
                 {/* Decorative corners */}
                 <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-primary/30 rounded-tl-lg" />
@@ -114,7 +125,7 @@ const AcademyCertificate = () => {
                 </h2>
 
                 <p className="text-body text-muted-foreground mb-2">
-                  has successfully completed the <strong>{course?.title}</strong> course 
+                  has successfully completed the <strong>{course?.title}</strong> course
                   at WorldAML Academy with a score of <strong>{cert.score}%</strong>.
                 </p>
 
@@ -142,18 +153,34 @@ const AcademyCertificate = () => {
                 </div>
               </div>
 
+              {/* Shareable Badge */}
+              <div className="mt-8 p-6 rounded-xl border border-border bg-muted/30 text-center">
+                <p className="text-body-sm font-semibold text-foreground mb-3">Your Shareable Badge</p>
+                <div className="inline-flex items-center gap-3 bg-primary text-primary-foreground rounded-lg px-5 py-3 shadow-md">
+                  <Award className="h-6 w-6 shrink-0" />
+                  <div className="text-left">
+                    <p className="text-sm font-bold leading-tight">{course?.title}</p>
+                    <p className="text-xs opacity-80">WorldAML Academy • {cert.score}%{course?.cpd_hours > 0 ? ` • ${course.cpd_hours} CPD` : ""}</p>
+                  </div>
+                  <CheckCircle className="h-5 w-5 shrink-0 opacity-80" />
+                </div>
+                <p className="text-caption text-muted-foreground mt-3">
+                  Share this badge on your profile or resume
+                </p>
+              </div>
+
               {/* Share Actions */}
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <Button variant="default" onClick={shareLinkedIn}>
                   <Linkedin className="h-4 w-4 mr-2" />
                   Share on LinkedIn
                 </Button>
-                <Button variant="outline" onClick={shareTwitter}>
-                  <Twitter className="h-4 w-4 mr-2" />
+                <Button variant="outline" onClick={shareX}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
                   Share on X
                 </Button>
                 <Button variant="outline" onClick={copyLink}>
-                  <Share2 className="h-4 w-4 mr-2" />
+                  <Copy className="h-4 w-4 mr-2" />
                   Copy Link
                 </Button>
               </div>
