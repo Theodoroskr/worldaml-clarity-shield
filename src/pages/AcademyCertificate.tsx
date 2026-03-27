@@ -19,12 +19,9 @@ const AcademyCertificate = () => {
     queryKey: ["academy-certificate", token],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("academy_certificates")
-        .select("*, academy_courses(*)")
-        .eq("share_token", token)
-        .single();
+        .rpc("get_certificate_by_token", { _token: token! });
       if (error) throw error;
-      return data;
+      return data as any;
     },
   });
 
