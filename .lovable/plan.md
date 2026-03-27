@@ -1,33 +1,30 @@
 
 
-## Fix: Restrict Public Certificate Access to Token-Based Lookup
+## Remove Duplicate Meta Tags from `index.html`
 
 ### Problem
-The `academy_certificates` table has an RLS policy `Anyone can view certificates by share_token` with `USING (true)`, which exposes **all** certificate records publicly. The intent is to allow viewing a single certificate via its `share_token`, but the policy doesn't enforce that filter.
+`index.html` has hardcoded meta tags (title, description, OG, Twitter) that conflict with the dynamic tags managed by `react-helmet-async` via the `<SEO />` component. This causes duplicate tags in the DOM and can confuse search engines.
 
-### Solution
-Replace the overly permissive public SELECT policy with a **security-definer function** that accepts a `share_token` parameter and returns only the matching row. Then restrict the public SELECT policy to `USING (false)` for anonymous users (keeping the authenticated user's own-certificate policy intact).
+### Change — Single file: `index.html`
 
-### Database migration
+**Keep:**
+- `<meta charset>`, `<meta name="viewport">`, `<link rel="icon">`
+- `<link rel="canonical">` (base canonical)
+- JSON-LD structured data blocks (Organization, WebSite, SoftwareApplication) — these don't conflict
+- The `<body>` and script tags
 
-1. **Drop** the permissive `Anyone can view certificates by share_token` policy
-2. **Create** a security-definer function `get_certificate_by_token(text)` that returns the certificate row joined with course data — callable by anyone but scoped to exactly one token
-3. No new public SELECT policy needed for anon — access goes through the function
+**Remove:**
+- `<title>` tag (line ~10)
+- `<meta name="title">` 
+- `<meta name="description">`
+- `<meta name="keywords">`
+- `<meta name="author">`
+- `<meta name="robots">`
+- All `<meta property="og:*">` tags (6 tags)
+- All `<meta name="twitter:*">` tags (5 tags)
 
-### Code change — `src/pages/AcademyCertificate.tsx`
+These are all dynamically set per-page by the `<SEO />` component via `react-helmet-async`.
 
-Replace the direct table query:
-```ts
-supabase.from("academy_certificates").select("*, academy_courses(*)").eq("share_token", token).single()
-```
-with an RPC call:
-```ts
-supabase.rpc("get_certificate_by_token", { _token: token }).single()
-```
-
-The function returns the same shape (certificate fields + nested course object), so the rest of the component stays unchanged.
-
-### Files changed
-- **Database migration** — drop policy, create `get_certificate_by_token` function
-- **`src/pages/AcademyCertificate.tsx`** — switch from `.from()` to `.rpc()`
+### Result
+Each page will have exactly one set of meta tags, controlled by the `<SEO />` component with page-specific content, rather than duplicated generic tags from `index.html`.
 
