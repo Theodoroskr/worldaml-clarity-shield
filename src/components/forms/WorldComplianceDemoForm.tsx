@@ -149,7 +149,7 @@ export const WorldComplianceDemoForm = () => {
             "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
           body: JSON.stringify({
-            form_type: "demo",
+            form_type: "free-trial",
             first_name: data.firstName,
             last_name: data.lastName,
             email: data.workEmail,
@@ -158,7 +158,7 @@ export const WorldComplianceDemoForm = () => {
             country: countryName,
             industry: data.industry,
             message: data.comments,
-            metadata: { product: "WorldCompliance" },
+            metadata: { product: "WorldCompliance", trial_days: 7 },
           }),
         }
       );
@@ -166,7 +166,7 @@ export const WorldComplianceDemoForm = () => {
       if (!response.ok) throw new Error("Submission failed");
       
       setIsSubmitted(true);
-      toast.success("Thank you! We'll be in touch shortly.");
+      toast.success("Thank you! We'll activate your trial within 24 hours.");
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
     } finally {
@@ -180,13 +180,13 @@ export const WorldComplianceDemoForm = () => {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-teal/10 text-teal mb-4">
           <CheckCircle2 className="w-8 h-8" />
         </div>
-        <h3 className="text-xl font-semibold text-navy mb-2">Thank You!</h3>
+        <h3 className="text-xl font-semibold text-navy mb-2">You're Almost In!</h3>
         <p className="text-text-secondary mb-4">
-          Your WorldCompliance® demo request has been submitted. A member of our team will 
-          contact you shortly to schedule your personalized demonstration.
+          Your WorldCompliance® free trial request has been submitted. We'll activate your 
+          trial within 24 hours and send you login credentials via email.
         </p>
         <p className="text-body-sm text-text-tertiary">
-          Please check your email for confirmation.
+          Please check your email for confirmation and onboarding instructions.
         </p>
       </div>
     );
@@ -198,7 +198,7 @@ export const WorldComplianceDemoForm = () => {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-semibold text-navy">
-            Request a WorldCompliance® Demo
+            Start Your 7-Day Free Trial
           </h3>
           <img 
             src={lexisnexisLogo} 
@@ -207,8 +207,8 @@ export const WorldComplianceDemoForm = () => {
           />
         </div>
         <p className="text-body-sm text-text-secondary">
-          See WorldCompliance® Online Search Tool in action. Complete the form below and 
-          our team will schedule a personalized demonstration.
+          Get full access to WorldCompliance® Online Search Tool for 7 days. Complete the form 
+          below and we'll activate your trial within 24 hours.
         </p>
       </div>
 
@@ -401,7 +401,7 @@ export const WorldComplianceDemoForm = () => {
         {/* Consent Notice */}
         <p className="text-xs text-text-tertiary">
           By submitting this form, you agree to be contacted by Infocredit Group 
-          and LexisNexis Risk Solutions regarding WorldCompliance® products and services. 
+          and LexisNexis Risk Solutions regarding your WorldCompliance® free trial. 
           You can opt-out at any time.
         </p>
 
@@ -413,14 +413,14 @@ export const WorldComplianceDemoForm = () => {
               Submitting...
             </>
           ) : (
-            "Request Demo"
+            "Start Free Trial"
           )}
         </Button>
       </form>
 
       {/* Terms */}
       <p className="text-xs text-text-tertiary mt-4">
-        * Demo availability subject to eligibility assessment. Response times may vary by region.
+        * Free trial subject to eligibility assessment. Trial access activated within 24 hours of approval.
       </p>
     </div>
   );
