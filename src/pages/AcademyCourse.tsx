@@ -1,0 +1,456 @@
+import { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import SEO from "@/components/SEO";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { ArrowRight, ArrowLeft, CheckCircle, XCircle, Award, Clock, BookOpen, Lock } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+const PASS_THRESHOLD = 80;
+
+const AcademyCourse = () => {
+  const { slug } = useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState<"learn" | "quiz">("learn");
+  const [activeModule, setActiveModule] = useState(0);
+  const [completedModules, setCompletedModules] = useState<string[]>([]);
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [quizScore, setQuizScore] = useState<number | null>(null);
+  const [generating, setGenerating] = useState(false);
+
+  const { data: course } = useQuery({
+    queryKey: ["academy-course", slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("academy_courses")
+        .select("*")
+        .eq("slug", slug)
+        .eq("is_published", true)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: modules } = useQuery({
+    queryKey: ["academy-modules", course?.id],
+    enabled: !!course?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("academy_modules")
+        .select("*")
+        .eq("course_id", course!.id)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: questions } = useQuery({
+    queryKey: ["academy-questions", course?.id],
+    enabled: !!course?.id && !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("academy_questions")
+        .select("*")
+        .eq("course_id", course!.id)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Load existing progress
+  const { data: progress } = useQuery({
+    queryKey: ["academy-progress", course?.id, user?.id],
+    enabled: !!course?.id && !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("academy_progress")
+        .select("*")
+        .eq("course_id", course!.id)
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (progress) {
+      const mods = progress.completed_modules as string[] | null;
+      if (mods) setCompletedModules(mods);
+      if (progress.quiz_passed && progress.quiz_score !== null) {
+        setQuizSubmitted(true);
+        setQuizScore(progress.quiz_score);
+      }
+    }
+  }, [progress]);
+
+  const markModuleComplete = async (moduleId: string) => {
+    const updated = [...new Set([...completedModules, moduleId])];
+    setCompletedModules(updated);
+
+    if (user && course) {
+      await supabase.from("academy_progress").upsert(
+        { user_id: user.id, course_id: course.id, completed_modules: updated },
+        { onConflict: "user_id,course_id" }
+      );
+    }
+  };
+
+  const handleAnswer = (questionId: string, optionIndex: number) => {
+    if (quizSubmitted) return;
+    setQuizAnswers((prev) => ({ ...prev, [questionId]: optionIndex }));
+  };
+
+  const submitQuiz = async () => {
+    if (!questions || !user || !course) return;
+    const correct = questions.filter((q) => quizAnswers[q.id] === q.correct_index).length;
+    const score = Math.round((correct / questions.length) * 100);
+    setQuizScore(score);
+    setQuizSubmitted(true);
+
+    const passed = score >= PASS_THRESHOLD;
+
+    await supabase.from("academy_progress").upsert(
+      {
+        user_id: user.id,
+        course_id: course.id,
+        completed_modules: completedModules,
+        quiz_score: score,
+        quiz_passed: passed,
+        completed_at: passed ? new Date().toISOString() : null,
+      },
+      { onConflict: "user_id,course_id" }
+    );
+
+    if (passed) {
+      // Generate certificate
+      setGenerating(true);
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", user.id)
+          .single();
+
+        const holderName = profile?.full_name || user.email || "Learner";
+
+        const { data: cert, error } = await supabase
+          .from("academy_certificates")
+          .upsert(
+            {
+              user_id: user.id,
+              course_id: course.id,
+              holder_name: holderName,
+              score,
+            },
+            { onConflict: "user_id,course_id" }
+          )
+          .select()
+          .single();
+
+        if (!error && cert) {
+          toast({
+            title: "🎉 Certificate Earned!",
+            description: "Congratulations! You can now download or share your certificate.",
+          });
+          navigate(`/academy/certificate/${cert.share_token}`);
+        }
+      } catch {
+        // Cert might already exist
+      } finally {
+        setGenerating(false);
+      }
+    } else {
+      toast({
+        title: "Not quite!",
+        description: `You scored ${score}%. You need ${PASS_THRESHOLD}% to pass. Try again!`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const allModulesComplete = modules ? completedModules.length >= modules.length : false;
+  const progressPercent = modules?.length ? (completedModules.length / modules.length) * 100 : 0;
+
+  if (!course) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <p className="text-muted-foreground">Loading course...</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <SEO
+        title={`${course.title} — WorldAML Academy`}
+        description={course.description}
+        canonical={`/academy/${course.slug}`}
+      />
+      <Header />
+      <main className="flex-1">
+        {/* Course Header */}
+        <section className="bg-navy py-8">
+          <div className="container-enterprise">
+            <Link to="/academy" className="text-slate-light text-body-sm hover:text-white inline-flex items-center gap-1 mb-4">
+              <ArrowLeft className="h-4 w-4" /> Back to Academy
+            </Link>
+            <h1 className="text-headline text-primary-foreground mb-2">{course.title}</h1>
+            <p className="text-body text-slate-light mb-4">{course.description}</p>
+            <div className="flex items-center gap-4 text-body-sm text-slate-light">
+              <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {course.duration_minutes} min</span>
+              <Badge variant="secondary">{course.difficulty}</Badge>
+            </div>
+            {user && (
+              <div className="mt-4 max-w-sm">
+                <div className="flex justify-between text-caption text-slate-light mb-1">
+                  <span>Progress</span>
+                  <span>{Math.round(progressPercent)}%</span>
+                </div>
+                <Progress value={progressPercent} className="h-2" />
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Tabs */}
+        <section className="border-b border-border bg-background sticky top-16 z-30">
+          <div className="container-enterprise flex gap-0">
+            <button
+              onClick={() => setActiveTab("learn")}
+              className={`px-6 py-3 text-body-sm font-medium border-b-2 transition-colors ${
+                activeTab === "learn" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <BookOpen className="h-4 w-4 inline mr-1.5" />
+              Learn ({modules?.length || 0} modules)
+            </button>
+            <button
+              onClick={() => user ? setActiveTab("quiz") : toast({ title: "Sign in required", description: "Please sign in to take the quiz.", variant: "destructive" })}
+              className={`px-6 py-3 text-body-sm font-medium border-b-2 transition-colors ${
+                activeTab === "quiz" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Award className="h-4 w-4 inline mr-1.5" />
+              Quiz & Certificate
+              {!user && <Lock className="h-3 w-3 inline ml-1" />}
+            </button>
+          </div>
+        </section>
+
+        {/* Content */}
+        <section className="section-padding bg-background">
+          <div className="container-enterprise">
+            {activeTab === "learn" ? (
+              <div className="grid lg:grid-cols-[280px_1fr] gap-8">
+                {/* Module sidebar */}
+                <nav className="space-y-1">
+                  {modules?.map((mod, i) => {
+                    const isComplete = completedModules.includes(mod.id);
+                    return (
+                      <button
+                        key={mod.id}
+                        onClick={() => setActiveModule(i)}
+                        className={`w-full text-left px-4 py-3 rounded-lg text-body-sm transition-colors flex items-center gap-2 ${
+                          i === activeModule
+                            ? "bg-primary/10 text-primary font-medium"
+                            : "text-muted-foreground hover:bg-secondary"
+                        }`}
+                      >
+                        {isComplete ? (
+                          <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                        ) : (
+                          <span className="w-4 h-4 rounded-full border border-border flex-shrink-0 text-center text-[10px] leading-4">
+                            {i + 1}
+                          </span>
+                        )}
+                        {mod.title}
+                      </button>
+                    );
+                  })}
+                </nav>
+
+                {/* Module content */}
+                {modules && modules[activeModule] && (
+                  <div>
+                    <h2 className="text-subtitle font-semibold text-foreground mb-4">
+                      {modules[activeModule].title}
+                    </h2>
+                    <div className="prose prose-slate max-w-none text-body text-foreground whitespace-pre-line mb-8">
+                      {modules[activeModule].content.split("\n").map((line, i) => {
+                        if (line.startsWith("**") && line.endsWith("**")) {
+                          return <p key={i} className="font-semibold mt-4 mb-1">{line.replace(/\*\*/g, "")}</p>;
+                        }
+                        if (line.startsWith("- ")) {
+                          return <p key={i} className="pl-4 text-muted-foreground">• {line.slice(2)}</p>;
+                        }
+                        if (line.trim() === "") return <br key={i} />;
+                        return <p key={i} className="text-muted-foreground">{line.replace(/\*\*/g, "")}</p>;
+                      })}
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {!completedModules.includes(modules[activeModule].id) && (
+                        <Button onClick={() => markModuleComplete(modules[activeModule].id)}>
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Mark as Complete
+                        </Button>
+                      )}
+                      {activeModule < modules.length - 1 && (
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            markModuleComplete(modules[activeModule].id);
+                            setActiveModule(activeModule + 1);
+                          }}
+                        >
+                          Next Module <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      )}
+                      {activeModule === modules.length - 1 && allModulesComplete && (
+                        <Button variant="accent" onClick={() => setActiveTab("quiz")}>
+                          Take the Quiz <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : !user ? (
+              <div className="max-w-md mx-auto text-center py-12">
+                <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-subtitle font-semibold mb-2">Sign In Required</h3>
+                <p className="text-muted-foreground mb-6">Create a free account to take the quiz and earn your certificate.</p>
+                <Button asChild>
+                  <Link to="/signup">Create Free Account</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="max-w-2xl mx-auto">
+                {quizSubmitted && quizScore !== null && quizScore >= PASS_THRESHOLD ? (
+                  <div className="text-center py-8">
+                    <Award className="h-16 w-16 text-accent mx-auto mb-4" />
+                    <h3 className="text-headline text-foreground mb-2">Congratulations! 🎉</h3>
+                    <p className="text-body-lg text-muted-foreground mb-2">
+                      You scored <span className="font-bold text-foreground">{quizScore}%</span> and earned your certificate!
+                    </p>
+                    <p className="text-body-sm text-muted-foreground mb-6">Redirecting to your certificate...</p>
+                  </div>
+                ) : (
+                  <>
+                    <h2 className="text-subtitle font-semibold text-foreground mb-2">
+                      {course.title} — Quiz
+                    </h2>
+                    <p className="text-body-sm text-muted-foreground mb-8">
+                      Answer all questions. You need {PASS_THRESHOLD}% to pass and earn your certificate.
+                    </p>
+
+                    <div className="space-y-8">
+                      {questions?.map((q, qi) => {
+                        const options = q.options as string[];
+                        const answered = quizAnswers[q.id] !== undefined;
+                        const isCorrect = quizSubmitted && quizAnswers[q.id] === q.correct_index;
+                        const isWrong = quizSubmitted && answered && quizAnswers[q.id] !== q.correct_index;
+
+                        return (
+                          <div key={q.id} className="rounded-xl border border-border p-6">
+                            <p className="text-body font-medium text-foreground mb-4">
+                              {qi + 1}. {q.question}
+                            </p>
+                            <div className="space-y-2">
+                              {options.map((opt, oi) => {
+                                const isSelected = quizAnswers[q.id] === oi;
+                                const showCorrect = quizSubmitted && oi === q.correct_index;
+                                return (
+                                  <button
+                                    key={oi}
+                                    onClick={() => handleAnswer(q.id, oi)}
+                                    disabled={quizSubmitted}
+                                    className={`w-full text-left px-4 py-3 rounded-lg border text-body-sm transition-colors flex items-center gap-3 ${
+                                      showCorrect
+                                        ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+                                        : isSelected && isWrong
+                                        ? "border-rose-500 bg-rose-50 text-rose-800"
+                                        : isSelected
+                                        ? "border-primary bg-primary/5 text-primary"
+                                        : "border-border hover:border-primary/30 text-muted-foreground hover:text-foreground"
+                                    }`}
+                                  >
+                                    {showCorrect && <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />}
+                                    {isSelected && isWrong && <XCircle className="h-4 w-4 text-rose-500 flex-shrink-0" />}
+                                    {!showCorrect && !(isSelected && isWrong) && (
+                                      <span className="w-4 h-4 rounded-full border border-current flex-shrink-0" />
+                                    )}
+                                    {opt}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {quizSubmitted && q.explanation && (
+                              <p className="mt-3 text-body-sm text-muted-foreground bg-secondary/50 p-3 rounded-lg">
+                                💡 {q.explanation}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {!quizSubmitted ? (
+                      <div className="mt-8">
+                        <Button
+                          size="lg"
+                          onClick={submitQuiz}
+                          disabled={!questions || Object.keys(quizAnswers).length < (questions?.length || 0) || generating}
+                        >
+                          {generating ? "Generating Certificate..." : "Submit Quiz"}
+                        </Button>
+                        {questions && Object.keys(quizAnswers).length < questions.length && (
+                          <p className="text-body-sm text-muted-foreground mt-2">
+                            Answer all {questions.length} questions to submit.
+                          </p>
+                        )}
+                      </div>
+                    ) : quizScore !== null && quizScore < PASS_THRESHOLD && (
+                      <div className="mt-8 text-center">
+                        <p className="text-body text-muted-foreground mb-4">
+                          You scored {quizScore}%. Review the material and try again!
+                        </p>
+                        <Button
+                          onClick={() => {
+                            setQuizAnswers({});
+                            setQuizSubmitted(false);
+                            setQuizScore(null);
+                          }}
+                        >
+                          Retake Quiz
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default AcademyCourse;
