@@ -1,12 +1,14 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, GraduationCap, Clock, BarChart3, Award, Shield, BookOpen } from "lucide-react";
+import { ArrowRight, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3 } from "lucide-react";
 
 const difficultyColor: Record<string, string> = {
   beginner: "bg-emerald-100 text-emerald-700",
@@ -14,7 +16,12 @@ const difficultyColor: Record<string, string> = {
   advanced: "bg-rose-100 text-rose-700",
 };
 
+type FilterTab = "all" | "in-progress" | "completed";
+
 const Academy = () => {
+  const { user } = useAuth();
+  const [filter, setFilter] = useState<FilterTab>("all");
+
   const { data: courses, isLoading } = useQuery({
     queryKey: ["academy-courses"],
     queryFn: async () => {
@@ -27,6 +34,57 @@ const Academy = () => {
       return data;
     },
   });
+
+  const { data: progressData } = useQuery({
+    queryKey: ["academy-user-progress", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("academy_progress")
+        .select("course_id, quiz_passed, completed_modules")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: certificates } = useQuery({
+    queryKey: ["academy-user-certificates", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("academy_certificates")
+        .select("course_id, share_token")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const progressMap = new Map(progressData?.map((p) => [p.course_id, p]) || []);
+  const certMap = new Map(certificates?.map((c) => [c.course_id, c]) || []);
+
+  const getCourseStatus = (courseId: string): "completed" | "in-progress" | null => {
+    if (certMap.has(courseId)) return "completed";
+    const prog = progressMap.get(courseId);
+    if (prog) {
+      const mods = prog.completed_modules as string[] | null;
+      if (mods && mods.length > 0) return "in-progress";
+    }
+    return null;
+  };
+
+  const filteredCourses = courses?.filter((course) => {
+    if (filter === "all") return true;
+    const status = getCourseStatus(course.id);
+    if (filter === "completed") return status === "completed";
+    if (filter === "in-progress") return status === "in-progress";
+    return true;
+  });
+
+  const completedCount = courses?.filter((c) => getCourseStatus(c.id) === "completed").length || 0;
+  const inProgressCount = courses?.filter((c) => getCourseStatus(c.id) === "in-progress").length || 0;
+  const certsCount = certificates?.length || 0;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -73,15 +131,63 @@ const Academy = () => {
           </div>
         </section>
 
+        {/* My Progress Summary (logged-in users only) */}
+        {user && progressData && (
+          <section className="bg-background border-b border-border">
+            <div className="container-enterprise py-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <h2 className="text-subtitle font-semibold text-foreground">My Progress</h2>
+                <div className="flex gap-6">
+                  <div className="text-center">
+                    <p className="text-headline font-bold text-primary">{inProgressCount}</p>
+                    <p className="text-caption text-muted-foreground">In Progress</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-headline font-bold text-accent">{completedCount}</p>
+                    <p className="text-caption text-muted-foreground">Completed</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-headline font-bold text-foreground">{certsCount}</p>
+                    <p className="text-caption text-muted-foreground">Certificates</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Courses Grid */}
         <section className="section-padding bg-background">
           <div className="container-enterprise">
-            <div className="text-center mb-12">
+            <div className="text-center mb-8">
               <h2 className="text-headline text-foreground mb-3">Available Courses</h2>
               <p className="text-body-lg text-muted-foreground max-w-xl mx-auto">
                 Choose a course, work through the material, then take the quiz to earn your certificate.
               </p>
             </div>
+
+            {/* Filter Tabs (logged-in only) */}
+            {user && (
+              <div className="flex gap-2 mb-8 justify-center">
+                {([
+                  { key: "all" as FilterTab, label: "All Courses" },
+                  { key: "in-progress" as FilterTab, label: "In Progress" },
+                  { key: "completed" as FilterTab, label: "Completed" },
+                ]).map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setFilter(tab.key)}
+                    className={`px-4 py-2 rounded-full text-body-sm font-medium transition-colors ${
+                      filter === tab.key
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {isLoading ? (
               <div className="grid md:grid-cols-3 gap-6">
@@ -94,34 +200,61 @@ const Academy = () => {
                   </div>
                 ))}
               </div>
-            ) : (
+            ) : filteredCourses && filteredCourses.length > 0 ? (
               <div className="grid md:grid-cols-3 gap-6">
-                {courses?.map((course) => (
-                  <Link
-                    key={course.id}
-                    to={`/academy/${course.slug}`}
-                    className="group rounded-xl border border-border bg-card p-6 hover:shadow-lg hover:border-primary/20 transition-all duration-300"
-                  >
-                    <div className="flex items-center gap-2 mb-4">
-                      <Badge className={difficultyColor[course.difficulty] || ""}>
-                        {course.difficulty}
-                      </Badge>
-                      <span className="text-caption text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        {course.duration_minutes} min
+                {filteredCourses.map((course) => {
+                  const status = getCourseStatus(course.id);
+                  const cert = certMap.get(course.id);
+                  return (
+                    <Link
+                      key={course.id}
+                      to={status === "completed" && cert ? `/academy/certificate/${cert.share_token}` : `/academy/${course.slug}`}
+                      className="group rounded-xl border border-border bg-card p-6 hover:shadow-lg hover:border-primary/20 transition-all duration-300 relative"
+                    >
+                      {/* Status Badge */}
+                      {status === "completed" && (
+                        <div className="absolute top-4 right-4">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium">
+                            <CheckCircle className="h-3 w-3" /> Completed
+                          </span>
+                        </div>
+                      )}
+                      {status === "in-progress" && (
+                        <div className="absolute top-4 right-4">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
+                            <BarChart3 className="h-3 w-3" /> In Progress
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-2 mb-4">
+                        <Badge className={difficultyColor[course.difficulty] || ""}>
+                          {course.difficulty}
+                        </Badge>
+                        <span className="text-caption text-muted-foreground flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          {course.duration_minutes} min
+                        </span>
+                      </div>
+                      <h3 className="text-subtitle font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                        {course.title}
+                      </h3>
+                      <p className="text-body-sm text-muted-foreground mb-4 line-clamp-3">
+                        {course.description}
+                      </p>
+                      <span className="text-body-sm font-medium text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                        {status === "completed" ? "View Certificate" : status === "in-progress" ? "Continue Course" : "Start Course"} <ArrowRight className="h-4 w-4" />
                       </span>
-                    </div>
-                    <h3 className="text-subtitle font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                      {course.title}
-                    </h3>
-                    <p className="text-body-sm text-muted-foreground mb-4 line-clamp-3">
-                      {course.description}
-                    </p>
-                    <span className="text-body-sm font-medium text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
-                      Start Course <ArrowRight className="h-4 w-4" />
-                    </span>
-                  </Link>
-                ))}
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No courses found for this filter.</p>
+                <button onClick={() => setFilter("all")} className="text-primary text-body-sm font-medium mt-2 hover:underline">
+                  View all courses
+                </button>
               </div>
             )}
           </div>
