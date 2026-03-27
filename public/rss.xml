@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>WorldAML Blog – Compliance Intelligence</title>
+    <link>https://worldaml-clarity-shield.lovable.app/blog</link>
+    <description>Expert insights on AML compliance, sanctions screening, KYC/KYB, risk assessment, and regulatory updates from WorldAML.</description>
+    <language>en</language>
+    <lastBuildDate>Fri, 27 Mar 2026 20:32:18 GMT</lastBuildDate>
+    <atom:link href="https://worldaml-clarity-shield.lovable.app/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>AML for Real Estate Agents: Obligations, Red Flags, and Compliance Workflows</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/aml-real-estate-property-transactions</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/aml-real-estate-property-transactions</guid>
+      <pubDate>Sat, 08 Mar 2025 00:00:00 GMT</pubDate>
+      <description>Real estate is consistently identified by the Financial Action Task Force (FATF) as one of the most significant money laundering vulnerabilities globally. High transaction values, complex ownership structures, and the relative opacity of property markets make them attractive channels for illicit funds. For estate agents, developers, and property professionals, AML obligations are no longer optional — they are legally mandated and increasingly enforced.</description>
+      <category>AML Compliance</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>PSD2 and Open Banking: AML Obligations for Third-Party Providers</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/psd2-open-banking-aml-obligations</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/psd2-open-banking-aml-obligations</guid>
+      <pubDate>Sat, 08 Mar 2025 00:00:00 GMT</pubDate>
+      <description>The EU&apos;s Second Payment Services Directive (PSD2) fundamentally reshaped the European payments landscape by mandating open access to bank account data and enabling third parties to initiate payments on behalf of customers. While PSD2&apos;s innovation goals are well-documented, its AML implications for the new category of Third-Party Providers (TPPs) — Account Information Service Providers (AISPs) and Payment Initiation Service Providers (PISPs) — are frequently overlooked. This guide sets out what PSD2 firms must do to meet their AML obligations.</description>
+      <category>Regulatory Updates</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>DORA Regulation: What Financial Institutions Need to Know About Digital Operational Resilience</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/dora-regulation-compliance-financial-institutions</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/dora-regulation-compliance-financial-institutions</guid>
+      <pubDate>Sat, 08 Mar 2025 00:00:00 GMT</pubDate>
+      <description>The EU&apos;s Digital Operational Resilience Act (DORA) — Regulation (EU) 2022/2554 — became applicable across all EU member states on 17 January 2025. DORA establishes a comprehensive framework for managing ICT (Information and Communications Technology) risk in the financial sector, creating binding requirements for banks, payment institutions, investment firms, insurance companies, crypto-asset service providers, and the ICT third-party providers that serve them. For compliance and technology teams, DORA represents a significant new operational obligation alongside existing AML and prudential frameworks.</description>
+      <category>Regulatory Updates</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>The FATF Travel Rule Explained: Obligations for VASPs and Financial Institutions</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/fatf-travel-rule-explained</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/fatf-travel-rule-explained</guid>
+      <pubDate>Wed, 05 Mar 2025 00:00:00 GMT</pubDate>
+      <description>The FATF Travel Rule — so called because customer information &apos;travels&apos; with the transaction — is one of the most technically complex compliance obligations in modern financial regulation. Originally established for traditional wire transfers in FATF Recommendation 16, it was extended to Virtual Asset Service Providers in the 2019 update to Recommendation 15. Compliance requires not just policy but technical infrastructure to capture, transmit, and verify the required data.</description>
+      <category>Regulatory Updates</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>AML Compliance for Crypto Exchanges and VASPs: 2025 Regulatory Guide</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/aml-compliance-crypto-vasp</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/aml-compliance-crypto-vasp</guid>
+      <pubDate>Sat, 01 Mar 2025 00:00:00 GMT</pubDate>
+      <description>Virtual Asset Service Providers (VASPs) — including cryptocurrency exchanges, custodial wallet providers, and crypto-to-fiat conversion platforms — are now subject to the same AML/CFT obligations as traditional financial institutions in most major jurisdictions. With FATF&apos;s Recommendation 15, the EU&apos;s MiCA Regulation, and FinCEN&apos;s enforcement posture all tightening simultaneously, crypto compliance is one of the most demanding areas in financial crime prevention.</description>
+      <category>AML Compliance</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>iGaming AML Obligations: What Online Gambling Operators Must Do</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/igaming-aml-obligations</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/igaming-aml-obligations</guid>
+      <pubDate>Sat, 22 Feb 2025 00:00:00 GMT</pubDate>
+      <description>The online gambling sector is a high-risk industry for money laundering, and regulators in the UK, EU, and internationally have consistently identified iGaming as a priority target for AML enforcement. Operators that fail to implement adequate controls face licence revocation, multi-million-pound fines, and in some cases criminal prosecution of senior officers. This guide sets out the key AML obligations for online gambling operators.</description>
+      <category>AML Compliance</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>AML Compliance Checklist for Financial Institutions in 2025</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/aml-compliance-checklist-2025</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/aml-compliance-checklist-2025</guid>
+      <pubDate>Tue, 18 Feb 2025 00:00:00 GMT</pubDate>
+      <description>Anti-money laundering (AML) compliance is no longer a tick-box exercise — it is a core operational function for any regulated financial institution. With FATF mutual evaluations intensifying, national regulators tightening enforcement, and fines reaching record highs, having a robust, auditable AML programme is essential. This checklist distils the key obligations into actionable steps.</description>
+      <category>AML Compliance</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>MLRO Responsibilities and Obligations: A Complete Guide for Money Laundering Reporting Officers</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/mlro-responsibilities-obligations</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/mlro-responsibilities-obligations</guid>
+      <pubDate>Mon, 10 Feb 2025 00:00:00 GMT</pubDate>
+      <description>The Money Laundering Reporting Officer (MLRO) is the individual legally responsible for a firm&apos;s AML compliance programme. In the UK and across the EU, the MLRO role carries personal legal liability — making it one of the most consequential compliance appointments in any regulated firm. This guide sets out what MLROs must know, what they must do, and how to build a compliance function that protects both the firm and themselves personally.</description>
+      <category>AML Compliance</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>Transaction Monitoring Red Flags: 25 Indicators of Suspicious Activity</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/transaction-monitoring-red-flags</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/transaction-monitoring-red-flags</guid>
+      <pubDate>Wed, 05 Feb 2025 00:00:00 GMT</pubDate>
+      <description>Transaction monitoring is the engine of any AML programme — but it is only as good as the red flags it is configured to detect. Knowing which indicators are most likely to reflect genuine money laundering activity, and distinguishing them from legitimate unusual transactions, is both an art and a science. This reference guide collects 25 of the most operationally significant red flags, organised by money laundering stage.</description>
+      <category>AML Compliance</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>KYC vs KYB: Key Differences and Why Both Matter</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/kyc-vs-kyb-differences</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/kyc-vs-kyb-differences</guid>
+      <pubDate>Thu, 30 Jan 2025 00:00:00 GMT</pubDate>
+      <description>Know Your Customer (KYC) and Know Your Business (KYB) are both mandated by anti-money laundering regulations, yet they serve distinct purposes and involve fundamentally different verification workflows. Confusing or conflating the two leads to compliance gaps — particularly in corporate onboarding.</description>
+      <category>KYC &amp; KYB</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>EDD vs SDD: When to Apply Enhanced or Simplified Due Diligence</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/edd-vs-sdd-enhanced-simplified-due-diligence</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/edd-vs-sdd-enhanced-simplified-due-diligence</guid>
+      <pubDate>Mon, 20 Jan 2025 00:00:00 GMT</pubDate>
+      <description>Customer due diligence is not one-size-fits-all. The risk-based approach requires firms to calibrate the level of due diligence applied to the actual risk posed by each customer relationship. At the extremes of the risk spectrum, Enhanced Due Diligence (EDD) and Simplified Due Diligence (SDD) represent fundamentally different levels of scrutiny — each with distinct legal requirements and documentation obligations.</description>
+      <category>KYC &amp; KYB</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>Sanctions Screening Best Practices: Reducing False Positives Without Increasing Risk</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/sanctions-screening-best-practices</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/sanctions-screening-best-practices</guid>
+      <pubDate>Tue, 14 Jan 2025 00:00:00 GMT</pubDate>
+      <description>Sanctions screening is one of the highest-stakes operations in a compliance programme. A missed hit can result in criminal liability, multi-million dollar fines, and reputational damage. But excessive false positives create alert fatigue, slow down onboarding, and burn analyst capacity. The goal is precision — catching every genuine hit while managing false positives intelligently.</description>
+      <category>Sanctions</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>Adverse Media Screening: Why Negative News Checks Are Essential for AML</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/adverse-media-screening-guide</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/adverse-media-screening-guide</guid>
+      <pubDate>Sun, 12 Jan 2025 00:00:00 GMT</pubDate>
+      <description>Adverse media screening — also called negative news screening — is the systematic search for negative information about a customer or counterparty in news sources, public records, and online databases. It is an increasingly important component of both KYC onboarding and ongoing monitoring, providing intelligence that sanctions lists and PEP databases alone cannot capture.</description>
+      <category>AML Compliance</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>The Risk-Based Approach to AML: A Practical Implementation Guide</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/risk-based-approach-aml</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/risk-based-approach-aml</guid>
+      <pubDate>Tue, 07 Jan 2025 00:00:00 GMT</pubDate>
+      <description>The risk-based approach (RBA) is the cornerstone of modern AML regulation. Rather than applying identical controls to every customer and transaction, the RBA requires firms to identify, assess, and understand their specific money laundering and terrorist financing risks — then apply proportionate controls. Regulators globally, following FATF Recommendation 1, now mandate this approach.</description>
+      <category>Risk Assessment</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>FATCA and CRS Reporting: Obligations for Financial Institutions</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/fatca-crs-reporting-guide</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/fatca-crs-reporting-guide</guid>
+      <pubDate>Sun, 05 Jan 2025 00:00:00 GMT</pubDate>
+      <description>FATCA (Foreign Account Tax Compliance Act) and the OECD&apos;s Common Reporting Standard (CRS) together form the backbone of the global Automatic Exchange of Information (AEOI) regime. Financial institutions in over 100 jurisdictions are required to identify accounts held by foreign tax residents, collect prescribed information, and report it to their local tax authority annually for onward transmission to partner jurisdictions. Non-compliance carries substantial penalties.</description>
+      <category>Regulatory Updates</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>Beneficial Ownership Verification: Regulatory Requirements and Practical Steps</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/beneficial-ownership-guide</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/beneficial-ownership-guide</guid>
+      <pubDate>Thu, 19 Dec 2024 00:00:00 GMT</pubDate>
+      <description>Beneficial ownership transparency is at the heart of the global fight against money laundering, corruption, and tax evasion. Shell companies and complex corporate structures remain the primary vehicles for concealing the proceeds of crime. Identifying and verifying the Ultimate Beneficial Owner (UBO) — the real human being who ultimately owns or controls a corporate entity — is a non-negotiable AML obligation.</description>
+      <category>KYC &amp; KYB</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+    <item>
+      <title>PEP Screening Guide: Who Are PEPs and How to Screen Them Effectively</title>
+      <link>https://worldaml-clarity-shield.lovable.app/blog/pep-screening-guide</link>
+      <guid isPermaLink="true">https://worldaml-clarity-shield.lovable.app/blog/pep-screening-guide</guid>
+      <pubDate>Thu, 05 Dec 2024 00:00:00 GMT</pubDate>
+      <description>Politically Exposed Persons (PEPs) represent a higher risk of corruption, bribery, and the laundering of proceeds from public office abuse. Regulators require financial institutions to identify PEPs, apply Enhanced Due Diligence (EDD), and maintain ongoing monitoring for the duration of the relationship — and often for a defined period after a person leaves a PEP role.</description>
+      <category>AML Compliance</category>
+      <author>WorldAML Compliance Team</author>
+    </item>
+  </channel>
+</rss>
