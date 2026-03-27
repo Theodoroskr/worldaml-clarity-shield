@@ -77,6 +77,9 @@ const DataCoverageCountry = lazy(() => import("./pages/DataCoverageCountry"));
 const Academy = lazy(() => import("./pages/Academy"));
 const AcademyCourse = lazy(() => import("./pages/AcademyCourse"));
 const AcademyCertificate = lazy(() => import("./pages/AcademyCertificate"));
+const AMLApi = lazy(() => import("./pages/AMLApi"));
+const SanctionsScreeningApi = lazy(() => import("./pages/SanctionsScreeningApi"));
+const KYCKYBApi = lazy(() => import("./pages/KYCKYBApi"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
