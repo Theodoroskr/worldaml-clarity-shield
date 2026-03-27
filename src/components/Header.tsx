@@ -73,6 +73,7 @@ const navLinks: NavLink[] = [
     label: "Resources",
     children: [
       { href: "/free-aml-check", label: "Free AML Check" },
+      { href: "/academy", label: "Academy" },
       { href: "/industries", label: "Industries" },
       { href: "/news", label: "News" },
       { href: "/resources/best-practices", label: "Best Practices" },
