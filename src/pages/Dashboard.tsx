@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert, Search, GraduationCap, Award } from "lucide-react";
+import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert, Search, GraduationCap, Award, Share2, ExternalLink, Copy } from "lucide-react";
 import { CrossSellCard } from "@/components/CrossSellCard";
 import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
 import { SearchHistoryPanel, SearchHistoryHandle } from "@/components/sanctions/SearchHistoryPanel";
@@ -18,6 +18,22 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
   const historyRef = useRef<SearchHistoryHandle>(null);
+  const [certificates, setCertificates] = useState<any[]>([]);
+  const [certsLoading, setCertsLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from("academy_certificates")
+        .select("*, academy_courses(title, slug)")
+        .eq("user_id", user.id)
+        .order("issued_at", { ascending: false })
+        .then(({ data }) => {
+          setCertificates(data ?? []);
+          setCertsLoading(false);
+        });
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -171,7 +187,95 @@ const Dashboard = () => {
             <SearchHistoryPanel ref={historyRef} />
           </div>
 
-          {/* Cross-sell: add analyst seats */}
+          {/* My Certificates */}
+          <div className="mt-10 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-navy flex items-center gap-2">
+                <Award className="h-5 w-5 text-teal" />
+                My Certificates
+              </h2>
+              {certificates.length > 0 && (
+                <Button variant="ghost" size="sm" onClick={() => navigate("/academy")}>
+                  Earn more →
+                </Button>
+              )}
+            </div>
+            {certsLoading ? (
+              <div className="flex items-center gap-2 text-sm text-text-secondary py-4">
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading certificates…
+              </div>
+            ) : certificates.length === 0 ? (
+              <Card className="border-dashed">
+                <CardContent className="py-8 text-center">
+                  <GraduationCap className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm font-medium text-navy mb-1">No certificates yet</p>
+                  <p className="text-xs text-text-secondary mb-4">Complete a course quiz with 80%+ to earn your first certificate.</p>
+                  <Button size="sm" onClick={() => navigate("/academy")}>Start Learning</Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-3">
+                {certificates.map((cert) => {
+                  const certUrl = `${window.location.origin}/academy/certificate/${cert.share_token}`;
+                  return (
+                    <Card key={cert.id} className="hover:shadow-sm transition-shadow">
+                      <CardContent className="flex items-center gap-4 py-4">
+                        <div className="w-10 h-10 rounded-lg bg-teal/10 flex items-center justify-center flex-shrink-0">
+                          <Award className="h-5 w-5 text-teal" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-navy truncate">
+                            {cert.academy_courses?.title ?? "Course"}
+                          </p>
+                          <p className="text-xs text-text-secondary">
+                            Score: {cert.score}% · {new Date(cert.issued_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            title="Copy share link"
+                            onClick={() => {
+                              navigator.clipboard.writeText(certUrl);
+                              toast.success("Certificate link copied!");
+                            }}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            title="View certificate"
+                            onClick={() => navigate(`/academy/certificate/${cert.share_token}`)}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            title="Share on LinkedIn"
+                            onClick={() => {
+                              window.open(
+                                `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(certUrl)}`,
+                                "_blank"
+                              );
+                            }}
+                          >
+                            <Share2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <div className="mt-8">
             <CrossSellCard
               variant="compact"
