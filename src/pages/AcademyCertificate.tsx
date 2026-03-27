@@ -78,7 +78,7 @@ const AcademyCertificate = () => {
         title={`${cert.holder_name} — ${course?.title} Certificate | WorldAML Academy`}
         description={`${cert.holder_name} earned the ${course?.title} certificate from WorldAML Academy with a score of ${cert.score}%.`}
         canonical={`/academy/certificate/${token}`}
-        ogImage="/og-certificate.png"
+        
       />
       <Header />
       <main className="flex-1">
