@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert, Search, GraduationCap, Award } from "lucide-react";
+import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert, Search, GraduationCap, Award, Share2, ExternalLink, Copy } from "lucide-react";
 import { CrossSellCard } from "@/components/CrossSellCard";
 import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
 import { SearchHistoryPanel, SearchHistoryHandle } from "@/components/sanctions/SearchHistoryPanel";
@@ -18,6 +18,22 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
   const historyRef = useRef<SearchHistoryHandle>(null);
+  const [certificates, setCertificates] = useState<any[]>([]);
+  const [certsLoading, setCertsLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from("academy_certificates")
+        .select("*, academy_courses(title, slug)")
+        .eq("user_id", user.id)
+        .order("issued_at", { ascending: false })
+        .then(({ data }) => {
+          setCertificates(data ?? []);
+          setCertsLoading(false);
+        });
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!isLoading && !user) {
