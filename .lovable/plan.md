@@ -1,45 +1,34 @@
 
 
-## Update Certificate Page: "WorldAML Academy" Branding + CPD Hours
+## Fix Certificate Sharing + Create Proper Badge
 
-### Problem
-The certificate page currently shows the generic WorldAML logo (via `<Logo />` component) rather than "WorldAML Academy" branding, and it doesn't display the CPD hours earned for the course.
+### Problems identified
+1. **LinkedIn sharing**: The `shareArticle` endpoint is deprecated. LinkedIn now uses `sharing/share-offsite/` for link sharing.
+2. **Popup blockers**: `window.open()` with specific dimensions triggers popup blockers in many browsers. Should use `_blank` target without size constraints.
+3. **Copy link works** — this part is fine with the published origin URL.
+4. **Badge is not shareable** — it's just a visual div. Users need something they can actually download/embed.
 
 ### Changes — Single file: `src/pages/AcademyCertificate.tsx`
 
-1. **Replace `<Logo />` with "WorldAML Academy" text branding**
-   - Remove the `<Logo>` component import and usage
-   - Replace with a styled heading: "WorldAML Academy" in navy with a smaller "Compliance Education & Certification" tagline beneath — matching the email template style
+1. **Fix LinkedIn share URL**
+   - Change from: `linkedin.com/shareArticle?mini=true&url=...&title=...`
+   - Change to: `linkedin.com/sharing/share-offsite/?url=...`
+   - Remove the `width/height` from `window.open` — just use `"_blank"` target via `window.open(url, "_blank")` to avoid popup blockers
 
-2. **Add CPD hours to the certificate body**
-   - The `academy_courses` table already has a `cpd_hours` column (joined via `academy_courses(*)`)
-   - Add a CPD hours badge below the score line, e.g.: "This course is accredited for **{n} CPD Hour(s)**"
-   - Also add CPD hours to the verification footer row (alongside "Verified", "Issued", "ID")
+2. **Fix X/Twitter share**
+   - Same fix: remove the `width/height` constraints from `window.open` to avoid popup blockers
 
-### Visual result on the certificate card:
+3. **Add a native share option**
+   - Use `navigator.share()` API (available on mobile and modern browsers) as an additional option alongside LinkedIn/X/Copy
+   - Falls back gracefully — button hidden if API not available
 
-```text
-┌──────────────────────────────────────┐
-│         WorldAML Academy             │
-│  Compliance Education & Certification│
-│  ──────────────────────────────────  │
-│      Certificate of Completion       │
-│        {Course Title}                │
-│                                      │
-│      This certifies that             │
-│        John Doe                      │
-│                                      │
-│   completed ... with a score of 92%  │
-│                                      │
-│   ✓ Verified  |  Issued: 27 Mar 2026 │
-│   📘 2 CPD Hours  |  ID: ABC123      │
-│                                      │
-│  WorldAML Academy — worldaml.com     │
-└──────────────────────────────────────┘
-```
+4. **Make badge downloadable**
+   - Add a "Download Badge" button that uses `html2canvas` or a canvas-based approach to render the badge as a PNG image the user can save
+   - Since adding a dependency may be complex, a simpler approach: render the badge as an SVG-based element and provide a download link using a data URI
 
-### Technical Details
-- `course.cpd_hours` is already available from the existing query (`select("*, academy_courses(*)")`)
-- No database changes needed
-- Single file edit
+### Simpler alternative for badge download
+Instead of `html2canvas`, generate a small SVG string containing the badge content (course title, score, CPD) and convert it to a downloadable PNG via canvas. This keeps it dependency-free.
+
+### Files changed
+- `src/pages/AcademyCertificate.tsx` — fix share URLs, add native share, add badge download
 
