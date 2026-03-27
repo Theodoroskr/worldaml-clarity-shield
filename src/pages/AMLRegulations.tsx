@@ -359,7 +359,7 @@ const AMLRegulations = () => {
                 </p>
               </div>
               <div className="overflow-x-auto rounded-2xl border border-divider">
-                <table className="w-full text-body-sm min-w-[860px]">
+                <table className="w-full text-body-sm min-w-[1400px]">
                   <thead>
                     <tr className="bg-surface-subtle border-b border-divider">
                       <th className="text-left font-semibold text-navy px-5 py-4 w-44">
