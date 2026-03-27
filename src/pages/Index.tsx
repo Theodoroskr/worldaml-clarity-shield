@@ -40,6 +40,7 @@ const Index = () => {
         <IndustriesSection />
         <HowItWorksSection />
         <GlobalReachSection />
+        <AcademyPromoSection />
         <TrustedByLogos 
           title="Trusted by Regulated Organisations"
           description="Financial institutions, fintechs, and compliance teams rely on WorldAML for their financial crime screening requirements."
