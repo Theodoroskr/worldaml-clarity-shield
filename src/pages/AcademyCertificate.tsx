@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Award, Download, Linkedin, Twitter, Share2, ArrowLeft, CheckCircle } from "lucide-react";
-import { Logo } from "@/components/Logo";
+import { BookOpen } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -99,8 +99,9 @@ const AcademyCertificate = () => {
                 <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-primary/30 rounded-br-lg" />
 
                 <div className="mb-6">
-                  <Logo size="lg" showTagline className="justify-center mb-5" />
-                  <div className="w-16 h-px bg-border mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold text-primary tracking-tight">WorldAML Academy</h3>
+                  <p className="text-body-sm text-muted-foreground">Compliance Education &amp; Certification</p>
+                  <div className="w-16 h-px bg-border mx-auto mt-4 mb-4" />
                   <p className="text-caption uppercase tracking-widest text-muted-foreground font-semibold mb-1">
                     Certificate of Completion
                   </p>
@@ -112,10 +113,17 @@ const AcademyCertificate = () => {
                   {cert.holder_name}
                 </h2>
 
-                <p className="text-body text-muted-foreground mb-6">
+                <p className="text-body text-muted-foreground mb-2">
                   has successfully completed the <strong>{course?.title}</strong> course 
                   at WorldAML Academy with a score of <strong>{cert.score}%</strong>.
                 </p>
+
+                {course?.cpd_hours > 0 && (
+                  <div className="inline-flex items-center gap-1.5 bg-secondary/40 text-foreground rounded-full px-4 py-1.5 text-body-sm font-medium mb-6">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    Accredited for {course.cpd_hours} CPD Hour{course.cpd_hours !== 1 ? "s" : ""}
+                  </div>
+                )}
 
                 <div className="flex items-center justify-center gap-6 text-body-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
