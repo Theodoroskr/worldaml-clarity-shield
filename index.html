@@ -8,15 +8,22 @@
     <link rel="canonical" href="https://www.worldaml.com/" />
     <link rel="alternate" type="application/rss+xml" title="WorldAML Blog RSS Feed" href="/rss.xml" />
 
-    <!-- JSON-LD Structured Data -->
+    <!-- JSON-LD: Organization -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Organization",
+      "@id": "https://www.worldaml.com/#organization",
       "name": "WorldAML",
+      "legalName": "WorldAML",
       "url": "https://www.worldaml.com",
-      "logo": "https://www.worldaml.com/favicon.svg",
-      "description": "Financial crime screening infrastructure for regulated organisations",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.worldaml.com/favicon.svg",
+        "width": 512,
+        "height": 512
+      },
+      "description": "Enterprise-grade financial crime screening infrastructure for regulated organisations worldwide.",
       "parentOrganization": {
         "@type": "Organization",
         "name": "Infocredit Group",
@@ -29,31 +36,85 @@
         "@type": "ContactPoint",
         "contactType": "sales",
         "url": "https://www.worldaml.com/contact-sales"
-      }
+      },
+      "knowsAbout": ["AML Screening","KYC","KYB","Sanctions Screening","PEP Screening","Adverse Media","Transaction Monitoring","Regulatory Reporting"]
     }
     </script>
+
+    <!-- JSON-LD: WebSite with SearchAction -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
+      "@id": "https://www.worldaml.com/#website",
       "name": "WorldAML",
-      "url": "https://www.worldaml.com"
+      "url": "https://www.worldaml.com",
+      "publisher": { "@id": "https://www.worldaml.com/#organization" }
     }
     </script>
+
+    <!-- JSON-LD: Product (Platform) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
+      "@type": "Product",
+      "@id": "https://www.worldaml.com/#product",
       "name": "WorldAML Platform",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web",
+      "description": "Unified compliance platform for AML sanctions screening, PEP checks, adverse media monitoring, KYC/KYB verification, transaction monitoring and regulatory reporting.",
+      "url": "https://www.worldaml.com/platform",
+      "brand": { "@id": "https://www.worldaml.com/#organization" },
+      "category": "Compliance Software",
       "offers": {
-        "@type": "Offer",
-        "price": "99",
+        "@type": "AggregateOffer",
         "priceCurrency": "EUR",
-        "priceValidUntil": "2027-12-31",
-        "availability": "https://schema.org/OnlineOnly"
+        "lowPrice": "99",
+        "highPrice": "499",
+        "offerCount": "2",
+        "availability": "https://schema.org/OnlineOnly",
+        "url": "https://www.worldaml.com/pricing"
       }
+    }
+    </script>
+
+    <!-- JSON-LD: WebAPI – AML Screening API -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebAPI",
+      "name": "WorldAML AML Screening API",
+      "description": "RESTful API for automated AML sanctions, PEP, and adverse media screening with real-time results and ongoing monitoring.",
+      "url": "https://www.worldaml.com/aml-api",
+      "provider": { "@id": "https://www.worldaml.com/#organization" },
+      "documentation": "https://www.worldaml.com/aml-api",
+      "termsOfService": "https://www.worldaml.com/terms"
+    }
+    </script>
+
+    <!-- JSON-LD: WebAPI – Sanctions Screening API -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebAPI",
+      "name": "WorldAML Sanctions Screening API",
+      "description": "Real-time sanctions list screening API covering OFAC, EU, UN, HMT and 1,400+ global sanctions lists with sub-second response times.",
+      "url": "https://www.worldaml.com/sanctions-screening-api",
+      "provider": { "@id": "https://www.worldaml.com/#organization" },
+      "documentation": "https://www.worldaml.com/sanctions-screening-api",
+      "termsOfService": "https://www.worldaml.com/terms"
+    }
+    </script>
+
+    <!-- JSON-LD: WebAPI – KYC/KYB API -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebAPI",
+      "name": "WorldAML KYC/KYB API",
+      "description": "Programmatic KYC and KYB verification API for identity verification, company due diligence, and beneficial ownership screening.",
+      "url": "https://www.worldaml.com/kyc-kyb-api",
+      "provider": { "@id": "https://www.worldaml.com/#organization" },
+      "documentation": "https://www.worldaml.com/kyc-kyb-api",
+      "termsOfService": "https://www.worldaml.com/terms"
     }
     </script>
   </head>
