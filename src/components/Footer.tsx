@@ -29,6 +29,7 @@ const footerLinks = {
     { href: "/support", label: "Support" },
     { href: "/faq", label: "FAQ" },
     { href: "/news", label: "News" },
+    { href: "/partners", label: "Partner Program" },
   ],
   resources: [
     { href: "https://worldaml.readme.io", label: "API Documentation", external: true },

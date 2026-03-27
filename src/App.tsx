@@ -69,6 +69,9 @@ const Glossary = lazy(() => import("./pages/Glossary"));
 const AMLRegulations = lazy(() => import("./pages/AMLRegulations"));
 const MarketPage = lazy(() => import("./pages/MarketPage"));
 const FreeAMLCheck = lazy(() => import("./pages/FreeAMLCheck"));
+const Partners = lazy(() => import("./pages/Partners"));
+const PartnerApply = lazy(() => import("./pages/PartnerApply"));
+const PartnerDashboard = lazy(() => import("./pages/PartnerDashboard"));
 const DataCoverageIndex = lazy(() => import("./pages/DataCoverageIndex"));
 const DataCoverageCountry = lazy(() => import("./pages/DataCoverageCountry"));
 
@@ -166,6 +169,11 @@ const App = () => (
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 
+                {/* Partners */}
+                <Route path="/partners" element={<Partners />} />
+                <Route path="/partners/apply" element={<PartnerApply />} />
+                <Route path="/partners/dashboard" element={<PartnerDashboard />} />
+
                 {/* Markets */}
                 <Route path="/markets/:market" element={<MarketPage />} />
                 
