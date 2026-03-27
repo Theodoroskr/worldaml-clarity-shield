@@ -1,28 +1,29 @@
 
 
-## Plan: Add 6 More AML Regulation Jurisdictions
+## Plan: SEO and Readability Fixes for AML Regulations Page
 
-Add Japan, South Korea, Switzerland, Luxembourg, Cayman Islands, and Jersey to the AML Regulations data file, bringing the total from 6 to 12.
+The page currently references "six frameworks" and only shows 6 filter tabs, despite having 12 jurisdictions in the data. SEO metadata, structured data, filter tabs, comparison table headers, and copy all need updating.
 
 ### Changes
 
-**`src/data/amlRegulations.ts`**
+**1. `src/pages/AMLRegulations.tsx`**
 
-Add 6 new `AMLRegulation` entries (same structure as existing ones) before the `comparisonMatrix`:
+- **SEO metadata**: Update title to "AML Regulations by Jurisdiction — 12 Countries Compared" and description to list all regions (EU, UK, US, Japan, Switzerland, etc.)
+- **Filter tabs**: Add the 6 missing jurisdiction tabs (Japan, South Korea, Switzerland, Luxembourg, Cayman Islands, Jersey) to the `jurisdictions` array
+- **Comparison matrix header**: Add the 6 missing column headers (`japan`, `southKorea`, `switzerland`, `luxembourg`, `cayman`, `jersey`) and update the `tbody` mapping to include all 12 keys
+- **Comparison section copy**: "all six frameworks" → "all twelve frameworks"
+- **Structured data description**: Update to mention all 12 jurisdictions
+- **Hero subtitle**: Mention 12 jurisdictions explicitly for clarity
+- **Add internal links** in the hero or below the subtitle:
+  - Link to `/platform/aml-screening` ("AML Screening Platform")
+  - Link to `/resources/glossary` ("Compliance Glossary")
+  - Link to `/free-aml-check` ("Free Sanctions Check")
+- **Add a "Related Resources" section** above the bottom CTA with links to relevant blog posts and platform pages (improves internal linking for SEO)
 
-| ID | Jurisdiction | Flag | Authority | Key Legislation |
-|----|-------------|------|-----------|-----------------|
-| `japan-aml` | Japan | 🇯🇵 | JAFIC / FSA Japan | Act on Prevention of Transfer of Criminal Proceeds |
-| `south-korea-aml` | South Korea | 🇰🇷 | KoFIU / FSC | Act on Reporting and Using Specified Financial Transaction Information |
-| `switzerland-aml` | Switzerland | 🇨🇭 | FINMA / MROS | AMLA (Anti-Money Laundering Act) |
-| `luxembourg-aml` | Luxembourg | 🇱🇺 | CSSF / CRF | AML Law of 2004 (as amended) |
-| `cayman-islands-aml` | Cayman Islands | 🇰🇾 | CIMA / FRA | Anti-Money Laundering Regulations (2020 Rev.) |
-| `jersey-aml` | Jersey | 🇯🇪 | JFSC | Proceeds of Crime (Jersey) Law 1999 / Money Laundering Order |
+**2. `src/data/amlRegulations.ts`** (minor)
 
-Each entry includes: authority, status, effective date, scope, 6-8 key obligations, UBO threshold, PEP/sanctions requirements, penalty regime, timeline, and official URL.
-
-**Update `comparisonMatrix`** — Add 6 new columns (`japan`, `southKorea`, `switzerland`, `luxembourg`, `cayman`, `jersey`) to each row with jurisdiction-specific values for UBO threshold, PEP EDD, SAR filing, sanctions screening, crypto coverage, record retention, and max penalty.
+- Ensure each regulation entry has meaningful `relatedLinks` pointing to real internal pages (some may reference blog posts that don't exist yet — verify and fix any broken link targets)
 
 ### Scope
-- 1 file (`src/data/amlRegulations.ts`), ~400 lines added
+- 1-2 files, mostly copy and metadata updates in `AMLRegulations.tsx`
 
