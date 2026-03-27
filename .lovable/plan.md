@@ -1,25 +1,16 @@
 
 
-## Plan: Add Header & Footer to Sanctions Check and Data Coverage Pages
+## Plan: Hide LexisNexis Price for Guests
 
-The Sanctions Quick Check page currently has a custom mini logo instead of the main navigation. The Data Coverage pages (index + country) also lack Header/Footer. All three need the standard site navigation for consistent browsing.
+Remove the "Starting from €75/user/month" price from the LexisNexis card in the public (non-authenticated) view on the Pricing page. Replace it with a "Log in to see pricing" prompt, consistent with the gate-pricing-behind-auth strategy.
 
 ### Changes
 
-**1. `src/pages/SanctionsCheck.tsx`**
-- Import `Header` and `Footer`
-- Wrap content in the standard `<div className="min-h-screen flex flex-col">` layout with `<Header />` at top and `<Footer />` at bottom
-- Remove the "mini brand header" block (the logo-only link around lines 152-161) since Header now provides navigation
-
-**2. `src/pages/DataCoverageIndex.tsx`**
-- Import `Header` and `Footer`
-- Wrap existing JSX in standard layout wrapper with Header/Footer
-
-**3. `src/pages/DataCoverageCountry.tsx`**
-- Import `Header` and `Footer`
-- Wrap existing JSX in standard layout wrapper with Header/Footer
+**`src/pages/Pricing.tsx`** (lines 386-390)
+- Remove the price block (`Starting from`, `€75`, `/user/month`)
+- Replace with a lock icon and "Sign up to see pricing" text, matching the existing CTA style below it
+- Keep all feature bullet points (2.5M+ profiles, unlimited searches, progressive discounts) visible to guests
 
 ### Scope
-- 3 file edits, no new files
-- Adds consistent navigation bar and footer across all subpages
+- 1 file, ~5 lines changed
 
