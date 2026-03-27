@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3 } from "lucide-react";
+import { ArrowRight, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers } from "lucide-react";
 
 const difficultyColor: Record<string, string> = {
   beginner: "bg-emerald-100 text-emerald-700",
@@ -16,11 +16,22 @@ const difficultyColor: Record<string, string> = {
   advanced: "bg-rose-100 text-rose-700",
 };
 
+const categoryConfig: Record<string, { label: string; color: string; icon: typeof Globe }> = {
+  foundational: { label: "Foundational", color: "bg-sky-100 text-sky-700", icon: BookOpen },
+  regional: { label: "Regional", color: "bg-violet-100 text-violet-700", icon: MapPin },
+  "global-specialisation": { label: "Specialisation", color: "bg-teal-100 text-teal-700", icon: Layers },
+  global: { label: "Global", color: "bg-slate-100 text-slate-700", icon: Globe },
+};
+
 type FilterTab = "all" | "in-progress" | "completed";
+type CategoryFilter = "all" | "foundational" | "regional" | "global-specialisation";
+type DifficultyFilter = "all" | "beginner" | "intermediate" | "advanced";
 
 const Academy = () => {
   const { user } = useAuth();
   const [filter, setFilter] = useState<FilterTab>("all");
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
 
   const { data: courses, isLoading } = useQuery({
     queryKey: ["academy-courses"],
@@ -75,6 +86,11 @@ const Academy = () => {
   };
 
   const filteredCourses = courses?.filter((course) => {
+    // Category filter
+    if (categoryFilter !== "all" && (course as any).category !== categoryFilter) return false;
+    // Difficulty filter
+    if (difficultyFilter !== "all" && course.difficulty !== difficultyFilter) return false;
+    // Progress filter (logged-in only)
     if (filter === "all") return true;
     const status = getCourseStatus(course.id);
     if (filter === "completed") return status === "completed";
@@ -85,6 +101,11 @@ const Academy = () => {
   const completedCount = courses?.filter((c) => getCourseStatus(c.id) === "completed").length || 0;
   const inProgressCount = courses?.filter((c) => getCourseStatus(c.id) === "in-progress").length || 0;
   const certsCount = certificates?.length || 0;
+
+  const formatCpd = (hours: number) => {
+    if (!hours) return null;
+    return `${hours} CPD Hr${hours !== 1 ? "s" : ""}`;
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -125,7 +146,8 @@ const Academy = () => {
               <div className="flex flex-wrap justify-center gap-6 text-body-sm text-slate-light">
                 <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-teal-light" /> Interactive Courses</span>
                 <span className="flex items-center gap-2"><Award className="h-4 w-4 text-teal-light" /> Shareable Certificates</span>
-                <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-teal-light" /> Industry-Recognised</span>
+                <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-teal-light" /> CPD-Accredited</span>
+                <span className="flex items-center gap-2"><Globe className="h-4 w-4 text-teal-light" /> Industry-Recognised</span>
               </div>
             </div>
           </div>
@@ -166,19 +188,21 @@ const Academy = () => {
               </p>
             </div>
 
-            {/* Filter Tabs (logged-in only) */}
-            {user && (
-              <div className="flex gap-2 mb-8 justify-center">
+            {/* Filters */}
+            <div className="space-y-4 mb-8">
+              {/* Category Filter */}
+              <div className="flex flex-wrap gap-2 justify-center">
                 {([
-                  { key: "all" as FilterTab, label: "All Courses" },
-                  { key: "in-progress" as FilterTab, label: "In Progress" },
-                  { key: "completed" as FilterTab, label: "Completed" },
+                  { key: "all" as CategoryFilter, label: "All Categories" },
+                  { key: "foundational" as CategoryFilter, label: "Foundational" },
+                  { key: "regional" as CategoryFilter, label: "Regional" },
+                  { key: "global-specialisation" as CategoryFilter, label: "Specialisation" },
                 ]).map((tab) => (
                   <button
                     key={tab.key}
-                    onClick={() => setFilter(tab.key)}
+                    onClick={() => setCategoryFilter(tab.key)}
                     className={`px-4 py-2 rounded-full text-body-sm font-medium transition-colors ${
-                      filter === tab.key
+                      categoryFilter === tab.key
                         ? "bg-primary text-primary-foreground"
                         : "bg-secondary text-muted-foreground hover:text-foreground"
                     }`}
@@ -187,7 +211,53 @@ const Academy = () => {
                   </button>
                 ))}
               </div>
-            )}
+
+              {/* Difficulty + Progress Filters */}
+              <div className="flex flex-wrap gap-2 justify-center">
+                {([
+                  { key: "all" as DifficultyFilter, label: "All Levels" },
+                  { key: "beginner" as DifficultyFilter, label: "Beginner" },
+                  { key: "intermediate" as DifficultyFilter, label: "Intermediate" },
+                  { key: "advanced" as DifficultyFilter, label: "Advanced" },
+                ]).map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setDifficultyFilter(tab.key)}
+                    className={`px-3 py-1.5 rounded-full text-caption font-medium transition-colors border ${
+                      difficultyFilter === tab.key
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+
+                {/* Progress filter for logged-in users */}
+                {user && (
+                  <>
+                    <span className="text-border self-center">|</span>
+                    {([
+                      { key: "all" as FilterTab, label: "All" },
+                      { key: "in-progress" as FilterTab, label: "In Progress" },
+                      { key: "completed" as FilterTab, label: "Completed" },
+                    ]).map((tab) => (
+                      <button
+                        key={tab.key}
+                        onClick={() => setFilter(tab.key)}
+                        className={`px-3 py-1.5 rounded-full text-caption font-medium transition-colors border ${
+                          filter === tab.key
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
 
             {isLoading ? (
               <div className="grid md:grid-cols-3 gap-6">
@@ -205,6 +275,9 @@ const Academy = () => {
                 {filteredCourses.map((course) => {
                   const status = getCourseStatus(course.id);
                   const cert = certMap.get(course.id);
+                  const catConfig = categoryConfig[(course as any).category] || categoryConfig.global;
+                  const cpd = (course as any).cpd_hours as number;
+                  const CatIcon = catConfig.icon;
                   return (
                     <Link
                       key={course.id}
@@ -227,33 +300,52 @@ const Academy = () => {
                         </div>
                       )}
 
-                      <div className="flex items-center gap-2 mb-4">
+                      <div className="flex flex-wrap items-center gap-2 mb-4">
                         <Badge className={difficultyColor[course.difficulty] || ""}>
                           {course.difficulty}
                         </Badge>
-                        <span className="text-caption text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-3.5 w-3.5" />
-                          {course.duration_minutes} min
-                        </span>
+                        <Badge className={catConfig.color}>
+                          <CatIcon className="h-3 w-3 mr-1" />
+                          {catConfig.label}
+                        </Badge>
                       </div>
+
                       <h3 className="text-subtitle font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
                         {course.title}
                       </h3>
                       <p className="text-body-sm text-muted-foreground mb-4 line-clamp-3">
                         {course.description}
                       </p>
-                      <span className="text-body-sm font-medium text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
-                        {status === "completed" ? "View Certificate" : status === "in-progress" ? "Continue Course" : "Start Course"} <ArrowRight className="h-4 w-4" />
-                      </span>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 text-caption text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3.5 w-3.5" />
+                            {course.duration_minutes} min
+                          </span>
+                          {cpd > 0 && (
+                            <span className="flex items-center gap-1 text-primary font-medium">
+                              <Award className="h-3.5 w-3.5" />
+                              {formatCpd(cpd)}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-body-sm font-medium text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                          {status === "completed" ? "View" : status === "in-progress" ? "Continue" : "Start"} <ArrowRight className="h-4 w-4" />
+                        </span>
+                      </div>
                     </Link>
                   );
                 })}
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">No courses found for this filter.</p>
-                <button onClick={() => setFilter("all")} className="text-primary text-body-sm font-medium mt-2 hover:underline">
-                  View all courses
+                <p className="text-muted-foreground">No courses found for these filters.</p>
+                <button
+                  onClick={() => { setCategoryFilter("all"); setDifficultyFilter("all"); setFilter("all"); }}
+                  className="text-primary text-body-sm font-medium mt-2 hover:underline"
+                >
+                  Clear all filters
                 </button>
               </div>
             )}
