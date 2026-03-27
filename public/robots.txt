@@ -39,6 +39,12 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
+User-agent: GoogleOther
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
 User-agent: *
 Allow: /
 Disallow: /login
