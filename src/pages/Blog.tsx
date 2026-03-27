@@ -78,6 +78,7 @@ const Blog = () => {
                 <Rss className="w-4 h-4" />
                 Subscribe via RSS
               </a>
+            </div>
           </div>
         </section>
 
