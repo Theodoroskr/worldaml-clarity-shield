@@ -1,29 +1,56 @@
 
 
-## Fix Partner Program Hero Section
+## Current State
 
-### Problem
-The current hero uses a dark navy background with low-contrast text (white/75 opacity for body, white/60 for highlights), a busy SVG grid pattern, and centered layout that feels generic compared to the rest of the site's professional, left-aligned product heroes.
+**Where completed courses are visible:**
+- **Dashboard** (`/dashboard`): Shows "My Certificates" section with all earned certificates, share links, and LinkedIn sharing
+- **Academy Course page** (`/academy/:slug`): Shows progress bar and quiz results inline
+- **Academy listing** (`/academy`): Currently does NOT show which courses are completed — no visual indicator for logged-in users
 
-### Solution
-Redesign to match the site's established professional pattern — light `bg-surface-subtle` background, left-aligned content, strong navy headings, proper typography hierarchy, and a professional visual element on the right side (partner tier cards or a network visual). This aligns with AML Screening, KYC, and other product heroes.
+**What's missing:**
+1. No completion badges on the Academy course listing for logged-in users
+2. No email notification when a certificate is earned
+3. No "My Progress" section showing in-progress vs completed courses
 
-### Changes — Single File
+## Plan
 
-**`src/components/partners/PartnerHeroSection.tsx`** — Full rewrite:
+### 1. Add completion indicators to Academy course cards
 
-- Switch from dark `bg-navy` to light `bg-surface-subtle` (matches site pattern)
-- Left-align content with `max-w-3xl` (like AMLHeroSection)
-- Use proper `text-navy` heading and `text-text-secondary` body text for strong contrast
-- Add a teal pill badge ("Partner Program") matching the LaneBadge pattern
-- Replace the busy SVG grid background with a clean right-side visual: three stacked partner tier cards (Referral 5%, Affiliate 10%, Reseller 15%) showing the commission structure at a glance
-- Keep the same CTAs (Apply Now + Talk to Sales) with proper `Button` variants
-- Move the highlights (commission, global, ISO) into subtle bordered chips below the CTAs
-- Use `section-padding` class for consistent spacing
+**File: `src/pages/Academy.tsx`**
+- For logged-in users, fetch `academy_progress` and `academy_certificates` for their user ID
+- Overlay a checkmark badge on completed courses (quiz_passed = true)
+- Show "In Progress" badge on courses with progress but no certificate
+- Keep cards unchanged for anonymous visitors
 
-### Visual Result
-- Clean, light background matching the rest of the site
-- Strong typographic hierarchy with navy heading
-- Right-side visual showing the three partner tiers with commission rates
-- Professional, institutional feel consistent with the enterprise brand
+### 2. Add "My Courses" tab/section to Academy page
+
+**File: `src/pages/Academy.tsx`**
+- For logged-in users, add a "My Progress" summary above the course grid showing: courses started, courses completed, certificates earned
+- Add filter tabs: "All Courses" | "In Progress" | "Completed"
+
+### 3. Send certificate email on quiz completion
+
+**Database**: No changes needed — existing tables suffice
+
+**Email setup**: Set up transactional email infrastructure and create a certificate-earned template:
+- Call `setup_email_infra` to create queue infrastructure
+- Call `scaffold_transactional_email` to create the Edge Function
+- Create a `certificate-earned.tsx` template with course name, score, certificate link, and LinkedIn share CTA
+- Register in the TEMPLATES registry and deploy
+
+**File: `src/pages/AcademyCourse.tsx`**
+- After certificate is created in `submitQuiz()`, invoke `send-transactional-email` with the `certificate-earned` template
+- Include `templateData`: holder name, course title, score, certificate URL
+
+### 4. Create unsubscribe page
+
+- Create the route/page as required by the transactional email system (path determined by scaffold tool)
+- Branded page matching the site's design, handles token validation and unsubscribe confirmation
+
+### Technical Details
+
+- Email template will use React Email components styled to match WorldAML brand (navy headings, teal accents, white background)
+- Idempotency key: `cert-email-${certificate.id}` to prevent duplicate sends
+- The certificate URL in the email links to the public verification page (`/academy/certificate/:token`)
+- Email subject: "Your WorldAML Certificate — {Course Title}"
 
