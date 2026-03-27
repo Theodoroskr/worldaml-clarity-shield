@@ -99,8 +99,9 @@ const AcademyCertificate = () => {
                 <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-primary/30 rounded-br-lg" />
 
                 <div className="mb-6">
-                  <Logo size="lg" showTagline className="justify-center mb-5" />
-                  <div className="w-16 h-px bg-border mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold text-primary tracking-tight">WorldAML Academy</h3>
+                  <p className="text-body-sm text-muted-foreground">Compliance Education &amp; Certification</p>
+                  <div className="w-16 h-px bg-border mx-auto mt-4 mb-4" />
                   <p className="text-caption uppercase tracking-widest text-muted-foreground font-semibold mb-1">
                     Certificate of Completion
                   </p>
