@@ -164,6 +164,20 @@ const AcademyCourse = () => {
             title: "🎉 Certificate Earned!",
             description: "Congratulations! You can now download or share your certificate.",
           });
+
+          // Fire-and-forget certificate email
+          const certUrl = `${window.location.origin}/academy/certificate/${cert.share_token}`;
+          supabase.functions.invoke("send-certificate-email", {
+            body: {
+              holder_name: holderName,
+              email: user.email,
+              course_title: course.title,
+              score,
+              certificate_url: certUrl,
+              certificate_id: cert.id,
+            },
+          }).catch(() => {});
+
           navigate(`/academy/certificate/${cert.share_token}`);
         }
       } catch {
