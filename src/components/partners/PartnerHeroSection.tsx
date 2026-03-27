@@ -2,45 +2,77 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Handshake, ArrowRight, TrendingUp, Globe2, ShieldCheck } from "lucide-react";
 
+const tiers = [
+  { label: "Referral Partner", rate: "5%", desc: "Refer clients and earn per conversion" },
+  { label: "Affiliate Partner", rate: "10%", desc: "Promote WorldAML with co-branded assets" },
+  { label: "Reseller Partner", rate: "15%", desc: "White-label and resell the full platform" },
+];
+
 const highlights = [
-  { icon: TrendingUp, label: "Up to 15% Commission" },
+  { icon: TrendingUp, label: "Recurring Commissions" },
   { icon: Globe2, label: "Global Programme" },
   { icon: ShieldCheck, label: "ISO 27001 Certified" },
 ];
 
 const PartnerHeroSection = () => (
-  <section className="relative bg-navy text-white py-24 md:py-32 overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-br from-navy via-navy-light to-navy opacity-90" />
-    {/* Subtle grid pattern */}
-    <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
-    <div className="container-enterprise relative z-10 text-center max-w-4xl mx-auto">
-      <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-5 py-2 mb-8">
-        <Handshake className="h-4 w-4 text-teal" />
-        <span className="text-sm font-medium text-white/90">Partner Program</span>
-      </div>
-      <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight tracking-tight">
-        Grow Your Revenue with <span className="text-teal">WorldAML</span>
-      </h1>
-      <p className="text-lg md:text-xl text-white/75 mb-10 max-w-2xl mx-auto leading-relaxed">
-        Join a global network of compliance professionals earning recurring commissions. Refer clients, access co-branded resources, and scale with dedicated support.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-        <Button asChild variant="accent" size="lg">
-          <Link to="/partners/apply">
-            Apply Now <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-        <Button asChild variant="outline-light" size="lg">
-          <Link to="/contact-sales">Talk to Sales</Link>
-        </Button>
-      </div>
-      <div className="flex flex-wrap justify-center gap-6 md:gap-10">
-        {highlights.map((h) => (
-          <div key={h.label} className="flex items-center gap-2 text-white/60">
-            <h.icon className="h-4 w-4 text-teal" />
-            <span className="text-sm font-medium">{h.label}</span>
+  <section className="section-padding bg-surface-subtle">
+    <div className="container-enterprise">
+      <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        {/* Left content */}
+        <div className="max-w-xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal/10 text-teal text-sm font-medium mb-6">
+            <Handshake className="h-4 w-4" />
+            Partner Program
           </div>
-        ))}
+          <h1 className="text-navy mb-6">
+            Grow Your Revenue with <span className="text-teal">WorldAML</span>
+          </h1>
+          <p className="text-body-lg text-text-secondary mb-4">
+            Join a global network of compliance professionals earning recurring commissions.
+            Refer clients, access co-branded resources, and scale with dedicated support.
+          </p>
+          <p className="text-body text-text-secondary mb-8">
+            Three flexible tiers designed for consultancies, technology partners, and resellers
+            across every major compliance market.
+          </p>
+          <div className="flex flex-wrap gap-4 mb-8">
+            <Button asChild size="lg">
+              <Link to="/partners/apply">
+                Apply Now <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" asChild>
+              <Link to="/contact-sales">Talk to Sales</Link>
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {highlights.map((h) => (
+              <div
+                key={h.label}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border text-text-secondary text-sm"
+              >
+                <h.icon className="h-3.5 w-3.5 text-teal" />
+                {h.label}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right visual — partner tier cards */}
+        <div className="space-y-4">
+          {tiers.map((tier, i) => (
+            <div
+              key={tier.label}
+              className="rounded-xl border border-border bg-white p-5 flex items-center justify-between gap-4 shadow-sm"
+            >
+              <div>
+                <p className="font-semibold text-navy text-base">{tier.label}</p>
+                <p className="text-text-secondary text-sm mt-0.5">{tier.desc}</p>
+              </div>
+              <span className="text-2xl font-bold text-teal whitespace-nowrap">{tier.rate}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   </section>
