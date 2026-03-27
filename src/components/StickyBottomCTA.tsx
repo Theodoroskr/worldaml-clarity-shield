@@ -31,7 +31,7 @@ const StickyBottomCTA = () => {
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
-          <Button size="sm" variant="outline" asChild className="border-white/20 text-primary-foreground hover:bg-white/10 flex-1 sm:flex-none">
+          <Button size="sm" variant="outline-light" asChild className="flex-1 sm:flex-none">
             <Link to="/free-aml-check">
               Try Free Check
             </Link>
