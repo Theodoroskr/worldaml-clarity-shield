@@ -14,6 +14,194 @@ export type Database = {
   }
   public: {
     Tables: {
+      academy_certificates: {
+        Row: {
+          course_id: string
+          holder_name: string
+          id: string
+          issued_at: string
+          score: number
+          share_token: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          holder_name: string
+          id?: string
+          issued_at?: string
+          score: number
+          share_token?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          holder_name?: string
+          id?: string
+          issued_at?: string
+          score?: number
+          share_token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_certificates_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_courses: {
+        Row: {
+          created_at: string
+          description: string
+          difficulty: string
+          duration_minutes: number
+          id: string
+          image_url: string | null
+          is_published: boolean
+          slug: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          difficulty?: string
+          duration_minutes?: number
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          slug: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          difficulty?: string
+          duration_minutes?: number
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          slug?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      academy_modules: {
+        Row: {
+          content: string
+          course_id: string
+          id: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          content: string
+          course_id: string
+          id?: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          content?: string
+          course_id?: string
+          id?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_progress: {
+        Row: {
+          completed_at: string | null
+          completed_modules: Json
+          course_id: string
+          created_at: string
+          id: string
+          quiz_passed: boolean
+          quiz_score: number | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_modules?: Json
+          course_id: string
+          created_at?: string
+          id?: string
+          quiz_passed?: boolean
+          quiz_score?: number | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_modules?: Json
+          course_id?: string
+          created_at?: string
+          id?: string
+          quiz_passed?: boolean
+          quiz_score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_questions: {
+        Row: {
+          correct_index: number
+          course_id: string
+          explanation: string | null
+          id: string
+          options: Json
+          question: string
+          sort_order: number
+        }
+        Insert: {
+          correct_index: number
+          course_id: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          question: string
+          sort_order?: number
+        }
+        Update: {
+          correct_index?: number
+          course_id?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          question?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_questions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       form_submissions: {
         Row: {
           account_type: string | null

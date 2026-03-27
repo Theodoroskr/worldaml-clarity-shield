@@ -74,6 +74,9 @@ const PartnerApply = lazy(() => import("./pages/PartnerApply"));
 const PartnerDashboard = lazy(() => import("./pages/PartnerDashboard"));
 const DataCoverageIndex = lazy(() => import("./pages/DataCoverageIndex"));
 const DataCoverageCountry = lazy(() => import("./pages/DataCoverageCountry"));
+const Academy = lazy(() => import("./pages/Academy"));
+const AcademyCourse = lazy(() => import("./pages/AcademyCourse"));
+const AcademyCertificate = lazy(() => import("./pages/AcademyCertificate"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -173,6 +176,11 @@ const App = () => (
                 <Route path="/partners" element={<Partners />} />
                 <Route path="/partners/apply" element={<PartnerApply />} />
                 <Route path="/partners/dashboard" element={<PartnerDashboard />} />
+
+                {/* Academy */}
+                <Route path="/academy" element={<Academy />} />
+                <Route path="/academy/certificate/:token" element={<AcademyCertificate />} />
+                <Route path="/academy/:slug" element={<AcademyCourse />} />
 
                 {/* Markets */}
                 <Route path="/markets/:market" element={<MarketPage />} />
