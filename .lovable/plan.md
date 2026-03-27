@@ -1,42 +1,43 @@
 
 
-## Add Course Filtering by Category and CPD Hours
+## Send Certificate Email via Resend on Quiz Completion
 
-### Problem
-The Academy page has no way to filter courses by type (regional vs global vs foundational) and doesn't show CPD (Continuing Professional Development) hours — a key credibility signal for compliance professionals.
+### Overview
+Create a new Edge Function that sends a branded certificate email to the user when they pass a quiz. Trigger it from the existing `submitQuiz()` flow in `AcademyCourse.tsx`. Uses the existing Resend setup (same pattern as `submit-form` and `notify-new-signup`).
 
-### Database Changes
+### Changes
 
-**Migration — add two columns to `academy_courses`:**
-- `category TEXT NOT NULL DEFAULT 'global'` — values: `foundational`, `regional`, `global-specialisation`
-- `cpd_hours NUMERIC NOT NULL DEFAULT 0` — CPD credit hours (typically duration_minutes rounded to nearest 0.5 hr)
+#### 1. New Edge Function: `supabase/functions/send-certificate-email/index.ts`
+- Uses `RESEND_API_KEY` from env (already configured)
+- Sends from `forms@worldaml.com` (or `noreply@worldaml.com`) to the user's email
+- Accepts: `holder_name`, `email`, `course_title`, `score`, `certificate_url`
+- HTML email template with navy/teal branding matching WorldAML style:
+  - Logo area with "WorldAML Academy"
+  - Congratulations message with course name and score
+  - CTA button linking to the certificate page
+  - LinkedIn share CTA
+  - Footer with "This is an automated certificate notification"
+- Idempotency: include `X-Entity-Ref-ID` header with certificate ID to prevent duplicates
 
-**Data update — categorise all 15 existing courses:**
-
-| Course | Category | CPD Hours |
-|--------|----------|-----------|
-| AML Fundamentals | foundational | 0.5 |
-| Sanctions Screening Essentials | foundational | 0.5 |
-| KYC & Customer Due Diligence | foundational | 1.0 |
-| AML Europe / Americas / Asia-Pacific / GCC-MENA / Africa / CIS | regional | 1.0 each (0.5 for 30-min courses) |
-| PEP Screening, Adverse Media, Beneficial Ownership, Transaction Monitoring, Crypto AML, Risk-Based Approach | global-specialisation | 0.5–1.0 based on duration |
-
-### UI Changes — `src/pages/Academy.tsx`
-
-1. **Category filter row** — Add pill buttons above the course grid: "All", "Foundational", "Regional", "Specialisation". Works alongside the existing progress filter for logged-in users.
-
-2. **Difficulty filter** — Add a secondary row or combined dropdown for difficulty: "All Levels", "Beginner", "Intermediate", "Advanced".
-
-3. **CPD hours badge** — Show on each course card next to the duration, e.g. `1.0 CPD` with a small award/clock icon.
-
-4. **Category badge** — Add a subtle tag on each card showing the category (e.g. "Regional" in a muted blue pill, "Foundational" in green).
-
-5. **Hero update** — Add "CPD-Accredited" to the hero highlights row alongside "Interactive Courses" and "Shareable Certificates".
+#### 2. Update `src/pages/AcademyCourse.tsx`
+- After certificate is successfully created (line ~162), invoke the new edge function:
+  ```
+  supabase.functions.invoke("send-certificate-email", {
+    body: {
+      holder_name: holderName,
+      email: user.email,
+      course_title: course.title,
+      score,
+      certificate_url: `${window.location.origin}/academy/certificate/${cert.share_token}`
+    }
+  })
+  ```
+- Fire-and-forget (don't block the UI on email delivery)
+- No error handling needed — email is a bonus, not critical path
 
 ### Technical Details
-
-- Category filter state: `useState<string>("all")` separate from progress filter
-- Both filters compose: `filteredCourses` applies category filter then progress filter
-- CPD hours derived from `cpd_hours` column, displayed as `{n} CPD Hr{s}`
-- No new tables or RLS changes needed — just two new columns on existing table
+- Same Resend pattern as existing `submit-form/index.ts`
+- No database changes needed
+- No new secrets needed (`RESEND_API_KEY` already configured)
+- Email subject: "Your WorldAML Certificate — {Course Title}"
 
