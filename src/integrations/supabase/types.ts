@@ -54,6 +54,8 @@ export type Database = {
       }
       academy_courses: {
         Row: {
+          category: string
+          cpd_hours: number
           created_at: string
           description: string
           difficulty: string
@@ -66,6 +68,8 @@ export type Database = {
           title: string
         }
         Insert: {
+          category?: string
+          cpd_hours?: number
           created_at?: string
           description: string
           difficulty?: string
@@ -78,6 +82,8 @@ export type Database = {
           title: string
         }
         Update: {
+          category?: string
+          cpd_hours?: number
           created_at?: string
           description?: string
           difficulty?: string
