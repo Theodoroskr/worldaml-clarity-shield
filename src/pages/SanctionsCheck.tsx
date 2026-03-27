@@ -7,7 +7,8 @@ import { SanctionsSearchForm } from "@/components/sanctions/SanctionsSearchForm"
 import { SanctionsResultCard } from "@/components/sanctions/SanctionsResultCard";
 import { SanctionsDisclaimerBanner } from "@/components/sanctions/SanctionsDisclaimerBanner";
 import SEO from "@/components/SEO";
-import { LogoIcon } from "@/components/Logo";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -519,6 +520,8 @@ export default function SanctionsCheck() {
           </p>
         </div>
       </section>
-    </>
+      </main>
+      <Footer />
+    </div>
   );
 }
