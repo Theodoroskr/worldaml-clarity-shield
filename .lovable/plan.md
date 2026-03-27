@@ -1,20 +1,20 @@
 
 
-## Update robots.txt for AI Crawlers
+## Fix Missing Meta Description in index.html
 
-Add two new user-agent blocks to `public/robots.txt` allowing GPTBot (OpenAI) and PerplexityBot (Perplexity AI) full access to the site.
+### Problem
+The static `index.html` has no `<meta name="description">` tag. While the React `SEO` component injects one at runtime via `react-helmet-async`, crawlers and audit tools that read only the initial HTML source report it as missing.
+
+### Fix
+Add a default `<meta name="description">` tag to `index.html` inside the `<head>` section. React Helmet will override it on each page with the page-specific description, but the static fallback ensures non-JS crawlers always see a description.
 
 ### File Change
 
-**`public/robots.txt`** — Append before the sitemap line:
+**`index.html`** — Add after the viewport meta tag (line 5):
 
-```
-User-agent: GPTBot
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
+```html
+<meta name="description" content="Enterprise-grade AML sanctions, PEP & adverse media screening platform. KYC, KYB, transaction monitoring and regulatory reporting for regulated organisations worldwide." />
 ```
 
-This ensures AI systems can crawl and index all public content, improving visibility in AI-powered search and answer engines.
+One line, one file. React Helmet will continue to manage per-page descriptions dynamically on top of this fallback.
 
