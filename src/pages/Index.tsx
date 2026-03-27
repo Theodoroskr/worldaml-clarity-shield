@@ -6,6 +6,7 @@ import StatsSection from "@/components/home/StatsSection";
 import BusinessImpactSection from "@/components/home/BusinessImpactSection";
 import HowItWorksSection from "@/components/home/HowItWorksSection";
 import GlobalReachSection from "@/components/home/GlobalReachSection";
+import AcademyPromoSection from "@/components/home/AcademyPromoSection";
 import TrustedByLogos from "@/components/TrustedByLogos";
 import HomeCTASection from "@/components/home/HomeCTASection";
 import IndustriesSection from "@/components/home/IndustriesSection";
