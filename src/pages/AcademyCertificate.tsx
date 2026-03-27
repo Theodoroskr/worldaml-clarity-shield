@@ -43,11 +43,11 @@ const AcademyCertificate = () => {
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(certificateUrl);
+      await navigator.clipboard.writeText(shareUrl);
       toast({ title: "Link copied!", description: "Certificate link copied to clipboard." });
     } catch {
       const textarea = document.createElement("textarea");
-      textarea.value = certificateUrl;
+      textarea.value = shareUrl;
       document.body.appendChild(textarea);
       textarea.select();
       document.execCommand("copy");
@@ -59,7 +59,7 @@ const AcademyCertificate = () => {
   const nativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: shareText, url: certificateUrl });
+        await navigator.share({ title: shareText, url: shareUrl });
       } catch { /* user cancelled */ }
     }
   };
