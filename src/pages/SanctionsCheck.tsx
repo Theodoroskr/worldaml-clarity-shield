@@ -145,6 +145,11 @@ export default function SanctionsCheck() {
       <SEO
         title="Sanctions Quick Check | WorldAML"
         description="Free open-source sanctions screening tool. Check names against OFAC, EU, UN, and HMT sanctions lists instantly."
+        canonical="/sanctions-check"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Sanctions Quick Check", url: "/sanctions-check" },
+        ]}
       />
       <Header />
       <main className="flex-1">
