@@ -262,7 +262,7 @@ const AMLRegulations = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="AML Regulations by Jurisdiction"
+        title="AML Regulations by Jurisdiction — 12 Countries Compared"
         description="Compare AML regulations across 12 jurisdictions — FATF, EU, UK, US, Japan, Switzerland, Luxembourg, Cyprus, Malta, South Korea, Cayman Islands, and Jersey. Obligations, penalties, UBO thresholds, and timelines."
         canonical="/resources/aml-regulations"
         breadcrumbs={[
@@ -417,6 +417,36 @@ const AMLRegulations = () => {
               </div>
             </section>
           )}
+
+          {/* Related Resources */}
+          <section>
+            <h2 className="text-heading-lg font-bold text-navy mb-6">
+              Related Resources
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                { title: "AML Screening Platform", description: "Automated screening against global watchlists, PEPs, and sanctions in real time.", href: "/platform/aml-screening" },
+                { title: "KYC & KYB Onboarding", description: "Streamlined identity verification and business due diligence workflows.", href: "/platform/kyc-kyb" },
+                { title: "Transaction Monitoring", description: "Rule-based and AI-driven monitoring to detect suspicious activity patterns.", href: "/platform/transaction-monitoring" },
+                { title: "Compliance Glossary", description: "Definitions for AML, KYC, UBO, PEP, SAR, and 200+ compliance terms.", href: "/resources/glossary" },
+                { title: "Free Sanctions Check", description: "Search global sanctions and PEP lists instantly — no account required.", href: "/free-aml-check" },
+                { title: "Data Coverage", description: "Explore the breadth of our global data sources across 200+ countries.", href: "/resources/data-coverage" },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="group rounded-xl border border-divider bg-background p-5 hover:border-navy/30 hover:shadow-sm transition-all"
+                >
+                  <h3 className="text-body font-semibold text-navy mb-1 group-hover:text-brand-teal transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-body-sm text-text-secondary leading-relaxed">
+                    {item.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
 
           {/* Bottom CTA */}
           <section className="rounded-2xl border border-divider bg-surface-subtle p-8 md:p-12 text-center">
