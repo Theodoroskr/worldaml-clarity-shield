@@ -1,4 +1,5 @@
 import { UserCheck, Shield, Eye, Scale } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const steps = [
   {
@@ -6,24 +7,28 @@ const steps = [
     step: "1",
     title: "KYC & KYB",
     description: "Verify individuals and businesses at onboarding with automated identity and entity checks.",
+    link: "/kyc-kyb-api",
   },
   {
     icon: Shield,
     step: "2",
     title: "AML Screening",
     description: "Screen against global sanctions lists, PEP databases, and adverse media in real time.",
+    link: "/aml-api",
   },
   {
     icon: Eye,
     step: "3",
     title: "Ongoing Monitoring",
     description: "Detect changes in risk status automatically — no manual re-screening required.",
+    link: "/sanctions-screening-api",
   },
   {
     icon: Scale,
     step: "4",
     title: "Risk Assessment",
     description: "Apply configurable risk scoring to prioritise reviews and satisfy regulatory expectations.",
+    link: "/platform/risk-assessment",
   },
 ];
 
@@ -53,9 +58,12 @@ export const HowItWorksSection = () => {
                 <h3 className="text-body font-semibold text-navy mb-2">
                   {step.title}
                 </h3>
-                <p className="text-body-sm text-text-secondary">
+                <p className="text-body-sm text-text-secondary mb-2">
                   {step.description}
                 </p>
+                <Link to={step.link} className="text-caption font-medium text-teal hover:underline">
+                  Explore API →
+                </Link>
               </div>
             </div>
           ))}
