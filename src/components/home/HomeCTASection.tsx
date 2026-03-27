@@ -30,9 +30,9 @@ export const HomeCTASection = () => {
             </Button>
             <Button 
               size="lg" 
-              variant="outline" 
+              variant="outline-light" 
               asChild
-              className="group border-slate-light/30 text-primary-foreground hover:bg-primary-foreground/10"
+              className="group"
             >
               <Link to="/free-aml-check">
                 Run a Free AML Check
