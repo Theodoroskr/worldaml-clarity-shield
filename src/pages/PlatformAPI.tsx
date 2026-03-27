@@ -125,6 +125,26 @@ const PlatformAPI = () => {
         <APIArchitectureSection />
         <GovernanceAuditSection />
         <APIUseCasesSection />
+
+        {/* API Product Cross-Links */}
+        <section className="section-padding bg-surface-subtle">
+          <div className="container-enterprise">
+            <h2 className="text-subheadline text-navy mb-8 text-center">Explore API Products</h2>
+            <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {[
+                { to: "/aml-api", title: "AML API", desc: "Automate AML screening with a single API call — sanctions, PEPs, adverse media, and RCAs." },
+                { to: "/sanctions-screening-api", title: "Sanctions Screening API", desc: "Real-time screening against 200+ global sanctions and watchlists with fuzzy matching." },
+                { to: "/kyc-kyb-api", title: "KYC / KYB API", desc: "Programmatic identity verification, UBO mapping, and corporate registry checks." },
+              ].map((item) => (
+                <a key={item.to} href={item.to} className="p-6 rounded-lg border border-divider bg-card hover:border-teal/30 transition-colors block">
+                  <h3 className="text-body font-semibold text-navy mb-2">{item.title}</h3>
+                  <p className="text-body-sm text-text-secondary">{item.desc}</p>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <APICTASection />
       </main>
       <Footer />
