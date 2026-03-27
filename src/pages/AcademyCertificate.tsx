@@ -28,6 +28,7 @@ const AcademyCertificate = () => {
 
   const course = cert?.academy_courses as any;
   const certificateUrl = `${PUBLISHED_ORIGIN}/academy/certificate/${token}`;
+  const shareUrl = `${SUPABASE_URL}/functions/v1/certificate-og?token=${token}`;
   const shareText = course ? `I just earned my "${course.title}" certificate from WorldAML Academy! 🎓` : "";
 
   const shareLinkedIn = () => {
