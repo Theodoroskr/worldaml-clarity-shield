@@ -5,7 +5,7 @@ import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Award, Linkedin, Share2, ArrowLeft, CheckCircle, BookOpen, ExternalLink, Copy } from "lucide-react";
+import { Award, Linkedin, Share2, ArrowLeft, CheckCircle, BookOpen, ExternalLink, Copy, Download } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -33,13 +33,13 @@ const AcademyCertificate = () => {
   const shareText = course ? `I just earned my "${course.title}" certificate from WorldAML Academy! 🎓` : "";
 
   const shareLinkedIn = () => {
-    const url = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(certificateUrl)}&title=${encodeURIComponent(shareText)}`;
-    window.open(url, "_blank", "noopener,noreferrer,width=600,height=500");
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(certificateUrl)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const shareX = () => {
     const url = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(certificateUrl)}`;
-    window.open(url, "_blank", "noopener,noreferrer,width=600,height=400");
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const copyLink = async () => {
@@ -47,7 +47,6 @@ const AcademyCertificate = () => {
       await navigator.clipboard.writeText(certificateUrl);
       toast({ title: "Link copied!", description: "Certificate link copied to clipboard." });
     } catch {
-      // Fallback for older browsers
       const textarea = document.createElement("textarea");
       textarea.value = certificateUrl;
       document.body.appendChild(textarea);
@@ -56,6 +55,54 @@ const AcademyCertificate = () => {
       document.body.removeChild(textarea);
       toast({ title: "Link copied!", description: "Certificate link copied to clipboard." });
     }
+  };
+
+  const nativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: shareText, url: certificateUrl });
+      } catch { /* user cancelled */ }
+    }
+  };
+
+  const downloadBadge = () => {
+    const title = course?.title || "Course";
+    const score = cert?.score || 0;
+    const cpd = course?.cpd_hours || 0;
+    const cpdText = cpd > 0 ? ` • ${cpd} CPD` : "";
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="120" viewBox="0 0 480 120">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#1a365d"/>
+          <stop offset="100%" stop-color="#2563eb"/>
+        </linearGradient>
+      </defs>
+      <rect width="480" height="120" rx="16" fill="url(#bg)"/>
+      <text x="60" y="48" font-family="Arial,sans-serif" font-size="18" font-weight="bold" fill="white">${title.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</text>
+      <text x="60" y="72" font-family="Arial,sans-serif" font-size="13" fill="rgba(255,255,255,0.85)">WorldAML Academy • ${score}%${cpdText}</text>
+      <text x="60" y="96" font-family="Arial,sans-serif" font-size="11" fill="rgba(255,255,255,0.6)">Verified Certificate</text>
+      <circle cx="28" cy="60" r="16" fill="rgba(255,255,255,0.15)"/>
+      <text x="28" y="65" font-family="Arial,sans-serif" font-size="16" fill="white" text-anchor="middle">🎓</text>
+      <circle cx="452" cy="60" r="12" fill="rgba(255,255,255,0.15)"/>
+      <text x="452" y="65" font-family="Arial,sans-serif" font-size="14" fill="#4ade80" text-anchor="middle">✓</text>
+    </svg>`;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 960;
+    canvas.height = 240;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, 960, 240);
+      const link = document.createElement("a");
+      link.download = `worldaml-badge-${course?.slug || "certificate"}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    };
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
   };
 
   if (isLoading) {
@@ -182,6 +229,16 @@ const AcademyCertificate = () => {
                 <Button variant="outline" onClick={copyLink}>
                   <Copy className="h-4 w-4 mr-2" />
                   Copy Link
+                </Button>
+                {typeof navigator !== "undefined" && navigator.share && (
+                  <Button variant="outline" onClick={nativeShare}>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+                )}
+                <Button variant="outline" onClick={downloadBadge}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Badge
                 </Button>
               </div>
 
