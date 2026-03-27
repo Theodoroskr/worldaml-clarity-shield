@@ -158,6 +158,7 @@ const App = () => (
                 <Route path="/resources/glossary" element={<Glossary />} />
                 <Route path="/resources/aml-regulations" element={<AMLRegulations />} />
                 <Route path="/sanctions-check" element={<SanctionsCheck />} />
+                <Route path="/free-aml-check" element={<FreeAMLCheck />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 
