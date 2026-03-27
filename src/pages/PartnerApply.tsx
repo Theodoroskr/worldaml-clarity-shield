@@ -25,7 +25,16 @@ const PartnerApply = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO title="Apply to Partner Program — WorldAML" description="Submit your partner application to join the WorldAML partner program." />
+      <SEO
+        title="Apply to Partner Program — WorldAML"
+        description="Submit your partner application to join the WorldAML partner program. Choose from referral, affiliate, or reseller tiers."
+        canonical="/partners/apply"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Partner Program", url: "/partners" },
+          { name: "Apply", url: "/partners/apply" },
+        ]}
+      />
       <Header />
       <main className="flex-1 py-16 md:py-24 bg-surface-subtle">
         <div className="container-enterprise">
