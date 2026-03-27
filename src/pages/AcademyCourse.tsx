@@ -380,14 +380,14 @@ const AcademyCourse = () => {
                                     key={oi}
                                     onClick={() => handleAnswer(q.id, oi)}
                                     disabled={quizSubmitted}
-                                    className={`w-full text-left px-4 py-3 rounded-lg border text-body-sm transition-colors flex items-center gap-3 ${
+                                    className={`w-full text-left px-4 py-3 rounded-lg border text-body-sm transition-all duration-150 flex items-center gap-3 ${
                                       showCorrect
                                         ? "border-emerald-500 bg-emerald-50 text-emerald-800"
                                         : isSelected && isWrong
                                         ? "border-rose-500 bg-rose-50 text-rose-800"
                                         : isSelected
-                                        ? "border-primary bg-primary/5 text-primary"
-                                        : "border-border hover:border-primary/30 text-muted-foreground hover:text-foreground"
+                                        ? "border-primary bg-primary/10 text-primary font-medium shadow-sm"
+                                        : "border-border hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm text-muted-foreground hover:text-foreground cursor-pointer"
                                     }`}
                                   >
                                     {showCorrect && <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />}
