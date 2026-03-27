@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
 const PUBLISHED_ORIGIN = "https://worldaml-clarity-shield.lovable.app";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 const AcademyCertificate = () => {
   const { token } = useParams();
@@ -27,25 +28,26 @@ const AcademyCertificate = () => {
 
   const course = cert?.academy_courses as any;
   const certificateUrl = `${PUBLISHED_ORIGIN}/academy/certificate/${token}`;
+  const shareUrl = `${SUPABASE_URL}/functions/v1/certificate-og?token=${token}`;
   const shareText = course ? `I just earned my "${course.title}" certificate from WorldAML Academy! 🎓` : "";
 
   const shareLinkedIn = () => {
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(certificateUrl)}`;
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const shareX = () => {
-    const url = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(certificateUrl)}`;
+    const url = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(certificateUrl);
+      await navigator.clipboard.writeText(shareUrl);
       toast({ title: "Link copied!", description: "Certificate link copied to clipboard." });
     } catch {
       const textarea = document.createElement("textarea");
-      textarea.value = certificateUrl;
+      textarea.value = shareUrl;
       document.body.appendChild(textarea);
       textarea.select();
       document.execCommand("copy");
@@ -57,7 +59,7 @@ const AcademyCertificate = () => {
   const nativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: shareText, url: certificateUrl });
+        await navigator.share({ title: shareText, url: shareUrl });
       } catch { /* user cancelled */ }
     }
   };
