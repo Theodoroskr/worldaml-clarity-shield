@@ -90,6 +90,12 @@ const Admin = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [updatingLead, setUpdatingLead] = useState<string | null>(null);
 
+  // Partners state
+  const [partnerApps, setPartnerApps] = useState<any[]>([]);
+  const [partners, setPartners] = useState<any[]>([]);
+  const [loadingPartners, setLoadingPartners] = useState(true);
+  const [partnerActionLoading, setPartnerActionLoading] = useState<string | null>(null);
+
   useEffect(() => {
     if (!isLoading && !user) navigate("/login");
     if (!isLoading && !isAdmin) navigate("/dashboard");
@@ -117,9 +123,20 @@ const Admin = () => {
     setLoadingLeads(false);
   }, []);
 
+  const fetchPartnerData = useCallback(async () => {
+    setLoadingPartners(true);
+    const [{ data: apps }, { data: pts }] = await Promise.all([
+      supabase.from("partner_applications").select("*").order("created_at", { ascending: false }),
+      supabase.from("partners").select("*").order("created_at", { ascending: false }),
+    ]);
+    setPartnerApps((apps as any[]) || []);
+    setPartners((pts as any[]) || []);
+    setLoadingPartners(false);
+  }, []);
+
   useEffect(() => {
-    if (isAdmin) { fetchProfiles(); fetchLeads(); }
-  }, [isAdmin, fetchLeads]);
+    if (isAdmin) { fetchProfiles(); fetchLeads(); fetchPartnerData(); }
+  }, [isAdmin, fetchLeads, fetchPartnerData]);
 
   const updateProfileStatus = async (profileId: string, newStatus: "approved" | "rejected") => {
     setActionLoading(profileId);
