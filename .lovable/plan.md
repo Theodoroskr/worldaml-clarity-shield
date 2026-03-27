@@ -1,58 +1,19 @@
 
 
-## Update sitemap.xml with All Missing Routes
+## Add WhatsApp Link to Footer
 
-### What's missing
-Comparing the router in `App.tsx` against the current `sitemap.xml`, these routes are absent:
-
-1. **Market pages** (3): `/markets/uk`, `/markets/uae`, `/markets/usa`
-2. **Academy** (1): `/academy`
-
-Everything else — all 17 blog posts, all 6 industry pages, glossary, best practices, sanctions lists, AML regulations, data coverage, partners, tools, products — is already present.
-
-### What won't be added
-- `/academy/:slug` and `/academy/certificate/:token` — these are dynamic database-driven routes; individual URLs can't be enumerated in a static sitemap
-- Auth pages (`/login`, `/signup`, `/dashboard`, `/admin`, etc.) — should remain excluded
-- `/suite-layout-preview` — internal preview route
+### What
+Add a WhatsApp icon + link (`wa.me/971504780113`) in the footer's logo/tagline column, below the InfoCredit badge.
 
 ### Changes
 
-**File: `public/sitemap.xml`**
-
-Add 4 new `<url>` entries after the existing Industry Landing Pages section:
-
-```xml
-<!-- Market Landing Pages -->
-<url>
-  <loc>https://www.worldaml.com/markets/uk</loc>
-  <lastmod>2026-03-27</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.8</priority>
-</url>
-<url>
-  <loc>https://www.worldaml.com/markets/uae</loc>
-  <lastmod>2026-03-27</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.8</priority>
-</url>
-<url>
-  <loc>https://www.worldaml.com/markets/usa</loc>
-  <lastmod>2026-03-27</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.8</priority>
-</url>
-
-<!-- Academy -->
-<url>
-  <loc>https://www.worldaml.com/academy</loc>
-  <lastmod>2026-03-27</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.7</priority>
-</url>
-```
-
-Also update all existing `lastmod` dates to `2026-03-27` to reflect the current state.
+**`src/components/Footer.tsx`**
+- Import `MessageCircle` from lucide-react (or use an inline WhatsApp SVG icon for brand accuracy)
+- After the InfoCredit Group badge block (line ~95), add a "Chat with us" WhatsApp link:
+  - WhatsApp brand icon (green) + "Chat on WhatsApp" text
+  - Links to `https://wa.me/971504780113` with `target="_blank"`
+  - Styled consistently with the existing footer text (small, secondary color, hover effect)
 
 ### Files changed
-- `public/sitemap.xml` — add 4 URLs, update dates
+- `src/components/Footer.tsx` — add WhatsApp link
 
