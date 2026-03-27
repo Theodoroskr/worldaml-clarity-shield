@@ -1,72 +1,47 @@
 
 
-## Plan: Partner & Referral Program
+## Plan: Rule-Based Chatbot Widget
 
-Build a full partner program with application, admin approval, referral tracking, commission attribution, and a partner dashboard.
+Add a floating chat bubble (bottom-right) on all pages with a pre-defined Q&A knowledge base covering WorldAML products, pricing, demos, and support.
 
-### Database Changes (3 new tables, 1 migration)
+### New Files
 
-**`partner_applications`** — stores applications from prospective partners
-- `id`, `user_id` (FK to auth.users), `company_name`, `website`, `partner_type` (enum: `referral`, `affiliate`, `reseller`), `description`, `status` (pending/approved/rejected), `created_at`, `reviewed_at`, `reviewed_by`
+**1. `src/components/chatbot/ChatbotWidget.tsx`**
+- Floating button (bottom-right, `fixed` position) with a chat icon
+- Click opens a chat panel (350x450px card) with message history
+- Input field at bottom, send button
+- Close/minimize button
+- Keyword-matching logic: scan user input against a knowledge base of Q&A entries, return the best match or a fallback "I can help you with..." response
+- Quick-action buttons at start: "Request a Demo", "View Pricing", "Free AML Check", "Talk to Sales"
+- Quick actions navigate or insert pre-filled responses with links
+- Mobile responsive (full-width on small screens)
 
-**`partners`** — approved partners with tracking codes and commission config
-- `id`, `user_id`, `referral_code` (unique, auto-generated), `partner_type`, `commission_rate` (decimal, e.g. 0.10 for 10%), `is_active`, `created_at`
+**2. `src/data/chatbotKnowledge.ts`**
+- Array of `{ keywords: string[], question: string, answer: string, link?: string }` entries covering:
+  - Product info (Suite, API, WorldCompliance, WorldID, AML screening, KYC/KYB, transaction monitoring)
+  - Pricing questions → link to `/pricing`
+  - Demo requests → link to `/contact-sales`
+  - Free trial → link to `/get-started`
+  - Free AML check → link to `/free-aml-check`
+  - Data coverage → link to `/resources/data-coverage`
+  - Partner program → link to `/partners`
+  - Support/contact → link to `/support`
+  - Security/compliance → link to `/platform/security`
+- Fallback response suggesting top actions
 
-**`referrals`** — tracks each referral and its conversion status
-- `id`, `partner_id` (FK to partners), `referred_email`, `referral_code_used`, `status` (clicked/signed_up/converted), `conversion_value` (nullable decimal), `commission_earned` (nullable decimal), `created_at`, `converted_at`
+### Modified Files
 
-RLS: Partners see only their own data; admins see everything. Public insert on `partner_applications`.
+**`src/components/Layout.tsx`**
+- Import and render `<ChatbotWidget />` so it appears on every page
 
-### New Pages & Components
-
-**1. `/partners` — Public Partner Program landing page**
-- Hero explaining the program (referral, affiliate, reseller tiers)
-- Benefits grid (commissions, co-branded materials, dedicated support)
-- "Apply Now" CTA linking to `/partners/apply`
-
-**2. `/partners/apply` — Partner Application Form**
-- Auth-gated (must be logged in)
-- Fields: company name, website, partner type selection, description of how they plan to refer
-- Submits to `partner_applications` table
-- Success state: "Application submitted — we'll review within 48 hours"
-
-**3. `/partners/dashboard` — Partner Dashboard (auth-gated, approved partners only)**
-- Overview stats: total referrals, conversions, pending commission, total earned
-- Unique referral link display with copy button (`?ref=CODE`)
-- Referral history table with status badges (clicked → signed up → converted)
-- Commission breakdown
-
-**4. Admin Panel — New "Partners" tab in `/admin`**
-- List partner applications with approve/reject actions
-- View active partners, their referral codes, and performance metrics
-- Set/adjust commission rates per partner
-
-### Referral Tracking Logic
-
-- Referral codes appended as `?ref=CODE` query param
-- On any page load, capture `ref` param and store in `localStorage`
-- On signup, read stored `ref` code and insert a row into `referrals` with `status: 'signed_up'`
-- On conversion (e.g. Stripe checkout success), update referral to `status: 'converted'` with value
-
-### Files Created/Modified
-
-| File | Action |
-|------|--------|
-| `src/pages/Partners.tsx` | Create — landing page |
-| `src/pages/PartnerApply.tsx` | Create — application form |
-| `src/pages/PartnerDashboard.tsx` | Create — partner dashboard |
-| `src/components/partners/PartnerHeroSection.tsx` | Create |
-| `src/components/partners/PartnerBenefitsSection.tsx` | Create |
-| `src/components/partners/PartnerApplicationForm.tsx` | Create |
-| `src/components/partners/PartnerStatsCards.tsx` | Create |
-| `src/components/partners/ReferralTable.tsx` | Create |
-| `src/pages/Admin.tsx` | Modify — add Partners tab |
-| `src/App.tsx` | Modify — add 3 routes |
-| `src/components/Footer.tsx` | Modify — add Partner Program link |
-| Migration | 3 tables + enum + RLS policies |
+### Technical Details
+- No database, no AI API key, no external dependencies
+- Pure client-side keyword matching with scoring (count keyword hits per entry, return highest)
+- State managed with `useState` — no persistence needed
+- z-index above other floating elements
+- Smooth open/close animation with Tailwind transitions
 
 ### Scope
-- 1 database migration (3 tables, 1 enum, RLS policies)
-- 8 new files, 3 modified files
-- No external dependencies
+- 2 new files, 1 modified file
+- No backend or database changes
 
