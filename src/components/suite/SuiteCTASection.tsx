@@ -37,7 +37,7 @@ export const SuiteCTASection = () => {
               </Link>
             </Button>
             <Button size="lg" variant="outline-light" asChild>
-              <Link to="/demo">
+              <Link to="/contact-sales">
                 <Play className="mr-2 h-4 w-4" />
                 Request Demo
               </Link>
