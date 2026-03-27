@@ -28,10 +28,10 @@ export const StatsSection = () => {
         {/* Section header */}
         <div className="text-center mb-16">
           <h2 className="text-headline text-primary-foreground mb-4">
-            Global Data Coverage
+            The Data Behind Every Decision
           </h2>
           <p className="text-body-lg text-slate-light max-w-2xl mx-auto">
-            Comprehensive, constantly updated databases ensure you never miss a compliance risk.
+            Real-time access to the world's most comprehensive financial crime databases — so you can screen with confidence.
           </p>
         </div>
 

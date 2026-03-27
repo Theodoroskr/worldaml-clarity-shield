@@ -1,18 +1,18 @@
 const impacts = [
   {
     value: "80%",
-    label: "Less Manual Review Time",
-    description: "Automated screening replaces hours of analyst work",
+    label: "Reduction in Manual Review",
+    description: "Free your compliance analysts to focus on genuine risk, not repetitive checks.",
   },
   {
     value: "<30s",
-    label: "Average Screening Result",
-    description: "Real-time decisions across sanctions, PEP & adverse media",
+    label: "Screening Turnaround",
+    description: "Onboard customers faster with real-time sanctions, PEP, and adverse media decisions.",
   },
   {
     value: "99.9%",
     label: "Uptime SLA",
-    description: "Enterprise-grade reliability for mission-critical compliance",
+    description: "Built for mission-critical compliance workflows that cannot afford downtime.",
   },
 ];
 

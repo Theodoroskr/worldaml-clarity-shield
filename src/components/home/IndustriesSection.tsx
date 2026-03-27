@@ -43,11 +43,11 @@ export const IndustriesSection = () => {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-16">
           <div className="max-w-2xl">
             <h2 className="text-headline text-navy mb-4">
-              Built for Regulated Industries
+              Compliance Infrastructure for Every Regulated Sector
             </h2>
             <p className="text-body-lg text-text-secondary">
-              Whether you're a traditional bank or an emerging fintech, WorldAML provides 
-              the compliance infrastructure you need to operate confidently.
+              From traditional banks to high-growth fintechs, WorldAML gives compliance teams 
+              the tools to onboard faster, screen smarter, and report with confidence.
             </p>
           </div>
           <Button variant="outline" asChild>

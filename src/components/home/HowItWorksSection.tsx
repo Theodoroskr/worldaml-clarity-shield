@@ -5,25 +5,25 @@ const steps = [
     icon: UserCheck,
     step: "1",
     title: "KYC & KYB",
-    description: "Identify individuals and companies.",
+    description: "Verify individuals and businesses at onboarding with automated identity and entity checks.",
   },
   {
     icon: Shield,
     step: "2",
     title: "AML Screening",
-    description: "Screen against sanctions, PEPs and adverse media.",
+    description: "Screen against global sanctions lists, PEP databases, and adverse media in real time.",
   },
   {
     icon: Eye,
     step: "3",
     title: "Ongoing Monitoring",
-    description: "Continuously monitor for changes in risk.",
+    description: "Detect changes in risk status automatically — no manual re-screening required.",
   },
   {
     icon: Scale,
     step: "4",
     title: "Risk Assessment",
-    description: "Apply risk-based decisioning across the lifecycle.",
+    description: "Apply configurable risk scoring to prioritise reviews and satisfy regulatory expectations.",
   },
 ];
 
@@ -32,7 +32,7 @@ export const HowItWorksSection = () => {
     <section className="section-padding bg-surface-subtle">
       <div className="container-enterprise">
         <h2 className="text-headline text-navy mb-12 text-center">
-          How WorldAML Works
+          From Onboarding to Ongoing Monitoring — in Four Steps
         </h2>
         
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">

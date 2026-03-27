@@ -155,14 +155,14 @@ export const NewHeroSection = () => {
         {/* Hero Header */}
         <div className="text-center max-w-4xl mx-auto mb-10">
           <h1 className="text-navy mb-6 text-balance">
-            WorldAML — Financial Crime Screening Infrastructure
+            AML, KYC & KYB Software for Regulated Businesses
           </h1>
           <p className="text-body-lg text-text-secondary mb-6 max-w-3xl mx-auto">
-            A unified platform and API layer for orchestrating financial crime screening 
-            using approved third-party data sources.
+            Streamline onboarding, screening, and monitoring with a scalable compliance 
+            platform trusted by banks, fintechs, and payment institutions across 3 continents.
           </p>
           
-          {/* Secondary CTAs */}
+          {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
             <Button variant="default" size="lg" asChild>
               <Link to="/contact-sales">
@@ -170,11 +170,16 @@ export const NewHeroSection = () => {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
+            <Button variant="outline" size="lg" asChild>
+              <Link to="/free-aml-check">
+                Run a Free AML Check
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
           
           <p className="text-body-sm text-text-tertiary border-t border-divider pt-6 mt-4">
-            WorldAML integrates trusted screening technologies, including LexisNexis Risk Solutions, 
-            and is delivered and supported by Infocredit Group.
+            Powered by LexisNexis Risk Solutions. Delivered and supported by Infocredit Group.
           </p>
         </div>
 
@@ -232,7 +237,7 @@ export const NewHeroSection = () => {
               </div>
               <CardTitle className="text-lg text-navy">WorldAML Platform & API</CardTitle>
               <CardDescription className="text-text-secondary text-sm">
-                Unified UI, APIs, workflows, and governance for managing financial crime screening.
+                Manage KYC, KYB, sanctions screening, and ongoing monitoring from a single dashboard.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -258,7 +263,7 @@ export const NewHeroSection = () => {
               </div>
               <CardTitle className="text-lg text-navy">WorldID</CardTitle>
               <CardDescription className="text-text-secondary text-sm">
-                Digital identity verification with document authentication and biometric liveness detection.
+                Verify identities in seconds with document authentication and biometric liveness checks.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -284,8 +289,7 @@ export const NewHeroSection = () => {
               </div>
               <CardTitle className="text-lg text-navy">Screening Solutions</CardTitle>
               <CardDescription className="text-text-secondary text-sm">
-                <span className="block">WorldCompliance®</span>
-                <span className="block">Bridger Insight XG®</span>
+                Access 1,900+ global watchlists via WorldCompliance® and Bridger Insight XG®.
               </CardDescription>
             </CardHeader>
             <CardContent>
