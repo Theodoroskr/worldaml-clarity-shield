@@ -67,6 +67,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Glossary = lazy(() => import("./pages/Glossary"));
 const AMLRegulations = lazy(() => import("./pages/AMLRegulations"));
+const MarketPage = lazy(() => import("./pages/MarketPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -158,6 +159,9 @@ const App = () => (
                 <Route path="/sanctions-check" element={<SanctionsCheck />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
+                
+                {/* Markets */}
+                <Route path="/markets/:market" element={<MarketPage />} />
                 
                 <Route path="/suite-layout-preview" element={<SuiteLayout />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
