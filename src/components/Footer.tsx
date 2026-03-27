@@ -4,6 +4,7 @@ import iso9001Badge from "@/assets/iso-9001-badge.png";
 import iso27001Badge from "@/assets/iso-27001-badge.png";
 import iso22301Badge from "@/assets/iso-22301-badge.png";
 import infocreditLogo from "@/assets/infocredit-logo.png";
+import whatsappQR from "@/assets/whatsapp-qr.jpg";
 
 const footerLinks = {
   platform: [
