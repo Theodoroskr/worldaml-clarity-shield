@@ -383,10 +383,9 @@ const Pricing = () => {
                           </div>
                           <CardTitle className="text-navy text-xl">LexisNexis Data</CardTitle>
                           <CardDescription>WorldCompliance® & Bridger Insight XG®</CardDescription>
-                          <div className="mt-4">
-                            <p className="text-xs font-medium text-text-tertiary uppercase tracking-wider mb-1">Starting from</p>
-                            <span className="text-3xl font-bold text-navy">€75</span>
-                            <span className="text-text-secondary">/user/month</span>
+                          <div className="mt-4 flex items-center gap-2">
+                            <Lock className="w-4 h-4 text-text-tertiary" />
+                            <span className="text-sm text-text-tertiary">Sign up to see pricing</span>
                           </div>
                         </CardHeader>
                         <CardContent>
