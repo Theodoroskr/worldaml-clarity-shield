@@ -1,35 +1,34 @@
 
 
-## Plan: AML Regulations Directory — 33 Jurisdictions
+## Plan: Convert WorldCompliance Demo to 7-Day Free Trial
 
-Transform the AML Regulations page from a flat 6-regulation list into a searchable directory with 33 jurisdictions across 6 regions.
-
-### Jurisdictions (33 total)
-
-| Region | Jurisdictions |
-|--------|--------------|
-| **Global** (1) | FATF |
-| **Europe** (13) | EU, UK, Cyprus, Malta, Greece, Romania, Ireland, Hungary, Germany, France, Netherlands, Poland, Bulgaria |
-| **Americas** (3) | US, Canada, Brazil, Mexico |
-| **GCC / Middle East** (5) | UAE, Saudi Arabia, Bahrain, Qatar, Turkey |
-| **Asia-Pacific** (4) | Singapore, Hong Kong, Australia, India |
-| **Africa** (3) | Mauritius, South Africa, Kenya, Nigeria |
-| **CIS** (1) | Armenia |
+Update copy, metadata, and CTA across 3 files to reposition the demo page as a free trial signup.
 
 ### Changes
 
-**1. `src/data/amlRegulations.ts`**
-- Add 27 new regulation entries with authority, key legislation, obligations, penalties
-- Group by region with region metadata
-- Update comparison matrix to dynamic structure
+**1. `src/pages/WorldComplianceDemo.tsx`**
+- SEO title/description: target "WorldCompliance free trial" keywords
+- Heading: "Request a WorldCompliance® Demo" → "Try WorldCompliance® Free for 7 Days"
+- Subtitle: "Get hands-on access to the industry-leading sanctions and PEP screening platform — no commitment, no credit card."
+- Add a highlighted trial badge above the feature list (teal background pill: "7-Day Free Trial")
+- Feature list header: "What you'll see in the demo:" → "What's included in your 7-day trial:"
+- Add 3 trial-specific features: "Full platform access for 7 days", "No credit card required", "Dedicated onboarding support"
+- Update disclaimer text to reference the free trial instead of demo scheduling
 
-**2. `src/pages/AMLRegulations.tsx`**
-- Search bar with instant filtering
-- Region tabs: All | Europe | Americas | GCC/MENA | Asia-Pacific | Africa | CIS
-- Card grid grouped by region with counts
-- Expandable detail cards (existing format)
-- Updated SEO with all 33 jurisdictions
+**2. `src/components/forms/WorldComplianceDemoForm.tsx`**
+- Form header: "Request a WorldCompliance® Demo" → "Start Your 7-Day Free Trial"
+- Description text: reference trial instead of demo scheduling
+- Submit button: "Request Demo" → "Start Free Trial"
+- Submission payload: `form_type: "free-trial"`, add `trial_days: 7` to metadata
+- Success message: update to confirm trial activation timeline ("We'll activate your trial within 24 hours")
+- Consent text: reference free trial
+- Footer note: reference trial eligibility instead of demo scheduling
+
+**3. `src/components/DataSourceCTA.tsx`** (worldcompliance variant only)
+- Card title: "Request a Demo" → "Start Free Trial"
+- Card description: reference 7-day trial
+- Button: "Schedule Demo" → "Start 7-Day Trial"
 
 ### Scope
-- 1 data file (~2500 lines)
-- 1 page file (refactor to directory)
+- 3 files, copy and metadata changes only
+
