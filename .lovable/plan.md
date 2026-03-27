@@ -1,34 +1,28 @@
 
 
-## Plan: Convert WorldCompliance Demo to 7-Day Free Trial
+## Plan: Add 6 More AML Regulation Jurisdictions
 
-Update copy, metadata, and CTA across 3 files to reposition the demo page as a free trial signup.
+Add Japan, South Korea, Switzerland, Luxembourg, Cayman Islands, and Jersey to the AML Regulations data file, bringing the total from 6 to 12.
 
 ### Changes
 
-**1. `src/pages/WorldComplianceDemo.tsx`**
-- SEO title/description: target "WorldCompliance free trial" keywords
-- Heading: "Request a WorldCompliance® Demo" → "Try WorldCompliance® Free for 7 Days"
-- Subtitle: "Get hands-on access to the industry-leading sanctions and PEP screening platform — no commitment, no credit card."
-- Add a highlighted trial badge above the feature list (teal background pill: "7-Day Free Trial")
-- Feature list header: "What you'll see in the demo:" → "What's included in your 7-day trial:"
-- Add 3 trial-specific features: "Full platform access for 7 days", "No credit card required", "Dedicated onboarding support"
-- Update disclaimer text to reference the free trial instead of demo scheduling
+**`src/data/amlRegulations.ts`**
 
-**2. `src/components/forms/WorldComplianceDemoForm.tsx`**
-- Form header: "Request a WorldCompliance® Demo" → "Start Your 7-Day Free Trial"
-- Description text: reference trial instead of demo scheduling
-- Submit button: "Request Demo" → "Start Free Trial"
-- Submission payload: `form_type: "free-trial"`, add `trial_days: 7` to metadata
-- Success message: update to confirm trial activation timeline ("We'll activate your trial within 24 hours")
-- Consent text: reference free trial
-- Footer note: reference trial eligibility instead of demo scheduling
+Add 6 new `AMLRegulation` entries (same structure as existing ones) before the `comparisonMatrix`:
 
-**3. `src/components/DataSourceCTA.tsx`** (worldcompliance variant only)
-- Card title: "Request a Demo" → "Start Free Trial"
-- Card description: reference 7-day trial
-- Button: "Schedule Demo" → "Start 7-Day Trial"
+| ID | Jurisdiction | Flag | Authority | Key Legislation |
+|----|-------------|------|-----------|-----------------|
+| `japan-aml` | Japan | 🇯🇵 | JAFIC / FSA Japan | Act on Prevention of Transfer of Criminal Proceeds |
+| `south-korea-aml` | South Korea | 🇰🇷 | KoFIU / FSC | Act on Reporting and Using Specified Financial Transaction Information |
+| `switzerland-aml` | Switzerland | 🇨🇭 | FINMA / MROS | AMLA (Anti-Money Laundering Act) |
+| `luxembourg-aml` | Luxembourg | 🇱🇺 | CSSF / CRF | AML Law of 2004 (as amended) |
+| `cayman-islands-aml` | Cayman Islands | 🇰🇾 | CIMA / FRA | Anti-Money Laundering Regulations (2020 Rev.) |
+| `jersey-aml` | Jersey | 🇯🇪 | JFSC | Proceeds of Crime (Jersey) Law 1999 / Money Laundering Order |
+
+Each entry includes: authority, status, effective date, scope, 6-8 key obligations, UBO threshold, PEP/sanctions requirements, penalty regime, timeline, and official URL.
+
+**Update `comparisonMatrix`** — Add 6 new columns (`japan`, `southKorea`, `switzerland`, `luxembourg`, `cayman`, `jersey`) to each row with jurisdiction-specific values for UBO threshold, PEP EDD, SAR filing, sanctions screening, crypto coverage, record retention, and max penalty.
 
 ### Scope
-- 3 files, copy and metadata changes only
+- 1 file (`src/data/amlRegulations.ts`), ~400 lines added
 
