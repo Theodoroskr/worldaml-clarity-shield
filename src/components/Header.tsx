@@ -68,6 +68,7 @@ const navLinks: NavLink[] = [
     ],
   },
   { href: "/pricing", label: "Pricing" },
+  { href: "/partners", label: "Partners" },
   {
     label: "Resources",
     children: [
