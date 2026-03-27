@@ -229,6 +229,11 @@ const SanctionsLists = () => {
         title="Global Sanctions Lists & AML Data Sources | WorldAML"
         description="Comprehensive reference of OFAC, EU, UN, OFSI, FATF and 30+ official sanctions lists and AML data sources used in compliance screening. Includes GCC and APAC authorities."
         canonical="/resources/sanctions-lists"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Resources", url: "/resources/sanctions-lists" },
+          { name: "Sanctions Lists", url: "/resources/sanctions-lists" },
+        ]}
         structuredData={[jsonLd, faqLd]}
       />
 

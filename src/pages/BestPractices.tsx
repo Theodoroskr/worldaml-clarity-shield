@@ -35,6 +35,11 @@ const BestPractices = () => {
         title="Global AML & Compliance Best Practices | WorldAML"
         description="Curated AML and compliance best practices from FATF, Basel Committee, Wolfsberg Group, FCA, FinCEN, and leading global banks. Linked to WorldAML features."
         canonical="/resources/best-practices"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Resources", url: "/resources/best-practices" },
+          { name: "Best Practices", url: "/resources/best-practices" },
+        ]}
       />
 
       {/* Hero */}
