@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Calendar, Clock, ArrowRight, Tag } from "lucide-react";
+import { Calendar, Clock, ArrowRight, Tag, Rss } from "lucide-react";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -66,9 +66,18 @@ const Blog = () => {
               <h1 className="text-display-sm md:text-display font-bold text-navy mb-4">
                 AML & Compliance Blog
               </h1>
-              <p className="text-body-lg text-text-secondary">
+              <p className="text-body-lg text-text-secondary mb-4">
                 Practical guides, regulatory updates, and expert analysis for compliance professionals — covering AML, KYC/KYB, sanctions, and risk management.
               </p>
+              <a
+                href="/rss.xml"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors"
+              >
+                <Rss className="w-4 h-4" />
+                Subscribe via RSS
+              </a>
             </div>
           </div>
         </section>
