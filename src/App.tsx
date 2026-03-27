@@ -77,6 +77,9 @@ const DataCoverageCountry = lazy(() => import("./pages/DataCoverageCountry"));
 const Academy = lazy(() => import("./pages/Academy"));
 const AcademyCourse = lazy(() => import("./pages/AcademyCourse"));
 const AcademyCertificate = lazy(() => import("./pages/AcademyCertificate"));
+const AMLApi = lazy(() => import("./pages/AMLApi"));
+const SanctionsScreeningApi = lazy(() => import("./pages/SanctionsScreeningApi"));
+const KYCKYBApi = lazy(() => import("./pages/KYCKYBApi"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -185,6 +188,11 @@ const App = () => (
                 {/* Markets */}
                 <Route path="/markets/:market" element={<MarketPage />} />
                 
+                {/* API Product Pages */}
+                <Route path="/aml-api" element={<AMLApi />} />
+                <Route path="/sanctions-screening-api" element={<SanctionsScreeningApi />} />
+                <Route path="/kyc-kyb-api" element={<KYCKYBApi />} />
+
                 <Route path="/suite-layout-preview" element={<SuiteLayout />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
