@@ -113,10 +113,17 @@ const AcademyCertificate = () => {
                   {cert.holder_name}
                 </h2>
 
-                <p className="text-body text-muted-foreground mb-6">
+                <p className="text-body text-muted-foreground mb-2">
                   has successfully completed the <strong>{course?.title}</strong> course 
                   at WorldAML Academy with a score of <strong>{cert.score}%</strong>.
                 </p>
+
+                {course?.cpd_hours > 0 && (
+                  <div className="inline-flex items-center gap-1.5 bg-secondary/40 text-foreground rounded-full px-4 py-1.5 text-body-sm font-medium mb-6">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    Accredited for {course.cpd_hours} CPD Hour{course.cpd_hours !== 1 ? "s" : ""}
+                  </div>
+                )}
 
                 <div className="flex items-center justify-center gap-6 text-body-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
