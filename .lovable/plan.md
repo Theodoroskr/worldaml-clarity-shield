@@ -1,34 +1,33 @@
 
 
-## Fix Certificate Sharing + Create Proper Badge
+## Fix: Restrict Public Certificate Access to Token-Based Lookup
 
-### Problems identified
-1. **LinkedIn sharing**: The `shareArticle` endpoint is deprecated. LinkedIn now uses `sharing/share-offsite/` for link sharing.
-2. **Popup blockers**: `window.open()` with specific dimensions triggers popup blockers in many browsers. Should use `_blank` target without size constraints.
-3. **Copy link works** — this part is fine with the published origin URL.
-4. **Badge is not shareable** — it's just a visual div. Users need something they can actually download/embed.
+### Problem
+The `academy_certificates` table has an RLS policy `Anyone can view certificates by share_token` with `USING (true)`, which exposes **all** certificate records publicly. The intent is to allow viewing a single certificate via its `share_token`, but the policy doesn't enforce that filter.
 
-### Changes — Single file: `src/pages/AcademyCertificate.tsx`
+### Solution
+Replace the overly permissive public SELECT policy with a **security-definer function** that accepts a `share_token` parameter and returns only the matching row. Then restrict the public SELECT policy to `USING (false)` for anonymous users (keeping the authenticated user's own-certificate policy intact).
 
-1. **Fix LinkedIn share URL**
-   - Change from: `linkedin.com/shareArticle?mini=true&url=...&title=...`
-   - Change to: `linkedin.com/sharing/share-offsite/?url=...`
-   - Remove the `width/height` from `window.open` — just use `"_blank"` target via `window.open(url, "_blank")` to avoid popup blockers
+### Database migration
 
-2. **Fix X/Twitter share**
-   - Same fix: remove the `width/height` constraints from `window.open` to avoid popup blockers
+1. **Drop** the permissive `Anyone can view certificates by share_token` policy
+2. **Create** a security-definer function `get_certificate_by_token(text)` that returns the certificate row joined with course data — callable by anyone but scoped to exactly one token
+3. No new public SELECT policy needed for anon — access goes through the function
 
-3. **Add a native share option**
-   - Use `navigator.share()` API (available on mobile and modern browsers) as an additional option alongside LinkedIn/X/Copy
-   - Falls back gracefully — button hidden if API not available
+### Code change — `src/pages/AcademyCertificate.tsx`
 
-4. **Make badge downloadable**
-   - Add a "Download Badge" button that uses `html2canvas` or a canvas-based approach to render the badge as a PNG image the user can save
-   - Since adding a dependency may be complex, a simpler approach: render the badge as an SVG-based element and provide a download link using a data URI
+Replace the direct table query:
+```ts
+supabase.from("academy_certificates").select("*, academy_courses(*)").eq("share_token", token).single()
+```
+with an RPC call:
+```ts
+supabase.rpc("get_certificate_by_token", { _token: token }).single()
+```
 
-### Simpler alternative for badge download
-Instead of `html2canvas`, generate a small SVG string containing the badge content (course title, score, CPD) and convert it to a downloadable PNG via canvas. This keeps it dependency-free.
+The function returns the same shape (certificate fields + nested course object), so the rest of the component stays unchanged.
 
 ### Files changed
-- `src/pages/AcademyCertificate.tsx` — fix share URLs, add native share, add badge download
+- **Database migration** — drop policy, create `get_certificate_by_token` function
+- **`src/pages/AcademyCertificate.tsx`** — switch from `.from()` to `.rpc()`
 
