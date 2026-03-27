@@ -7,20 +7,23 @@ import { CheckCircle2 } from "lucide-react";
 import lexisNexisLogo from "@/assets/lexisnexis-risk-solutions-logo.png";
 
 const features = [
+  "Full platform access for 7 days",
   "Access 9.2+ million detailed risk profiles",
   "Screen against 500+ sanctions and watchlists",
   "PEP coverage across 240+ countries",
   "Real-time adverse media monitoring",
   "Flexible search with name variations",
   "Audit-ready compliance reports",
+  "No credit card required",
+  "Dedicated onboarding support",
 ];
 
 const WorldComplianceDemo = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="WorldCompliance® Demo"
-        description="Request a free demo of WorldCompliance® Online. Screen against 9.2M+ risk profiles, 500+ sanctions lists, and PEP data across 240+ countries."
+        title="WorldCompliance® Free Trial — 7 Days Free"
+        description="Start your 7-day free trial of WorldCompliance® Online. Screen against 9.2M+ risk profiles, 500+ sanctions lists, and PEP data across 240+ countries. No credit card required."
         canonical="/data-sources/worldcompliance/demo"
         breadcrumbs={[
           { name: "Home", url: "/" },
@@ -39,10 +42,10 @@ const WorldComplianceDemo = () => {
               <div>
                 <LaneBadge lane="data-source" className="mb-6" />
                 <h1 className="text-navy mb-4">
-                  Request a WorldCompliance® Demo
+                  Try WorldCompliance® Free for 7 Days
                 </h1>
                 <p className="text-xl text-teal-dark font-medium mb-6">
-                  See the industry-leading sanctions and PEP screening solution in action
+                  Get hands-on access to the industry-leading sanctions and PEP screening platform — no commitment, no credit card.
                 </p>
                 
                 {/* Attribution Block */}
@@ -61,7 +64,8 @@ const WorldComplianceDemo = () => {
 
                 {/* Feature List */}
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-navy mb-4">What you'll see in the demo:</h3>
+                  <span className="inline-block bg-teal/10 text-teal text-sm font-semibold px-4 py-1.5 rounded-full mb-2">7-Day Free Trial</span>
+                  <h3 className="font-semibold text-navy mb-4">What's included in your 7-day trial:</h3>
                   {features.map((feature) => (
                     <div key={feature} className="flex items-start gap-3">
                       <CheckCircle2 className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
@@ -83,9 +87,9 @@ const WorldComplianceDemo = () => {
         <section className="py-8 bg-surface-subtle border-t border-divider">
           <div className="container-enterprise">
             <p className="text-body-sm text-text-tertiary text-center max-w-3xl mx-auto">
-              WorldCompliance® is a trademark of LexisNexis Risk Solutions. Demo availability 
-              and product features may vary by region. All demonstrations are subject to 
-              eligibility assessment and scheduling availability.
+              WorldCompliance® is a trademark of LexisNexis Risk Solutions. Free trial availability 
+              and product features may vary by region. All trials are subject to 
+              eligibility assessment. Trial access is activated within 24 hours of approval.
             </p>
           </div>
         </section>
