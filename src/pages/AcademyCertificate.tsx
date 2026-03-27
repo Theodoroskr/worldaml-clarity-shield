@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Award, Download, Linkedin, Twitter, Share2, ArrowLeft, CheckCircle } from "lucide-react";
-import { Logo } from "@/components/Logo";
+import { BookOpen } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
