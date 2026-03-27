@@ -68,6 +68,7 @@ const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Glossary = lazy(() => import("./pages/Glossary"));
 const AMLRegulations = lazy(() => import("./pages/AMLRegulations"));
 const MarketPage = lazy(() => import("./pages/MarketPage"));
+const FreeAMLCheck = lazy(() => import("./pages/FreeAMLCheck"));
 
 const queryClient = new QueryClient({
   defaultOptions: {

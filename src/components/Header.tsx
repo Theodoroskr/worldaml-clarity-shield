@@ -58,7 +58,7 @@ const navLinks: NavLink[] = [
       { href: "/data-sources/bridger-xg", label: "Bridger Insight XG®" },
     ],
   },
-  { href: "/sanctions-check", label: "Quick Check" },
+  { href: "/free-aml-check", label: "Free AML Check" },
   {
     label: "Markets",
     children: [
