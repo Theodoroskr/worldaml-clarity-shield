@@ -1,56 +1,42 @@
 
 
-## Current State
+## Add Course Filtering by Category and CPD Hours
 
-**Where completed courses are visible:**
-- **Dashboard** (`/dashboard`): Shows "My Certificates" section with all earned certificates, share links, and LinkedIn sharing
-- **Academy Course page** (`/academy/:slug`): Shows progress bar and quiz results inline
-- **Academy listing** (`/academy`): Currently does NOT show which courses are completed — no visual indicator for logged-in users
+### Problem
+The Academy page has no way to filter courses by type (regional vs global vs foundational) and doesn't show CPD (Continuing Professional Development) hours — a key credibility signal for compliance professionals.
 
-**What's missing:**
-1. No completion badges on the Academy course listing for logged-in users
-2. No email notification when a certificate is earned
-3. No "My Progress" section showing in-progress vs completed courses
+### Database Changes
 
-## Plan
+**Migration — add two columns to `academy_courses`:**
+- `category TEXT NOT NULL DEFAULT 'global'` — values: `foundational`, `regional`, `global-specialisation`
+- `cpd_hours NUMERIC NOT NULL DEFAULT 0` — CPD credit hours (typically duration_minutes rounded to nearest 0.5 hr)
 
-### 1. Add completion indicators to Academy course cards
+**Data update — categorise all 15 existing courses:**
 
-**File: `src/pages/Academy.tsx`**
-- For logged-in users, fetch `academy_progress` and `academy_certificates` for their user ID
-- Overlay a checkmark badge on completed courses (quiz_passed = true)
-- Show "In Progress" badge on courses with progress but no certificate
-- Keep cards unchanged for anonymous visitors
+| Course | Category | CPD Hours |
+|--------|----------|-----------|
+| AML Fundamentals | foundational | 0.5 |
+| Sanctions Screening Essentials | foundational | 0.5 |
+| KYC & Customer Due Diligence | foundational | 1.0 |
+| AML Europe / Americas / Asia-Pacific / GCC-MENA / Africa / CIS | regional | 1.0 each (0.5 for 30-min courses) |
+| PEP Screening, Adverse Media, Beneficial Ownership, Transaction Monitoring, Crypto AML, Risk-Based Approach | global-specialisation | 0.5–1.0 based on duration |
 
-### 2. Add "My Courses" tab/section to Academy page
+### UI Changes — `src/pages/Academy.tsx`
 
-**File: `src/pages/Academy.tsx`**
-- For logged-in users, add a "My Progress" summary above the course grid showing: courses started, courses completed, certificates earned
-- Add filter tabs: "All Courses" | "In Progress" | "Completed"
+1. **Category filter row** — Add pill buttons above the course grid: "All", "Foundational", "Regional", "Specialisation". Works alongside the existing progress filter for logged-in users.
 
-### 3. Send certificate email on quiz completion
+2. **Difficulty filter** — Add a secondary row or combined dropdown for difficulty: "All Levels", "Beginner", "Intermediate", "Advanced".
 
-**Database**: No changes needed — existing tables suffice
+3. **CPD hours badge** — Show on each course card next to the duration, e.g. `1.0 CPD` with a small award/clock icon.
 
-**Email setup**: Set up transactional email infrastructure and create a certificate-earned template:
-- Call `setup_email_infra` to create queue infrastructure
-- Call `scaffold_transactional_email` to create the Edge Function
-- Create a `certificate-earned.tsx` template with course name, score, certificate link, and LinkedIn share CTA
-- Register in the TEMPLATES registry and deploy
+4. **Category badge** — Add a subtle tag on each card showing the category (e.g. "Regional" in a muted blue pill, "Foundational" in green).
 
-**File: `src/pages/AcademyCourse.tsx`**
-- After certificate is created in `submitQuiz()`, invoke `send-transactional-email` with the `certificate-earned` template
-- Include `templateData`: holder name, course title, score, certificate URL
-
-### 4. Create unsubscribe page
-
-- Create the route/page as required by the transactional email system (path determined by scaffold tool)
-- Branded page matching the site's design, handles token validation and unsubscribe confirmation
+5. **Hero update** — Add "CPD-Accredited" to the hero highlights row alongside "Interactive Courses" and "Shareable Certificates".
 
 ### Technical Details
 
-- Email template will use React Email components styled to match WorldAML brand (navy headings, teal accents, white background)
-- Idempotency key: `cert-email-${certificate.id}` to prevent duplicate sends
-- The certificate URL in the email links to the public verification page (`/academy/certificate/:token`)
-- Email subject: "Your WorldAML Certificate — {Course Title}"
+- Category filter state: `useState<string>("all")` separate from progress filter
+- Both filters compose: `filteredCourses` applies category filter then progress filter
+- CPD hours derived from `cpd_hours` column, displayed as `{n} CPD Hr{s}`
+- No new tables or RLS changes needed — just two new columns on existing table
 
