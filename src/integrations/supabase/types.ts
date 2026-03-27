@@ -74,6 +74,75 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_applications: {
+        Row: {
+          company_name: string
+          created_at: string
+          description: string | null
+          id: string
+          partner_type: Database["public"]["Enums"]["partner_type"]
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["partner_status"]
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          partner_type?: Database["public"]["Enums"]["partner_type"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["partner_status"]
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          partner_type?: Database["public"]["Enums"]["partner_type"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["partner_status"]
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      partners: {
+        Row: {
+          commission_rate: number
+          created_at: string
+          id: string
+          is_active: boolean
+          partner_type: Database["public"]["Enums"]["partner_type"]
+          referral_code: string
+          user_id: string
+        }
+        Insert: {
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          partner_type?: Database["public"]["Enums"]["partner_type"]
+          referral_code?: string
+          user_id: string
+        }
+        Update: {
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          partner_type?: Database["public"]["Enums"]["partner_type"]
+          referral_code?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company_name: string | null
@@ -109,6 +178,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      referrals: {
+        Row: {
+          commission_earned: number | null
+          conversion_value: number | null
+          converted_at: string | null
+          created_at: string
+          id: string
+          partner_id: string
+          referral_code_used: string
+          referred_email: string | null
+          status: Database["public"]["Enums"]["referral_status"]
+        }
+        Insert: {
+          commission_earned?: number | null
+          conversion_value?: number | null
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          partner_id: string
+          referral_code_used: string
+          referred_email?: string | null
+          status?: Database["public"]["Enums"]["referral_status"]
+        }
+        Update: {
+          commission_earned?: number | null
+          conversion_value?: number | null
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          partner_id?: string
+          referral_code_used?: string
+          referred_email?: string | null
+          status?: Database["public"]["Enums"]["referral_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sanctions_searches: {
         Row: {
@@ -179,6 +292,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      partner_status: "pending" | "approved" | "rejected"
+      partner_type: "referral" | "affiliate" | "reseller"
+      referral_status: "clicked" | "signed_up" | "converted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -307,6 +423,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      partner_status: ["pending", "approved", "rejected"],
+      partner_type: ["referral", "affiliate", "reseller"],
+      referral_status: ["clicked", "signed_up", "converted"],
     },
   },
 } as const
