@@ -58,9 +58,12 @@ export const HowItWorksSection = () => {
                 <h3 className="text-body font-semibold text-navy mb-2">
                   {step.title}
                 </h3>
-                <p className="text-body-sm text-text-secondary">
+                <p className="text-body-sm text-text-secondary mb-2">
                   {step.description}
                 </p>
+                <Link to={step.link} className="text-caption font-medium text-teal hover:underline">
+                  Explore API →
+                </Link>
               </div>
             </div>
           ))}
