@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Award, Download, Linkedin, Twitter, Share2, ArrowLeft, CheckCircle } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -98,7 +99,8 @@ const AcademyCertificate = () => {
                 <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-primary/30 rounded-br-lg" />
 
                 <div className="mb-6">
-                  <Award className="h-16 w-16 text-accent mx-auto mb-4" />
+                  <Logo size="lg" showTagline className="justify-center mb-5" />
+                  <div className="w-16 h-px bg-border mx-auto mb-4" />
                   <p className="text-caption uppercase tracking-widest text-muted-foreground font-semibold mb-1">
                     Certificate of Completion
                   </p>
@@ -124,7 +126,8 @@ const AcademyCertificate = () => {
                   <span>ID: {cert.share_token.toUpperCase()}</span>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-border">
+                <div className="mt-4 pt-4 border-t border-border flex items-center justify-center gap-2">
+                  <Award className="h-4 w-4 text-accent" />
                   <p className="text-caption text-muted-foreground">
                     WorldAML Academy — www.worldaml.com/academy
                   </p>
