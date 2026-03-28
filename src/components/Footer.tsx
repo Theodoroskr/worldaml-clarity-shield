@@ -44,6 +44,7 @@ const footerLinks = {
     { href: "/resources/best-practices", label: "Best Practices" },
     { href: "/resources/sanctions-lists", label: "Sanctions Lists" },
     { href: "/data-coverage", label: "Data Coverage" },
+    { href: "/eu-sanctions-map", label: "EU Sanctions Map" },
     { href: "/demo", label: "Request Demo" },
   ],
 };

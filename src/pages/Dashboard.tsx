@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert, Search, GraduationCap, Award, Share2, ExternalLink, Copy } from "lucide-react";
+import { Loader2, User, Building2, LogOut, CreditCard, ShieldAlert, Search, GraduationCap, Award, Share2, ExternalLink, Copy, Globe } from "lucide-react";
 import { CrossSellCard } from "@/components/CrossSellCard";
 import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
 import { SearchHistoryPanel, SearchHistoryHandle } from "@/components/sanctions/SearchHistoryPanel";
@@ -183,6 +183,22 @@ const Dashboard = () => {
           </div>
           <div className="mt-10 space-y-6">
             <h2 className="text-xl font-semibold text-navy">Quick Tools</h2>
+
+            {/* EU Sanctions Map Card */}
+            <Card className="border-navy/20 hover:shadow-md transition-shadow">
+              <CardContent className="flex items-center gap-4 py-4">
+                <div className="w-10 h-10 rounded-lg bg-navy/10 flex items-center justify-center flex-shrink-0">
+                  <Globe className="h-5 w-5 text-navy" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-navy">EU Sanctions Map</p>
+                  <p className="text-xs text-text-secondary">Interactive map of EU restrictive measures by country</p>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => navigate("/eu-sanctions-map")}>
+                  Explore Map
+                </Button>
+              </CardContent>
+            </Card>
             <DashboardSanctionsWidget onSearchComplete={() => historyRef.current?.refresh()} />
             <SearchHistoryPanel ref={historyRef} />
           </div>
