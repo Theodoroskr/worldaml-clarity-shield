@@ -273,11 +273,12 @@ export const InteractiveSanctionsMap = ({ activeRegion }: InteractiveSanctionsMa
 
         {/* Continent labels */}
         <text x="80" y="95" className="fill-muted-foreground text-[7px]" textAnchor="middle" fontWeight="600" opacity="0.4">NORTH AMERICA</text>
-        <text x="95" y="190" className="fill-muted-foreground text-[7px]" textAnchor="middle" fontWeight="600" opacity="0.4">SOUTH AMERICA</text>
-        <text x="260" y="75" className="fill-muted-foreground text-[7px]" textAnchor="middle" fontWeight="600" opacity="0.4">EUROPE</text>
+        <text x="100" y="220" className="fill-muted-foreground text-[7px]" textAnchor="middle" fontWeight="600" opacity="0.4">SOUTH AMERICA</text>
+        <text x="250" y="75" className="fill-muted-foreground text-[7px]" textAnchor="middle" fontWeight="600" opacity="0.4">EUROPE</text>
         <text x="270" y="195" className="fill-muted-foreground text-[7px]" textAnchor="middle" fontWeight="600" opacity="0.4">AFRICA</text>
-        <text x="330" y="130" className="fill-muted-foreground text-[7px]" textAnchor="middle" fontWeight="600" opacity="0.4">MIDDLE EAST</text>
+        <text x="325" y="130" className="fill-muted-foreground text-[7px]" textAnchor="middle" fontWeight="600" opacity="0.4">MIDDLE EAST</text>
         <text x="410" y="90" className="fill-muted-foreground text-[7px]" textAnchor="middle" fontWeight="600" opacity="0.4">ASIA</text>
+        <text x="440" y="245" className="fill-muted-foreground text-[7px]" textAnchor="middle" fontWeight="600" opacity="0.4">OCEANIA</text>
       </svg>
 
       {/* Tooltip */}
