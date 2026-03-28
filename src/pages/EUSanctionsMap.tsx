@@ -2,7 +2,8 @@ import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import { allEUSanctionsRegimes, regionLabels } from "@/data/euSanctionsRegimes";
-import { Shield, Globe, Search, ExternalLink, ChevronRight, Filter } from "lucide-react";
+import { Shield, Globe, Search, ExternalLink, ChevronRight, Filter, Map } from "lucide-react";
+import InteractiveSanctionsMap from "@/components/sanctions/InteractiveSanctionsMap";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -109,6 +110,18 @@ const EUSanctionsMap = () => {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Interactive Map */}
+      <section className="py-10 bg-card border-b border-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center gap-2 mb-6">
+            <Map className="w-5 h-5 text-accent" />
+            <h2 className="text-lg font-semibold text-foreground">Interactive Sanctions Map</h2>
+            <span className="text-sm text-muted-foreground ml-auto">Click a country to view details</span>
+          </div>
+          <InteractiveSanctionsMap activeRegion={activeRegion} />
         </div>
       </section>
 
