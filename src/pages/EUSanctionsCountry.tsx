@@ -181,12 +181,12 @@ const EUSanctionsCountry = () => {
       {/* Compliance Warning */}
       <section className="py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
+          <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-semibold text-amber-900 dark:text-amber-200 mb-1">Compliance Obligation</h3>
-                <p className="text-sm text-amber-800 dark:text-amber-300">
+                <h3 className="font-semibold text-foreground mb-1">Compliance Obligation</h3>
+                <p className="text-sm text-muted-foreground">
                   EU sanctions are legally binding on all EU persons and entities, including EU nationals abroad and companies incorporated in the EU.
                   Non-compliance can result in criminal penalties. This page is for informational purposes only — always consult official EU sources and legal counsel
                   for compliance decisions.
