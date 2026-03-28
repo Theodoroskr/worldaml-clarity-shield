@@ -1,31 +1,37 @@
 
-Goal: fully replace the old Lovable favicon everywhere (preview + published) so browsers stop showing the wrong tab icon.
 
-What I found
-- `index.html` already points to `/favicon.png`.
-- `public/favicon.ico` still exists, and many browsers request `/favicon.ico` first (or keep it cached), which is likely why you still see the old icon.
+# Add Interactive SVG World Map to EU Sanctions Map Page
 
-Implementation plan
-1. Normalize favicon source
-- Use one canonical icon file (your current WorldAML icon) as the single source.
+## What we'll build
+An interactive, clickable SVG world map rendered directly above the existing country cards on `/eu-sanctions-map`. Sanctioned countries are color-coded by region, hovering shows a tooltip with the country name and number of regimes, and clicking navigates to the country detail page.
 
-2. Replace conflicting favicon assets
-- Remove the stale `public/favicon.ico` that can override linked icons.
-- Rebuild/provide a fresh `.ico` from the new icon (same brand mark), so even direct `/favicon.ico` requests return the correct icon.
-- Ensure `public/favicon.png` and `public/favicon.svg` are aligned to the same icon.
+## Approach
+Use a lightweight, dependency-free inline SVG world map component with pre-mapped ISO country codes. No external libraries needed — just an SVG with path data for each country, matched to the existing `euSanctionsRegimes` data via country slugs/names.
 
-3. Harden `<head>` favicon declarations in `index.html`
-- Add explicit favicon links for SVG + PNG + ICO (with correct MIME types/sizes).
-- Add versioned query params (e.g. `?v=2`) to force cache busting after deploy.
+## Changes
 
-4. Verify end-to-end
-- Check these URLs directly return the new icon: `/favicon.ico`, `/favicon.png`, `/favicon.svg`.
-- Hard refresh and verify tab icon on:
-  - Preview URL
-  - Published URL
-- Validate on desktop + mobile browser tab/home-screen behavior.
+### 1. Create `src/components/sanctions/InteractiveSanctionsMap.tsx`
+- Render an SVG world map using standard SVG `<path>` elements for each country
+- Use a lookup map from country name/slug to SVG path IDs (ISO alpha-2 codes)
+- Color sanctioned countries by their region color; non-sanctioned countries stay light gray
+- On hover: show a floating tooltip with country name, regime count, and region badge
+- On click: navigate to `/eu-sanctions/:slug` for sanctioned countries
+- Responsive: scales to container width, scrollable on mobile
+- Active region filter from parent highlights only that region's countries
 
-Files to update
-- `index.html`
-- `public/favicon.ico` (replace/regenerate)
-- `public/favicon.png` and/or `public/favicon.svg` (only if needed for consistency)
+### 2. Update `src/pages/EUSanctionsMap.tsx`
+- Import and render `InteractiveSanctionsMap` between the stats section and the search/filter section
+- Pass `activeRegion` and the regimes data as props
+- Add a legend below the map showing region color coding
+
+### 3. SVG map data
+- Use a simplified world map SVG with ~180 country paths (common open-source approach, e.g., from amCharts or Natural Earth simplified projections)
+- Each path gets an `id` matching the ISO alpha-2 code
+- Map the existing `slug` values to ISO codes via a small lookup object
+
+## Technical notes
+- Pure SVG + React — zero additional dependencies
+- Map paths are ~50KB of inline SVG data, well within acceptable bundle size
+- Tooltip implemented with absolute-positioned div tracking mouse coordinates
+- Uses the same `regionColors` palette already defined on the page
+
