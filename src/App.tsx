@@ -81,6 +81,8 @@ const AMLApi = lazy(() => import("./pages/AMLApi"));
 const SanctionsScreeningApi = lazy(() => import("./pages/SanctionsScreeningApi"));
 const KYCKYBApi = lazy(() => import("./pages/KYCKYBApi"));
 const WhyWorldAML = lazy(() => import("./pages/WhyWorldAML"));
+const EUSanctionsMap = lazy(() => import("./pages/EUSanctionsMap"));
+const EUSanctionsCountry = lazy(() => import("./pages/EUSanctionsCountry"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -194,6 +196,10 @@ const App = () => (
                 <Route path="/aml-api" element={<AMLApi />} />
                 <Route path="/sanctions-screening-api" element={<SanctionsScreeningApi />} />
                 <Route path="/kyc-kyb-api" element={<KYCKYBApi />} />
+
+                {/* EU Sanctions */}
+                <Route path="/eu-sanctions-map" element={<EUSanctionsMap />} />
+                <Route path="/eu-sanctions/:slug" element={<EUSanctionsCountry />} />
 
                 <Route path="/suite-layout-preview" element={<SuiteLayout />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
