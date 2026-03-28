@@ -121,7 +121,7 @@ const EUSanctionsCountry = () => {
             <Badge className="bg-white/15 text-primary-foreground">{regionLabels[regime.region]}</Badge>
             <Badge className="bg-white/15 text-primary-foreground">{regime.regimes.length} Regime{regime.regimes.length > 1 ? "s" : ""}</Badge>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">
             EU Sanctions on {regime.country}
           </h1>
           <p className="text-lg text-primary-foreground/80 max-w-3xl">
