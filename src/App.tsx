@@ -80,6 +80,7 @@ const AcademyCertificate = lazy(() => import("./pages/AcademyCertificate"));
 const AMLApi = lazy(() => import("./pages/AMLApi"));
 const SanctionsScreeningApi = lazy(() => import("./pages/SanctionsScreeningApi"));
 const KYCKYBApi = lazy(() => import("./pages/KYCKYBApi"));
+const WhyWorldAML = lazy(() => import("./pages/WhyWorldAML"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
