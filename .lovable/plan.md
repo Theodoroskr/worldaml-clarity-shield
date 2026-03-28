@@ -1,32 +1,31 @@
 
+Goal: fully replace the old Lovable favicon everywhere (preview + published) so browsers stop showing the wrong tab icon.
 
-## Add 3 Missing API Pages to sitemap.xml
+What I found
+- `index.html` already points to `/favicon.png`.
+- `public/favicon.ico` still exists, and many browsers request `/favicon.ico` first (or keep it cached), which is likely why you still see the old icon.
 
-### Change
+Implementation plan
+1. Normalize favicon source
+- Use one canonical icon file (your current WorldAML icon) as the single source.
 
-**`public/sitemap.xml`** — Insert 3 new `<url>` entries after the Products section (after line 135), before the Resources section:
+2. Replace conflicting favicon assets
+- Remove the stale `public/favicon.ico` that can override linked icons.
+- Rebuild/provide a fresh `.ico` from the new icon (same brand mark), so even direct `/favicon.ico` requests return the correct icon.
+- Ensure `public/favicon.png` and `public/favicon.svg` are aligned to the same icon.
 
-```xml
-<!-- API Landing Pages -->
-<url>
-  <loc>https://www.worldaml.com/aml-api</loc>
-  <lastmod>2026-03-27</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.9</priority>
-</url>
-<url>
-  <loc>https://www.worldaml.com/sanctions-screening-api</loc>
-  <lastmod>2026-03-27</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.9</priority>
-</url>
-<url>
-  <loc>https://www.worldaml.com/kyc-kyb-api</loc>
-  <lastmod>2026-03-27</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.9</priority>
-</url>
-```
+3. Harden `<head>` favicon declarations in `index.html`
+- Add explicit favicon links for SVG + PNG + ICO (with correct MIME types/sizes).
+- Add versioned query params (e.g. `?v=2`) to force cache busting after deploy.
 
-Priority set to 0.9 to match other high-value product pages. One file, three entries.
+4. Verify end-to-end
+- Check these URLs directly return the new icon: `/favicon.ico`, `/favicon.png`, `/favicon.svg`.
+- Hard refresh and verify tab icon on:
+  - Preview URL
+  - Published URL
+- Validate on desktop + mobile browser tab/home-screen behavior.
 
+Files to update
+- `index.html`
+- `public/favicon.ico` (replace/regenerate)
+- `public/favicon.png` and/or `public/favicon.svg` (only if needed for consistency)
