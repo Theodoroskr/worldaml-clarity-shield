@@ -473,7 +473,41 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      academy_questions_safe: {
+        Row: {
+          course_id: string | null
+          explanation: string | null
+          id: string | null
+          options: Json | null
+          question: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          course_id?: string | null
+          explanation?: string | null
+          id?: string | null
+          options?: Json | null
+          question?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          course_id?: string | null
+          explanation?: string | null
+          id?: string | null
+          options?: Json | null
+          question?: string | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_questions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       get_certificate_by_token: { Args: { _token: string }; Returns: Json }

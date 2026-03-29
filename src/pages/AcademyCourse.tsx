@@ -26,6 +26,7 @@ const AcademyCourse = () => {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [correctAnswers, setCorrectAnswers] = useState<Record<string, number>>({});
 
   const { data: course } = useQuery({
     queryKey: ["academy-course", slug],
@@ -60,7 +61,7 @@ const AcademyCourse = () => {
     enabled: !!course?.id && !!user,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("academy_questions")
+        .from("academy_questions_safe")
         .select("*")
         .eq("course_id", course!.id)
         .order("sort_order");
@@ -134,8 +135,12 @@ const AcademyCourse = () => {
 
       if (error) throw error;
 
-      const result = data as { passed: boolean; score: number; certificate_id?: string; share_token?: string };
+      const result = data as { passed: boolean; score: number; certificate_id?: string; share_token?: string; correct_answers?: Record<string, number> };
       setQuizScore(result.score);
+      setQuizSubmitted(true);
+      if (result.correct_answers) {
+        setCorrectAnswers(result.correct_answers);
+      }
       setQuizSubmitted(true);
 
       if (result.passed && result.share_token) {
@@ -359,8 +364,9 @@ const AcademyCourse = () => {
                       {questions?.map((q, qi) => {
                         const options = q.options as string[];
                         const answered = quizAnswers[q.id] !== undefined;
-                        const isCorrect = quizSubmitted && quizAnswers[q.id] === q.correct_index;
-                        const isWrong = quizSubmitted && answered && quizAnswers[q.id] !== q.correct_index;
+                        const correctIdx = correctAnswers[q.id];
+                        const isCorrect = quizSubmitted && quizAnswers[q.id] === correctIdx;
+                        const isWrong = quizSubmitted && answered && quizAnswers[q.id] !== correctIdx;
 
                         return (
                           <div key={q.id} className="rounded-xl border border-border p-6">
@@ -370,7 +376,7 @@ const AcademyCourse = () => {
                             <div className="space-y-2">
                               {options.map((opt, oi) => {
                                 const isSelected = quizAnswers[q.id] === oi;
-                                const showCorrect = quizSubmitted && oi === q.correct_index;
+                                const showCorrect = quizSubmitted && oi === correctIdx;
                                 return (
                                   <button
                                     key={oi}
