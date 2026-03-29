@@ -364,8 +364,9 @@ const AcademyCourse = () => {
                       {questions?.map((q, qi) => {
                         const options = q.options as string[];
                         const answered = quizAnswers[q.id] !== undefined;
-                        const isCorrect = quizSubmitted && quizAnswers[q.id] === q.correct_index;
-                        const isWrong = quizSubmitted && answered && quizAnswers[q.id] !== q.correct_index;
+                        const correctIdx = correctAnswers[q.id];
+                        const isCorrect = quizSubmitted && quizAnswers[q.id] === correctIdx;
+                        const isWrong = quizSubmitted && answered && quizAnswers[q.id] !== correctIdx;
 
                         return (
                           <div key={q.id} className="rounded-xl border border-border p-6">
