@@ -60,7 +60,7 @@ const AcademyCourse = () => {
     enabled: !!course?.id && !!user,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("academy_questions")
+        .from("academy_questions_safe")
         .select("*")
         .eq("course_id", course!.id)
         .order("sort_order");
