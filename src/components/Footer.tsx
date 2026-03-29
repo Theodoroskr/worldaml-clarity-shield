@@ -27,6 +27,15 @@ const footerLinks = {
     { href: "/data-sources/bridger-xg", label: "Bridger Insight XG®" },
     { href: "/data-sources/resources", label: "Resources & Data Coverage" },
   ],
+  markets: [
+    { href: "/markets/uk", label: "United Kingdom" },
+    { href: "/markets/uae", label: "UAE" },
+    { href: "/markets/usa", label: "United States" },
+    { href: "/markets/greece", label: "Greece" },
+    { href: "/markets/cyprus", label: "Cyprus" },
+    { href: "/markets/malta", label: "Malta" },
+    { href: "/markets/romania", label: "Romania" },
+  ],
   company: [
     { href: "/about", label: "About" },
     { href: "/contact-sales", label: "Contact Sales" },
@@ -74,7 +83,7 @@ export const Footer = () => {
   return (
     <footer className="border-t border-divider bg-surface-subtle">
       <div className="container-enterprise py-12 md:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-7 gap-8">
           {/* Logo and tagline */}
           <div className="col-span-2">
             <Logo size="md" showTagline />
@@ -131,6 +140,23 @@ export const Footer = () => {
             <h4 className="font-semibold text-body-sm text-navy mb-4">Data Sources</h4>
             <ul className="space-y-3">
               {footerLinks.dataSources.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="text-body-sm text-text-secondary hover:text-navy transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Markets */}
+          <div>
+            <h4 className="font-semibold text-body-sm text-navy mb-4">Markets</h4>
+            <ul className="space-y-3">
+              {footerLinks.markets.map((link) => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
