@@ -26,6 +26,7 @@ const AcademyCourse = () => {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [correctAnswers, setCorrectAnswers] = useState<Record<string, number>>({});
 
   const { data: course } = useQuery({
     queryKey: ["academy-course", slug],
