@@ -44,9 +44,6 @@ function jaroWinkler(s1: string, s2: string, p = 0.1): number {
 }
 
 // ─── Static sanctions dataset (representative open-source data) ───────────────
-// In production, this would be compiled from OFAC SDN XML, EU consolidated list,
-// UN Security Council list, and HMT asset freeze list.
-// For MVP we include a representative structured dataset with real list metadata.
 const SANCTIONS_DATA = [
   // OFAC SDN entries (representative)
   { id: "OFAC-001", name: "AL-QAIDA", aliases: ["Al Qaeda", "Al Qa'ida", "القاعدة"], entity_type: "organization", nationality: "AF", list_source: "OFAC SDN", list_updated: "2025-01-15", designation_date: "2001-10-12", programs: ["SDGT"] },
@@ -92,16 +89,13 @@ function scoreEntry(query: string, entry: typeof SANCTIONS_DATA[0]): { score: nu
   let best = 0;
   let matchedOn = entry.name;
   for (const candidate of candidates) {
-    // Exact
     if (candidate === q) return { score: 1.0, matchedOn: candidate };
-    // Contains
     if (candidate.includes(q) || q.includes(candidate)) {
       const s = Math.min(q.length, candidate.length) / Math.max(q.length, candidate.length);
       if (s > best) { best = Math.max(s, 0.9); matchedOn = candidate; }
     }
     const jw = jaroWinkler(q, candidate);
     if (jw > best) { best = jw; matchedOn = candidate; }
-    // Word-level: check if any word in query matches any word in candidate
     const qWords = q.split(/\s+/);
     const cWords = candidate.split(/\s+/);
     for (const qw of qWords) {
@@ -119,6 +113,28 @@ function getConfidence(score: number): "Exact" | "High" | "Possible" {
   if (score >= 0.98) return "Exact";
   if (score >= 0.88) return "High";
   return "Possible";
+}
+
+// ─── Anonymous rate limiting (session-based, server-side) ─────────────────────
+const ANON_QUOTA = 1; // 1 search for anonymous users
+const ANON_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const anonRateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function checkAnonQuota(sessionId: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const entry = anonRateLimitStore.get(sessionId);
+
+  if (!entry || now > entry.resetAt) {
+    anonRateLimitStore.set(sessionId, { count: 1, resetAt: now + ANON_RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: ANON_QUOTA - 1 };
+  }
+
+  if (entry.count >= ANON_QUOTA) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  entry.count += 1;
+  return { allowed: true, remaining: ANON_QUOTA - entry.count };
 }
 
 Deno.serve(async (req) => {
@@ -150,6 +166,7 @@ Deno.serve(async (req) => {
     // Check quota
     let remaining = 1;
     if (userId) {
+      // Authenticated: server-side cap at 5 total searches
       const { count } = await supabase
         .from('sanctions_searches')
         .select('id', { count: 'exact', head: true })
@@ -162,15 +179,21 @@ Deno.serve(async (req) => {
         });
       }
     } else {
-      // Anonymous: no server-side block — frontend handles display gating
-      remaining = 999;
+      // Anonymous: server-side session-based rate limit
+      const { allowed, remaining: anonRemaining } = checkAnonQuota(sessionId);
+      if (!allowed) {
+        return new Response(JSON.stringify({ error: "quota_exceeded", remaining: 0 }), {
+          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      remaining = anonRemaining;
     }
 
     // Fuzzy match
     const THRESHOLD = 0.70;
     const results = SANCTIONS_DATA
       .filter(entry => {
-        if (country && entry.nationality && entry.nationality !== country) return true; // still include, just lower priority
+        if (country && entry.nationality && entry.nationality !== country) return true;
         if (entityType && entityType !== 'all' && entry.entity_type !== entityType) return false;
         return true;
       })
@@ -211,7 +234,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({
       results,
       session_id: sessionId,
-      remaining: userId ? Math.max(0, remaining - 1) : 999,
+      remaining: userId ? Math.max(0, remaining - 1) : remaining,
       total_searched: SANCTIONS_DATA.length,
       disclaimer: "Open-source coverage only. Data may be delayed. Not legal advice.",
     }), {
@@ -219,7 +242,8 @@ Deno.serve(async (req) => {
     });
 
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error('[sanctions-search] Unhandled error:', err);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }

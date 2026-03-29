@@ -10,6 +10,15 @@ const corsHeaders = {
 const NOTIFY_EMAIL = "info@worldaml.com";
 const FROM_EMAIL = "WorldAML Forms <forms@worldaml.com>";
 
+function escapeHtml(s: string): string {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 async function sendEmailWithRetry(resend: any, params: any, retries = 1): Promise<void> {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
