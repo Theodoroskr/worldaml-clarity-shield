@@ -195,12 +195,12 @@ Deno.serve(async (req) => {
           ["Products", products?.join(", ") || "—"],
           ["Message", message || "—"],
         ]
-          .map(([label, value]) => `<tr><td style="padding:6px 12px;font-weight:600;color:#374151;">${label}</td><td style="padding:6px 12px;color:#111827;">${value}</td></tr>`)
+          .map(([label, value]) => `<tr><td style="padding:6px 12px;font-weight:600;color:#374151;">${escapeHtml(label)}</td><td style="padding:6px 12px;color:#111827;">${escapeHtml(value)}</td></tr>`)
           .join("");
 
         const html = `
           <div style="font-family:sans-serif;max-width:600px;margin:0 auto;">
-            <h2 style="color:#1e3a5f;">New ${form_type} Submission</h2>
+            <h2 style="color:#1e3a5f;">New ${escapeHtml(form_type)} Submission</h2>
             <table style="border-collapse:collapse;width:100%;font-size:14px;">
               ${detailRows}
             </table>
@@ -210,7 +210,7 @@ Deno.serve(async (req) => {
         await sendEmailWithRetry(resend, {
           from: FROM_EMAIL,
           to: [NOTIFY_EMAIL],
-          subject: `New ${form_type} from ${first_name} ${last_name}`,
+          subject: `New ${escapeHtml(form_type)} from ${escapeHtml(first_name)} ${escapeHtml(last_name)}`,
           html,
         });
       }
