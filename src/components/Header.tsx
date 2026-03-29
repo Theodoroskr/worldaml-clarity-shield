@@ -61,14 +61,30 @@ const navLinks: NavLink[] = [
   
   {
     label: "Markets",
-    children: [
-      { href: "/markets/uk", label: "United Kingdom" },
-      { href: "/markets/uae", label: "United Arab Emirates" },
-      { href: "/markets/usa", label: "United States" },
-      { href: "/markets/greece", label: "Greece" },
-      { href: "/markets/cyprus", label: "Cyprus" },
-      { href: "/markets/malta", label: "Malta" },
-      { href: "/markets/romania", label: "Romania" },
+    groups: [
+      {
+        groupLabel: "Europe",
+        items: [
+          { href: "/markets/uk", label: "United Kingdom" },
+          { href: "/markets/germany", label: "Germany" },
+          { href: "/markets/netherlands", label: "Netherlands" },
+          { href: "/markets/ireland", label: "Ireland" },
+          { href: "/markets/greece", label: "Greece" },
+          { href: "/markets/cyprus", label: "Cyprus" },
+          { href: "/markets/malta", label: "Malta" },
+          { href: "/markets/romania", label: "Romania" },
+        ],
+      },
+      {
+        groupLabel: "Global",
+        items: [
+          { href: "/markets/usa", label: "United States" },
+          { href: "/markets/singapore", label: "Singapore" },
+          { href: "/markets/uae", label: "UAE" },
+          { href: "/markets/south-africa", label: "South Africa" },
+          { href: "/markets/nigeria", label: "Nigeria" },
+        ],
+      },
     ],
   },
   { href: "/pricing", label: "Pricing" },
