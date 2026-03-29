@@ -376,7 +376,7 @@ const AcademyCourse = () => {
                             <div className="space-y-2">
                               {options.map((opt, oi) => {
                                 const isSelected = quizAnswers[q.id] === oi;
-                                const showCorrect = quizSubmitted && oi === q.correct_index;
+                                const showCorrect = quizSubmitted && oi === correctIdx;
                                 return (
                                   <button
                                     key={oi}
