@@ -279,7 +279,7 @@ export const Header = () => {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-divider animate-slide-down">
+          <div className="md:hidden py-4 border-t border-divider animate-slide-down max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="mb-4">
               <RegionSelector />
             </div>
