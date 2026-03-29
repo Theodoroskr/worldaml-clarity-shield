@@ -135,8 +135,12 @@ const AcademyCourse = () => {
 
       if (error) throw error;
 
-      const result = data as { passed: boolean; score: number; certificate_id?: string; share_token?: string };
+      const result = data as { passed: boolean; score: number; certificate_id?: string; share_token?: string; correct_answers?: Record<string, number> };
       setQuizScore(result.score);
+      setQuizSubmitted(true);
+      if (result.correct_answers) {
+        setCorrectAnswers(result.correct_answers);
+      }
       setQuizSubmitted(true);
 
       if (result.passed && result.share_token) {
