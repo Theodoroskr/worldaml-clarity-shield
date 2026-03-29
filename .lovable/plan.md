@@ -1,33 +1,61 @@
 
 
-# Add Greece, Cyprus, Malta, Romania Market Pages
+# Next 6 Highest-ROI Market Landing Pages
 
-## Summary
-Add four new market landing pages by extending the existing `marketPages` data object and updating navigation/sitemap. No new components needed — the existing `MarketPage.tsx` handles rendering.
+## Recommended markets (ranked by ROI potential)
 
-## Changes
+### Tier 1 — High volume, high urgency
 
-### 1. `src/data/marketPages.ts` — Add 4 market entries
-Add `greece`, `cyprus`, `malta`, `romania` keys with full data following the existing UK/UAE/USA pattern:
+| # | Market | Why | Regulator / Key Law | Industry Angle |
+|---|--------|-----|---------------------|----------------|
+| 1 | **Singapore** 🇸🇬 | Asia's #1 fintech hub; MAS is one of the strictest AML supervisors globally. Huge demand from payment institutions, digital banks, and crypto firms licensing under the Payment Services Act. English-speaking market = high search volume for English AML keywords. | MAS, STRO (FIU), Payment Services Act 2019, MAS Notice 626 | Digital banks, payment institutions, crypto (PSA licensing), wealth management |
+| 2 | **Germany** 🇩🇪 | Largest EU economy; BaFin is aggressively enforcing AML after the Wirecard scandal. New EU AMLR applies directly from 2027. Massive fintech sector (N26, Solaris, etc.). English search volume is strong because German fintechs operate internationally. | BaFin, FIU Germany, GwG (Geldwäschegesetz), EU AMLR | Banks, fintechs, crypto (BaFin crypto custody license), real estate |
+| 3 | **South Africa** 🇿🇦 | Recently removed from FATF grey list (Feb 2025) — every obligated entity is now scrambling to prove compliance. English-speaking market. Only major African economy with mature financial services sector needing AML tech. | SARB, FIC, FICA (Financial Intelligence Centre Act), POCDATARA | Banks, insurers, estate agents, crypto (CASP registration) |
 
-| Market | Flag | Regulators | Key Laws | Industry Focus |
-|---|---|---|---|---|
-| Greece 🇬🇷 | HCMC, Bank of Greece, Hellenic FIU | Law 4557/2018, EU AMLR | Banks, Fintechs, Crypto (MiCA), Shipping |
-| Cyprus 🇨🇾 | CySEC, MOKAS, CBC | AML Law 188(I)/2007, CySEC Directives | CIFs, Forex Brokers, Crypto, Holding Cos |
-| Malta 🇲🇹 | FIAU, MFSA | PMLFTR, FIAU Implementing Procedures | iGaming, Crypto/DLT, Payment Institutions |
-| Romania 🇷🇴 | ONPCSB, NBR, ASF | Law 129/2019, Gov. Emergency Ordinance 111 | Banks, Fintechs, NBFIs, Payment Institutions |
+### Tier 2 — Strategic positioning
 
-Each entry includes: SEO metadata, hero, 4 challenges, 6 regulation rows, 6 platform modules, 4 industry verticals, 5 FAQs, and CTA.
+| # | Market | Why | Regulator / Key Law | Industry Angle |
+|---|--------|-----|---------------------|----------------|
+| 4 | **Netherlands** 🇳🇱 | Major EU financial hub (Amsterdam); DNB is a strict AML enforcer (ING €775M fine). Large payments/fintech ecosystem (Adyen, Mollie). Strong English search intent. | DNB, AFM, Wwft (Anti-Money Laundering and Terrorist Financing Act), EU AMLR | Payment institutions, banks, crypto, trust offices (TCSPs) |
+| 5 | **Ireland** 🇮🇪 | EU tech/fintech headquarters for US companies (Stripe, PayPal, Coinbase EU). Central Bank of Ireland is expanding AML supervision. English-speaking = direct SEO value. | CBI, AMLCU, Criminal Justice Act 2010, EU AMLR | E-money institutions, payment firms, fund administrators, crypto |
+| 6 | **Nigeria** 🇳🇬 | Africa's largest economy by GDP; fast-growing fintech sector (Flutterwave, Paystack, OPay). CBN and SEC are tightening AML enforcement. English-speaking with high digital adoption. Currently on FATF grey list = compliance urgency is extreme. | CBN, NFIU, EFCC, Money Laundering (Prevention and Prohibition) Act 2022 | Banks, fintechs, mobile money operators, crypto exchanges |
 
-### 2. `src/components/Header.tsx` — Add to Markets dropdown
-Add the 4 new markets to the existing Markets navigation children array.
+## Implementation approach
 
-### 3. `src/components/Footer.tsx` — Add Markets column
-Add a "Markets" link group listing all 7 markets.
+Same pattern as Greece/Cyprus/Malta/Romania — add 6 new entries to `src/data/marketPages.ts`. No new components needed.
 
-### 4. `public/sitemap.xml` — Add 4 URLs
-Add `/markets/greece`, `/markets/cyprus`, `/markets/malta`, `/markets/romania` with appropriate lastmod dates.
+### Files to modify
 
-## No routing changes needed
-The wildcard route `/markets/:market` in `App.tsx` already handles any market slug.
+| File | Change |
+|---|---|
+| `src/data/marketPages.ts` | Add `singapore`, `germany`, `south-africa`, `netherlands`, `ireland`, `nigeria` entries |
+| `src/components/Header.tsx` | Add 6 markets to the Markets dropdown (consider grouping by region: Europe, Asia-Pacific, Middle East & Africa) |
+| `src/components/Footer.tsx` | Update Markets column with all 13 markets, possibly grouped |
+| `public/sitemap.xml` | Add 6 new `/markets/*` URLs |
+
+### SEO title targets
+
+```text
+/markets/singapore    → "AML Compliance Software for Singapore | WorldAML"
+/markets/germany      → "AML & KYC Compliance Software for Germany | WorldAML"
+/markets/south-africa → "AML Compliance Software for South Africa | WorldAML"
+/markets/netherlands  → "AML Compliance for Netherlands Financial Institutions | WorldAML"
+/markets/ireland      → "AML & KYC Software for Ireland | WorldAML"
+/markets/nigeria      → "AML Compliance Software for Nigeria | WorldAML"
+```
+
+### Navigation grouping suggestion
+
+With 13 total markets, the dropdown should be grouped:
+
+```text
+Markets
+├── Europe: UK, Germany, Netherlands, Ireland, Greece, Cyprus, Malta, Romania
+├── Middle East & Africa: UAE, South Africa, Nigeria
+└── Asia-Pacific & Americas: USA, Singapore
+```
+
+## Priority recommendation
+
+If you want to start with just 4, pick **Singapore, Germany, South Africa, Ireland** — they cover three continents, all are English-speaking or have strong English search intent, and each has an active regulatory enforcement cycle driving immediate demand.
 
