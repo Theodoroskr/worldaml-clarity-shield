@@ -490,7 +490,7 @@ export const marketPages: Record<string, MarketPageData> = {
     flag: "🇸🇬",
     seo: {
       title: "AML Compliance Software for Singapore | WorldAML",
-      description: "AML compliance platform for MAS-regulated financial institutions in Singapore. Payment Services Act compliance, STRO reporting, sanctions screening, KYC/KYB, and transaction monitoring.",
+      description: "AML platform for MAS-regulated firms. Payment Services Act compliance, STRO reporting, sanctions screening, KYC/KYB, and transaction monitoring.",
       canonical: "/markets/singapore",
     },
     hero: {
@@ -552,8 +552,8 @@ export const marketPages: Record<string, MarketPageData> = {
     regionLabel: "Germany",
     flag: "🇩🇪",
     seo: {
-      title: "AML & KYC Compliance Software for Germany | WorldAML",
-      description: "AML compliance platform for BaFin-regulated financial institutions in Germany. GwG compliance, FIU Germany reporting, sanctions screening, KYC/KYB, and transaction monitoring for banks, fintechs, and crypto firms.",
+      title: "AML & KYC Software for Germany | WorldAML",
+      description: "AML platform for BaFin-regulated banks, fintechs, and crypto firms. GwG compliance, FIU reporting, sanctions screening, and transaction monitoring.",
       canonical: "/markets/germany",
     },
     hero: {
@@ -616,7 +616,7 @@ export const marketPages: Record<string, MarketPageData> = {
     flag: "🇿🇦",
     seo: {
       title: "AML Compliance Software for South Africa | WorldAML",
-      description: "AML compliance platform for South African banks, insurers, and fintechs. FICA compliance, FIC reporting, CASP registration, sanctions screening, KYC/KYB, and transaction monitoring.",
+      description: "AML platform for South African banks, insurers, and fintechs. FICA compliance, FIC reporting, CASP registration, and sanctions screening.",
       canonical: "/markets/south-africa",
     },
     hero: {
@@ -678,8 +678,8 @@ export const marketPages: Record<string, MarketPageData> = {
     regionLabel: "Netherlands",
     flag: "🇳🇱",
     seo: {
-      title: "AML Compliance for Netherlands Financial Institutions | WorldAML",
-      description: "AML compliance platform for DNB and AFM-regulated financial institutions in the Netherlands. Wwft compliance, FIU-Nederland reporting, sanctions screening, KYC/KYB, and transaction monitoring.",
+      title: "AML Compliance Software for Netherlands | WorldAML",
+      description: "AML platform for DNB and AFM-regulated firms. Wwft compliance, FIU-Nederland reporting, sanctions screening, KYC/KYB, and transaction monitoring.",
       canonical: "/markets/netherlands",
     },
     hero: {
@@ -742,7 +742,7 @@ export const marketPages: Record<string, MarketPageData> = {
     flag: "🇮🇪",
     seo: {
       title: "AML & KYC Software for Ireland | WorldAML",
-      description: "AML compliance platform for Central Bank of Ireland-regulated financial institutions. Criminal Justice Act compliance, sanctions screening, KYC/KYB, and transaction monitoring for Irish fintechs, e-money firms, and fund administrators.",
+      description: "AML platform for CBI-regulated e-money firms, payment institutions, and fund administrators. Sanctions screening, KYC/KYB, and transaction monitoring.",
       canonical: "/markets/ireland",
     },
     hero: {
@@ -805,7 +805,7 @@ export const marketPages: Record<string, MarketPageData> = {
     flag: "🇳🇬",
     seo: {
       title: "AML Compliance Software for Nigeria | WorldAML",
-      description: "AML compliance platform for Nigerian banks, fintechs, and mobile money operators. CBN compliance, NFIU reporting, sanctions screening, KYC/KYB, and transaction monitoring for Nigeria's regulated financial sector.",
+      description: "AML platform for Nigerian banks, fintechs, and mobile money operators. CBN compliance, NFIU reporting, sanctions screening, and transaction monitoring.",
       canonical: "/markets/nigeria",
     },
     hero: {
