@@ -1,31 +1,43 @@
 
 
-# Update Sitemap
+# Fix Email Notifications + Add Auto-Approval for Trusted Domains
 
-## What needs updating
+## Problem Found: Why admin notifications aren't sending
 
-The sitemap is comprehensive but has stale `lastmod` dates. After the recent market page additions and navigation changes, several dates need refreshing to `2026-03-29`.
+The `notify-new-signup` edge function requires an `x-internal-secret` header validated against `INTERNAL_WEBHOOK_SECRET`. But the Signup page sends only an `apikey` header — so every notification is **rejected with 403**. Additionally, `INTERNAL_WEBHOOK_SECRET` is not in the configured secrets list.
 
-### Pages to update `lastmod` to `2026-03-29`
+## Plan
 
-| Section | Pages | Reason |
-|---|---|---|
-| Main pages | `/`, `/pricing`, `/demo`, `/contact-sales`, `/get-started` | Navigation updated |
-| All platform pages | `/platform`, `/platform/suite`, `/platform/api`, etc. | Header/footer changed |
-| All data source pages | `/data-sources/*` | Footer changed |
-| Industry pages | `/industries/*` | Footer changed |
-| Existing market pages (UK, UAE, USA) | `/markets/uk`, `/markets/uae`, `/markets/usa` | Were `2026-03-15`, now grouped in new nav |
-| Blog index | `/blog` | Already current |
-| Partners | `/partners`, `/partners/apply` | Footer changed |
-| Tools | `/free-aml-check`, `/sanctions-check` | Footer changed |
-| Academy, data-coverage | `/academy`, `/data-coverage` | Footer changed |
-| Legal pages | `/privacy`, `/terms`, `/cookies`, `/access-your-data` | Leave as-is (no content change) |
+### 1. Database: Create `auto_approve_domains` table + trigger
 
-### No missing routes
+Create a migration that:
+- Adds an `auto_approve_domains` table (columns: `id`, `domain` text unique, `created_at`) with RLS allowing only admins to manage it
+- Inserts `infocreditgroup.com` as a seed row
+- Creates a trigger function `auto_approve_trusted_domain()` on `profiles` INSERT that checks if the user's email domain matches any row in `auto_approve_domains` — if so, sets `status = 'approved'` immediately
 
-Cross-referencing `App.tsx` routes against the sitemap, all public-facing pages are present. Auth routes (`/login`, `/signup`, `/dashboard`, `/admin`, etc.) are correctly excluded. Dynamic routes (`/blog/:slug`, `/eu-sanctions/:slug`, `/markets/:market`, `/data-coverage/:country`) have their known entries listed.
+### 2. Fix notification auth: Remove shared-secret check
 
-### Implementation
+The edge function's internal-secret check is broken (secret was never configured). Replace it with standard Supabase auth (verify the request has a valid `apikey` or `Authorization` header via Supabase client). Since this is a non-sensitive admin notification (not a data mutation), validating the anon key is sufficient.
 
-Single file edit: `public/sitemap.xml` -- update all `lastmod` values (except legal pages and EU sanctions country pages which haven't changed) to `2026-03-29`.
+**Files:** `supabase/functions/notify-new-signup/index.ts` — remove `INTERNAL_WEBHOOK_SECRET` check, use standard anon-key validation instead.
+
+### 3. Update Signup page to send correct headers
+
+**File:** `src/pages/Signup.tsx` — update the fetch call to include the `apikey` header in the standard Supabase format (already present) and add `Authorization: Bearer <anon_key>` header.
+
+### 4. Update notification for auto-approved users
+
+Modify the edge function to accept an `auto_approved` boolean flag. When true, the admin email says "Auto-approved (trusted domain)" instead of "awaiting your approval".
+
+### 5. Update Signup flow for auto-approved domains
+
+In `src/pages/Signup.tsx`, after signup succeeds, check if the email domain is in the trusted list. If auto-approved, show a different toast message ("Your account has been approved automatically") and navigate to `/login` as usual. The trigger handles the actual approval server-side.
+
+### 6. Admin UI: Manage trusted domains
+
+Add a section in the Admin page to view, add, and remove auto-approve domains.
+
+## Technical detail
+
+The trigger approach is secure — domain matching happens server-side in PostgreSQL, not client-side. The auto-approval cannot be spoofed because it runs as a `BEFORE INSERT` trigger on the `profiles` table.
 
