@@ -73,7 +73,7 @@ const UPSELL_TEMPLATES = [
     subject: "Add Identity Verification to Your Stack",
     message: "Complete your compliance toolkit with WorldID — our white-label identity verification solution.\n\nWorldID provides document verification, liveness detection, and biometric matching to help you onboard customers securely.\n\nLearn more about how WorldID fits into your compliance workflow.",
     cta_text: "Learn About WorldID",
-    cta_url: "https://worldaml-clarity-shield.lovable.app/world-id",
+    cta_url: "https://worldaml.com/world-id",
   },
   {
     label: "Custom message",
