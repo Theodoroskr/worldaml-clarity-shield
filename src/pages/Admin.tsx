@@ -200,6 +200,33 @@ const Admin = () => {
     setPartnerActionLoading(null);
   };
 
+  const addTrustedDomain = async () => {
+    const domain = newDomain.trim().toLowerCase();
+    if (!domain || !domain.includes(".")) { toast.error("Enter a valid domain"); return; }
+    setAddingDomain(true);
+    const { error } = await supabase.from("auto_approve_domains").insert({ domain } as any);
+    if (error) {
+      if (error.code === "23505") toast.error("Domain already exists");
+      else toast.error("Failed to add domain");
+    } else {
+      toast.success(`${domain} added`);
+      setNewDomain("");
+      fetchTrustedDomains();
+    }
+    setAddingDomain(false);
+  };
+
+  const removeTrustedDomain = async (id: string) => {
+    setDeletingDomain(id);
+    const { error } = await supabase.from("auto_approve_domains").delete().eq("id", id);
+    if (error) toast.error("Failed to remove domain");
+    else {
+      toast.success("Domain removed");
+      setTrustedDomains((prev) => prev.filter((d) => d.id !== id));
+    }
+    setDeletingDomain(null);
+  };
+
   const rejectPartnerApp = async (appId: string) => {
     setPartnerActionLoading(appId);
     const { error } = await supabase
