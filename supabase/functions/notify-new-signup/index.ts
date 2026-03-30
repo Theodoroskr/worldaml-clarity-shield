@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
       ? new Date(signed_up_at).toLocaleString("en-GB", { timeZone: "UTC", dateStyle: "long", timeStyle: "short" }) + " UTC"
       : new Date().toLocaleString("en-GB", { timeZone: "UTC", dateStyle: "long", timeStyle: "short" }) + " UTC";
 
-    const adminUrl = `https://worldaml-clarity-shield.lovable.app/admin`;
+    const adminUrl = `https://worldaml.com/admin`;
 
     const statusMessage = auto_approved
       ? `has registered and was <strong style="color:#059669;">automatically approved</strong> (trusted domain).`

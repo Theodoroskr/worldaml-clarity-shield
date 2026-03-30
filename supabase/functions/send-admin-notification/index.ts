@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const FROM_EMAIL = "WorldAML <forms@worldaml.com>";
-const SITE_URL = "https://worldaml-clarity-shield.lovable.app";
+const SITE_URL = "https://worldaml.com";
 
 function escapeHtml(str: string): string {
   return str
