@@ -6,7 +6,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const SITE_URL = "https://worldaml-clarity-shield.lovable.app";
+const SITE_URL = "https://worldaml.com";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {

@@ -66,7 +66,7 @@ const UPSELL_TEMPLATES = [
     subject: "Integrate Compliance Into Your Workflow",
     message: "Now that you understand the fundamentals of AML compliance, you can automate screening directly in your applications.\n\nThe WorldAML API provides real-time sanctions screening, KYC/KYB verification, and risk assessment — all via a simple REST API.\n\nStart your free trial today.",
     cta_text: "Explore the API",
-    cta_url: "https://worldaml-clarity-shield.lovable.app/api",
+    cta_url: "https://worldaml.com/platform/api",
   },
   {
     label: "WorldID Verification",
