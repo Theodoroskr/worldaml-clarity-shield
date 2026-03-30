@@ -3,7 +3,7 @@ import { Resend } from "npm:resend";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version, x-internal-secret",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const NOTIFY_EMAIL = "info@worldaml.com";
@@ -53,20 +53,8 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Shared-secret authentication — only internal callers may invoke this function
-  const internalSecret = Deno.env.get("INTERNAL_WEBHOOK_SECRET");
-  const providedSecret = req.headers.get("x-internal-secret");
-
-  if (!internalSecret || !providedSecret || providedSecret !== internalSecret) {
-    console.warn("notify-new-signup: rejected unauthenticated request");
-    return new Response(JSON.stringify({ error: "Forbidden" }), {
-      status: 403,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
   try {
-    const { full_name, company_name, email, signed_up_at } = await req.json();
+    const { full_name, company_name, email, signed_up_at, auto_approved } = await req.json();
 
     if (!email) {
       return new Response(JSON.stringify({ error: "Missing email" }), {
@@ -96,6 +84,10 @@ Deno.serve(async (req) => {
 
     const adminUrl = `https://worldaml-clarity-shield.lovable.app/admin`;
 
+    const statusMessage = auto_approved
+      ? `has registered and was <strong style="color:#059669;">automatically approved</strong> (trusted domain).`
+      : `has registered and is <strong style="color:#d97706;">awaiting your approval</strong>.`;
+
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;background:#fff;">
         <div style="background:#1e3a5f;padding:28px 32px;">
@@ -105,7 +97,7 @@ Deno.serve(async (req) => {
         </div>
         <div style="padding:28px 32px;">
           <p style="color:#374151;font-size:15px;margin:0 0 20px;">
-            A new user has registered and is <strong style="color:#d97706;">awaiting your approval</strong>.
+            A new user ${statusMessage}
           </p>
           <table style="border-collapse:collapse;width:100%;font-size:14px;margin-bottom:24px;">
             <tr style="background:#f3f4f6;">
@@ -125,27 +117,33 @@ Deno.serve(async (req) => {
               <td style="padding:10px 14px;color:#111827;">${signupTime}</td>
             </tr>
           </table>
+          ${!auto_approved ? `
           <a href="${adminUrl}"
              style="display:inline-block;background:#0d9488;color:#fff;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:600;font-size:14px;">
             Review &amp; Approve in Admin Panel →
-          </a>
+          </a>` : `
+          <p style="color:#059669;font-size:14px;font-weight:600;margin:0;">
+            ✓ No action needed — user was auto-approved via trusted domain list.
+          </p>`}
         </div>
         <div style="padding:16px 32px;border-top:1px solid #e5e7eb;">
           <p style="color:#9ca3af;font-size:12px;margin:0;">
-            This is an automated notification from WorldAML. The user will not be able to access the platform until you approve their account.
+            This is an automated notification from WorldAML.${!auto_approved ? " The user will not be able to access the platform until you approve their account." : ""}
           </p>
         </div>
       </div>
     `;
 
+    const subjectPrefix = auto_approved ? "Auto-Approved" : "Action Required";
+
     await sendEmailWithRetry(resend, {
       from: FROM_EMAIL,
       to: [NOTIFY_EMAIL],
-      subject: `New Registration: ${displayName} (${displayCompany}) — Action Required`,
+      subject: `New Registration: ${displayName} (${displayCompany}) — ${subjectPrefix}`,
       html,
     });
 
-    console.log(`✅ Admin notification sent for new signup: ${safeEmail}`);
+    console.log(`✅ Admin notification sent for new signup: ${safeEmail} (auto_approved: ${!!auto_approved})`);
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

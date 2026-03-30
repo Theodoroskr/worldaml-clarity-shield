@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle, XCircle, Clock, Users, ShieldAlert, Inbox, Search, Filter, Handshake } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, Clock, Users, ShieldAlert, Inbox, Search, Filter, Handshake, Globe, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface ProfileRow {
@@ -96,6 +96,13 @@ const Admin = () => {
   const [loadingPartners, setLoadingPartners] = useState(true);
   const [partnerActionLoading, setPartnerActionLoading] = useState<string | null>(null);
 
+  // Trusted domains state
+  const [trustedDomains, setTrustedDomains] = useState<{ id: string; domain: string; created_at: string }[]>([]);
+  const [loadingDomains, setLoadingDomains] = useState(true);
+  const [newDomain, setNewDomain] = useState("");
+  const [addingDomain, setAddingDomain] = useState(false);
+  const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
+
   useEffect(() => {
     if (!isLoading && !user) navigate("/login");
     if (!isLoading && !isAdmin) navigate("/dashboard");
@@ -134,9 +141,20 @@ const Admin = () => {
     setLoadingPartners(false);
   }, []);
 
+  const fetchTrustedDomains = useCallback(async () => {
+    setLoadingDomains(true);
+    const { data, error } = await supabase
+      .from("auto_approve_domains")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) { toast.error("Failed to load trusted domains"); console.error(error); }
+    else setTrustedDomains((data as any[]) || []);
+    setLoadingDomains(false);
+  }, []);
+
   useEffect(() => {
-    if (isAdmin) { fetchProfiles(); fetchLeads(); fetchPartnerData(); }
-  }, [isAdmin, fetchLeads, fetchPartnerData]);
+    if (isAdmin) { fetchProfiles(); fetchLeads(); fetchPartnerData(); fetchTrustedDomains(); }
+  }, [isAdmin, fetchLeads, fetchPartnerData, fetchTrustedDomains]);
 
   const updateProfileStatus = async (profileId: string, newStatus: "approved" | "rejected") => {
     setActionLoading(profileId);
@@ -180,6 +198,33 @@ const Admin = () => {
     if (insertErr) { toast.error("Failed to create partner record"); console.error(insertErr); }
     else { toast.success("Partner approved!"); fetchPartnerData(); }
     setPartnerActionLoading(null);
+  };
+
+  const addTrustedDomain = async () => {
+    const domain = newDomain.trim().toLowerCase();
+    if (!domain || !domain.includes(".")) { toast.error("Enter a valid domain"); return; }
+    setAddingDomain(true);
+    const { error } = await supabase.from("auto_approve_domains").insert({ domain } as any);
+    if (error) {
+      if (error.code === "23505") toast.error("Domain already exists");
+      else toast.error("Failed to add domain");
+    } else {
+      toast.success(`${domain} added`);
+      setNewDomain("");
+      fetchTrustedDomains();
+    }
+    setAddingDomain(false);
+  };
+
+  const removeTrustedDomain = async (id: string) => {
+    setDeletingDomain(id);
+    const { error } = await supabase.from("auto_approve_domains").delete().eq("id", id);
+    if (error) toast.error("Failed to remove domain");
+    else {
+      toast.success("Domain removed");
+      setTrustedDomains((prev) => prev.filter((d) => d.id !== id));
+    }
+    setDeletingDomain(null);
   };
 
   const rejectPartnerApp = async (appId: string) => {
@@ -359,6 +404,7 @@ const Admin = () => {
                   </span>
                 )}
               </TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
             {/* ── LEADS TAB ── */}
@@ -623,6 +669,60 @@ const Admin = () => {
                         </div>
                       )}
                     </>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* ── SETTINGS TAB ── */}
+            <TabsContent value="settings">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-navy">Auto-Approve Trusted Domains</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-text-secondary text-sm mb-4">
+                    Users registering with email addresses from these domains will be automatically approved without manual review.
+                  </p>
+                  <div className="flex gap-2 mb-6">
+                    <Input
+                      placeholder="e.g. company.com"
+                      value={newDomain}
+                      onChange={(e) => setNewDomain(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && addTrustedDomain()}
+                      className="max-w-xs"
+                    />
+                    <Button onClick={addTrustedDomain} disabled={addingDomain} size="sm">
+                      {addingDomain ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />}
+                      Add Domain
+                    </Button>
+                  </div>
+                  {loadingDomains ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-teal" />
+                    </div>
+                  ) : trustedDomains.length === 0 ? (
+                    <p className="text-text-secondary text-sm py-4 text-center">No trusted domains configured.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {trustedDomains.map((d) => (
+                        <div key={d.id} className="flex items-center justify-between py-2 px-3 bg-surface-subtle rounded-md">
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-teal" />
+                            <span className="font-mono text-sm text-navy">@{d.domain}</span>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                            disabled={deletingDomain === d.id}
+                            onClick={() => removeTrustedDomain(d.id)}
+                          >
+                            {deletingDomain === d.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </CardContent>
               </Card>
