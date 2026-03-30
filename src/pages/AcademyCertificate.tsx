@@ -5,7 +5,8 @@ import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Award, Linkedin, Share2, ArrowLeft, CheckCircle, BookOpen, ExternalLink, Copy, Download } from "lucide-react";
+import { Award, Linkedin, Share2, ArrowLeft, CheckCircle, BookOpen, ExternalLink, Copy, Download, FileDown } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -62,6 +63,102 @@ const AcademyCertificate = () => {
         await navigator.share({ title: shareText, url: shareUrl });
       } catch { /* user cancelled */ }
     }
+  };
+
+  const downloadCertificatePDF = () => {
+    const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+    const w = 297, h = 210;
+    const title = course?.title || "Course";
+    const score = cert?.score || 0;
+    const cpd = course?.cpd_hours || 0;
+    const issuedDate = cert?.issued_at ? format(new Date(cert.issued_at), "dd MMMM yyyy") : "";
+    const certId = cert?.share_token?.toUpperCase() || "";
+
+    // Background
+    doc.setFillColor(30, 58, 95); // navy
+    doc.rect(0, 0, w, h, "F");
+
+    // Inner white card
+    const mx = 18, my = 14;
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(mx, my, w - mx * 2, h - my * 2, 4, 4, "F");
+
+    // Decorative top accent bar
+    doc.setFillColor(13, 148, 136); // teal
+    doc.rect(mx, my, w - mx * 2, 3, "F");
+
+    // Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(30, 58, 95);
+    doc.text("WorldAML Academy", w / 2, 38, { align: "center" });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(120, 120, 120);
+    doc.text("Compliance Education & Certification", w / 2, 46, { align: "center" });
+
+    // Divider
+    doc.setDrawColor(200, 200, 200);
+    doc.line(w / 2 - 30, 52, w / 2 + 30, 52);
+
+    // Certificate of Completion
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(120, 120, 120);
+    doc.text("CERTIFICATE OF COMPLETION", w / 2, 62, { align: "center" });
+
+    // Course title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(30, 30, 30);
+    doc.text(title, w / 2, 74, { align: "center", maxWidth: w - 80 });
+
+    // "This certifies that"
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(120, 120, 120);
+    doc.text("This certifies that", w / 2, 90, { align: "center" });
+
+    // Holder name
+    doc.setFont("times", "bolditalic");
+    doc.setFontSize(28);
+    doc.setTextColor(13, 148, 136);
+    doc.text(cert?.holder_name || "", w / 2, 104, { align: "center" });
+
+    // Description
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(80, 80, 80);
+    const desc = `has successfully completed the "${title}" course at WorldAML Academy with a score of ${score}%.`;
+    doc.text(desc, w / 2, 118, { align: "center", maxWidth: w - 80 });
+
+    // CPD hours
+    if (cpd > 0) {
+      doc.setFontSize(10);
+      doc.setTextColor(13, 148, 136);
+      doc.text(`Accredited for ${cpd} CPD Hour${cpd !== 1 ? "s" : ""}`, w / 2, 132, { align: "center" });
+    }
+
+    // Footer info
+    const footerY = h - my - 20;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(140, 140, 140);
+    doc.text(`Issued: ${issuedDate}`, w / 2 - 50, footerY, { align: "center" });
+    doc.text(`ID: ${certId}`, w / 2 + 50, footerY, { align: "center" });
+
+    // Verified badge
+    doc.setFillColor(13, 148, 136);
+    doc.circle(w / 2, footerY + 10, 3, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(5);
+    doc.text("✓", w / 2, footerY + 11.5, { align: "center" });
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(8);
+    doc.text("Verified • www.worldaml.com/academy", w / 2, footerY + 18, { align: "center" });
+
+    doc.save(`WorldAML-Certificate-${course?.slug || "certificate"}.pdf`);
   };
 
   const downloadBadge = () => {
@@ -217,7 +314,11 @@ const AcademyCertificate = () => {
 
               {/* Share Actions */}
               <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <Button variant="default" onClick={shareLinkedIn}>
+                <Button variant="default" onClick={downloadCertificatePDF}>
+                  <FileDown className="h-4 w-4 mr-2" />
+                  Download Certificate (PDF)
+                </Button>
+                <Button variant="outline" onClick={shareLinkedIn}>
                   <Linkedin className="h-4 w-4 mr-2" />
                   Share on LinkedIn
                 </Button>
