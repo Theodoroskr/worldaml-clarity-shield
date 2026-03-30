@@ -673,6 +673,60 @@ const Admin = () => {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {/* ── SETTINGS TAB ── */}
+            <TabsContent value="settings">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-navy">Auto-Approve Trusted Domains</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-text-secondary text-sm mb-4">
+                    Users registering with email addresses from these domains will be automatically approved without manual review.
+                  </p>
+                  <div className="flex gap-2 mb-6">
+                    <Input
+                      placeholder="e.g. company.com"
+                      value={newDomain}
+                      onChange={(e) => setNewDomain(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && addTrustedDomain()}
+                      className="max-w-xs"
+                    />
+                    <Button onClick={addTrustedDomain} disabled={addingDomain} size="sm">
+                      {addingDomain ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />}
+                      Add Domain
+                    </Button>
+                  </div>
+                  {loadingDomains ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-teal" />
+                    </div>
+                  ) : trustedDomains.length === 0 ? (
+                    <p className="text-text-secondary text-sm py-4 text-center">No trusted domains configured.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {trustedDomains.map((d) => (
+                        <div key={d.id} className="flex items-center justify-between py-2 px-3 bg-surface-subtle rounded-md">
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-teal" />
+                            <span className="font-mono text-sm text-navy">@{d.domain}</span>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                            disabled={deletingDomain === d.id}
+                            onClick={() => removeTrustedDomain(d.id)}
+                          >
+                            {deletingDomain === d.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
         </div>
       </main>
