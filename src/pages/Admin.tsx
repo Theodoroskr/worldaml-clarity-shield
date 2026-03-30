@@ -404,6 +404,7 @@ const Admin = () => {
                   </span>
                 )}
               </TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
             {/* ── LEADS TAB ── */}
