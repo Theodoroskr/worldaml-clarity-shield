@@ -96,6 +96,13 @@ const Admin = () => {
   const [loadingPartners, setLoadingPartners] = useState(true);
   const [partnerActionLoading, setPartnerActionLoading] = useState<string | null>(null);
 
+  // Trusted domains state
+  const [trustedDomains, setTrustedDomains] = useState<{ id: string; domain: string; created_at: string }[]>([]);
+  const [loadingDomains, setLoadingDomains] = useState(true);
+  const [newDomain, setNewDomain] = useState("");
+  const [addingDomain, setAddingDomain] = useState(false);
+  const [deletingDomain, setDeletingDomain] = useState<string | null>(null);
+
   useEffect(() => {
     if (!isLoading && !user) navigate("/login");
     if (!isLoading && !isAdmin) navigate("/dashboard");
