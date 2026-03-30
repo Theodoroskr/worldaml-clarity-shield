@@ -11,7 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle, XCircle, Clock, Users, ShieldAlert, Inbox, Search, Filter, Handshake, Globe, Plus, Trash2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Loader2, CheckCircle, XCircle, Clock, Users, ShieldAlert, Inbox, Search, Filter, Handshake, Globe, Plus, Trash2, GraduationCap, Mail, Send } from "lucide-react";
 import { toast } from "sonner";
 
 interface ProfileRow {
@@ -22,6 +24,13 @@ interface ProfileRow {
   company_name: string | null;
   status: string;
   created_at: string;
+}
+
+interface AcademyStats {
+  user_id: string;
+  courses_completed: number;
+  certificates_earned: number;
+  course_names: string[];
 }
 
 interface LeadRow {
@@ -43,6 +52,37 @@ interface LeadRow {
 
 const LEAD_STATUSES = ["new", "contacted", "qualified", "closed"] as const;
 type LeadStatus = typeof LEAD_STATUSES[number];
+
+const UPSELL_TEMPLATES = [
+  {
+    label: "Upgrade to WorldAML Suite",
+    subject: "Unlock the Full WorldAML Suite",
+    message: "You've been making great progress on the WorldAML Academy! Ready to take the next step?\n\nThe WorldAML Suite gives you access to real-time AML screening, KYC/KYB onboarding, transaction monitoring, and more — all in one platform.\n\nBook a quick demo to see how it can streamline your compliance workflow.",
+    cta_text: "Book a Demo",
+    cta_url: "https://worldaml-clarity-shield.lovable.app/contact-sales",
+  },
+  {
+    label: "Try WorldAML API",
+    subject: "Integrate Compliance Into Your Workflow",
+    message: "Now that you understand the fundamentals of AML compliance, you can automate screening directly in your applications.\n\nThe WorldAML API provides real-time sanctions screening, KYC/KYB verification, and risk assessment — all via a simple REST API.\n\nStart your free trial today.",
+    cta_text: "Explore the API",
+    cta_url: "https://worldaml-clarity-shield.lovable.app/api",
+  },
+  {
+    label: "WorldID Verification",
+    subject: "Add Identity Verification to Your Stack",
+    message: "Complete your compliance toolkit with WorldID — our white-label identity verification solution.\n\nWorldID provides document verification, liveness detection, and biometric matching to help you onboard customers securely.\n\nLearn more about how WorldID fits into your compliance workflow.",
+    cta_text: "Learn About WorldID",
+    cta_url: "https://worldaml-clarity-shield.lovable.app/world-id",
+  },
+  {
+    label: "Custom message",
+    subject: "",
+    message: "",
+    cta_text: "",
+    cta_url: "",
+  },
+];
 
 const leadStatusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -81,6 +121,17 @@ const Admin = () => {
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [academyStats, setAcademyStats] = useState<Map<string, AcademyStats>>(new Map());
+
+  // Notification modal state
+  const [notifyModalOpen, setNotifyModalOpen] = useState(false);
+  const [notifyTarget, setNotifyTarget] = useState<ProfileRow | null>(null);
+  const [notifySubject, setNotifySubject] = useState("");
+  const [notifyMessage, setNotifyMessage] = useState("");
+  const [notifyCtaText, setNotifyCtaText] = useState("");
+  const [notifyCtaUrl, setNotifyCtaUrl] = useState("");
+  const [sendingNotification, setSendingNotification] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState("");
 
   // Leads state
   const [leads, setLeads] = useState<LeadRow[]>([]);
@@ -119,6 +170,57 @@ const Admin = () => {
     setLoadingProfiles(false);
   };
 
+  const fetchAcademyStats = async () => {
+    // Fetch progress (completed courses)
+    const { data: progressData } = await supabase
+      .from("academy_progress")
+      .select("user_id, course_id, quiz_passed, completed_at");
+
+    // Fetch certificates
+    const { data: certData } = await supabase
+      .from("academy_certificates")
+      .select("user_id, course_id");
+
+    // Fetch course names
+    const { data: courses } = await supabase
+      .from("academy_courses")
+      .select("id, title");
+
+    const courseNameMap = new Map<string, string>();
+    (courses || []).forEach((c: any) => courseNameMap.set(c.id, c.title));
+
+    const statsMap = new Map<string, AcademyStats>();
+
+    // Count completed courses per user
+    (progressData || []).forEach((p: any) => {
+      if (!p.quiz_passed) return;
+      const existing = statsMap.get(p.user_id) || {
+        user_id: p.user_id,
+        courses_completed: 0,
+        certificates_earned: 0,
+        course_names: [],
+      };
+      existing.courses_completed++;
+      const name = courseNameMap.get(p.course_id);
+      if (name) existing.course_names.push(name);
+      statsMap.set(p.user_id, existing);
+    });
+
+    // Count certificates per user
+    (certData || []).forEach((c: any) => {
+      const existing = statsMap.get(c.user_id) || {
+        user_id: c.user_id,
+        courses_completed: 0,
+        certificates_earned: 0,
+        course_names: [],
+      };
+      existing.certificates_earned++;
+      statsMap.set(c.user_id, existing);
+    });
+
+    setAcademyStats(statsMap);
+  };
+
   const fetchLeads = useCallback(async () => {
     setLoadingLeads(true);
     const { data, error } = await supabase
@@ -153,7 +255,7 @@ const Admin = () => {
   }, []);
 
   useEffect(() => {
-    if (isAdmin) { fetchProfiles(); fetchLeads(); fetchPartnerData(); fetchTrustedDomains(); }
+    if (isAdmin) { fetchProfiles(); fetchAcademyStats(); fetchLeads(); fetchPartnerData(); fetchTrustedDomains(); }
   }, [isAdmin, fetchLeads, fetchPartnerData, fetchTrustedDomains]);
 
   const updateProfileStatus = async (profileId: string, newStatus: "approved" | "rejected") => {
@@ -193,14 +295,12 @@ const Admin = () => {
 
   const approvePartnerApp = async (app: any) => {
     setPartnerActionLoading(app.id);
-    // Update application status
     const { error: updateErr } = await supabase
       .from("partner_applications")
       .update({ status: "approved", reviewed_at: new Date().toISOString(), reviewed_by: user!.id } as any)
       .eq("id", app.id);
     if (updateErr) { toast.error("Failed to approve"); setPartnerActionLoading(null); return; }
 
-    // Create partner record
     const { error: insertErr } = await supabase.from("partners").insert({
       user_id: app.user_id,
       partner_type: app.partner_type,
@@ -248,6 +348,54 @@ const Admin = () => {
     setPartnerActionLoading(null);
   };
 
+  const openNotifyModal = (profile: ProfileRow) => {
+    setNotifyTarget(profile);
+    setNotifySubject("");
+    setNotifyMessage("");
+    setNotifyCtaText("");
+    setNotifyCtaUrl("");
+    setSelectedTemplate("");
+    setNotifyModalOpen(true);
+  };
+
+  const applyTemplate = (templateLabel: string) => {
+    const template = UPSELL_TEMPLATES.find((t) => t.label === templateLabel);
+    if (template) {
+      setNotifySubject(template.subject);
+      setNotifyMessage(template.message);
+      setNotifyCtaText(template.cta_text);
+      setNotifyCtaUrl(template.cta_url);
+      setSelectedTemplate(templateLabel);
+    }
+  };
+
+  const sendNotification = async () => {
+    if (!notifyTarget?.email || !notifySubject.trim() || !notifyMessage.trim()) {
+      toast.error("Subject and message are required");
+      return;
+    }
+    setSendingNotification(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-admin-notification", {
+        body: {
+          email: notifyTarget.email,
+          full_name: notifyTarget.full_name,
+          subject: notifySubject,
+          message: notifyMessage,
+          cta_text: notifyCtaText || undefined,
+          cta_url: notifyCtaUrl || undefined,
+        },
+      });
+      if (error) throw error;
+      toast.success(`Email sent to ${notifyTarget.email}`);
+      setNotifyModalOpen(false);
+    } catch (err) {
+      console.error("Notification failed:", err);
+      toast.error("Failed to send notification");
+    }
+    setSendingNotification(false);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -270,7 +418,6 @@ const Admin = () => {
     return matchType && matchStatus && matchSearch;
   });
 
-  // Unique form types from data
   const formTypes = ["all", ...Array.from(new Set(leads.map((l) => l.form_type)))];
 
   const pending = profiles.filter((p) => p.status === "pending");
@@ -290,41 +437,76 @@ const Admin = () => {
               <th className="pb-3 pr-4 font-semibold text-navy">Name</th>
               <th className="pb-3 pr-4 font-semibold text-navy">Email</th>
               <th className="pb-3 pr-4 font-semibold text-navy">Company</th>
+              <th className="pb-3 pr-4 font-semibold text-navy">Academy</th>
               <th className="pb-3 pr-4 font-semibold text-navy">Registered</th>
               <th className="pb-3 pr-4 font-semibold text-navy">Status</th>
               <th className="pb-3 font-semibold text-navy">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((p) => (
-              <tr key={p.id} className="border-b border-divider/50 hover:bg-surface-subtle transition-colors">
-                <td className="py-3 pr-4 font-medium text-navy">{p.full_name || "—"}</td>
-                <td className="py-3 pr-4 text-text-secondary">{p.email || "—"}</td>
-                <td className="py-3 pr-4 text-text-secondary">{p.company_name || "—"}</td>
-                <td className="py-3 pr-4 text-text-secondary">
-                  {new Date(p.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
-                </td>
-                <td className="py-3 pr-4">{profileStatusBadge(p.status)}</td>
-                <td className="py-3">
-                  <div className="flex gap-2">
-                    {p.status !== "approved" && (
-                      <Button size="sm" variant="outline" className="text-green-700 border-green-300 hover:bg-green-50"
-                        disabled={actionLoading === p.id} onClick={() => updateProfileStatus(p.id, "approved")}>
-                        {actionLoading === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-                        Approve
-                      </Button>
+            {rows.map((p) => {
+              const stats = academyStats.get(p.user_id);
+              return (
+                <tr key={p.id} className="border-b border-divider/50 hover:bg-surface-subtle transition-colors">
+                  <td className="py-3 pr-4 font-medium text-navy">{p.full_name || "—"}</td>
+                  <td className="py-3 pr-4 text-text-secondary">{p.email || "—"}</td>
+                  <td className="py-3 pr-4 text-text-secondary">{p.company_name || "—"}</td>
+                  <td className="py-3 pr-4">
+                    {stats ? (
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <GraduationCap className="h-3.5 w-3.5 text-teal" />
+                          <span className="text-xs text-navy font-medium">
+                            {stats.courses_completed} course{stats.courses_completed !== 1 ? "s" : ""} completed
+                          </span>
+                        </div>
+                        {stats.certificates_earned > 0 && (
+                          <span className="text-xs text-teal font-medium">
+                            🎓 {stats.certificates_earned} certificate{stats.certificates_earned !== 1 ? "s" : ""}
+                          </span>
+                        )}
+                        {stats.course_names.length > 0 && (
+                          <span className="text-xs text-text-secondary truncate max-w-[200px]" title={stats.course_names.join(", ")}>
+                            {stats.course_names.join(", ")}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-text-secondary">No activity</span>
                     )}
-                    {p.status !== "rejected" && (
-                      <Button size="sm" variant="outline" className="text-red-700 border-red-300 hover:bg-red-50"
-                        disabled={actionLoading === p.id} onClick={() => updateProfileStatus(p.id, "rejected")}>
-                        {actionLoading === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <XCircle className="h-3 w-3 mr-1" />}
-                        Reject
-                      </Button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="py-3 pr-4 text-text-secondary">
+                    {new Date(p.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                  </td>
+                  <td className="py-3 pr-4">{profileStatusBadge(p.status)}</td>
+                  <td className="py-3">
+                    <div className="flex gap-2 flex-wrap">
+                      {p.status !== "approved" && (
+                        <Button size="sm" variant="outline" className="text-green-700 border-green-300 hover:bg-green-50"
+                          disabled={actionLoading === p.id} onClick={() => updateProfileStatus(p.id, "approved")}>
+                          {actionLoading === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3 mr-1" />}
+                          Approve
+                        </Button>
+                      )}
+                      {p.status !== "rejected" && (
+                        <Button size="sm" variant="outline" className="text-red-700 border-red-300 hover:bg-red-50"
+                          disabled={actionLoading === p.id} onClick={() => updateProfileStatus(p.id, "rejected")}>
+                          {actionLoading === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <XCircle className="h-3 w-3 mr-1" />}
+                          Reject
+                        </Button>
+                      )}
+                      {p.email && (
+                        <Button size="sm" variant="outline" className="text-teal border-teal/30 hover:bg-teal/5"
+                          onClick={() => openNotifyModal(p)}>
+                          <Mail className="h-3 w-3 mr-1" />
+                          Notify
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -425,31 +607,31 @@ const Admin = () => {
                 </CardHeader>
                 <CardContent>
                   {/* Filters */}
-                  <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                    <div className="relative flex-1">
+                  <div className="flex flex-wrap gap-3 mb-6">
+                    <div className="relative flex-1 min-w-[200px]">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
                       <Input
-                        placeholder="Search name, email or company…"
-                        className="pl-9"
+                        placeholder="Search leads..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9"
                       />
                     </div>
                     <Select value={formTypeFilter} onValueChange={setFormTypeFilter}>
-                      <SelectTrigger className="w-full sm:w-48">
+                      <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Form type" />
                       </SelectTrigger>
                       <SelectContent>
-                        {formTypes.map((t) => (
-                          <SelectItem key={t} value={t}>
-                            {FORM_TYPE_LABELS[t] || t}
+                        {formTypes.map((ft) => (
+                          <SelectItem key={ft} value={ft}>
+                            {FORM_TYPE_LABELS[ft] || ft}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     <Select value={leadStatusFilter} onValueChange={setLeadStatusFilter}>
-                      <SelectTrigger className="w-full sm:w-44">
-                        <SelectValue placeholder="Lead status" />
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue placeholder="Status" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Statuses</SelectItem>
@@ -476,65 +658,50 @@ const Admin = () => {
                             <th className="pb-3 pr-4 font-semibold text-navy">Name</th>
                             <th className="pb-3 pr-4 font-semibold text-navy">Email</th>
                             <th className="pb-3 pr-4 font-semibold text-navy">Company</th>
+                            <th className="pb-3 pr-4 font-semibold text-navy">Type</th>
                             <th className="pb-3 pr-4 font-semibold text-navy">Products</th>
-                            <th className="pb-3 pr-4 font-semibold text-navy">Form</th>
+                            <th className="pb-3 pr-4 font-semibold text-navy">Region</th>
                             <th className="pb-3 pr-4 font-semibold text-navy">Date</th>
-                            <th className="pb-3 font-semibold text-navy">Status</th>
+                            <th className="pb-3 pr-4 font-semibold text-navy">Status</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredLeads.map((lead) => (
-                            <tr key={lead.id} className="border-b border-divider/50 hover:bg-surface-subtle transition-colors">
-                              <td className="py-3 pr-4 font-medium text-navy whitespace-nowrap">
-                                {lead.first_name} {lead.last_name}
+                          {filteredLeads.map((l) => (
+                            <tr key={l.id} className="border-b border-divider/50 hover:bg-surface-subtle transition-colors">
+                              <td className="py-3 pr-4 font-medium text-navy">
+                                {l.first_name} {l.last_name}
+                                {l.job_title && <span className="block text-xs text-text-secondary">{l.job_title}</span>}
+                              </td>
+                              <td className="py-3 pr-4 text-text-secondary">{l.email}</td>
+                              <td className="py-3 pr-4 text-text-secondary">{l.company || "—"}</td>
+                              <td className="py-3 pr-4">
+                                <Badge variant="outline" className="text-xs">
+                                  {FORM_TYPE_LABELS[l.form_type] || l.form_type}
+                                </Badge>
+                              </td>
+                              <td className="py-3 pr-4 text-text-secondary text-xs">
+                                {l.products?.join(", ") || "—"}
+                              </td>
+                              <td className="py-3 pr-4 text-text-secondary text-xs">
+                                {l.region || l.country || "—"}
                               </td>
                               <td className="py-3 pr-4 text-text-secondary">
-                                <a href={`mailto:${lead.email}`} className="hover:text-teal underline-offset-2 hover:underline">
-                                  {lead.email}
-                                </a>
-                              </td>
-                              <td className="py-3 pr-4 text-text-secondary">{lead.company || "—"}</td>
-                              <td className="py-3 pr-4">
-                                {lead.products && lead.products.length > 0 ? (
-                                  <div className="flex flex-wrap gap-1">
-                                    {lead.products.map((p) => (
-                                      <span key={p} className="text-xs bg-navy/10 text-navy px-2 py-0.5 rounded-full whitespace-nowrap">
-                                        {p}
-                                      </span>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <span className="text-text-secondary">—</span>
-                                )}
-                              </td>
-                              <td className="py-3 pr-4">
-                                <span className="text-xs bg-surface-subtle text-text-secondary px-2 py-1 rounded-md">
-                                  {FORM_TYPE_LABELS[lead.form_type] || lead.form_type}
-                                </span>
-                              </td>
-                              <td className="py-3 pr-4 text-text-secondary whitespace-nowrap">
-                                {new Date(lead.created_at).toLocaleDateString("en-GB", {
-                                  day: "2-digit",
-                                  month: "short",
-                                  year: "numeric",
+                                {new Date(l.created_at).toLocaleDateString("en-GB", {
+                                  day: "2-digit", month: "short", year: "numeric",
                                 })}
                               </td>
-                              <td className="py-3">
+                              <td className="py-3 pr-4">
                                 <Select
-                                  value={lead.lead_status}
-                                  onValueChange={(val) => updateLeadStatus(lead.id, val as LeadStatus)}
-                                  disabled={updatingLead === lead.id}
+                                  value={l.lead_status}
+                                  onValueChange={(val) => updateLeadStatus(l.id, val as LeadStatus)}
+                                  disabled={updatingLead === l.id}
                                 >
-                                  <SelectTrigger className="h-8 w-32 text-xs">
-                                    {updatingLead === lead.id ? (
-                                      <Loader2 className="h-3 w-3 animate-spin" />
-                                    ) : (
-                                      <SelectValue />
-                                    )}
+                                  <SelectTrigger className="w-[130px] h-8 text-xs">
+                                    <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
                                     {LEAD_STATUSES.map((s) => (
-                                      <SelectItem key={s} value={s} className="text-xs">
+                                      <SelectItem key={s} value={s}>
                                         {s.charAt(0).toUpperCase() + s.slice(1)}
                                       </SelectItem>
                                     ))}
@@ -740,6 +907,84 @@ const Admin = () => {
           </Tabs>
         </div>
       </main>
+
+      {/* Notification Modal */}
+      <Dialog open={notifyModalOpen} onOpenChange={setNotifyModalOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="text-navy flex items-center gap-2">
+              <Send className="h-5 w-5 text-teal" />
+              Send Notification to {notifyTarget?.full_name || notifyTarget?.email}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-sm font-medium text-navy mb-1.5 block">Quick Templates</label>
+              <Select value={selectedTemplate} onValueChange={applyTemplate}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a template or write custom..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {UPSELL_TEMPLATES.map((t) => (
+                    <SelectItem key={t.label} value={t.label}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-navy mb-1.5 block">Subject *</label>
+              <Input
+                placeholder="Email subject line"
+                value={notifySubject}
+                onChange={(e) => setNotifySubject(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-navy mb-1.5 block">Message *</label>
+              <Textarea
+                placeholder="Write your message..."
+                value={notifyMessage}
+                onChange={(e) => setNotifyMessage(e.target.value)}
+                rows={5}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium text-navy mb-1.5 block">CTA Button Text</label>
+                <Input
+                  placeholder="e.g. Book a Demo"
+                  value={notifyCtaText}
+                  onChange={(e) => setNotifyCtaText(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-navy mb-1.5 block">CTA Button URL</label>
+                <Input
+                  placeholder="https://..."
+                  value={notifyCtaUrl}
+                  onChange={(e) => setNotifyCtaUrl(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNotifyModalOpen(false)}>Cancel</Button>
+            <Button
+              onClick={sendNotification}
+              disabled={sendingNotification || !notifySubject.trim() || !notifyMessage.trim()}
+              className="bg-teal hover:bg-teal/90 text-white"
+            >
+              {sendingNotification ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              Send Email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );
