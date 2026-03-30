@@ -314,7 +314,11 @@ const AcademyCertificate = () => {
 
               {/* Share Actions */}
               <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <Button variant="default" onClick={shareLinkedIn}>
+                <Button variant="default" onClick={downloadCertificatePDF}>
+                  <FileDown className="h-4 w-4 mr-2" />
+                  Download Certificate (PDF)
+                </Button>
+                <Button variant="outline" onClick={shareLinkedIn}>
                   <Linkedin className="h-4 w-4 mr-2" />
                   Share on LinkedIn
                 </Button>
