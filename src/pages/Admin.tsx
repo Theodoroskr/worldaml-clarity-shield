@@ -141,9 +141,20 @@ const Admin = () => {
     setLoadingPartners(false);
   }, []);
 
+  const fetchTrustedDomains = useCallback(async () => {
+    setLoadingDomains(true);
+    const { data, error } = await supabase
+      .from("auto_approve_domains")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) { toast.error("Failed to load trusted domains"); console.error(error); }
+    else setTrustedDomains((data as any[]) || []);
+    setLoadingDomains(false);
+  }, []);
+
   useEffect(() => {
-    if (isAdmin) { fetchProfiles(); fetchLeads(); fetchPartnerData(); }
-  }, [isAdmin, fetchLeads, fetchPartnerData]);
+    if (isAdmin) { fetchProfiles(); fetchLeads(); fetchPartnerData(); fetchTrustedDomains(); }
+  }, [isAdmin, fetchLeads, fetchPartnerData, fetchTrustedDomains]);
 
   const updateProfileStatus = async (profileId: string, newStatus: "approved" | "rejected") => {
     setActionLoading(profileId);
