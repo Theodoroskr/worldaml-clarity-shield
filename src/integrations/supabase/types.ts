@@ -208,6 +208,24 @@ export type Database = {
           },
         ]
       }
+      auto_approve_domains: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+        }
+        Relationships: []
+      }
       form_submissions: {
         Row: {
           account_type: string | null
