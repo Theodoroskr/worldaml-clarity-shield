@@ -1,7 +1,7 @@
 // Build-time script to generate /public/rss.xml from blog posts
 import { blogPosts } from "../src/data/blogPosts";
 
-const SITE_URL = "https://worldaml-clarity-shield.lovable.app";
+const SITE_URL = "https://worldaml.com";
 
 function escapeXml(str: string): string {
   return str
