@@ -163,6 +163,16 @@ const Admin = () => {
     else {
       toast.success(`User ${newStatus}`);
       setProfiles((prev) => prev.map((p) => (p.id === profileId ? { ...p, status: newStatus } : p)));
+
+      // Send approval notification email (fire-and-forget)
+      if (newStatus === "approved") {
+        const profile = profiles.find((p) => p.id === profileId);
+        if (profile?.email) {
+          supabase.functions.invoke("notify-user-approved", {
+            body: { email: profile.email, full_name: profile.full_name },
+          }).catch((err) => console.error("Approval email failed:", err));
+        }
+      }
     }
     setActionLoading(null);
   };
