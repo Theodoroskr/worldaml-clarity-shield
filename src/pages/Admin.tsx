@@ -59,7 +59,7 @@ const UPSELL_TEMPLATES = [
     subject: "Unlock the Full WorldAML Suite",
     message: "You've been making great progress on the WorldAML Academy! Ready to take the next step?\n\nThe WorldAML Suite gives you access to real-time AML screening, KYC/KYB onboarding, transaction monitoring, and more — all in one platform.\n\nBook a quick demo to see how it can streamline your compliance workflow.",
     cta_text: "Book a Demo",
-    cta_url: "https://worldaml-clarity-shield.lovable.app/contact-sales",
+    cta_url: "https://worldaml.com/contact-sales",
   },
   {
     label: "Try WorldAML API",
