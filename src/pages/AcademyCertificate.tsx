@@ -5,7 +5,8 @@ import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Award, Linkedin, Share2, ArrowLeft, CheckCircle, BookOpen, ExternalLink, Copy, Download } from "lucide-react";
+import { Award, Linkedin, Share2, ArrowLeft, CheckCircle, BookOpen, ExternalLink, Copy, Download, FileDown } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
