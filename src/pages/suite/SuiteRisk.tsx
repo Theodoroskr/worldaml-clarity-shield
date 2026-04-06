@@ -5,15 +5,70 @@ import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Responsi
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 
-/* ─── High-risk & medium-risk country lists (FATF / EU) ─── */
-const HIGH_RISK_COUNTRIES = new Set([
-  "IR", "KP", "SY", "CU", "MM", "AF", "YE", "SO", "LY", "SD",
-  "VE", "NI", "ZW", "CD", "SS", "BI", "CF", "IQ"
-]);
-const MEDIUM_RISK_COUNTRIES = new Set([
-  "PK", "NG", "KH", "AL", "JM", "PA", "TT", "BF", "HT", "ML",
-  "MZ", "SN", "TZ", "UG", "GY", "PH", "TR", "JO", "TN", "MA"
-]);
+/*
+ * ─── Basel AML Index 2025 (Public Edition) ───
+ * Source: Basel Institute on Governance – index.baselgovernance.org/ranking
+ * Scale: 0 (low risk) → 10 (high risk). We normalise to 0-100 for the scoring engine.
+ * Countries not listed default to 50 (medium-unknown).
+ * FATF black-list jurisdictions without a Basel score get 95.
+ */
+const BASEL_AML_SCORES: Record<string, number> = {
+  // 1–10: Very High Risk
+  MM: 8.18, HT: 8.12, CD: 7.63, TD: 7.56, GQ: 7.55, VE: 7.55,
+  LA: 7.50, GA: 7.46, CF: 7.44, GW: 7.30,
+  // 11–20
+  CG: 7.27, CN: 7.26, DJ: 6.93, NE: 6.84, DZ: 6.82, MG: 6.77,
+  TM: 6.73, KH: 6.72, VN: 6.69, KM: 6.67,
+  // 21–30
+  NI: 6.61, PG: 6.61, KE: 6.60, AO: 6.55, SZ: 6.51, TJ: 6.44,
+  TG: 6.44, GN: 6.43, SR: 6.42, CM: 6.41,
+  // 31–40
+  SL: 6.41, MZ: 6.38, BJ: 6.33, SB: 6.31, MR: 6.29, LR: 6.26,
+  ML: 6.22, NG: 6.18, KW: 6.13, AE: 6.11,
+  // 41–50
+  CI: 6.05, LS: 6.04, ZW: 5.99, TH: 5.98, KG: 5.96, ST: 5.96,
+  LB: 5.93, IQ: 5.90, NP: 5.88, SA: 5.87,
+  // 51–60
+  PA: 5.83, GM: 5.76, BF: 5.75, UG: 5.72, RW: 5.71, BY: 5.70,
+  ET: 5.68, TO: 5.67, HN: 5.66, IN: 5.66,
+  // 61–70
+  SV: 5.65, TR: 5.65, PK: 5.63, ZA: 5.63, BD: 5.62, MY: 5.60,
+  BO: 5.58, TL: 5.58, BA: 5.54, ID: 5.52,
+  // 71–80
+  MX: 5.52, TZ: 5.51, BT: 5.49, PH: 5.48, AZ: 5.46, KN: 5.46,
+  CV: 5.45, GT: 5.44, MW: 5.44, BR: 5.40,
+  // 81–90
+  UA: 5.38, HK: 5.37, SN: 5.36, ZM: 5.31, UZ: 5.27, QA: 5.25,
+  EG: 5.22, RS: 5.21, KZ: 5.18, BH: 5.16,
+  // 91–100
+  CU: 5.16, GY: 5.16, HU: 5.16, LK: 5.16, MT: 5.15, GH: 5.13,
+  BS: 5.08, DO: 5.08, CO: 5.05, MA: 5.04,
+  // 101–110
+  BG: 5.00, CR: 4.97, DE: 4.97, VU: 4.97, MN: 4.96, BB: 4.91,
+  EC: 4.91, PY: 4.91, MH: 4.89, PE: 4.88,
+  // 111–120
+  GD: 4.85, JO: 4.85, US: 4.83, RO: 4.81, JM: 4.78, NA: 4.78,
+  CY: 4.77, IT: 4.76, TN: 4.75, FJ: 4.73,
+  // 121–130
+  JP: 4.73, SG: 4.73, MU: 4.65, MD: 4.64, CA: 4.61, SC: 4.60,
+  LC: 4.58, WS: 4.56, NL: 4.53, KR: 4.51,
+  // 131–140
+  TW: 4.49, PL: 4.49, CH: 4.47, BE: 4.46, AR: 4.44, IE: 4.40,
+  SK: 4.38, AL: 4.36, ME: 4.33, GE: 4.32,
+  // 141–150
+  AT: 4.28, CL: 4.28, OM: 4.25, ES: 4.24, UY: 4.23, BN: 4.22,
+  MK: 4.20, HR: 4.18, DM: 4.17, AU: 4.13,
+  // 151–160
+  BW: 4.12, TT: 4.12, LI: 4.11, BZ: 4.06, IL: 4.06, VC: 4.05,
+  GB: 4.04, LT: 4.03, LV: 4.01, FR: 3.99,
+  // 161–177
+  GR: 3.99, AG: 3.98, AM: 3.98, LU: 3.97, NR: 3.88, PT: 3.83,
+  CZ: 3.82, NZ: 3.76, NO: 3.73, SI: 3.49, AD: 3.48, SE: 3.48,
+  EE: 3.25, DK: 3.18, SM: 3.08, IS: 3.04, FI: 3.03,
+  // FATF black-list / sanctioned (no Basel score available)
+  IR: 8.50, KP: 9.00, SY: 8.50, AF: 8.00, YE: 8.00, SO: 8.00,
+  LY: 7.80, SD: 7.80, SS: 8.00, BI: 7.00,
+};
 
 /* ─── Risk factor weights (total = 100) ─── */
 const WEIGHTS = {
@@ -53,9 +108,12 @@ interface ScoredCustomer extends Customer {
 function scoreCountry(country: string | null): number {
   if (!country) return 50; // unknown = medium risk
   const c = country.toUpperCase();
-  if (HIGH_RISK_COUNTRIES.has(c)) return 95;
-  if (MEDIUM_RISK_COUNTRIES.has(c)) return 60;
-  return 15;
+  const baselScore = BASEL_AML_SCORES[c];
+  if (baselScore !== undefined) {
+    // Normalise Basel 0-10 scale → 0-100 risk score
+    return Math.round(baselScore * 10);
+  }
+  return 50; // unlisted country = medium risk
 }
 
 function scoreScreening(matchCount: number, hasMatches: boolean): number {
