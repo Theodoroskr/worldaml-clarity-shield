@@ -84,6 +84,12 @@ const WhyWorldAML = lazy(() => import("./pages/WhyWorldAML"));
 const EUSanctionsMap = lazy(() => import("./pages/EUSanctionsMap"));
 const EUSanctionsCountry = lazy(() => import("./pages/EUSanctionsCountry"));
 
+const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminForms = lazy(() => import("./pages/admin/AdminForms"));
+const AdminWorkflows = lazy(() => import("./pages/admin/AdminWorkflows"));
+const AdminPricing = lazy(() => import("./pages/admin/AdminPricing"));
+
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
 const SuiteOnboarding = lazy(() => import("./pages/suite/SuiteOnboarding"));
