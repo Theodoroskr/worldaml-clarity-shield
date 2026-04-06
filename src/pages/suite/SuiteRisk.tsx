@@ -1,29 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { BarChart3, TrendingUp, TrendingDown, AlertTriangle, ChevronRight, Search, SlidersHorizontal } from "lucide-react";
+import { TrendingUp, TrendingDown, AlertTriangle, ChevronRight, Search, SlidersHorizontal, Loader2 } from "lucide-react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { supabase } from "@/integrations/supabase/client";
 
-const customers = [
-  { id: "96273547", name: "John Cameron", risk: 87, pep: "Class 2", jurisdiction: "CY/GR", transactions: 142, adverse: true, kyc: "EDD Required", change: +12, segment: "HNW" },
-  { id: "96790142", name: "Nikos Papadimitriou", risk: 64, pep: "None", jurisdiction: "CY", transactions: 89, adverse: false, kyc: "Verified", change: +5, segment: "Corporate" },
-  { id: "99118508", name: "Michael Stavros", risk: 71, pep: "None", jurisdiction: "CY/UK", transactions: 210, adverse: true, kyc: "EDD Required", change: +8, segment: "HNW" },
-  { id: "97807621", name: "Robert Mueller", risk: 55, pep: "None", jurisdiction: "DE", transactions: 67, adverse: true, kyc: "Verified", change: -3, segment: "Retail" },
-  { id: "96685261", name: "Cameron Andrews", risk: 48, pep: "Class 1", jurisdiction: "GB", transactions: 33, adverse: false, kyc: "Verified", change: 0, segment: "HNW" },
-  { id: "96503465", name: "Dimitris Konstantinou", risk: 79, pep: "None", jurisdiction: "GR", transactions: 178, adverse: false, kyc: "Pending", change: +15, segment: "Corporate" },
-  { id: "96209874", name: "Anna Kyriakou", risk: 43, pep: "None", jurisdiction: "CY", transactions: 55, adverse: false, kyc: "Verified", change: -2, segment: "Retail" },
-  { id: "96790300", name: "Sofia Andreou", risk: 52, pep: "Class 3", jurisdiction: "CY", transactions: 91, adverse: false, kyc: "In Review", change: +4, segment: "Retail" },
-];
+interface Customer {
+  id: string;
+  name: string;
+  risk_level: string;
+  kyc_status: string;
+  country: string | null;
+  type: string;
+  email: string | null;
+  created_at: string;
+}
 
-const riskDrivers = [
-  { label: "PEP Exposure", score: 80 }, { label: "Jurisdiction Risk", score: 70 },
-  { label: "Transaction Behaviour", score: 65 }, { label: "Adverse Media", score: 55 },
-  { label: "KYC Status", score: 90 }, { label: "Account Age", score: 30 },
-];
-
-const distributionData = [
-  { range: "0-20", count: 2340 }, { range: "21-40", count: 4120 }, { range: "41-60", count: 2870 },
-  { range: "61-80", count: 1290 }, { range: "81-100", count: 738 },
-];
+const riskScore = (level: string) => {
+  switch (level) {
+    case "critical": return 90;
+    case "high": return 75;
+    case "medium": return 55;
+    case "low": return 30;
+    default: return 20;
+  }
+};
 
 const riskColor = (r: number) => r >= 75 ? "text-destructive" : r >= 55 ? "text-amber-600" : r >= 35 ? "text-foreground" : "text-emerald-600";
 const riskBg = (r: number) => r >= 75 ? "bg-destructive" : r >= 55 ? "bg-amber-400" : r >= 35 ? "bg-primary" : "bg-emerald-500";
@@ -33,13 +33,48 @@ const riskLabel = (r: number) => r >= 75 ? "High" : r >= 55 ? "Medium" : r >= 35
 export default function SuiteRisk() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"risk" | "name">("risk");
-  const filtered = [...customers].filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase())).sort((a, b) => sort === "risk" ? b.risk - a.risk : a.name.localeCompare(b.name));
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase.from("suite_customers").select("id, name, risk_level, kyc_status, country, type, email, created_at").order("created_at", { ascending: false });
+      setCustomers(data || []);
+      setLoading(false);
+    };
+    fetch();
+  }, []);
+
+  const scored = customers.map(c => ({ ...c, score: riskScore(c.risk_level) }));
+  const filtered = scored
+    .filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => sort === "risk" ? b.score - a.score : a.name.localeCompare(b.name));
+
+  // Build distribution from real data
+  const distributionData = [
+    { range: "0-20", count: scored.filter(c => c.score <= 20).length },
+    { range: "21-40", count: scored.filter(c => c.score > 20 && c.score <= 40).length },
+    { range: "41-60", count: scored.filter(c => c.score > 40 && c.score <= 60).length },
+    { range: "61-80", count: scored.filter(c => c.score > 60 && c.score <= 80).length },
+    { range: "81-100", count: scored.filter(c => c.score > 80).length },
+  ];
+
+  // Risk drivers based on real aggregates
+  const total = customers.length || 1;
+  const riskDrivers = [
+    { label: "High Risk", score: Math.round((customers.filter(c => c.risk_level === "high" || c.risk_level === "critical").length / total) * 100) },
+    { label: "KYC Pending", score: Math.round((customers.filter(c => c.kyc_status === "pending").length / total) * 100) },
+    { label: "KYC Rejected", score: Math.round((customers.filter(c => c.kyc_status === "rejected").length / total) * 100) },
+    { label: "Individuals", score: Math.round((customers.filter(c => c.type === "individual").length / total) * 100) },
+    { label: "Businesses", score: Math.round((customers.filter(c => c.type === "business").length / total) * 100) },
+    { label: "Medium Risk", score: Math.round((customers.filter(c => c.risk_level === "medium").length / total) * 100) },
+  ];
 
   return (
     <div className="p-6 space-y-5 h-full overflow-y-auto">
-      <div><h1 className="text-xl font-bold text-foreground">Risk Scoring</h1><p className="text-xs text-muted-foreground mt-0.5">Composite customer risk profiles · Behavioural analysis</p></div>
+      <div><h1 className="text-xl font-bold text-foreground">Risk Scoring</h1><p className="text-xs text-muted-foreground mt-0.5">Composite customer risk profiles · Live data from your customer base</p></div>
 
-      <div className="grid grid-cols-[1fr_260px] gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-5">
         <div className="bg-card rounded-xl border border-border">
           <div className="px-5 py-4 border-b border-border"><h2 className="font-semibold text-foreground">Score Distribution</h2></div>
           <div className="p-5">
@@ -61,7 +96,7 @@ export default function SuiteRisk() {
               <RadarChart data={riskDrivers}>
                 <PolarGrid stroke="hsl(220,13%,91%)" />
                 <PolarAngleAxis dataKey="label" tick={{ fontSize: 9, fill: "hsl(220,9%,46%)" }} />
-                <Radar name="Score" dataKey="score" stroke="hsl(221,83%,53%)" fill="hsl(221,83%,53%)" fillOpacity={0.2} />
+                <Radar name="%" dataKey="score" stroke="hsl(221,83%,53%)" fill="hsl(221,83%,53%)" fillOpacity={0.2} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
@@ -70,33 +105,37 @@ export default function SuiteRisk() {
 
       <div className="bg-card rounded-xl border border-border">
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-          <div><h2 className="font-semibold text-foreground">Customer Risk Scores</h2></div>
+          <div><h2 className="font-semibold text-foreground">Customer Risk Scores</h2><p className="text-xs text-muted-foreground">{customers.length} customers</p></div>
           <div className="flex items-center gap-2">
             <div className="relative"><Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" className="pl-7 py-1.5 text-xs rounded border border-border bg-background text-foreground w-36 focus:outline-none focus:ring-1 focus:ring-primary" /></div>
             <button onClick={() => setSort(s => s === "risk" ? "name" : "risk")} className="flex items-center gap-1 text-xs px-2 py-1.5 rounded border border-border hover:bg-muted transition-colors text-muted-foreground"><SlidersHorizontal className="w-3 h-3" /> Sort: {sort === "risk" ? "Risk ↓" : "Name A-Z"}</button>
           </div>
         </div>
-        <table className="w-full text-sm">
-          <thead><tr className="border-b border-border bg-muted/30">
-            {["Customer", "Risk Score", "Level", "PEP", "Jurisdiction", "Txns", "Adverse Media", "KYC", "Change", ""].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>)}
-          </tr></thead>
-          <tbody className="divide-y divide-border">
-            {filtered.map(c => (
-              <tr key={c.id} className="hover:bg-muted/20 transition-colors group">
-                <td className="px-4 py-3"><div className="font-semibold text-foreground text-sm">{c.name}</div><div className="text-xs text-muted-foreground font-mono">{c.id}</div></td>
-                <td className="px-4 py-3"><div className="flex items-center gap-2"><div className="w-14 h-2 rounded-full bg-muted overflow-hidden"><div className={cn("h-full rounded-full", riskBg(c.risk))} style={{ width: `${c.risk}%` }} /></div><span className={cn("text-sm font-mono font-bold", riskColor(c.risk))}>{c.risk}</span></div></td>
-                <td className="px-4 py-3"><span className={cn("text-xs px-2 py-0.5 rounded border font-semibold", riskBadge(c.risk))}>{riskLabel(c.risk)}</span></td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{c.pep}</td>
-                <td className="px-4 py-3 text-xs font-mono text-muted-foreground">{c.jurisdiction}</td>
-                <td className="px-4 py-3 font-mono text-xs text-foreground">{c.transactions}</td>
-                <td className="px-4 py-3">{c.adverse ? <AlertTriangle className="w-3.5 h-3.5 text-destructive" /> : <span className="text-xs text-muted-foreground">—</span>}</td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{c.kyc}</td>
-                <td className="px-4 py-3"><div className={cn("flex items-center gap-1 text-xs font-medium", c.change > 0 ? "text-destructive" : c.change < 0 ? "text-emerald-600" : "text-muted-foreground")}>{c.change > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : c.change < 0 ? <TrendingDown className="w-3.5 h-3.5" /> : null}{c.change !== 0 ? `${c.change > 0 ? "+" : ""}${c.change}` : "—"}</div></td>
-                <td className="px-4 py-3"><button className="opacity-0 group-hover:opacity-100 text-xs text-primary hover:underline transition-opacity flex items-center gap-1">Profile <ChevronRight className="w-3 h-3" /></button></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-12 text-sm text-muted-foreground">No customers found. Add customers via Onboarding first.</div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead><tr className="border-b border-border bg-muted/30">
+              {["Customer", "Risk Score", "Level", "Type", "Country", "KYC Status", ""].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>)}
+            </tr></thead>
+            <tbody className="divide-y divide-border">
+              {filtered.map(c => (
+                <tr key={c.id} className="hover:bg-muted/20 transition-colors group">
+                  <td className="px-4 py-3"><div className="font-semibold text-foreground text-sm">{c.name}</div><div className="text-xs text-muted-foreground">{c.email || "—"}</div></td>
+                  <td className="px-4 py-3"><div className="flex items-center gap-2"><div className="w-14 h-2 rounded-full bg-muted overflow-hidden"><div className={cn("h-full rounded-full", riskBg(c.score))} style={{ width: `${c.score}%` }} /></div><span className={cn("text-sm font-mono font-bold", riskColor(c.score))}>{c.score}</span></div></td>
+                  <td className="px-4 py-3"><span className={cn("text-xs px-2 py-0.5 rounded border font-semibold", riskBadge(c.score))}>{riskLabel(c.score)}</span></td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground capitalize">{c.type}</td>
+                  <td className="px-4 py-3 text-xs font-mono text-muted-foreground">{c.country || "—"}</td>
+                  <td className="px-4 py-3"><span className="text-xs capitalize text-muted-foreground">{c.kyc_status}</span></td>
+                  <td className="px-4 py-3"><button className="opacity-0 group-hover:opacity-100 text-xs text-primary hover:underline transition-opacity flex items-center gap-1">Profile <ChevronRight className="w-3 h-3" /></button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
