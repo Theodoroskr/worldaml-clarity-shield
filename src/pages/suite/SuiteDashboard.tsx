@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   TrendingUp, Users, Activity, AlertTriangle, Briefcase, Clock, CheckCircle, Bell, ChevronRight
 } from "lucide-react";
@@ -8,13 +8,7 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { Timeline, TimelineEvent } from "@/components/ui/timeline";
-
-const kpiData = [
-  { label: "Active Customers", value: "50,048", change: "+2.4%", positive: true, icon: Users, color: "text-primary", bg: "bg-primary/10", spark: [30,35,32,40,38,44,50,48,52,50] },
-  { label: "Open Cases", value: "14", change: "+3 today", positive: false, icon: Briefcase, color: "text-destructive", bg: "bg-destructive/10", spark: [8,10,9,11,10,12,13,12,14,14] },
-  { label: "Pending Reviews", value: "37", change: "8 overdue", positive: false, icon: Clock, color: "text-amber-600", bg: "bg-amber-50", spark: [20,25,22,30,28,35,32,38,37,37] },
-  { label: "Flagged Today", value: "5", change: "+5 vs yesterday", positive: false, icon: AlertTriangle, color: "text-amber-600", bg: "bg-amber-50", spark: [5,3,2,4,1,2,0,1,3,5] },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const trendData = [
   { date: "30/01", flagged: 0, clear: 29, pending: 0 },
@@ -25,31 +19,6 @@ const trendData = [
   { date: "20/02", flagged: 0, clear: 34, pending: 0 },
   { date: "25/02", flagged: 3, clear: 31, pending: 2 },
   { date: "28/02", flagged: 5, clear: 37, pending: 3 },
-];
-
-const riskDistribution = [
-  { name: "High Risk", value: 12, color: "hsl(0,84%,60%)" },
-  { name: "Medium Risk", value: 23, color: "hsl(36,95%,53%)" },
-  { name: "Low Risk", value: 51, color: "hsl(142,71%,45%)" },
-  { name: "Unscored", value: 14, color: "hsl(220,9%,60%)" },
-];
-
-const amlSummary = [
-  { label: "Total Screened", value: "50,048", change: "+124 today", positive: true },
-  { label: "PEP Hits", value: "83", change: "+2", positive: false, highlight: true },
-  { label: "Sanctions Hits", value: "11", change: "0", positive: true, highlight: true },
-  { label: "Adverse Media", value: "27", change: "+5", positive: false, highlight: true },
-  { label: "False Positives Dismissed", value: "241", change: "+8 today", positive: true },
-  { label: "Pending Review", value: "37", change: "-3", positive: true },
-];
-
-const activityFeed: TimelineEvent[] = [
-  { id: "1", timestamp: "06/04 14:32", actor: "System", action: "AML screening completed for John Cameron", type: "screening", detail: "No new matches" },
-  { id: "2", timestamp: "06/04 13:15", actor: "Admin", action: "Case #CSE-2341 escalated", type: "case", detail: "STR filed — amount threshold exceeded" },
-  { id: "3", timestamp: "06/04 12:02", actor: "System", action: "New customer onboarded — PEP match detected", type: "screening", detail: "PEP Class 2 — manual review required", after: "Pending Review" },
-  { id: "4", timestamp: "06/04 11:45", actor: "Maria P.", action: "Document verified for customer 96685261", type: "document", detail: "Passport — extraction confirmed" },
-  { id: "5", timestamp: "06/04 10:30", actor: "Admin", action: "Risk status updated for Cameron Group", type: "status", before: "Medium", after: "High" },
-  { id: "6", timestamp: "06/04 09:10", actor: "System", action: "Scheduled re-screening batch completed", type: "system", detail: "247 profiles re-screened, 3 new hits" },
 ];
 
 function SparkLine({ data, positive }: { data: number[]; positive: boolean }) {
@@ -76,22 +45,84 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent
 };
 
 export default function SuiteDashboard() {
+  const [customerCount, setCustomerCount] = useState(0);
+  const [openAlerts, setOpenAlerts] = useState(0);
+  const [screeningCount, setScreeningCount] = useState(0);
+  const [riskDistribution, setRiskDistribution] = useState([
+    { name: "High Risk", value: 0, color: "hsl(0,84%,60%)" },
+    { name: "Medium Risk", value: 0, color: "hsl(36,95%,53%)" },
+    { name: "Low Risk", value: 0, color: "hsl(142,71%,45%)" },
+    { name: "Critical", value: 0, color: "hsl(280,70%,50%)" },
+  ]);
+  const [auditEvents, setAuditEvents] = useState<TimelineEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const [customersRes, alertsRes, screeningsRes, auditRes] = await Promise.all([
+        supabase.from("suite_customers").select("id, risk_level").eq("user_id", user.id),
+        supabase.from("suite_alerts").select("id, status").eq("user_id", user.id),
+        supabase.from("suite_screenings").select("id").eq("user_id", user.id),
+        supabase.from("suite_audit_log").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
+      ]);
+
+      const customers = customersRes.data || [];
+      const alerts = alertsRes.data || [];
+      const screenings = screeningsRes.data || [];
+      const audit = auditRes.data || [];
+
+      setCustomerCount(customers.length);
+      setOpenAlerts(alerts.filter(a => a.status === "open" || a.status === "reviewing").length);
+      setScreeningCount(screenings.length);
+
+      const riskCounts = { low: 0, medium: 0, high: 0, critical: 0 };
+      customers.forEach(c => { if (c.risk_level in riskCounts) riskCounts[c.risk_level as keyof typeof riskCounts]++; });
+      const total = customers.length || 1;
+      setRiskDistribution([
+        { name: "High Risk", value: Math.round((riskCounts.high / total) * 100), color: "hsl(0,84%,60%)" },
+        { name: "Medium Risk", value: Math.round((riskCounts.medium / total) * 100), color: "hsl(36,95%,53%)" },
+        { name: "Low Risk", value: Math.round((riskCounts.low / total) * 100), color: "hsl(142,71%,45%)" },
+        { name: "Critical", value: Math.round((riskCounts.critical / total) * 100), color: "hsl(280,70%,50%)" },
+      ]);
+
+      setAuditEvents(audit.map(a => ({
+        id: a.id,
+        timestamp: new Date(a.created_at).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }),
+        actor: "You",
+        action: a.action,
+        type: a.entity_type as any,
+        detail: typeof a.details === "object" && a.details !== null ? (a.details as any).detail || "" : "",
+      })));
+
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  const kpiData = [
+    { label: "Active Customers", value: customerCount.toLocaleString(), change: "live", positive: true, icon: Users, color: "text-primary", bg: "bg-primary/10", spark: [30,35,32,40,38,44,50,48,52, customerCount] },
+    { label: "Open Alerts", value: openAlerts.toString(), change: "live", positive: openAlerts === 0, icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10", spark: [8,10,9,11,10,12,13,12,14, openAlerts] },
+    { label: "Total Screenings", value: screeningCount.toLocaleString(), change: "live", positive: true, icon: Activity, color: "text-primary", bg: "bg-primary/10", spark: [20,25,22,30,28,35,32,38,37, screeningCount] },
+    { label: "Flagged Today", value: "—", change: "", positive: true, icon: Clock, color: "text-amber-600", bg: "bg-amber-50", spark: [5,3,2,4,1,2,0,1,3,0] },
+  ];
+
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Compliance Operations Center</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Real-time overview — April 6, 2026</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Real-time overview{loading ? " — loading…" : ""}</p>
         </div>
       </div>
 
       {/* KPI cards */}
       <div className="grid grid-cols-4 gap-4">
         {kpiData.map((kpi) => (
-          <div key={kpi.label} className={cn(
-            "bg-card rounded-xl border shadow-sm hover:shadow-md transition-shadow p-5",
-            "border-border"
-          )}>
+          <div key={kpi.label} className={cn("bg-card rounded-xl border shadow-sm hover:shadow-md transition-shadow p-5", "border-border")}>
             <div className="flex items-start justify-between mb-3">
               <div className={cn("p-2 rounded-lg", kpi.bg)}>
                 <kpi.icon className={cn("w-4 h-4", kpi.color)} />
@@ -100,9 +131,7 @@ export default function SuiteDashboard() {
             </div>
             <div className="text-2xl font-bold text-foreground font-mono">{kpi.value}</div>
             <div className="text-xs text-muted-foreground mt-0.5">{kpi.label}</div>
-            <div className={cn("text-xs font-medium mt-1", kpi.positive ? "text-emerald-600" : "text-destructive")}>
-              {kpi.change}
-            </div>
+            {kpi.change && <div className={cn("text-xs font-medium mt-1", kpi.positive ? "text-emerald-600" : "text-destructive")}>{kpi.change}</div>}
           </div>
         ))}
       </div>
@@ -171,55 +200,20 @@ export default function SuiteDashboard() {
         </div>
       </div>
 
-      {/* AML Summary + Activity Feed */}
-      <div className="grid grid-cols-[1fr_340px] gap-5">
-        <div className="bg-card rounded-xl border border-border">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <div>
-              <h2 className="font-semibold text-foreground">AML Screening Summary</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">OFAC · EU Sanctions · UN · PEP · Adverse Media</p>
-            </div>
-          </div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Metric</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase">Count</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase">Change</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {amlSummary.map((row) => (
-                <tr key={row.label} className={cn("hover:bg-muted/20 transition-colors", row.highlight && "bg-amber-50/30")}>
-                  <td className="px-5 py-3 font-medium text-foreground text-sm">{row.label}</td>
-                  <td className="px-5 py-3 text-right font-mono font-bold text-foreground">{row.value}</td>
-                  <td className={cn("px-5 py-3 text-right font-medium text-sm", row.positive ? "text-emerald-600" : "text-destructive")}>{row.change}</td>
-                  <td className="px-5 py-3 text-right">
-                    {row.highlight ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                        <AlertTriangle className="w-3 h-3" /> Review
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                        <CheckCircle className="w-3 h-3" /> OK
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Activity Feed */}
+      <div className="bg-card rounded-xl border border-border">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <h2 className="font-semibold text-foreground">Recent Activity</h2>
+          <Bell className="w-4 h-4 text-muted-foreground" />
         </div>
-
-        <div className="bg-card rounded-xl border border-border">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-semibold text-foreground">Activity Feed</h2>
-            <Bell className="w-4 h-4 text-muted-foreground" />
-          </div>
-          <div className="p-4 overflow-y-auto max-h-[340px]">
-            <Timeline events={activityFeed} />
-          </div>
+        <div className="p-4 overflow-y-auto max-h-[340px]">
+          {auditEvents.length > 0 ? (
+            <Timeline events={auditEvents} />
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              {loading ? "Loading activity…" : "No activity yet. Start by adding a customer."}
+            </p>
+          )}
         </div>
       </div>
     </div>
