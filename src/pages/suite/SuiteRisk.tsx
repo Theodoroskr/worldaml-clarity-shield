@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, ChevronRight, Search, Loader2, Shield, Globe, Users, ArrowUpDown, FileSearch, Banknote, BarChart3, Grid3X3, List, X } from "lucide-react";
+import { AlertTriangle, ChevronRight, Search, Loader2, Shield, Globe, Users, ArrowUpDown, FileSearch, Banknote, BarChart3, Grid3X3, List, X, MapPin } from "lucide-react";
+import CountryRiskTable from "@/components/risk-assessment/CountryRiskTable";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -211,7 +212,7 @@ export default function SuiteRisk() {
   const [customers, setCustomers] = useState<ScoredCustomer[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [view, setView] = useState<"scoring" | "matrix">("scoring");
+  const [view, setView] = useState<"scoring" | "matrix" | "countries">("scoring");
   const [selectedCell, setSelectedCell] = useState<{ l: number; i: number } | null>(null);
   const [drillCustomer, setDrillCustomer] = useState<ScoredCustomer | null>(null);
 
@@ -331,11 +332,16 @@ export default function SuiteRisk() {
           <button onClick={() => { setView("matrix"); setExpandedId(null); }} className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors", view === "matrix" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
             <Grid3X3 className="w-3.5 h-3.5" /> Risk Matrix
           </button>
+          <button onClick={() => { setView("countries"); setExpandedId(null); setSelectedCell(null); setDrillCustomer(null); }} className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors", view === "countries" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+            <MapPin className="w-3.5 h-3.5" /> Country Risk
+          </button>
         </div>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-24"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+      ) : view === "countries" ? (
+        <CountryRiskTable baselScores={BASEL_AML_SCORES} />
       ) : view === "matrix" ? (
         /* ═══ MATRIX VIEW ═══ */
         <div className="space-y-5">
