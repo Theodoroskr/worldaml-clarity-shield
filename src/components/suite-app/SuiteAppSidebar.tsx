@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard, Users, Shield, CreditCard, AlertTriangle,
   FileText, BarChart3, Settings, ChevronRight, Activity,
-  UserCheck, Fingerprint, ClipboardList, Menu, Scale,
+  UserCheck, Fingerprint, ClipboardList, Menu, Scale, ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
