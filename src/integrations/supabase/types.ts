@@ -468,6 +468,39 @@ export type Database = {
         }
         Relationships: []
       }
+      suite_alert_rules: {
+        Row: {
+          conditions: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          severity: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conditions?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          severity?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conditions?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          severity?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       suite_alerts: {
         Row: {
           alert_type: string
@@ -554,6 +587,95 @@ export type Database = {
         }
         Relationships: []
       }
+      suite_case_notes: {
+        Row: {
+          case_id: string
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          case_id: string
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          case_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_case_notes_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "suite_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_cases: {
+        Row: {
+          alert_id: string | null
+          assigned_to: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          priority: string
+          resolution: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alert_id?: string | null
+          assigned_to?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          priority?: string
+          resolution?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alert_id?: string | null
+          assigned_to?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          priority?: string
+          resolution?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_cases_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "suite_alerts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_cases_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_customers: {
         Row: {
           company_name: string | null
@@ -605,6 +727,50 @@ export type Database = {
         }
         Relationships: []
       }
+      suite_idv_sessions: {
+        Row: {
+          created_at: string
+          customer_id: string
+          document_type: string | null
+          id: string
+          liveness_result: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          document_type?: string | null
+          id?: string
+          liveness_result?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          document_type?: string | null
+          id?: string
+          liveness_result?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_idv_sessions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_screenings: {
         Row: {
           created_at: string
@@ -639,6 +805,97 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "suite_screenings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_transactions: {
+        Row: {
+          amount: number
+          counterparty: string | null
+          counterparty_country: string | null
+          created_at: string
+          currency: string
+          customer_id: string
+          description: string | null
+          direction: string
+          id: string
+          risk_flag: boolean
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          counterparty?: string | null
+          counterparty_country?: string | null
+          created_at?: string
+          currency?: string
+          customer_id: string
+          description?: string | null
+          direction?: string
+          id?: string
+          risk_flag?: boolean
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          counterparty?: string | null
+          counterparty_country?: string | null
+          created_at?: string
+          currency?: string
+          customer_id?: string
+          description?: string | null
+          direction?: string
+          id?: string
+          risk_flag?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_ubo: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          is_verified: boolean
+          name: string
+          nationality: string | null
+          ownership_pct: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          is_verified?: boolean
+          name: string
+          nationality?: string | null
+          ownership_pct?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          is_verified?: boolean
+          name?: string
+          nationality?: string | null
+          ownership_pct?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_ubo_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "suite_customers"
