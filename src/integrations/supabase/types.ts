@@ -208,6 +208,256 @@ export type Database = {
           },
         ]
       }
+      admin_form_submissions: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          id: string
+          reviewed_by: string | null
+          status: string
+          submitted_data: Json
+          template_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          reviewed_by?: string | null
+          status?: string
+          submitted_data?: Json
+          template_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          reviewed_by?: string | null
+          status?: string
+          submitted_data?: Json
+          template_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_form_submissions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_form_submissions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "admin_form_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_form_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          fields: Json
+          form_type: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          fields?: Json
+          form_type?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          fields?: Json
+          form_type?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_subscription_tiers: {
+        Row: {
+          created_at: string
+          description: string | null
+          features: Json
+          id: string
+          is_active: boolean
+          max_api_requests_per_day: number
+          max_customers: number
+          max_screenings_per_month: number
+          monthly_price_cents: number
+          name: string
+          sort_order: number
+          stripe_price_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_api_requests_per_day?: number
+          max_customers?: number
+          max_screenings_per_month?: number
+          monthly_price_cents?: number
+          name: string
+          sort_order?: number
+          stripe_price_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_api_requests_per_day?: number
+          max_customers?: number
+          max_screenings_per_month?: number
+          monthly_price_cents?: number
+          name?: string
+          sort_order?: number
+          stripe_price_id?: string | null
+        }
+        Relationships: []
+      }
+      admin_user_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          status: string
+          stripe_subscription_id: string | null
+          tier_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          tier_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          tier_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_user_subscriptions_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "admin_subscription_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_workflow_executions: {
+        Row: {
+          completed_at: string | null
+          entity_id: string | null
+          entity_type: string
+          execution_log: Json
+          id: string
+          started_at: string
+          status: string
+          user_id: string
+          workflow_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          entity_id?: string | null
+          entity_type: string
+          execution_log?: Json
+          id?: string
+          started_at?: string
+          status?: string
+          user_id: string
+          workflow_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          execution_log?: Json
+          id?: string
+          started_at?: string
+          status?: string
+          user_id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_workflow_executions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "admin_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_workflows: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          edges: Json
+          id: string
+          is_active: boolean
+          name: string
+          nodes: Json
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          edges?: Json
+          id?: string
+          is_active?: boolean
+          name: string
+          nodes?: Json
+          trigger_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          edges?: Json
+          id?: string
+          is_active?: boolean
+          name?: string
+          nodes?: Json
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       auto_approve_domains: {
         Row: {
           created_at: string
