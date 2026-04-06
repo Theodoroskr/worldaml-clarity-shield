@@ -4,9 +4,9 @@ import SuiteAppSidebar from "@/components/suite-app/SuiteAppSidebar";
 import SuiteAppTopbar from "@/components/suite-app/SuiteAppTopbar";
 
 export default function SuiteAppLayout() {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
 
-  if (loading) {
+  if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
   }
 
