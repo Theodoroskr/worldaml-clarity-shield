@@ -108,6 +108,22 @@ const Dashboard = () => {
             </div>
           )}
 
+          <div className="mb-6 p-5 rounded-lg border border-teal/20 bg-gradient-to-r from-teal/5 to-navy/5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-teal/10 text-teal">
+                <Globe className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-navy text-sm">WorldAML Suite</p>
+                <p className="text-text-secondary text-xs">Onboarding, screening, monitoring, alerts & compliance — all in one place</p>
+              </div>
+            </div>
+            <Button variant="accent" size="sm" onClick={() => navigate("/suite")}>
+              Go to WorldAML Suite
+              <ExternalLink className="ml-1 h-3.5 w-3.5" />
+            </Button>
+          </div>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card>
               <CardHeader>
