@@ -84,6 +84,19 @@ const WhyWorldAML = lazy(() => import("./pages/WhyWorldAML"));
 const EUSanctionsMap = lazy(() => import("./pages/EUSanctionsMap"));
 const EUSanctionsCountry = lazy(() => import("./pages/EUSanctionsCountry"));
 
+const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
+const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
+const SuiteOnboarding = lazy(() => import("./pages/suite/SuiteOnboarding"));
+const SuiteIDV = lazy(() => import("./pages/suite/SuiteIDV"));
+const SuiteScreening = lazy(() => import("./pages/suite/SuiteScreening"));
+const SuiteTransactions = lazy(() => import("./pages/suite/SuiteTransactions"));
+const SuiteAlerts = lazy(() => import("./pages/suite/SuiteAlerts"));
+const SuiteAlertRules = lazy(() => import("./pages/suite/SuiteAlertRules"));
+const SuiteRisk = lazy(() => import("./pages/suite/SuiteRisk"));
+const SuiteCases = lazy(() => import("./pages/suite/SuiteCases"));
+const SuiteAudit = lazy(() => import("./pages/suite/SuiteAudit"));
+const SuiteSettings = lazy(() => import("./pages/suite/SuiteSettings"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
