@@ -212,7 +212,7 @@ export default function SuiteRisk() {
   const [customers, setCustomers] = useState<ScoredCustomer[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [view, setView] = useState<"scoring" | "matrix">("scoring");
+  const [view, setView] = useState<"scoring" | "matrix" | "countries">("scoring");
   const [selectedCell, setSelectedCell] = useState<{ l: number; i: number } | null>(null);
   const [drillCustomer, setDrillCustomer] = useState<ScoredCustomer | null>(null);
 
