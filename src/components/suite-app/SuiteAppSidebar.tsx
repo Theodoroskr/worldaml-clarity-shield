@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard, Users, Shield, CreditCard, AlertTriangle,
   FileText, BarChart3, Settings, ChevronRight, Activity,
-  UserCheck, Fingerprint, ClipboardList, Menu, Scale,
+  UserCheck, Fingerprint, ClipboardList, Menu, Scale, ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +64,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
 ];
 
 export default function SuiteAppSidebar() {
+  const { isAdmin } = useAuth();
   const [expandedItems, setExpandedItems] = useState<string[]>(["Customers", "Transactions"]);
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
@@ -169,6 +171,15 @@ export default function SuiteAppSidebar() {
             </div>
           </div>
         ))}
+        {isAdmin && (
+          <div>
+            <div className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">Admin</div>
+            <button onClick={() => navigate("/admin/users")} className={cn("flex items-center gap-2 w-full text-left px-2.5 py-2 rounded-lg text-sm font-medium transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground")}>
+              <ShieldCheck className="w-4 h-4 shrink-0 opacity-70" />
+              <span className="flex-1">Admin Panel</span>
+            </button>
+          </div>
+        )}
       </nav>
 
       {/* Footer */}
