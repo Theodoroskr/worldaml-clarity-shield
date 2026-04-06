@@ -1,6 +1,22 @@
-import { useState } from "react";
-import { Search, Upload, Shield, X, Plus, ChevronDown, MoreHorizontal } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, X, Plus, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface Screening {
+  id: string;
+  customer_id: string;
+  screening_type: string;
+  result: string;
+  match_count: number;
+  screened_at: string;
+}
+
+interface Customer {
+  id: string;
+  name: string;
+}
 
 const sampleResults = [
   { id: "1", name: "John Timothy Cameron", confidence: 92, listType: "PEP Class 2", aliases: ["J.T. Cameron", "John T. Cameron"], countries: ["GR", "GB"], dob: "18/07/1975", position: "Member of Parliament — Greece" },
@@ -8,28 +24,94 @@ const sampleResults = [
   { id: "3", name: "Cameron, John Frederick", confidence: 31, listType: "EU Sanctions", aliases: [], countries: ["DE"], dob: "Unknown", position: "Former government official" },
 ];
 
-const watchlist = [
-  { id: "W-001", name: "Global Internal Blocklist", entries: 145, lastUpdated: "06/04/2026", status: "Active" },
-  { id: "W-002", name: "High-Risk Jurisdictions", entries: 34, lastUpdated: "15/03/2026", status: "Active" },
-  { id: "W-003", name: "Internal PEP Supplement", entries: 22, lastUpdated: "01/03/2026", status: "Draft" },
-];
-
 export default function SuiteScreening() {
   const [searchName, setSearchName] = useState("");
   const [searched, setSearched] = useState(false);
-  const [expandedResult, setExpandedResult] = useState<string | null>(null);
+  const [screenings, setScreenings] = useState<Screening[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
 
-  const runSearch = () => { if (searchName.trim()) setSearched(true); };
+  useEffect(() => {
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const [sRes, cRes] = await Promise.all([
+        supabase.from("suite_screenings").select("*").eq("user_id", user.id).order("screened_at", { ascending: false }).limit(50),
+        supabase.from("suite_customers").select("id, name").eq("user_id", user.id),
+      ]);
+      setScreenings(sRes.data || []);
+      setCustomers(cRes.data || []);
+      if (cRes.data && cRes.data.length > 0) setSelectedCustomerId(cRes.data[0].id);
+    };
+    load();
+  }, []);
+
+  const runSearch = async () => {
+    if (!searchName.trim()) return;
+    setSearched(true);
+
+    if (!selectedCustomerId) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const matchCount = sampleResults.length;
+    const result = matchCount > 0 ? "potential_match" : "clear";
+
+    const { error } = await supabase.from("suite_screenings").insert({
+      customer_id: selectedCustomerId,
+      user_id: user.id,
+      screening_type: "sanctions",
+      result,
+      match_count: matchCount,
+    });
+
+    if (!error) {
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: `AML screening for "${searchName}" — ${matchCount} matches`,
+        entity_type: "screening",
+        details: { detail: `Query: ${searchName}, Result: ${result}` },
+      });
+
+      // If matches found, create an alert
+      if (matchCount > 0) {
+        await supabase.from("suite_alerts").insert({
+          customer_id: selectedCustomerId,
+          user_id: user.id,
+          alert_type: "screening",
+          severity: matchCount >= 2 ? "high" : "medium",
+          title: `Screening match: ${searchName}`,
+          description: `${matchCount} potential matches found across sanctions/PEP databases`,
+        });
+      }
+
+      toast.success(`Screening complete — ${matchCount} matches`);
+      // Refresh screenings
+      const { data } = await supabase.from("suite_screenings").select("*").eq("user_id", user.id).order("screened_at", { ascending: false }).limit(50);
+      setScreenings(data || []);
+    }
+  };
+
+  const customerName = (id: string) => customers.find(c => c.id === id)?.name || "Unknown";
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-bold text-foreground">AML Screening</h1><p className="text-sm text-muted-foreground mt-0.5">Search · Bulk Screen · Watchlist Management</p></div>
+        <div><h1 className="text-2xl font-bold text-foreground">AML Screening</h1><p className="text-sm text-muted-foreground mt-0.5">Search · Results · History</p></div>
       </div>
 
       <div className="bg-card rounded-xl border border-border p-5">
         <h2 className="font-semibold text-foreground mb-4">Individual Search</h2>
         <div className="flex gap-3 items-end">
+          {customers.length > 0 && (
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Link to Customer</label>
+              <select value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)} className="border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30">
+                {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+          )}
           <div className="flex-1">
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Full Name *</label>
             <input value={searchName} onChange={e => setSearchName(e.target.value)} onKeyDown={e => e.key === "Enter" && runSearch()} placeholder="e.g. John Cameron" className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30" />
@@ -77,10 +159,6 @@ export default function SuiteScreening() {
                         <div className={cn("h-full rounded-full", result.confidence >= 70 ? "bg-destructive" : result.confidence >= 40 ? "bg-amber-400" : "bg-emerald-500")} style={{ width: `${result.confidence}%` }} />
                       </div>
                     </div>
-                    <div className="flex flex-col gap-1.5">
-                      <button className="text-xs px-3 py-1.5 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg hover:bg-destructive/20 transition-colors font-medium">Escalate to Case</button>
-                      <button className="text-xs px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors">Dismiss as FP</button>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -89,37 +167,40 @@ export default function SuiteScreening() {
         </div>
       )}
 
+      {/* Screening History */}
       <div className="bg-card rounded-xl border border-border">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div><h2 className="font-semibold text-foreground">Watchlist Management</h2><p className="text-xs text-muted-foreground mt-0.5">Internal blocklists and custom screening lists</p></div>
-          <button className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3.5 h-3.5" />New Watchlist</button>
+        <div className="px-5 py-4 border-b border-border">
+          <h2 className="font-semibold text-foreground">Screening History</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{screenings.length} screenings recorded</p>
         </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/30">
-              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">ID</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Name</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Entries</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Last Updated</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
-              <th className="px-5 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {watchlist.map((wl) => (
-              <tr key={wl.id} className="hover:bg-muted/20 transition-colors group">
-                <td className="px-5 py-3 font-mono text-xs font-bold text-primary">{wl.id}</td>
-                <td className="px-5 py-3 font-medium text-foreground">{wl.name}</td>
-                <td className="px-5 py-3 font-mono text-foreground font-bold">{wl.entries}</td>
-                <td className="px-5 py-3 text-muted-foreground text-xs font-mono">{wl.lastUpdated}</td>
-                <td className="px-5 py-3">
-                  <span className={cn("text-xs px-2 py-0.5 rounded-full border font-medium", wl.status === "Active" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-muted text-muted-foreground border-border")}>{wl.status}</span>
-                </td>
-                <td className="px-5 py-3"><button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-muted rounded transition-all"><MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground" /></button></td>
+        {screenings.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">No screenings yet. Run a search above.</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/30">
+                {["Customer", "Type", "Result", "Matches", "Date"].map(h => (
+                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {screenings.map(s => (
+                <tr key={s.id} className="hover:bg-muted/20 transition-colors">
+                  <td className="px-5 py-3 font-medium text-foreground text-sm">{customerName(s.customer_id)}</td>
+                  <td className="px-5 py-3 text-xs capitalize text-muted-foreground">{s.screening_type}</td>
+                  <td className="px-5 py-3">
+                    <span className={cn("text-xs px-2 py-0.5 rounded-full border font-medium",
+                      s.result === "clear" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-amber-50 text-amber-700 border-amber-200"
+                    )}>{s.result.replace("_", " ")}</span>
+                  </td>
+                  <td className="px-5 py-3 font-mono font-bold text-foreground">{s.match_count}</td>
+                  <td className="px-5 py-3 text-xs font-mono text-muted-foreground">{new Date(s.screened_at).toLocaleString("en-GB")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
