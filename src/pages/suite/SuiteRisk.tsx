@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, ChevronRight, Search, SlidersHorizontal, Loader2, Shield, Globe, Users, ArrowUpDown, FileSearch, Banknote, BarChart3 } from "lucide-react";
+import { AlertTriangle, ChevronRight, Search, Loader2, Shield, Globe, Users, ArrowUpDown, FileSearch, Banknote, BarChart3, Grid3X3, List, X } from "lucide-react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
