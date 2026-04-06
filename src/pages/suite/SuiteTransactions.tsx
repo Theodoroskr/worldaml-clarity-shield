@@ -1,81 +1,165 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Activity, AlertTriangle, TrendingUp, Globe, RefreshCw } from "lucide-react";
+import { Activity, AlertTriangle, TrendingUp, Globe, RefreshCw, Plus } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface TxRow {
-  id: string; time: string; sender: string; receiver: string; amount: number;
-  currency: string; country: string; countryCode: string; type: string;
-  riskScore: number; status: "Clean" | "Review" | "Flagged" | "Blocked";
+  id: string;
+  customer_id: string;
+  amount: number;
+  currency: string;
+  direction: string;
+  counterparty: string | null;
+  counterparty_country: string | null;
+  risk_flag: boolean;
+  description: string | null;
+  created_at: string;
 }
 
-const COUNTRIES: [string, string][] = [
-  ["Cyprus", "CY"], ["Greece", "GR"], ["Malta", "MT"], ["Germany", "DE"],
-  ["Russia", "RU"], ["Iran", "IR"], ["UAE", "AE"], ["UK", "GB"],
-  ["Panama", "PA"], ["Switzerland", "CH"],
-];
-const HIGH_RISK = ["RU", "IR", "PA"];
-const TXN_TYPES = ["Wire Transfer", "Cash Deposit", "Card Payment", "SWIFT", "Crypto Convert", "Internal Transfer"];
-const NAMES = ["John Cameron", "Maria P.", "Nikos S.", "Elena K.", "Costas V.", "Sofia A.", "Andreas N.", "Dimitris C."];
-
-let counter = 100;
-function generateTx(): TxRow {
-  counter++;
-  const amount = Math.round(Math.random() * 49000 + 1000);
-  const [country, code] = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
-  const isHighRisk = HIGH_RISK.includes(code);
-  const isLarge = amount > 30000;
-  const risk = Math.min(100, Math.round((isHighRisk ? 40 : 0) + (isLarge ? 30 : 0) + Math.random() * 30));
-  const status: TxRow["status"] = risk >= 80 ? "Flagged" : risk >= 60 ? "Review" : "Clean";
-  const now = new Date();
-  return { id: `TXN-${counter}`, time: `${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}:${now.getSeconds().toString().padStart(2,"0")}`, sender: NAMES[Math.floor(Math.random() * NAMES.length)], receiver: NAMES[Math.floor(Math.random() * NAMES.length)], amount, currency: "EUR", country, countryCode: code, type: TXN_TYPES[Math.floor(Math.random() * TXN_TYPES.length)], riskScore: risk, status };
+interface Customer {
+  id: string;
+  name: string;
 }
 
-const INITIAL_TXS: TxRow[] = Array.from({ length: 18 }, () => generateTx()).reverse();
-
-const statusStyle: Record<TxRow["status"], string> = {
-  Clean: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  Review: "bg-amber-50 text-amber-700 border-amber-200",
-  Flagged: "bg-red-50 text-red-700 border-red-200",
-  Blocked: "bg-slate-100 text-slate-600 border-slate-200",
-};
-
-const riskColor = (s: number) => s >= 80 ? "text-destructive" : s >= 60 ? "text-amber-600" : "text-emerald-600";
+const HIGH_RISK = ["RU", "IR", "PA", "KP", "SY"];
 
 export default function SuiteTransactions() {
-  const [txs, setTxs] = useState<TxRow[]>(INITIAL_TXS);
-  const [live, setLive] = useState(true);
-  const [filter, setFilter] = useState<"All" | TxRow["status"]>("All");
+  const [txs, setTxs] = useState<TxRow[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"All" | "flagged" | "clean">("All");
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ customer_id: "", amount: "", currency: "EUR", direction: "inbound", counterparty: "", counterparty_country: "", description: "" });
 
-  useEffect(() => {
-    if (!live) return;
-    const id = setInterval(() => { setTxs((prev) => [generateTx(), ...prev.slice(0, 49)]); }, 3000);
-    return () => clearInterval(id);
-  }, [live]);
+  const fetchData = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const [tRes, cRes] = await Promise.all([
+      supabase.from("suite_transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100),
+      supabase.from("suite_customers").select("id, name").eq("user_id", user.id),
+    ]);
+    setTxs(tRes.data || []);
+    setCustomers(cRes.data || []);
+    if (cRes.data && cRes.data.length > 0 && !form.customer_id) {
+      setForm(f => ({ ...f, customer_id: cRes.data![0].id }));
+    }
+    setLoading(false);
+  };
 
-  const filtered = filter === "All" ? txs : txs.filter((t) => t.status === filter);
-  const stats = { total: txs.length, flagged: txs.filter((t) => t.status === "Flagged").length, review: txs.filter((t) => t.status === "Review").length, volume: txs.reduce((s, t) => s + t.amount, 0) };
+  useEffect(() => { fetchData(); }, []);
+
+  const addTransaction = async () => {
+    if (!form.customer_id || !form.amount) { toast.error("Customer and amount required"); return; }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const isHighRisk = HIGH_RISK.includes((form.counterparty_country || "").toUpperCase());
+    const amount = parseFloat(form.amount);
+    const riskFlag = isHighRisk || amount > 10000;
+
+    const { error } = await supabase.from("suite_transactions").insert({
+      customer_id: form.customer_id,
+      user_id: user.id,
+      amount,
+      currency: form.currency,
+      direction: form.direction,
+      counterparty: form.counterparty || null,
+      counterparty_country: form.counterparty_country || null,
+      risk_flag: riskFlag,
+      description: form.description || null,
+    });
+
+    if (error) { toast.error(error.message); return; }
+
+    await supabase.from("suite_audit_log").insert({
+      user_id: user.id,
+      action: `Transaction recorded: ${form.currency} ${amount} ${form.direction}`,
+      entity_type: "transaction",
+      details: { detail: `Counterparty: ${form.counterparty || "N/A"}, Country: ${form.counterparty_country || "N/A"}` },
+    });
+
+    if (riskFlag) {
+      await supabase.from("suite_alerts").insert({
+        customer_id: form.customer_id,
+        user_id: user.id,
+        alert_type: "transaction",
+        severity: amount > 30000 ? "critical" : "high",
+        title: `Flagged transaction: ${form.currency} ${amount.toLocaleString()}`,
+        description: `${form.direction} transaction${isHighRisk ? " to high-risk jurisdiction (" + form.counterparty_country + ")" : ""} exceeds threshold`,
+      });
+    }
+
+    toast.success("Transaction recorded");
+    setForm({ customer_id: form.customer_id, amount: "", currency: "EUR", direction: "inbound", counterparty: "", counterparty_country: "", description: "" });
+    setShowForm(false);
+    fetchData();
+  };
+
+  const customerName = (id: string) => customers.find(c => c.id === id)?.name || "Unknown";
+  const filtered = filter === "All" ? txs : filter === "flagged" ? txs.filter(t => t.risk_flag) : txs.filter(t => !t.risk_flag);
+  const stats = { total: txs.length, flagged: txs.filter(t => t.risk_flag).length, volume: txs.reduce((s, t) => s + Number(t.amount), 0) };
 
   return (
     <div className="flex flex-col h-full bg-background">
       <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-card shrink-0">
         <div className="flex items-center gap-3">
-          <div className={cn("w-2 h-2 rounded-full", live ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground")} />
           <span className="text-sm font-semibold text-foreground">Transaction Monitor</span>
-          <span className="text-xs text-muted-foreground">{live ? "Live Feed" : "Paused"}</span>
+          <span className="text-xs text-muted-foreground">{txs.length} records</span>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setLive(!live)} className={cn("flex items-center gap-1.5 text-xs px-3 py-1.5 rounded border font-medium transition-colors", live ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-border bg-muted text-muted-foreground")}>
-            <Activity className="w-3 h-3" />{live ? "Live" : "Paused"}
-          </button>
-          <button onClick={() => setTxs(Array.from({ length: 18 }, () => generateTx()).reverse())} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded border border-border hover:bg-muted transition-colors text-foreground"><RefreshCw className="w-3 h-3" />Refresh</button>
+          <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-medium"><Plus className="w-3 h-3" />Add Transaction</button>
+          <button onClick={fetchData} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded border border-border hover:bg-muted transition-colors text-foreground"><RefreshCw className="w-3 h-3" />Refresh</button>
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-0 border-b border-border bg-card shrink-0">
+      {showForm && (
+        <div className="px-5 py-4 border-b border-border bg-card animate-fade-in">
+          <h3 className="font-semibold text-foreground text-sm mb-3">Record Transaction</h3>
+          <div className="grid grid-cols-4 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Customer *</label>
+              <select value={form.customer_id} onChange={e => setForm(f => ({ ...f, customer_id: e.target.value }))} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground">
+                {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Amount *</label>
+              <input type="number" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} placeholder="10000" className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Currency</label>
+              <select value={form.currency} onChange={e => setForm(f => ({ ...f, currency: e.target.value }))} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground">
+                {["EUR", "USD", "GBP", "CHF"].map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Direction</label>
+              <select value={form.direction} onChange={e => setForm(f => ({ ...f, direction: e.target.value }))} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground">
+                <option value="inbound">Inbound</option>
+                <option value="outbound">Outbound</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Counterparty</label>
+              <input value={form.counterparty} onChange={e => setForm(f => ({ ...f, counterparty: e.target.value }))} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Country Code</label>
+              <input value={form.counterparty_country} onChange={e => setForm(f => ({ ...f, counterparty_country: e.target.value }))} placeholder="e.g. DE" className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground" />
+            </div>
+            <div className="col-span-2 flex items-end gap-2">
+              <button onClick={() => setShowForm(false)} className="text-xs px-3 py-2 rounded-lg border border-border text-muted-foreground hover:bg-muted">Cancel</button>
+              <button onClick={addTransaction} className="text-xs px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-3 gap-0 border-b border-border bg-card shrink-0">
         {[
           { label: "Total", value: stats.total, icon: TrendingUp, color: "text-primary" },
           { label: "Flagged", value: stats.flagged, icon: AlertTriangle, color: "text-destructive" },
-          { label: "Review", value: stats.review, icon: Activity, color: "text-amber-600" },
           { label: "Volume", value: `€${stats.volume.toLocaleString()}`, icon: Globe, color: "text-foreground" },
         ].map(({ label, value, icon: Icon, color }) => (
           <div key={label} className="flex items-center gap-3 px-5 py-3 border-r border-border last:border-r-0">
@@ -89,43 +173,47 @@ export default function SuiteTransactions() {
       </div>
 
       <div className="flex items-center gap-1.5 px-5 py-2 border-b border-border bg-card shrink-0">
-        {(["All", "Clean", "Review", "Flagged"] as const).map((s) => (
-          <button key={s} onClick={() => setFilter(s)} className={cn("text-xs px-3 py-1 rounded-full border font-medium transition-colors", filter === s ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary")}>
-            {s}{s !== "All" && <span className="ml-1 font-mono">{txs.filter(t => t.status === s).length}</span>}
+        {(["All", "flagged", "clean"] as const).map(s => (
+          <button key={s} onClick={() => setFilter(s)} className={cn("text-xs px-3 py-1 rounded-full border font-medium transition-colors capitalize", filter === s ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary")}>
+            {s}
           </button>
         ))}
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-card border-b border-border z-10">
-            <tr>{["Time", "ID", "Sender", "Receiver", "Amount", "Type", "Country", "Risk", "Status"].map((h) => (<th key={h} className="px-3 py-2.5 text-left font-semibold text-muted-foreground uppercase tracking-wide text-[10px]">{h}</th>))}</tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {filtered.map((tx) => (
-              <tr key={tx.id} className={cn("hover:bg-muted/30 transition-colors", tx.status === "Flagged" && "bg-red-50/40", tx.status === "Review" && "bg-amber-50/20")}>
-                <td className="px-3 py-2.5 font-mono text-muted-foreground">{tx.time}</td>
-                <td className="px-3 py-2.5 font-mono font-bold text-primary">{tx.id}</td>
-                <td className="px-3 py-2.5 text-foreground font-medium truncate max-w-[100px]">{tx.sender}</td>
-                <td className="px-3 py-2.5 text-muted-foreground truncate max-w-[100px]">{tx.receiver}</td>
-                <td className="px-3 py-2.5 font-mono font-bold text-foreground">€{tx.amount.toLocaleString()}</td>
-                <td className="px-3 py-2.5 text-muted-foreground">{tx.type}</td>
-                <td className="px-3 py-2.5">
-                  <span className={cn("flex items-center gap-1", HIGH_RISK.includes(tx.countryCode) ? "text-destructive font-semibold" : "text-muted-foreground")}>
-                    {HIGH_RISK.includes(tx.countryCode) && <AlertTriangle className="w-3 h-3" />}{tx.country}
-                  </span>
-                </td>
-                <td className="px-3 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden"><div className={cn("h-full rounded-full", tx.riskScore >= 80 ? "bg-destructive" : tx.riskScore >= 60 ? "bg-amber-400" : "bg-emerald-400")} style={{ width: `${tx.riskScore}%` }} /></div>
-                    <span className={cn("font-mono font-bold text-[11px]", riskColor(tx.riskScore))}>{tx.riskScore}</span>
-                  </div>
-                </td>
-                <td className="px-3 py-2.5"><span className={cn("px-2 py-0.5 rounded border font-medium text-[10px]", statusStyle[tx.status])}>{tx.status}</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {loading ? (
+          <p className="text-sm text-muted-foreground text-center py-8">Loading…</p>
+        ) : filtered.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">No transactions yet. Add one above.</p>
+        ) : (
+          <table className="w-full text-xs">
+            <thead className="sticky top-0 bg-card border-b border-border z-10">
+              <tr>{["Date", "Customer", "Direction", "Amount", "Counterparty", "Country", "Risk", ""].map(h => <th key={h} className="px-3 py-2.5 text-left font-semibold text-muted-foreground uppercase tracking-wide text-[10px]">{h}</th>)}</tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {filtered.map(tx => (
+                <tr key={tx.id} className={cn("hover:bg-muted/30 transition-colors", tx.risk_flag && "bg-red-50/40")}>
+                  <td className="px-3 py-2.5 font-mono text-muted-foreground">{new Date(tx.created_at).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</td>
+                  <td className="px-3 py-2.5 text-foreground font-medium">{customerName(tx.customer_id)}</td>
+                  <td className="px-3 py-2.5 capitalize text-muted-foreground">{tx.direction}</td>
+                  <td className="px-3 py-2.5 font-mono font-bold text-foreground">{tx.currency} {Number(tx.amount).toLocaleString()}</td>
+                  <td className="px-3 py-2.5 text-muted-foreground">{tx.counterparty || "—"}</td>
+                  <td className="px-3 py-2.5">
+                    <span className={cn("text-muted-foreground", tx.counterparty_country && HIGH_RISK.includes(tx.counterparty_country.toUpperCase()) && "text-destructive font-semibold")}>
+                      {tx.counterparty_country || "—"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <span className={cn("px-2 py-0.5 rounded border font-medium text-[10px]", tx.risk_flag ? "bg-red-50 text-red-700 border-red-200" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
+                      {tx.risk_flag ? "Flagged" : "Clean"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2.5 text-[10px] text-muted-foreground">{tx.description || ""}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
