@@ -133,6 +133,12 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/pending-approval" element={<PendingApproval />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route path="users" element={<AdminUsers />} />
+                  <Route path="forms" element={<AdminForms />} />
+                  <Route path="workflows" element={<AdminWorkflows />} />
+                  <Route path="pricing" element={<AdminPricing />} />
+                </Route>
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 
