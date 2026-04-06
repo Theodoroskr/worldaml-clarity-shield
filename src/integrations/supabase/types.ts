@@ -468,6 +468,184 @@ export type Database = {
         }
         Relationships: []
       }
+      suite_alerts: {
+        Row: {
+          alert_type: string
+          assigned_to: string | null
+          created_at: string
+          customer_id: string | null
+          description: string | null
+          id: string
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alert_type?: string
+          assigned_to?: string | null
+          created_at?: string
+          customer_id?: string | null
+          description?: string | null
+          id?: string
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alert_type?: string
+          assigned_to?: string | null
+          created_at?: string
+          customer_id?: string | null
+          description?: string | null
+          id?: string
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_alerts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      suite_customers: {
+        Row: {
+          company_name: string | null
+          country: string | null
+          created_at: string
+          date_of_birth: string | null
+          email: string | null
+          id: string
+          kyc_status: string
+          name: string
+          registration_number: string | null
+          risk_level: string
+          status: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          id?: string
+          kyc_status?: string
+          name: string
+          registration_number?: string | null
+          risk_level?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          id?: string
+          kyc_status?: string
+          name?: string
+          registration_number?: string | null
+          risk_level?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      suite_screenings: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          match_count: number
+          result: string
+          screened_at: string
+          screening_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          match_count?: number
+          result?: string
+          screened_at?: string
+          screening_type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          match_count?: number
+          result?: string
+          screened_at?: string
+          screening_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_screenings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
