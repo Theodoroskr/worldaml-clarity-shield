@@ -332,11 +332,16 @@ export default function SuiteRisk() {
           <button onClick={() => { setView("matrix"); setExpandedId(null); }} className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors", view === "matrix" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
             <Grid3X3 className="w-3.5 h-3.5" /> Risk Matrix
           </button>
+          <button onClick={() => { setView("countries"); setExpandedId(null); setSelectedCell(null); setDrillCustomer(null); }} className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors", view === "countries" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+            <MapPin className="w-3.5 h-3.5" /> Country Risk
+          </button>
         </div>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-24"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+      ) : view === "countries" ? (
+        <CountryRiskTable baselScores={BASEL_AML_SCORES} />
       ) : view === "matrix" ? (
         /* ═══ MATRIX VIEW ═══ */
         <div className="space-y-5">
