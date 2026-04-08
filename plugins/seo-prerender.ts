@@ -524,7 +524,7 @@ export function seoPrerender(): Plugin {
       } else {
         rootHtml = rootHtml.replace("</head>", `  <meta data-rh="true" name="description" content="${rootMeta.description}" />\n  </head>`);
       }
-      rootHtml = rootHtml.replace("</head>", `  <link rel="canonical" href="${BASE_URL}/" />\n  </head>`);
+      rootHtml = rootHtml.replace("</head>", `  <link data-rh="true" rel="canonical" href="${BASE_URL}/" />\n  </head>`);
       fs.writeFileSync(path.join(distDir, "index.html"), rootHtml, "utf-8");
 
       // --- Generate fresh sitemap.xml ---
