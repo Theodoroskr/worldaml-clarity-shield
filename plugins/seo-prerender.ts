@@ -454,6 +454,33 @@ export function seoPrerender(): Plugin {
       for (const [route, meta] of Object.entries(routes)) {
         if (route === "/") continue;
 
+        // Check if this route is a redirect
+        const redirectTarget = REDIRECT_ROUTES[route];
+
+        if (redirectTarget) {
+          // Generate a redirect HTML page with meta refresh + canonical pointing to target
+          const targetUrl = `${BASE_URL}${redirectTarget}`;
+          const redirectHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="0;url=${targetUrl}" />
+  <link rel="canonical" href="${targetUrl}" />
+  <title>${meta.title} | ${SITE_NAME}</title>
+  <meta name="robots" content="noindex, follow" />
+  <meta name="description" content="${meta.description}" />
+</head>
+<body>
+  <h1 style="position:absolute;left:-9999px">${meta.h1}</h1>
+  <p>This page has moved to <a href="${targetUrl}">${targetUrl}</a>.</p>
+</body>
+</html>`;
+          const routeDir = path.join(distDir, route);
+          fs.mkdirSync(routeDir, { recursive: true });
+          fs.writeFileSync(path.join(routeDir, "index.html"), redirectHtml, "utf-8");
+          continue;
+        }
+
         const fullTitle =
           meta.title === SITE_NAME ? meta.title : `${meta.title} | ${SITE_NAME}`;
         const canonicalUrl = `${BASE_URL}${route}`;
