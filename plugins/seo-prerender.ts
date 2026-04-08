@@ -488,10 +488,15 @@ export function seoPrerender(): Plugin {
         let html = indexHtml;
 
         html = html.replace(/<title>[^<]*<\/title>/, `<title>${fullTitle}</title>`);
-        html = html.replace(
-          /<meta name="description" content="[^"]*"/,
-          `<meta name="description" content="${meta.description}"`
-        );
+        // Insert or replace meta description
+        if (html.includes('<meta name="description"')) {
+          html = html.replace(
+            /<meta name="description" content="[^"]*"/,
+            `<meta name="description" content="${meta.description}"`
+          );
+        } else {
+          html = html.replace("</head>", `  <meta name="description" content="${meta.description}" />\n  </head>`);
+        }
         html = html.replace("</head>", `  <link rel="canonical" href="${canonicalUrl}" />\n  </head>`);
         html = html.replace(/<meta property="og:title" content="[^"]*"/, `<meta property="og:title" content="${fullTitle}"`);
         html = html.replace(/<meta property="og:description" content="[^"]*"/, `<meta property="og:description" content="${meta.description}"`);
@@ -511,10 +516,14 @@ export function seoPrerender(): Plugin {
       let rootHtml = indexHtml;
       const rootTitle = `${rootMeta.title} | ${SITE_NAME}`;
       rootHtml = rootHtml.replace(/<title>[^<]*<\/title>/, `<title>${rootTitle}</title>`);
-      rootHtml = rootHtml.replace(
-        /<meta name="description" content="[^"]*"/,
-        `<meta name="description" content="${rootMeta.description}"`
-      );
+      if (rootHtml.includes('<meta name="description"')) {
+        rootHtml = rootHtml.replace(
+          /<meta name="description" content="[^"]*"/,
+          `<meta name="description" content="${rootMeta.description}"`
+        );
+      } else {
+        rootHtml = rootHtml.replace("</head>", `  <meta name="description" content="${rootMeta.description}" />\n  </head>`);
+      }
       rootHtml = rootHtml.replace("</head>", `  <link rel="canonical" href="${BASE_URL}/" />\n  </head>`);
       fs.writeFileSync(path.join(distDir, "index.html"), rootHtml, "utf-8");
 
