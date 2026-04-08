@@ -318,6 +318,114 @@ const routes: Record<string, RouteMeta> = {
 };
 
 /* ------------------------------------------------------------------ */
+/*  All sitemap URLs (static routes + dynamic pages)                  */
+/* ------------------------------------------------------------------ */
+interface SitemapEntry {
+  loc: string;
+  priority: string;
+  changefreq: string;
+}
+
+function buildSitemapEntries(): SitemapEntry[] {
+  const entries: SitemapEntry[] = [];
+
+  // Static routes from the prerender map
+  for (const route of Object.keys(routes)) {
+    const priority =
+      route === "/" ? "1.0" :
+      route.startsWith("/platform") || route === "/pricing" ? "0.9" :
+      route.startsWith("/industries") || route.startsWith("/products") ? "0.8" :
+      route.startsWith("/resources") || route.startsWith("/data-sources") || route.startsWith("/blog") ? "0.7" :
+      "0.6";
+    entries.push({ loc: `${BASE_URL}${route}`, priority, changefreq: "weekly" });
+  }
+
+  // Blog posts
+  const blogSlugs = [
+    "aml-compliance-checklist-2025", "kyc-vs-kyb-differences", "sanctions-screening-best-practices",
+    "risk-based-approach-aml", "beneficial-ownership-guide", "pep-screening-guide",
+    "aml-compliance-crypto-vasp", "igaming-aml-obligations", "mlro-responsibilities-obligations",
+    "edd-vs-sdd-enhanced-simplified-due-diligence", "fatf-travel-rule-explained",
+    "transaction-monitoring-red-flags", "adverse-media-screening-guide", "fatca-crs-reporting-guide",
+    "aml-real-estate-property-transactions", "psd2-open-banking-aml-obligations",
+    "dora-regulation-compliance-financial-institutions",
+  ];
+  for (const slug of blogSlugs) {
+    entries.push({ loc: `${BASE_URL}/blog/${slug}`, priority: "0.7", changefreq: "monthly" });
+  }
+
+  // EU Sanctions country pages
+  const euSanctionsSlugs = [
+    "afghanistan", "belarus", "bosnia-herzegovina", "burundi", "central-african-republic",
+    "chemical-weapons", "china", "cyber-attacks", "democratic-republic-congo", "guatemala",
+    "guinea", "guinea-bissau", "haiti", "human-rights", "iran", "iraq", "lebanon", "libya",
+    "mali", "moldova", "montenegro", "myanmar", "nicaragua", "niger", "north-korea", "russia",
+    "serbia", "somalia", "south-sudan", "sudan", "syria", "terrorism", "tunisia", "turkiye",
+    "ukraine", "united-states", "venezuela", "yemen", "zimbabwe",
+  ];
+  for (const slug of euSanctionsSlugs) {
+    entries.push({ loc: `${BASE_URL}/eu-sanctions/${slug}`, priority: "0.6", changefreq: "monthly" });
+  }
+
+  // Market pages
+  const marketSlugs = [
+    "cyprus", "germany", "greece", "ireland", "malta", "netherlands", "nigeria",
+    "romania", "singapore", "south-africa", "uae", "uk", "usa",
+  ];
+  for (const slug of marketSlugs) {
+    entries.push({ loc: `${BASE_URL}/markets/${slug}`, priority: "0.7", changefreq: "monthly" });
+  }
+
+  // Data source regional pages
+  for (const ds of ["worldcompliance", "bridger-xg"]) {
+    for (const region of ["eu-me", "uk-ie", "na"]) {
+      if (!entries.some(e => e.loc === `${BASE_URL}/data-sources/${ds}/${region}`)) {
+        entries.push({ loc: `${BASE_URL}/data-sources/${ds}/${region}`, priority: "0.6", changefreq: "monthly" });
+      }
+    }
+  }
+  if (!entries.some(e => e.loc === `${BASE_URL}/data-sources/worldcompliance/demo`)) {
+    entries.push({ loc: `${BASE_URL}/data-sources/worldcompliance/demo`, priority: "0.5", changefreq: "monthly" });
+  }
+  if (!entries.some(e => e.loc === `${BASE_URL}/data-sources/worldcompliance/pricing`)) {
+    entries.push({ loc: `${BASE_URL}/data-sources/worldcompliance/pricing`, priority: "0.6", changefreq: "monthly" });
+  }
+  if (!entries.some(e => e.loc === `${BASE_URL}/data-sources/resources`)) {
+    entries.push({ loc: `${BASE_URL}/data-sources/resources`, priority: "0.6", changefreq: "monthly" });
+  }
+
+  // Deduplicate
+  const seen = new Set<string>();
+  return entries.filter(e => {
+    if (seen.has(e.loc)) return false;
+    seen.add(e.loc);
+    return true;
+  });
+}
+
+function generateSitemapXml(): string {
+  const today = new Date().toISOString().split("T")[0];
+  const entries = buildSitemapEntries();
+
+  const urls = entries
+    .map(
+      (e) => `  <url>
+    <loc>${e.loc}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${e.changefreq}</changefreq>
+    <priority>${e.priority}</priority>
+  </url>`
+    )
+    .join("\n");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>
+`;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Plugin                                                            */
 /* ------------------------------------------------------------------ */
 export function seoPrerender(): Plugin {
@@ -330,80 +438,54 @@ export function seoPrerender(): Plugin {
       const distDir = path.resolve(process.cwd(), "dist");
       const indexHtml = fs.readFileSync(path.join(distDir, "index.html"), "utf-8");
 
+      // --- Generate per-route HTML files ---
       for (const [route, meta] of Object.entries(routes)) {
-        if (route === "/") continue; // index.html already covers /
+        if (route === "/") continue;
 
         const fullTitle =
           meta.title === SITE_NAME ? meta.title : `${meta.title} | ${SITE_NAME}`;
         const canonicalUrl = `${BASE_URL}${route}`;
 
-        // Clone index.html and inject route-specific SEO content
         let html = indexHtml;
 
-        // Replace <title>
-        html = html.replace(
-          /<title>[^<]*<\/title>/,
-          `<title>${fullTitle}</title>`
-        );
-
-        // Replace meta description
+        html = html.replace(/<title>[^<]*<\/title>/, `<title>${fullTitle}</title>`);
         html = html.replace(
           /<meta name="description" content="[^"]*"/,
           `<meta name="description" content="${meta.description}"`
         );
-
-        // Add canonical link (before </head>)
-        html = html.replace(
-          "</head>",
-          `  <link rel="canonical" href="${canonicalUrl}" />\n  </head>`
-        );
-
-        // Replace OG tags
-        html = html.replace(
-          /<meta property="og:title" content="[^"]*"/,
-          `<meta property="og:title" content="${fullTitle}"`
-        );
-        html = html.replace(
-          /<meta property="og:description" content="[^"]*"/,
-          `<meta property="og:description" content="${meta.description}"`
-        );
-        html = html.replace(
-          /<meta property="og:url" content="[^"]*"/,
-          `<meta property="og:url" content="${canonicalUrl}"`
-        );
-
-        // Replace the fallback <h1> inside #root
+        html = html.replace("</head>", `  <link rel="canonical" href="${canonicalUrl}" />\n  </head>`);
+        html = html.replace(/<meta property="og:title" content="[^"]*"/, `<meta property="og:title" content="${fullTitle}"`);
+        html = html.replace(/<meta property="og:description" content="[^"]*"/, `<meta property="og:description" content="${meta.description}"`);
+        html = html.replace(/<meta property="og:url" content="[^"]*"/, `<meta property="og:url" content="${canonicalUrl}"`);
         html = html.replace(
           /<h1 style="position:absolute;left:-9999px">[^<]*<\/h1>/,
           `<h1 style="position:absolute;left:-9999px">${meta.h1}</h1>`
         );
 
-        // Write to the correct path, e.g. dist/pricing/index.html
         const routeDir = path.join(distDir, route);
         fs.mkdirSync(routeDir, { recursive: true });
         fs.writeFileSync(path.join(routeDir, "index.html"), html, "utf-8");
       }
 
-      // Also update the root index.html with its own canonical + OG URL
+      // Update root index.html
       const rootMeta = routes["/"];
       let rootHtml = indexHtml;
       const rootTitle = `${rootMeta.title} | ${SITE_NAME}`;
-      rootHtml = rootHtml.replace(
-        /<title>[^<]*<\/title>/,
-        `<title>${rootTitle}</title>`
-      );
+      rootHtml = rootHtml.replace(/<title>[^<]*<\/title>/, `<title>${rootTitle}</title>`);
       rootHtml = rootHtml.replace(
         /<meta name="description" content="[^"]*"/,
         `<meta name="description" content="${rootMeta.description}"`
       );
-      rootHtml = rootHtml.replace(
-        "</head>",
-        `  <link rel="canonical" href="${BASE_URL}/" />\n  </head>`
-      );
+      rootHtml = rootHtml.replace("</head>", `  <link rel="canonical" href="${BASE_URL}/" />\n  </head>`);
       fs.writeFileSync(path.join(distDir, "index.html"), rootHtml, "utf-8");
 
+      // --- Generate fresh sitemap.xml ---
+      const sitemapXml = generateSitemapXml();
+      fs.writeFileSync(path.join(distDir, "sitemap.xml"), sitemapXml, "utf-8");
+
+      const entryCount = buildSitemapEntries().length;
       console.log(
-        `[seo-prerender] Generated ${Object.keys(routes).length} pre-rendered HTML files`
+        `[seo-prerender] Generated ${Object.keys(routes).length} pre-rendered HTML files + sitemap.xml (${entryCount} URLs)`
       );
     },
   };
