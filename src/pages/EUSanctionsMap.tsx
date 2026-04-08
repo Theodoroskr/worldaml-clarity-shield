@@ -57,7 +57,7 @@ const EUSanctionsMap = () => {
     <>
       <SEO
         title="EU Sanctions Map – Complete Guide to EU Restrictive Measures"
-        description={`Explore all ${allEUSanctionsRegimes.length} EU sanctions regimes covering ${totalRegimes} restrictive measures frameworks. Country-by-country guide to EU, UN, and joint sanctions with measure types and compliance guidance.`}
+        description={`Explore ${allEUSanctionsRegimes.length} EU sanctions regimes. Country-by-country guide to EU, UN, and joint sanctions with measure types and compliance guidance.`}
         canonical="/eu-sanctions-map"
         breadcrumbs={breadcrumbs}
         structuredData={structuredData}

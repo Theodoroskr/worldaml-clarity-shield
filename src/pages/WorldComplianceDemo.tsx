@@ -23,7 +23,7 @@ const WorldComplianceDemo = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="WorldCompliance® Free Trial — 7 Days Free"
-        description="Start your 7-day free trial of WorldCompliance® Online. Screen against 9.2M+ risk profiles, 500+ sanctions lists, and PEP data across 240+ countries. No credit card required."
+        description="Start your free trial of WorldCompliance® Online. Screen against 9.2M+ risk profiles, 500+ sanctions lists, and PEP data across 240+ countries."
         canonical="/data-sources/worldcompliance/demo"
         breadcrumbs={[
           { name: "Home", url: "/" },

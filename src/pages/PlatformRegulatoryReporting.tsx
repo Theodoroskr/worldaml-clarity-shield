@@ -108,7 +108,7 @@ const PlatformRegulatoryReporting = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="Regulatory Reporting Software | CRS FATCA FINTRAC | WorldAML"
-        description="Automate CRS, FATCA, and FINTRAC regulatory reporting with WorldAML. Account classification, OECD XML generation, pre-submission validation, and deadline tracking in one platform."
+        description="Automate CRS, FATCA, and FINTRAC regulatory reporting with WorldAML. Account classification, OECD XML generation, and deadline tracking."
         canonical="/platform/regulatory-reporting"
         breadcrumbs={[
           { name: "Home", url: "/" },

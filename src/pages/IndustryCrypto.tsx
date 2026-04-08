@@ -63,7 +63,7 @@ const IndustryCrypto = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
       title="AML Compliance for Crypto Exchanges & VASPs | FATF Travel Rule | WorldAML"
-      description="VASP compliance platform for crypto exchanges and digital asset businesses. KYC onboarding, sanctions screening, FATF Travel Rule, and CARF reporting. MiCA and FATF R.15 aligned."
+      description="VASP compliance for crypto exchanges and digital asset businesses. KYC onboarding, sanctions screening, FATF Travel Rule, and CARF reporting."
       canonical="/industries/crypto"
       breadcrumbs={[
         { name: "Home", url: "/" },

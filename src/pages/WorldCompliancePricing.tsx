@@ -169,7 +169,7 @@ const WorldCompliancePricing = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="WorldCompliance® Pricing"
-        description="WorldCompliance® Online pricing with progressive per-user discounts. Annual subscription with unlimited searches for sanctions, PEP, and adverse media screening."
+        description="WorldCompliance® Online pricing with per-user discounts. Annual subscription with unlimited sanctions, PEP, and adverse media screening."
         canonical="/data-sources/worldcompliance/pricing"
         breadcrumbs={[
           { name: "Home", url: "/" },

@@ -89,7 +89,7 @@ const PlatformRiskAssessment = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
       title="Customer Risk Assessment Software | AML Risk Categorisation | WorldAML"
-      description="Automate customer risk scoring and categorisation with WorldAML. Configurable risk matrix, Low/Medium/High tier assignment, EDD triggers, and audit trail. FATF RBA and EU AMLD aligned."
+      description="Automate customer risk scoring with WorldAML. Configurable risk matrix, EDD triggers, and full audit trail. FATF RBA and EU AMLD aligned."
       canonical="/platform/risk-assessment"
       breadcrumbs={[
         { name: "Home", url: "/" },

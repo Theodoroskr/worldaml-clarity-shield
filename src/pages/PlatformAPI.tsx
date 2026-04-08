@@ -108,7 +108,7 @@ const PlatformAPI = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="Compliance API | KYC AML Sanctions Screening API | WorldAML"
-        description="RESTful compliance API for AML screening, KYC/KYB onboarding, sanctions checks, risk scoring, and ongoing monitoring. Integrate compliance directly into your platform in days."
+        description="RESTful compliance API for AML screening, KYC/KYB onboarding, sanctions checks, risk scoring, and ongoing monitoring. Integrate in days."
         canonical="/platform/api"
         breadcrumbs={[
           { name: "Home", url: "/" },

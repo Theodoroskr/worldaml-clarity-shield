@@ -89,7 +89,7 @@ const PlatformKYCKYB = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
       title="KYC & KYB Onboarding Software | Customer Due Diligence | WorldAML"
-      description="KYC and KYB compliance software for banks, payment processors, and fintechs. Identity verification, sanctions screening, UBO mapping, and EDD workflows — FATF R.10 and AMLD aligned."
+      description="KYC and KYB compliance software for banks, payment processors, and fintechs. Identity verification, sanctions screening, UBO mapping, and EDD."
       canonical="/platform/kyc-kyb"
       breadcrumbs={[
         { name: "Home", url: "/" },

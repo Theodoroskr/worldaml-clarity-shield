@@ -97,7 +97,7 @@ const PlatformAMLScreening = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
       title="AML Screening & Monitoring Software | Sanctions & PEP Screening | WorldAML"
-      description="AML screening software covering sanctions, PEPs, adverse media, and RCAs. Real-time and batch screening powered by WorldCompliance® and Bridger Insight XG®. FATF aligned."
+      description="AML screening software covering sanctions, PEPs, adverse media, and RCAs. Real-time and batch screening powered by WorldCompliance® data."
       canonical="/platform/aml-screening"
       breadcrumbs={[
         { name: "Home", url: "/" },
