@@ -497,10 +497,10 @@ export function seoPrerender(): Plugin {
         } else {
           html = html.replace("</head>", `  <meta data-rh="true" name="description" content="${meta.description}" />\n  </head>`);
         }
-        html = html.replace("</head>", `  <link rel="canonical" href="${canonicalUrl}" />\n  </head>`);
-        html = html.replace(/<meta property="og:title" content="[^"]*"/, `<meta property="og:title" content="${fullTitle}"`);
-        html = html.replace(/<meta property="og:description" content="[^"]*"/, `<meta property="og:description" content="${meta.description}"`);
-        html = html.replace(/<meta property="og:url" content="[^"]*"/, `<meta property="og:url" content="${canonicalUrl}"`);
+        html = html.replace("</head>", `  <link data-rh="true" rel="canonical" href="${canonicalUrl}" />\n  </head>`);
+        html = html.replace(/<meta property="og:title" content="[^"]*"/, `<meta data-rh="true" property="og:title" content="${fullTitle}"`);
+        html = html.replace(/<meta property="og:description" content="[^"]*"/, `<meta data-rh="true" property="og:description" content="${meta.description}"`);
+        html = html.replace(/<meta property="og:url" content="[^"]*"/, `<meta data-rh="true" property="og:url" content="${canonicalUrl}"`);
         html = html.replace(
           /<h1 style="position:absolute;left:-9999px">[^<]*<\/h1>/,
           `<h1 style="position:absolute;left:-9999px">${meta.h1}</h1>`
