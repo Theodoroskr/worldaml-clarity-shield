@@ -315,6 +315,12 @@ const routes: Record<string, RouteMeta> = {
       "Discover why regulated organisations choose WorldAML for AML screening, KYC/KYB, and compliance automation.",
     h1: "Why WorldAML",
   },
+  "/about-us": {
+    title: "About WorldAML — Global AML & Compliance Solutions",
+    description:
+      "Learn about WorldAML, the trusted provider of AML screening, KYC/KYB verification, and compliance automation for regulated businesses worldwide.",
+    h1: "About WorldAML",
+  },
 };
 
 /* ------------------------------------------------------------------ */
@@ -326,11 +332,17 @@ interface SitemapEntry {
   changefreq: string;
 }
 
+// Routes that are redirects — prerender them but exclude from sitemap
+const REDIRECT_ROUTES: Record<string, string> = {
+  "/about-us": "/about",
+};
+
 function buildSitemapEntries(): SitemapEntry[] {
   const entries: SitemapEntry[] = [];
 
-  // Static routes from the prerender map
+  // Static routes from the prerender map (exclude redirects)
   for (const route of Object.keys(routes)) {
+    if (REDIRECT_ROUTES[route]) continue; // skip redirects from sitemap
     const priority =
       route === "/" ? "1.0" :
       route.startsWith("/platform") || route === "/pricing" ? "0.9" :
@@ -441,6 +453,33 @@ export function seoPrerender(): Plugin {
       // --- Generate per-route HTML files ---
       for (const [route, meta] of Object.entries(routes)) {
         if (route === "/") continue;
+
+        // Check if this route is a redirect
+        const redirectTarget = REDIRECT_ROUTES[route];
+
+        if (redirectTarget) {
+          // Generate a redirect HTML page with meta refresh + canonical pointing to target
+          const targetUrl = `${BASE_URL}${redirectTarget}`;
+          const redirectHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="0;url=${targetUrl}" />
+  <link rel="canonical" href="${targetUrl}" />
+  <title>${meta.title} | ${SITE_NAME}</title>
+  <meta name="robots" content="noindex, follow" />
+  <meta name="description" content="${meta.description}" />
+</head>
+<body>
+  <h1 style="position:absolute;left:-9999px">${meta.h1}</h1>
+  <p>This page has moved to <a href="${targetUrl}">${targetUrl}</a>.</p>
+</body>
+</html>`;
+          const routeDir = path.join(distDir, route);
+          fs.mkdirSync(routeDir, { recursive: true });
+          fs.writeFileSync(path.join(routeDir, "index.html"), redirectHtml, "utf-8");
+          continue;
+        }
 
         const fullTitle =
           meta.title === SITE_NAME ? meta.title : `${meta.title} | ${SITE_NAME}`;
