@@ -315,6 +315,12 @@ const routes: Record<string, RouteMeta> = {
       "Discover why regulated organisations choose WorldAML for AML screening, KYC/KYB, and compliance automation.",
     h1: "Why WorldAML",
   },
+  "/about-us": {
+    title: "About WorldAML — Global AML & Compliance Solutions",
+    description:
+      "Learn about WorldAML, the trusted provider of AML screening, KYC/KYB verification, and compliance automation for regulated businesses worldwide.",
+    h1: "About WorldAML",
+  },
 };
 
 /* ------------------------------------------------------------------ */
@@ -326,11 +332,17 @@ interface SitemapEntry {
   changefreq: string;
 }
 
+// Routes that are redirects — prerender them but exclude from sitemap
+const REDIRECT_ROUTES: Record<string, string> = {
+  "/about-us": "/about",
+};
+
 function buildSitemapEntries(): SitemapEntry[] {
   const entries: SitemapEntry[] = [];
 
-  // Static routes from the prerender map
+  // Static routes from the prerender map (exclude redirects)
   for (const route of Object.keys(routes)) {
+    if (REDIRECT_ROUTES[route]) continue; // skip redirects from sitemap
     const priority =
       route === "/" ? "1.0" :
       route.startsWith("/platform") || route === "/pricing" ? "0.9" :
