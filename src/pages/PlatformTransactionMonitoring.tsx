@@ -100,7 +100,7 @@ const PlatformTransactionMonitoring = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="Transaction Monitoring Software | AML Platform"
-        description="Real-time AML transaction monitoring software for banks, VASPs, and payment processors. Detect suspicious activity, automate SAR filing, and satisfy FATF Rec. 20 requirements with WorldAML."
+        description="Real-time AML transaction monitoring for banks, VASPs, and payment processors. Detect suspicious activity and automate SAR filing."
         canonical="/platform/transaction-monitoring"
         breadcrumbs={[
           { name: "Home", url: "/" },

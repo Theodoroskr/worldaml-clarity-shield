@@ -139,7 +139,7 @@ const PlatformSecurity = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="Platform Security | ISO 27001 GDPR DORA Compliance | WorldAML"
-        description="WorldAML security architecture: ISO 27001-aligned controls, AES-256 encryption, TLS 1.3, RBAC, immutable audit trails, and GDPR-compliant data handling for regulated financial institutions."
+        description="WorldAML security: ISO 27001 controls, AES-256 encryption, TLS 1.3, RBAC, immutable audit trails, and GDPR-compliant data handling."
         canonical="/platform/security"
         breadcrumbs={[
           { name: "Home", url: "/" },

@@ -72,7 +72,7 @@ const IndustryBanking = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
       title="AML Compliance for Banks & EMIs | KYC Onboarding | WorldAML"
-      description="AML compliance platform for banks and electronic money institutions. KYC/KYB onboarding, sanctions and PEP screening, transaction monitoring, and regulatory reporting. FATF, AMLD6, and CRR2 aligned."
+      description="AML compliance for banks and EMIs. KYC/KYB onboarding, sanctions and PEP screening, transaction monitoring, and regulatory reporting."
       canonical="/industries/banking"
       breadcrumbs={[
         { name: "Home", url: "/" },

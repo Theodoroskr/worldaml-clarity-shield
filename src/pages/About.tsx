@@ -77,7 +77,7 @@ const About = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="About"
-        description="WorldAML is a financial crime screening platform operated by Infocredit Group, an authorised regional partner of LexisNexis Risk Solutions. ISO 27001, 9001, and 22301 certified."
+        description="WorldAML is a financial crime screening platform by Infocredit Group, a regional partner of LexisNexis Risk Solutions. ISO 27001 certified."
         canonical="/about"
         breadcrumbs={[
           { name: "Home", url: "/" },

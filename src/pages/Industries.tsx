@@ -55,7 +55,7 @@ const Industries = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="Industries"
-        description="AML compliance solutions for banks, fintechs, payment providers, crypto businesses, gaming operators, and legal services. API-first platform for all regulated sectors."
+        description="AML compliance solutions for banks, fintechs, payment providers, crypto, gaming, and legal services. API-first platform for regulated sectors."
         canonical="/industries"
         breadcrumbs={[
           { name: "Home", url: "/" },

@@ -44,7 +44,7 @@ const DataCoverageIndex = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="Global AML Screening Data Coverage"
-        description="Explore WorldAML's global regulatory and screening coverage across 200+ jurisdictions. View sanctions lists, PEP data, law enforcement, and financial regulators by country."
+        description="Explore WorldAML's global screening coverage across 200+ jurisdictions. View sanctions lists, PEP data, and financial regulators by country."
         canonical="/data-coverage"
         structuredData={structuredData}
         breadcrumbs={[

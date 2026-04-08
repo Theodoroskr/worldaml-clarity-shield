@@ -142,7 +142,7 @@ const WhyWorldAML = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="Why WorldAML — Competitive Advantages"
-        description="Discover why regulated institutions choose WorldAML for financial crime screening: trusted LexisNexis data sources, multi-jurisdictional coverage, bank-grade security, rapid API integration, and dedicated regional support."
+        description="Why regulated institutions choose WorldAML: trusted LexisNexis data, multi-jurisdictional coverage, bank-grade security, and rapid API integration."
         canonical="/about-us/why-worldaml"
         breadcrumbs={[
           { name: "Home", url: "/" },

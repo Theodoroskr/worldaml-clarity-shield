@@ -227,7 +227,7 @@ const SanctionsLists = () => {
     <>
       <SEO
         title="Global Sanctions Lists & AML Data Sources | WorldAML"
-        description="Comprehensive reference of OFAC, EU, UN, OFSI, FATF and 30+ official sanctions lists and AML data sources used in compliance screening. Includes GCC and APAC authorities."
+        description="Reference of OFAC, EU, UN, OFSI, FATF and 30+ official sanctions lists and AML data sources used in compliance screening worldwide."
         canonical="/resources/sanctions-lists"
         breadcrumbs={[
           { name: "Home", url: "/" },

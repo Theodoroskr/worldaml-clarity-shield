@@ -111,7 +111,7 @@ const Academy = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="Compliance Academy — Free AML & KYC Training | WorldAML"
-        description="Earn free compliance certificates with WorldAML Academy. Learn AML fundamentals, KYC best practices, and sanctions screening through interactive courses and quizzes."
+        description="Earn free compliance certificates with WorldAML Academy. Learn AML, KYC, and sanctions screening through interactive courses and quizzes."
         canonical="/academy"
         breadcrumbs={[
           { name: "Home", url: "/" },

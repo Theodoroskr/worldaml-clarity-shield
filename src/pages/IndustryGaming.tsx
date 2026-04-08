@@ -63,7 +63,7 @@ const IndustryGaming = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
       title="AML Compliance for Gaming & iGaming Operators | Player KYC | WorldAML"
-      description="AML and KYC compliance for licensed gaming and gambling operators. Player KYC, source of funds checks, PEP screening, and transaction monitoring. UKGC, MGA, and GRA aligned."
+      description="AML and KYC compliance for gaming and gambling operators. Player KYC, source of funds checks, PEP screening, and transaction monitoring."
       canonical="/industries/gaming"
       breadcrumbs={[
         { name: "Home", url: "/" },
