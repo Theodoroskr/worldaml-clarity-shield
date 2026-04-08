@@ -488,14 +488,14 @@ export function seoPrerender(): Plugin {
         let html = indexHtml;
 
         html = html.replace(/<title>[^<]*<\/title>/, `<title>${fullTitle}</title>`);
-        // Insert or replace meta description
+        // Insert or replace meta description (with data-rh so react-helmet-async manages it)
         if (html.includes('<meta name="description"')) {
           html = html.replace(
-            /<meta name="description" content="[^"]*"/,
-            `<meta name="description" content="${meta.description}"`
+            /<meta name="description" content="[^"]*"[^>]*/,
+            `<meta data-rh="true" name="description" content="${meta.description}"`
           );
         } else {
-          html = html.replace("</head>", `  <meta name="description" content="${meta.description}" />\n  </head>`);
+          html = html.replace("</head>", `  <meta data-rh="true" name="description" content="${meta.description}" />\n  </head>`);
         }
         html = html.replace("</head>", `  <link rel="canonical" href="${canonicalUrl}" />\n  </head>`);
         html = html.replace(/<meta property="og:title" content="[^"]*"/, `<meta property="og:title" content="${fullTitle}"`);
@@ -518,11 +518,11 @@ export function seoPrerender(): Plugin {
       rootHtml = rootHtml.replace(/<title>[^<]*<\/title>/, `<title>${rootTitle}</title>`);
       if (rootHtml.includes('<meta name="description"')) {
         rootHtml = rootHtml.replace(
-          /<meta name="description" content="[^"]*"/,
-          `<meta name="description" content="${rootMeta.description}"`
+          /<meta name="description" content="[^"]*"[^>]*/,
+          `<meta data-rh="true" name="description" content="${rootMeta.description}"`
         );
       } else {
-        rootHtml = rootHtml.replace("</head>", `  <meta name="description" content="${rootMeta.description}" />\n  </head>`);
+        rootHtml = rootHtml.replace("</head>", `  <meta data-rh="true" name="description" content="${rootMeta.description}" />\n  </head>`);
       }
       rootHtml = rootHtml.replace("</head>", `  <link rel="canonical" href="${BASE_URL}/" />\n  </head>`);
       fs.writeFileSync(path.join(distDir, "index.html"), rootHtml, "utf-8");
