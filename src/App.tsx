@@ -182,6 +182,7 @@ const App = () => (
                 <Route path="/industries/payments" element={<IndustryPayments />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/about-us" element={<Navigate to="/about" replace />} />
                 <Route path="/about-us/why-worldaml" element={<WhyWorldAML />} />
                 <Route path="/get-started" element={<GetStarted />} />
                 <Route path="/contact-sales" element={<ContactSales />} />
