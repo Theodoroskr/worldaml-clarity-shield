@@ -139,6 +139,7 @@ const App = () => (
                   <Route path="forms" element={<AdminForms />} />
                   <Route path="workflows" element={<AdminWorkflows />} />
                   <Route path="pricing" element={<AdminPricing />} />
+                  <Route path="mastercard" element={<AdminMastercard />} />
                 </Route>
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
