@@ -89,6 +89,7 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminForms = lazy(() => import("./pages/admin/AdminForms"));
 const AdminWorkflows = lazy(() => import("./pages/admin/AdminWorkflows"));
 const AdminPricing = lazy(() => import("./pages/admin/AdminPricing"));
+const AdminMastercard = lazy(() => import("./pages/admin/AdminMastercard"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
