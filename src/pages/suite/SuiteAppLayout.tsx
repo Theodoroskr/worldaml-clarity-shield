@@ -2,9 +2,10 @@ import { Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import SuiteAppSidebar from "@/components/suite-app/SuiteAppSidebar";
 import SuiteAppTopbar from "@/components/suite-app/SuiteAppTopbar";
+import SuiteAccessRestricted from "@/components/suite-app/SuiteAccessRestricted";
 
 export default function SuiteAppLayout() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAdmin } = useAuth();
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
@@ -12,6 +13,10 @@ export default function SuiteAppLayout() {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (!isAdmin) {
+    return <SuiteAccessRestricted />;
   }
 
   return (
