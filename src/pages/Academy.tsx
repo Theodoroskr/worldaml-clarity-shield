@@ -387,7 +387,6 @@ const Academy = () => {
                               const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://worldaml-clarity-shield.lovable.app/academy/${course.slug}`)}`;
                               window.open(url, "_blank");
                             }}
-                            }}
                             className="p-1.5 rounded-md text-muted-foreground hover:text-[#0A66C2] hover:bg-[#0A66C2]/10 transition-colors"
                           >
                             <Linkedin className="h-4 w-4" />
