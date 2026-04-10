@@ -126,6 +126,30 @@ function extractSlugs(filePath: string): string[] {
   }
 }
 
+/**
+ * Extract top-level keys from a Record-style TypeScript data file.
+ * Matches patterns like:  `keyname: {`  inside `coverageData = {`
+ */
+function extractRecordKeys(filePath: string): string[] {
+  try {
+    const content = fs.readFileSync(filePath, "utf-8");
+    // Match keys after the opening `= {` of coverageData
+    const dataStart = content.indexOf("coverageData");
+    if (dataStart === -1) return [];
+    const rest = content.slice(dataStart);
+    const keyRegex = /^\s{2}(\w[\w-]*):\s*\{/gm;
+    const keys: string[] = [];
+    let match: RegExpExecArray | null;
+    while ((match = keyRegex.exec(rest)) !== null) {
+      keys.push(match[1]);
+    }
+    return keys;
+  } catch {
+    console.warn(`[sitemap] Could not read ${filePath}`);
+    return [];
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /*  XML builder                                                       */
 /* ------------------------------------------------------------------ */
@@ -176,8 +200,13 @@ function generateSitemap(root: string): string {
     entries.push({ path: `/eu-sanctions/${slug}`, changefreq: "monthly", priority: 0.6 });
   }
 
+  // Dynamic: data coverage country pages → /data-coverage/:country
+  const countryKeys = extractRecordKeys(path.join(root, "src/data/worldComplianceSources.ts"));
+  for (const key of countryKeys) {
+    entries.push({ path: `/data-coverage/${key}`, changefreq: "monthly", priority: 0.5 });
+  }
+
   // Dynamic: academy courses (read from academy data or hard-coded known slugs)
-  // Academy courses live in the DB, but we can extract any static references
   const knownAcademyCourses = [
     "aml-fundamentals",
     "kyc-essentials",
@@ -209,19 +238,18 @@ export function sitemapGenerator(): Plugin {
     configResolved(config) {
       projectRoot = config.root;
     },
-    // Generate on every build
     buildStart() {
       const xml = generateSitemap(projectRoot);
       const outPath = path.join(projectRoot, "public/sitemap.xml");
       fs.writeFileSync(outPath, xml, "utf-8");
       console.log(`[sitemap] Generated ${outPath} with sitemap entries`);
     },
-    // Also regenerate during dev on file changes to data files
     handleHotUpdate({ file }) {
       if (
         file.includes("blogPosts") ||
         file.includes("marketPages") ||
-        file.includes("euSanctionsRegimes")
+        file.includes("euSanctionsRegimes") ||
+        file.includes("worldComplianceSources")
       ) {
         const xml = generateSitemap(projectRoot);
         const outPath = path.join(projectRoot, "public/sitemap.xml");
