@@ -10,6 +10,7 @@ interface SEOProps {
   description: string;
   canonical?: string;
   noindex?: boolean;
+  ogType?: string;
   breadcrumbs?: BreadcrumbItem[];
   structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
