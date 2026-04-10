@@ -16,7 +16,7 @@ export default function SuiteAppLayout() {
   }
 
   if (!isAdmin) {
-    return <SuiteAccessRestricted />;
+    return <Navigate to="/academy" replace />;
   }
 
   return (
