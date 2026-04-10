@@ -6,12 +6,6 @@ Disallow: /signup
 Disallow: /dashboard
 Disallow: /forgot-password
 Disallow: /reset-password
-Disallow: /data-sources/worldcompliance/eu-me
-Disallow: /data-sources/worldcompliance/uk-ie
-Disallow: /data-sources/worldcompliance/na
-Disallow: /data-sources/bridger-xg/eu-me
-Disallow: /data-sources/bridger-xg/uk-ie
-Disallow: /data-sources/bridger-xg/na
 
 User-agent: Bingbot
 Allow: /
