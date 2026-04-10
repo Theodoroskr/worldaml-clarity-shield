@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X } from "lucide-react";
+import { ArrowRight, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin } from "lucide-react";
 
 const difficultyColor: Record<string, string> = {
   beginner: "bg-emerald-100 text-emerald-700",
