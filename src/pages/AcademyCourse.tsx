@@ -288,23 +288,61 @@ const AcademyCourse = () => {
 
                 {/* Module content */}
                 {modules && modules[activeModule] && (
-                  <div>
-                    <h2 className="text-subtitle font-semibold text-foreground mb-4">
+                  <div className="min-w-0">
+                    <h2 className="text-subtitle font-semibold text-foreground mb-6">
                       {modules[activeModule].title}
                     </h2>
-                    <div className="prose prose-slate max-w-none text-body text-foreground whitespace-pre-line mb-8">
-                      {modules[activeModule].content.split("\n").map((line, i) => {
-                        if (line.startsWith("**") && line.endsWith("**")) {
-                          return <p key={i} className="font-semibold mt-4 mb-1">{line.replace(/\*\*/g, "")}</p>;
-                        }
-                        if (line.startsWith("- ")) {
-                          return <p key={i} className="pl-4 text-muted-foreground">• {line.slice(2)}</p>;
-                        }
-                        if (line.trim() === "") return <br key={i} />;
-                        return <p key={i} className="text-muted-foreground">{line.replace(/\*\*/g, "")}</p>;
-                      })}
+                    <div className="prose prose-slate dark:prose-invert max-w-none mb-8 space-y-1">
+                      {modules[activeModule].content
+                        .replace(/\\n/g, "\n")
+                        .split("\n")
+                        .map((line, i) => {
+                          const trimmed = line.trim();
+                          if (!trimmed) return <div key={i} className="h-3" />;
+                          if (trimmed.startsWith("**") && trimmed.endsWith("**")) {
+                            return (
+                              <h3 key={i} className="text-lg font-semibold text-foreground mt-6 mb-2">
+                                {trimmed.replace(/\*\*/g, "")}
+                              </h3>
+                            );
+                          }
+                          if (trimmed.startsWith("- ")) {
+                            return (
+                              <div key={i} className="flex items-start gap-2 pl-4 py-0.5">
+                                <span className="text-primary mt-1.5 flex-shrink-0">•</span>
+                                <span className="text-muted-foreground text-body leading-relaxed">
+                                  {trimmed.slice(2).replace(/\*\*(.*?)\*\*/g, "$1")}
+                                </span>
+                              </div>
+                            );
+                          }
+                          if (/^\d+\.?\s/.test(trimmed)) {
+                            const match = trimmed.match(/^(\d+\.?\s)(.*)/);
+                            return (
+                              <div key={i} className="flex items-start gap-2 pl-4 py-0.5">
+                                <span className="text-primary font-medium flex-shrink-0">{match?.[1]}</span>
+                                <span className="text-muted-foreground text-body leading-relaxed">
+                                  {(match?.[2] || "").replace(/\*\*(.*?)\*\*/g, "$1")}
+                                </span>
+                              </div>
+                            );
+                          }
+                          // Inline bold handling
+                          const parts = trimmed.split(/\*\*(.*?)\*\*/g);
+                          return (
+                            <p key={i} className="text-muted-foreground text-body leading-relaxed">
+                              {parts.map((part, pi) =>
+                                pi % 2 === 1 ? (
+                                  <strong key={pi} className="text-foreground font-medium">{part}</strong>
+                                ) : (
+                                  <span key={pi}>{part}</span>
+                                )
+                              )}
+                            </p>
+                          );
+                        })}
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 pt-4 border-t border-border">
                       {!completedModules.includes(modules[activeModule].id) && (
                         <Button onClick={() => markModuleComplete(modules[activeModule].id)}>
                           <CheckCircle className="h-4 w-4 mr-2" />
