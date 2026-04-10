@@ -213,6 +213,42 @@ const routes: Record<string, RouteMeta> = {
       "Free online AML compliance courses with CPD certification. Learn sanctions screening, KYC, risk assessment and more.",
     h1: "WorldAML Compliance Academy",
   },
+  "/academy/aml-fundamentals": {
+    title: "AML Fundamentals — WorldAML Academy",
+    description:
+      "Learn the essentials of Anti-Money Laundering compliance, including key regulations, red flags, and reporting obligations.",
+    h1: "AML Fundamentals",
+  },
+  "/academy/kyc-essentials": {
+    title: "KYC Essentials — WorldAML Academy",
+    description:
+      "Master Know Your Customer procedures: identity verification, customer due diligence, and ongoing monitoring.",
+    h1: "KYC Essentials",
+  },
+  "/academy/sanctions-screening-fundamentals": {
+    title: "Sanctions Screening Fundamentals — WorldAML Academy",
+    description:
+      "Understand global sanctions regimes, list screening techniques, and compliance best practices.",
+    h1: "Sanctions Screening Fundamentals",
+  },
+  "/academy/risk-based-approach": {
+    title: "Risk-Based Approach — WorldAML Academy",
+    description:
+      "Learn to implement a risk-based approach to AML compliance with risk assessment frameworks and methodologies.",
+    h1: "Risk-Based Approach to AML",
+  },
+  "/academy/international-sanctions-compliance": {
+    title: "International Sanctions Compliance — WorldAML Academy",
+    description:
+      "Advanced course on international sanctions regimes, cross-border compliance, and enforcement actions.",
+    h1: "International Sanctions Compliance",
+  },
+  "/academy/beneficial-ownership-ubo-transparency": {
+    title: "Beneficial Ownership & UBO Transparency — WorldAML Academy",
+    description:
+      "Advanced course on beneficial ownership identification, UBO verification, and corporate transparency requirements.",
+    h1: "Beneficial Ownership & UBO Transparency",
+  },
   "/partners": {
     title: "Partner Programme",
     description:
