@@ -200,8 +200,18 @@ const AcademyCourse = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title={`${course.title} — WorldAML Academy`}
-        description={course.description}
+        description={course.description.slice(0, 160)}
         canonical={`/academy/${course.slug}`}
+        ogType="article"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "Course",
+          name: course.title,
+          description: course.description,
+          provider: { "@type": "Organization", name: "WorldAML" },
+          timeRequired: `PT${course.duration_minutes}M`,
+          educationalLevel: course.difficulty,
+        }}
       />
       <Header />
       <main className="flex-1">

@@ -10,6 +10,7 @@ interface SEOProps {
   description: string;
   canonical?: string;
   noindex?: boolean;
+  ogType?: string;
   breadcrumbs?: BreadcrumbItem[];
   structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
@@ -18,7 +19,7 @@ const SITE_NAME = "WorldAML";
 const BASE_URL = "https://www.worldaml.com";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 
-const SEO = ({ title, description, canonical, noindex = false, breadcrumbs, structuredData }: SEOProps) => {
+const SEO = ({ title, description, canonical, noindex = false, ogType = "website", breadcrumbs, structuredData }: SEOProps) => {
   const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
   const canonicalUrl = canonical ? `${BASE_URL}${canonical}` : undefined;
 
@@ -38,23 +39,23 @@ const SEO = ({ title, description, canonical, noindex = false, breadcrumbs, stru
   return (
     <Helmet>
       <title>{fullTitle}</title>
-      <meta name="description" content={description} />
-      {noindex && <meta name="robots" content="noindex, nofollow" />}
-      {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+      <meta name="description" content={description} data-rh="true" />
+      {noindex && <meta name="robots" content="noindex, nofollow" data-rh="true" />}
+      {canonicalUrl && <link rel="canonical" href={canonicalUrl} data-rh="true" />}
 
       {/* Open Graph */}
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={OG_IMAGE} />
-      {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
-      <meta property="og:type" content="website" />
-      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:title" content={fullTitle} data-rh="true" />
+      <meta property="og:description" content={description} data-rh="true" />
+      <meta property="og:image" content={OG_IMAGE} data-rh="true" />
+      {canonicalUrl && <meta property="og:url" content={canonicalUrl} data-rh="true" />}
+      <meta property="og:type" content={ogType} data-rh="true" />
+      <meta property="og:site_name" content={SITE_NAME} data-rh="true" />
 
       {/* Twitter */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={fullTitle} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={OG_IMAGE} />
+      <meta name="twitter:card" content="summary_large_image" data-rh="true" />
+      <meta name="twitter:title" content={fullTitle} data-rh="true" />
+      <meta name="twitter:description" content={description} data-rh="true" />
+      <meta name="twitter:image" content={OG_IMAGE} data-rh="true" />
 
       {/* Breadcrumb JSON-LD */}
       {breadcrumbLD && (
