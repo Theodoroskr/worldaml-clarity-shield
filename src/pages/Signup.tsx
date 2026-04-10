@@ -38,21 +38,7 @@ const Signup = () => {
         variant: "destructive",
       });
     } else {
-      // Check if email domain is auto-approved
-      const emailDomain = email.split("@")[1]?.toLowerCase();
-      let isAutoApproved = false;
-      try {
-        const { data: domainData } = await supabase
-          .from("auto_approve_domains")
-          .select("domain")
-          .eq("domain", emailDomain)
-          .maybeSingle();
-        isAutoApproved = !!domainData;
-      } catch {
-        // non-blocking
-      }
-
-      // Send admin notification (non-blocking)
+      // Send admin notification (non-blocking) — all users are auto-approved
       try {
         const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
         await fetch(`https://${projectId}.supabase.co/functions/v1/notify-new-signup`, {
@@ -67,7 +53,7 @@ const Signup = () => {
             company_name: companyName,
             email,
             signed_up_at: new Date().toISOString(),
-            auto_approved: isAutoApproved,
+            auto_approved: true,
           }),
         });
       } catch (notifyErr) {
@@ -75,10 +61,8 @@ const Signup = () => {
       }
 
       toast({
-        title: isAutoApproved ? "Account approved" : "Check your email",
-        description: isAutoApproved
-          ? "Your account has been automatically approved. Please verify your email and sign in."
-          : "We've sent you a verification link. Please check your email to complete signup.",
+        title: "Account created",
+        description: "Your account has been approved. Please verify your email and sign in.",
       });
       navigate("/login");
     }
