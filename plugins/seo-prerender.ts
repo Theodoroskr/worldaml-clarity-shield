@@ -213,6 +213,42 @@ const routes: Record<string, RouteMeta> = {
       "Free online AML compliance courses with CPD certification. Learn sanctions screening, KYC, risk assessment and more.",
     h1: "WorldAML Compliance Academy",
   },
+  "/academy/aml-fundamentals": {
+    title: "AML Fundamentals — WorldAML Academy",
+    description:
+      "Learn the essentials of Anti-Money Laundering compliance, including key regulations, red flags, and reporting obligations.",
+    h1: "AML Fundamentals",
+  },
+  "/academy/kyc-essentials": {
+    title: "KYC Essentials — WorldAML Academy",
+    description:
+      "Master Know Your Customer procedures: identity verification, customer due diligence, and ongoing monitoring.",
+    h1: "KYC Essentials",
+  },
+  "/academy/sanctions-screening-fundamentals": {
+    title: "Sanctions Screening Fundamentals — WorldAML Academy",
+    description:
+      "Understand global sanctions regimes, list screening techniques, and compliance best practices.",
+    h1: "Sanctions Screening Fundamentals",
+  },
+  "/academy/risk-based-approach": {
+    title: "Risk-Based Approach — WorldAML Academy",
+    description:
+      "Learn to implement a risk-based approach to AML compliance with risk assessment frameworks and methodologies.",
+    h1: "Risk-Based Approach to AML",
+  },
+  "/academy/international-sanctions-compliance": {
+    title: "International Sanctions Compliance — WorldAML Academy",
+    description:
+      "Advanced course on international sanctions regimes, cross-border compliance, and enforcement actions.",
+    h1: "International Sanctions Compliance",
+  },
+  "/academy/beneficial-ownership-ubo-transparency": {
+    title: "Beneficial Ownership & UBO Transparency — WorldAML Academy",
+    description:
+      "Advanced course on beneficial ownership identification, UBO verification, and corporate transparency requirements.",
+    h1: "Beneficial Ownership & UBO Transparency",
+  },
   "/partners": {
     title: "Partner Programme",
     description:
@@ -498,9 +534,22 @@ export function seoPrerender(): Plugin {
           html = html.replace("</head>", `  <meta data-rh="true" name="description" content="${meta.description}" />\n  </head>`);
         }
         html = html.replace("</head>", `  <link data-rh="true" rel="canonical" href="${canonicalUrl}" />\n  </head>`);
-        html = html.replace(/<meta property="og:title" content="[^"]*"/, `<meta data-rh="true" property="og:title" content="${fullTitle}"`);
-        html = html.replace(/<meta property="og:description" content="[^"]*"/, `<meta data-rh="true" property="og:description" content="${meta.description}"`);
-        html = html.replace(/<meta property="og:url" content="[^"]*"/, `<meta data-rh="true" property="og:url" content="${canonicalUrl}"`);
+        // OG tags — insert if missing (base index.html has none), replace if present
+        const ogBlock = [
+          `<meta data-rh="true" property="og:title" content="${fullTitle}" />`,
+          `<meta data-rh="true" property="og:description" content="${meta.description}" />`,
+          `<meta data-rh="true" property="og:url" content="${canonicalUrl}" />`,
+          `<meta data-rh="true" property="og:image" content="${BASE_URL}/og-image.png" />`,
+          `<meta data-rh="true" property="og:type" content="website" />`,
+          `<meta data-rh="true" property="og:site_name" content="${SITE_NAME}" />`,
+        ];
+        if (html.includes('property="og:title"')) {
+          html = html.replace(/<meta[^>]*property="og:title"[^>]*>/, ogBlock[0]);
+          html = html.replace(/<meta[^>]*property="og:description"[^>]*>/, ogBlock[1]);
+          html = html.replace(/<meta[^>]*property="og:url"[^>]*>/, ogBlock[2]);
+        } else {
+          html = html.replace("</head>", `  ${ogBlock.join("\n  ")}\n  </head>`);
+        }
         html = html.replace(
           /<h1 style="position:absolute;left:-9999px">[^<]*<\/h1>/,
           `<h1 style="position:absolute;left:-9999px">${meta.h1}</h1>`
