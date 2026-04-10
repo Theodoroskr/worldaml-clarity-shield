@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X } from "lucide-react";
+import { ArrowRight, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin } from "lucide-react";
 
 const difficultyColor: Record<string, string> = {
   beginner: "bg-emerald-100 text-emerald-700",
@@ -377,9 +377,27 @@ const Academy = () => {
                             </span>
                           )}
                         </div>
-                        <span className="text-body-sm font-medium text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
-                          {status === "completed" ? "View" : status === "in-progress" ? "Continue" : "Start"} <ArrowRight className="h-4 w-4" />
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            title="Share on LinkedIn"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              window.open(
+                                `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://worldaml-clarity-shield.lovable.app/academy/${course.slug}`)}`,
+                                "_blank",
+                                "noopener,noreferrer"
+                              );
+                            }}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-[#0A66C2] hover:bg-[#0A66C2]/10 transition-colors"
+                          >
+                            <Linkedin className="h-4 w-4" />
+                          </button>
+                          <span className="text-body-sm font-medium text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                            {status === "completed" ? "View" : status === "in-progress" ? "Continue" : "Start"} <ArrowRight className="h-4 w-4" />
+                          </span>
+                        </div>
                       </div>
                     </Link>
                   );
