@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import SuiteAppSidebar from "@/components/suite-app/SuiteAppSidebar";
 import SuiteAppTopbar from "@/components/suite-app/SuiteAppTopbar";
 import SuiteAccessRestricted from "@/components/suite-app/SuiteAccessRestricted";
+import SEO from "@/components/SEO";
 
 export default function SuiteAppLayout() {
   const { user, isLoading, isAdmin } = useAuth();
@@ -21,6 +22,7 @@ export default function SuiteAppLayout() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
+      <SEO title="Suite" description="WorldAML Compliance Suite — manage onboarding, screening, alerts, and cases." noindex />
       <SuiteAppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <SuiteAppTopbar />
