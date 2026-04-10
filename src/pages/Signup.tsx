@@ -61,10 +61,8 @@ const Signup = () => {
       }
 
       toast({
-        title: isAutoApproved ? "Account approved" : "Check your email",
-        description: isAutoApproved
-          ? "Your account has been automatically approved. Please verify your email and sign in."
-          : "We've sent you a verification link. Please check your email to complete signup.",
+        title: "Account created",
+        description: "Your account has been approved. Please verify your email and sign in.",
       });
       navigate("/login");
     }
