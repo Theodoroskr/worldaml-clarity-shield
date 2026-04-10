@@ -19,7 +19,7 @@ const SITE_NAME = "WorldAML";
 const BASE_URL = "https://www.worldaml.com";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 
-const SEO = ({ title, description, canonical, noindex = false, breadcrumbs, structuredData }: SEOProps) => {
+const SEO = ({ title, description, canonical, noindex = false, ogType = "website", breadcrumbs, structuredData }: SEOProps) => {
   const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
   const canonicalUrl = canonical ? `${BASE_URL}${canonical}` : undefined;
 
