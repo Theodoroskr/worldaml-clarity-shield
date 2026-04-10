@@ -2,12 +2,14 @@ import { SuiteHeader } from "@/components/suite/SuiteHeader";
 import { SuiteFooter } from "@/components/suite/SuiteFooter";
 import { useState } from "react";
 import type { SuiteProduct } from "@/components/suite/SuiteHeader";
+import SEO from "@/components/SEO";
 
 const SuiteLayout = () => {
   const [product, setProduct] = useState<SuiteProduct>("worldaml");
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <SEO title="Suite Layout Preview" description="Internal preview of the WorldAML Suite layout." noindex />
       <SuiteHeader currentProduct={product} />
 
       {/* Demo content */}
