@@ -32,6 +32,14 @@ const Academy = () => {
   const [filter, setFilter] = useState<FilterTab>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
+  const [bannerDismissed, setBannerDismissed] = useState(() => {
+    try { return sessionStorage.getItem("academy-new-courses-dismissed") === "1"; } catch { return false; }
+  });
+
+  const dismissBanner = () => {
+    setBannerDismissed(true);
+    try { sessionStorage.setItem("academy-new-courses-dismissed", "1"); } catch {}
+  };
 
   const { data: courses, isLoading } = useQuery({
     queryKey: ["academy-courses"],
