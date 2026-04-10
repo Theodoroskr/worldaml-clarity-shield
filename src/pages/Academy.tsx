@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers } from "lucide-react";
+import { ArrowRight, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X } from "lucide-react";
 
 const difficultyColor: Record<string, string> = {
   beginner: "bg-emerald-100 text-emerald-700",
@@ -32,6 +32,14 @@ const Academy = () => {
   const [filter, setFilter] = useState<FilterTab>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
+  const [bannerDismissed, setBannerDismissed] = useState(() => {
+    try { return sessionStorage.getItem("academy-new-courses-dismissed") === "1"; } catch { return false; }
+  });
+
+  const dismissBanner = () => {
+    setBannerDismissed(true);
+    try { sessionStorage.setItem("academy-new-courses-dismissed", "1"); } catch {}
+  };
 
   const { data: courses, isLoading } = useQuery({
     queryKey: ["academy-courses"],
@@ -152,6 +160,45 @@ const Academy = () => {
             </div>
           </div>
         </section>
+
+        {/* New Courses Announcement Banner */}
+        {!bannerDismissed && (
+          <section className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border-b border-primary/20">
+            <div className="container-enterprise py-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex-shrink-0 h-9 w-9 rounded-full bg-primary/15 flex items-center justify-center">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-body-sm font-semibold text-foreground">
+                      🎓 New Advanced Courses Available!
+                    </p>
+                    <p className="text-caption text-muted-foreground truncate">
+                      <strong>International Sanctions Compliance</strong> and <strong>Beneficial Ownership & UBO Transparency</strong> — start learning today.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button size="sm" variant="default" className="text-xs" onClick={() => {
+                    setCategoryFilter("all");
+                    setDifficultyFilter("advanced");
+                    dismissBanner();
+                  }}>
+                    View Courses <ArrowRight className="h-3 w-3 ml-1" />
+                  </Button>
+                  <button
+                    onClick={dismissBanner}
+                    className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                    aria-label="Dismiss announcement"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* My Progress Summary (logged-in users only) */}
         {user && progressData && (
