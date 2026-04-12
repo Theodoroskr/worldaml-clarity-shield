@@ -605,6 +605,54 @@ export type Database = {
         }
         Relationships: []
       }
+      periodic_reports: {
+        Row: {
+          completed_at: string | null
+          content: Json
+          created_at: string
+          filed_at: string | null
+          filing_status: string
+          id: string
+          notes: string | null
+          period_year: number
+          regulator: string
+          report_title: string
+          report_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          content?: Json
+          created_at?: string
+          filed_at?: string | null
+          filing_status?: string
+          id?: string
+          notes?: string | null
+          period_year?: number
+          regulator: string
+          report_title: string
+          report_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          content?: Json
+          created_at?: string
+          filed_at?: string | null
+          filing_status?: string
+          id?: string
+          notes?: string | null
+          period_year?: number
+          regulator?: string
+          report_title?: string
+          report_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company_name: string | null
