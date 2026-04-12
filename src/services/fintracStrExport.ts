@@ -157,7 +157,7 @@ function checkPage(doc: jsPDF, y: number, needed = 20): number {
 }
 
 export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{ blobUrl: string; fileName: string }> {
-  const { caseItem, notes, customer, transactions, submittedBy, reportingEntity, reportingEntityRef, strType, manualFields, targetWindow } = opts;
+  const { caseItem, notes, customer, transactions, submittedBy, reportingEntity, reportingEntityRef, strType, manualFields } = opts;
   const mf = manualFields ?? DEFAULT_MANUAL_FIELDS;
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
