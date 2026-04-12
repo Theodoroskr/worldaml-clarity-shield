@@ -203,11 +203,15 @@ export default function SuiteTransactions() {
       const isHighRisk = HIGH_RISK.includes((row.counterparty_country || "").toUpperCase());
       const riskFlag = isHighRisk || amount > 10000;
 
+      const parsedDate = row.date ? new Date(row.date) : null;
+      const createdAt = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : undefined;
+
       const { data, error } = await supabase.from("suite_transactions").insert({
         customer_id: custId, user_id: user.id, amount, currency: row.currency || "EUR",
         direction: row.direction || "inbound", counterparty: row.counterparty || null,
         counterparty_country: row.counterparty_country || null, risk_flag: riskFlag,
         description: row.description || null,
+        ...(createdAt ? { created_at: createdAt } : {}),
       }).select("id").single();
 
       if (!error && data) {
