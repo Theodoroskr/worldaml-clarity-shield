@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2 } from "lucide-react";
+import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import FormFieldBuilder, { type CustomField } from "@/components/suite/FormFieldBuilder";
+import { REGULATORY_PROFILES, REGULATOR_OPTIONS, type RegulatoryProfile } from "@/data/regulatoryProfiles";
 
 interface Customer {
   id: string;
