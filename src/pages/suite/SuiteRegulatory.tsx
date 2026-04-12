@@ -48,7 +48,7 @@ const REGULATORY_PROFILES: Record<string, RegulatoryProfile> = {
       { name: "Currency Transaction Report", code: "CTR", description: "Report cash transactions exceeding $10,000 in a single business day.", deadline: "15 days from transaction", trigger: "Cash transaction > $10,000", frequency: "event" },
     ],
     periodicObligations: [
-      { title: "BSA/AML Compliance Program Review", deadline: "Annual", description: "Independent review of the AML compliance program effectiveness." },
+      { title: "BSA/AML Compliance Program Review", deadline: "Annual", description: "Independent review of the AML compliance program effectiveness.", frequencyMonths: 12 },
       { title: "OFAC Sanctions List Update", deadline: "Continuous", description: "Ensure customer screening against current OFAC SDN and sectoral lists." },
     ],
     keyRequirements: [
@@ -75,7 +75,7 @@ const REGULATORY_PROFILES: Record<string, RegulatoryProfile> = {
       { name: "Terrorist Property Report", code: "TPR", description: "Report property owned or controlled by a listed terrorist entity.", deadline: "Immediately", trigger: "Listed entity property identified", frequency: "event" },
     ],
     periodicObligations: [
-      { title: "Two-Year Effectiveness Review", deadline: "Every 2 years", description: "Independent review of compliance program effectiveness." },
+      { title: "Two-Year Effectiveness Review", deadline: "Every 2 years", description: "Independent review of compliance program effectiveness.", frequencyMonths: 24 },
       { title: "Risk Assessment Update", deadline: "As needed / ongoing", description: "Update ML/TF risk assessment when business changes occur." },
     ],
     keyRequirements: [
@@ -100,8 +100,8 @@ const REGULATORY_PROFILES: Record<string, RegulatoryProfile> = {
       { name: "Defence Against Money Laundering (DAML)", code: "DAML", description: "Request consent from NCA to proceed with a transaction that is suspected to involve criminal property.", deadline: "Before proceeding with transaction", trigger: "Suspected criminal property — need consent", frequency: "event" },
     ],
     periodicObligations: [
-      { title: "Annual Financial Crime Report (REP-CRIM)", deadline: "Annually (30 business days after period end)", description: "Submit the REP-CRIM report to the FCA covering financial crime data." },
-      { title: "AML/CTF Risk Assessment", deadline: "Ongoing / Annual review", description: "Firm-wide risk assessment under Reg 18 of the MLR 2017." },
+      { title: "Annual Financial Crime Report (REP-CRIM)", deadline: "Annually (30 business days after period end)", description: "Submit the REP-CRIM report to the FCA covering financial crime data.", frequencyMonths: 12 },
+      { title: "AML/CTF Risk Assessment", deadline: "Ongoing / Annual review", description: "Firm-wide risk assessment under Reg 18 of the MLR 2017.", frequencyMonths: 12 },
     ],
     keyRequirements: [
       "Appoint a nominated officer (MLRO)",
@@ -125,8 +125,8 @@ const REGULATORY_PROFILES: Record<string, RegulatoryProfile> = {
       { name: "Cash Transaction Report", code: "CTR", description: "Report cash payments of €10,000 or more.", deadline: "Within working days of transaction", trigger: "Cash ≥ €10,000", frequency: "event" },
     ],
     periodicObligations: [
-      { title: "Annual Compliance Report (ACR)", deadline: "By 30 April each year", description: "Self-assessment of AML/CFT compliance effectiveness submitted to CySEC." },
-      { title: "Internal Audit Report", deadline: "Annually", description: "Independent audit of AML policies, procedures, and controls." },
+      { title: "Annual Compliance Report (ACR)", deadline: "By 30 April each year", description: "Self-assessment of AML/CFT compliance effectiveness submitted to CySEC.", month: 3, day: 30 },
+      { title: "Internal Audit Report", deadline: "Annually", description: "Independent audit of AML policies, procedures, and controls.", frequencyMonths: 12 },
       { title: "CAMLO Appointment Notification", deadline: "Within 15 days of change", description: "Notify CySEC of any change to the appointed CAMLO." },
     ],
     keyRequirements: [
@@ -150,8 +150,8 @@ const REGULATORY_PROFILES: Record<string, RegulatoryProfile> = {
       { name: "Suspicious Transaction Report", code: "STR", description: "Report suspicious transactions to MOKAS.", deadline: "As soon as suspicion is formed", trigger: "Suspicion of ML/TF", frequency: "event" },
     ],
     periodicObligations: [
-      { title: "Internal Assessment Report (IAR)", deadline: "Annually", description: "Annual internal AML risk assessment submitted to ICPAC." },
-      { title: "AML Compliance Questionnaire", deadline: "Annually", description: "Mandatory self-assessment questionnaire on AML/CFT compliance." },
+      { title: "Internal Assessment Report (IAR)", deadline: "Annually", description: "Annual internal AML risk assessment submitted to ICPAC.", frequencyMonths: 12 },
+      { title: "AML Compliance Questionnaire", deadline: "Annually", description: "Mandatory self-assessment questionnaire on AML/CFT compliance.", frequencyMonths: 12 },
       { title: "CDD Records Maintenance", deadline: "Ongoing", description: "Maintain client due diligence files for all financial transactions." },
     ],
     keyRequirements: [
