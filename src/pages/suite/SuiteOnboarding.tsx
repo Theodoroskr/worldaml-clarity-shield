@@ -744,7 +744,14 @@ export default function SuiteOnboarding() {
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-border">
+      {/* Custom fields */}
+      {renderCustomFieldsSection(kycCustomFields)}
+
+      <div className="flex justify-between items-center pt-2 border-t border-border">
+        <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-7" onClick={() => setShowBuilder("kyc")}>
+          <Settings2 className="w-3.5 h-3.5 mr-1" /> Configure Fields
+        </Button>
+        <div className="flex gap-2">
         <Button variant="outline" size="sm" onClick={cancelOnboarding}>Cancel</Button>
         <Button size="sm" onClick={submitKYC} disabled={saving}>
           {saving ? "Saving…" : "Submit KYC Application"}
