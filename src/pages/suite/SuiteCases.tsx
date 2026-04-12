@@ -155,10 +155,10 @@ export default function SuiteCases() {
   const [caseTransactions, setCaseTransactions] = useState<any[]>([]);
   const [manualFields, setManualFields] = useState<FINTRACManualFields>({ ...DEFAULT_MANUAL_FIELDS });
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [pdfPreview, setPdfPreview] = useState<{ blobUrl: string; fileName: string } | null>(null);
   const mf = manualFields;
   const setMF = (patch: Partial<FINTRACManualFields>) => {
     setManualFields(prev => ({ ...prev, ...patch }));
-    // Clear validation errors for the changed fields
     if (validationErrors.length > 0) setValidationErrors([]);
   };
 
