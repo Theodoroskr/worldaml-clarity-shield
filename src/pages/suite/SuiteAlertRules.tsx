@@ -168,6 +168,101 @@ const FINCEN_REQUIREMENTS: FinCENRequirement[] = [
   },
 ];
 
+/* FINTRAC (Canada) Regulatory Mapping */
+const FINTRAC_REQUIREMENTS: FinCENRequirement[] = [
+  {
+    id: "lcttr",
+    regulation: "Large Cash Transaction Report (LCTR)",
+    citation: "PCMLTFA s. 7, PCMLTFR s. 12",
+    description: "Reporting entities must submit an LCTR to FINTRAC for every cash transaction of CAD 10,000 or more, whether conducted in a single transaction or in two or more transactions within 24 hours by or on behalf of the same individual.",
+    rulePatterns: ["Large Transaction", "P-TLO", "P-TLI", "P-HSUMI", "P-HSUMO"],
+    suggestedRules: [
+      { name: "[FINTRAC-LCTR] Aggregate 24h cash ≥ CAD 10,000", severity: "critical", rationale: "FINTRAC requires LCTR filing when aggregate cash transactions by the same person reach CAD 10,000 within a 24-hour window. Monitors daily aggregation for timely reporting.", conditions: [{ field: "account.totalDeposits30d", operator: ">", value: "10000" }, { field: "transaction.type", operator: "==", value: "cash" }] },
+    ],
+  },
+  {
+    id: "str",
+    regulation: "Suspicious Transaction Report (STR)",
+    citation: "PCMLTFA s. 7(1)",
+    description: "Reporting entities must file an STR with FINTRAC when there are reasonable grounds to suspect that a transaction or attempted transaction is related to money laundering, terrorist financing, or sanctions evasion. There is no minimum dollar threshold — all suspicious activity must be reported.",
+    rulePatterns: ["HRCOU", "DORMANT", "NCOU", "RISKWORD", "REFTEXT", "HASUMI", "HASUMO", "HANUMI", "HANUMO", "IN>AVG", "OUT>AVG"],
+    suggestedRules: [
+      { name: "[FINTRAC-STR] Rapid movement of funds (layering)", severity: "high", rationale: "FINTRAC Guidance identifies rapid in-out patterns as a key ML indicator. Funds deposited and moved quickly through multiple accounts suggest layering.", conditions: [{ field: "transaction.amount", operator: ">", value: "3000" }, { field: "transaction.frequency", operator: ">", value: "3" }] },
+    ],
+  },
+  {
+    id: "eftr",
+    regulation: "Electronic Funds Transfer Report (EFTR)",
+    citation: "PCMLTFR s. 12.1",
+    description: "Reporting entities must file an EFTR for international electronic funds transfers of CAD 10,000 or more, whether sent or received. This includes SWIFT transfers, wire transfers, and other electronic payment mechanisms.",
+    rulePatterns: ["SUMCCI", "SUMCCO"],
+    suggestedRules: [
+      { name: "[FINTRAC-EFTR] International EFT ≥ CAD 10,000", severity: "high", rationale: "FINTRAC requires EFTR filing for all international electronic transfers of CAD 10,000+. This rule flags qualifying cross-border electronic transfers for timely reporting.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.country", operator: "!=", value: "CA" }] },
+    ],
+  },
+  {
+    id: "tpr",
+    regulation: "Terrorist Property Report (TPR)",
+    citation: "Criminal Code s. 83.1, PCMLTFA s. 7.1",
+    description: "Every person in Canada must disclose without delay to the RCMP and CSIS the existence of property owned or controlled by or on behalf of a listed terrorist entity. FINTRAC must also be notified.",
+    rulePatterns: ["CUSTSCRS", "CUSTSCRH", "CTPYSCRS", "CUSTBIC", "CTPYBIC", "INSTSCRS", "INSTSCRH", "High-Risk Country"],
+  },
+  {
+    id: "casino-dr",
+    regulation: "Casino Disbursement Report (CDR)",
+    citation: "PCMLTFR s. 13",
+    description: "Casinos must report disbursements of CAD 10,000 or more, including payouts, redemptions of chips/tokens, and advances. Aggregation within 24 hours applies.",
+    rulePatterns: [],
+    suggestedRules: [
+      { name: "[FINTRAC-CDR] Casino disbursement ≥ CAD 10K", severity: "high", rationale: "Canadian casinos must file CDRs for disbursements of CAD 10,000+. This rule flags large casino payouts for compliance reporting.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.type", operator: "==", value: "casino_payout" }] },
+    ],
+  },
+  {
+    id: "vc-report",
+    regulation: "Virtual Currency Transaction Report (VCTR)",
+    citation: "PCMLTFR s. 12.2",
+    description: "Money services businesses (MSBs) dealing in virtual currency must report virtual currency transactions of CAD 10,000 or more. This includes exchanges, transfers, and receipt of virtual currency.",
+    rulePatterns: [],
+    suggestedRules: [
+      { name: "[FINTRAC-VCTR] Virtual currency transfer ≥ CAD 10K", severity: "high", rationale: "FINTRAC requires VCTR filing for virtual currency transactions of CAD 10,000+. MSBs handling crypto must monitor transaction values for reporting obligations.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.currency", operator: "IN", value: "BTC,ETH,USDT,USDC" }] },
+    ],
+  },
+  {
+    id: "structuring-ca",
+    regulation: "Anti-Structuring (Canada)",
+    citation: "PCMLTFA s. 10.1",
+    description: "It is an offence to structure or attempt to structure transactions to avoid FINTRAC reporting thresholds. Patterns of transactions just below CAD 10,000 trigger enhanced scrutiny.",
+    rulePatterns: ["STRIN", "STROUT"],
+  },
+  {
+    id: "kyc-ca",
+    regulation: "Know Your Client (KYC) — Canada",
+    citation: "PCMLTFR s. 52–67",
+    description: "Reporting entities must verify the identity of clients for prescribed transactions, including any cash transaction ≥ CAD 10,000, opening of accounts, and international EFTs ≥ CAD 1,000. Enhanced measures apply to PEPs, HIO, and high-risk clients.",
+    rulePatterns: ["VC", "CDC01-P", "CDC01-E", "CUSTPEP", "CTPYPEP"],
+    suggestedRules: [
+      { name: "[FINTRAC-KYC] PEP/HIO enhanced monitoring", severity: "high", rationale: "FINTRAC requires enhanced ongoing monitoring for Politically Exposed Persons (PEPs) and Heads of International Organizations (HIO), including family members and close associates.", conditions: [{ field: "customer.pepStatus", operator: "==", value: "true" }] },
+    ],
+  },
+  {
+    id: "compliance-program",
+    regulation: "Compliance Program Requirements",
+    citation: "PCMLTFR s. 71",
+    description: "Every reporting entity must implement a compliance program that includes: a compliance officer, written policies and procedures, a risk assessment, an ongoing training program, and an effectiveness review every two years.",
+    rulePatterns: [],
+    suggestedRules: [
+      { name: "[FINTRAC-CP] Biennial effectiveness review due", severity: "medium", rationale: "FINTRAC mandates that compliance programs undergo an independent effectiveness review at least every two years. This rule monitors the review cycle to ensure timely completion.", conditions: [{ field: "alert.count", operator: ">=", value: "0" }] },
+    ],
+  },
+  {
+    id: "sanctions-ca",
+    regulation: "Canadian Sanctions Screening",
+    citation: "SEMA, UNA, Justice for Victims of Corrupt Foreign Officials Act",
+    description: "Canadian entities must screen against OSFI's Consolidated Canadian Autonomous Sanctions List, UN sanctions, and listings under the Sergei Magnitsky Act. Dealing with listed persons or entities is prohibited.",
+    rulePatterns: ["CUSTSCRS", "CUSTSCRH", "CTPYSCRS", "High-Risk Country"],
+  },
+];
+
 export default function SuiteAlertRules() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -180,6 +275,7 @@ export default function SuiteAlertRules() {
   const [ruleAnalysis, setRuleAnalysis] = useState<any>(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [showFinCEN, setShowFinCEN] = useState(false);
+  const [showFINTRAC, setShowFINTRAC] = useState(false);
 
   const fetchRules = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -325,9 +421,13 @@ export default function SuiteAlertRules() {
             {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
             {aiLoading ? "Analyzing…" : "AI Suggest Rules"}
           </button>
-          <button onClick={() => { setShowFinCEN(!showFinCEN); setShowAiPanel(false); setShowAnalysis(false); }} className={cn("flex items-center justify-center gap-1.5 text-xs px-2.5 py-2 rounded-lg border transition-colors font-medium w-full", showFinCEN ? "border-blue-500 bg-blue-100 text-blue-800" : "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100")}>
+          <button onClick={() => { setShowFinCEN(!showFinCEN); setShowFINTRAC(false); setShowAiPanel(false); setShowAnalysis(false); }} className={cn("flex items-center justify-center gap-1.5 text-xs px-2.5 py-2 rounded-lg border transition-colors font-medium w-full", showFinCEN ? "border-blue-500 bg-blue-100 text-blue-800" : "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100")}>
             <Scale className="w-3.5 h-3.5" />
-            FinCEN / BSA Mapping
+            FinCEN / BSA
+          </button>
+          <button onClick={() => { setShowFINTRAC(!showFINTRAC); setShowFinCEN(false); setShowAiPanel(false); setShowAnalysis(false); }} className={cn("flex items-center justify-center gap-1.5 text-xs px-2.5 py-2 rounded-lg border transition-colors font-medium w-full", showFINTRAC ? "border-red-500 bg-red-100 text-red-800" : "border-red-300 bg-red-50 text-red-700 hover:bg-red-100")}>
+            <Scale className="w-3.5 h-3.5" />
+            FINTRAC
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
@@ -758,6 +858,140 @@ export default function SuiteAlertRules() {
                   )}
 
                   {/* Suggested new rules */}
+                  {hasSuggestions && (
+                    <div className="px-4 py-2.5 border-t border-border bg-amber-50/20">
+                      <p className="text-[10px] font-semibold text-amber-700 uppercase tracking-wider mb-1.5">💡 Suggested New Rules</p>
+                      <div className="space-y-2">
+                        {req.suggestedRules!.map((sr, si) => (
+                          <div key={si} className="border border-amber-200 rounded-lg p-2.5 bg-card">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[11px] font-semibold text-foreground">{sr.name}</span>
+                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[sr.severity])}>{sr.severity}</span>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed mb-2">{sr.rationale}</p>
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {sr.conditions.map((c, ci) => (
+                                <span key={ci} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{c.field} {c.operator} {c.value}</span>
+                              ))}
+                            </div>
+                            <button onClick={() => adoptRule(sr)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
+                              <Plus className="w-3 h-3 inline mr-1" />Adopt Rule
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Right panel - FINTRAC Mapping */}
+      {showFINTRAC && (
+        <div className="w-[460px] shrink-0 border-l border-border flex flex-col bg-card overflow-hidden">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2"><Scale className="w-4 h-4 text-red-600" /><h3 className="font-semibold text-foreground text-sm">FINTRAC Regulatory Mapping</h3></div>
+            <button onClick={() => setShowFINTRAC(false)} className="p-1 rounded hover:bg-muted transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {(() => {
+              const totalReqs = FINTRAC_REQUIREMENTS.length;
+              const coveredReqs = FINTRAC_REQUIREMENTS.filter(req =>
+                req.rulePatterns.length > 0 && req.rulePatterns.some(pattern =>
+                  rules.some(r => r.name.includes(pattern))
+                )
+              ).length;
+              const coveragePct = Math.round((coveredReqs / totalReqs) * 100);
+              const allSuggested = FINTRAC_REQUIREMENTS.flatMap(r => r.suggestedRules || []);
+              return (
+                <div className="bg-gradient-to-br from-red-50 to-rose-50 border border-red-200 rounded-xl p-4">
+                  <div className="flex items-end gap-4 mb-3">
+                    <div>
+                      <p className="text-[10px] text-red-600 uppercase tracking-wider font-semibold mb-1">FINTRAC Coverage</p>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-bold text-red-900">{coveragePct}%</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 grid grid-cols-3 gap-2">
+                      <div className="text-center">
+                        <p className="text-[10px] text-muted-foreground mb-0.5">Covered</p>
+                        <p className="text-xs font-bold text-emerald-600">{coveredReqs}/{totalReqs}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[10px] text-muted-foreground mb-0.5">Gaps</p>
+                        <p className="text-xs font-bold text-red-600">{totalReqs - coveredReqs}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[10px] text-muted-foreground mb-0.5">Suggested</p>
+                        <p className="text-xs font-bold text-amber-600">{allSuggested.length}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-red-200 rounded-full h-2">
+                    <div className="bg-red-600 h-2 rounded-full transition-all" style={{ width: `${coveragePct}%` }} />
+                  </div>
+                </div>
+              );
+            })()}
+
+            {FINTRAC_REQUIREMENTS.map(req => {
+              const matchedRules = rules.filter(r =>
+                req.rulePatterns.some(pattern => r.name.includes(pattern))
+              );
+              const isCovered = matchedRules.length > 0;
+              const hasSuggestions = (req.suggestedRules?.length || 0) > 0;
+
+              return (
+                <div key={req.id} className={cn("border rounded-xl overflow-hidden", isCovered ? "border-emerald-200" : "border-red-200")}>
+                  <div className={cn("px-4 py-3 flex items-start gap-3", isCovered ? "bg-emerald-50/50" : "bg-red-50/50")}>
+                    {isCovered ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertOctagon className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <h4 className="text-xs font-semibold text-foreground">{req.regulation}</h4>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200 font-mono font-medium shrink-0">{req.citation}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">{req.description}</p>
+                    </div>
+                  </div>
+
+                  {matchedRules.length > 0 && (
+                    <div className="px-4 py-2.5 border-t border-border bg-card">
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Mapped Rules ({matchedRules.length})</p>
+                      <div className="space-y-1">
+                        {matchedRules.map(r => (
+                          <div key={r.id} onClick={() => { setSelected(r.id); setShowFINTRAC(false); }} className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors group">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <ChevronRight className="w-3 h-3 text-muted-foreground group-hover:text-primary shrink-0" />
+                              <span className="text-[11px] font-medium text-foreground truncate">{r.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[r.priority])}>{r.priority}</span>
+                              <span className={cn("w-1.5 h-1.5 rounded-full", r.enabled ? "bg-emerald-500" : "bg-muted-foreground/30")} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {!isCovered && req.rulePatterns.length > 0 && (
+                    <div className="px-4 py-2 border-t border-border bg-red-50/30">
+                      <p className="text-[11px] text-red-600 font-medium">⚠ No matching rules found — potential compliance gap</p>
+                    </div>
+                  )}
+                  {!isCovered && req.rulePatterns.length === 0 && !hasSuggestions && (
+                    <div className="px-4 py-2 border-t border-border bg-amber-50/30">
+                      <p className="text-[11px] text-amber-600 font-medium">⚠ No automated rules — may require manual process</p>
+                    </div>
+                  )}
+
                   {hasSuggestions && (
                     <div className="px-4 py-2.5 border-t border-border bg-amber-50/20">
                       <p className="text-[10px] font-semibold text-amber-700 uppercase tracking-wider mb-1.5">💡 Suggested New Rules</p>
