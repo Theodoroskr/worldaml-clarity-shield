@@ -305,24 +305,8 @@ export default function SuiteCases() {
   const handleExportFINTRAC = async () => {
     if (!selectedCase) return;
 
-    const previewWindow = window.open("", "_blank");
-    if (previewWindow) {
-      previewWindow.document.write(`
-        <html><head><title>Generating FINTRAC PDF…</title></head>
-        <body style="font-family: Arial, sans-serif; padding: 24px; color: #111827;">
-          <p style="margin: 0; font-size: 14px;">Generating FINTRAC PDF…</p>
-        </body></html>
-      `);
-      previewWindow.document.close();
-    }
-
-    const closePreviewWindow = () => {
-      if (previewWindow && !previewWindow.closed) previewWindow.close();
-    };
-
     const errors = validateFintracFields();
     if (errors.length > 0) {
-      closePreviewWindow();
       setValidationErrors(errors);
       const labels: Record<string, string> = {
         methodOfTransaction: "Method of Transaction",
@@ -346,7 +330,6 @@ export default function SuiteCases() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        closePreviewWindow();
         toast.error("Please log in to export");
         return;
       }
@@ -369,7 +352,7 @@ export default function SuiteCases() {
         transactions = data || [];
       }
 
-      await exportFINTRACStr({
+      const result = await exportFINTRACStr({
         caseItem: selectedCase,
         notes,
         customer,
@@ -379,8 +362,9 @@ export default function SuiteCases() {
         reportingEntityRef: `FINTRAC-${fintracStrType.toUpperCase()}-${selectedCase.id.slice(0, 8).toUpperCase()}`,
         strType: fintracStrType,
         manualFields,
-        targetWindow: previewWindow,
       });
+
+      setPdfPreview(result);
 
       await supabase.from("suite_audit_log").insert({
         user_id: user.id,
@@ -389,14 +373,29 @@ export default function SuiteCases() {
         entity_id: selectedCase.id,
         details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada" },
       });
-
-      toast.success(`FINTRAC ${fintracStrType.toUpperCase()} PDF opened`);
     } catch (err: any) {
-      closePreviewWindow();
       console.error("FINTRAC export error:", err);
       toast.error(`PDF export failed: ${err?.message || "Unknown error"}`);
     }
   };
+
+  const handleDownloadPdf = () => {
+    if (!pdfPreview) return;
+    const link = document.createElement("a");
+    link.href = pdfPreview.blobUrl;
+    link.download = pdfPreview.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("PDF downloaded");
+  };
+
+  const closePdfPreview = useCallback(() => {
+    if (pdfPreview) {
+      URL.revokeObjectURL(pdfPreview.blobUrl);
+      setPdfPreview(null);
+    }
+  }, [pdfPreview]);
 
   const filtered = cases.filter(c =>
     (filter === "All" || c.status === filter) &&
