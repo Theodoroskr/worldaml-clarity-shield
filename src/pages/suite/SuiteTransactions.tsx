@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, TrendingUp, Globe, RefreshCw, Plus } from "lucide-react";
+import { AlertTriangle, TrendingUp, Globe, RefreshCw, Plus, Upload, FileText, Sparkles, X, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface TxRow {
   id: string;
@@ -17,21 +19,33 @@ interface TxRow {
   created_at: string;
 }
 
-interface Customer {
-  id: string;
-  name: string;
+interface Customer { id: string; name: string; }
+
+interface BulkRow {
+  customer_name: string;
+  amount: string;
+  currency: string;
+  direction: string;
+  counterparty: string;
+  counterparty_country: string;
+  description: string;
+}
+
+interface AIAnalysis {
+  summary: string;
+  flagged_patterns: { pattern: string; severity: string; affected_count: number }[];
+  suggested_rules: { name: string; severity: string; conditions: { field: string; operator: string; value: string }[]; rationale: string }[];
 }
 
 const HIGH_RISK = ["RU", "IR", "PA", "KP", "SY"];
+const EMPTY_BULK: BulkRow = { customer_name: "", amount: "", currency: "EUR", direction: "inbound", counterparty: "", counterparty_country: "", description: "" };
 
 const triggerMonitoring = async (userId: string, transactionId: string) => {
   try {
     await supabase.functions.invoke("evaluate-transactions", {
       body: { user_id: userId, transaction_ids: [transactionId] },
     });
-  } catch {
-    console.warn("Transaction monitoring evaluation deferred");
-  }
+  } catch { console.warn("Transaction monitoring evaluation deferred"); }
 };
 
 export default function SuiteTransactions() {
@@ -41,6 +55,20 @@ export default function SuiteTransactions() {
   const [filter, setFilter] = useState<"All" | "flagged" | "clean">("All");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ customer_id: "", amount: "", currency: "EUR", direction: "inbound", counterparty: "", counterparty_country: "", description: "" });
+
+  // Import state
+  const [showImport, setShowImport] = useState(false);
+  const [importMode, setImportMode] = useState<"csv" | "manual">("csv");
+  const [csvData, setCsvData] = useState<BulkRow[]>([]);
+  const [bulkRows, setBulkRows] = useState<BulkRow[]>([{ ...EMPTY_BULK }]);
+  const [importing, setImporting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // AI state
+  const [showAI, setShowAI] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
+  const [savingRules, setSavingRules] = useState<Set<number>>(new Set());
 
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -63,71 +91,356 @@ export default function SuiteTransactions() {
     if (!form.customer_id || !form.amount) { toast.error("Customer and amount required"); return; }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-
     const isHighRisk = HIGH_RISK.includes((form.counterparty_country || "").toUpperCase());
     const amount = parseFloat(form.amount);
     const riskFlag = isHighRisk || amount > 10000;
 
     const { data, error } = await supabase.from("suite_transactions").insert({
-      customer_id: form.customer_id,
-      user_id: user.id,
-      amount,
-      currency: form.currency,
-      direction: form.direction,
-      counterparty: form.counterparty || null,
-      counterparty_country: form.counterparty_country || null,
-      risk_flag: riskFlag,
-      description: form.description || null,
+      customer_id: form.customer_id, user_id: user.id, amount, currency: form.currency, direction: form.direction,
+      counterparty: form.counterparty || null, counterparty_country: form.counterparty_country || null, risk_flag: riskFlag, description: form.description || null,
     }).select().single();
 
     if (error) { toast.error(error.message); return; }
-
-    await supabase.from("suite_audit_log").insert({
-      user_id: user.id,
-      action: `Transaction recorded: ${form.currency} ${amount} ${form.direction}`,
-      entity_type: "transaction",
-      details: { detail: `Counterparty: ${form.counterparty || "N/A"}, Country: ${form.counterparty_country || "N/A"}` },
-    });
-
+    await supabase.from("suite_audit_log").insert({ user_id: user.id, action: `Transaction recorded: ${form.currency} ${amount} ${form.direction}`, entity_type: "transaction", details: { detail: `Counterparty: ${form.counterparty || "N/A"}, Country: ${form.counterparty_country || "N/A"}` } });
     if (riskFlag) {
-      await supabase.from("suite_alerts").insert({
-        customer_id: form.customer_id,
-        user_id: user.id,
-        alert_type: "transaction",
-        severity: amount > 30000 ? "critical" : "high",
-        title: `Flagged transaction: ${form.currency} ${amount.toLocaleString()}`,
-        description: `${form.direction} transaction${isHighRisk ? " to high-risk jurisdiction (" + form.counterparty_country + ")" : ""} exceeds threshold`,
-      });
+      await supabase.from("suite_alerts").insert({ customer_id: form.customer_id, user_id: user.id, alert_type: "transaction", severity: amount > 30000 ? "critical" : "high", title: `Flagged transaction: ${form.currency} ${amount.toLocaleString()}`, description: `${form.direction} transaction${isHighRisk ? " to high-risk jurisdiction (" + form.counterparty_country + ")" : ""} exceeds threshold` });
     }
-
-    // Trigger server-side rule evaluation
-    if (data) {
-      triggerMonitoring(user.id, data.id);
-    }
-
+    if (data) triggerMonitoring(user.id, data.id);
     toast.success("Transaction recorded");
     setForm({ customer_id: form.customer_id, amount: "", currency: "EUR", direction: "inbound", counterparty: "", counterparty_country: "", description: "" });
     setShowForm(false);
     fetchData();
   };
 
+  // CSV parsing
+  const parseCSV = (text: string): BulkRow[] => {
+    const lines = text.trim().split("\n");
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(",").map(h => h.trim().toLowerCase().replace(/[^a-z_]/g, ""));
+    const fieldMap: Record<string, keyof BulkRow> = {
+      customer: "customer_name", customer_name: "customer_name", name: "customer_name",
+      amount: "amount", currency: "currency", direction: "direction",
+      counterparty: "counterparty", counterparty_country: "counterparty_country", country: "counterparty_country",
+      description: "description", desc: "description",
+    };
+    return lines.slice(1).filter(l => l.trim()).map(line => {
+      const cols = line.split(",").map(c => c.trim().replace(/^["']|["']$/g, ""));
+      const row: BulkRow = { ...EMPTY_BULK };
+      headers.forEach((h, i) => {
+        const key = fieldMap[h];
+        if (key && cols[i]) (row as any)[key] = cols[i];
+      });
+      return row;
+    }).filter(r => r.amount && r.customer_name);
+  };
+
+  const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      const rows = parseCSV(text);
+      if (rows.length === 0) { toast.error("No valid rows found. Ensure CSV has headers: customer_name, amount, currency, direction, counterparty, counterparty_country, description"); return; }
+      setCsvData(rows);
+      toast.success(`${rows.length} rows parsed from CSV`);
+    };
+    reader.readAsText(file);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const importTransactions = async (rows: BulkRow[]) => {
+    if (rows.length === 0) { toast.error("No rows to import"); return; }
+    setImporting(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setImporting(false); return; }
+
+    const customerMap = new Map(customers.map(c => [c.name.toLowerCase(), c.id]));
+    let imported = 0, skipped = 0;
+
+    for (const row of rows) {
+      const custId = customerMap.get(row.customer_name.toLowerCase());
+      if (!custId) { skipped++; continue; }
+      const amount = parseFloat(row.amount);
+      if (isNaN(amount)) { skipped++; continue; }
+      const isHighRisk = HIGH_RISK.includes((row.counterparty_country || "").toUpperCase());
+      const riskFlag = isHighRisk || amount > 10000;
+
+      const { data, error } = await supabase.from("suite_transactions").insert({
+        customer_id: custId, user_id: user.id, amount, currency: row.currency || "EUR",
+        direction: row.direction || "inbound", counterparty: row.counterparty || null,
+        counterparty_country: row.counterparty_country || null, risk_flag: riskFlag,
+        description: row.description || null,
+      }).select("id").single();
+
+      if (!error && data) {
+        imported++;
+        if (riskFlag) {
+          await supabase.from("suite_alerts").insert({ customer_id: custId, user_id: user.id, alert_type: "transaction", severity: amount > 30000 ? "critical" : "high", title: `Flagged import: ${row.currency || "EUR"} ${amount.toLocaleString()}`, description: `Imported transaction flagged${isHighRisk ? " (high-risk jurisdiction)" : ""}` });
+        }
+      } else { skipped++; }
+    }
+
+    await supabase.from("suite_audit_log").insert({ user_id: user.id, action: `Bulk import: ${imported} transactions imported, ${skipped} skipped`, entity_type: "transaction", details: { imported, skipped, total: rows.length } });
+
+    toast.success(`Imported ${imported} transactions${skipped > 0 ? `, ${skipped} skipped` : ""}`);
+    setImporting(false);
+    setShowImport(false);
+    setCsvData([]);
+    setBulkRows([{ ...EMPTY_BULK }]);
+    fetchData();
+  };
+
+  // AI analysis
+  const runAIAnalysis = async () => {
+    setAiLoading(true);
+    setAiAnalysis(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("suggest-rules");
+      if (error) throw error;
+      if (data?.error) { toast.error(data.error); setAiLoading(false); return; }
+      setAiAnalysis(data);
+      setShowAI(true);
+    } catch (err: any) {
+      toast.error(err?.message || "AI analysis failed");
+    }
+    setAiLoading(false);
+  };
+
+  const saveRule = async (index: number) => {
+    if (!aiAnalysis) return;
+    const rule = aiAnalysis.suggested_rules[index];
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    setSavingRules(prev => new Set(prev).add(index));
+
+    const { error } = await supabase.from("suite_alert_rules").insert({
+      user_id: user.id, name: rule.name, severity: rule.severity, conditions: rule.conditions as any, is_active: true,
+    });
+
+    if (error) toast.error(error.message);
+    else toast.success(`Rule "${rule.name}" created`);
+    setSavingRules(prev => { const s = new Set(prev); s.delete(index); return s; });
+  };
+
   const customerName = (id: string) => customers.find(c => c.id === id)?.name || "Unknown";
   const filtered = filter === "All" ? txs : filter === "flagged" ? txs.filter(t => t.risk_flag) : txs.filter(t => !t.risk_flag);
   const stats = { total: txs.length, flagged: txs.filter(t => t.risk_flag).length, volume: txs.reduce((s, t) => s + Number(t.amount), 0) };
 
+  const sevColor = (s: string) => s === "critical" ? "bg-red-100 text-red-800 border-red-200" : s === "high" ? "bg-orange-100 text-orange-800 border-orange-200" : s === "medium" ? "bg-yellow-100 text-yellow-800 border-yellow-200" : "bg-blue-100 text-blue-800 border-blue-200";
+
   return (
     <div className="flex flex-col h-full bg-background">
+      {/* Header */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-card shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold text-foreground">Transaction Monitor</span>
           <span className="text-xs text-muted-foreground">{txs.length} records</span>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-medium"><Plus className="w-3 h-3" />Add Transaction</button>
-          <button onClick={fetchData} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded border border-border hover:bg-muted transition-colors text-foreground"><RefreshCw className="w-3 h-3" />Refresh</button>
+          <Button variant="outline" size="sm" className="text-xs h-7 gap-1.5" onClick={() => { setShowImport(!showImport); setShowAI(false); }}>
+            <Upload className="w-3 h-3" />Import
+          </Button>
+          <Button variant="outline" size="sm" className="text-xs h-7 gap-1.5" onClick={() => { runAIAnalysis(); setShowImport(false); }} disabled={aiLoading || txs.length === 0}>
+            {aiLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+            AI Suggest Rules
+          </Button>
+          <Button size="sm" className="text-xs h-7 gap-1.5" onClick={() => { setShowForm(!showForm); setShowImport(false); setShowAI(false); }}>
+            <Plus className="w-3 h-3" />Add Transaction
+          </Button>
+          <Button variant="ghost" size="sm" className="text-xs h-7" onClick={fetchData}><RefreshCw className="w-3 h-3" /></Button>
         </div>
       </div>
 
+      {/* AI Analysis Panel */}
+      {showAI && aiAnalysis && (
+        <div className="px-5 py-4 border-b border-border bg-card animate-fade-in max-h-[400px] overflow-y-auto">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <h3 className="font-semibold text-foreground text-sm">AI Risk Analysis</h3>
+            </div>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setShowAI(false)}><X className="w-3.5 h-3.5" /></Button>
+          </div>
+
+          {/* Summary */}
+          <div className="bg-muted/50 rounded-lg p-3 mb-4">
+            <p className="text-xs text-foreground leading-relaxed">{aiAnalysis.summary}</p>
+          </div>
+
+          {/* Flagged Patterns */}
+          {aiAnalysis.flagged_patterns?.length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Detected Patterns</h4>
+              <div className="space-y-1.5">
+                {aiAnalysis.flagged_patterns.map((p, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <span className={cn("px-1.5 py-0.5 rounded border text-[10px] font-medium", sevColor(p.severity))}>{p.severity}</span>
+                    <span className="text-foreground flex-1">{p.pattern}</span>
+                    <span className="text-muted-foreground font-mono">{p.affected_count} txn{p.affected_count !== 1 ? "s" : ""}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Suggested Rules */}
+          {aiAnalysis.suggested_rules?.length > 0 && (
+            <div>
+              <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Suggested Alert Rules</h4>
+              <div className="space-y-2">
+                {aiAnalysis.suggested_rules.map((rule, i) => (
+                  <div key={i} className="border border-border rounded-lg p-3 bg-background">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-semibold text-foreground">{rule.name}</span>
+                          <span className={cn("px-1.5 py-0.5 rounded border text-[10px] font-medium", sevColor(rule.severity))}>{rule.severity}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mb-1.5">{rule.rationale}</p>
+                        <div className="flex flex-wrap gap-1">
+                          {rule.conditions.map((c, ci) => (
+                            <span key={ci} className="text-[10px] px-1.5 py-0.5 bg-muted rounded font-mono">{c.field} {c.operator} {typeof c.value === "object" ? JSON.stringify(c.value) : c.value}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" className="text-xs h-7 shrink-0 gap-1" onClick={() => saveRule(i)} disabled={savingRules.has(i)}>
+                        {savingRules.has(i) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                        Save Rule
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Import Panel */}
+      {showImport && (
+        <div className="px-5 py-4 border-b border-border bg-card animate-fade-in">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-foreground text-sm">Import Transactions</h3>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { setShowImport(false); setCsvData([]); }}><X className="w-3.5 h-3.5" /></Button>
+          </div>
+
+          {/* Mode toggle */}
+          <div className="flex gap-1 mb-3">
+            {(["csv", "manual"] as const).map(m => (
+              <button key={m} onClick={() => setImportMode(m)} className={cn("text-xs px-3 py-1 rounded-full border font-medium capitalize", importMode === m ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border")}>
+                {m === "csv" ? "CSV Upload" : "Manual Entry"}
+              </button>
+            ))}
+          </div>
+
+          {importMode === "csv" ? (
+            <div>
+              {csvData.length === 0 ? (
+                <div>
+                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors" onClick={() => fileRef.current?.click()}>
+                    <FileText className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground mb-1">Click to upload CSV file</p>
+                    <p className="text-[10px] text-muted-foreground">Expected columns: customer_name, amount, currency, direction, counterparty, counterparty_country, description</p>
+                  </div>
+                  <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleCSVUpload} />
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-muted-foreground">{csvData.length} rows ready to import</span>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => setCsvData([])}>Clear</Button>
+                      <Button size="sm" className="text-xs h-7" onClick={() => importTransactions(csvData)} disabled={importing}>
+                        {importing ? <><Loader2 className="w-3 h-3 animate-spin mr-1" />Importing…</> : `Import ${csvData.length} rows`}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="max-h-[200px] overflow-y-auto border border-border rounded-lg">
+                    <table className="w-full text-[11px]">
+                      <thead className="bg-muted sticky top-0">
+                        <tr>{["Customer", "Amount", "Currency", "Dir", "Counterparty", "Country"].map(h => <th key={h} className="px-2 py-1.5 text-left font-semibold text-muted-foreground">{h}</th>)}</tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {csvData.slice(0, 50).map((r, i) => {
+                          const matched = customers.some(c => c.name.toLowerCase() === r.customer_name.toLowerCase());
+                          return (
+                            <tr key={i} className={cn(!matched && "bg-red-50/30")}>
+                              <td className="px-2 py-1">
+                                <span className={cn(!matched && "text-destructive")}>{r.customer_name}</span>
+                                {!matched && <span className="text-[9px] text-destructive ml-1">(not found)</span>}
+                              </td>
+                              <td className="px-2 py-1 font-mono">{r.amount}</td>
+                              <td className="px-2 py-1">{r.currency}</td>
+                              <td className="px-2 py-1">{r.direction}</td>
+                              <td className="px-2 py-1">{r.counterparty}</td>
+                              <td className="px-2 py-1">{r.counterparty_country}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    {csvData.length > 50 && <p className="text-[10px] text-center text-muted-foreground py-1">…and {csvData.length - 50} more</p>}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              <div className="max-h-[250px] overflow-y-auto space-y-2 mb-3">
+                {bulkRows.map((row, i) => (
+                  <div key={i} className="grid grid-cols-7 gap-2 items-end">
+                    <div>
+                      {i === 0 && <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Customer *</label>}
+                      <select value={row.customer_name} onChange={e => { const r = [...bulkRows]; r[i] = { ...r[i], customer_name: e.target.value }; setBulkRows(r); }} className="w-full border border-border rounded px-2 py-1.5 text-xs bg-background text-foreground">
+                        <option value="">Select…</option>
+                        {customers.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      {i === 0 && <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Amount *</label>}
+                      <input type="number" value={row.amount} onChange={e => { const r = [...bulkRows]; r[i] = { ...r[i], amount: e.target.value }; setBulkRows(r); }} className="w-full border border-border rounded px-2 py-1.5 text-xs bg-background text-foreground" placeholder="0" />
+                    </div>
+                    <div>
+                      {i === 0 && <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Currency</label>}
+                      <select value={row.currency} onChange={e => { const r = [...bulkRows]; r[i] = { ...r[i], currency: e.target.value }; setBulkRows(r); }} className="w-full border border-border rounded px-2 py-1.5 text-xs bg-background text-foreground">
+                        {["EUR", "USD", "GBP", "CHF"].map(c => <option key={c}>{c}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      {i === 0 && <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Direction</label>}
+                      <select value={row.direction} onChange={e => { const r = [...bulkRows]; r[i] = { ...r[i], direction: e.target.value }; setBulkRows(r); }} className="w-full border border-border rounded px-2 py-1.5 text-xs bg-background text-foreground">
+                        <option value="inbound">Inbound</option><option value="outbound">Outbound</option>
+                      </select>
+                    </div>
+                    <div>
+                      {i === 0 && <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Counterparty</label>}
+                      <input value={row.counterparty} onChange={e => { const r = [...bulkRows]; r[i] = { ...r[i], counterparty: e.target.value }; setBulkRows(r); }} className="w-full border border-border rounded px-2 py-1.5 text-xs bg-background text-foreground" />
+                    </div>
+                    <div>
+                      {i === 0 && <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Country</label>}
+                      <input value={row.counterparty_country} onChange={e => { const r = [...bulkRows]; r[i] = { ...r[i], counterparty_country: e.target.value }; setBulkRows(r); }} placeholder="DE" className="w-full border border-border rounded px-2 py-1.5 text-xs bg-background text-foreground" />
+                    </div>
+                    <div className="flex gap-1">
+                      {bulkRows.length > 1 && <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => setBulkRows(bulkRows.filter((_, j) => j !== i))}><X className="w-3 h-3" /></Button>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between">
+                <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => setBulkRows([...bulkRows, { ...EMPTY_BULK }])}>
+                  <Plus className="w-3 h-3 mr-1" />Add Row
+                </Button>
+                <Button size="sm" className="text-xs h-7" onClick={() => importTransactions(bulkRows.filter(r => r.customer_name && r.amount))} disabled={importing}>
+                  {importing ? <><Loader2 className="w-3 h-3 animate-spin mr-1" />Importing…</> : `Import ${bulkRows.filter(r => r.customer_name && r.amount).length} rows`}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Single add form */}
       {showForm && (
         <div className="px-5 py-4 border-b border-border bg-card animate-fade-in">
           <h3 className="font-semibold text-foreground text-sm mb-3">Record Transaction</h3>
@@ -151,8 +464,7 @@ export default function SuiteTransactions() {
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1 block">Direction</label>
               <select value={form.direction} onChange={e => setForm(f => ({ ...f, direction: e.target.value }))} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground">
-                <option value="inbound">Inbound</option>
-                <option value="outbound">Outbound</option>
+                <option value="inbound">Inbound</option><option value="outbound">Outbound</option>
               </select>
             </div>
             <div>
@@ -164,13 +476,14 @@ export default function SuiteTransactions() {
               <input value={form.counterparty_country} onChange={e => setForm(f => ({ ...f, counterparty_country: e.target.value }))} placeholder="e.g. DE" className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground" />
             </div>
             <div className="col-span-2 flex items-end gap-2">
-              <button onClick={() => setShowForm(false)} className="text-xs px-3 py-2 rounded-lg border border-border text-muted-foreground hover:bg-muted">Cancel</button>
-              <button onClick={addTransaction} className="text-xs px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium">Save</button>
+              <Button variant="outline" size="sm" onClick={() => setShowForm(false)}>Cancel</Button>
+              <Button size="sm" onClick={addTransaction}>Save</Button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Stats */}
       <div className="grid grid-cols-3 gap-0 border-b border-border bg-card shrink-0">
         {[
           { label: "Total", value: stats.total, icon: TrendingUp, color: "text-primary" },
@@ -187,6 +500,7 @@ export default function SuiteTransactions() {
         ))}
       </div>
 
+      {/* Filters */}
       <div className="flex items-center gap-1.5 px-5 py-2 border-b border-border bg-card shrink-0">
         {(["All", "flagged", "clean"] as const).map(s => (
           <button key={s} onClick={() => setFilter(s)} className={cn("text-xs px-3 py-1 rounded-full border font-medium transition-colors capitalize", filter === s ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary")}>
@@ -195,6 +509,7 @@ export default function SuiteTransactions() {
         ))}
       </div>
 
+      {/* Table */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (
           <p className="text-sm text-muted-foreground text-center py-8">Loading…</p>
