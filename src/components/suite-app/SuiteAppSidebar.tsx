@@ -58,6 +58,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
   {
     title: "System",
     items: [
+      { icon: Scale, label: "Regulatory Hub", path: "/suite/regulatory" },
       { icon: Settings, label: "Settings", path: "/suite/settings" },
       { icon: HelpCircle, label: "Help — SAR/STR", path: "/suite/help" },
     ],
