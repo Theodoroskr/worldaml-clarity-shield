@@ -5,6 +5,7 @@ import { generatePeriodicReportPDF, PeriodicReportPDFData } from "@/services/per
 import {
   FileText, Plus, Download, CheckCircle2, Clock, Send,
   ChevronDown, ChevronUp, Pencil, Trash2, Eye, Sparkles, Loader2,
+  AlertTriangle, CircleAlert, Info, CheckSquare,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
