@@ -29,8 +29,6 @@ interface ScoredCustomer extends Customer {
 
 const PIE_COLORS = ["hsl(142,71%,45%)", "hsl(221,83%,53%)", "hsl(38,92%,50%)", "hsl(0,84%,60%)"];
 
-const PIE_COLORS = ["hsl(142,71%,45%)", "hsl(221,83%,53%)", "hsl(38,92%,50%)", "hsl(0,84%,60%)"];
-
 /* ─── Likelihood & Impact derivation ─── */
 // Likelihood = avg(screening, transaction, kycStatus) — how likely is a risk event
 // Impact = avg(country, customerType, composite) — how severe would the impact be
