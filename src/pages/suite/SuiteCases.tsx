@@ -153,8 +153,13 @@ export default function SuiteCases() {
   const [caseCustomer, setCaseCustomer] = useState<any>(null);
   const [caseTransactions, setCaseTransactions] = useState<any[]>([]);
   const [manualFields, setManualFields] = useState<FINTRACManualFields>({ ...DEFAULT_MANUAL_FIELDS });
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const mf = manualFields;
-  const setMF = (patch: Partial<FINTRACManualFields>) => setManualFields(prev => ({ ...prev, ...patch }));
+  const setMF = (patch: Partial<FINTRACManualFields>) => {
+    setManualFields(prev => ({ ...prev, ...patch }));
+    // Clear validation errors for the changed fields
+    if (validationErrors.length > 0) setValidationErrors([]);
+  };
 
   const fetchCases = async () => {
     const { data: { user } } = await supabase.auth.getUser();
