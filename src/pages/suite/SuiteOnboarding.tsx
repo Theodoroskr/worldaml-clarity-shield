@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2 } from "lucide-react";
+import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import FormFieldBuilder, { type CustomField } from "@/components/suite/FormFieldBuilder";
+import { REGULATORY_PROFILES, REGULATOR_OPTIONS, type RegulatoryProfile } from "@/data/regulatoryProfiles";
 
 interface Customer {
   id: string;
@@ -24,6 +25,7 @@ interface Customer {
   company_name: string | null;
   registration_number: string | null;
   date_of_birth: string | null;
+  regulator: string | null;
   created_at: string;
 }
 
@@ -80,12 +82,13 @@ interface KYCForm {
   occupation: string;
   sourceOfFunds: string;
   pep: string;
+  regulator: string;
 }
 
 const emptyKYC: KYCForm = {
   firstName: "", lastName: "", email: "", dateOfBirth: "", nationality: "", country: "",
   address: "", city: "", postalCode: "", idType: "passport", idNumber: "",
-  occupation: "", sourceOfFunds: "", pep: "no",
+  occupation: "", sourceOfFunds: "", pep: "no", regulator: "",
 };
 
 // KYB form state
@@ -109,6 +112,7 @@ interface KYBForm {
   uboName: string;
   uboNationality: string;
   uboOwnership: string;
+  regulator: string;
 }
 
 const emptyKYB: KYBForm = {
@@ -116,8 +120,98 @@ const emptyKYB: KYBForm = {
   legalStructure: "limited", industry: "", website: "", registeredAddress: "",
   city: "", postalCode: "", contactName: "", contactEmail: "", contactPhone: "",
   annualTurnover: "", numberOfEmployees: "", sourceOfFunds: "",
-  uboName: "", uboNationality: "", uboOwnership: "",
+  uboName: "", uboNationality: "", uboOwnership: "", regulator: "",
 };
+
+// Auto-provision baseline alert rules for the selected regulator
+async function provisionRegulatoryRules(userId: string, regulatorId: string, customerName: string) {
+  const profile = REGULATORY_PROFILES[regulatorId];
+  if (!profile) return;
+
+  // Check which rules already exist for this user to avoid duplicates
+  const { data: existing } = await supabase.from("suite_alert_rules")
+    .select("name")
+    .eq("user_id", userId);
+  const existingNames = new Set((existing || []).map(r => r.name));
+
+  const newRules = profile.baselineRules.filter(r => !existingNames.has(r.name));
+  if (newRules.length === 0) return;
+
+  const inserts = newRules.map(rule => ({
+    user_id: userId,
+    name: rule.name,
+    severity: rule.severity,
+    conditions: rule.conditions,
+    is_active: true,
+  }));
+
+  const { error } = await supabase.from("suite_alert_rules").insert(inserts);
+  if (error) {
+    console.error("Failed to provision rules:", error);
+  } else {
+    toast.success(`${newRules.length} ${profile.shortName} alert rules auto-configured`);
+    // Audit log
+    await supabase.from("suite_audit_log").insert({
+      user_id: userId,
+      action: `Auto-provisioned ${newRules.length} ${profile.shortName} rules for ${customerName}`,
+      entity_type: "alert_rule",
+      details: { regulator: regulatorId, rules_added: newRules.map(r => r.name) },
+    });
+  }
+}
+
+// Regulator picker component
+function RegulatorPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const selected = value ? REGULATORY_PROFILES[value] : null;
+
+  return (
+    <div className="mb-6">
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-1.5">
+        <Shield className="w-3.5 h-3.5" /> Regulatory Jurisdiction
+      </h3>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="col-span-2">
+          <FormField label="Reporting Regulator" required>
+            <Select value={value} onValueChange={onChange}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select regulator…" /></SelectTrigger>
+              <SelectContent>
+                {REGULATOR_OPTIONS.map(r => (
+                  <SelectItem key={r.id} value={r.id}>
+                    <span className="font-medium">{r.label}</span>
+                    <span className="text-muted-foreground ml-1.5">({r.country})</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+        </div>
+      </div>
+
+      {selected && (
+        <div className="mt-3 p-3 bg-muted/30 border border-border rounded-lg space-y-2 animate-fade-in">
+          <p className="text-xs font-medium text-foreground">{selected.name}</p>
+          <p className="text-[10px] text-muted-foreground">{selected.legislation}</p>
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {selected.reportingObligations.map(ob => (
+              <span key={ob.code} className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">
+                <FileText className="w-2.5 h-2.5" /> {ob.code}
+                {ob.threshold && <span className="text-muted-foreground">({ob.threshold})</span>}
+              </span>
+            ))}
+          </div>
+          <div className="mt-2">
+            <p className="text-[10px] font-medium text-muted-foreground mb-1">Auto-configured on submit:</p>
+            <ul className="text-[10px] text-muted-foreground space-y-0.5">
+              <li className="flex items-center gap-1"><AlertTriangle className="w-2.5 h-2.5 text-amber-500" /> {selected.baselineRules.length} monitoring rules</li>
+              <li className="flex items-center gap-1"><Shield className="w-2.5 h-2.5 text-primary" /> Risk weights: Country {selected.riskWeights.countryRisk}%, Screening {selected.riskWeights.screeningMatches}%, Transactions {selected.riskWeights.transactions}%</li>
+              <li className="flex items-center gap-1"><FileText className="w-2.5 h-2.5 text-emerald-500" /> {selected.reportingObligations.length} reporting obligations</li>
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const KYC_STATUSES = ["pending", "in_review", "verified", "rejected"];
 const RISK_LEVELS = ["low", "medium", "high", "critical"];
@@ -276,6 +370,14 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
         <div>
           <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Compliance Status</h3>
           <div className="space-y-3">
+            <div>
+              <span className="text-xs text-muted-foreground block mb-0.5">Reporting Regulator</span>
+              {customer.regulator ? (
+                <Badge className="text-xs bg-primary/10 text-primary border-primary/20">
+                  {REGULATORY_PROFILES[customer.regulator]?.shortName || customer.regulator}
+                </Badge>
+              ) : <p className="text-sm text-muted-foreground">—</p>}
+            </div>
             <div>
               <span className="text-xs text-muted-foreground block mb-0.5">KYC/KYB Status</span>
               {editing ? (
@@ -524,6 +626,9 @@ export default function SuiteOnboarding() {
     if (!kycForm.firstName.trim() || !kycForm.lastName.trim()) {
       toast.error("First name and last name are required"); return;
     }
+    if (!kycForm.regulator) {
+      toast.error("Please select a reporting regulator"); return;
+    }
     if (kycForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(kycForm.email)) {
       toast.error("Invalid email address"); return;
     }
@@ -539,9 +644,15 @@ export default function SuiteOnboarding() {
       email: kycForm.email.trim() || null,
       country: kycForm.country || null,
       date_of_birth: kycForm.dateOfBirth || null,
+      regulator: kycForm.regulator || null,
     });
 
     if (error) { toast.error(error.message); setSaving(false); return; }
+
+    // Auto-provision regulatory baseline rules
+    if (kycForm.regulator) {
+      await provisionRegulatoryRules(user.id, kycForm.regulator, fullName);
+    }
 
     await supabase.from("suite_audit_log").insert({
       user_id: user.id,
@@ -549,6 +660,7 @@ export default function SuiteOnboarding() {
       entity_type: "customer",
       details: {
         type: "individual",
+        regulator: kycForm.regulator,
         nationality: kycForm.nationality,
         country: kycForm.country,
         id_type: kycForm.idType,
@@ -568,6 +680,7 @@ export default function SuiteOnboarding() {
   const submitKYB = async () => {
     if (!kybForm.companyName.trim()) { toast.error("Company name is required"); return; }
     if (!kybForm.country) { toast.error("Country of incorporation is required"); return; }
+    if (!kybForm.regulator) { toast.error("Please select a reporting regulator"); return; }
     if (kybForm.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(kybForm.contactEmail)) {
       toast.error("Invalid contact email"); return;
     }
@@ -583,6 +696,7 @@ export default function SuiteOnboarding() {
       country: kybForm.country || null,
       company_name: kybForm.companyName.trim(),
       registration_number: kybForm.registrationNumber.trim() || null,
+      regulator: kybForm.regulator || null,
     }).select("id").single();
 
     if (error) { toast.error(error.message); setSaving(false); return; }
@@ -598,12 +712,18 @@ export default function SuiteOnboarding() {
       });
     }
 
+    // Auto-provision regulatory baseline rules
+    if (kybForm.regulator) {
+      await provisionRegulatoryRules(user.id, kybForm.regulator, kybForm.companyName);
+    }
+
     await supabase.from("suite_audit_log").insert({
       user_id: user.id,
       action: `KYB onboarding: ${kybForm.companyName}`,
       entity_type: "customer",
       details: {
         type: "business",
+        regulator: kybForm.regulator,
         country: kybForm.country,
         legal_structure: kybForm.legalStructure,
         industry: kybForm.industry,
@@ -715,6 +835,9 @@ export default function SuiteOnboarding() {
           </FormField>
         </div>
       </div>
+
+      {/* Section: Regulatory Jurisdiction */}
+      <RegulatorPicker value={kycForm.regulator} onChange={v => setKycForm(f => ({ ...f, regulator: v }))} />
 
       {/* Section: Risk & Compliance */}
       <div className="mb-6">
@@ -912,6 +1035,9 @@ export default function SuiteOnboarding() {
         </div>
       </div>
 
+      {/* Section: Regulatory Jurisdiction */}
+      <RegulatorPicker value={kybForm.regulator} onChange={v => setKybForm(f => ({ ...f, regulator: v }))} />
+
       {/* Section: UBO */}
       <div className="mb-6">
         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Ultimate Beneficial Owner (UBO)</h3>
@@ -1070,7 +1196,7 @@ export default function SuiteOnboarding() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    {["Customer", "Type", "Country", "Risk", "KYC Status", "Started", ""].map(h => (
+                    {["Customer", "Type", "Regulator", "Country", "Risk", "KYC Status", "Started", ""].map(h => (
                       <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold text-muted-foreground uppercase">{h}</th>
                     ))}
                   </tr>
@@ -1090,6 +1216,13 @@ export default function SuiteOnboarding() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground capitalize">{c.type}</td>
+                      <td className="px-4 py-3">
+                        {c.regulator ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">
+                            {REGULATORY_PROFILES[c.regulator]?.shortName || c.regulator}
+                          </span>
+                        ) : <span className="text-xs text-muted-foreground">—</span>}
+                      </td>
                       <td className="px-4 py-3 text-xs font-mono text-muted-foreground">{c.country || "—"}</td>
                       <td className="px-4 py-3"><span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-semibold capitalize", riskBadge(c.risk_level))}>{c.risk_level}</span></td>
                       <td className="px-4 py-3"><span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-semibold", statusColor(c.kyc_status))}>{kycStatusLabel[c.kyc_status] || c.kyc_status}</span></td>

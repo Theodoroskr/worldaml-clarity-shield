@@ -1049,6 +1049,7 @@ export type Database = {
           name: string
           pep_status: string | null
           registration_number: string | null
+          regulator: string | null
           risk_level: string
           status: string
           type: string
@@ -1066,6 +1067,7 @@ export type Database = {
           name: string
           pep_status?: string | null
           registration_number?: string | null
+          regulator?: string | null
           risk_level?: string
           status?: string
           type?: string
@@ -1083,6 +1085,7 @@ export type Database = {
           name?: string
           pep_status?: string | null
           registration_number?: string | null
+          regulator?: string | null
           risk_level?: string
           status?: string
           type?: string
