@@ -74,7 +74,7 @@ export default function SuiteTransactions() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const [tRes, cRes] = await Promise.all([
-      supabase.from("suite_transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100),
+      supabase.from("suite_transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(500),
       supabase.from("suite_customers").select("id, name").eq("user_id", user.id),
     ]);
     setTxs(tRes.data || []);
@@ -240,6 +240,17 @@ export default function SuiteTransactions() {
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="text-xs h-7 gap-1.5" onClick={() => { setShowImport(!showImport); setShowAI(false); }}>
             <Upload className="w-3 h-3" />Import
+          </Button>
+          <Button variant="outline" size="sm" className="text-xs h-7 gap-1.5" onClick={async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            toast.info("Running rule engine…");
+            const { data, error } = await supabase.functions.invoke("evaluate-transactions", { body: { user_id: user.id } });
+            if (error) { toast.error("Rule engine failed"); return; }
+            toast.success(`Evaluated ${data?.evaluated || 0} transactions, ${data?.alerts_created || 0} alerts created`);
+            fetchData();
+          }} disabled={txs.length === 0}>
+            <RefreshCw className="w-3 h-3" />Run Rules
           </Button>
           <Button variant="outline" size="sm" className="text-xs h-7 gap-1.5" onClick={() => { runAIAnalysis(); setShowImport(false); }} disabled={aiLoading || txs.length === 0}>
             {aiLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
