@@ -610,6 +610,7 @@ export default function SuiteOnboarding() {
         registration_number: kybForm.registrationNumber,
         annual_turnover: kybForm.annualTurnover,
         ubo_provided: !!kybForm.uboName.trim(),
+        ...(Object.keys(customFieldValues).length > 0 && { custom_fields: customFieldValues }),
       },
     });
 
