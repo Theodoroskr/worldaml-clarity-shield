@@ -493,6 +493,48 @@ export default function SuiteCases() {
               ))}
             </div>
 
+            {/* Transaction Selection */}
+            {caseTransactions.length > 0 && (
+              <div className="bg-white border border-red-200 rounded-xl p-4 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-bold text-red-900 flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5" /> Select Transactions for Report
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setSelectedTxIds(new Set(caseTransactions.map(t => t.id)))}
+                      className="text-[10px] text-red-600 hover:text-red-800 underline">Select all</button>
+                    <button onClick={() => setSelectedTxIds(new Set())}
+                      className="text-[10px] text-red-600 hover:text-red-800 underline">Clear</button>
+                    <span className="text-[10px] font-semibold text-red-700">{selectedTxIds.size}/{caseTransactions.length} selected</span>
+                  </div>
+                </div>
+                <div className="max-h-[200px] overflow-y-auto border border-red-100 rounded-lg divide-y divide-red-50">
+                  {caseTransactions.map(tx => (
+                    <label key={tx.id} className="flex items-center gap-3 px-3 py-2 hover:bg-red-50/50 cursor-pointer">
+                      <input type="checkbox" checked={selectedTxIds.has(tx.id)}
+                        onChange={e => {
+                          const next = new Set(selectedTxIds);
+                          e.target.checked ? next.add(tx.id) : next.delete(tx.id);
+                          setSelectedTxIds(next);
+                        }}
+                        className="rounded border-red-300 text-red-600 focus:ring-red-300" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-semibold",
+                            tx.direction === "inbound" ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"
+                          )}>{tx.direction}</span>
+                          <span className="text-xs font-semibold text-foreground">{tx.currency} {Number(tx.amount).toLocaleString()}</span>
+                          {tx.counterparty && <span className="text-[11px] text-muted-foreground">→ {tx.counterparty}</span>}
+                          {tx.risk_flag && <span className="text-[9px] bg-red-100 text-red-700 px-1 rounded font-bold">FLAGGED</span>}
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">{new Date(tx.created_at).toLocaleDateString()}{tx.description ? ` · ${tx.description}` : ''}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Validation Summary */}
             {validationErrors.length > 0 && (
               <div className="bg-red-50 border-2 border-red-400 rounded-xl p-3 flex items-start gap-2 animate-fade-in">
