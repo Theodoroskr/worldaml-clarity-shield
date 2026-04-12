@@ -876,7 +876,150 @@ export default function SuiteCases() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 flex-wrap">
+
+            {/* TPR-Specific Fields */}
+            {fintracStrType === "tpr" && (
+              <div className="space-y-4 mt-4">
+                {/* Terrorist Entity */}
+                <div className="bg-white border border-red-200 rounded-xl p-4">
+                  <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
+                    <Flag className="w-3.5 h-3.5" /> Terrorist Entity / Listed Person
+                  </h3>
+                  <p className="text-[10px] text-red-600 mb-3">Criminal Code s.83.05 — Identify the listed entity or person whose property has been identified.</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Listed Entity / Person Name *</label>
+                      <input value={mf.tprTerroristEntityName} onChange={e => setMF({ tprTerroristEntityName: e.target.value })}
+                        placeholder="Full name as listed"
+                        className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                          validationErrors.includes("tprTerroristEntityName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Entity Type</label>
+                      <select value={mf.tprTerroristEntityType} onChange={e => setMF({ tprTerroristEntityType: e.target.value })}
+                        className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                        <option value="individual">Individual</option>
+                        <option value="entity">Entity / Organisation</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Listed Under (Regulation) *</label>
+                      <select value={mf.tprListedUnder} onChange={e => setMF({ tprListedUnder: e.target.value })}
+                        className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                          validationErrors.includes("tprListedUnder") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
+                        <option value="">Select regulation…</option>
+                        <option value="Criminal Code s.83.05 — Listed Entity">Criminal Code s.83.05 — Listed Entity</option>
+                        <option value="UNAQTR — UN Al-Qaida/Taliban Regulations">UNAQTR — UN Al-Qaida/Taliban Regulations</option>
+                        <option value="SEMA — Special Economic Measures Act">SEMA — Special Economic Measures Act</option>
+                        <option value="JVCFOA — Justice for Victims of Corrupt Foreign Officials">JVCFOA — Magnitsky Act</option>
+                        <option value="Other — See Notes">Other — See Notes</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Date Property Discovered *</label>
+                      <input type="date" value={mf.tprDateDiscovered} onChange={e => setMF({ tprDateDiscovered: e.target.value })}
+                        className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                          validationErrors.includes("tprDateDiscovered") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Relationship to Listed Entity</label>
+                      <select value={mf.tprRelationshipToEntity} onChange={e => setMF({ tprRelationshipToEntity: e.target.value })}
+                        className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                        <option value="">Select relationship…</option>
+                        <option value="Account holder">Account holder</option>
+                        <option value="Signatory / Authorised person">Signatory / Authorised person</option>
+                        <option value="Beneficial owner">Beneficial owner</option>
+                        <option value="Associate / Family member">Associate / Family member</option>
+                        <option value="Director / Officer">Director / Officer</option>
+                        <option value="Agent / Nominee">Agent / Nominee</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Property Details */}
+                <div className="bg-white border border-red-200 rounded-xl p-4">
+                  <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5" /> Property Details (PCMLTFA s.7.1)
+                  </h3>
+                  <p className="text-[10px] text-red-600 mb-3">Describe the property owned or controlled by the listed entity that you have identified.</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Property Type *</label>
+                      <select value={mf.tprPropertyType} onChange={e => setMF({ tprPropertyType: e.target.value })}
+                        className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                          validationErrors.includes("tprPropertyType") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
+                        <option value="">Select type…</option>
+                        <option value="bank_account">Bank Account / Deposit</option>
+                        <option value="investment">Investment / Securities</option>
+                        <option value="real_estate">Real Estate / Property</option>
+                        <option value="vehicle">Vehicle / Vessel / Aircraft</option>
+                        <option value="cash">Cash / Currency</option>
+                        <option value="crypto">Virtual Currency / Crypto-asset</option>
+                        <option value="insurance">Insurance Policy / Annuity</option>
+                        <option value="precious">Precious Metals / Stones</option>
+                        <option value="other">Other Property</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Estimated Value *</label>
+                      <div className="flex gap-2">
+                        <select value={mf.tprPropertyCurrency} onChange={e => setMF({ tprPropertyCurrency: e.target.value })}
+                          className="w-20 border border-red-200 rounded-lg px-2 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                          <option value="CAD">CAD</option>
+                          <option value="USD">USD</option>
+                          <option value="EUR">EUR</option>
+                          <option value="GBP">GBP</option>
+                        </select>
+                        <input type="number" value={mf.tprPropertyValue} onChange={e => setMF({ tprPropertyValue: e.target.value })}
+                          placeholder="0.00"
+                          className={cn("flex-1 border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                            validationErrors.includes("tprPropertyValue") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
+                      </div>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Property Description *</label>
+                      <textarea value={mf.tprPropertyDescription} onChange={e => setMF({ tprPropertyDescription: e.target.value })}
+                        placeholder="Describe the property — account number, asset details, location, etc."
+                        rows={2}
+                        className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none resize-none",
+                          validationErrors.includes("tprPropertyDescription") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Location of Property</label>
+                      <input value={mf.tprPropertyLocation} onChange={e => setMF({ tprPropertyLocation: e.target.value })}
+                        placeholder="Branch, address, jurisdiction, or account location"
+                        className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Disposition Action */}
+                <div className="bg-white border border-red-200 rounded-xl p-4">
+                  <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5" /> Disposition & Action (Criminal Code s.83.08)
+                  </h3>
+                  <p className="text-[10px] text-red-600 mb-3">Under Criminal Code s.83.08, no person shall deal with property owned/controlled by a listed entity. Report what action has been taken.</p>
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">Disposition Action *</label>
+                    <select value={mf.tprDispositionAction} onChange={e => setMF({ tprDispositionAction: e.target.value })}
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("tprDispositionAction") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
+                      <option value="">Select action…</option>
+                      <option value="frozen">Property Frozen / Account Blocked</option>
+                      <option value="seized">Property Seized by Law Enforcement</option>
+                      <option value="reported_rcmp">Reported to RCMP / CSIS</option>
+                      <option value="retained">Property Retained — Awaiting Direction</option>
+                      <option value="released">Property Released (with FINTRAC/court order)</option>
+                      <option value="other">Other — See Notes</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-3 flex-wrap mt-4">
               <button onClick={handleExportFINTRAC}
                 className="flex items-center gap-1.5 text-xs px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
                 <Download className="w-3.5 h-3.5" /> Export {fintracStrType.toUpperCase()} PDF
