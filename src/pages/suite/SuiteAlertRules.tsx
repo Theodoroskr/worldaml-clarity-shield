@@ -825,6 +825,152 @@ export default function SuiteAlertRules() {
           </div>
         </div>
       )}
+
+      {/* Right panel - FINTRAC Mapping */}
+      {showFINTRAC && (
+        <div className="w-[460px] shrink-0 border-l border-border flex flex-col bg-card overflow-hidden">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2"><Scale className="w-4 h-4 text-red-600" /><h3 className="font-semibold text-foreground text-sm">FINTRAC Regulatory Mapping</h3></div>
+            <button onClick={() => setShowFINTRAC(false)} className="p-1 rounded hover:bg-muted transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {(() => {
+              const totalReqs = FINTRAC_REQUIREMENTS.length;
+              const coveredReqs = FINTRAC_REQUIREMENTS.filter(req => req.rulePatterns.length > 0 && req.rulePatterns.some(p => rules.some(r => r.name.includes(p)))).length;
+              const coveragePct = Math.round((coveredReqs / totalReqs) * 100);
+              const allSuggested = FINTRAC_REQUIREMENTS.flatMap(r => r.suggestedRules || []);
+              return (
+                <div className="bg-gradient-to-br from-red-50 to-rose-50 border border-red-200 rounded-xl p-4">
+                  <div className="flex items-end gap-4 mb-3">
+                    <div><p className="text-[10px] text-red-600 uppercase tracking-wider font-semibold mb-1">FINTRAC Coverage</p><div className="flex items-baseline gap-1"><span className="text-3xl font-bold text-red-900">{coveragePct}%</span></div></div>
+                    <div className="flex-1 grid grid-cols-3 gap-2">
+                      <div className="text-center"><p className="text-[10px] text-muted-foreground mb-0.5">Covered</p><p className="text-xs font-bold text-emerald-600">{coveredReqs}/{totalReqs}</p></div>
+                      <div className="text-center"><p className="text-[10px] text-muted-foreground mb-0.5">Gaps</p><p className="text-xs font-bold text-red-600">{totalReqs - coveredReqs}</p></div>
+                      <div className="text-center"><p className="text-[10px] text-muted-foreground mb-0.5">Suggested</p><p className="text-xs font-bold text-amber-600">{allSuggested.length}</p></div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-red-200 rounded-full h-2"><div className="bg-red-600 h-2 rounded-full transition-all" style={{ width: `${coveragePct}%` }} /></div>
+                </div>
+              );
+            })()}
+            {FINTRAC_REQUIREMENTS.map(req => {
+              const matchedRules = rules.filter(r => req.rulePatterns.some(p => r.name.includes(p)));
+              const isCovered = matchedRules.length > 0;
+              const hasSuggestions = (req.suggestedRules?.length || 0) > 0;
+              return (
+                <div key={req.id} className={cn("border rounded-xl overflow-hidden", isCovered ? "border-emerald-200" : "border-red-200")}>
+                  <div className={cn("px-4 py-3 flex items-start gap-3", isCovered ? "bg-emerald-50/50" : "bg-red-50/50")}>
+                    {isCovered ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" /> : <AlertOctagon className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-1"><h4 className="text-xs font-semibold text-foreground">{req.regulation}</h4><span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200 font-mono font-medium shrink-0">{req.citation}</span></div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">{req.description}</p>
+                    </div>
+                  </div>
+                  {matchedRules.length > 0 && (
+                    <div className="px-4 py-2.5 border-t border-border bg-card">
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Mapped Rules ({matchedRules.length})</p>
+                      <div className="space-y-1">{matchedRules.map(r => (
+                        <div key={r.id} onClick={() => { setSelected(r.id); setShowFINTRAC(false); }} className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors group">
+                          <div className="flex items-center gap-2 min-w-0"><ChevronRight className="w-3 h-3 text-muted-foreground group-hover:text-primary shrink-0" /><span className="text-[11px] font-medium text-foreground truncate">{r.name}</span></div>
+                          <div className="flex items-center gap-1.5 shrink-0"><span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[r.priority])}>{r.priority}</span><span className={cn("w-1.5 h-1.5 rounded-full", r.enabled ? "bg-emerald-500" : "bg-muted-foreground/30")} /></div>
+                        </div>
+                      ))}</div>
+                    </div>
+                  )}
+                  {!isCovered && req.rulePatterns.length > 0 && <div className="px-4 py-2 border-t border-border bg-red-50/30"><p className="text-[11px] text-red-600 font-medium">⚠ No matching rules — potential compliance gap</p></div>}
+                  {!isCovered && req.rulePatterns.length === 0 && !hasSuggestions && <div className="px-4 py-2 border-t border-border bg-amber-50/30"><p className="text-[11px] text-amber-600 font-medium">⚠ No automated rules — may require manual process</p></div>}
+                  {hasSuggestions && (
+                    <div className="px-4 py-2.5 border-t border-border bg-amber-50/20">
+                      <p className="text-[10px] font-semibold text-amber-700 uppercase tracking-wider mb-1.5">💡 Suggested New Rules</p>
+                      <div className="space-y-2">{req.suggestedRules!.map((sr, si) => (
+                        <div key={si} className="border border-amber-200 rounded-lg p-2.5 bg-card">
+                          <div className="flex items-center justify-between mb-1"><span className="text-[11px] font-semibold text-foreground">{sr.name}</span><span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[sr.severity])}>{sr.severity}</span></div>
+                          <p className="text-[10px] text-muted-foreground leading-relaxed mb-2">{sr.rationale}</p>
+                          <div className="flex flex-wrap gap-1 mb-2">{sr.conditions.map((c, ci) => <span key={ci} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{c.field} {c.operator} {c.value}</span>)}</div>
+                          <button onClick={() => adoptRule(sr)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3 inline mr-1" />Adopt Rule</button>
+                        </div>
+                      ))}</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Right panel - FCA (UK) Mapping */}
+      {showFCA && (
+        <div className="w-[460px] shrink-0 border-l border-border flex flex-col bg-card overflow-hidden">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2"><Scale className="w-4 h-4 text-indigo-600" /><h3 className="font-semibold text-foreground text-sm">FCA (UK) Regulatory Mapping</h3></div>
+            <button onClick={() => setShowFCA(false)} className="p-1 rounded hover:bg-muted transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {(() => {
+              const totalReqs = FCA_REQUIREMENTS.length;
+              const coveredReqs = FCA_REQUIREMENTS.filter(req => req.rulePatterns.length > 0 && req.rulePatterns.some(p => rules.some(r => r.name.includes(p)))).length;
+              const coveragePct = Math.round((coveredReqs / totalReqs) * 100);
+              const allSuggested = FCA_REQUIREMENTS.flatMap(r => r.suggestedRules || []);
+              return (
+                <div className="bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-200 rounded-xl p-4">
+                  <div className="flex items-end gap-4 mb-3">
+                    <div><p className="text-[10px] text-indigo-600 uppercase tracking-wider font-semibold mb-1">FCA Coverage</p><div className="flex items-baseline gap-1"><span className="text-3xl font-bold text-indigo-900">{coveragePct}%</span></div></div>
+                    <div className="flex-1 grid grid-cols-3 gap-2">
+                      <div className="text-center"><p className="text-[10px] text-muted-foreground mb-0.5">Covered</p><p className="text-xs font-bold text-emerald-600">{coveredReqs}/{totalReqs}</p></div>
+                      <div className="text-center"><p className="text-[10px] text-muted-foreground mb-0.5">Gaps</p><p className="text-xs font-bold text-red-600">{totalReqs - coveredReqs}</p></div>
+                      <div className="text-center"><p className="text-[10px] text-muted-foreground mb-0.5">Suggested</p><p className="text-xs font-bold text-amber-600">{allSuggested.length}</p></div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-indigo-200 rounded-full h-2"><div className="bg-indigo-600 h-2 rounded-full transition-all" style={{ width: `${coveragePct}%` }} /></div>
+                </div>
+              );
+            })()}
+            {FCA_REQUIREMENTS.map(req => {
+              const matchedRules = rules.filter(r => req.rulePatterns.some(p => r.name.includes(p)));
+              const isCovered = matchedRules.length > 0;
+              const hasSuggestions = (req.suggestedRules?.length || 0) > 0;
+              return (
+                <div key={req.id} className={cn("border rounded-xl overflow-hidden", isCovered ? "border-emerald-200" : "border-red-200")}>
+                  <div className={cn("px-4 py-3 flex items-start gap-3", isCovered ? "bg-emerald-50/50" : "bg-red-50/50")}>
+                    {isCovered ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" /> : <AlertOctagon className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-1"><h4 className="text-xs font-semibold text-foreground">{req.regulation}</h4><span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 border border-indigo-200 font-mono font-medium shrink-0">{req.citation}</span></div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">{req.description}</p>
+                    </div>
+                  </div>
+                  {matchedRules.length > 0 && (
+                    <div className="px-4 py-2.5 border-t border-border bg-card">
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Mapped Rules ({matchedRules.length})</p>
+                      <div className="space-y-1">{matchedRules.map(r => (
+                        <div key={r.id} onClick={() => { setSelected(r.id); setShowFCA(false); }} className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors group">
+                          <div className="flex items-center gap-2 min-w-0"><ChevronRight className="w-3 h-3 text-muted-foreground group-hover:text-primary shrink-0" /><span className="text-[11px] font-medium text-foreground truncate">{r.name}</span></div>
+                          <div className="flex items-center gap-1.5 shrink-0"><span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[r.priority])}>{r.priority}</span><span className={cn("w-1.5 h-1.5 rounded-full", r.enabled ? "bg-emerald-500" : "bg-muted-foreground/30")} /></div>
+                        </div>
+                      ))}</div>
+                    </div>
+                  )}
+                  {!isCovered && req.rulePatterns.length > 0 && <div className="px-4 py-2 border-t border-border bg-red-50/30"><p className="text-[11px] text-red-600 font-medium">⚠ No matching rules — potential compliance gap</p></div>}
+                  {!isCovered && req.rulePatterns.length === 0 && !hasSuggestions && <div className="px-4 py-2 border-t border-border bg-amber-50/30"><p className="text-[11px] text-amber-600 font-medium">⚠ No automated rules — may require manual process</p></div>}
+                  {hasSuggestions && (
+                    <div className="px-4 py-2.5 border-t border-border bg-amber-50/20">
+                      <p className="text-[10px] font-semibold text-amber-700 uppercase tracking-wider mb-1.5">💡 Suggested New Rules</p>
+                      <div className="space-y-2">{req.suggestedRules!.map((sr, si) => (
+                        <div key={si} className="border border-amber-200 rounded-lg p-2.5 bg-card">
+                          <div className="flex items-center justify-between mb-1"><span className="text-[11px] font-semibold text-foreground">{sr.name}</span><span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[sr.severity])}>{sr.severity}</span></div>
+                          <p className="text-[10px] text-muted-foreground leading-relaxed mb-2">{sr.rationale}</p>
+                          <div className="flex flex-wrap gap-1 mb-2">{sr.conditions.map((c, ci) => <span key={ci} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{c.field} {c.operator} {c.value}</span>)}</div>
+                          <button onClick={() => adoptRule(sr)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3 inline mr-1" />Adopt Rule</button>
+                        </div>
+                      ))}</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
