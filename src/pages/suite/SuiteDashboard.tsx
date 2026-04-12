@@ -275,7 +275,78 @@ export default function SuiteDashboard() {
         </div>
       </div>
 
-      {/* Activity Feed */}
+      {/* Compliance Calendar Widget */}
+      <div className="bg-card rounded-xl border border-border">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <CalendarClock className="w-4 h-4 text-primary" />
+            <div>
+              <h2 className="font-semibold text-foreground">Compliance Calendar</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Upcoming periodic filing deadlines</p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/suite/regulatory")}
+            className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+          >
+            View all <ChevronRight className="w-3 h-3" />
+          </button>
+        </div>
+        <div className="p-4">
+          {!regulator ? (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              Set your regulator in{" "}
+              <button onClick={() => navigate("/suite/settings")} className="text-primary underline underline-offset-2 hover:text-primary/80">
+                Settings
+              </button>{" "}
+              to see filing deadlines.
+            </p>
+          ) : calendarItems.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No periodic obligations found for your regulator.</p>
+          ) : (
+            <div className="divide-y divide-border">
+              {calendarItems.map((item, i) => (
+                <div key={i} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                  <div className="shrink-0">
+                    {item.status === "overdue" ? (
+                      <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+                    ) : item.status === "urgent" ? (
+                      <div className="w-2 h-2 rounded-full bg-orange-500" />
+                    ) : item.status === "upcoming" ? (
+                      <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                    ) : item.status === "on-track" ? (
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                    ) : (
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground/30" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium text-foreground truncate block">{item.title}</span>
+                  </div>
+                  <div className="text-right shrink-0">
+                    {item.nextDue ? (
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-medium text-foreground">{format(item.nextDue, "d MMM yyyy")}</div>
+                        <div className={cn("text-[10px]",
+                          item.daysUntil !== null && item.daysUntil <= 30 ? "text-destructive font-semibold" : "text-muted-foreground"
+                        )}>
+                          {item.daysUntil !== null && item.daysUntil >= 0
+                            ? `${item.daysUntil}d left`
+                            : item.daysUntil !== null
+                            ? `${Math.abs(item.daysUntil)}d overdue`
+                            : ""}
+                        </div>
+                      </div>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">{item.deadline}</Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
       <div className="bg-card rounded-xl border border-border">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h2 className="font-semibold text-foreground">Recent Activity</h2>
