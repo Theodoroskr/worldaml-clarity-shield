@@ -390,7 +390,74 @@ export default function SuiteRegulatory() {
         </CardContent>
       </Card>
 
-      {/* Event-driven reports */}
+      {/* ─── Compliance Calendar ─── */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <CalendarClock className="w-4 h-4 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Compliance Calendar</h2>
+        </div>
+        <Card>
+          <CardContent className="pt-5 pb-4">
+            <div className="divide-y divide-border">
+              {calendarItems.map((item, i) => {
+                const cfg = statusConfig[item.status];
+                return (
+                  <div key={i} className="flex items-start gap-4 py-3 first:pt-0 last:pb-0">
+                    {/* Status indicator */}
+                    <div className="pt-0.5 shrink-0">
+                      {item.status === "overdue" ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
+                      ) : item.status === "urgent" ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
+                      ) : item.status === "upcoming" ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+                      ) : item.status === "on-track" ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                      ) : (
+                        <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/30" />
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium text-foreground">{item.title}</span>
+                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${cfg.badgeClass}`}>
+                          {cfg.label}
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                          {item.type === "periodic" ? "Periodic" : "Event-triggered"}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{item.description}</p>
+                    </div>
+
+                    {/* Deadline / countdown */}
+                    <div className="text-right shrink-0 space-y-0.5">
+                      {item.nextDue ? (
+                        <>
+                          <div className="text-sm font-medium text-foreground">
+                            {format(item.nextDue, "d MMM yyyy")}
+                          </div>
+                          <div className={`text-xs ${item.daysUntil !== null && item.daysUntil <= 30 ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+                            {item.daysUntil !== null && item.daysUntil >= 0
+                              ? `${item.daysUntil} days left`
+                              : item.daysUntil !== null
+                              ? `${Math.abs(item.daysUntil)} days overdue`
+                              : ""}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-xs text-muted-foreground">{item.deadline}</div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
       <section className="space-y-3">
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-orange-500" />
