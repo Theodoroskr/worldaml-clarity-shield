@@ -105,6 +105,67 @@ const FINCEN_REQUIREMENTS: FinCENRequirement[] = [
       { name: "[FINCEN-FNL] Multi-region deposit/withdrawal pattern", severity: "critical", rationale: "FinCEN Advisory FIN-2014-A009 identifies funnel accounts as a high-priority typology. Deposits in one region with rapid withdrawals in another region indicate cross-border laundering.", conditions: [{ field: "transaction.country", operator: "!=", value: "account_country" }, { field: "transaction.amount", operator: ">", value: "3000" }] },
     ],
   },
+  {
+    id: "ctr-filing",
+    regulation: "CTR Filing (Reporting)",
+    citation: "31 CFR § 1010.306(a)",
+    description: "CTRs must be filed within 15 calendar days of the transaction date. Institutions must maintain records of CTRs for 5 years. Aggregated cash transactions by or on behalf of the same person in a single business day count toward the $10,000 threshold.",
+    rulePatterns: ["Large Transaction", "P-TLO", "P-TLI", "FINCEN-CTR"],
+    suggestedRules: [
+      { name: "[FINCEN-RPT] CTR filing deadline approaching (>$10K cash)", severity: "high", rationale: "FinCEN requires CTR filing within 15 days. This rule flags large cash transactions nearing the filing deadline to prevent late submissions and regulatory penalties.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.type", operator: "==", value: "cash" }] },
+    ],
+  },
+  {
+    id: "sar-filing",
+    regulation: "SAR Filing (Reporting)",
+    citation: "31 CFR § 1020.320(b)",
+    description: "SARs must be filed within 30 calendar days of initial detection. If no suspect is identified, filing may be delayed up to 60 days. SARs must be retained for 5 years. Continuing suspicious activity requires follow-up SARs every 90 days.",
+    rulePatterns: ["HRCOU", "DORMANT", "RISKWORD", "REFTEXT", "FINCEN-SAR"],
+    suggestedRules: [
+      { name: "[FINCEN-RPT] SAR 90-day follow-up review", severity: "high", rationale: "FinCEN guidance requires institutions to file continuing activity SARs at least every 90 days when suspicious activity persists. This rule triggers a review cycle for previously filed SARs.", conditions: [{ field: "alert.count", operator: ">", value: "0" }] },
+      { name: "[FINCEN-RPT] SAR filing deadline monitor (30-day)", severity: "critical", rationale: "Once suspicious activity is detected, institutions have 30 calendar days to file a SAR. This rule monitors open alerts approaching the filing deadline.", conditions: [{ field: "alert.count", operator: ">", value: "0" }] },
+    ],
+  },
+  {
+    id: "cmir",
+    regulation: "Currency & Monetary Instrument Report (CMIR)",
+    citation: "31 CFR § 1010.340",
+    description: "Any person physically transporting, mailing, or shipping currency or monetary instruments exceeding $10,000 into or out of the United States must file a CMIR (FinCEN Form 105) at the time of transportation.",
+    rulePatterns: [],
+    suggestedRules: [
+      { name: "[FINCEN-CMIR] Cross-border currency transport >$10K", severity: "critical", rationale: "CMIR filing is required for physical movement of $10,000+ across US borders. This rule flags large cross-border transactions that may involve physical currency transport requiring a CMIR.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.country", operator: "!=", value: "US" }] },
+    ],
+  },
+  {
+    id: "fbar",
+    regulation: "FBAR — Foreign Bank Account Report",
+    citation: "31 CFR § 1010.350",
+    description: "US persons with a financial interest in or signature authority over foreign financial accounts must file an FBAR (FinCEN Form 114) if the aggregate value exceeds $10,000 at any time during the calendar year. Filed annually by April 15.",
+    rulePatterns: [],
+    suggestedRules: [
+      { name: "[FINCEN-FBAR] Foreign account aggregate >$10K", severity: "high", rationale: "FBAR filing is required when aggregate foreign account balances exceed $10,000. This rule monitors customer transactions involving foreign institutions to identify potential FBAR obligations.", conditions: [{ field: "transaction.country", operator: "!=", value: "US" }, { field: "account.totalDeposits30d", operator: ">", value: "10000" }] },
+    ],
+  },
+  {
+    id: "form8300",
+    regulation: "Form 8300 — Cash Payments Over $10K",
+    citation: "26 USC § 6050I",
+    description: "Non-financial trades and businesses that receive more than $10,000 in cash in a single transaction (or related transactions) must file Form 8300 with FinCEN and the IRS within 15 days. Applies to dealers, attorneys, real estate agents, and others.",
+    rulePatterns: [],
+    suggestedRules: [
+      { name: "[FINCEN-8300] Non-bank cash receipt >$10K", severity: "high", rationale: "Form 8300 is required for cash payments exceeding $10,000 received by non-financial businesses. This rule flags large cash receipts that may trigger Form 8300 filing obligations.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.type", operator: "==", value: "cash" }] },
+    ],
+  },
+  {
+    id: "msl",
+    regulation: "Monetary Instrument Log (MIL)",
+    citation: "31 CFR § 1010.415",
+    description: "Banks must maintain a Monetary Instrument Log recording each purchase of cashier's checks, drafts, or money orders between $3,000 and $10,000. This log must include customer identification and be retained for 5 years.",
+    rulePatterns: [],
+    suggestedRules: [
+      { name: "[FINCEN-MIL] Monetary instrument purchase $3K–$10K", severity: "medium", rationale: "Banks must log purchases of monetary instruments between $3,000 and $10,000. This rule flags transactions in the MIL range to ensure proper record-keeping and detect potential structuring.", conditions: [{ field: "transaction.amount", operator: ">", value: "3000" }, { field: "transaction.amount", operator: "<", value: "10000" }] },
+    ],
+  },
 ];
 
 export default function SuiteAlertRules() {
