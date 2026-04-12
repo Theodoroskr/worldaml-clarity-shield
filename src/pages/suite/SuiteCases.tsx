@@ -301,17 +301,32 @@ export default function SuiteCases() {
 
   const validateFintracFields = (): string[] => {
     const errors: string[] = [];
-    if (!mf.methodOfTransaction) errors.push("methodOfTransaction");
-    if (!mf.sourceOfFunds) errors.push("sourceOfFunds");
-    if (!mf.conductorName && !caseCustomer?.name) errors.push("conductorName");
-    if (mf.thirdPartyIndicator === "third_party" && !mf.thirdPartyName) errors.push("thirdPartyName");
-    if (!mf.dispositionOfFunds) errors.push("dispositionOfFunds");
-    if (!mf.beneficiaryName) errors.push("beneficiaryName");
-    if (!mf.suspicionType) errors.push("suspicionType");
-    if (mf.selectedIndicators.length === 0) errors.push("selectedIndicators");
-    if (!mf.camloName) errors.push("camloName");
-    if (!mf.actionTaken) errors.push("actionTaken");
-    if (notes.length === 0) errors.push("notes");
+    if (fintracStrType === "tpr") {
+      // TPR-specific validation
+      if (!mf.tprTerroristEntityName) errors.push("tprTerroristEntityName");
+      if (!mf.tprListedUnder) errors.push("tprListedUnder");
+      if (!mf.tprDateDiscovered) errors.push("tprDateDiscovered");
+      if (!mf.tprPropertyType) errors.push("tprPropertyType");
+      if (!mf.tprPropertyValue) errors.push("tprPropertyValue");
+      if (!mf.tprPropertyDescription) errors.push("tprPropertyDescription");
+      if (!mf.tprDispositionAction) errors.push("tprDispositionAction");
+      if (!mf.camloName) errors.push("camloName");
+      if (!mf.actionTaken) errors.push("actionTaken");
+      if (notes.length === 0) errors.push("notes");
+    } else {
+      // STR/LCTR/EFTR validation
+      if (!mf.methodOfTransaction) errors.push("methodOfTransaction");
+      if (!mf.sourceOfFunds) errors.push("sourceOfFunds");
+      if (!mf.conductorName && !caseCustomer?.name) errors.push("conductorName");
+      if (mf.thirdPartyIndicator === "third_party" && !mf.thirdPartyName) errors.push("thirdPartyName");
+      if (!mf.dispositionOfFunds) errors.push("dispositionOfFunds");
+      if (!mf.beneficiaryName) errors.push("beneficiaryName");
+      if (!mf.suspicionType) errors.push("suspicionType");
+      if (mf.selectedIndicators.length === 0) errors.push("selectedIndicators");
+      if (!mf.camloName) errors.push("camloName");
+      if (!mf.actionTaken) errors.push("actionTaken");
+      if (notes.length === 0) errors.push("notes");
+    }
     return errors;
   };
 
