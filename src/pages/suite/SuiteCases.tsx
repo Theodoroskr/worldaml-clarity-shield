@@ -941,6 +941,42 @@ export default function SuiteCases() {
           </table>
         )}
       </div>
+
+      {/* PDF Preview Modal */}
+      <Dialog open={!!pdfPreview} onOpenChange={(open) => { if (!open) closePdfPreview(); }}>
+        <DialogContent className="max-w-4xl w-[90vw] h-[85vh] flex flex-col p-0 gap-0">
+          <DialogHeader className="px-6 py-4 border-b border-border flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2 text-sm font-semibold">
+              <FileText className="w-4 h-4 text-destructive" />
+              {pdfPreview?.fileName ?? "FINTRAC STR Preview"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0">
+            {pdfPreview && (
+              <iframe
+                src={pdfPreview.blobUrl}
+                className="w-full h-full border-0"
+                title="FINTRAC PDF Preview"
+              />
+            )}
+          </div>
+          <DialogFooter className="px-6 py-3 border-t border-border flex-shrink-0">
+            <button
+              onClick={closePdfPreview}
+              className="text-xs px-3 py-1.5 border border-border rounded-lg text-muted-foreground hover:bg-muted"
+            >
+              Close
+            </button>
+            <button
+              onClick={handleDownloadPdf}
+              className="text-xs px-4 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-medium flex items-center gap-1.5"
+            >
+              <Download className="w-3 h-3" />
+              Download PDF
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
