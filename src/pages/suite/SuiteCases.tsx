@@ -1357,7 +1357,7 @@ export default function SuiteCases() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-foreground">Case Management — SAR / STR Filing</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">FinCEN SAR · FINTRAC STR/LCTR/EFTR · Multi-jurisdiction reporting</p>
+          <p className="text-xs text-muted-foreground mt-0.5">FinCEN SAR · FINTRAC STR/LCTR/EFTR · MOKAS STR (Cyprus) · Multi-jurisdiction reporting</p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium"><Plus className="w-3.5 h-3.5" /> New Case</button>
       </div>
