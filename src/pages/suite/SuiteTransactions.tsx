@@ -91,6 +91,7 @@ export default function SuiteTransactions() {
   const [rulesMap, setRulesMap] = useState<Record<string, RuleInfo>>({});
   const [ruleFilter, setRuleFilter] = useState<string>("all");
   const [ruleTxMap, setRuleTxMap] = useState<Record<string, Set<string>>>({});
+  const [showRulesPanel, setShowRulesPanel] = useState(false);
 
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
