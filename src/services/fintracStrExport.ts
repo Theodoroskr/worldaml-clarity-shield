@@ -20,6 +20,8 @@ export interface FINTRACTransaction {
   counterparty_country?: string | null;
   created_at: string;
   description?: string | null;
+  monitoring_status?: string | null;
+  risk_flag?: boolean;
 }
 
 export interface FINTRACCase {
