@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Activity, AlertTriangle, TrendingUp, Globe, RefreshCw, Plus } from "lucide-react";
+import { AlertTriangle, TrendingUp, Globe, RefreshCw, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -23,6 +23,16 @@ interface Customer {
 }
 
 const HIGH_RISK = ["RU", "IR", "PA", "KP", "SY"];
+
+const triggerMonitoring = async (userId: string, transactionId: string) => {
+  try {
+    await supabase.functions.invoke("evaluate-transactions", {
+      body: { user_id: userId, transaction_ids: [transactionId] },
+    });
+  } catch {
+    console.warn("Transaction monitoring evaluation deferred");
+  }
+};
 
 export default function SuiteTransactions() {
   const [txs, setTxs] = useState<TxRow[]>([]);
@@ -58,7 +68,7 @@ export default function SuiteTransactions() {
     const amount = parseFloat(form.amount);
     const riskFlag = isHighRisk || amount > 10000;
 
-    const { error } = await supabase.from("suite_transactions").insert({
+    const { data, error } = await supabase.from("suite_transactions").insert({
       customer_id: form.customer_id,
       user_id: user.id,
       amount,
@@ -68,7 +78,7 @@ export default function SuiteTransactions() {
       counterparty_country: form.counterparty_country || null,
       risk_flag: riskFlag,
       description: form.description || null,
-    });
+    }).select().single();
 
     if (error) { toast.error(error.message); return; }
 
@@ -88,6 +98,11 @@ export default function SuiteTransactions() {
         title: `Flagged transaction: ${form.currency} ${amount.toLocaleString()}`,
         description: `${form.direction} transaction${isHighRisk ? " to high-risk jurisdiction (" + form.counterparty_country + ")" : ""} exceeds threshold`,
       });
+    }
+
+    // Trigger server-side rule evaluation
+    if (data) {
+      triggerMonitoring(user.id, data.id);
     }
 
     toast.success("Transaction recorded");
