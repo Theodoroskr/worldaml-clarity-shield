@@ -613,6 +613,11 @@ export default function SuiteCases() {
             </div>
           </div>
           <div className="flex gap-1.5 flex-wrap">
+            <button onClick={() => setShowChecklist(!showChecklist)}
+              className={cn("flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors",
+                showChecklist ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-foreground border-border hover:bg-muted/80")}>
+              <ClipboardCheck className="w-3 h-3" /> Compliance Checklist
+            </button>
             {selectedCase.status === "open" && (
               <button onClick={() => updateStatus(selectedCase.id, "investigating")}
                 className="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100">
@@ -621,18 +626,24 @@ export default function SuiteCases() {
             )}
             {selectedCase.status === "investigating" && (
               <>
-                <button onClick={() => updateStatus(selectedCase.id, "sar_filed")}
-                  className="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg hover:bg-purple-100">
-                  File SAR (FinCEN)
-                </button>
-                <button onClick={() => updateStatus(selectedCase.id, "str_filed")}
-                  className="text-xs px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100">
-                  File STR (FINTRAC)
-                </button>
-                <button onClick={() => updateStatus(selectedCase.id, "str_filed")}
-                  className="text-xs px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-100">
-                  File STR (MOKAS)
-                </button>
+                {availableExports.has("sar") && (
+                  <button onClick={() => updateStatus(selectedCase.id, "sar_filed")}
+                    className="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg hover:bg-purple-100">
+                    File SAR (FinCEN)
+                  </button>
+                )}
+                {availableExports.has("fintrac") && (
+                  <button onClick={() => updateStatus(selectedCase.id, "str_filed")}
+                    className="text-xs px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100">
+                    File STR (FINTRAC)
+                  </button>
+                )}
+                {availableExports.has("mokas") && (
+                  <button onClick={() => updateStatus(selectedCase.id, "str_filed")}
+                    className="text-xs px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-100">
+                    File STR (MOKAS)
+                  </button>
+                )}
               </>
             )}
             {selectedCase.status !== "closed" && (
@@ -641,7 +652,7 @@ export default function SuiteCases() {
                 Close
               </button>
             )}
-            {(selectedCase.status === "sar_filed" || selectedCase.status === "closed") && (
+            {(selectedCase.status === "sar_filed" || selectedCase.status === "closed") && availableExports.has("sar") && (
               <button onClick={handleExportSAR}
                 className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-medium">
                 <Download className="w-3 h-3" /> SAR PDF
@@ -649,14 +660,18 @@ export default function SuiteCases() {
             )}
             {(selectedCase.status === "str_filed" || selectedCase.status === "sar_filed" || selectedCase.status === "closed") && (
               <>
-                <button onClick={() => { setShowFintracPanel(!showFintracPanel); setShowMokasPanel(false); }}
-                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
-                  <Flag className="w-3 h-3" /> FINTRAC Report
-                </button>
-                <button onClick={() => { setShowMokasPanel(!showMokasPanel); setShowFintracPanel(false); }}
-                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium">
-                  <MapPin className="w-3 h-3" /> MOKAS Report
-                </button>
+                {availableExports.has("fintrac") && (
+                  <button onClick={() => { setShowFintracPanel(!showFintracPanel); setShowMokasPanel(false); }}
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                    <Flag className="w-3 h-3" /> FINTRAC Report
+                  </button>
+                )}
+                {availableExports.has("mokas") && (
+                  <button onClick={() => { setShowMokasPanel(!showMokasPanel); setShowFintracPanel(false); }}
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium">
+                    <MapPin className="w-3 h-3" /> MOKAS Report
+                  </button>
+                )}
               </>
             )}
           </div>
