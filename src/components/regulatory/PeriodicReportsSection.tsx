@@ -565,6 +565,7 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
       .eq("id", report.id);
     if (error) { toast.error("Update failed"); return; }
     toast.success(`Report marked as ${newStatus}`);
+    await logAudit(newStatus, report.id, { report_type: report.report_type, regulator: report.regulator });
     fetchReports();
   };
 
