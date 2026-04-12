@@ -1,10 +1,102 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, MapPin, AlertTriangle, Shield } from "lucide-react";
+import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, MapPin, AlertTriangle, Shield, CheckCircle2, XCircle, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { exportSAR } from "@/services/sarExport";
 import { exportFINTRACStr } from "@/services/fintracStrExport";
+
+/* ── FINTRAC STR Field Mapping ── */
+interface FieldMapping {
+  fintracField: string;
+  fintracPart: string;
+  description: string;
+  sourceTable: string;
+  sourceColumn: string | null;
+  required: boolean;
+}
+
+const FINTRAC_FIELD_MAP: FieldMapping[] = [
+  // Part A — Report Identification
+  { fintracPart: "A", fintracField: "Report Reference Number", description: "Unique identifier assigned by reporting entity", sourceTable: "suite_cases", sourceColumn: "id", required: true },
+  { fintracPart: "A", fintracField: "Report Type", description: "STR, LCTR, or EFTR", sourceTable: "system", sourceColumn: "strType", required: true },
+  { fintracPart: "A", fintracField: "Reporting Entity Name", description: "Legal name of the reporting entity", sourceTable: "profiles", sourceColumn: "company_name", required: true },
+  { fintracPart: "A", fintracField: "CAMLO / Reporting Officer", description: "Name of the compliance officer filing", sourceTable: "auth.users", sourceColumn: "email", required: true },
+  { fintracPart: "A", fintracField: "Report Date", description: "Date the report is generated", sourceTable: "system", sourceColumn: "now()", required: true },
+  { fintracPart: "A", fintracField: "Filing Deadline", description: "3 business days (STR) or 15 calendar days (LCTR/EFTR)", sourceTable: "system", sourceColumn: "computed", required: true },
+  // Part B — Subject Information
+  { fintracPart: "B", fintracField: "Subject Full Legal Name", description: "Individual or entity name", sourceTable: "suite_customers", sourceColumn: "name", required: true },
+  { fintracPart: "B", fintracField: "Subject Type", description: "Individual or legal entity", sourceTable: "suite_customers", sourceColumn: "type", required: true },
+  { fintracPart: "B", fintracField: "Date of Birth", description: "For individuals only", sourceTable: "suite_customers", sourceColumn: "date_of_birth", required: false },
+  { fintracPart: "B", fintracField: "Country of Residence", description: "Country of residence or incorporation", sourceTable: "suite_customers", sourceColumn: "country", required: true },
+  { fintracPart: "B", fintracField: "Business Operating Name", description: "Trade name if different from legal name", sourceTable: "suite_customers", sourceColumn: "company_name", required: false },
+  { fintracPart: "B", fintracField: "Business Registration No.", description: "Corporate registration number", sourceTable: "suite_customers", sourceColumn: "registration_number", required: false },
+  { fintracPart: "B", fintracField: "Email / Contact", description: "Email address or phone", sourceTable: "suite_customers", sourceColumn: "email", required: false },
+  { fintracPart: "B", fintracField: "Risk Classification", description: "Client risk level (low/medium/high/critical)", sourceTable: "suite_customers", sourceColumn: "risk_level", required: true },
+  // Part C — Transaction Details (Starting Action)
+  { fintracPart: "C", fintracField: "Transaction Date", description: "Date of each transaction", sourceTable: "suite_transactions", sourceColumn: "created_at", required: true },
+  { fintracPart: "C", fintracField: "Transaction Amount", description: "Value of funds or virtual currency", sourceTable: "suite_transactions", sourceColumn: "amount", required: true },
+  { fintracPart: "C", fintracField: "Currency", description: "Currency code (CAD, USD, EUR, etc.)", sourceTable: "suite_transactions", sourceColumn: "currency", required: true },
+  { fintracPart: "C", fintracField: "Direction (In/Out)", description: "Whether funds flow inbound or outbound", sourceTable: "suite_transactions", sourceColumn: "direction", required: true },
+  { fintracPart: "C", fintracField: "Counterparty Name", description: "Person or entity on the other side", sourceTable: "suite_transactions", sourceColumn: "counterparty", required: true },
+  { fintracPart: "C", fintracField: "Counterparty Country", description: "Country of the counterparty", sourceTable: "suite_transactions", sourceColumn: "counterparty_country", required: true },
+  { fintracPart: "C", fintracField: "Transaction Description", description: "Purpose or nature of the transaction", sourceTable: "suite_transactions", sourceColumn: "description", required: false },
+  { fintracPart: "C", fintracField: "Monitoring Status", description: "Whether flagged by monitoring rules", sourceTable: "suite_transactions", sourceColumn: "monitoring_status", required: false },
+  { fintracPart: "C", fintracField: "Risk Flag", description: "Whether the transaction was risk-flagged", sourceTable: "suite_transactions", sourceColumn: "risk_flag", required: false },
+  // Part C — Starting Action (missing from DB)
+  { fintracPart: "C-SA", fintracField: "Method of Transaction", description: "In-person, online, telephone, mail, etc.", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  { fintracPart: "C-SA", fintracField: "Source of Funds", description: "How the conductor obtained the funds", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  { fintracPart: "C-SA", fintracField: "Conductor Name", description: "Person who physically conducted the transaction", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  { fintracPart: "C-SA", fintracField: "Third Party Indicator", description: "Whether transaction was on behalf of a third party", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  // Part C — Completing Action (missing from DB)
+  { fintracPart: "C-CA", fintracField: "Disposition Details", description: "How the funds were ultimately used", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  { fintracPart: "C-CA", fintracField: "Beneficiary Name", description: "Person or entity who benefited from the transaction", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  // Part D — Grounds for Suspicion
+  { fintracPart: "D", fintracField: "Suspicion Type", description: "ML, TF, or sanctions evasion", sourceTable: "manual", sourceColumn: null, required: true },
+  { fintracPart: "D", fintracField: "ML/TF Indicators", description: "Checkboxes from FINTRAC indicator guidance", sourceTable: "system", sourceColumn: "indicators_checklist", required: true },
+  { fintracPart: "D", fintracField: "PEP Status", description: "Whether subject is a politically exposed person", sourceTable: "suite_customers", sourceColumn: null, required: true },
+  // Part E — Narrative
+  { fintracPart: "E", fintracField: "Investigation Narrative", description: "Facts + context + indicators = grounds", sourceTable: "suite_case_notes", sourceColumn: "content", required: true },
+  // Part F — Declaration
+  { fintracPart: "F", fintracField: "CAMLO Signature", description: "Physical or electronic signature", sourceTable: "manual", sourceColumn: null, required: true },
+  { fintracPart: "F", fintracField: "Action Taken", description: "Steps taken: enhanced monitoring, account freeze, etc.", sourceTable: "manual", sourceColumn: null, required: true },
+];
+
+function getFieldStatus(field: FieldMapping, customer: any, transactions: any[], notes: any[]): "mapped" | "partial" | "missing" {
+  if (field.sourceTable === "manual" || field.sourceTable === "system") {
+    if (field.sourceColumn === "indicators_checklist") return "mapped"; // rendered in PDF
+    if (field.sourceColumn === "computed" || field.sourceColumn === "now()" || field.sourceColumn === "strType") return "mapped";
+    return "missing"; // manual entry needed
+  }
+  if (field.sourceColumn === null) return "missing";
+  if (field.sourceTable === "suite_customers") {
+    if (!customer) return "missing";
+    const val = customer[field.sourceColumn];
+    return val != null && val !== "" ? "mapped" : "partial";
+  }
+  if (field.sourceTable === "suite_transactions") {
+    if (transactions.length === 0) return "missing";
+    const filled = transactions.filter(t => t[field.sourceColumn!] != null && t[field.sourceColumn!] !== "").length;
+    return filled === transactions.length ? "mapped" : filled > 0 ? "partial" : "missing";
+  }
+  if (field.sourceTable === "suite_case_notes") {
+    return notes.length > 0 ? "mapped" : "missing";
+  }
+  if (field.sourceTable === "suite_cases") return "mapped";
+  if (field.sourceTable === "profiles" || field.sourceTable === "auth.users") return "mapped";
+  return "missing";
+}
+
+const PART_LABELS: Record<string, string> = {
+  "A": "Part A — Report Identification",
+  "B": "Part B — Subject Information",
+  "C": "Part C — Transaction Details",
+  "C-SA": "Part C — Starting Action (Conductor)",
+  "C-CA": "Part C — Completing Action (Beneficiary)",
+  "D": "Part D — Grounds for Suspicion",
+  "E": "Part E — Investigation Narrative",
+  "F": "Part F — Declaration & Action Taken",
+};
 
 interface CaseItem {
   id: string;
