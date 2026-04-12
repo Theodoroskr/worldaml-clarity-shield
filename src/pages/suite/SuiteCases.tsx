@@ -1,12 +1,63 @@
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, MapPin, AlertTriangle, Shield, CheckCircle2, XCircle, Info, X } from "lucide-react";
+import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, MapPin, AlertTriangle, Shield, CheckCircle2, XCircle, Info, X, ClipboardCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { exportSAR } from "@/services/sarExport";
 import { exportFINTRACStr, DEFAULT_MANUAL_FIELDS, type FINTRACManualFields } from "@/services/fintracStrExport";
 import { exportMOKASStr, DEFAULT_MOKAS_FIELDS, type MOKASManualFields } from "@/services/mokasStrExport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+
+/* ── Regulator → Required Reports Mapping ── */
+interface ReportObligation {
+  id: string;
+  name: string;
+  regulator: string;
+  description: string;
+  deadline: string;
+  threshold?: string;
+  legalBasis: string;
+  exportKey: "sar" | "fintrac" | "mokas";
+}
+
+const REGULATOR_REPORTS: Record<string, ReportObligation[]> = {
+  FinCEN: [
+    { id: "sar", name: "SAR", regulator: "FinCEN", description: "Suspicious Activity Report", deadline: "30 calendar days", legalBasis: "BSA 31 CFR §1020.320", exportKey: "sar" },
+    { id: "ctr", name: "CTR", regulator: "FinCEN", description: "Currency Transaction Report (cash ≥ $10,000)", deadline: "15 calendar days", threshold: "$10,000 cash", legalBasis: "BSA 31 CFR §1010.311", exportKey: "sar" },
+  ],
+  FINTRAC: [
+    { id: "str", name: "STR", regulator: "FINTRAC", description: "Suspicious Transaction Report", deadline: "3 business days", legalBasis: "PCMLTFA s.7", exportKey: "fintrac" },
+    { id: "lctr", name: "LCTR", regulator: "FINTRAC", description: "Large Cash Transaction Report (≥ CAD 10,000)", deadline: "15 calendar days", threshold: "CAD 10,000", legalBasis: "PCMLTFR s.132", exportKey: "fintrac" },
+    { id: "eftr", name: "EFTR", regulator: "FINTRAC", description: "Electronic Funds Transfer Report (≥ CAD 10,000)", deadline: "15 calendar days", threshold: "CAD 10,000", legalBasis: "PCMLTFR s.12", exportKey: "fintrac" },
+    { id: "tpr", name: "TPR", regulator: "FINTRAC", description: "Terrorist Property Report", deadline: "Immediately", legalBasis: "PCMLTFA s.7.1 / Criminal Code s.83.08", exportKey: "fintrac" },
+  ],
+  FCA: [
+    { id: "sar_uk", name: "SAR (NCA)", regulator: "FCA", description: "Suspicious Activity Report to NCA", deadline: "As soon as practicable", legalBasis: "POCA 2002 s.330-332", exportKey: "sar" },
+    { id: "daml", name: "DAML", regulator: "FCA", description: "Defence Against Money Laundering", deadline: "Before proceeding with transaction", legalBasis: "POCA 2002 s.335", exportKey: "sar" },
+  ],
+  "EU AMLD": [
+    { id: "str_eu", name: "STR", regulator: "EU AMLD", description: "Suspicious Transaction Report to FIU", deadline: "Without delay", legalBasis: "6AMLD Art. 33", exportKey: "sar" },
+    { id: "threshold_eu", name: "Threshold Report", regulator: "EU AMLD", description: "Cash transactions ≥ €10,000", deadline: "Within reporting period", threshold: "€10,000", legalBasis: "6AMLD Art. 11", exportKey: "sar" },
+  ],
+  CySEC: [
+    { id: "mokas_str", name: "STR (MOKAS)", regulator: "CySEC", description: "Suspicious Transaction Report to MOKAS", deadline: "3 working days", legalBasis: "AML Law 188(I)/2007 Art. 27", exportKey: "mokas" },
+    { id: "mokas_threshold", name: "Threshold Report", regulator: "CySEC", description: "Cash transactions ≥ €10,000", deadline: "Within reporting period", threshold: "€10,000", legalBasis: "AML Law 188(I)/2007 Art. 58", exportKey: "mokas" },
+  ],
+  ICPAC: [
+    { id: "mokas_str_icpac", name: "STR (MOKAS)", regulator: "ICPAC", description: "Suspicious Transaction Report to MOKAS", deadline: "3 working days", legalBasis: "AML Law 188(I)/2007 Art. 27", exportKey: "mokas" },
+  ],
+  "CBA Cyprus": [
+    { id: "mokas_str_cba", name: "STR (MOKAS)", regulator: "CBA Cyprus", description: "Suspicious Transaction Report to MOKAS", deadline: "3 working days", legalBasis: "AML Law 188(I)/2007 Art. 27", exportKey: "mokas" },
+  ],
+};
+
+// Which export buttons to show per regulator
+function getAvailableExports(regulator: string | null): Set<string> {
+  if (!regulator) return new Set(["sar", "fintrac", "mokas"]); // show all if unknown
+  const reports = REGULATOR_REPORTS[regulator];
+  if (!reports) return new Set(["sar", "fintrac", "mokas"]);
+  return new Set(reports.map(r => r.exportKey));
+}
 
 /* ── FINTRAC STR Field Mapping ── */
 interface FieldMapping {
