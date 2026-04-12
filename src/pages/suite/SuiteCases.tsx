@@ -688,7 +688,7 @@ export default function SuiteCases() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <button onClick={handleExportFINTRAC}
                 className="flex items-center gap-1.5 text-xs px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
                 <Download className="w-3.5 h-3.5" /> Export {fintracStrType.toUpperCase()} PDF
@@ -697,6 +697,11 @@ export default function SuiteCases() {
                 className="flex items-center gap-1.5 text-xs px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-100 font-medium">
                 <Info className="w-3.5 h-3.5" /> {showFieldMapping ? "Hide" : "Show"} Field Mapping
               </button>
+              {validationErrors.includes("notes") && (
+                <span className="text-[10px] text-red-600 font-semibold flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> Add investigation notes (Part E) before exporting
+                </span>
+              )}
               <span className="text-[10px] text-red-500">PCMLTFA s.7 · PCMLTFR Part 1</span>
             </div>
 
