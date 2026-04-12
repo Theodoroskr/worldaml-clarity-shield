@@ -467,6 +467,64 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
           </div>
         </div>
 
+        {/* Risk Scorecard */}
+        <div>
+          <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Composite Risk Score</h3>
+          {riskLoading ? (
+            <div className="flex items-center gap-2 py-3 text-xs text-muted-foreground"><Loader2 className="w-3.5 h-3.5 animate-spin" />Calculating…</div>
+          ) : riskBreakdown ? (
+            <div className="space-y-3">
+              {/* Score header */}
+              <div className="flex items-center gap-3">
+                <div className={cn("text-2xl font-bold tabular-nums", riskColor(riskBreakdown.composite))}>
+                  {riskBreakdown.composite}
+                </div>
+                <div className="flex-1">
+                  <Badge className={cn("text-xs capitalize", riskBadgeClass(riskBreakdown.composite))}>
+                    {riskLabel(riskBreakdown.composite)}
+                  </Badge>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">out of 100</p>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                <div className={cn("h-full rounded-full transition-all", riskBg(riskBreakdown.composite))} style={{ width: `${riskBreakdown.composite}%` }} />
+              </div>
+
+              {/* Breakdown */}
+              <div className="space-y-2">
+                {[
+                  { label: "Country", score: riskBreakdown.country, weight: WEIGHTS.country },
+                  { label: "Screening", score: riskBreakdown.screening, weight: WEIGHTS.screening },
+                  { label: "Transactions", score: riskBreakdown.transaction, weight: WEIGHTS.transaction },
+                  { label: "Entity Type", score: riskBreakdown.customerType, weight: WEIGHTS.customerType },
+                  { label: "KYC Status", score: riskBreakdown.kycStatus, weight: WEIGHTS.kycStatus },
+                ].map(d => (
+                  <div key={d.label} className="flex items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground w-20 shrink-0">{d.label}</span>
+                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div className={cn("h-full rounded-full", riskBg(d.score))} style={{ width: `${d.score}%` }} />
+                    </div>
+                    <span className={cn("text-[10px] font-mono font-semibold w-7 text-right tabular-nums", riskColor(d.score))}>{d.score}</span>
+                    <span className="text-[10px] text-muted-foreground w-12">{d.weight}% · {Math.round(d.score * d.weight / 100)}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Summary badges */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <span className={cn("inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border font-medium", statusColor(customer.kyc_status))}>
+                  KYC: {kycStatusLabel[customer.kyc_status] || customer.kyc_status}
+                </span>
+                <span className={cn("inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border font-medium capitalize", riskBadge(customer.risk_level))}>
+                  Stored Risk: {customer.risk_level}
+                </span>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
         {/* Metadata */}
         <div>
           <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Record Info</h3>
