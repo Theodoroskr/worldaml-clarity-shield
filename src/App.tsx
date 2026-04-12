@@ -103,6 +103,7 @@ const SuiteRisk = lazy(() => import("./pages/suite/SuiteRisk"));
 const SuiteCases = lazy(() => import("./pages/suite/SuiteCases"));
 const SuiteAudit = lazy(() => import("./pages/suite/SuiteAudit"));
 const SuiteSettings = lazy(() => import("./pages/suite/SuiteSettings"));
+const SuiteHelp = lazy(() => import("./pages/suite/SuiteHelp"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -244,6 +245,7 @@ const App = () => (
                   <Route path="cases" element={<SuiteCases />} />
                   <Route path="audit" element={<SuiteAudit />} />
                   <Route path="settings" element={<SuiteSettings />} />
+                  <Route path="help" element={<SuiteHelp />} />
                 </Route>
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

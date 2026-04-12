@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard, Users, Shield, CreditCard, AlertTriangle,
   FileText, BarChart3, Settings, ChevronRight, Activity,
-  UserCheck, Fingerprint, ClipboardList, Menu, Scale, ShieldCheck,
+  UserCheck, Fingerprint, ClipboardList, Menu, Scale, ShieldCheck, HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -59,6 +59,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
     title: "System",
     items: [
       { icon: Settings, label: "Settings", path: "/suite/settings" },
+      { icon: HelpCircle, label: "Help — SAR/STR", path: "/suite/help" },
     ],
   },
 ];
