@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import {
   FileText, Clock, Scale, ExternalLink, AlertTriangle,
   CheckCircle2, Calendar, Building2, Shield, Info,
+  CalendarClock, Timer, ArrowRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { format, differenceInDays, addYears, addMonths, isPast, isFuture, setMonth, setDate } from "date-fns";
 
 /* ─── Regulator knowledge base ─── */
 interface ReportObligation {
@@ -28,7 +30,7 @@ interface RegulatoryProfile {
   fiu: string;
   fiuPortal?: string;
   reports: ReportObligation[];
-  periodicObligations: { title: string; deadline: string; description: string }[];
+  periodicObligations: { title: string; deadline: string; description: string; month?: number; day?: number; frequencyMonths?: number }[];
   keyRequirements: string[];
 }
 
@@ -46,7 +48,7 @@ const REGULATORY_PROFILES: Record<string, RegulatoryProfile> = {
       { name: "Currency Transaction Report", code: "CTR", description: "Report cash transactions exceeding $10,000 in a single business day.", deadline: "15 days from transaction", trigger: "Cash transaction > $10,000", frequency: "event" },
     ],
     periodicObligations: [
-      { title: "BSA/AML Compliance Program Review", deadline: "Annual", description: "Independent review of the AML compliance program effectiveness." },
+      { title: "BSA/AML Compliance Program Review", deadline: "Annual", description: "Independent review of the AML compliance program effectiveness.", frequencyMonths: 12 },
       { title: "OFAC Sanctions List Update", deadline: "Continuous", description: "Ensure customer screening against current OFAC SDN and sectoral lists." },
     ],
     keyRequirements: [
@@ -73,7 +75,7 @@ const REGULATORY_PROFILES: Record<string, RegulatoryProfile> = {
       { name: "Terrorist Property Report", code: "TPR", description: "Report property owned or controlled by a listed terrorist entity.", deadline: "Immediately", trigger: "Listed entity property identified", frequency: "event" },
     ],
     periodicObligations: [
-      { title: "Two-Year Effectiveness Review", deadline: "Every 2 years", description: "Independent review of compliance program effectiveness." },
+      { title: "Two-Year Effectiveness Review", deadline: "Every 2 years", description: "Independent review of compliance program effectiveness.", frequencyMonths: 24 },
       { title: "Risk Assessment Update", deadline: "As needed / ongoing", description: "Update ML/TF risk assessment when business changes occur." },
     ],
     keyRequirements: [
@@ -98,8 +100,8 @@ const REGULATORY_PROFILES: Record<string, RegulatoryProfile> = {
       { name: "Defence Against Money Laundering (DAML)", code: "DAML", description: "Request consent from NCA to proceed with a transaction that is suspected to involve criminal property.", deadline: "Before proceeding with transaction", trigger: "Suspected criminal property — need consent", frequency: "event" },
     ],
     periodicObligations: [
-      { title: "Annual Financial Crime Report (REP-CRIM)", deadline: "Annually (30 business days after period end)", description: "Submit the REP-CRIM report to the FCA covering financial crime data." },
-      { title: "AML/CTF Risk Assessment", deadline: "Ongoing / Annual review", description: "Firm-wide risk assessment under Reg 18 of the MLR 2017." },
+      { title: "Annual Financial Crime Report (REP-CRIM)", deadline: "Annually (30 business days after period end)", description: "Submit the REP-CRIM report to the FCA covering financial crime data.", frequencyMonths: 12 },
+      { title: "AML/CTF Risk Assessment", deadline: "Ongoing / Annual review", description: "Firm-wide risk assessment under Reg 18 of the MLR 2017.", frequencyMonths: 12 },
     ],
     keyRequirements: [
       "Appoint a nominated officer (MLRO)",
@@ -123,8 +125,8 @@ const REGULATORY_PROFILES: Record<string, RegulatoryProfile> = {
       { name: "Cash Transaction Report", code: "CTR", description: "Report cash payments of €10,000 or more.", deadline: "Within working days of transaction", trigger: "Cash ≥ €10,000", frequency: "event" },
     ],
     periodicObligations: [
-      { title: "Annual Compliance Report (ACR)", deadline: "By 30 April each year", description: "Self-assessment of AML/CFT compliance effectiveness submitted to CySEC." },
-      { title: "Internal Audit Report", deadline: "Annually", description: "Independent audit of AML policies, procedures, and controls." },
+      { title: "Annual Compliance Report (ACR)", deadline: "By 30 April each year", description: "Self-assessment of AML/CFT compliance effectiveness submitted to CySEC.", month: 3, day: 30 },
+      { title: "Internal Audit Report", deadline: "Annually", description: "Independent audit of AML policies, procedures, and controls.", frequencyMonths: 12 },
       { title: "CAMLO Appointment Notification", deadline: "Within 15 days of change", description: "Notify CySEC of any change to the appointed CAMLO." },
     ],
     keyRequirements: [
@@ -148,8 +150,8 @@ const REGULATORY_PROFILES: Record<string, RegulatoryProfile> = {
       { name: "Suspicious Transaction Report", code: "STR", description: "Report suspicious transactions to MOKAS.", deadline: "As soon as suspicion is formed", trigger: "Suspicion of ML/TF", frequency: "event" },
     ],
     periodicObligations: [
-      { title: "Internal Assessment Report (IAR)", deadline: "Annually", description: "Annual internal AML risk assessment submitted to ICPAC." },
-      { title: "AML Compliance Questionnaire", deadline: "Annually", description: "Mandatory self-assessment questionnaire on AML/CFT compliance." },
+      { title: "Internal Assessment Report (IAR)", deadline: "Annually", description: "Annual internal AML risk assessment submitted to ICPAC.", frequencyMonths: 12 },
+      { title: "AML Compliance Questionnaire", deadline: "Annually", description: "Mandatory self-assessment questionnaire on AML/CFT compliance.", frequencyMonths: 12 },
       { title: "CDD Records Maintenance", deadline: "Ongoing", description: "Maintain client due diligence files for all financial transactions." },
     ],
     keyRequirements: [
@@ -204,6 +206,110 @@ export default function SuiteRegulatory() {
   }, [user]);
 
   const profile = regulator ? REGULATORY_PROFILES[regulator.toLowerCase()] : null;
+  const eventReports = profile?.reports.filter((r) => r.frequency === "event") ?? [];
+  const periodicObs = profile?.periodicObligations ?? [];
+
+  /* ─── Compliance Calendar logic ─── */
+  const calendarItems = useMemo(() => {
+    if (!profile) return [];
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    interface CalendarItem {
+      title: string;
+      type: "periodic" | "event-triggered";
+      nextDue: Date | null;
+      daysUntil: number | null;
+      deadline: string;
+      description: string;
+      status: "overdue" | "urgent" | "upcoming" | "on-track" | "continuous";
+    }
+
+    const items: CalendarItem[] = [];
+
+    // Periodic obligations with fixed dates
+    for (const ob of periodicObs) {
+      if (ob.month !== undefined && ob.day !== undefined) {
+        // Fixed annual date (e.g., ACR by 30 April → month=3, day=30)
+        let nextDue = new Date(currentYear, ob.month, ob.day);
+        if (isPast(nextDue)) {
+          nextDue = new Date(currentYear + 1, ob.month, ob.day);
+        }
+        const days = differenceInDays(nextDue, now);
+        items.push({
+          title: ob.title,
+          type: "periodic",
+          nextDue,
+          daysUntil: days,
+          deadline: ob.deadline,
+          description: ob.description,
+          status: days < 0 ? "overdue" : days <= 30 ? "urgent" : days <= 90 ? "upcoming" : "on-track",
+        });
+      } else if (ob.frequencyMonths) {
+        // Rolling frequency — assume next due is start of next period from now
+        const monthsAhead = ob.frequencyMonths;
+        // Approximate: next due = first day of the month that is `frequencyMonths` from Jan 1 of current year
+        let nextDue = new Date(currentYear, monthsAhead - 1, 1);
+        while (isPast(nextDue)) {
+          nextDue = addMonths(nextDue, ob.frequencyMonths);
+        }
+        const days = differenceInDays(nextDue, now);
+        items.push({
+          title: ob.title,
+          type: "periodic",
+          nextDue,
+          daysUntil: days,
+          deadline: ob.deadline,
+          description: ob.description,
+          status: days <= 30 ? "urgent" : days <= 90 ? "upcoming" : "on-track",
+        });
+      } else {
+        // Continuous / ongoing
+        items.push({
+          title: ob.title,
+          type: "periodic",
+          nextDue: null,
+          daysUntil: null,
+          deadline: ob.deadline,
+          description: ob.description,
+          status: "continuous",
+        });
+      }
+    }
+
+    // Transaction-triggered reports — show as standing obligations
+    for (const r of eventReports) {
+      items.push({
+        title: `${r.name} (${r.code})`,
+        type: "event-triggered",
+        nextDue: null,
+        daysUntil: null,
+        deadline: r.deadline,
+        description: r.trigger,
+        status: "continuous",
+      });
+    }
+
+    // Sort: overdue first, then by days until due, then continuous at end
+    const statusOrder: Record<string, number> = { overdue: 0, urgent: 1, upcoming: 2, "on-track": 3, continuous: 4 };
+    items.sort((a, b) => {
+      const oa = statusOrder[a.status] ?? 5;
+      const ob2 = statusOrder[b.status] ?? 5;
+      if (oa !== ob2) return oa - ob2;
+      if (a.daysUntil !== null && b.daysUntil !== null) return a.daysUntil - b.daysUntil;
+      return 0;
+    });
+
+    return items;
+  }, [periodicObs, eventReports]);
+
+  const statusConfig: Record<string, { label: string; badgeClass: string }> = {
+    overdue: { label: "Overdue", badgeClass: "bg-destructive/10 text-destructive border-destructive/20" },
+    urgent: { label: "Due Soon", badgeClass: "bg-orange-500/10 text-orange-600 border-orange-500/20" },
+    upcoming: { label: "Upcoming", badgeClass: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20" },
+    "on-track": { label: "On Track", badgeClass: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
+    continuous: { label: "Ongoing", badgeClass: "bg-muted text-muted-foreground border-border" },
+  };
 
   if (isLoading) {
     return (
@@ -228,9 +334,6 @@ export default function SuiteRegulatory() {
       </div>
     );
   }
-
-  const eventReports = profile.reports.filter((r) => r.frequency === "event");
-  const periodicObs = profile.periodicObligations;
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-6 space-y-8">
@@ -287,7 +390,74 @@ export default function SuiteRegulatory() {
         </CardContent>
       </Card>
 
-      {/* Event-driven reports */}
+      {/* ─── Compliance Calendar ─── */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <CalendarClock className="w-4 h-4 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Compliance Calendar</h2>
+        </div>
+        <Card>
+          <CardContent className="pt-5 pb-4">
+            <div className="divide-y divide-border">
+              {calendarItems.map((item, i) => {
+                const cfg = statusConfig[item.status];
+                return (
+                  <div key={i} className="flex items-start gap-4 py-3 first:pt-0 last:pb-0">
+                    {/* Status indicator */}
+                    <div className="pt-0.5 shrink-0">
+                      {item.status === "overdue" ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
+                      ) : item.status === "urgent" ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
+                      ) : item.status === "upcoming" ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+                      ) : item.status === "on-track" ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                      ) : (
+                        <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/30" />
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium text-foreground">{item.title}</span>
+                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${cfg.badgeClass}`}>
+                          {cfg.label}
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                          {item.type === "periodic" ? "Periodic" : "Event-triggered"}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{item.description}</p>
+                    </div>
+
+                    {/* Deadline / countdown */}
+                    <div className="text-right shrink-0 space-y-0.5">
+                      {item.nextDue ? (
+                        <>
+                          <div className="text-sm font-medium text-foreground">
+                            {format(item.nextDue, "d MMM yyyy")}
+                          </div>
+                          <div className={`text-xs ${item.daysUntil !== null && item.daysUntil <= 30 ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+                            {item.daysUntil !== null && item.daysUntil >= 0
+                              ? `${item.daysUntil} days left`
+                              : item.daysUntil !== null
+                              ? `${Math.abs(item.daysUntil)} days overdue`
+                              : ""}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-xs text-muted-foreground">{item.deadline}</div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
       <section className="space-y-3">
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-orange-500" />
