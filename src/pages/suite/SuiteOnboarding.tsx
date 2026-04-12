@@ -119,6 +119,14 @@ const emptyKYB: KYBForm = {
 const KYC_STATUSES = ["pending", "in_review", "verified", "rejected"];
 const RISK_LEVELS = ["low", "medium", "high", "critical"];
 
+interface AuditEvent {
+  id: string;
+  action: string;
+  created_at: string;
+  details: any;
+  entity_type: string;
+}
+
 function CustomerDetailPanel({ customer, onClose, onUpdated }: {
   customer: Customer;
   onClose: () => void;
@@ -126,6 +134,8 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
 }) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [timeline, setTimeline] = useState<AuditEvent[]>([]);
+  const [timelineLoading, setTimelineLoading] = useState(true);
   const [edit, setEdit] = useState({
     name: customer.name,
     email: customer.email || "",
@@ -135,6 +145,19 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
     risk_level: customer.risk_level,
     kyc_status: customer.kyc_status,
   });
+
+  const fetchTimeline = async () => {
+    setTimelineLoading(true);
+    const { data } = await supabase
+      .from("suite_audit_log")
+      .select("id, action, created_at, details, entity_type")
+      .eq("entity_id", customer.id)
+      .eq("entity_type", "customer")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    setTimeline((data || []) as AuditEvent[]);
+    setTimelineLoading(false);
+  };
 
   // Sync when customer changes
   useEffect(() => {
@@ -148,6 +171,7 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
       kyc_status: customer.kyc_status,
     });
     setEditing(false);
+    fetchTimeline();
   }, [customer.id]);
 
   const saveChanges = async () => {
