@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle, Trash2 } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -12,6 +12,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import FormFieldBuilder, { type CustomField } from "@/components/suite/FormFieldBuilder";
 import { REGULATORY_PROFILES, REGULATOR_OPTIONS, type RegulatoryProfile } from "@/data/regulatoryProfiles";
+import {
+  scoreCountry, scoreScreening, scoreTransactions, scoreCustomerType, scoreKycStatus,
+  computeComposite, riskColor, riskBg, riskLabel, riskBadgeClass, WEIGHTS,
+  type RiskBreakdown,
+} from "@/lib/riskScoring";
 
 interface Customer {
   id: string;
@@ -252,6 +257,8 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
 }) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [riskBreakdown, setRiskBreakdown] = useState<RiskBreakdown | null>(null);
+  const [riskLoading, setRiskLoading] = useState(true);
   const [edit, setEdit] = useState({
     name: customer.name,
     email: customer.email || "",
@@ -261,6 +268,34 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
     risk_level: customer.risk_level,
     kyc_status: customer.kyc_status,
   });
+
+  // Fetch screening + transaction data for risk scoring
+  const fetchRiskData = useCallback(async () => {
+    setRiskLoading(true);
+    const [screenings, transactions] = await Promise.all([
+      supabase.from("suite_screenings").select("match_count").eq("customer_id", customer.id),
+      supabase.from("suite_transactions").select("risk_flag, amount").eq("customer_id", customer.id),
+    ]);
+    const totalMatches = (screenings.data || []).reduce((s, r: any) => s + (r.match_count || 0), 0);
+    const hasMatches = totalMatches > 0;
+    const txData = transactions.data || [];
+    const flaggedCount = txData.filter((t: any) => t.risk_flag).length;
+    const totalVolume = txData.reduce((s, t: any) => s + (Number(t.amount) || 0), 0);
+
+    const b = {
+      country: scoreCountry(customer.country),
+      screening: scoreScreening(totalMatches, hasMatches),
+      transaction: scoreTransactions(flaggedCount, txData.length, totalVolume),
+      customerType: scoreCustomerType(customer.type),
+      kycStatus: scoreKycStatus(customer.kyc_status),
+      composite: 0,
+    };
+    b.composite = computeComposite(b);
+    setRiskBreakdown(b);
+    setRiskLoading(false);
+  }, [customer.id, customer.country, customer.type, customer.kyc_status]);
+
+  useEffect(() => { fetchRiskData(); }, [fetchRiskData]);
 
   // Sync when customer changes
   useEffect(() => {
@@ -430,6 +465,64 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
               ) : <Badge className={cn("text-xs capitalize", riskBadge(customer.risk_level))}>{customer.risk_level}</Badge>}
             </div>
           </div>
+        </div>
+
+        {/* Risk Scorecard */}
+        <div>
+          <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Composite Risk Score</h3>
+          {riskLoading ? (
+            <div className="flex items-center gap-2 py-3 text-xs text-muted-foreground"><Loader2 className="w-3.5 h-3.5 animate-spin" />Calculating…</div>
+          ) : riskBreakdown ? (
+            <div className="space-y-3">
+              {/* Score header */}
+              <div className="flex items-center gap-3">
+                <div className={cn("text-2xl font-bold tabular-nums", riskColor(riskBreakdown.composite))}>
+                  {riskBreakdown.composite}
+                </div>
+                <div className="flex-1">
+                  <Badge className={cn("text-xs capitalize", riskBadgeClass(riskBreakdown.composite))}>
+                    {riskLabel(riskBreakdown.composite)}
+                  </Badge>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">out of 100</p>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                <div className={cn("h-full rounded-full transition-all", riskBg(riskBreakdown.composite))} style={{ width: `${riskBreakdown.composite}%` }} />
+              </div>
+
+              {/* Breakdown */}
+              <div className="space-y-2">
+                {[
+                  { label: "Country", score: riskBreakdown.country, weight: WEIGHTS.country },
+                  { label: "Screening", score: riskBreakdown.screening, weight: WEIGHTS.screening },
+                  { label: "Transactions", score: riskBreakdown.transaction, weight: WEIGHTS.transaction },
+                  { label: "Entity Type", score: riskBreakdown.customerType, weight: WEIGHTS.customerType },
+                  { label: "KYC Status", score: riskBreakdown.kycStatus, weight: WEIGHTS.kycStatus },
+                ].map(d => (
+                  <div key={d.label} className="flex items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground w-20 shrink-0">{d.label}</span>
+                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div className={cn("h-full rounded-full", riskBg(d.score))} style={{ width: `${d.score}%` }} />
+                    </div>
+                    <span className={cn("text-[10px] font-mono font-semibold w-7 text-right tabular-nums", riskColor(d.score))}>{d.score}</span>
+                    <span className="text-[10px] text-muted-foreground w-12">{d.weight}% · {Math.round(d.score * d.weight / 100)}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Summary badges */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <span className={cn("inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border font-medium", statusColor(customer.kyc_status))}>
+                  KYC: {kycStatusLabel[customer.kyc_status] || customer.kyc_status}
+                </span>
+                <span className={cn("inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border font-medium capitalize", riskBadge(customer.risk_level))}>
+                  Stored Risk: {customer.risk_level}
+                </span>
+              </div>
+            </div>
+          ) : null}
         </div>
 
         {/* Metadata */}
