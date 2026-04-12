@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { exportSAR } from "@/services/sarExport";
 import { exportFINTRACStr, DEFAULT_MANUAL_FIELDS, type FINTRACManualFields } from "@/services/fintracStrExport";
+import { exportMOKASStr, DEFAULT_MOKAS_FIELDS, type MOKASManualFields } from "@/services/mokasStrExport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 /* ── FINTRAC STR Field Mapping ── */
