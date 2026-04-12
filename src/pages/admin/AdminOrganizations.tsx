@@ -149,13 +149,16 @@ export default function AdminOrganizations() {
     for (const member of validMembers) {
       const { data: profile } = await supabase.from("profiles").select("user_id").eq("email", member.email.trim()).single();
       if (profile) {
-        await supabase.from("suite_org_members").insert({
+        const { error: memberErr } = await supabase.from("suite_org_members").insert({
           organization_id: (org as any).id,
           user_id: profile.user_id,
           role: member.role,
           invited_email: member.email.trim(),
           joined_at: new Date().toISOString(),
         } as any);
+        if (memberErr) {
+          toast({ title: `Failed to add ${member.email}`, description: memberErr.message, variant: "destructive" });
+        }
         // Also grant suite access
         await supabase.rpc("admin_grant_suite_access", {
           target_email: member.email.trim(),
