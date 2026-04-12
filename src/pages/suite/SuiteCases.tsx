@@ -491,7 +491,8 @@ export default function SuiteCases() {
                   <div>
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Method of Transaction *</label>
                     <select value={mf.methodOfTransaction} onChange={e => setMF({ methodOfTransaction: e.target.value })}
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("methodOfTransaction") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
                       <option value="">Select method…</option>
                       <option value="In-person">In-person</option>
                       <option value="Online / Electronic">Online / Electronic</option>
@@ -505,7 +506,8 @@ export default function SuiteCases() {
                   <div>
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Source of Funds *</label>
                     <select value={mf.sourceOfFunds} onChange={e => setMF({ sourceOfFunds: e.target.value })}
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("sourceOfFunds") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
                       <option value="">Select source…</option>
                       <option value="Employment / Salary">Employment / Salary</option>
                       <option value="Business revenue">Business revenue</option>
@@ -522,7 +524,8 @@ export default function SuiteCases() {
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Conductor Name *</label>
                     <input value={mf.conductorName} onChange={e => setMF({ conductorName: e.target.value })}
                       placeholder={caseCustomer?.name || "Person who conducted the transaction"}
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("conductorName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
                     <p className="text-[9px] text-red-500 mt-0.5">The individual who physically or electronically initiated the transaction</p>
                   </div>
                   <div>
@@ -538,7 +541,8 @@ export default function SuiteCases() {
                       <label className="text-[10px] font-semibold text-red-800 mb-1 block">Third Party Name *</label>
                       <input value={mf.thirdPartyName} onChange={e => setMF({ thirdPartyName: e.target.value })}
                         placeholder="Full legal name of the third party"
-                        className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                        className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                          validationErrors.includes("thirdPartyName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
                     </div>
                   )}
                 </div>
