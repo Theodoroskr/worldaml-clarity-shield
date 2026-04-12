@@ -30,7 +30,7 @@ interface RegulatoryProfile {
   fiu: string;
   fiuPortal?: string;
   reports: ReportObligation[];
-  periodicObligations: { title: string; deadline: string; description: string }[];
+  periodicObligations: { title: string; deadline: string; description: string; month?: number; day?: number; frequencyMonths?: number }[];
   keyRequirements: string[];
 }
 
