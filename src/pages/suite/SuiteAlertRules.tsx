@@ -100,14 +100,59 @@ export default function SuiteAlertRules() {
     setRules(prev => prev.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r));
   };
 
+  const suggestRules = async () => {
+    setAiLoading(true);
+    setShowAiPanel(true);
+    setAiResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("suggest-rules");
+      if (error) throw error;
+      setAiResult(data);
+    } catch (e: any) {
+      toast.error(e.message || "AI analysis failed");
+      setShowAiPanel(false);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const adoptRule = async (suggested: any) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const conditions = (suggested.conditions || []).map((c: any) => ({
+      id: uid(),
+      field: c.field || "transaction.amount",
+      operator: c.operator === "gt" ? ">" : c.operator === "eq" ? "==" : c.operator === "in" ? "IN" : c.operator === "contains" ? "CONTAINS" : ">",
+      value: String(c.value),
+      logic: "AND",
+      action: suggested.severity === "critical" ? "Block" : "Flag",
+    }));
+    const { error } = await supabase.from("suite_alert_rules").insert({
+      user_id: user.id,
+      name: suggested.name,
+      conditions,
+      severity: suggested.severity || "medium",
+      is_active: false,
+    });
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Rule "${suggested.name}" added`);
+    fetchRules();
+  };
+
   if (loading) return <div className="flex items-center justify-center h-full text-sm text-muted-foreground">Loading rules…</div>;
 
   return (
     <div className="flex h-full overflow-hidden bg-background">
       <div className="w-72 shrink-0 border-r border-border flex flex-col bg-card">
-        <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
-          <div><h2 className="font-semibold text-foreground text-sm">Alert Rules</h2><p className="text-xs text-muted-foreground">{rules.filter(r => r.enabled).length}/{rules.length} active</p></div>
-          <button onClick={addRule} className="flex items-center gap-1 text-xs px-2.5 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3" />New</button>
+        <div className="px-4 py-3 border-b border-border flex flex-col gap-2 shrink-0">
+          <div className="flex items-center justify-between">
+            <div><h2 className="font-semibold text-foreground text-sm">Alert Rules</h2><p className="text-xs text-muted-foreground">{rules.filter(r => r.enabled).length}/{rules.length} active</p></div>
+            <button onClick={addRule} className="flex items-center gap-1 text-xs px-2.5 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3" />New</button>
+          </div>
+          <button onClick={suggestRules} disabled={aiLoading} className="flex items-center justify-center gap-1.5 text-xs px-2.5 py-2 rounded-lg border border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors font-medium w-full">
+            {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            {aiLoading ? "Analyzing…" : "AI Suggest Rules"}
+          </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
           {rules.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">No rules yet. Click New to create one.</p>}
