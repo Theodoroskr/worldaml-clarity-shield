@@ -58,6 +58,18 @@ export interface FINTRACManualFields {
   // Part F — Declaration
   camloName: string;
   actionTaken: string;
+  // TPR-specific fields
+  tprTerroristEntityName: string;
+  tprTerroristEntityType: string;
+  tprListedUnder: string;
+  tprPropertyType: string;
+  tprPropertyDescription: string;
+  tprPropertyValue: string;
+  tprPropertyCurrency: string;
+  tprPropertyLocation: string;
+  tprDispositionAction: string;
+  tprDateDiscovered: string;
+  tprRelationshipToEntity: string;
 }
 
 export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
@@ -75,6 +87,17 @@ export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
   selectedIndicators: [],
   camloName: "",
   actionTaken: "",
+  tprTerroristEntityName: "",
+  tprTerroristEntityType: "individual",
+  tprListedUnder: "",
+  tprPropertyType: "",
+  tprPropertyDescription: "",
+  tprPropertyValue: "",
+  tprPropertyCurrency: "CAD",
+  tprPropertyLocation: "",
+  tprDispositionAction: "",
+  tprDateDiscovered: "",
+  tprRelationshipToEntity: "",
 };
 
 export interface FINTRACSTRExportOptions {
@@ -85,7 +108,7 @@ export interface FINTRACSTRExportOptions {
   submittedBy: string;
   reportingEntity: string;
   reportingEntityRef?: string;
-  strType: "str" | "lctr" | "eftr";
+  strType: "str" | "lctr" | "eftr" | "tpr";
   manualFields?: FINTRACManualFields;
 }
 
@@ -98,6 +121,7 @@ const STR_TYPE_LABELS: Record<string, string> = {
   str: "Suspicious Transaction Report (STR)",
   lctr: "Large Cash Transaction Report (LCTR)",
   eftr: "Electronic Funds Transfer Report (EFTR)",
+  tpr: "Terrorist Property Report (TPR)",
 };
 
 function header(doc: jsPDF, title: string, y: number): number {
@@ -327,6 +351,61 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     }
   }
   y += 2;
+
+  // TPR-SPECIFIC SECTIONS — Terrorist Property Report
+  if (strType === "tpr") {
+    // Part C-TPR: Terrorist Entity Information
+    y = checkPage(doc, y, 60);
+    y = header(doc, "Part C-TPR — Terrorist Entity / Listed Person", y);
+    y = fieldPair(doc, "Listed Entity / Person Name", mf.tprTerroristEntityName || "Not specified",
+      "Entity Type", mf.tprTerroristEntityType === "entity" ? "Entity / Organisation" : "Individual", y);
+    y = field(doc, "Listed Under (Regulation)", mf.tprListedUnder || "Not specified — e.g., Criminal Code s.83.05, UN Regulations (UNAQTR)", y);
+    y = field(doc, "Relationship of Subject to Listed Entity", mf.tprRelationshipToEntity || "Not specified — e.g., account holder, signatory, beneficial owner, associate", y);
+    y = field(doc, "Date Property Identified / Discovered", mf.tprDateDiscovered || "Not specified", y);
+    y += 2;
+
+    // Part D-TPR: Property Details
+    y = checkPage(doc, y, 60);
+    y = header(doc, "Part D-TPR — Property Details (PCMLTFA s.7.1)", y);
+    const propTypes: Record<string, string> = {
+      bank_account: "Bank Account / Deposit",
+      investment: "Investment / Securities",
+      real_estate: "Real Estate / Property",
+      vehicle: "Vehicle / Vessel / Aircraft",
+      cash: "Cash / Currency",
+      crypto: "Virtual Currency / Crypto-asset",
+      insurance: "Insurance Policy / Annuity",
+      precious: "Precious Metals / Stones",
+      other: "Other Property",
+    };
+    y = fieldPair(doc, "Property Type", (propTypes[mf.tprPropertyType] ?? mf.tprPropertyType) || "Not specified",
+      "Estimated Value", `${mf.tprPropertyCurrency || "CAD"} ${mf.tprPropertyValue || "—"}`, y);
+    y = field(doc, "Property Description", mf.tprPropertyDescription || "Not specified — describe the property or asset in detail", y);
+    y = field(doc, "Location of Property", mf.tprPropertyLocation || "Not specified — branch, address, account number, or jurisdiction", y);
+    y += 2;
+
+    // Part E-TPR: Action / Disposition
+    y = checkPage(doc, y, 30);
+    y = header(doc, "Part E-TPR — Disposition & Action Taken (Criminal Code s.83.08)", y);
+    const dispActions: Record<string, string> = {
+      frozen: "Property Frozen / Account Blocked",
+      seized: "Property Seized by Law Enforcement",
+      reported_rcmp: "Reported to RCMP / CSIS",
+      retained: "Property Retained — Awaiting Direction",
+      released: "Property Released (with FINTRAC/court order)",
+      other: "Other — See Notes",
+    };
+    y = field(doc, "Disposition Action", (dispActions[mf.tprDispositionAction] ?? mf.tprDispositionAction) || "Not specified", y);
+    doc.setFontSize(7.5);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(120, 20, 20);
+    doc.text("Under Criminal Code s.83.08, no person shall deal with property owned/controlled by a listed entity.", MARGIN, y);
+    y += 6;
+    doc.text("Failure to disclose terrorist property is an offence under PCMLTFA s.7.1 and Criminal Code s.83.1.", MARGIN, y);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "normal");
+    y += 8;
+  }
 
   // PART D: Indicators & Grounds for Suspicion
   y = checkPage(doc, y, 30);

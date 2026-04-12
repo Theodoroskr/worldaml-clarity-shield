@@ -151,7 +151,7 @@ export default function SuiteCases() {
   const [newNote, setNewNote] = useState("");
   const [showFintracPanel, setShowFintracPanel] = useState(false);
   const [showFieldMapping, setShowFieldMapping] = useState(false);
-  const [fintracStrType, setFintracStrType] = useState<"str" | "lctr" | "eftr">("str");
+  const [fintracStrType, setFintracStrType] = useState<"str" | "lctr" | "eftr" | "tpr">("str");
   const [caseCustomer, setCaseCustomer] = useState<any>(null);
   const [caseTransactions, setCaseTransactions] = useState<any[]>([]);
   const [selectedTxIds, setSelectedTxIds] = useState<Set<string>>(new Set());
@@ -301,17 +301,32 @@ export default function SuiteCases() {
 
   const validateFintracFields = (): string[] => {
     const errors: string[] = [];
-    if (!mf.methodOfTransaction) errors.push("methodOfTransaction");
-    if (!mf.sourceOfFunds) errors.push("sourceOfFunds");
-    if (!mf.conductorName && !caseCustomer?.name) errors.push("conductorName");
-    if (mf.thirdPartyIndicator === "third_party" && !mf.thirdPartyName) errors.push("thirdPartyName");
-    if (!mf.dispositionOfFunds) errors.push("dispositionOfFunds");
-    if (!mf.beneficiaryName) errors.push("beneficiaryName");
-    if (!mf.suspicionType) errors.push("suspicionType");
-    if (mf.selectedIndicators.length === 0) errors.push("selectedIndicators");
-    if (!mf.camloName) errors.push("camloName");
-    if (!mf.actionTaken) errors.push("actionTaken");
-    if (notes.length === 0) errors.push("notes");
+    if (fintracStrType === "tpr") {
+      // TPR-specific validation
+      if (!mf.tprTerroristEntityName) errors.push("tprTerroristEntityName");
+      if (!mf.tprListedUnder) errors.push("tprListedUnder");
+      if (!mf.tprDateDiscovered) errors.push("tprDateDiscovered");
+      if (!mf.tprPropertyType) errors.push("tprPropertyType");
+      if (!mf.tprPropertyValue) errors.push("tprPropertyValue");
+      if (!mf.tprPropertyDescription) errors.push("tprPropertyDescription");
+      if (!mf.tprDispositionAction) errors.push("tprDispositionAction");
+      if (!mf.camloName) errors.push("camloName");
+      if (!mf.actionTaken) errors.push("actionTaken");
+      if (notes.length === 0) errors.push("notes");
+    } else {
+      // STR/LCTR/EFTR validation
+      if (!mf.methodOfTransaction) errors.push("methodOfTransaction");
+      if (!mf.sourceOfFunds) errors.push("sourceOfFunds");
+      if (!mf.conductorName && !caseCustomer?.name) errors.push("conductorName");
+      if (mf.thirdPartyIndicator === "third_party" && !mf.thirdPartyName) errors.push("thirdPartyName");
+      if (!mf.dispositionOfFunds) errors.push("dispositionOfFunds");
+      if (!mf.beneficiaryName) errors.push("beneficiaryName");
+      if (!mf.suspicionType) errors.push("suspicionType");
+      if (mf.selectedIndicators.length === 0) errors.push("selectedIndicators");
+      if (!mf.camloName) errors.push("camloName");
+      if (!mf.actionTaken) errors.push("actionTaken");
+      if (notes.length === 0) errors.push("notes");
+    }
     return errors;
   };
 
@@ -333,6 +348,13 @@ export default function SuiteCases() {
         camloName: "CAMLO Name",
         actionTaken: "Action Taken",
         notes: "Investigation Narrative (add case notes)",
+        tprTerroristEntityName: "Listed Entity Name",
+        tprListedUnder: "Listed Under (Regulation)",
+        tprDateDiscovered: "Date Property Discovered",
+        tprPropertyType: "Property Type",
+        tprPropertyValue: "Property Value",
+        tprPropertyDescription: "Property Description",
+        tprDispositionAction: "Disposition Action",
       };
       const missing = errors.map(e => labels[e] || e).join(", ");
       toast.error(`Missing mandatory fields: ${missing}`, { duration: 6000 });
@@ -590,11 +612,12 @@ export default function SuiteCases() {
             <p className="text-xs text-red-700 mb-4">
               Select the report type per PCMLTFA/PCMLTFR requirements. STR must be filed within 3 business days of determination. LCTR/EFTR within 15 calendar days.
             </p>
-            <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="grid grid-cols-4 gap-3 mb-4">
               {([
                 { value: "str" as const, label: "STR", desc: "Suspicious Transaction Report", icon: AlertTriangle, deadline: "3 business days" },
                 { value: "lctr" as const, label: "LCTR", desc: "Large Cash Transaction (≥ CAD 10,000)", icon: FileText, deadline: "15 calendar days" },
                 { value: "eftr" as const, label: "EFTR", desc: "Electronic Funds Transfer (≥ CAD 10,000)", icon: Shield, deadline: "15 calendar days" },
+                { value: "tpr" as const, label: "TPR", desc: "Terrorist Property Report (s.7.1)", icon: Flag, deadline: "Immediately" },
               ]).map(t => (
                 <button key={t.value} onClick={() => setFintracStrType(t.value)}
                   className={cn(
@@ -875,7 +898,150 @@ export default function SuiteCases() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 flex-wrap">
+
+            {/* TPR-Specific Fields */}
+            {fintracStrType === "tpr" && (
+              <div className="space-y-4 mt-4">
+                {/* Terrorist Entity */}
+                <div className="bg-white border border-red-200 rounded-xl p-4">
+                  <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
+                    <Flag className="w-3.5 h-3.5" /> Terrorist Entity / Listed Person
+                  </h3>
+                  <p className="text-[10px] text-red-600 mb-3">Criminal Code s.83.05 — Identify the listed entity or person whose property has been identified.</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Listed Entity / Person Name *</label>
+                      <input value={mf.tprTerroristEntityName} onChange={e => setMF({ tprTerroristEntityName: e.target.value })}
+                        placeholder="Full name as listed"
+                        className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                          validationErrors.includes("tprTerroristEntityName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Entity Type</label>
+                      <select value={mf.tprTerroristEntityType} onChange={e => setMF({ tprTerroristEntityType: e.target.value })}
+                        className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                        <option value="individual">Individual</option>
+                        <option value="entity">Entity / Organisation</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Listed Under (Regulation) *</label>
+                      <select value={mf.tprListedUnder} onChange={e => setMF({ tprListedUnder: e.target.value })}
+                        className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                          validationErrors.includes("tprListedUnder") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
+                        <option value="">Select regulation…</option>
+                        <option value="Criminal Code s.83.05 — Listed Entity">Criminal Code s.83.05 — Listed Entity</option>
+                        <option value="UNAQTR — UN Al-Qaida/Taliban Regulations">UNAQTR — UN Al-Qaida/Taliban Regulations</option>
+                        <option value="SEMA — Special Economic Measures Act">SEMA — Special Economic Measures Act</option>
+                        <option value="JVCFOA — Justice for Victims of Corrupt Foreign Officials">JVCFOA — Magnitsky Act</option>
+                        <option value="Other — See Notes">Other — See Notes</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Date Property Discovered *</label>
+                      <input type="date" value={mf.tprDateDiscovered} onChange={e => setMF({ tprDateDiscovered: e.target.value })}
+                        className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                          validationErrors.includes("tprDateDiscovered") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Relationship to Listed Entity</label>
+                      <select value={mf.tprRelationshipToEntity} onChange={e => setMF({ tprRelationshipToEntity: e.target.value })}
+                        className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                        <option value="">Select relationship…</option>
+                        <option value="Account holder">Account holder</option>
+                        <option value="Signatory / Authorised person">Signatory / Authorised person</option>
+                        <option value="Beneficial owner">Beneficial owner</option>
+                        <option value="Associate / Family member">Associate / Family member</option>
+                        <option value="Director / Officer">Director / Officer</option>
+                        <option value="Agent / Nominee">Agent / Nominee</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Property Details */}
+                <div className="bg-white border border-red-200 rounded-xl p-4">
+                  <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5" /> Property Details (PCMLTFA s.7.1)
+                  </h3>
+                  <p className="text-[10px] text-red-600 mb-3">Describe the property owned or controlled by the listed entity that you have identified.</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Property Type *</label>
+                      <select value={mf.tprPropertyType} onChange={e => setMF({ tprPropertyType: e.target.value })}
+                        className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                          validationErrors.includes("tprPropertyType") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
+                        <option value="">Select type…</option>
+                        <option value="bank_account">Bank Account / Deposit</option>
+                        <option value="investment">Investment / Securities</option>
+                        <option value="real_estate">Real Estate / Property</option>
+                        <option value="vehicle">Vehicle / Vessel / Aircraft</option>
+                        <option value="cash">Cash / Currency</option>
+                        <option value="crypto">Virtual Currency / Crypto-asset</option>
+                        <option value="insurance">Insurance Policy / Annuity</option>
+                        <option value="precious">Precious Metals / Stones</option>
+                        <option value="other">Other Property</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Estimated Value *</label>
+                      <div className="flex gap-2">
+                        <select value={mf.tprPropertyCurrency} onChange={e => setMF({ tprPropertyCurrency: e.target.value })}
+                          className="w-20 border border-red-200 rounded-lg px-2 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                          <option value="CAD">CAD</option>
+                          <option value="USD">USD</option>
+                          <option value="EUR">EUR</option>
+                          <option value="GBP">GBP</option>
+                        </select>
+                        <input type="number" value={mf.tprPropertyValue} onChange={e => setMF({ tprPropertyValue: e.target.value })}
+                          placeholder="0.00"
+                          className={cn("flex-1 border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                            validationErrors.includes("tprPropertyValue") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
+                      </div>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Property Description *</label>
+                      <textarea value={mf.tprPropertyDescription} onChange={e => setMF({ tprPropertyDescription: e.target.value })}
+                        placeholder="Describe the property — account number, asset details, location, etc."
+                        rows={2}
+                        className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none resize-none",
+                          validationErrors.includes("tprPropertyDescription") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Location of Property</label>
+                      <input value={mf.tprPropertyLocation} onChange={e => setMF({ tprPropertyLocation: e.target.value })}
+                        placeholder="Branch, address, jurisdiction, or account location"
+                        className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Disposition Action */}
+                <div className="bg-white border border-red-200 rounded-xl p-4">
+                  <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5" /> Disposition & Action (Criminal Code s.83.08)
+                  </h3>
+                  <p className="text-[10px] text-red-600 mb-3">Under Criminal Code s.83.08, no person shall deal with property owned/controlled by a listed entity. Report what action has been taken.</p>
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">Disposition Action *</label>
+                    <select value={mf.tprDispositionAction} onChange={e => setMF({ tprDispositionAction: e.target.value })}
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("tprDispositionAction") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
+                      <option value="">Select action…</option>
+                      <option value="frozen">Property Frozen / Account Blocked</option>
+                      <option value="seized">Property Seized by Law Enforcement</option>
+                      <option value="reported_rcmp">Reported to RCMP / CSIS</option>
+                      <option value="retained">Property Retained — Awaiting Direction</option>
+                      <option value="released">Property Released (with FINTRAC/court order)</option>
+                      <option value="other">Other — See Notes</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-3 flex-wrap mt-4">
               <button onClick={handleExportFINTRAC}
                 className="flex items-center gap-1.5 text-xs px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
                 <Download className="w-3.5 h-3.5" /> Export {fintracStrType.toUpperCase()} PDF
@@ -1357,7 +1523,7 @@ export default function SuiteCases() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-foreground">Case Management — SAR / STR Filing</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">FinCEN SAR · FINTRAC STR/LCTR/EFTR · MOKAS STR (Cyprus) · Multi-jurisdiction reporting</p>
+          <p className="text-xs text-muted-foreground mt-0.5">FinCEN SAR · FINTRAC STR/LCTR/EFTR/TPR · MOKAS STR (Cyprus) · Multi-jurisdiction reporting</p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium"><Plus className="w-3.5 h-3.5" /> New Case</button>
       </div>
