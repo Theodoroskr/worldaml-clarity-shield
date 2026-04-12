@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Plus, Trash2, Play, Pause, Settings2, CheckCircle, AlertCircle, Sparkles, Loader2 } from "lucide-react";
+import { Plus, Trash2, Settings2, AlertCircle, Sparkles, Loader2, BarChart3, Shield, Target, TrendingUp, Lightbulb, ChevronRight, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -19,6 +19,9 @@ const actionStyle: Record<RuleAction, string> = { Flag: "bg-amber-50 text-amber-
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
+const coverageColor: Record<string, string> = { high: "text-emerald-600", medium: "text-amber-600", low: "text-red-600" };
+const fpColor: Record<string, string> = { high: "text-red-600", medium: "text-amber-600", low: "text-emerald-600" };
+
 export default function SuiteAlertRules() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -27,6 +30,9 @@ export default function SuiteAlertRules() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
   const [showAiPanel, setShowAiPanel] = useState(false);
+  const [analysing, setAnalysing] = useState(false);
+  const [ruleAnalysis, setRuleAnalysis] = useState<any>(null);
+  const [showAnalysis, setShowAnalysis] = useState(false);
 
   const fetchRules = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -103,6 +109,7 @@ export default function SuiteAlertRules() {
   const suggestRules = async () => {
     setAiLoading(true);
     setShowAiPanel(true);
+    setShowAnalysis(false);
     setAiResult(null);
     try {
       const { data, error } = await supabase.functions.invoke("suggest-rules");
@@ -139,10 +146,28 @@ export default function SuiteAlertRules() {
     fetchRules();
   };
 
+  const analyseRule = async (ruleId: string) => {
+    setAnalysing(true);
+    setShowAnalysis(true);
+    setShowAiPanel(false);
+    setRuleAnalysis(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("analyse-rule", { body: { rule_id: ruleId } });
+      if (error) throw error;
+      setRuleAnalysis(data);
+    } catch (e: any) {
+      toast.error(e.message || "Analysis failed");
+      setShowAnalysis(false);
+    } finally {
+      setAnalysing(false);
+    }
+  };
+
   if (loading) return <div className="flex items-center justify-center h-full text-sm text-muted-foreground">Loading rules…</div>;
 
   return (
     <div className="flex h-full overflow-hidden bg-background">
+      {/* Left sidebar - rule list */}
       <div className="w-72 shrink-0 border-r border-border flex flex-col bg-card">
         <div className="px-4 py-3 border-b border-border flex flex-col gap-2 shrink-0">
           <div className="flex items-center justify-between">
@@ -171,6 +196,7 @@ export default function SuiteAlertRules() {
         </div>
       </div>
 
+      {/* Center - rule editor */}
       {activeRule ? (
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card shrink-0">
@@ -179,6 +205,10 @@ export default function SuiteAlertRules() {
               <input value={activeRule.name} onChange={e => updateRule({ name: e.target.value })} className="font-semibold text-foreground text-sm bg-transparent border-0 outline-none focus:bg-muted/50 rounded px-1 py-0.5 w-72" />
             </div>
             <div className="flex items-center gap-2">
+              <button onClick={() => analyseRule(activeRule.id)} disabled={analysing} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors font-medium">
+                {analysing ? <Loader2 className="w-3 h-3 animate-spin" /> : <BarChart3 className="w-3 h-3" />}
+                Analyse Rule
+              </button>
               <button onClick={() => deleteRule(activeRule.id)} className="text-xs px-3 py-1.5 rounded-lg border border-destructive/20 text-destructive hover:bg-destructive/10 transition-colors"><Trash2 className="w-3 h-3 inline mr-1" />Delete</button>
               <button onClick={saveRule} disabled={saving} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
                 {saving ? "Saving…" : "Save Rule"}
@@ -253,12 +283,155 @@ export default function SuiteAlertRules() {
         </div>
       )}
 
+      {/* Right panel - AI Analysis for individual rule */}
+      {showAnalysis && (
+        <div className="w-[420px] shrink-0 border-l border-border flex flex-col bg-card overflow-hidden">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2"><BarChart3 className="w-4 h-4 text-purple-600" /><h3 className="font-semibold text-foreground text-sm">Rule Analysis</h3></div>
+            <button onClick={() => setShowAnalysis(false)} className="p-1 rounded hover:bg-muted transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {analysing && (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+                <p className="text-xs text-muted-foreground">Analysing rule effectiveness…</p>
+                <p className="text-[10px] text-muted-foreground/60">Evaluating against your transaction portfolio</p>
+              </div>
+            )}
+            {ruleAnalysis && (
+              <>
+                {/* Score header */}
+                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-semibold text-purple-900">{ruleAnalysis.rule_name}</h4>
+                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-medium capitalize", priorityStyle[ruleAnalysis.rule_severity] || priorityStyle.medium)}>{ruleAnalysis.rule_severity}</span>
+                  </div>
+                  <div className="flex items-end gap-4">
+                    <div>
+                      <p className="text-[10px] text-purple-600 uppercase tracking-wider font-semibold mb-1">Effectiveness</p>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-bold text-purple-900">{ruleAnalysis.effectiveness_score}</span>
+                        <span className="text-sm text-purple-500">/100</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 grid grid-cols-3 gap-2">
+                      <div className="text-center">
+                        <p className="text-[10px] text-muted-foreground mb-0.5">Coverage</p>
+                        <p className={cn("text-xs font-bold capitalize", coverageColor[ruleAnalysis.risk_coverage] || "text-foreground")}>{ruleAnalysis.risk_coverage}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[10px] text-muted-foreground mb-0.5">FP Risk</p>
+                        <p className={cn("text-xs font-bold capitalize", fpColor[ruleAnalysis.false_positive_risk] || "text-foreground")}>{ruleAnalysis.false_positive_risk}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[10px] text-muted-foreground mb-0.5">Alerts</p>
+                        <p className="text-xs font-bold text-foreground">{ruleAnalysis.alerts_count}</p>
+                      </div>
+                    </div>
+                  </div>
+                  {ruleAnalysis.estimated_hit_rate && (
+                    <p className="text-[11px] text-purple-600 mt-2 bg-purple-100/50 rounded-lg px-2 py-1">
+                      <Target className="w-3 h-3 inline mr-1" />{ruleAnalysis.estimated_hit_rate}
+                    </p>
+                  )}
+                </div>
 
-      {showAiPanel && (
+                {/* Summary */}
+                <div className="bg-muted/50 rounded-xl border border-border p-3">
+                  <p className="text-xs text-foreground leading-relaxed">{ruleAnalysis.summary}</p>
+                </div>
+
+                {/* Strengths & Weaknesses */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-2"><Shield className="w-3.5 h-3.5 text-emerald-600" /><h4 className="text-xs font-semibold text-foreground">Strengths</h4></div>
+                    <ul className="space-y-1.5">
+                      {ruleAnalysis.strengths?.map((s: string, i: number) => (
+                        <li key={i} className="text-[11px] text-muted-foreground leading-relaxed flex gap-1.5">
+                          <span className="text-emerald-500 shrink-0 mt-0.5">✓</span>{s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-2"><AlertCircle className="w-3.5 h-3.5 text-red-500" /><h4 className="text-xs font-semibold text-foreground">Weaknesses</h4></div>
+                    <ul className="space-y-1.5">
+                      {ruleAnalysis.weaknesses?.map((w: string, i: number) => (
+                        <li key={i} className="text-[11px] text-muted-foreground leading-relaxed flex gap-1.5">
+                          <span className="text-red-400 shrink-0 mt-0.5">✗</span>{w}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* False positive explanation */}
+                {ruleAnalysis.false_positive_explanation && (
+                  <div className="border border-border rounded-xl p-3">
+                    <h4 className="text-xs font-semibold text-foreground mb-1.5 flex items-center gap-1.5"><Target className="w-3.5 h-3.5 text-amber-500" />False Positive Assessment</h4>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">{ruleAnalysis.false_positive_explanation}</p>
+                  </div>
+                )}
+
+                {/* Regulatory alignment */}
+                {ruleAnalysis.regulatory_alignment?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-blue-500" />Regulatory Alignment</h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {ruleAnalysis.regulatory_alignment.map((r: string, i: number) => (
+                        <span key={i} className="text-[10px] px-2 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 font-medium">{r}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Improvement suggestions */}
+                {ruleAnalysis.improvement_suggestions?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5"><Lightbulb className="w-3.5 h-3.5 text-amber-500" />Improvement Suggestions</h4>
+                    <div className="space-y-2">
+                      {ruleAnalysis.improvement_suggestions.map((s: any, i: number) => (
+                        <div key={i} className="border border-border rounded-xl p-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-medium text-foreground">{s.suggestion}</span>
+                            <span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[s.priority] || priorityStyle.medium)}>{s.priority}</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">{s.rationale}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Complementary rules */}
+                {ruleAnalysis.similar_rules_to_consider?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5 text-purple-500" />Complementary Rules</h4>
+                    <div className="space-y-1.5">
+                      {ruleAnalysis.similar_rules_to_consider.map((r: any, i: number) => (
+                        <div key={i} className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-muted/30">
+                          <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
+                          <div>
+                            <p className="text-xs font-medium text-foreground">{r.name}</p>
+                            <p className="text-[10px] text-muted-foreground">{r.conditions_summary}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Right panel - AI Suggest rules */}
+      {showAiPanel && !showAnalysis && (
         <div className="w-96 shrink-0 border-l border-border flex flex-col bg-card overflow-hidden">
           <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-purple-600" /><h3 className="font-semibold text-foreground text-sm">AI Analysis</h3></div>
-            <button onClick={() => setShowAiPanel(false)} className="text-xs text-muted-foreground hover:text-foreground">✕</button>
+            <button onClick={() => setShowAiPanel(false)} className="p-1 rounded hover:bg-muted transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {aiLoading && (
