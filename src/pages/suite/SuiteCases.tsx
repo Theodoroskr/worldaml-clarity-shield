@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { exportSAR } from "@/services/sarExport";
 import { exportFINTRACStr, DEFAULT_MANUAL_FIELDS, type FINTRACManualFields } from "@/services/fintracStrExport";
+import { exportMOKASStr, DEFAULT_MOKAS_FIELDS, type MOKASManualFields } from "@/services/mokasStrExport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 /* ── FINTRAC STR Field Mapping ── */
@@ -161,6 +162,15 @@ export default function SuiteCases() {
   const setMF = (patch: Partial<FINTRACManualFields>) => {
     setManualFields(prev => ({ ...prev, ...patch }));
     if (validationErrors.length > 0) setValidationErrors([]);
+  };
+
+  // MOKAS (Cyprus) state
+  const [showMokasPanel, setShowMokasPanel] = useState(false);
+  const [mokasFields, setMokasFields] = useState<MOKASManualFields>({ ...DEFAULT_MOKAS_FIELDS });
+  const [mokasValidationErrors, setMokasValidationErrors] = useState<string[]>([]);
+  const setMokasF = (patch: Partial<MOKASManualFields>) => {
+    setMokasFields(prev => ({ ...prev, ...patch }));
+    if (mokasValidationErrors.length > 0) setMokasValidationErrors([]);
   };
 
   const fetchCases = async () => {
@@ -391,6 +401,97 @@ export default function SuiteCases() {
     }
   };
 
+  // ── MOKAS (Cyprus) Validation & Export ──
+  const validateMokasFields = (): string[] => {
+    const errors: string[] = [];
+    if (!mokasFields.complianceOfficerName) errors.push("complianceOfficerName");
+    if (!mokasFields.sourceOfFunds) errors.push("sourceOfFunds");
+    if (!mokasFields.destinationOfFunds) errors.push("destinationOfFunds");
+    if (!mokasFields.methodOfPayment) errors.push("methodOfPayment");
+    if (!mokasFields.suspicionType) errors.push("suspicionType");
+    if (mokasFields.selectedIndicators.length === 0) errors.push("selectedIndicators");
+    if (!mokasFields.actionTaken) errors.push("actionTaken");
+    if (notes.length === 0) errors.push("notes");
+    return errors;
+  };
+
+  const handleExportMOKAS = async () => {
+    if (!selectedCase) return;
+
+    const errors = validateMokasFields();
+    if (errors.length > 0) {
+      setMokasValidationErrors(errors);
+      const labels: Record<string, string> = {
+        complianceOfficerName: "AMLCO Name",
+        sourceOfFunds: "Source of Funds",
+        destinationOfFunds: "Destination of Funds",
+        methodOfPayment: "Method of Payment",
+        suspicionType: "Suspicion Type",
+        selectedIndicators: "At least 1 Indicator",
+        actionTaken: "Action Taken",
+        notes: "Investigation Narrative (add case notes)",
+      };
+      const missing = errors.map(e => labels[e] || e).join(", ");
+      toast.error(`Missing mandatory fields: ${missing}`, { duration: 6000 });
+      return;
+    }
+    setMokasValidationErrors([]);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error("Please log in to export"); return; }
+
+      let customer = null;
+      if (selectedCase.customer_id) {
+        const { data } = await supabase.from("suite_customers").select("*").eq("id", selectedCase.customer_id).single();
+        customer = data;
+      }
+
+      const transactions = caseTransactions.filter(t => selectedTxIds.has(t.id));
+
+      const result = await exportMOKASStr({
+        caseItem: selectedCase,
+        notes,
+        customer,
+        transactions,
+        submittedBy: user.email ?? "AMLCO",
+        reportingEntity: "WorldAML Client",
+        reportingEntityRef: `MOKAS-STR-${selectedCase.id.slice(0, 8).toUpperCase()}`,
+        manualFields: mokasFields,
+      });
+
+      setPdfPreview(result);
+
+      // Persist STR report
+      const { data: strReport } = await supabase.from("str_reports").insert({
+        user_id: user.id,
+        case_id: selectedCase.id,
+        customer_id: selectedCase.customer_id,
+        filing_status: "draft",
+        camlo_name: mokasFields.complianceOfficerName,
+        action_taken: mokasFields.actionTaken,
+        grounds_for_suspicion: mokasFields.suspicionType,
+      }).select("id").single();
+
+      if (strReport && transactions.length > 0) {
+        await supabase.from("str_report_transactions").insert(
+          transactions.map(tx => ({ report_id: strReport.id, transaction_id: tx.id }))
+        );
+      }
+
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: `MOKAS STR exported: ${selectedCase.title}`,
+        entity_type: "case",
+        entity_id: selectedCase.id,
+        details: { report_type: "mokas_str", jurisdiction: "CySEC-Cyprus", str_report_id: strReport?.id, transactions_count: transactions.length },
+      });
+    } catch (err: any) {
+      console.error("MOKAS export error:", err);
+      toast.error(`PDF export failed: ${err?.message || "Unknown error"}`);
+    }
+  };
+
   const handleDownloadPdf = () => {
     if (!pdfPreview) return;
     const link = document.createElement("a");
@@ -446,6 +547,10 @@ export default function SuiteCases() {
                   className="text-xs px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100">
                   File STR (FINTRAC)
                 </button>
+                <button onClick={() => updateStatus(selectedCase.id, "str_filed")}
+                  className="text-xs px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-100">
+                  File STR (MOKAS)
+                </button>
               </>
             )}
             {selectedCase.status !== "closed" && (
@@ -461,10 +566,16 @@ export default function SuiteCases() {
               </button>
             )}
             {(selectedCase.status === "str_filed" || selectedCase.status === "sar_filed" || selectedCase.status === "closed") && (
-              <button onClick={() => setShowFintracPanel(!showFintracPanel)}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
-                <Flag className="w-3 h-3" /> FINTRAC Report
-              </button>
+              <>
+                <button onClick={() => { setShowFintracPanel(!showFintracPanel); setShowMokasPanel(false); }}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                  <Flag className="w-3 h-3" /> FINTRAC Report
+                </button>
+                <button onClick={() => { setShowMokasPanel(!showMokasPanel); setShowFintracPanel(false); }}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium">
+                  <MapPin className="w-3 h-3" /> MOKAS Report
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -873,6 +984,312 @@ export default function SuiteCases() {
           </div>
         )}
 
+        {/* MOKAS (Cyprus) Export Panel */}
+        {showMokasPanel && (
+          <div className="bg-teal-50 border border-teal-200 rounded-xl p-5 animate-fade-in">
+            <div className="flex items-center gap-2 mb-3">
+              <MapPin className="w-4 h-4 text-teal-700" />
+              <h2 className="font-semibold text-teal-900">MOKAS — Cyprus Suspicious Transaction Report</h2>
+            </div>
+            <p className="text-xs text-teal-700 mb-4">
+              File STR to MOKAS (Unit for Combating Money Laundering) per AML Law 188(I)/2007. CySEC-regulated entities must file within 3 working days of forming suspicion (CySEC Directive DI144-2007-08, Para. 34).
+            </p>
+
+            {/* Transaction Selection */}
+            {caseTransactions.length > 0 && (
+              <div className="bg-white border border-teal-200 rounded-xl p-4 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-bold text-teal-900 flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5" /> Select Transactions for Report
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setSelectedTxIds(new Set(caseTransactions.map(t => t.id)))}
+                      className="text-[10px] text-teal-600 hover:text-teal-800 underline">Select all</button>
+                    <button onClick={() => setSelectedTxIds(new Set())}
+                      className="text-[10px] text-teal-600 hover:text-teal-800 underline">Clear</button>
+                    <span className="text-[10px] font-semibold text-teal-700">{selectedTxIds.size}/{caseTransactions.length} selected</span>
+                  </div>
+                </div>
+                <div className="max-h-[200px] overflow-y-auto border border-teal-100 rounded-lg divide-y divide-teal-50">
+                  {caseTransactions.map(tx => (
+                    <label key={tx.id} className="flex items-center gap-3 px-3 py-2 hover:bg-teal-50/50 cursor-pointer">
+                      <input type="checkbox" checked={selectedTxIds.has(tx.id)}
+                        onChange={e => {
+                          const next = new Set(selectedTxIds);
+                          e.target.checked ? next.add(tx.id) : next.delete(tx.id);
+                          setSelectedTxIds(next);
+                        }}
+                        className="rounded border-teal-300 text-teal-600 focus:ring-teal-300" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-semibold",
+                            tx.direction === "inbound" ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"
+                          )}>{tx.direction}</span>
+                          <span className="text-xs font-semibold text-foreground">{tx.currency} {Number(tx.amount).toLocaleString()}</span>
+                          {tx.counterparty && <span className="text-[11px] text-muted-foreground">→ {tx.counterparty}</span>}
+                          {tx.risk_flag && <span className="text-[9px] bg-red-100 text-red-700 px-1 rounded font-bold">FLAGGED</span>}
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">{new Date(tx.created_at).toLocaleDateString()}{tx.description ? ` · ${tx.description}` : ''}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Validation Summary */}
+            {mokasValidationErrors.length > 0 && (
+              <div className="bg-teal-50 border-2 border-teal-400 rounded-xl p-3 flex items-start gap-2 animate-fade-in mb-4">
+                <XCircle className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-teal-800">Missing mandatory fields — please complete before exporting</p>
+                  <p className="text-[10px] text-teal-600 mt-0.5">Fields highlighted below must be filled to comply with AML Law 188(I)/2007.</p>
+                </div>
+              </div>
+            )}
+
+            {/* ── Manual Entry Forms ── */}
+            <div className="space-y-4 mt-4">
+              {/* Section 1: Reporting Entity & AMLCO */}
+              <div className="bg-white border border-teal-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-teal-900 mb-1 flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5" /> Reporting Entity & AMLCO
+                </h3>
+                <p className="text-[10px] text-teal-600 mb-3">AML Law Art. 69 — Identify the reporting entity and Anti-Money Laundering Compliance Officer (AMLCO).</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">AMLCO Name *</label>
+                    <input value={mokasFields.complianceOfficerName} onChange={e => setMokasF({ complianceOfficerName: e.target.value })}
+                      placeholder="Full name of AMLCO"
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        mokasValidationErrors.includes("complianceOfficerName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-teal-200 focus:ring-teal-300")} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">Position / Title</label>
+                    <input value={mokasFields.complianceOfficerPosition} onChange={e => setMokasF({ complianceOfficerPosition: e.target.value })}
+                      placeholder="e.g. AMLCO, Compliance Director"
+                      className="w-full border border-teal-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-teal-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">CySEC License / CIF Number</label>
+                    <input value={mokasFields.reportingEntityCIF} onChange={e => setMokasF({ reportingEntityCIF: e.target.value })}
+                      placeholder="e.g. CIF 123/10"
+                      className="w-full border border-teal-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-teal-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">DRCOR Registration No.</label>
+                    <input value={mokasFields.reportingEntityDRCOR} onChange={e => setMokasF({ reportingEntityDRCOR: e.target.value })}
+                      placeholder="Department of Registrar of Companies"
+                      className="w-full border border-teal-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-teal-300 focus:outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Subject Details */}
+              <div className="bg-white border border-teal-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-teal-900 mb-1 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5" /> Subject Details (Cyprus-Specific)
+                </h3>
+                <p className="text-[10px] text-teal-600 mb-3">AML Law Art. 58 — Additional identification details for the subject of suspicion.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">Passport / ID Number</label>
+                    <input value={mokasFields.subjectPassportId} onChange={e => setMokasF({ subjectPassportId: e.target.value })}
+                      placeholder="National ID or passport number"
+                      className="w-full border border-teal-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-teal-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">Occupation / Business Activity</label>
+                    <input value={mokasFields.subjectOccupation} onChange={e => setMokasF({ subjectOccupation: e.target.value })}
+                      placeholder="e.g. Director, Real Estate Agent"
+                      className="w-full border border-teal-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-teal-300 focus:outline-none" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">Address</label>
+                    <input value={mokasFields.subjectAddress} onChange={e => setMokasF({ subjectAddress: e.target.value })}
+                      placeholder="Full residential or registered address"
+                      className="w-full border border-teal-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-teal-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">PEP Status (Art. 38)</label>
+                    <select value={mokasFields.subjectPEP} onChange={e => setMokasF({ subjectPEP: e.target.value })}
+                      className="w-full border border-teal-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-teal-300 focus:outline-none">
+                      <option value="no">No — Not a PEP</option>
+                      <option value="yes">Yes — PEP</option>
+                      <option value="domestic_pep">Yes — Domestic PEP</option>
+                      <option value="foreign_pep">Yes — Foreign PEP (Art. 38)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">Beneficial Owner</label>
+                    <input value={mokasFields.beneficialOwner} onChange={e => setMokasF({ beneficialOwner: e.target.value })}
+                      placeholder="If different from subject"
+                      className="w-full border border-teal-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-teal-300 focus:outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Transaction Details */}
+              <div className="bg-white border border-teal-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-teal-900 mb-1 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" /> Transaction Details (Art. 58)
+                </h3>
+                <p className="text-[10px] text-teal-600 mb-3">AML Law Art. 58 — Source and destination of funds and method of payment.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">Source of Funds *</label>
+                    <select value={mokasFields.sourceOfFunds} onChange={e => setMokasF({ sourceOfFunds: e.target.value })}
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        mokasValidationErrors.includes("sourceOfFunds") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-teal-200 focus:ring-teal-300")}>
+                      <option value="">Select source…</option>
+                      <option value="Employment / Salary">Employment / Salary</option>
+                      <option value="Business revenue">Business revenue</option>
+                      <option value="Savings / Investments">Savings / Investments</option>
+                      <option value="Loan proceeds">Loan proceeds</option>
+                      <option value="Sale of property">Sale of property</option>
+                      <option value="Inheritance / Gift">Inheritance / Gift</option>
+                      <option value="Rental income">Rental income</option>
+                      <option value="Dividends / Capital gains">Dividends / Capital gains</option>
+                      <option value="Unknown / Unable to verify">Unknown / Unable to verify</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">Destination of Funds *</label>
+                    <select value={mokasFields.destinationOfFunds} onChange={e => setMokasF({ destinationOfFunds: e.target.value })}
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        mokasValidationErrors.includes("destinationOfFunds") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-teal-200 focus:ring-teal-300")}>
+                      <option value="">Select destination…</option>
+                      <option value="Wire transfer (domestic)">Wire transfer (domestic)</option>
+                      <option value="Wire transfer (international)">Wire transfer (international)</option>
+                      <option value="Cash withdrawal">Cash withdrawal</option>
+                      <option value="Account credit">Account credit</option>
+                      <option value="Investment purchase">Investment purchase</option>
+                      <option value="Real estate purchase">Real estate purchase</option>
+                      <option value="Crypto / virtual currency">Crypto / virtual currency</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">Method of Payment *</label>
+                    <select value={mokasFields.methodOfPayment} onChange={e => setMokasF({ methodOfPayment: e.target.value })}
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        mokasValidationErrors.includes("methodOfPayment") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-teal-200 focus:ring-teal-300")}>
+                      <option value="">Select method…</option>
+                      <option value="Bank transfer">Bank transfer</option>
+                      <option value="Cash">Cash</option>
+                      <option value="Cheque / Bank draft">Cheque / Bank draft</option>
+                      <option value="Credit/Debit card">Credit/Debit card</option>
+                      <option value="E-wallet / Online payment">E-wallet / Online payment</option>
+                      <option value="Cryptocurrency">Cryptocurrency</option>
+                      <option value="Mixed methods">Mixed methods</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 4: Grounds for Suspicion */}
+              <div className="bg-white border border-teal-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-teal-900 mb-1 flex items-center gap-1.5">
+                  <Flag className="w-3.5 h-3.5" /> Grounds for Suspicion (Art. 27)
+                </h3>
+                <p className="text-[10px] text-teal-600 mb-3">AML Law Art. 27 — Select suspicion type and applicable indicators from MOKAS/CySEC guidance.</p>
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">Suspicion Type *</label>
+                    <select value={mokasFields.suspicionType} onChange={e => setMokasF({ suspicionType: e.target.value })}
+                      className="w-full border border-teal-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-teal-300 focus:outline-none">
+                      <option value="ml">Money Laundering (ML)</option>
+                      <option value="tf">Terrorist Financing (TF)</option>
+                      <option value="sanctions">Sanctions Evasion</option>
+                      <option value="ml_tf">ML and TF</option>
+                      <option value="fraud">Fraud / Predicate Offence</option>
+                    </select>
+                  </div>
+                </div>
+                <label className={cn("text-[10px] font-semibold mb-2 block",
+                  mokasValidationErrors.includes("selectedIndicators") ? "text-red-600" : "text-teal-800")}>
+                  Suspicion Indicators (select at least 1) {mokasValidationErrors.includes("selectedIndicators") && <span className="text-red-500 font-bold">⚠ Required</span>}
+                </label>
+                <div className="space-y-1.5">
+                  {[
+                    "Transaction inconsistent with client's known business or economic profile",
+                    "Structuring transactions to avoid €10,000 reporting threshold",
+                    "Involvement of high-risk third country (EU Commission list)",
+                    "Unusual use of shell companies, trusts, or nominee structures",
+                    "Client unable or unwilling to provide source of funds/wealth",
+                    "Rapid movement of funds with no apparent economic rationale",
+                    "Transactions involving sanctioned jurisdictions or persons",
+                    "Use of complex corporate structures disproportionate to business needs",
+                    "Funds linked to jurisdictions with weak AML frameworks",
+                    "Client is PEP or close associate / family member of PEP (Art. 38)",
+                    "Adverse media linking client to financial crime or corruption",
+                    "Dormant account suddenly reactivated with significant transactions",
+                  ].map((ind, i) => (
+                    <label key={i} className="flex items-start gap-2 cursor-pointer group">
+                      <input type="checkbox" checked={mokasFields.selectedIndicators.includes(i)}
+                        onChange={e => {
+                          const next = e.target.checked
+                            ? [...mokasFields.selectedIndicators, i]
+                            : mokasFields.selectedIndicators.filter(x => x !== i);
+                          setMokasF({ selectedIndicators: next });
+                        }}
+                        className="mt-0.5 rounded border-teal-300 text-teal-600 focus:ring-teal-300" />
+                      <span className="text-[11px] text-foreground group-hover:text-teal-800 transition-colors">{ind}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 5: Action Taken */}
+              <div className="bg-white border border-teal-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-teal-900 mb-1 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" /> Action Taken & Internal Measures (Art. 27(5))
+                </h3>
+                <p className="text-[10px] text-teal-600 mb-3">Document what action has been or will be taken, plus any internal measures applied.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">Action Taken *</label>
+                    <select value={mokasFields.actionTaken} onChange={e => setMokasF({ actionTaken: e.target.value })}
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        mokasValidationErrors.includes("actionTaken") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-teal-200 focus:ring-teal-300")}>
+                      <option value="">Select action…</option>
+                      <option value="Enhanced monitoring applied">Enhanced monitoring applied</option>
+                      <option value="Account restricted / frozen">Account restricted / frozen</option>
+                      <option value="Relationship terminated">Relationship terminated</option>
+                      <option value="Additional due diligence requested">Additional due diligence requested</option>
+                      <option value="Transaction blocked">Transaction blocked</option>
+                      <option value="Police / law enforcement notified">Police / law enforcement notified</option>
+                      <option value="No further action — monitoring continues">No further action — monitoring continues</option>
+                      <option value="Multiple actions taken (see notes)">Multiple actions taken (see notes)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-teal-800 mb-1 block">Internal Measures</label>
+                    <input value={mokasFields.internalMeasures} onChange={e => setMokasF({ internalMeasures: e.target.value })}
+                      placeholder="e.g. Enhanced due diligence, staff training"
+                      className="w-full border border-teal-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-teal-300 focus:outline-none" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap mt-4">
+              <button onClick={handleExportMOKAS}
+                className="flex items-center gap-1.5 text-xs px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-semibold">
+                <Download className="w-3.5 h-3.5" /> Export MOKAS STR PDF
+              </button>
+              {mokasValidationErrors.includes("notes") && (
+                <span className="text-[10px] text-teal-600 font-semibold flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> Add investigation notes before exporting
+                </span>
+              )}
+              <span className="text-[10px] text-teal-500">AML Law 188(I)/2007 · CySEC DI144-2007-08</span>
+            </div>
+          </div>
+        )}
+
         {/* Case Notes */}
         <div className="bg-card rounded-xl border border-border">
           <div className="px-5 py-4 border-b border-border flex items-center gap-2">
@@ -940,7 +1357,7 @@ export default function SuiteCases() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-foreground">Case Management — SAR / STR Filing</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">FinCEN SAR · FINTRAC STR/LCTR/EFTR · Multi-jurisdiction reporting</p>
+          <p className="text-xs text-muted-foreground mt-0.5">FinCEN SAR · FINTRAC STR/LCTR/EFTR · MOKAS STR (Cyprus) · Multi-jurisdiction reporting</p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium"><Plus className="w-3.5 h-3.5" /> New Case</button>
       </div>
