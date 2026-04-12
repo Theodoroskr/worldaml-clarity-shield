@@ -86,6 +86,7 @@ const EUSanctionsCountry = lazy(() => import("./pages/EUSanctionsCountry"));
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminAlertRules = lazy(() => import("./pages/admin/AdminAlertRules"));
 const AdminForms = lazy(() => import("./pages/admin/AdminForms"));
 const AdminWorkflows = lazy(() => import("./pages/admin/AdminWorkflows"));
 const AdminPricing = lazy(() => import("./pages/admin/AdminPricing"));
@@ -135,6 +136,7 @@ const App = () => (
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route path="users" element={<AdminUsers />} />
+                  <Route path="alert-rules" element={<AdminAlertRules />} />
                   <Route path="forms" element={<AdminForms />} />
                   <Route path="workflows" element={<AdminWorkflows />} />
                   <Route path="pricing" element={<AdminPricing />} />
