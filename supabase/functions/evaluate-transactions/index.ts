@@ -186,9 +186,15 @@ Deno.serve(async (req) => {
     }
 
     // Batch insert alerts
+    let insertedCount = 0;
     if (alertsToCreate.length > 0) {
       for (let i = 0; i < alertsToCreate.length; i += 50) {
-        await supabaseAdmin.from("suite_alerts").insert(alertsToCreate.slice(i, i + 50));
+        const { error: insertErr, data: inserted } = await supabaseAdmin.from("suite_alerts").insert(alertsToCreate.slice(i, i + 50)).select("id");
+        if (insertErr) {
+          console.error("Alert insert error:", JSON.stringify(insertErr));
+        } else {
+          insertedCount += inserted?.length || 0;
+        }
       }
     }
 
