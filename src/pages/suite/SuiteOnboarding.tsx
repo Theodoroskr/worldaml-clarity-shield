@@ -216,6 +216,7 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
     onUpdated({ ...customer, ...updates });
     setEditing(false);
     setSaving(false);
+    fetchTimeline();
   };
 
   return (
