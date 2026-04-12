@@ -4,7 +4,7 @@ import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, Ma
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { exportSAR } from "@/services/sarExport";
-import { exportFINTRACStr } from "@/services/fintracStrExport";
+import { exportFINTRACStr, DEFAULT_MANUAL_FIELDS, type FINTRACManualFields } from "@/services/fintracStrExport";
 
 /* ── FINTRAC STR Field Mapping ── */
 interface FieldMapping {
