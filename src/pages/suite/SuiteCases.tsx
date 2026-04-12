@@ -224,15 +224,24 @@ export default function SuiteCases() {
     if (mokasValidationErrors.length > 0) setMokasValidationErrors([]);
   };
 
+  // ── Regulator auto-detection ──
+  const [userRegulator, setUserRegulator] = useState<string | null>(null);
+  const [showChecklist, setShowChecklist] = useState(false);
+  const [filedReports, setFiledReports] = useState<Set<string>>(new Set());
+  const availableExports = getAvailableExports(userRegulator);
+  const regulatorReports = userRegulator ? (REGULATOR_REPORTS[userRegulator] || []) : [];
+
   const fetchCases = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const [cRes, aRes] = await Promise.all([
+    const [cRes, aRes, profileRes] = await Promise.all([
       supabase.from("suite_cases").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("suite_alerts").select("id, title").eq("user_id", user.id).eq("status", "open"),
+      supabase.from("profiles").select("regulator").eq("user_id", user.id).maybeSingle(),
     ]);
     setCases(cRes.data || []);
     setAlerts(aRes.data || []);
+    if (profileRes.data?.regulator) setUserRegulator(profileRes.data.regulator);
     setLoading(false);
   };
 
