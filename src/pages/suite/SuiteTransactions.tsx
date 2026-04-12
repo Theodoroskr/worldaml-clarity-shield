@@ -89,6 +89,8 @@ export default function SuiteTransactions() {
   const [txAlerts, setTxAlerts] = useState<Record<string, AlertRow[]>>({});
   const [alertsLoading, setAlertsLoading] = useState<string | null>(null);
   const [rulesMap, setRulesMap] = useState<Record<string, RuleInfo>>({});
+  const [ruleFilter, setRuleFilter] = useState<string>("all");
+  const [ruleTxMap, setRuleTxMap] = useState<Record<string, Set<string>>>({});
 
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
