@@ -252,7 +252,7 @@ export default function SuiteAlertRules() {
           {rules.length === 0 ? "Create your first alert rule" : "Select a rule to edit"}
         </div>
       )}
-    </div>
+
 
       {showAiPanel && (
         <div className="w-96 shrink-0 border-l border-border flex flex-col bg-card overflow-hidden">
