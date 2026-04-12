@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, Fragment } from "react";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, TrendingUp, Globe, RefreshCw, Plus, Upload, FileText, Sparkles, X, Check, Loader2 } from "lucide-react";
+import { AlertTriangle, TrendingUp, Globe, RefreshCw, Plus, Upload, FileText, Sparkles, X, Check, Loader2, ChevronDown, ChevronRight, Shield, Clock, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -17,9 +17,20 @@ interface TxRow {
   risk_flag: boolean;
   description: string | null;
   created_at: string;
+  monitoring_status: string;
 }
 
-interface Customer { id: string; name: string; }
+interface AlertRow {
+  id: string;
+  title: string;
+  severity: string;
+  status: string;
+  created_at: string;
+  rule_id: string | null;
+  description: string | null;
+}
+
+interface Customer { id: string; name: string; risk_level?: string; country?: string; }
 
 interface BulkRow {
   customer_name: string;
@@ -70,12 +81,17 @@ export default function SuiteTransactions() {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [savingRules, setSavingRules] = useState<Set<number>>(new Set());
 
+  // Detail expand state
+  const [expandedTx, setExpandedTx] = useState<string | null>(null);
+  const [txAlerts, setTxAlerts] = useState<Record<string, AlertRow[]>>({});
+  const [alertsLoading, setAlertsLoading] = useState<string | null>(null);
+
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const [tRes, cRes] = await Promise.all([
       supabase.from("suite_transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(500),
-      supabase.from("suite_customers").select("id, name").eq("user_id", user.id),
+      supabase.from("suite_customers").select("id, name, risk_level, country").eq("user_id", user.id),
     ]);
     setTxs(tRes.data || []);
     setCustomers(cRes.data || []);
@@ -224,8 +240,34 @@ export default function SuiteTransactions() {
   };
 
   const customerName = (id: string) => customers.find(c => c.id === id)?.name || "Unknown";
+  const customerInfo = (id: string) => customers.find(c => c.id === id);
   const filtered = filter === "All" ? txs : filter === "flagged" ? txs.filter(t => t.risk_flag) : txs.filter(t => !t.risk_flag);
   const stats = { total: txs.length, flagged: txs.filter(t => t.risk_flag).length, volume: txs.reduce((s, t) => s + Number(t.amount), 0) };
+
+  const toggleExpand = async (txId: string) => {
+    if (expandedTx === txId) { setExpandedTx(null); return; }
+    setExpandedTx(txId);
+    if (!txAlerts[txId]) {
+      setAlertsLoading(txId);
+      const { data } = await supabase.from("suite_alerts").select("id, title, severity, status, created_at, rule_id, description").eq("transaction_id", txId).order("created_at", { ascending: false });
+      setTxAlerts(prev => ({ ...prev, [txId]: (data as AlertRow[]) || [] }));
+      setAlertsLoading(null);
+    }
+  };
+
+  const statusColor = (s: string) => {
+    if (s === "flagged") return "bg-destructive/10 text-destructive border-destructive/20";
+    if (s === "clear") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    if (s === "reviewed") return "bg-blue-50 text-blue-700 border-blue-200";
+    return "bg-muted text-muted-foreground border-border";
+  };
+
+  const riskColor = (r?: string) => {
+    if (r === "critical") return "text-destructive font-bold";
+    if (r === "high") return "text-orange-600 font-semibold";
+    if (r === "medium") return "text-amber-600 font-medium";
+    return "text-emerald-600";
+  };
 
   const sevColor = (s: string) => s === "critical" ? "bg-red-100 text-red-800 border-red-200" : s === "high" ? "bg-orange-100 text-orange-800 border-orange-200" : s === "medium" ? "bg-yellow-100 text-yellow-800 border-yellow-200" : "bg-blue-100 text-blue-800 border-blue-200";
 
@@ -529,29 +571,111 @@ export default function SuiteTransactions() {
         ) : (
           <table className="w-full text-xs">
             <thead className="sticky top-0 bg-card border-b border-border z-10">
-              <tr>{["Date", "Customer", "Direction", "Amount", "Counterparty", "Country", "Risk", ""].map(h => <th key={h} className="px-3 py-2.5 text-left font-semibold text-muted-foreground uppercase tracking-wide text-[10px]">{h}</th>)}</tr>
+              <tr>
+                <th className="px-2 py-2.5 w-6"></th>
+                {["Date", "Customer", "Direction", "Amount", "Counterparty", "Country", "Status", "Risk"].map(h => (
+                  <th key={h} className="px-3 py-2.5 text-left font-semibold text-muted-foreground uppercase tracking-wide text-[10px]">{h}</th>
+                ))}
+              </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filtered.map(tx => (
-                <tr key={tx.id} className={cn("hover:bg-muted/30 transition-colors", tx.risk_flag && "bg-red-50/40")}>
-                  <td className="px-3 py-2.5 font-mono text-muted-foreground">{new Date(tx.created_at).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</td>
-                  <td className="px-3 py-2.5 text-foreground font-medium">{customerName(tx.customer_id)}</td>
-                  <td className="px-3 py-2.5 capitalize text-muted-foreground">{tx.direction}</td>
-                  <td className="px-3 py-2.5 font-mono font-bold text-foreground">{tx.currency} {Number(tx.amount).toLocaleString()}</td>
-                  <td className="px-3 py-2.5 text-muted-foreground">{tx.counterparty || "—"}</td>
-                  <td className="px-3 py-2.5">
-                    <span className={cn("text-muted-foreground", tx.counterparty_country && HIGH_RISK.includes(tx.counterparty_country.toUpperCase()) && "text-destructive font-semibold")}>
-                      {tx.counterparty_country || "—"}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <span className={cn("px-2 py-0.5 rounded border font-medium text-[10px]", tx.risk_flag ? "bg-red-50 text-red-700 border-red-200" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
-                      {tx.risk_flag ? "Flagged" : "Clean"}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2.5 text-[10px] text-muted-foreground">{tx.description || ""}</td>
-                </tr>
-              ))}
+              {filtered.map(tx => {
+                const isExpanded = expandedTx === tx.id;
+                const cust = customerInfo(tx.customer_id);
+                const alerts = txAlerts[tx.id] || [];
+                return (
+                  <Fragment key={tx.id}>
+                    <tr key={tx.id} className={cn("hover:bg-muted/30 transition-colors cursor-pointer", tx.risk_flag && "bg-destructive/5")} onClick={() => toggleExpand(tx.id)}>
+                      <td className="px-2 py-2.5 text-muted-foreground">
+                        {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                      </td>
+                      <td className="px-3 py-2.5 font-mono text-muted-foreground">{new Date(tx.created_at).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</td>
+                      <td className="px-3 py-2.5 text-foreground font-medium">{customerName(tx.customer_id)}</td>
+                      <td className="px-3 py-2.5 capitalize text-muted-foreground">{tx.direction}</td>
+                      <td className="px-3 py-2.5 font-mono font-bold text-foreground">{tx.currency} {Number(tx.amount).toLocaleString()}</td>
+                      <td className="px-3 py-2.5 text-muted-foreground">{tx.counterparty || "—"}</td>
+                      <td className="px-3 py-2.5">
+                        <span className={cn("text-muted-foreground", tx.counterparty_country && HIGH_RISK.includes(tx.counterparty_country.toUpperCase()) && "text-destructive font-semibold")}>
+                          {tx.counterparty_country || "—"}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <span className={cn("px-2 py-0.5 rounded border font-medium text-[10px] capitalize", statusColor(tx.monitoring_status))}>
+                          {tx.monitoring_status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <span className={cn("px-2 py-0.5 rounded border font-medium text-[10px]", tx.risk_flag ? "bg-destructive/10 text-destructive border-destructive/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
+                          {tx.risk_flag ? "Flagged" : "Clean"}
+                        </span>
+                      </td>
+                    </tr>
+                    {isExpanded && (
+                      <tr key={`${tx.id}-detail`} className="bg-muted/20">
+                        <td colSpan={9} className="px-6 py-4">
+                          <div className="grid grid-cols-3 gap-6">
+                            {/* Transaction Details */}
+                            <div>
+                              <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                                <Eye className="w-3 h-3" /> Transaction Details
+                              </h4>
+                              <div className="space-y-1.5 text-xs">
+                                <div className="flex justify-between"><span className="text-muted-foreground">ID</span><span className="font-mono text-foreground text-[10px]">{tx.id.slice(0, 8)}…</span></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Amount</span><span className="font-mono font-bold text-foreground">{tx.currency} {Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Direction</span><span className="capitalize text-foreground">{tx.direction}</span></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Counterparty</span><span className="text-foreground">{tx.counterparty || "—"}</span></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Country</span><span className={cn("text-foreground", tx.counterparty_country && HIGH_RISK.includes(tx.counterparty_country.toUpperCase()) && "text-destructive font-semibold")}>{tx.counterparty_country || "—"}</span></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Date</span><span className="font-mono text-foreground">{new Date(tx.created_at).toLocaleString("en-GB")}</span></div>
+                                {tx.description && <div className="pt-1 border-t border-border"><span className="text-muted-foreground">Note:</span> <span className="text-foreground">{tx.description}</span></div>}
+                              </div>
+                            </div>
+
+                            {/* Customer Info */}
+                            <div>
+                              <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                                <Shield className="w-3 h-3" /> Customer Profile
+                              </h4>
+                              <div className="space-y-1.5 text-xs">
+                                <div className="flex justify-between"><span className="text-muted-foreground">Name</span><span className="text-foreground font-medium">{cust?.name || "Unknown"}</span></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Risk Level</span><span className={riskColor(cust?.risk_level)}>{cust?.risk_level || "—"}</span></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Country</span><span className="text-foreground">{cust?.country || "—"}</span></div>
+                              </div>
+                            </div>
+
+                            {/* Triggered Alerts */}
+                            <div>
+                              <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                                <AlertTriangle className="w-3 h-3" /> Triggered Alerts ({alertsLoading === tx.id ? "…" : alerts.length})
+                              </h4>
+                              {alertsLoading === tx.id ? (
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin" /> Loading alerts…</div>
+                              ) : alerts.length === 0 ? (
+                                <p className="text-xs text-muted-foreground">No alerts triggered for this transaction.</p>
+                              ) : (
+                                <div className="space-y-1.5 max-h-[160px] overflow-y-auto">
+                                  {alerts.map(a => (
+                                    <div key={a.id} className="border border-border rounded p-2 bg-background">
+                                      <div className="flex items-center gap-1.5 mb-0.5">
+                                        <span className={cn("px-1.5 py-0.5 rounded border text-[9px] font-medium", sevColor(a.severity))}>{a.severity}</span>
+                                        <span className="text-[11px] font-medium text-foreground truncate">{a.title}</span>
+                                      </div>
+                                      {a.description && <p className="text-[10px] text-muted-foreground truncate">{a.description}</p>}
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <span className={cn("px-1.5 py-0.5 rounded text-[9px] capitalize", a.status === "open" ? "bg-amber-50 text-amber-700" : "bg-muted text-muted-foreground")}>{a.status}</span>
+                                        <span className="text-[9px] text-muted-foreground font-mono">{new Date(a.created_at).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
         )}
