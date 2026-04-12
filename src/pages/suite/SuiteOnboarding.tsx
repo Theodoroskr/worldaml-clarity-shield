@@ -410,16 +410,21 @@ export default function SuiteOnboarding() {
     if (!user) { setSaving(false); return; }
 
     const fullName = `${kycForm.firstName.trim()} ${kycForm.lastName.trim()}`;
-    const { error } = await supabase.from("suite_customers").insert({
+    const { data: customer, error } = await supabase.from("suite_customers").insert({
       user_id: user.id,
       name: fullName,
       type: "individual",
       email: kycForm.email.trim() || null,
       country: kycForm.country || null,
       date_of_birth: kycForm.dateOfBirth || null,
-    });
+    }).select("id").single();
 
     if (error) { toast.error(error.message); setSaving(false); return; }
+
+    // Upload documents
+    if (kycFiles.length > 0 && customer) {
+      await uploadDocuments(user.id, customer.id, kycFiles);
+    }
 
     await supabase.from("suite_audit_log").insert({
       user_id: user.id,
