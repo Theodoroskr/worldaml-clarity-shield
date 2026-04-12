@@ -658,7 +658,10 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="text-sm font-medium text-foreground">{ob.title}</p>
-                      <p className="text-xs text-muted-foreground">{ob.deadline}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-muted-foreground">{ob.deadline}</p>
+                        <DeadlineBadge obligation={ob} />
+                      </div>
                     </div>
                     {existing ? (
                       <Badge variant="outline" className={STATUS_CONFIG[existing.filing_status]?.badgeClass || ""}>
