@@ -555,6 +555,7 @@ export default function SuiteOnboarding() {
         occupation: kycForm.occupation,
         pep: kycForm.pep,
         source_of_funds: kycForm.sourceOfFunds,
+        ...(Object.keys(customFieldValues).length > 0 && { custom_fields: customFieldValues }),
       },
     });
 
