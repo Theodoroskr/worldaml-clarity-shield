@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from "react";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, TrendingUp, Globe, RefreshCw, Plus, Upload, FileText, Sparkles, X, Check, Loader2, ChevronDown, ChevronRight, Shield, Clock, Eye, Filter } from "lucide-react";
+import { AlertTriangle, TrendingUp, Globe, RefreshCw, Plus, Upload, FileText, Sparkles, X, Check, Loader2, ChevronDown, ChevronRight, Shield, Clock, Eye, Filter, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
