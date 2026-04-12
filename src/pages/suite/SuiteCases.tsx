@@ -558,7 +558,8 @@ export default function SuiteCases() {
                   <div>
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Disposition of Funds *</label>
                     <select value={mf.dispositionOfFunds} onChange={e => setMF({ dispositionOfFunds: e.target.value })}
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("dispositionOfFunds") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
                       <option value="">Select disposition…</option>
                       <option value="Cash withdrawal">Cash withdrawal</option>
                       <option value="Wire transfer (domestic)">Wire transfer (domestic)</option>
@@ -575,7 +576,8 @@ export default function SuiteCases() {
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Beneficiary Name *</label>
                     <input value={mf.beneficiaryName} onChange={e => setMF({ beneficiaryName: e.target.value })}
                       placeholder="Person or entity who benefited"
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("beneficiaryName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
                   </div>
                   <div>
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Beneficiary Account</label>
