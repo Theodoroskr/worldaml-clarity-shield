@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Plus, Trash2, Settings2, AlertCircle, Sparkles, Loader2, BarChart3, Shield, Target, TrendingUp, Lightbulb, ChevronRight, X } from "lucide-react";
+import { Plus, Trash2, Settings2, AlertCircle, Sparkles, Loader2, BarChart3, Shield, Target, TrendingUp, Lightbulb, ChevronRight, X, Scale, CheckCircle2, AlertOctagon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -22,6 +22,91 @@ function uid() { return Math.random().toString(36).slice(2, 9); }
 const coverageColor: Record<string, string> = { high: "text-emerald-600", medium: "text-amber-600", low: "text-red-600" };
 const fpColor: Record<string, string> = { high: "text-red-600", medium: "text-amber-600", low: "text-emerald-600" };
 
+/* FinCEN / BSA Regulatory Mapping */
+interface FinCENRequirement {
+  id: string;
+  regulation: string;
+  citation: string;
+  description: string;
+  rulePatterns: string[]; // substrings to match against rule names
+  suggestedRules?: { name: string; severity: string; rationale: string; conditions: { field: string; operator: string; value: string }[] }[];
+}
+
+const FINCEN_REQUIREMENTS: FinCENRequirement[] = [
+  {
+    id: "ctr",
+    regulation: "Currency Transaction Report (CTR)",
+    citation: "31 CFR § 1010.311",
+    description: "Financial institutions must file a CTR for each cash transaction exceeding $10,000, including aggregated daily transactions by the same customer.",
+    rulePatterns: ["Large Transaction", "P-TLO", "P-TLI", "P-HSUMI", "P-HSUMO"],
+    suggestedRules: [
+      { name: "[FINCEN-CTR] Aggregate daily cash ≥ $10,000", severity: "critical", rationale: "FinCEN requires CTR filing when a customer's aggregate cash transactions in a single business day reach $10,000. This rule flags daily aggregates approaching or exceeding the threshold.", conditions: [{ field: "account.totalDeposits30d", operator: ">", value: "10000" }] },
+    ],
+  },
+  {
+    id: "structuring",
+    regulation: "Anti-Structuring",
+    citation: "31 USC § 5324",
+    description: "It is illegal to structure (break up) transactions to evade CTR filing requirements. Patterns of transactions just below $10,000 are a key indicator.",
+    rulePatterns: ["STRIN", "STROUT"],
+  },
+  {
+    id: "sar",
+    regulation: "Suspicious Activity Report (SAR)",
+    citation: "31 CFR § 1020.320",
+    description: "Institutions must file a SAR for transactions of $5,000+ involving suspected money laundering, BSA violations, or terrorist financing. No tipping off customers.",
+    rulePatterns: ["HRCOU", "DORMANT", "NCOU", "RISKWORD", "REFTEXT", "HASUMI", "HASUMO", "HANUMI", "HANUMO", "IN>AVG", "OUT>AVG"],
+    suggestedRules: [
+      { name: "[FINCEN-SAR] Rapid in-out (pass-through) within 48h", severity: "high", rationale: "Funds deposited and quickly withdrawn may indicate layering. FinCEN SAR guidance highlights rapid movement of funds as a red flag for money laundering.", conditions: [{ field: "transaction.amount", operator: ">", value: "5000" }, { field: "transaction.frequency", operator: ">", value: "2" }] },
+      { name: "[FINCEN-SAR] Round-dollar transactions pattern", severity: "medium", rationale: "Recurring round-dollar amounts ($5,000, $9,000) are flagged in FinCEN advisories as structuring or suspicious activity indicators.", conditions: [{ field: "transaction.amount", operator: "==", value: "round_dollar" }] },
+    ],
+  },
+  {
+    id: "ofac",
+    regulation: "OFAC Sanctions Compliance",
+    citation: "31 CFR Part 501",
+    description: "All US financial institutions must screen transactions and customers against OFAC's SDN List, Sectoral Sanctions, and country-based sanctions programs.",
+    rulePatterns: ["CUSTSCRS", "CUSTSCRH", "CTPYSCRS", "CUSTBIC", "CTPYBIC", "INSTSCRS", "INSTSCRH", "High-Risk Country"],
+  },
+  {
+    id: "cdd",
+    regulation: "Customer Due Diligence (CDD) Rule",
+    citation: "31 CFR § 1010.230",
+    description: "Requires identification and verification of beneficial owners of legal entity customers, ongoing monitoring of customer relationships, and understanding the nature and purpose of accounts.",
+    rulePatterns: ["VC", "CDC01-P", "CDC01-E", "MCOC", "OCMC"],
+    suggestedRules: [
+      { name: "[FINCEN-CDD] Beneficial ownership change detected", severity: "high", rationale: "Under the CDD Rule, institutions must update beneficial ownership information when they become aware of changes. Monitoring ownership changes ensures ongoing compliance.", conditions: [{ field: "customer.status", operator: "==", value: "ownership_changed" }] },
+    ],
+  },
+  {
+    id: "pep",
+    regulation: "PEP Enhanced Due Diligence",
+    citation: "31 CFR § 1010.620",
+    description: "Enhanced due diligence for private banking accounts held by senior foreign political figures (PEPs), including scrutiny of sources of funds.",
+    rulePatterns: ["CUSTPEP", "CTPYPEP"],
+  },
+  {
+    id: "314a",
+    regulation: "Information Sharing (314(a))",
+    citation: "31 USC § 5318(g)",
+    description: "FinCEN can require financial institutions to search records for accounts or transactions involving persons suspected of terrorism or money laundering.",
+    rulePatterns: [],
+    suggestedRules: [
+      { name: "[FINCEN-314a] Name match on FinCEN 314(a) list", severity: "critical", rationale: "Institutions must respond to FinCEN 314(a) requests within 14 days. Automated screening of customer names against 314(a) subjects ensures timely compliance.", conditions: [{ field: "customer.status", operator: "==", value: "314a_match" }] },
+    ],
+  },
+  {
+    id: "funnel",
+    regulation: "Funnel Account Detection",
+    citation: "FinCEN Advisory FIN-2014-A009",
+    description: "Funnel accounts are used to move illicit proceeds across borders, with deposits in one geographic area and rapid withdrawals in another. FinCEN specifically advises monitoring for this pattern.",
+    rulePatterns: ["SUMCCI", "SUMCCO", "NUMCCI", "NUMCCO"],
+    suggestedRules: [
+      { name: "[FINCEN-FNL] Multi-region deposit/withdrawal pattern", severity: "critical", rationale: "FinCEN Advisory FIN-2014-A009 identifies funnel accounts as a high-priority typology. Deposits in one region with rapid withdrawals in another region indicate cross-border laundering.", conditions: [{ field: "transaction.country", operator: "!=", value: "account_country" }, { field: "transaction.amount", operator: ">", value: "3000" }] },
+    ],
+  },
+];
+
 export default function SuiteAlertRules() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -33,6 +118,7 @@ export default function SuiteAlertRules() {
   const [analysing, setAnalysing] = useState(false);
   const [ruleAnalysis, setRuleAnalysis] = useState<any>(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [showFinCEN, setShowFinCEN] = useState(false);
 
   const fetchRules = async () => {
     const { data: { user } } = await supabase.auth.getUser();
