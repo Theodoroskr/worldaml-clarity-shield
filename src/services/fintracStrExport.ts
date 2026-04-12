@@ -39,6 +39,44 @@ export interface FINTRACNote {
   created_at: string;
 }
 
+export interface FINTRACManualFields {
+  // Starting Action
+  methodOfTransaction: string;
+  sourceOfFunds: string;
+  conductorName: string;
+  thirdPartyIndicator: string;
+  thirdPartyName: string;
+  // Completing Action
+  dispositionOfFunds: string;
+  beneficiaryName: string;
+  beneficiaryAccount: string;
+  beneficiaryCountry: string;
+  // Part D — Suspicion
+  suspicionType: string;
+  isPEP: string;
+  selectedIndicators: number[];
+  // Part F — Declaration
+  camloName: string;
+  actionTaken: string;
+}
+
+export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
+  methodOfTransaction: "",
+  sourceOfFunds: "",
+  conductorName: "",
+  thirdPartyIndicator: "own_behalf",
+  thirdPartyName: "",
+  dispositionOfFunds: "",
+  beneficiaryName: "",
+  beneficiaryAccount: "",
+  beneficiaryCountry: "",
+  suspicionType: "ml",
+  isPEP: "no",
+  selectedIndicators: [],
+  camloName: "",
+  actionTaken: "",
+};
+
 export interface FINTRACSTRExportOptions {
   caseItem: FINTRACCase;
   notes: FINTRACNote[];
@@ -48,6 +86,7 @@ export interface FINTRACSTRExportOptions {
   reportingEntity: string;
   reportingEntityRef?: string;
   strType: "str" | "lctr" | "eftr";
+  manualFields?: FINTRACManualFields;
 }
 
 const MARGIN = 20;
@@ -118,7 +157,8 @@ function checkPage(doc: jsPDF, y: number, needed = 20): number {
 }
 
 export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<void> {
-  const { caseItem, notes, customer, transactions, submittedBy, reportingEntity, reportingEntityRef, strType } = opts;
+  const { caseItem, notes, customer, transactions, submittedBy, reportingEntity, reportingEntityRef, strType, manualFields } = opts;
+  const mf = manualFields ?? DEFAULT_MANUAL_FIELDS;
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
   const now = new Date();
@@ -253,10 +293,10 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
     y += 10;
 
     const startingFields = [
-      { label: "Method of Transaction", value: "☐ In-person  ☐ Online  ☐ Telephone  ☐ Mail  ☐ Other: ___________" },
-      { label: "Source of Funds", value: "☐ Employment  ☐ Business revenue  ☐ Savings  ☐ Investment  ☐ Loan  ☐ Other: ___________" },
-      { label: "Conductor Name", value: customer ? customer.name : "__________________ (enter name of person who conducted the transaction)" },
-      { label: "Third Party Determination", value: "☐ Transaction conducted on own behalf  ☐ On behalf of third party: __________________" },
+      { label: "Method of Transaction", value: mf.methodOfTransaction || "Not specified" },
+      { label: "Source of Funds", value: mf.sourceOfFunds || "Not specified" },
+      { label: "Conductor Name", value: mf.conductorName || (customer ? customer.name : "Not specified") },
+      { label: "Third Party Determination", value: mf.thirdPartyIndicator === "third_party" ? `On behalf of third party: ${mf.thirdPartyName || "—"}` : "Transaction conducted on own behalf" },
     ];
     for (const sf of startingFields) {
       y = checkPage(doc, y, 12);
@@ -276,10 +316,10 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
     y += 10;
 
     const completingFields = [
-      { label: "Disposition of Funds", value: "☐ Cash withdrawal  ☐ Wire transfer  ☐ Draft/cheque  ☐ Account credit  ☐ VC transfer  ☐ Other: ___________" },
-      { label: "Beneficiary Name", value: "__________________ (person or entity who benefited)" },
-      { label: "Beneficiary Account", value: "__________________ (account number or virtual currency address, if applicable)" },
-      { label: "Beneficiary Country", value: "__________________ " },
+      { label: "Disposition of Funds", value: mf.dispositionOfFunds || "Not specified" },
+      { label: "Beneficiary Name", value: mf.beneficiaryName || "Not specified" },
+      { label: "Beneficiary Account", value: mf.beneficiaryAccount || "—" },
+      { label: "Beneficiary Country", value: mf.beneficiaryCountry || "—" },
     ];
     for (const cf of completingFields) {
       y = checkPage(doc, y, 12);
@@ -291,6 +331,10 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
   // PART D: Indicators & Grounds for Suspicion
   y = checkPage(doc, y, 30);
   y = header(doc, "Part D — Grounds for Suspicion / Indicators", y);
+
+  // Suspicion type & PEP
+  const suspicionLabels: Record<string, string> = { ml: "Money Laundering (ML)", tf: "Terrorist Activity Financing (TF)", sanctions: "Sanctions Evasion", ml_tf: "ML and TF" };
+  y = fieldPair(doc, "Suspicion Type", suspicionLabels[mf.suspicionType] ?? mf.suspicionType ?? "Not specified", "PEP Status", mf.isPEP === "yes" ? "YES — Subject is a Politically Exposed Person" : mf.isPEP === "foreign_pep" ? "YES — Foreign PEP" : mf.isPEP === "domestic_pep" ? "YES — Domestic PEP" : "No", y);
 
   // FINTRAC indicator checklist
   const indicators = [
@@ -304,10 +348,11 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
     "Unusual use of corporate structures or nominee arrangements",
   ];
   doc.setFontSize(8);
-  for (const ind of indicators) {
+  for (let i = 0; i < indicators.length; i++) {
     y = checkPage(doc, y, 7);
     doc.setFont("helvetica", "normal");
-    doc.text("☐  " + ind, MARGIN + 2, y);
+    const checked = mf.selectedIndicators.includes(i);
+    doc.text((checked ? "☑  " : "☐  ") + indicators[i], MARGIN + 2, y);
     y += 6;
   }
   y += 4;
@@ -348,12 +393,18 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
   }
   y += 4;
 
-  // PART F: Compliance Officer Declaration
+  // Action Taken
+  y = checkPage(doc, y, 20);
+  y = header(doc, "Part F — Action Taken", y);
+  y = field(doc, "Action Taken by Reporting Entity", mf.actionTaken || "Not specified — describe what action was or will be taken (e.g., enhanced monitoring, account restriction, relationship terminated)", y);
+  y += 2;
+
+  // PART G: Compliance Officer Declaration
   y = checkPage(doc, y, 60);
-  y = header(doc, "Part F — Compliance Officer Declaration (PCMLTFA s.7)", y);
+  y = header(doc, "Part G — Compliance Officer Declaration (PCMLTFA s.7)", y);
   doc.setFontSize(9);
   const declaration = [
-    "I, the undersigned Chief Anti-Money Laundering Officer (CAMLO) or authorised delegate, hereby declare that:",
+    `I, ${mf.camloName || "___________________"}, Chief Anti-Money Laundering Officer (CAMLO) or authorised delegate, hereby declare that:`,
     "",
     "1. This report is filed in compliance with the Proceeds of Crime (Money Laundering) and Terrorist Financing Act (PCMLTFA).",
     "2. The information contained herein is true, complete, and accurate to the best of my knowledge.",
@@ -378,7 +429,7 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
   y += 28;
   y = checkPage(doc, y, 15);
   doc.line(MARGIN, y, MARGIN + 70, y);
-  doc.text("Print Name", MARGIN, y + 4);
+  doc.text("Print Name: " + (mf.camloName || ""), MARGIN, y + 4);
   doc.line(MARGIN + 90, y, MARGIN + 160, y);
   doc.text("FINTRAC Report ID (if assigned)", MARGIN + 90, y + 4);
 
