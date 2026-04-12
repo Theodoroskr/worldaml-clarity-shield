@@ -448,5 +448,18 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
   }
 
   const fileName = `FINTRAC_${strType.toUpperCase()}_${refNum.replace(/[^A-Z0-9]/gi, "_")}_${now.toISOString().slice(0, 10)}.pdf`;
-  doc.save(fileName);
+  
+  try {
+    const pdfBlob = doc.output("blob");
+    const url = URL.createObjectURL(pdfBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch {
+    doc.save(fileName);
+  }
 }

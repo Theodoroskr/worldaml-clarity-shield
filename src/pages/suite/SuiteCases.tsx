@@ -282,49 +282,53 @@ export default function SuiteCases() {
 
   const handleExportFINTRAC = async () => {
     if (!selectedCase) return;
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error("Please log in to export"); return; }
 
-    let customer = null;
-    if (selectedCase.customer_id) {
-      const { data } = await supabase.from("suite_customers").select("*").eq("id", selectedCase.customer_id).single();
-      customer = data;
+      let customer = null;
+      if (selectedCase.customer_id) {
+        const { data } = await supabase.from("suite_customers").select("*").eq("id", selectedCase.customer_id).single();
+        customer = data;
+      }
+
+      let transactions: any[] = [];
+      if (selectedCase.customer_id) {
+        const { data } = await supabase
+          .from("suite_transactions")
+          .select("*")
+          .eq("customer_id", selectedCase.customer_id)
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(50);
+        transactions = data || [];
+      }
+
+      await exportFINTRACStr({
+        caseItem: selectedCase,
+        notes,
+        customer,
+        transactions,
+        submittedBy: user.email ?? "CAMLO",
+        reportingEntity: "WorldAML Client",
+        reportingEntityRef: `FINTRAC-${fintracStrType.toUpperCase()}-${selectedCase.id.slice(0, 8).toUpperCase()}`,
+        strType: fintracStrType,
+        manualFields,
+      });
+
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: `FINTRAC ${fintracStrType.toUpperCase()} exported: ${selectedCase.title}`,
+        entity_type: "case",
+        entity_id: selectedCase.id,
+        details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada" },
+      });
+
+      toast.success(`FINTRAC ${fintracStrType.toUpperCase()} PDF downloaded`);
+    } catch (err: any) {
+      console.error("FINTRAC export error:", err);
+      toast.error(`PDF export failed: ${err?.message || "Unknown error"}`);
     }
-
-    // Fetch linked transactions
-    let transactions: any[] = [];
-    if (selectedCase.customer_id) {
-      const { data } = await supabase
-        .from("suite_transactions")
-        .select("*")
-        .eq("customer_id", selectedCase.customer_id)
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      transactions = data || [];
-    }
-
-    await exportFINTRACStr({
-      caseItem: selectedCase,
-      notes,
-      customer,
-      transactions,
-      submittedBy: user.email ?? "CAMLO",
-      reportingEntity: "WorldAML Client",
-      reportingEntityRef: `FINTRAC-${fintracStrType.toUpperCase()}-${selectedCase.id.slice(0, 8).toUpperCase()}`,
-      strType: fintracStrType,
-      manualFields,
-    });
-
-    await supabase.from("suite_audit_log").insert({
-      user_id: user.id,
-      action: `FINTRAC ${fintracStrType.toUpperCase()} exported: ${selectedCase.title}`,
-      entity_type: "case",
-      entity_id: selectedCase.id,
-      details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada" },
-    });
-
-    toast.success(`FINTRAC ${fintracStrType.toUpperCase()} PDF downloaded`);
   };
 
   const filtered = cases.filter(c =>
