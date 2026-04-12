@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Plus, Trash2, Settings2, AlertCircle, Sparkles, Loader2, BarChart3, Shield, Target, TrendingUp, Lightbulb, ChevronRight, X, Scale, CheckCircle2, AlertOctagon, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { REGULATORY_PROFILES } from "@/data/regulatoryProfiles";
 
 type Operator = ">" | ">=" | "<" | "<=" | "==" | "!=" | "IN" | "NOT IN" | "CONTAINS";
 type LogicGate = "AND" | "OR";
@@ -275,17 +276,51 @@ export default function SuiteAlertRules() {
 
   useEffect(() => { fetchRules(); }, []);
 
-  // Fetch user's assigned regulator
+  // Fetch user's assigned regulator & auto-provision baseline rules
   useEffect(() => {
-    const fetchRegulator = async () => {
+    const fetchRegulatorAndProvision = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const { data: profile } = await supabase.from("profiles").select("regulator").eq("user_id", user.id).single();
-      if (profile?.regulator) {
-        setUserRegulator(profile.regulator as string);
+      if (!profile?.regulator) return;
+      const reg = profile.regulator as string;
+      setUserRegulator(reg);
+
+      // Auto-provision baseline rules if user has none yet
+      const { count } = await supabase
+        .from("suite_alert_rules")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      if (count === 0) {
+        const regProfile = REGULATORY_PROFILES[reg];
+        if (regProfile && regProfile.baselineRules.length > 0) {
+          const regLabel = REGULATOR_MAP[reg]?.label || regProfile.shortName;
+          const rows = regProfile.baselineRules.map(br => ({
+            user_id: user.id,
+            name: br.name,
+            conditions: br.conditions.map(c => ({
+              id: uid(),
+              field: c.field,
+              operator: c.operator === ">=" ? ">=" : c.operator === "<" ? "<" : c.operator === "in" ? "IN" : c.operator === "=" ? "==" : c.operator,
+              value: String(c.value),
+              logic: "AND",
+              action: br.severity === "critical" ? "Block" : "Flag",
+            })),
+            severity: br.severity,
+            is_active: true,
+            source_regulator: regLabel,
+            source_citation: regProfile.legislation,
+          }));
+          const { error } = await supabase.from("suite_alert_rules").insert(rows);
+          if (!error) {
+            toast.success(`${rows.length} baseline ${regLabel} rules auto-provisioned`, { duration: 5000 });
+            fetchRules();
+          }
+        }
       }
     };
-    fetchRegulator();
+    fetchRegulatorAndProvision();
   }, []);
 
   const activeRule = rules.find(r => r.id === selected);
