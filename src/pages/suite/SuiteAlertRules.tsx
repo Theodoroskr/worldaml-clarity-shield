@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Plus, Trash2, Play, Pause, Settings2, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus, Trash2, Play, Pause, Settings2, CheckCircle, AlertCircle, Sparkles, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
