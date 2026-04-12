@@ -752,10 +752,11 @@ export default function SuiteOnboarding() {
           <Settings2 className="w-3.5 h-3.5 mr-1" /> Configure Fields
         </Button>
         <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={cancelOnboarding}>Cancel</Button>
-        <Button size="sm" onClick={submitKYC} disabled={saving}>
-          {saving ? "Saving…" : "Submit KYC Application"}
-        </Button>
+          <Button variant="outline" size="sm" onClick={cancelOnboarding}>Cancel</Button>
+          <Button size="sm" onClick={submitKYC} disabled={saving}>
+            {saving ? "Saving…" : "Submit KYC Application"}
+          </Button>
+        </div>
       </div>
     </div>
   );
