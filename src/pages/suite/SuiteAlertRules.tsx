@@ -894,7 +894,7 @@ export default function SuiteAlertRules() {
                                 <span key={ci} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{c.field} {c.operator} {c.value}</span>
                               ))}
                             </div>
-                            <button onClick={() => adoptRule(sr)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
+                            <button onClick={() => adoptRule(sr, "FinCEN / BSA", req.citation)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
                               <Plus className="w-3 h-3 inline mr-1" />Adopt Rule
                             </button>
                           </div>
@@ -970,7 +970,7 @@ export default function SuiteAlertRules() {
                           <div className="flex items-center justify-between mb-1"><span className="text-[11px] font-semibold text-foreground">{sr.name}</span><span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[sr.severity])}>{sr.severity}</span></div>
                           <p className="text-[10px] text-muted-foreground leading-relaxed mb-2">{sr.rationale}</p>
                           <div className="flex flex-wrap gap-1 mb-2">{sr.conditions.map((c, ci) => <span key={ci} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{c.field} {c.operator} {c.value}</span>)}</div>
-                          <button onClick={() => adoptRule(sr)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3 inline mr-1" />Adopt Rule</button>
+                          <button onClick={() => adoptRule(sr, "FINTRAC", req.citation)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3 inline mr-1" />Adopt Rule</button>
                         </div>
                       ))}</div>
                     </div>
@@ -1043,7 +1043,7 @@ export default function SuiteAlertRules() {
                           <div className="flex items-center justify-between mb-1"><span className="text-[11px] font-semibold text-foreground">{sr.name}</span><span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[sr.severity])}>{sr.severity}</span></div>
                           <p className="text-[10px] text-muted-foreground leading-relaxed mb-2">{sr.rationale}</p>
                           <div className="flex flex-wrap gap-1 mb-2">{sr.conditions.map((c, ci) => <span key={ci} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{c.field} {c.operator} {c.value}</span>)}</div>
-                          <button onClick={() => adoptRule(sr)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3 inline mr-1" />Adopt Rule</button>
+                          <button onClick={() => adoptRule(sr, "FCA (UK)", req.citation)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3 inline mr-1" />Adopt Rule</button>
                         </div>
                       ))}</div>
                     </div>
@@ -1116,7 +1116,7 @@ export default function SuiteAlertRules() {
                           <div className="flex items-center justify-between mb-1"><span className="text-[11px] font-semibold text-foreground">{sr.name}</span><span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[sr.severity])}>{sr.severity}</span></div>
                           <p className="text-[10px] text-muted-foreground leading-relaxed mb-2">{sr.rationale}</p>
                           <div className="flex flex-wrap gap-1 mb-2">{sr.conditions.map((c, ci) => <span key={ci} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{c.field} {c.operator} {c.value}</span>)}</div>
-                          <button onClick={() => adoptRule(sr)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3 inline mr-1" />Adopt Rule</button>
+                          <button onClick={() => adoptRule(sr, "EU AMLD", req.citation)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3 inline mr-1" />Adopt Rule</button>
                         </div>
                       ))}</div>
                     </div>
@@ -1189,7 +1189,7 @@ export default function SuiteAlertRules() {
                           <div className="flex items-center justify-between mb-1"><span className="text-[11px] font-semibold text-foreground">{sr.name}</span><span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[sr.severity])}>{sr.severity}</span></div>
                           <p className="text-[10px] text-muted-foreground leading-relaxed mb-2">{sr.rationale}</p>
                           <div className="flex flex-wrap gap-1 mb-2">{sr.conditions.map((c, ci) => <span key={ci} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{c.field} {c.operator} {c.value}</span>)}</div>
-                          <button onClick={() => adoptRule(sr)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3 inline mr-1" />Adopt Rule</button>
+                          <button onClick={() => adoptRule(sr, "CySEC", req.citation)} className="w-full text-[11px] py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3 inline mr-1" />Adopt Rule</button>
                         </div>
                       ))}</div>
                     </div>
