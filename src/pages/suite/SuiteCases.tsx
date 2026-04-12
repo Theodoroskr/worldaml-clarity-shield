@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, MapPin, AlertTriangle, Shield, CheckCircle2, XCircle, Info } from "lucide-react";
+import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, MapPin, AlertTriangle, Shield, CheckCircle2, XCircle, Info, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { exportSAR } from "@/services/sarExport";
 import { exportFINTRACStr, DEFAULT_MANUAL_FIELDS, type FINTRACManualFields } from "@/services/fintracStrExport";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 /* ── FINTRAC STR Field Mapping ── */
 interface FieldMapping {
@@ -154,10 +155,10 @@ export default function SuiteCases() {
   const [caseTransactions, setCaseTransactions] = useState<any[]>([]);
   const [manualFields, setManualFields] = useState<FINTRACManualFields>({ ...DEFAULT_MANUAL_FIELDS });
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [pdfPreview, setPdfPreview] = useState<{ blobUrl: string; fileName: string } | null>(null);
   const mf = manualFields;
   const setMF = (patch: Partial<FINTRACManualFields>) => {
     setManualFields(prev => ({ ...prev, ...patch }));
-    // Clear validation errors for the changed fields
     if (validationErrors.length > 0) setValidationErrors([]);
   };
 
@@ -304,24 +305,8 @@ export default function SuiteCases() {
   const handleExportFINTRAC = async () => {
     if (!selectedCase) return;
 
-    const previewWindow = window.open("", "_blank");
-    if (previewWindow) {
-      previewWindow.document.write(`
-        <html><head><title>Generating FINTRAC PDF…</title></head>
-        <body style="font-family: Arial, sans-serif; padding: 24px; color: #111827;">
-          <p style="margin: 0; font-size: 14px;">Generating FINTRAC PDF…</p>
-        </body></html>
-      `);
-      previewWindow.document.close();
-    }
-
-    const closePreviewWindow = () => {
-      if (previewWindow && !previewWindow.closed) previewWindow.close();
-    };
-
     const errors = validateFintracFields();
     if (errors.length > 0) {
-      closePreviewWindow();
       setValidationErrors(errors);
       const labels: Record<string, string> = {
         methodOfTransaction: "Method of Transaction",
@@ -345,7 +330,6 @@ export default function SuiteCases() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        closePreviewWindow();
         toast.error("Please log in to export");
         return;
       }
@@ -368,7 +352,7 @@ export default function SuiteCases() {
         transactions = data || [];
       }
 
-      await exportFINTRACStr({
+      const result = await exportFINTRACStr({
         caseItem: selectedCase,
         notes,
         customer,
@@ -378,8 +362,9 @@ export default function SuiteCases() {
         reportingEntityRef: `FINTRAC-${fintracStrType.toUpperCase()}-${selectedCase.id.slice(0, 8).toUpperCase()}`,
         strType: fintracStrType,
         manualFields,
-        targetWindow: previewWindow,
       });
+
+      setPdfPreview(result);
 
       await supabase.from("suite_audit_log").insert({
         user_id: user.id,
@@ -388,14 +373,29 @@ export default function SuiteCases() {
         entity_id: selectedCase.id,
         details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada" },
       });
-
-      toast.success(`FINTRAC ${fintracStrType.toUpperCase()} PDF opened`);
     } catch (err: any) {
-      closePreviewWindow();
       console.error("FINTRAC export error:", err);
       toast.error(`PDF export failed: ${err?.message || "Unknown error"}`);
     }
   };
+
+  const handleDownloadPdf = () => {
+    if (!pdfPreview) return;
+    const link = document.createElement("a");
+    link.href = pdfPreview.blobUrl;
+    link.download = pdfPreview.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("PDF downloaded");
+  };
+
+  const closePdfPreview = useCallback(() => {
+    if (pdfPreview) {
+      URL.revokeObjectURL(pdfPreview.blobUrl);
+      setPdfPreview(null);
+    }
+  }, [pdfPreview]);
 
   const filtered = cases.filter(c =>
     (filter === "All" || c.status === filter) &&
@@ -941,6 +941,42 @@ export default function SuiteCases() {
           </table>
         )}
       </div>
+
+      {/* PDF Preview Modal */}
+      <Dialog open={!!pdfPreview} onOpenChange={(open) => { if (!open) closePdfPreview(); }}>
+        <DialogContent className="max-w-4xl w-[90vw] h-[85vh] flex flex-col p-0 gap-0">
+          <DialogHeader className="px-6 py-4 border-b border-border flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2 text-sm font-semibold">
+              <FileText className="w-4 h-4 text-destructive" />
+              {pdfPreview?.fileName ?? "FINTRAC STR Preview"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0">
+            {pdfPreview && (
+              <iframe
+                src={pdfPreview.blobUrl}
+                className="w-full h-full border-0"
+                title="FINTRAC PDF Preview"
+              />
+            )}
+          </div>
+          <DialogFooter className="px-6 py-3 border-t border-border flex-shrink-0">
+            <button
+              onClick={closePdfPreview}
+              className="text-xs px-3 py-1.5 border border-border rounded-lg text-muted-foreground hover:bg-muted"
+            >
+              Close
+            </button>
+            <button
+              onClick={handleDownloadPdf}
+              className="text-xs px-4 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-medium flex items-center gap-1.5"
+            >
+              <Download className="w-3 h-3" />
+              Download PDF
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
