@@ -393,12 +393,18 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
   }
   y += 4;
 
-  // PART F: Compliance Officer Declaration
+  // Action Taken
+  y = checkPage(doc, y, 20);
+  y = header(doc, "Part F — Action Taken", y);
+  y = field(doc, "Action Taken by Reporting Entity", mf.actionTaken || "Not specified — describe what action was or will be taken (e.g., enhanced monitoring, account restriction, relationship terminated)", y);
+  y += 2;
+
+  // PART G: Compliance Officer Declaration
   y = checkPage(doc, y, 60);
-  y = header(doc, "Part F — Compliance Officer Declaration (PCMLTFA s.7)", y);
+  y = header(doc, "Part G — Compliance Officer Declaration (PCMLTFA s.7)", y);
   doc.setFontSize(9);
   const declaration = [
-    "I, the undersigned Chief Anti-Money Laundering Officer (CAMLO) or authorised delegate, hereby declare that:",
+    `I, ${mf.camloName || "___________________"}, Chief Anti-Money Laundering Officer (CAMLO) or authorised delegate, hereby declare that:`,
     "",
     "1. This report is filed in compliance with the Proceeds of Crime (Money Laundering) and Terrorist Financing Act (PCMLTFA).",
     "2. The information contained herein is true, complete, and accurate to the best of my knowledge.",
@@ -423,7 +429,7 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
   y += 28;
   y = checkPage(doc, y, 15);
   doc.line(MARGIN, y, MARGIN + 70, y);
-  doc.text("Print Name", MARGIN, y + 4);
+  doc.text("Print Name: " + (mf.camloName || ""), MARGIN, y + 4);
   doc.line(MARGIN + 90, y, MARGIN + 160, y);
   doc.text("FINTRAC Report ID (if assigned)", MARGIN + 90, y + 4);
 
