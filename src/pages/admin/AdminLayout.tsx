@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { label: "Users", path: "/admin/users", icon: Users },
+  { label: "Alert Rules", path: "/admin/alert-rules", icon: Bell },
   { label: "Forms", path: "/admin/forms", icon: FileText },
   { label: "Workflows", path: "/admin/workflows", icon: GitBranch },
   { label: "Pricing", path: "/admin/pricing", icon: CreditCard },
