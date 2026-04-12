@@ -17,9 +17,20 @@ interface TxRow {
   risk_flag: boolean;
   description: string | null;
   created_at: string;
+  monitoring_status: string;
 }
 
-interface Customer { id: string; name: string; }
+interface AlertRow {
+  id: string;
+  title: string;
+  severity: string;
+  status: string;
+  created_at: string;
+  rule_id: string | null;
+  description: string | null;
+}
+
+interface Customer { id: string; name: string; risk_level?: string; country?: string; }
 
 interface BulkRow {
   customer_name: string;
