@@ -371,6 +371,14 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
           <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Compliance Status</h3>
           <div className="space-y-3">
             <div>
+              <span className="text-xs text-muted-foreground block mb-0.5">Reporting Regulator</span>
+              {customer.regulator ? (
+                <Badge className="text-xs bg-primary/10 text-primary border-primary/20">
+                  {REGULATORY_PROFILES[customer.regulator]?.shortName || customer.regulator}
+                </Badge>
+              ) : <p className="text-sm text-muted-foreground">—</p>}
+            </div>
+            <div>
               <span className="text-xs text-muted-foreground block mb-0.5">KYC/KYB Status</span>
               {editing ? (
                 <Select value={edit.kyc_status} onValueChange={v => setEdit(f => ({ ...f, kyc_status: v }))}>
