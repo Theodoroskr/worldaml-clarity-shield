@@ -413,6 +413,205 @@ export default function SuiteCases() {
                 </button>
               ))}
             </div>
+
+            {/* ── Manual Entry Forms ── */}
+            <div className="space-y-4 mt-4">
+              {/* Section 1: Starting Action */}
+              <div className="bg-white border border-red-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5" /> Starting Action — Conductor & Source
+                </h3>
+                <p className="text-[10px] text-red-600 mb-3">PCMLTFR s.132 — Identify who conducted the transaction and how the funds were obtained.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">Method of Transaction *</label>
+                    <select value={mf.methodOfTransaction} onChange={e => setMF({ methodOfTransaction: e.target.value })}
+                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      <option value="">Select method…</option>
+                      <option value="In-person">In-person</option>
+                      <option value="Online / Electronic">Online / Electronic</option>
+                      <option value="Telephone">Telephone</option>
+                      <option value="Mail / Courier">Mail / Courier</option>
+                      <option value="ATM">ATM</option>
+                      <option value="Mobile banking">Mobile banking</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">Source of Funds *</label>
+                    <select value={mf.sourceOfFunds} onChange={e => setMF({ sourceOfFunds: e.target.value })}
+                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      <option value="">Select source…</option>
+                      <option value="Employment / Salary">Employment / Salary</option>
+                      <option value="Business revenue">Business revenue</option>
+                      <option value="Savings / Investments">Savings / Investments</option>
+                      <option value="Loan proceeds">Loan proceeds</option>
+                      <option value="Sale of property">Sale of property</option>
+                      <option value="Inheritance / Gift">Inheritance / Gift</option>
+                      <option value="Casino winnings">Casino winnings</option>
+                      <option value="Unknown">Unknown</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">Conductor Name *</label>
+                    <input value={mf.conductorName} onChange={e => setMF({ conductorName: e.target.value })}
+                      placeholder={caseCustomer?.name || "Person who conducted the transaction"}
+                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                    <p className="text-[9px] text-red-500 mt-0.5">The individual who physically or electronically initiated the transaction</p>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">Third Party Determination *</label>
+                    <select value={mf.thirdPartyIndicator} onChange={e => setMF({ thirdPartyIndicator: e.target.value })}
+                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      <option value="own_behalf">On own behalf</option>
+                      <option value="third_party">On behalf of a third party</option>
+                    </select>
+                  </div>
+                  {mf.thirdPartyIndicator === "third_party" && (
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-semibold text-red-800 mb-1 block">Third Party Name *</label>
+                      <input value={mf.thirdPartyName} onChange={e => setMF({ thirdPartyName: e.target.value })}
+                        placeholder="Full legal name of the third party"
+                        className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Section 2: Completing Action */}
+              <div className="bg-white border border-red-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5" /> Completing Action — Disposition & Beneficiary
+                </h3>
+                <p className="text-[10px] text-red-600 mb-3">PCMLTFR s.133 — How were the funds ultimately used and who benefited?</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">Disposition of Funds *</label>
+                    <select value={mf.dispositionOfFunds} onChange={e => setMF({ dispositionOfFunds: e.target.value })}
+                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      <option value="">Select disposition…</option>
+                      <option value="Cash withdrawal">Cash withdrawal</option>
+                      <option value="Wire transfer (domestic)">Wire transfer (domestic)</option>
+                      <option value="Wire transfer (international)">Wire transfer (international)</option>
+                      <option value="Bank draft / Cheque">Bank draft / Cheque</option>
+                      <option value="Account credit">Account credit</option>
+                      <option value="Virtual currency transfer">Virtual currency transfer</option>
+                      <option value="Purchase of monetary instrument">Purchase of monetary instrument</option>
+                      <option value="Foreign currency exchange">Foreign currency exchange</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">Beneficiary Name *</label>
+                    <input value={mf.beneficiaryName} onChange={e => setMF({ beneficiaryName: e.target.value })}
+                      placeholder="Person or entity who benefited"
+                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">Beneficiary Account</label>
+                    <input value={mf.beneficiaryAccount} onChange={e => setMF({ beneficiaryAccount: e.target.value })}
+                      placeholder="Account number or VC address"
+                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">Beneficiary Country</label>
+                    <input value={mf.beneficiaryCountry} onChange={e => setMF({ beneficiaryCountry: e.target.value })}
+                      placeholder="e.g. Canada"
+                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Grounds for Suspicion */}
+              <div className="bg-white border border-red-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
+                  <Flag className="w-3.5 h-3.5" /> Grounds for Suspicion — Part D
+                </h3>
+                <p className="text-[10px] text-red-600 mb-3">PCMLTFA s.7 — Select the suspicion type, PEP status, and applicable ML/TF indicators.</p>
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">Suspicion Type *</label>
+                    <select value={mf.suspicionType} onChange={e => setMF({ suspicionType: e.target.value })}
+                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      <option value="ml">Money Laundering (ML)</option>
+                      <option value="tf">Terrorist Activity Financing (TF)</option>
+                      <option value="sanctions">Sanctions Evasion</option>
+                      <option value="ml_tf">ML and TF</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">PEP Status *</label>
+                    <select value={mf.isPEP} onChange={e => setMF({ isPEP: e.target.value })}
+                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      <option value="no">No — Not a PEP</option>
+                      <option value="yes">Yes — PEP (unspecified)</option>
+                      <option value="domestic_pep">Yes — Domestic PEP</option>
+                      <option value="foreign_pep">Yes — Foreign PEP</option>
+                    </select>
+                    <p className="text-[9px] text-red-500 mt-0.5">Politically Exposed Person per PCMLTFR s.2</p>
+                  </div>
+                </div>
+                <label className="text-[10px] font-semibold text-red-800 mb-2 block">ML/TF Indicators (select all that apply)</label>
+                <div className="space-y-1.5">
+                  {[
+                    "Transaction inconsistent with client's known business or occupation",
+                    "Structured to avoid reporting thresholds (PCMLTFR s.12)",
+                    "Involves high-risk jurisdiction (FATF grey/black list)",
+                    "Rapid movement of funds with no apparent economic purpose",
+                    "Client unwilling to provide identification or provides suspicious documents",
+                    "Pattern of transactions below CAD 10,000 threshold",
+                    "Funds received from or sent to a jurisdiction with weak AML controls",
+                    "Unusual use of corporate structures or nominee arrangements",
+                  ].map((ind, i) => (
+                    <label key={i} className="flex items-start gap-2 cursor-pointer group">
+                      <input type="checkbox" checked={mf.selectedIndicators.includes(i)}
+                        onChange={e => {
+                          const next = e.target.checked
+                            ? [...mf.selectedIndicators, i]
+                            : mf.selectedIndicators.filter(x => x !== i);
+                          setMF({ selectedIndicators: next });
+                        }}
+                        className="mt-0.5 rounded border-red-300 text-red-600 focus:ring-red-300" />
+                      <span className="text-[11px] text-foreground group-hover:text-red-800 transition-colors">{ind}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 4: Declaration & Action */}
+              <div className="bg-white border border-red-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" /> Declaration & Action Taken — Parts F/G
+                </h3>
+                <p className="text-[10px] text-red-600 mb-3">PCMLTFA s.7 — The CAMLO or delegate must sign the declaration. Document what action was taken.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">CAMLO / Signing Officer Name *</label>
+                    <input value={mf.camloName} onChange={e => setMF({ camloName: e.target.value })}
+                      placeholder="Full name of the signing officer"
+                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                    <p className="text-[9px] text-red-500 mt-0.5">Chief Anti-Money Laundering Officer or authorised delegate</p>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-red-800 mb-1 block">Action Taken *</label>
+                    <select value={mf.actionTaken} onChange={e => setMF({ actionTaken: e.target.value })}
+                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      <option value="">Select action…</option>
+                      <option value="Enhanced monitoring applied">Enhanced monitoring applied</option>
+                      <option value="Account restricted / frozen">Account restricted / frozen</option>
+                      <option value="Relationship terminated">Relationship terminated</option>
+                      <option value="Additional identification requested">Additional identification requested</option>
+                      <option value="Transaction blocked">Transaction blocked</option>
+                      <option value="Law enforcement notified">Law enforcement notified</option>
+                      <option value="No further action — monitoring continues">No further action — monitoring continues</option>
+                      <option value="Multiple actions taken (see notes)">Multiple actions taken (see notes)</option>
+                    </select>
+                    <p className="text-[9px] text-red-500 mt-0.5">What action was or will be taken as a result of this filing</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex items-center gap-3">
               <button onClick={handleExportFINTRAC}
                 className="flex items-center gap-1.5 text-xs px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
