@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { FileText, Clock, CheckCircle2, AlertTriangle, ChevronRight, Search, Plus, MessageSquare } from "lucide-react";
+import { FileText, ChevronRight, Search, Plus, MessageSquare, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { exportSAR } from "@/services/sarExport";
 
 interface CaseItem {
   id: string;
@@ -128,6 +129,40 @@ export default function SuiteCases() {
     setNotes(data || []);
   };
 
+  const handleExportSAR = async () => {
+    if (!selectedCase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    let customer = null;
+    if (selectedCase.customer_id) {
+      const { data } = await supabase
+        .from("suite_customers")
+        .select("*")
+        .eq("id", selectedCase.customer_id)
+        .single();
+      customer = data;
+    }
+
+    await exportSAR({
+      caseItem: selectedCase,
+      notes,
+      customer,
+      submittedBy: user.email ?? "Reporting Officer",
+      reportingEntity: "WorldAML Client",
+      reportingEntityRef: `SAR-${selectedCase.id.slice(0, 8).toUpperCase()}`,
+    });
+
+    await supabase.from("suite_audit_log").insert({
+      user_id: user.id,
+      action: `SAR exported: ${selectedCase.title}`,
+      entity_type: "case",
+      entity_id: selectedCase.id,
+    });
+
+    toast.success("SAR PDF downloaded");
+  };
+
   const filtered = cases.filter(c =>
     (filter === "All" || c.status === filter) &&
     (!search || c.title.toLowerCase().includes(search.toLowerCase()))
@@ -147,9 +182,30 @@ export default function SuiteCases() {
             </div>
           </div>
           <div className="flex gap-1.5">
-            {selectedCase.status === "open" && <button onClick={() => updateStatus(selectedCase.id, "investigating")} className="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100">Investigate</button>}
-            {selectedCase.status === "investigating" && <button onClick={() => updateStatus(selectedCase.id, "sar_filed")} className="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg hover:bg-purple-100">File SAR</button>}
-            {selectedCase.status !== "closed" && <button onClick={() => updateStatus(selectedCase.id, "closed")} className="text-xs px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100">Close</button>}
+            {selectedCase.status === "open" && (
+              <button onClick={() => updateStatus(selectedCase.id, "investigating")}
+                className="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100">
+                Investigate
+              </button>
+            )}
+            {selectedCase.status === "investigating" && (
+              <button onClick={() => updateStatus(selectedCase.id, "sar_filed")}
+                className="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg hover:bg-purple-100">
+                File SAR
+              </button>
+            )}
+            {selectedCase.status !== "closed" && (
+              <button onClick={() => updateStatus(selectedCase.id, "closed")}
+                className="text-xs px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100">
+                Close
+              </button>
+            )}
+            {(selectedCase.status === "sar_filed" || selectedCase.status === "closed") && (
+              <button onClick={handleExportSAR}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-medium">
+                <Download className="w-3 h-3" /> Export SAR PDF
+              </button>
+            )}
           </div>
         </div>
 
