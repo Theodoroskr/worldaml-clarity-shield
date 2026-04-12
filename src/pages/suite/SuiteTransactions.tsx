@@ -43,6 +43,7 @@ interface BulkRow {
   counterparty: string;
   counterparty_country: string;
   description: string;
+  date: string;
 }
 
 interface AIAnalysis {
@@ -52,7 +53,7 @@ interface AIAnalysis {
 }
 
 const HIGH_RISK = ["RU", "IR", "PA", "KP", "SY"];
-const EMPTY_BULK: BulkRow = { customer_name: "", amount: "", currency: "EUR", direction: "inbound", counterparty: "", counterparty_country: "", description: "" };
+const EMPTY_BULK: BulkRow = { customer_name: "", amount: "", currency: "EUR", direction: "inbound", counterparty: "", counterparty_country: "", description: "", date: "" };
 
 const triggerMonitoring = async (userId: string, transactionId: string) => {
   try {
@@ -157,6 +158,7 @@ export default function SuiteTransactions() {
       amount: "amount", currency: "currency", direction: "direction",
       counterparty: "counterparty", counterparty_country: "counterparty_country", country: "counterparty_country",
       description: "description", desc: "description",
+      date: "date", transaction_date: "date", created_at: "date", executed_at: "date", execution_date: "date",
     };
     return lines.slice(1).filter(l => l.trim()).map(line => {
       const cols = line.split(",").map(c => c.trim().replace(/^["']|["']$/g, ""));
@@ -201,11 +203,15 @@ export default function SuiteTransactions() {
       const isHighRisk = HIGH_RISK.includes((row.counterparty_country || "").toUpperCase());
       const riskFlag = isHighRisk || amount > 10000;
 
+      const parsedDate = row.date ? new Date(row.date) : null;
+      const createdAt = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : undefined;
+
       const { data, error } = await supabase.from("suite_transactions").insert({
         customer_id: custId, user_id: user.id, amount, currency: row.currency || "EUR",
         direction: row.direction || "inbound", counterparty: row.counterparty || null,
         counterparty_country: row.counterparty_country || null, risk_flag: riskFlag,
         description: row.description || null,
+        ...(createdAt ? { created_at: createdAt } : {}),
       }).select("id").single();
 
       if (!error && data) {
@@ -424,7 +430,7 @@ export default function SuiteTransactions() {
                   <div className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors" onClick={() => fileRef.current?.click()}>
                     <FileText className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
                     <p className="text-xs text-muted-foreground mb-1">Click to upload CSV file</p>
-                    <p className="text-[10px] text-muted-foreground">Expected columns: customer_name, amount, currency, direction, counterparty, counterparty_country, description</p>
+                    <p className="text-[10px] text-muted-foreground">Expected columns: customer_name, amount, currency, direction, counterparty, counterparty_country, description, date</p>
                   </div>
                   <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleCSVUpload} />
                 </div>
@@ -442,7 +448,7 @@ export default function SuiteTransactions() {
                   <div className="max-h-[200px] overflow-y-auto border border-border rounded-lg">
                     <table className="w-full text-[11px]">
                       <thead className="bg-muted sticky top-0">
-                        <tr>{["Customer", "Amount", "Currency", "Dir", "Counterparty", "Country"].map(h => <th key={h} className="px-2 py-1.5 text-left font-semibold text-muted-foreground">{h}</th>)}</tr>
+                        <tr>{["Customer", "Amount", "Currency", "Dir", "Counterparty", "Country", "Date"].map(h => <th key={h} className="px-2 py-1.5 text-left font-semibold text-muted-foreground">{h}</th>)}</tr>
                       </thead>
                       <tbody className="divide-y divide-border">
                         {csvData.slice(0, 50).map((r, i) => {
@@ -458,6 +464,7 @@ export default function SuiteTransactions() {
                               <td className="px-2 py-1">{r.direction}</td>
                               <td className="px-2 py-1">{r.counterparty}</td>
                               <td className="px-2 py-1">{r.counterparty_country}</td>
+                              <td className="px-2 py-1 font-mono">{r.date || "—"}</td>
                             </tr>
                           );
                         })}
