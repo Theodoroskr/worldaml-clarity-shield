@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Plus, Trash2, Settings2, AlertCircle, Sparkles, Loader2, BarChart3, Shield, Target, TrendingUp, Lightbulb, ChevronRight, X, Scale, CheckCircle2, AlertOctagon, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { REGULATORY_PROFILES } from "@/data/regulatoryProfiles";
 
 type Operator = ">" | ">=" | "<" | "<=" | "==" | "!=" | "IN" | "NOT IN" | "CONTAINS";
 type LogicGate = "AND" | "OR";
