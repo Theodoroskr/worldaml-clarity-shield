@@ -168,6 +168,101 @@ const FINCEN_REQUIREMENTS: FinCENRequirement[] = [
   },
 ];
 
+/* FINTRAC (Canada) Regulatory Mapping */
+const FINTRAC_REQUIREMENTS: FinCENRequirement[] = [
+  {
+    id: "lcttr",
+    regulation: "Large Cash Transaction Report (LCTR)",
+    citation: "PCMLTFA s. 7, PCMLTFR s. 12",
+    description: "Reporting entities must submit an LCTR to FINTRAC for every cash transaction of CAD 10,000 or more, whether conducted in a single transaction or in two or more transactions within 24 hours by or on behalf of the same individual.",
+    rulePatterns: ["Large Transaction", "P-TLO", "P-TLI", "P-HSUMI", "P-HSUMO"],
+    suggestedRules: [
+      { name: "[FINTRAC-LCTR] Aggregate 24h cash ≥ CAD 10,000", severity: "critical", rationale: "FINTRAC requires LCTR filing when aggregate cash transactions by the same person reach CAD 10,000 within a 24-hour window. Monitors daily aggregation for timely reporting.", conditions: [{ field: "account.totalDeposits30d", operator: ">", value: "10000" }, { field: "transaction.type", operator: "==", value: "cash" }] },
+    ],
+  },
+  {
+    id: "str",
+    regulation: "Suspicious Transaction Report (STR)",
+    citation: "PCMLTFA s. 7(1)",
+    description: "Reporting entities must file an STR with FINTRAC when there are reasonable grounds to suspect that a transaction or attempted transaction is related to money laundering, terrorist financing, or sanctions evasion. There is no minimum dollar threshold — all suspicious activity must be reported.",
+    rulePatterns: ["HRCOU", "DORMANT", "NCOU", "RISKWORD", "REFTEXT", "HASUMI", "HASUMO", "HANUMI", "HANUMO", "IN>AVG", "OUT>AVG"],
+    suggestedRules: [
+      { name: "[FINTRAC-STR] Rapid movement of funds (layering)", severity: "high", rationale: "FINTRAC Guidance identifies rapid in-out patterns as a key ML indicator. Funds deposited and moved quickly through multiple accounts suggest layering.", conditions: [{ field: "transaction.amount", operator: ">", value: "3000" }, { field: "transaction.frequency", operator: ">", value: "3" }] },
+    ],
+  },
+  {
+    id: "eftr",
+    regulation: "Electronic Funds Transfer Report (EFTR)",
+    citation: "PCMLTFR s. 12.1",
+    description: "Reporting entities must file an EFTR for international electronic funds transfers of CAD 10,000 or more, whether sent or received. This includes SWIFT transfers, wire transfers, and other electronic payment mechanisms.",
+    rulePatterns: ["SUMCCI", "SUMCCO"],
+    suggestedRules: [
+      { name: "[FINTRAC-EFTR] International EFT ≥ CAD 10,000", severity: "high", rationale: "FINTRAC requires EFTR filing for all international electronic transfers of CAD 10,000+. This rule flags qualifying cross-border electronic transfers for timely reporting.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.country", operator: "!=", value: "CA" }] },
+    ],
+  },
+  {
+    id: "tpr",
+    regulation: "Terrorist Property Report (TPR)",
+    citation: "Criminal Code s. 83.1, PCMLTFA s. 7.1",
+    description: "Every person in Canada must disclose without delay to the RCMP and CSIS the existence of property owned or controlled by or on behalf of a listed terrorist entity. FINTRAC must also be notified.",
+    rulePatterns: ["CUSTSCRS", "CUSTSCRH", "CTPYSCRS", "CUSTBIC", "CTPYBIC", "INSTSCRS", "INSTSCRH", "High-Risk Country"],
+  },
+  {
+    id: "casino-dr",
+    regulation: "Casino Disbursement Report (CDR)",
+    citation: "PCMLTFR s. 13",
+    description: "Casinos must report disbursements of CAD 10,000 or more, including payouts, redemptions of chips/tokens, and advances. Aggregation within 24 hours applies.",
+    rulePatterns: [],
+    suggestedRules: [
+      { name: "[FINTRAC-CDR] Casino disbursement ≥ CAD 10K", severity: "high", rationale: "Canadian casinos must file CDRs for disbursements of CAD 10,000+. This rule flags large casino payouts for compliance reporting.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.type", operator: "==", value: "casino_payout" }] },
+    ],
+  },
+  {
+    id: "vc-report",
+    regulation: "Virtual Currency Transaction Report (VCTR)",
+    citation: "PCMLTFR s. 12.2",
+    description: "Money services businesses (MSBs) dealing in virtual currency must report virtual currency transactions of CAD 10,000 or more. This includes exchanges, transfers, and receipt of virtual currency.",
+    rulePatterns: [],
+    suggestedRules: [
+      { name: "[FINTRAC-VCTR] Virtual currency transfer ≥ CAD 10K", severity: "high", rationale: "FINTRAC requires VCTR filing for virtual currency transactions of CAD 10,000+. MSBs handling crypto must monitor transaction values for reporting obligations.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.currency", operator: "IN", value: "BTC,ETH,USDT,USDC" }] },
+    ],
+  },
+  {
+    id: "structuring-ca",
+    regulation: "Anti-Structuring (Canada)",
+    citation: "PCMLTFA s. 10.1",
+    description: "It is an offence to structure or attempt to structure transactions to avoid FINTRAC reporting thresholds. Patterns of transactions just below CAD 10,000 trigger enhanced scrutiny.",
+    rulePatterns: ["STRIN", "STROUT"],
+  },
+  {
+    id: "kyc-ca",
+    regulation: "Know Your Client (KYC) — Canada",
+    citation: "PCMLTFR s. 52–67",
+    description: "Reporting entities must verify the identity of clients for prescribed transactions, including any cash transaction ≥ CAD 10,000, opening of accounts, and international EFTs ≥ CAD 1,000. Enhanced measures apply to PEPs, HIO, and high-risk clients.",
+    rulePatterns: ["VC", "CDC01-P", "CDC01-E", "CUSTPEP", "CTPYPEP"],
+    suggestedRules: [
+      { name: "[FINTRAC-KYC] PEP/HIO enhanced monitoring", severity: "high", rationale: "FINTRAC requires enhanced ongoing monitoring for Politically Exposed Persons (PEPs) and Heads of International Organizations (HIO), including family members and close associates.", conditions: [{ field: "customer.pepStatus", operator: "==", value: "true" }] },
+    ],
+  },
+  {
+    id: "compliance-program",
+    regulation: "Compliance Program Requirements",
+    citation: "PCMLTFR s. 71",
+    description: "Every reporting entity must implement a compliance program that includes: a compliance officer, written policies and procedures, a risk assessment, an ongoing training program, and an effectiveness review every two years.",
+    rulePatterns: [],
+    suggestedRules: [
+      { name: "[FINTRAC-CP] Biennial effectiveness review due", severity: "medium", rationale: "FINTRAC mandates that compliance programs undergo an independent effectiveness review at least every two years. This rule monitors the review cycle to ensure timely completion.", conditions: [{ field: "alert.count", operator: ">=", value: "0" }] },
+    ],
+  },
+  {
+    id: "sanctions-ca",
+    regulation: "Canadian Sanctions Screening",
+    citation: "SEMA, UNA, Justice for Victims of Corrupt Foreign Officials Act",
+    description: "Canadian entities must screen against OSFI's Consolidated Canadian Autonomous Sanctions List, UN sanctions, and listings under the Sergei Magnitsky Act. Dealing with listed persons or entities is prohibited.",
+    rulePatterns: ["CUSTSCRS", "CUSTSCRH", "CTPYSCRS", "High-Risk Country"],
+  },
+];
+
 export default function SuiteAlertRules() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
