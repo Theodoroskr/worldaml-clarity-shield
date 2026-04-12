@@ -308,6 +308,7 @@ export default function SuiteCases() {
       reportingEntity: "WorldAML Client",
       reportingEntityRef: `FINTRAC-${fintracStrType.toUpperCase()}-${selectedCase.id.slice(0, 8).toUpperCase()}`,
       strType: fintracStrType,
+      manualFields,
     });
 
     await supabase.from("suite_audit_log").insert({
