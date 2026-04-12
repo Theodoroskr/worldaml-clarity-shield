@@ -112,6 +112,72 @@ export default function SuiteDashboard() {
     fetchData();
   }, []);
 
+  /* ─── Compliance Calendar from Regulatory Hub data ─── */
+  const PERIODIC_BY_REGULATOR: Record<string, { title: string; deadline: string; month?: number; day?: number; frequencyMonths?: number }[]> = {
+    fincen: [
+      { title: "BSA/AML Compliance Program Review", deadline: "Annual", frequencyMonths: 12 },
+      { title: "OFAC Sanctions List Update", deadline: "Continuous" },
+    ],
+    fintrac: [
+      { title: "Two-Year Effectiveness Review", deadline: "Every 2 years", frequencyMonths: 24 },
+      { title: "Risk Assessment Update", deadline: "As needed / ongoing" },
+    ],
+    fca: [
+      { title: "REP-CRIM (Annual Financial Crime Report)", deadline: "Annually (30 business days after period end)", frequencyMonths: 12 },
+      { title: "AML/CTF Risk Assessment", deadline: "Ongoing / Annual review", frequencyMonths: 12 },
+    ],
+    cysec: [
+      { title: "Annual Compliance Report (ACR)", deadline: "By 30 April", month: 3, day: 30 },
+      { title: "Internal Audit Report", deadline: "Annually", frequencyMonths: 12 },
+    ],
+    icpac: [
+      { title: "Internal Assessment Report (IAR)", deadline: "Annually", frequencyMonths: 12 },
+      { title: "AML Compliance Questionnaire", deadline: "Annually", frequencyMonths: 12 },
+    ],
+    amld: [
+      { title: "Risk Assessment Review", deadline: "Ongoing" },
+    ],
+  };
+
+  const calendarItems = useMemo(() => {
+    if (!regulator) return [];
+    const obligations = PERIODIC_BY_REGULATOR[regulator.toLowerCase()] ?? [];
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    return obligations
+      .map((ob) => {
+        let nextDue: Date | null = null;
+        let daysUntil: number | null = null;
+
+        if (ob.month !== undefined && ob.day !== undefined) {
+          nextDue = new Date(currentYear, ob.month, ob.day);
+          if (isPast(nextDue)) nextDue = new Date(currentYear + 1, ob.month, ob.day);
+          daysUntil = differenceInDays(nextDue, now);
+        } else if (ob.frequencyMonths) {
+          nextDue = new Date(currentYear, ob.frequencyMonths - 1, 1);
+          while (isPast(nextDue)) nextDue = addMonths(nextDue, ob.frequencyMonths);
+          daysUntil = differenceInDays(nextDue, now);
+        }
+
+        const status =
+          daysUntil !== null && daysUntil < 0 ? "overdue"
+          : daysUntil !== null && daysUntil <= 30 ? "urgent"
+          : daysUntil !== null && daysUntil <= 90 ? "upcoming"
+          : nextDue ? "on-track"
+          : "continuous";
+
+        return { title: ob.title, deadline: ob.deadline, nextDue, daysUntil, status };
+      })
+      .sort((a, b) => {
+        const order: Record<string, number> = { overdue: 0, urgent: 1, upcoming: 2, "on-track": 3, continuous: 4 };
+        const diff = (order[a.status] ?? 5) - (order[b.status] ?? 5);
+        if (diff !== 0) return diff;
+        if (a.daysUntil !== null && b.daysUntil !== null) return a.daysUntil - b.daysUntil;
+        return 0;
+      });
+  }, [regulator]);
+
   const kpiData = [
     { label: "Active Customers", value: customerCount.toLocaleString(), change: "live", positive: true, icon: Users, color: "text-primary", bg: "bg-primary/10", spark: [30,35,32,40,38,44,50,48,52, customerCount] },
     { label: "Open Alerts", value: openAlerts.toString(), change: "live", positive: openAlerts === 0, icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10", spark: [8,10,9,11,10,12,13,12,14, openAlerts] },
