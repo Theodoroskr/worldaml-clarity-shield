@@ -158,6 +158,7 @@ export default function SuiteTransactions() {
       amount: "amount", currency: "currency", direction: "direction",
       counterparty: "counterparty", counterparty_country: "counterparty_country", country: "counterparty_country",
       description: "description", desc: "description",
+      date: "date", transaction_date: "date", created_at: "date", executed_at: "date", execution_date: "date",
     };
     return lines.slice(1).filter(l => l.trim()).map(line => {
       const cols = line.split(",").map(c => c.trim().replace(/^["']|["']$/g, ""));
