@@ -1216,6 +1216,13 @@ export default function SuiteOnboarding() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground capitalize">{c.type}</td>
+                      <td className="px-4 py-3">
+                        {c.regulator ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">
+                            {REGULATORY_PROFILES[c.regulator]?.shortName || c.regulator}
+                          </span>
+                        ) : <span className="text-xs text-muted-foreground">—</span>}
+                      </td>
                       <td className="px-4 py-3 text-xs font-mono text-muted-foreground">{c.country || "—"}</td>
                       <td className="px-4 py-3"><span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-semibold capitalize", riskBadge(c.risk_level))}>{c.risk_level}</span></td>
                       <td className="px-4 py-3"><span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-semibold", statusColor(c.kyc_status))}>{kycStatusLabel[c.kyc_status] || c.kyc_status}</span></td>
