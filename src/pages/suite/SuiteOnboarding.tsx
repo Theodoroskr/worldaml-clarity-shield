@@ -353,6 +353,29 @@ export default function SuiteOnboarding() {
   const [kybForm, setKybForm] = useState<KYBForm>(emptyKYB);
   const [saving, setSaving] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [kycFiles, setKycFiles] = useState<File[]>([]);
+  const [kybFiles, setKybFiles] = useState<File[]>([]);
+
+  const handleFileSelect = (setter: React.Dispatch<React.SetStateAction<File[]>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const valid = files.filter(f => f.size <= 10 * 1024 * 1024); // 10MB max
+    if (valid.length < files.length) toast.error("Some files exceeded 10MB limit and were skipped");
+    setter(prev => [...prev, ...valid]);
+    e.target.value = "";
+  };
+
+  const removeFile = (setter: React.Dispatch<React.SetStateAction<File[]>>, index: number) => {
+    setter(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadDocuments = async (userId: string, customerId: string, files: File[]) => {
+    for (const file of files) {
+      const ext = file.name.split(".").pop() || "bin";
+      const path = `${userId}/${customerId}/${Date.now()}_${file.name}`;
+      const { error } = await supabase.storage.from("customer-documents").upload(path, file, { contentType: file.type });
+      if (error) console.error("Upload error:", error.message);
+    }
+  };
 
   const fetchCustomers = async () => {
     const { data: { user } } = await supabase.auth.getUser();
