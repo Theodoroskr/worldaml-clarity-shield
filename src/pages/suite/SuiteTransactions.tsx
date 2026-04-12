@@ -430,7 +430,7 @@ export default function SuiteTransactions() {
                   <div className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors" onClick={() => fileRef.current?.click()}>
                     <FileText className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
                     <p className="text-xs text-muted-foreground mb-1">Click to upload CSV file</p>
-                    <p className="text-[10px] text-muted-foreground">Expected columns: customer_name, amount, currency, direction, counterparty, counterparty_country, description</p>
+                    <p className="text-[10px] text-muted-foreground">Expected columns: customer_name, amount, currency, direction, counterparty, counterparty_country, description, date</p>
                   </div>
                   <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleCSVUpload} />
                 </div>
