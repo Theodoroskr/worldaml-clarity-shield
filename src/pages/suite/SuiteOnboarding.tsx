@@ -389,8 +389,8 @@ export default function SuiteOnboarding() {
 
   const startOnboarding = (type: "kyc-form" | "kyb-form") => {
     setStep(type);
-    if (type === "kyc-form") setKycForm(emptyKYC);
-    else setKybForm(emptyKYB);
+    if (type === "kyc-form") { setKycForm(emptyKYC); setKycFiles([]); }
+    else { setKybForm(emptyKYB); setKybFiles([]); }
   };
 
   const cancelOnboarding = () => {
