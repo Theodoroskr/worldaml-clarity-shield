@@ -873,6 +873,311 @@ export default function SuiteCases() {
           </div>
         )}
 
+        {/* CTR (FinCEN) Export Panel */}
+        {showCtrPanel && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 animate-fade-in">
+            <div className="flex items-center gap-2 mb-3">
+              <FileText className="w-4 h-4 text-blue-700" />
+              <h2 className="font-semibold text-blue-900">FinCEN — Currency Transaction Report (CTR)</h2>
+            </div>
+            <p className="text-xs text-blue-700 mb-4">
+              FinCEN Form 112 · 31 CFR §1010.311 · Required for cash transactions exceeding $10,000. Must be filed within 15 calendar days of the transaction date.
+            </p>
+
+            {/* Validation Summary */}
+            {ctrValidationErrors.length > 0 && (
+              <div className="bg-red-50 border-2 border-red-400 rounded-xl p-3 flex items-start gap-2 animate-fade-in mb-4">
+                <XCircle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-red-800">Missing mandatory fields</p>
+                  <p className="text-[10px] text-red-600 mt-0.5">Complete highlighted fields per BSA/FinCEN requirements.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Transaction Selection */}
+            {caseTransactions.length > 0 && (
+              <div className="bg-white border border-blue-200 rounded-xl p-4 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5" /> Select Cash Transactions for CTR
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setSelectedTxIds(new Set(caseTransactions.map(t => t.id)))}
+                      className="text-[10px] text-blue-600 hover:text-blue-800 underline">Select all</button>
+                    <button onClick={() => setSelectedTxIds(new Set())}
+                      className="text-[10px] text-blue-600 hover:text-blue-800 underline">Clear</button>
+                    <span className="text-[10px] font-semibold text-blue-700">{selectedTxIds.size}/{caseTransactions.length}</span>
+                  </div>
+                </div>
+                <div className="max-h-[180px] overflow-y-auto border border-blue-100 rounded-lg divide-y divide-blue-50">
+                  {caseTransactions.map(tx => (
+                    <label key={tx.id} className="flex items-center gap-3 px-3 py-2 hover:bg-blue-50/50 cursor-pointer">
+                      <input type="checkbox" checked={selectedTxIds.has(tx.id)}
+                        onChange={e => {
+                          const next = new Set(selectedTxIds);
+                          e.target.checked ? next.add(tx.id) : next.delete(tx.id);
+                          setSelectedTxIds(next);
+                        }}
+                        className="rounded border-blue-300 text-blue-600 focus:ring-blue-300" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-semibold",
+                            tx.direction === "inbound" ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"
+                          )}>{tx.direction}</span>
+                          <span className="text-xs font-semibold text-foreground">${Number(tx.amount).toLocaleString()}</span>
+                          {tx.counterparty && <span className="text-[11px] text-muted-foreground">→ {tx.counterparty}</span>}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              {/* Part I: Person(s) Involved */}
+              <div className="bg-white border border-blue-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-blue-900 mb-1 flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5" /> Part I — Person(s) Involved in Transaction(s)
+                </h3>
+                <p className="text-[10px] text-blue-600 mb-3">31 CFR §1010.312 — Identify the person conducting or on whose behalf the transaction is conducted.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Full Legal Name *</label>
+                    <input value={ctrFields.conductorName} onChange={e => setCtrF({ conductorName: e.target.value })}
+                      placeholder={caseCustomer?.name || "First Middle Last"}
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        ctrValidationErrors.includes("conductorName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-blue-200 focus:ring-blue-300")} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Date of Birth</label>
+                    <input type="date" value={ctrFields.conductorDOB} onChange={e => setCtrF({ conductorDOB: e.target.value })}
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">SSN / ITIN / EIN</label>
+                    <input value={ctrFields.conductorSSN} onChange={e => setCtrF({ conductorSSN: e.target.value })}
+                      placeholder="XXX-XX-XXXX"
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Phone Number</label>
+                    <input value={ctrFields.conductorPhone} onChange={e => setCtrF({ conductorPhone: e.target.value })}
+                      placeholder="(555) 555-5555"
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">ID Type *</label>
+                    <select value={ctrFields.conductorIDType} onChange={e => setCtrF({ conductorIDType: e.target.value })}
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        ctrValidationErrors.includes("conductorIDType") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-blue-200 focus:ring-blue-300")}>
+                      <option value="">Select ID type…</option>
+                      <option value="Driver's License">Driver's License</option>
+                      <option value="State ID">State ID</option>
+                      <option value="Passport">Passport</option>
+                      <option value="Military ID">Military ID</option>
+                      <option value="Alien Registration">Alien Registration Card</option>
+                      <option value="Other">Other Government-Issued ID</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">ID Number *</label>
+                    <input value={ctrFields.conductorIDNumber} onChange={e => setCtrF({ conductorIDNumber: e.target.value })}
+                      placeholder="ID number as shown on document"
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        ctrValidationErrors.includes("conductorIDNumber") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-blue-200 focus:ring-blue-300")} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Issuing State / Country</label>
+                    <input value={ctrFields.conductorIDState} onChange={e => setCtrF({ conductorIDState: e.target.value })}
+                      placeholder="e.g. California, USA"
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Occupation / Business</label>
+                    <input value={ctrFields.conductorOccupation} onChange={e => setCtrF({ conductorOccupation: e.target.value })}
+                      placeholder="Occupation or type of business"
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Address</label>
+                    <input value={ctrFields.conductorAddress} onChange={e => setCtrF({ conductorAddress: e.target.value })}
+                      placeholder="Street address"
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">City</label>
+                    <input value={ctrFields.conductorCity} onChange={e => setCtrF({ conductorCity: e.target.value })}
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] font-semibold text-blue-800 mb-1 block">State</label>
+                      <input value={ctrFields.conductorState} onChange={e => setCtrF({ conductorState: e.target.value })}
+                        className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-semibold text-blue-800 mb-1 block">ZIP Code</label>
+                      <input value={ctrFields.conductorZip} onChange={e => setCtrF({ conductorZip: e.target.value })}
+                        className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                    </div>
+                  </div>
+                </div>
+                <label className="flex items-center gap-2 mt-3 cursor-pointer">
+                  <input type="checkbox" checked={ctrFields.multiplePersons} onChange={e => setCtrF({ multiplePersons: e.target.checked })}
+                    className="rounded border-blue-300 text-blue-600 focus:ring-blue-300" />
+                  <span className="text-[11px] text-blue-800">Multiple persons involved in this transaction</span>
+                </label>
+              </div>
+
+              {/* Part II: Amount and Type */}
+              <div className="bg-white border border-blue-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-blue-900 mb-1 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5" /> Part II — Amount and Type of Transaction(s)
+                </h3>
+                <p className="text-[10px] text-blue-600 mb-3">31 USC §5313 — Report the total cash-in and cash-out amounts. Threshold: $10,000.</p>
+                <div className="grid grid-cols-3 gap-3 mb-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Cash In ($) *</label>
+                    <input type="number" value={ctrFields.cashInAmount} onChange={e => setCtrF({ cashInAmount: e.target.value })}
+                      placeholder="0.00"
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        ctrValidationErrors.includes("cashAmount") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-blue-200 focus:ring-blue-300")} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Cash Out ($) *</label>
+                    <input type="number" value={ctrFields.cashOutAmount} onChange={e => setCtrF({ cashOutAmount: e.target.value })}
+                      placeholder="0.00"
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        ctrValidationErrors.includes("cashAmount") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-blue-200 focus:ring-blue-300")} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Total Amount ($)</label>
+                    <input type="number" value={ctrFields.totalAmount} onChange={e => setCtrF({ totalAmount: e.target.value })}
+                      placeholder="Auto-calculated if blank"
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Cash In Type(s)</label>
+                    <input value={ctrFields.cashInBreakdown} onChange={e => setCtrF({ cashInBreakdown: e.target.value })}
+                      placeholder="e.g. Deposits, currency exchange"
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Cash Out Type(s)</label>
+                    <input value={ctrFields.cashOutBreakdown} onChange={e => setCtrF({ cashOutBreakdown: e.target.value })}
+                      placeholder="e.g. Withdrawals, negotiable instruments"
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Foreign Currency (if any)</label>
+                    <input value={ctrFields.foreignCurrencyType} onChange={e => setCtrF({ foreignCurrencyType: e.target.value })}
+                      placeholder="e.g. EUR, GBP"
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Foreign Currency Amount</label>
+                    <input type="number" value={ctrFields.foreignCurrencyAmount} onChange={e => setCtrF({ foreignCurrencyAmount: e.target.value })}
+                      placeholder="0.00"
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Part III: Financial Institution */}
+              <div className="bg-white border border-blue-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-blue-900 mb-1 flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5" /> Part III — Financial Institution
+                </h3>
+                <p className="text-[10px] text-blue-600 mb-3">Identify the financial institution where the transaction(s) took place.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Institution Name *</label>
+                    <input value={ctrFields.fiName} onChange={e => setCtrF({ fiName: e.target.value })}
+                      placeholder="Legal name of the financial institution"
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        ctrValidationErrors.includes("fiName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-blue-200 focus:ring-blue-300")} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">EIN</label>
+                    <input value={ctrFields.fiEIN} onChange={e => setCtrF({ fiEIN: e.target.value })}
+                      placeholder="XX-XXXXXXX"
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Institution Address</label>
+                    <input value={ctrFields.fiAddress} onChange={e => setCtrF({ fiAddress: e.target.value })}
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">RSSD Number</label>
+                    <input value={ctrFields.fiRSSD} onChange={e => setCtrF({ fiRSSD: e.target.value })}
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Branch Address (if different)</label>
+                    <input value={ctrFields.fiBranchAddress} onChange={e => setCtrF({ fiBranchAddress: e.target.value })}
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Part IV: Contact & Filing */}
+              <div className="bg-white border border-blue-200 rounded-xl p-4">
+                <h3 className="text-xs font-bold text-blue-900 mb-1 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" /> Part IV — Contact Information & Filing
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Contact Person *</label>
+                    <input value={ctrFields.contactName} onChange={e => setCtrF({ contactName: e.target.value })}
+                      placeholder="BSA Officer or authorized contact"
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        ctrValidationErrors.includes("contactName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-blue-200 focus:ring-blue-300")} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Title / Position</label>
+                    <input value={ctrFields.contactTitle} onChange={e => setCtrF({ contactTitle: e.target.value })}
+                      placeholder="e.g. BSA Officer"
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Phone</label>
+                    <input value={ctrFields.contactPhone} onChange={e => setCtrF({ contactPhone: e.target.value })}
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Filing Type</label>
+                    <select value={ctrFields.filingType} onChange={e => setCtrF({ filingType: e.target.value as "initial" | "amendment" })}
+                      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none">
+                      <option value="initial">Initial Report</option>
+                      <option value="amendment">Amendment</option>
+                    </select>
+                  </div>
+                  {ctrFields.filingType === "amendment" && (
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-semibold text-blue-800 mb-1 block">Prior DCN (Document Control Number)</label>
+                      <input value={ctrFields.priorDCN} onChange={e => setCtrF({ priorDCN: e.target.value })}
+                        className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap mt-4">
+              <button onClick={handleExportCTR}
+                className="flex items-center gap-1.5 text-xs px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 font-semibold">
+                <Download className="w-3.5 h-3.5" /> Export CTR PDF
+              </button>
+              <span className="text-[10px] text-blue-500">FinCEN Form 112 · 31 CFR §1010.311 · BSA</span>
+            </div>
+          </div>
+        )}
+
         {/* FINTRAC Export Panel */}
         {showFintracPanel && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-5 animate-fade-in">
