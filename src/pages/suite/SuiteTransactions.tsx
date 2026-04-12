@@ -240,8 +240,34 @@ export default function SuiteTransactions() {
   };
 
   const customerName = (id: string) => customers.find(c => c.id === id)?.name || "Unknown";
+  const customerInfo = (id: string) => customers.find(c => c.id === id);
   const filtered = filter === "All" ? txs : filter === "flagged" ? txs.filter(t => t.risk_flag) : txs.filter(t => !t.risk_flag);
   const stats = { total: txs.length, flagged: txs.filter(t => t.risk_flag).length, volume: txs.reduce((s, t) => s + Number(t.amount), 0) };
+
+  const toggleExpand = async (txId: string) => {
+    if (expandedTx === txId) { setExpandedTx(null); return; }
+    setExpandedTx(txId);
+    if (!txAlerts[txId]) {
+      setAlertsLoading(txId);
+      const { data } = await supabase.from("suite_alerts").select("id, title, severity, status, created_at, rule_id, description").eq("transaction_id", txId).order("created_at", { ascending: false });
+      setTxAlerts(prev => ({ ...prev, [txId]: (data as AlertRow[]) || [] }));
+      setAlertsLoading(null);
+    }
+  };
+
+  const statusColor = (s: string) => {
+    if (s === "flagged") return "bg-destructive/10 text-destructive border-destructive/20";
+    if (s === "clear") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    if (s === "reviewed") return "bg-blue-50 text-blue-700 border-blue-200";
+    return "bg-muted text-muted-foreground border-border";
+  };
+
+  const riskColor = (r?: string) => {
+    if (r === "critical") return "text-destructive font-bold";
+    if (r === "high") return "text-orange-600 font-semibold";
+    if (r === "medium") return "text-amber-600 font-medium";
+    return "text-emerald-600";
+  };
 
   const sevColor = (s: string) => s === "critical" ? "bg-red-100 text-red-800 border-red-200" : s === "high" ? "bg-orange-100 text-orange-800 border-orange-200" : s === "medium" ? "bg-yellow-100 text-yellow-800 border-yellow-200" : "bg-blue-100 text-blue-800 border-blue-200";
 
