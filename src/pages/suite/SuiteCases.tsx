@@ -225,7 +225,15 @@ export default function SuiteCases() {
     if (mokasValidationErrors.length > 0) setMokasValidationErrors([]);
   };
 
-  // ── Regulator auto-detection ──
+  // CTR (FinCEN) state
+  const [showCtrPanel, setShowCtrPanel] = useState(false);
+  const [ctrFields, setCtrFields] = useState<CTRManualFields>({ ...DEFAULT_CTR_FIELDS });
+  const [ctrValidationErrors, setCtrValidationErrors] = useState<string[]>([]);
+  const setCtrF = (patch: Partial<CTRManualFields>) => {
+    setCtrFields(prev => ({ ...prev, ...patch }));
+    if (ctrValidationErrors.length > 0) setCtrValidationErrors([]);
+  };
+
   const [userRegulator, setUserRegulator] = useState<string | null>(null);
   const [showChecklist, setShowChecklist] = useState(false);
   const [filedReports, setFiledReports] = useState<Set<string>>(new Set());
