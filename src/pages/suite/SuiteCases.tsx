@@ -547,6 +547,10 @@ export default function SuiteCases() {
                   className="text-xs px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100">
                   File STR (FINTRAC)
                 </button>
+                <button onClick={() => updateStatus(selectedCase.id, "str_filed")}
+                  className="text-xs px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-100">
+                  File STR (MOKAS)
+                </button>
               </>
             )}
             {selectedCase.status !== "closed" && (
