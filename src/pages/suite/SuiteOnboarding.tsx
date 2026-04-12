@@ -332,6 +332,62 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
           </div>
         </div>
 
+        {/* Status Timeline */}
+        <div>
+          <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">Activity Timeline</h3>
+          {timelineLoading ? (
+            <p className="text-xs text-muted-foreground">Loading…</p>
+          ) : timeline.length === 0 ? (
+            <p className="text-xs text-muted-foreground italic">No activity recorded yet</p>
+          ) : (
+            <div className="relative pl-5">
+              {/* Vertical line */}
+              <div className="absolute left-[7px] top-1 bottom-1 w-px bg-border" />
+              <div className="space-y-4">
+                {timeline.map((event, idx) => {
+                  const isOnboarding = event.action.toLowerCase().includes("onboarding");
+                  const isUpdate = event.action.toLowerCase().includes("updated");
+                  const isStatusChange = event.details?.changes?.some?.((c: string) => c.includes("status"));
+                  const isRiskChange = event.details?.changes?.some?.((c: string) => c.includes("risk"));
+
+                  let icon = <Clock className="w-3 h-3" />;
+                  let dotColor = "bg-muted-foreground";
+                  if (isOnboarding) { icon = <UserCheck className="w-3 h-3" />; dotColor = "bg-primary"; }
+                  else if (isStatusChange) { icon = <ShieldCheck className="w-3 h-3" />; dotColor = "bg-blue-500"; }
+                  else if (isRiskChange) { icon = <AlertTriangle className="w-3 h-3" />; dotColor = "bg-amber-500"; }
+
+                  return (
+                    <div key={event.id} className="relative">
+                      {/* Dot */}
+                      <div className={cn("absolute -left-5 top-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center text-white", dotColor)}>
+                        {icon}
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-foreground leading-tight">{event.action}</p>
+                        {event.details?.changes && (
+                          <ul className="mt-0.5 space-y-0.5">
+                            {(event.details.changes as string[]).map((c: string, ci: number) => (
+                              <li key={ci} className="text-[11px] text-muted-foreground font-mono">• {c}</li>
+                            ))}
+                          </ul>
+                        )}
+                        {event.details?.type && !event.details?.changes && (
+                          <p className="text-[11px] text-muted-foreground capitalize mt-0.5">Type: {event.details.type}</p>
+                        )}
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          {new Date(event.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                          {" "}
+                          {new Date(event.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Actions */}
         <div className="pt-2 border-t border-border space-y-2">
           <div className="flex gap-2">
