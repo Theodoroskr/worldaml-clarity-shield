@@ -311,6 +311,30 @@ export default function SuiteRegulatory() {
     continuous: { label: "Ongoing", badgeClass: "bg-muted text-muted-foreground border-border" },
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-24 text-sm text-muted-foreground">Loading…</div>
+    );
+  }
+
+  if (!regulator || !profile) {
+    return (
+      <div className="max-w-2xl mx-auto py-16 px-6 text-center space-y-4">
+        <SEO title="Regulatory Hub" description="View your regulatory obligations." noindex />
+        <div className="w-14 h-14 mx-auto rounded-2xl bg-muted flex items-center justify-center">
+          <Building2 className="w-7 h-7 text-muted-foreground" />
+        </div>
+        <h1 className="text-xl font-bold text-foreground">No Regulator Selected</h1>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          To see your regulatory obligations, reporting requirements, and filing deadlines, please set your regulator in{" "}
+          <a href="/suite/settings" className="text-primary underline underline-offset-2 hover:text-primary/80">
+            Settings
+          </a>.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto py-8 px-6 space-y-8">
       <SEO title={`Regulatory Hub — ${profile.name}`} description={`Regulatory obligations for ${profile.fullName}`} noindex />
