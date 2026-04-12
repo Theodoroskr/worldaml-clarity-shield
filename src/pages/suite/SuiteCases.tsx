@@ -148,7 +148,10 @@ export default function SuiteCases() {
   const [notes, setNotes] = useState<CaseNote[]>([]);
   const [newNote, setNewNote] = useState("");
   const [showFintracPanel, setShowFintracPanel] = useState(false);
+  const [showFieldMapping, setShowFieldMapping] = useState(false);
   const [fintracStrType, setFintracStrType] = useState<"str" | "lctr" | "eftr">("str");
+  const [caseCustomer, setCaseCustomer] = useState<any>(null);
+  const [caseTransactions, setCaseTransactions] = useState<any[]>([]);
 
   const fetchCases = async () => {
     const { data: { user } } = await supabase.auth.getUser();
