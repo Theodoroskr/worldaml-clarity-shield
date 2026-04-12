@@ -285,8 +285,48 @@ export default function SuiteCases() {
     toast.success("SAR PDF downloaded");
   };
 
+  const validateFintracFields = (): string[] => {
+    const errors: string[] = [];
+    if (!mf.methodOfTransaction) errors.push("methodOfTransaction");
+    if (!mf.sourceOfFunds) errors.push("sourceOfFunds");
+    if (!mf.conductorName && !caseCustomer?.name) errors.push("conductorName");
+    if (mf.thirdPartyIndicator === "third_party" && !mf.thirdPartyName) errors.push("thirdPartyName");
+    if (!mf.dispositionOfFunds) errors.push("dispositionOfFunds");
+    if (!mf.beneficiaryName) errors.push("beneficiaryName");
+    if (!mf.suspicionType) errors.push("suspicionType");
+    if (mf.selectedIndicators.length === 0) errors.push("selectedIndicators");
+    if (!mf.camloName) errors.push("camloName");
+    if (!mf.actionTaken) errors.push("actionTaken");
+    if (notes.length === 0) errors.push("notes");
+    return errors;
+  };
+
   const handleExportFINTRAC = async () => {
     if (!selectedCase) return;
+
+    // Validate mandatory fields
+    const errors = validateFintracFields();
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      const labels: Record<string, string> = {
+        methodOfTransaction: "Method of Transaction",
+        sourceOfFunds: "Source of Funds",
+        conductorName: "Conductor Name",
+        thirdPartyName: "Third Party Name",
+        dispositionOfFunds: "Disposition of Funds",
+        beneficiaryName: "Beneficiary Name",
+        suspicionType: "Suspicion Type",
+        selectedIndicators: "At least 1 ML/TF Indicator",
+        camloName: "CAMLO Name",
+        actionTaken: "Action Taken",
+        notes: "Investigation Narrative (add case notes)",
+      };
+      const missing = errors.map(e => labels[e] || e).join(", ");
+      toast.error(`Missing mandatory fields: ${missing}`, { duration: 6000 });
+      return;
+    }
+    setValidationErrors([]);
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { toast.error("Please log in to export"); return; }
