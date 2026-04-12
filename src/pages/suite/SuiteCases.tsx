@@ -677,6 +677,123 @@ export default function SuiteCases() {
           </div>
         </div>
 
+        {/* Compliance Checklist Panel */}
+        {showChecklist && (
+          <div className="bg-card border border-border rounded-xl overflow-hidden animate-fade-in">
+            <div className="px-5 py-4 border-b border-border bg-muted/30 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ClipboardCheck className="w-4 h-4 text-primary" />
+                <h2 className="font-semibold text-foreground text-sm">
+                  Regulatory Reporting Obligations
+                  {userRegulator && (
+                    <span className="ml-2 text-xs font-normal px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                      {userRegulator}
+                    </span>
+                  )}
+                </h2>
+              </div>
+              {!userRegulator && (
+                <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full font-medium">
+                  No regulator set — showing all obligations
+                </span>
+              )}
+            </div>
+            {regulatorReports.length > 0 ? (
+              <div className="divide-y divide-border">
+                {regulatorReports.map(report => {
+                  const isFiled = filedReports.has(report.id) ||
+                    (report.exportKey === "sar" && (selectedCase.status === "sar_filed" || selectedCase.status === "closed")) ||
+                    (report.exportKey === "fintrac" && selectedCase.status === "str_filed") ||
+                    (report.exportKey === "mokas" && selectedCase.status === "str_filed");
+                  return (
+                    <div key={report.id} className={cn("px-5 py-3 flex items-center gap-4", isFiled && "bg-emerald-50/30")}>
+                      <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                        isFiled ? "border-emerald-500 bg-emerald-100" : "border-muted-foreground/30 bg-background"
+                      )}>
+                        {isFiled && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-foreground">{report.name}</span>
+                          <span className="text-[10px] text-muted-foreground">— {report.description}</span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-0.5">
+                          <span className="text-[10px] text-muted-foreground">
+                            <strong>Deadline:</strong> {report.deadline}
+                          </span>
+                          {report.threshold && (
+                            <span className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-medium">
+                              Threshold: {report.threshold}
+                            </span>
+                          )}
+                          <span className="text-[10px] text-muted-foreground font-mono">{report.legalBasis}</span>
+                        </div>
+                      </div>
+                      <div>
+                        {isFiled ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold">
+                            Filed
+                          </span>
+                        ) : (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200 font-semibold">
+                            Pending
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="px-5 py-6">
+                <p className="text-sm text-muted-foreground mb-3">All jurisdictions' reporting obligations are available:</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {Object.entries(REGULATOR_REPORTS).map(([reg, reports]) => (
+                    <div key={reg} className="border border-border rounded-lg p-3">
+                      <h4 className="text-xs font-bold text-foreground mb-1.5">{reg}</h4>
+                      <div className="space-y-1">
+                        {reports.map(r => (
+                          <div key={r.id} className="flex items-center gap-2">
+                            <span className="text-[10px] font-semibold text-primary">{r.name}</span>
+                            <span className="text-[10px] text-muted-foreground">{r.description}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {regulatorReports.length > 0 && (() => {
+              const filed = regulatorReports.filter(r =>
+                filedReports.has(r.id) ||
+                (r.exportKey === "sar" && (selectedCase.status === "sar_filed" || selectedCase.status === "closed")) ||
+                (r.exportKey === "fintrac" && selectedCase.status === "str_filed") ||
+                (r.exportKey === "mokas" && selectedCase.status === "str_filed")
+              ).length;
+              const total = regulatorReports.length;
+              const pct = Math.round((filed / total) * 100);
+              return (
+                <div className="px-5 py-3 border-t border-border bg-muted/20 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                      <div className={cn("h-full rounded-full transition-all",
+                        pct === 100 ? "bg-emerald-500" : pct >= 50 ? "bg-amber-500" : "bg-red-400"
+                      )} style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="text-[11px] font-semibold text-muted-foreground">{filed}/{total} obligations addressed</span>
+                  </div>
+                  <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full",
+                    pct === 100 ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                  )}>
+                    {pct === 100 ? "✓ Compliant" : `${pct}% Complete`}
+                  </span>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
         {/* FINTRAC Export Panel */}
         {showFintracPanel && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-5 animate-fade-in">
