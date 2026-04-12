@@ -87,6 +87,7 @@ export interface FINTRACSTRExportOptions {
   reportingEntityRef?: string;
   strType: "str" | "lctr" | "eftr";
   manualFields?: FINTRACManualFields;
+  targetWindow?: Window | null;
 }
 
 const MARGIN = 20;
@@ -157,7 +158,7 @@ function checkPage(doc: jsPDF, y: number, needed = 20): number {
 }
 
 export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<void> {
-  const { caseItem, notes, customer, transactions, submittedBy, reportingEntity, reportingEntityRef, strType, manualFields } = opts;
+  const { caseItem, notes, customer, transactions, submittedBy, reportingEntity, reportingEntityRef, strType, manualFields, targetWindow } = opts;
   const mf = manualFields ?? DEFAULT_MANUAL_FIELDS;
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
@@ -448,20 +449,24 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
   }
 
   const fileName = `FINTRAC_${strType.toUpperCase()}_${refNum.replace(/[^A-Z0-9]/gi, "_")}_${now.toISOString().slice(0, 10)}.pdf`;
-
-  // Use window.open with blob URL — works in sandboxed iframes where anchor downloads are blocked
   const pdfBlob = doc.output("blob");
   const blobUrl = URL.createObjectURL(pdfBlob);
+
+  if (targetWindow && !targetWindow.closed) {
+    targetWindow.location.href = blobUrl;
+    targetWindow.document.title = fileName;
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
+    return;
+  }
+
   const opened = window.open(blobUrl, "_blank");
   if (!opened) {
-    // Popup blocked — fall back to anchor click, then direct save
     const link = document.createElement("a");
     link.href = blobUrl;
     link.download = fileName;
-    link.target = "_blank";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   }
-  setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
 }
