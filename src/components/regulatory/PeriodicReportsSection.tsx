@@ -15,7 +15,38 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, differenceInDays, setMonth, setDate, setYear, isBefore } from "date-fns";
+
+function getNextDeadline(ob: PeriodicObligation): Date | null {
+  const now = new Date();
+  const year = now.getFullYear();
+  if (ob.month !== undefined && ob.day !== undefined) {
+    let deadline = setDate(setMonth(new Date(year, 0, 1), ob.month - 1), ob.day);
+    if (isBefore(deadline, now)) deadline = setYear(deadline, year + 1);
+    return deadline;
+  }
+  if (ob.deadline?.toLowerCase() === "annually") {
+    return new Date(year, 11, 31);
+  }
+  return null;
+}
+
+function DeadlineBadge({ obligation }: { obligation: PeriodicObligation }) {
+  const deadline = getNextDeadline(obligation);
+  if (!deadline) return null;
+  const days = differenceInDays(deadline, new Date());
+  let colorClass = "bg-muted text-muted-foreground";
+  if (days <= 7) colorClass = "bg-destructive/15 text-destructive";
+  else if (days <= 30) colorClass = "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400";
+  else if (days <= 90) colorClass = "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
+  const label = days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? "Due today" : `${days}d left`;
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${colorClass}`}>
+      <Clock className="w-3 h-3" />
+      {label}
+    </span>
+  );
+}
 
 interface PeriodicObligation {
   title: string;
@@ -627,7 +658,10 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="text-sm font-medium text-foreground">{ob.title}</p>
-                      <p className="text-xs text-muted-foreground">{ob.deadline}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-muted-foreground">{ob.deadline}</p>
+                        <DeadlineBadge obligation={ob} />
+                      </div>
                     </div>
                     {existing ? (
                       <Badge variant="outline" className={STATUS_CONFIG[existing.filing_status]?.badgeClass || ""}>
