@@ -1080,6 +1080,8 @@ export type Database = {
       suite_transactions: {
         Row: {
           amount: number
+          beneficiary_name: string | null
+          conductor_name: string | null
           counterparty: string | null
           counterparty_country: string | null
           created_at: string
@@ -1087,13 +1089,19 @@ export type Database = {
           customer_id: string
           description: string | null
           direction: string
+          disposition: string | null
           id: string
+          method_of_transaction: string | null
           monitoring_status: string
           risk_flag: boolean
+          source_of_funds: string | null
+          third_party_indicator: string | null
           user_id: string
         }
         Insert: {
           amount?: number
+          beneficiary_name?: string | null
+          conductor_name?: string | null
           counterparty?: string | null
           counterparty_country?: string | null
           created_at?: string
@@ -1101,13 +1109,19 @@ export type Database = {
           customer_id: string
           description?: string | null
           direction?: string
+          disposition?: string | null
           id?: string
+          method_of_transaction?: string | null
           monitoring_status?: string
           risk_flag?: boolean
+          source_of_funds?: string | null
+          third_party_indicator?: string | null
           user_id: string
         }
         Update: {
           amount?: number
+          beneficiary_name?: string | null
+          conductor_name?: string | null
           counterparty?: string | null
           counterparty_country?: string | null
           created_at?: string
@@ -1115,9 +1129,13 @@ export type Database = {
           customer_id?: string
           description?: string | null
           direction?: string
+          disposition?: string | null
           id?: string
+          method_of_transaction?: string | null
           monitoring_status?: string
           risk_flag?: boolean
+          source_of_funds?: string | null
+          third_party_indicator?: string | null
           user_id?: string
         }
         Relationships: [
