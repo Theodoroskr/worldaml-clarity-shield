@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Plus, Trash2, Settings2, AlertCircle, Sparkles, Loader2, BarChart3, Shield, Target, TrendingUp, Lightbulb, ChevronRight, X, Scale, CheckCircle2, AlertOctagon } from "lucide-react";
+import { Plus, Trash2, Settings2, AlertCircle, Sparkles, Loader2, BarChart3, Shield, Target, TrendingUp, Lightbulb, ChevronRight, X, Scale, CheckCircle2, AlertOctagon, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -170,12 +170,12 @@ const FINCEN_REQUIREMENTS: FinCENRequirement[] = [
 
 /* FINTRAC (Canada) Regulatory Mapping */
 const FINTRAC_REQUIREMENTS: FinCENRequirement[] = [
-  { id: "lcttr", regulation: "Large Cash Transaction Report (LCTR)", citation: "PCMLTFA s.7 / PCMLTFR s.12", description: "Reporting entities must submit an LCTR to FINTRAC for every cash transaction of CAD 10,000 or more, including aggregated 24-hour transactions by or on behalf of the same person.", rulePatterns: ["Large Transaction", "P-TLO", "P-TLI", "P-HSUMI", "P-HSUMO", "FINTRAC-LCTR", "TALKA-LCTR"], suggestedRules: [{ name: "[FINTRAC-LCTR] Aggregate 24h cash ≥ CAD 10,000", severity: "critical", rationale: "FINTRAC requires LCTR filing when aggregate cash transactions by the same person reach CAD 10,000 within a 24-hour window.", conditions: [{ field: "account.totalDeposits30d", operator: ">", value: "10000" }, { field: "transaction.type", operator: "==", value: "cash" }] }, { name: "[TALKA-LCTR] Large Cash Report Generation ≥ CAD 10,000", severity: "critical", rationale: "From Rules Configuration Template: Generate Large Cash Transaction Report for conductor, beneficiary and third party. 24-hour static period (00:00:00–23:59:59). Cash deposits ≥ CAD 10,000 equivalent.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.currency", operator: "==", value: "CAD" }, { field: "transaction.type", operator: "==", value: "cash_deposit" }] }] },
-  { id: "str", regulation: "Suspicious Transaction Report (STR)", citation: "PCMLTFA s.7(1)", description: "Reporting entities must file an STR when there are reasonable grounds to suspect a transaction is related to ML, TF, or sanctions evasion. No minimum dollar threshold.", rulePatterns: ["HRCOU", "DORMANT", "NCOU", "RISKWORD", "REFTEXT", "HASUMI", "HASUMO", "HANUMI", "HANUMO", "IN>AVG", "OUT>AVG", "FINTRAC-STR", "TALKA-CIRC", "TALKA-DORMANT", "TALKA-UNREL", "TALKA-ELRP", "TALKA-HIST"], suggestedRules: [{ name: "[FINTRAC-STR] Rapid movement of funds (layering)", severity: "high", rationale: "FINTRAC guidance identifies rapid in-out patterns as a key ML indicator.", conditions: [{ field: "transaction.amount", operator: ">", value: "3000" }, { field: "transaction.frequency", operator: ">", value: "3" }] }, { name: "[TALKA-CIRC] Funds Circulation — deposit & withdraw within 2 days", severity: "high", rationale: "From Rules Configuration Template: Any amount deposited AND any amount withdrawn within a 2-day window. Rapid fund circulation is a key ML indicator under FINTRAC STR guidance.", conditions: [{ field: "transaction.amount", operator: ">", value: "0" }, { field: "transaction.direction", operator: "==", value: "inbound" }, { field: "transaction.timeframe", operator: "<=", value: "2d" }] }, { name: "[TALKA-DORMANT] Dormant-to-Active Account Reactivation", severity: "high", rationale: "From Rules Configuration Template: Any deposit or withdrawal on an account inactive for 180+ days. Dormant account reactivation is a FINTRAC ML indicator.", conditions: [{ field: "account.dormantDays", operator: ">", value: "180" }, { field: "transaction.amount", operator: ">", value: "0" }] }, { name: "[TALKA-UNREL] Transactions Between Unrelated Members", severity: "medium", rationale: "From Rules Configuration Template: More than 1 transaction between unrelated members. Unusual patterns between unrelated parties may indicate layering or structuring.", conditions: [{ field: "transaction.unrelatedPartyCount", operator: ">", value: "1" }] }, { name: "[TALKA-ELRP] Early Loan Repayment", severity: "medium", rationale: "From Rules Configuration Template: Any loan or mortgage repayment before the maturity date, any amount. Early repayment can indicate integration of illicit funds.", conditions: [{ field: "transaction.type", operator: "==", value: "loan_repayment" }, { field: "transaction.isEarly", operator: "==", value: "true" }] }, { name: "[TALKA-HIST] Historical Activity Profiling Deviation", severity: "high", rationale: "From Rules Configuration Template: Monitor for activity that falls significantly outside historical transaction patterns over a 30-day rolling window. FINTRAC STR indicator.", conditions: [{ field: "transaction.deviationFromAvg", operator: ">", value: "200" }, { field: "transaction.timeframe", operator: "<=", value: "30d" }] }] },
-  { id: "eftr", regulation: "Electronic Funds Transfer Report (EFTR)", citation: "PCMLTFR s.12.1", description: "Reporting entities must file an EFTR for international electronic funds transfers of CAD 10,000 or more, whether sent or received.", rulePatterns: ["SUMCCI", "SUMCCO", "FINTRAC-EFTR", "TALKA-EFTR"], suggestedRules: [{ name: "[FINTRAC-EFTR] International EFT ≥ CAD 10,000", severity: "high", rationale: "FINTRAC requires EFTR filing for all international electronic transfers of CAD 10,000+.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.country", operator: "!=", value: "CA" }] }, { name: "[TALKA-EFTR] Electronic Funds Transfer Report ≥ CAD 10,000", severity: "high", rationale: "From Rules Configuration Template: Generate Electronic Funds Transfer Report for conductor, beneficiary and third party. 24-hour static period. CAD 10,000 equivalent threshold.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.type", operator: "==", value: "electronic_transfer" }, { field: "transaction.country", operator: "!=", value: "CA" }] }] },
+  { id: "lcttr", regulation: "Large Cash Transaction Report (LCTR)", citation: "PCMLTFA s.7 / PCMLTFR s.12", description: "Reporting entities must submit an LCTR to FINTRAC for every cash transaction of CAD 10,000 or more, including aggregated 24-hour transactions by or on behalf of the same person.", rulePatterns: ["Large Transaction", "P-TLO", "P-TLI", "P-HSUMI", "P-HSUMO", "FINTRAC-LCTR", "LCTR"], suggestedRules: [{ name: "[FINTRAC-LCTR] Aggregate 24h cash ≥ CAD 10,000", severity: "critical", rationale: "FINTRAC requires LCTR filing when aggregate cash transactions by the same person reach CAD 10,000 within a 24-hour window.", conditions: [{ field: "account.totalDeposits30d", operator: ">", value: "10000" }, { field: "transaction.type", operator: "==", value: "cash" }] }, { name: "[LCTR] Large Cash Report Generation ≥ CAD 10,000", severity: "critical", rationale: "From Rules Configuration Template: Generate Large Cash Transaction Report for conductor, beneficiary and third party. 24-hour static period (00:00:00–23:59:59). Cash deposits ≥ CAD 10,000 equivalent.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.currency", operator: "==", value: "CAD" }, { field: "transaction.type", operator: "==", value: "cash_deposit" }] }] },
+  { id: "str", regulation: "Suspicious Transaction Report (STR)", citation: "PCMLTFA s.7(1)", description: "Reporting entities must file an STR when there are reasonable grounds to suspect a transaction is related to ML, TF, or sanctions evasion. No minimum dollar threshold.", rulePatterns: ["HRCOU", "DORMANT", "NCOU", "RISKWORD", "REFTEXT", "HASUMI", "HASUMO", "HANUMI", "HANUMO", "IN>AVG", "OUT>AVG", "FINTRAC-STR", "CIRC", "DORMANT", "UNREL", "ELRP", "HIST"], suggestedRules: [{ name: "[FINTRAC-STR] Rapid movement of funds (layering)", severity: "high", rationale: "FINTRAC guidance identifies rapid in-out patterns as a key ML indicator.", conditions: [{ field: "transaction.amount", operator: ">", value: "3000" }, { field: "transaction.frequency", operator: ">", value: "3" }] }, { name: "[CIRC] Funds Circulation — deposit & withdraw within 2 days", severity: "high", rationale: "From Rules Configuration Template: Any amount deposited AND any amount withdrawn within a 2-day window. Rapid fund circulation is a key ML indicator under FINTRAC STR guidance.", conditions: [{ field: "transaction.amount", operator: ">", value: "0" }, { field: "transaction.direction", operator: "==", value: "inbound" }, { field: "transaction.timeframe", operator: "<=", value: "2d" }] }, { name: "[DORMANT] Dormant-to-Active Account Reactivation", severity: "high", rationale: "From Rules Configuration Template: Any deposit or withdrawal on an account inactive for 180+ days. Dormant account reactivation is a FINTRAC ML indicator.", conditions: [{ field: "account.dormantDays", operator: ">", value: "180" }, { field: "transaction.amount", operator: ">", value: "0" }] }, { name: "[UNREL] Transactions Between Unrelated Members", severity: "medium", rationale: "From Rules Configuration Template: More than 1 transaction between unrelated members. Unusual patterns between unrelated parties may indicate layering or structuring.", conditions: [{ field: "transaction.unrelatedPartyCount", operator: ">", value: "1" }] }, { name: "[ELRP] Early Loan Repayment", severity: "medium", rationale: "From Rules Configuration Template: Any loan or mortgage repayment before the maturity date, any amount. Early repayment can indicate integration of illicit funds.", conditions: [{ field: "transaction.type", operator: "==", value: "loan_repayment" }, { field: "transaction.isEarly", operator: "==", value: "true" }] }, { name: "[HIST] Historical Activity Profiling Deviation", severity: "high", rationale: "From Rules Configuration Template: Monitor for activity that falls significantly outside historical transaction patterns over a 30-day rolling window. FINTRAC STR indicator.", conditions: [{ field: "transaction.deviationFromAvg", operator: ">", value: "200" }, { field: "transaction.timeframe", operator: "<=", value: "30d" }] }] },
+  { id: "eftr", regulation: "Electronic Funds Transfer Report (EFTR)", citation: "PCMLTFR s.12.1", description: "Reporting entities must file an EFTR for international electronic funds transfers of CAD 10,000 or more, whether sent or received.", rulePatterns: ["SUMCCI", "SUMCCO", "FINTRAC-EFTR", "EFTR"], suggestedRules: [{ name: "[FINTRAC-EFTR] International EFT ≥ CAD 10,000", severity: "high", rationale: "FINTRAC requires EFTR filing for all international electronic transfers of CAD 10,000+.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.country", operator: "!=", value: "CA" }] }, { name: "[EFTR] Electronic Funds Transfer Report ≥ CAD 10,000", severity: "high", rationale: "From Rules Configuration Template: Generate Electronic Funds Transfer Report for conductor, beneficiary and third party. 24-hour static period. CAD 10,000 equivalent threshold.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.type", operator: "==", value: "electronic_transfer" }, { field: "transaction.country", operator: "!=", value: "CA" }] }] },
   { id: "tpr", regulation: "Terrorist Property Report (TPR)", citation: "Criminal Code s.83.1 / PCMLTFA s.7.1", description: "Every person in Canada must disclose without delay to the RCMP and CSIS the existence of property owned or controlled by a listed terrorist entity.", rulePatterns: ["CUSTSCRS", "CUSTSCRH", "CTPYSCRS", "CUSTBIC", "CTPYBIC", "INSTSCRS", "INSTSCRH", "High-Risk Country"] },
   { id: "vctr", regulation: "Virtual Currency Transaction Report (VCTR)", citation: "PCMLTFR s.12.2", description: "MSBs dealing in virtual currency must report transactions of CAD 10,000 or more, including exchanges, transfers, and receipt of virtual currency.", rulePatterns: [], suggestedRules: [{ name: "[FINTRAC-VCTR] Virtual currency transfer ≥ CAD 10K", severity: "high", rationale: "FINTRAC requires VCTR filing for virtual currency transactions of CAD 10,000+.", conditions: [{ field: "transaction.amount", operator: ">", value: "10000" }, { field: "transaction.currency", operator: "IN", value: "BTC,ETH,USDT,USDC" }] }] },
-  { id: "structuring-ca", regulation: "Anti-Structuring (Canada)", citation: "PCMLTFA s.10.1", description: "It is an offence to structure transactions to avoid FINTRAC reporting thresholds. Patterns of transactions just below CAD 10,000 trigger enhanced scrutiny.", rulePatterns: ["STRIN", "STROUT", "TALKA-STRUCT"], suggestedRules: [{ name: "[TALKA-STRUCT] Structuring Detection > CAD 5,000 in 30 days", severity: "high", rationale: "From Rules Configuration Template: Transactions > CAD 5,000 by conductor, beneficiary and third party within a 30-day rolling window. Structuring to avoid FINTRAC thresholds.", conditions: [{ field: "transaction.amount", operator: ">", value: "5000" }, { field: "transaction.currency", operator: "==", value: "CAD" }, { field: "transaction.timeframe", operator: "<=", value: "30d" }] }] },
+  { id: "structuring-ca", regulation: "Anti-Structuring (Canada)", citation: "PCMLTFA s.10.1", description: "It is an offence to structure transactions to avoid FINTRAC reporting thresholds. Patterns of transactions just below CAD 10,000 trigger enhanced scrutiny.", rulePatterns: ["STRIN", "STROUT", "STRUCT"], suggestedRules: [{ name: "[STRUCT] Structuring Detection > CAD 5,000 in 30 days", severity: "high", rationale: "From Rules Configuration Template: Transactions > CAD 5,000 by conductor, beneficiary and third party within a 30-day rolling window. Structuring to avoid FINTRAC thresholds.", conditions: [{ field: "transaction.amount", operator: ">", value: "5000" }, { field: "transaction.currency", operator: "==", value: "CAD" }, { field: "transaction.timeframe", operator: "<=", value: "30d" }] }] },
   { id: "kyc-ca", regulation: "Know Your Client (KYC) — Canada", citation: "PCMLTFR s.52–67", description: "Reporting entities must verify client identity for prescribed transactions. Enhanced measures apply to PEPs, Heads of International Organizations (HIO), and high-risk clients.", rulePatterns: ["VC", "CDC01-P", "CDC01-E", "CUSTPEP", "CTPYPEP"], suggestedRules: [{ name: "[FINTRAC-KYC] PEP/HIO enhanced monitoring", severity: "high", rationale: "FINTRAC requires enhanced ongoing monitoring for PEPs and HIOs, including family members and close associates.", conditions: [{ field: "customer.pepStatus", operator: "==", value: "true" }] }] },
   { id: "sanctions-ca", regulation: "Canadian Sanctions Screening", citation: "SEMA / UNA / Magnitsky Act", description: "Canadian entities must screen against OSFI's Consolidated Canadian Autonomous Sanctions List, UN sanctions, and Sergei Magnitsky Act listings.", rulePatterns: ["CUSTSCRS", "CUSTSCRH", "CTPYSCRS", "High-Risk Country"] },
   { id: "compliance-ca", regulation: "Compliance Program Requirements", citation: "PCMLTFR s.71", description: "Every reporting entity must implement a compliance program including: compliance officer, written policies, risk assessment, ongoing training, and effectiveness review every two years.", rulePatterns: [], suggestedRules: [{ name: "[FINTRAC-CP] Biennial effectiveness review due", severity: "medium", rationale: "FINTRAC mandates independent effectiveness reviews at least every two years.", conditions: [{ field: "alert.count", operator: ">=", value: "0" }] }] },
@@ -198,6 +198,16 @@ const FCA_REQUIREMENTS: FinCENRequirement[] = [
   { id: "fca-threshold", regulation: "Occasional Transaction Threshold (€15,000)", citation: "MLR 2017 Reg 27(1)(b)", description: "CDD must be applied to occasional transactions amounting to €15,000 or more, whether carried out in a single operation or several linked operations. Wire transfers ≥ €1,000 also trigger CDD.", rulePatterns: ["P-TLO", "P-TLI", "Large Transaction"], suggestedRules: [{ name: "[FCA-OT] Occasional transaction ≥ €15,000", severity: "high", rationale: "MLR 2017 requires CDD for occasional transactions of €15,000+. This rule flags transactions at the EU-aligned threshold for UK compliance.", conditions: [{ field: "transaction.amount", operator: ">", value: "15000" }] }] },
 ];
 
+const REGULATOR_MAP: Record<string, { key: "fincen" | "fintrac" | "fca"; label: string; color: string; activeColor: string }> = {
+  fincen: { key: "fincen", label: "FinCEN / BSA", color: "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100", activeColor: "border-blue-500 bg-blue-100 text-blue-800" },
+  fintrac: { key: "fintrac", label: "FINTRAC", color: "border-red-300 bg-red-50 text-red-700 hover:bg-red-100", activeColor: "border-red-500 bg-red-100 text-red-800" },
+  fca: { key: "fca", label: "FCA (UK)", color: "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100", activeColor: "border-indigo-500 bg-indigo-100 text-indigo-800" },
+  eu_amld: { key: "fca", label: "EU AMLD", color: "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100", activeColor: "border-indigo-500 bg-indigo-100 text-indigo-800" },
+  cysec: { key: "fca", label: "CySEC", color: "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100", activeColor: "border-indigo-500 bg-indigo-100 text-indigo-800" },
+  icpac: { key: "fca", label: "ICPAC", color: "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100", activeColor: "border-indigo-500 bg-indigo-100 text-indigo-800" },
+  cba_cyprus: { key: "fca", label: "CBA Cyprus", color: "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100", activeColor: "border-indigo-500 bg-indigo-100 text-indigo-800" },
+};
+
 export default function SuiteAlertRules() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -209,9 +219,9 @@ export default function SuiteAlertRules() {
   const [analysing, setAnalysing] = useState(false);
   const [ruleAnalysis, setRuleAnalysis] = useState<any>(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
-  const [showFinCEN, setShowFinCEN] = useState(false);
-  const [showFINTRAC, setShowFINTRAC] = useState(false);
-  const [showFCA, setShowFCA] = useState(false);
+  const [activeRegPanel, setActiveRegPanel] = useState<"fincen" | "fintrac" | "fca" | null>(null);
+  const [userRegulator, setUserRegulator] = useState<string | null>(null);
+  const [showOtherRegs, setShowOtherRegs] = useState(false);
 
   const fetchRules = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -233,6 +243,19 @@ export default function SuiteAlertRules() {
   };
 
   useEffect(() => { fetchRules(); }, []);
+
+  // Fetch user's assigned regulator
+  useEffect(() => {
+    const fetchRegulator = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase.from("profiles").select("regulator").eq("user_id", user.id).single();
+      if (profile?.regulator) {
+        setUserRegulator(profile.regulator as string);
+      }
+    };
+    fetchRegulator();
+  }, []);
 
   const activeRule = rules.find(r => r.id === selected);
   const updateRule = (update: Partial<Rule>) => { setRules(prev => prev.map(r => r.id === selected ? { ...r, ...update } : r)); };
@@ -357,30 +380,55 @@ export default function SuiteAlertRules() {
             {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
             {aiLoading ? "Analyzing…" : "AI Suggest Rules"}
           </button>
-          <button onClick={() => { setShowFinCEN(!showFinCEN); setShowFINTRAC(false); setShowFCA(false); setShowAiPanel(false); setShowAnalysis(false); }} className={cn("flex items-center justify-center gap-1.5 text-xs px-2.5 py-2 rounded-lg border transition-colors font-medium w-full", showFinCEN ? "border-blue-500 bg-blue-100 text-blue-800" : "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100")}>
-            <Scale className="w-3.5 h-3.5" />FinCEN / BSA
+          {/* Your Regulator button (auto-detected) */}
+          {userRegulator && REGULATOR_MAP[userRegulator] && (() => {
+            const rm = REGULATOR_MAP[userRegulator];
+            const isActive = activeRegPanel === rm.key;
+            return (
+              <button onClick={() => { setActiveRegPanel(isActive ? null : rm.key); setShowAiPanel(false); setShowAnalysis(false); }} className={cn("flex items-center justify-center gap-1.5 text-xs px-2.5 py-2 rounded-lg border transition-colors font-medium w-full", isActive ? rm.activeColor : rm.color)}>
+                <Scale className="w-3.5 h-3.5" />{rm.label} <span className="opacity-60">(Your Regulator)</span>
+              </button>
+            );
+          })()}
+
+          {/* Other Regulators toggle */}
+          <button onClick={() => setShowOtherRegs(!showOtherRegs)} className="flex items-center justify-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors font-medium w-full">
+            <Globe className="w-3.5 h-3.5" />{showOtherRegs ? "Hide Other Regulators" : "Other Regulators"}
           </button>
-          <button onClick={() => { setShowFINTRAC(!showFINTRAC); setShowFinCEN(false); setShowFCA(false); setShowAiPanel(false); setShowAnalysis(false); }} className={cn("flex items-center justify-center gap-1.5 text-xs px-2.5 py-2 rounded-lg border transition-colors font-medium w-full", showFINTRAC ? "border-red-500 bg-red-100 text-red-800" : "border-red-300 bg-red-50 text-red-700 hover:bg-red-100")}>
-            <Scale className="w-3.5 h-3.5" />FINTRAC
-          </button>
-          <button onClick={() => { setShowFCA(!showFCA); setShowFinCEN(false); setShowFINTRAC(false); setShowAiPanel(false); setShowAnalysis(false); }} className={cn("flex items-center justify-center gap-1.5 text-xs px-2.5 py-2 rounded-lg border transition-colors font-medium w-full", showFCA ? "border-indigo-500 bg-indigo-100 text-indigo-800" : "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100")}>
-            <Scale className="w-3.5 h-3.5" />FCA (UK)
-          </button>
+          {showOtherRegs && (
+            <div className="space-y-1">
+              {(["fincen", "fintrac", "fca"] as const).filter(k => !userRegulator || REGULATOR_MAP[userRegulator]?.key !== k).map(k => {
+                const label = k === "fincen" ? "FinCEN / BSA" : k === "fintrac" ? "FINTRAC" : "FCA (UK)";
+                const colors = k === "fincen" ? { normal: "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100", active: "border-blue-500 bg-blue-100 text-blue-800" } : k === "fintrac" ? { normal: "border-red-300 bg-red-50 text-red-700 hover:bg-red-100", active: "border-red-500 bg-red-100 text-red-800" } : { normal: "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100", active: "border-indigo-500 bg-indigo-100 text-indigo-800" };
+                return (
+                  <button key={k} onClick={() => { setActiveRegPanel(activeRegPanel === k ? null : k); setShowAiPanel(false); setShowAnalysis(false); }} className={cn("flex items-center justify-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border transition-colors font-medium w-full", activeRegPanel === k ? colors.active : colors.normal)}>
+                    <Scale className="w-3 h-3" />{label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
           {rules.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">No rules yet. Click New to create one.</p>}
-          {rules.map(r => (
-            <button key={r.id} onClick={() => setSelected(r.id)} className={cn("w-full text-left p-3 rounded-xl border transition-colors", selected === r.id ? "bg-primary/5 border-primary/30" : "border-border hover:bg-muted/50")}>
-              <div className="flex items-start justify-between gap-2 mb-1.5">
-                <span className="text-xs font-semibold text-foreground leading-tight">{r.name}</span>
-                <button onClick={(e) => toggleRule(r.id, e)} className={cn("w-8 h-4 rounded-full flex items-center shrink-0 transition-colors px-0.5", r.enabled ? "bg-emerald-500 justify-end" : "bg-muted justify-start")}><div className="w-3 h-3 rounded-full bg-white shadow" /></button>
-              </div>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[r.priority])}>{r.priority}</span>
-                <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", actionStyle[r.action])}>{r.action}</span>
-              </div>
-            </button>
-          ))}
+          {rules.map(r => {
+            // Detect regulator label from rule name
+            const regLabel = r.name.includes("[FINCEN") ? "FinCEN" : r.name.includes("[FINTRAC") ? "FINTRAC" : r.name.includes("[FCA") ? "FCA" : r.name.includes("[EU") ? "EU" : null;
+            const regBadgeColor = regLabel === "FinCEN" ? "bg-blue-100 text-blue-700" : regLabel === "FINTRAC" ? "bg-red-100 text-red-700" : regLabel === "FCA" ? "bg-indigo-100 text-indigo-700" : regLabel === "EU" ? "bg-violet-100 text-violet-700" : "";
+            return (
+              <button key={r.id} onClick={() => setSelected(r.id)} className={cn("w-full text-left p-3 rounded-xl border transition-colors", selected === r.id ? "bg-primary/5 border-primary/30" : "border-border hover:bg-muted/50")}>
+                <div className="flex items-start justify-between gap-2 mb-1.5">
+                  <span className="text-xs font-semibold text-foreground leading-tight">{r.name}</span>
+                  <button onClick={(e) => toggleRule(r.id, e)} className={cn("w-8 h-4 rounded-full flex items-center shrink-0 transition-colors px-0.5", r.enabled ? "bg-emerald-500 justify-end" : "bg-muted justify-start")}><div className="w-3 h-3 rounded-full bg-white shadow" /></button>
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {regLabel && <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", regBadgeColor)}>{regLabel}</span>}
+                  <span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[r.priority])}>{r.priority}</span>
+                  <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", actionStyle[r.action])}>{r.action}</span>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -683,11 +731,11 @@ export default function SuiteAlertRules() {
       )}
 
       {/* Right panel - FinCEN / BSA Mapping */}
-      {showFinCEN && (
+      {activeRegPanel === "fincen" && (
         <div className="w-[460px] shrink-0 border-l border-border flex flex-col bg-card overflow-hidden">
           <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2"><Scale className="w-4 h-4 text-blue-600" /><h3 className="font-semibold text-foreground text-sm">FinCEN / BSA Regulatory Mapping</h3></div>
-            <button onClick={() => setShowFinCEN(false)} className="p-1 rounded hover:bg-muted transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
+            <button onClick={() => setActiveRegPanel(null)} className="p-1 rounded hover:bg-muted transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Coverage summary */}
@@ -765,7 +813,7 @@ export default function SuiteAlertRules() {
                         {matchedRules.map(r => (
                           <div
                             key={r.id}
-                            onClick={() => { setSelected(r.id); setShowFinCEN(false); }}
+                            onClick={() => { setSelected(r.id); setActiveRegPanel(null); }}
                             className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors group"
                           >
                             <div className="flex items-center gap-2 min-w-0">
@@ -827,11 +875,11 @@ export default function SuiteAlertRules() {
       )}
 
       {/* Right panel - FINTRAC Mapping */}
-      {showFINTRAC && (
+      {activeRegPanel === "fintrac" && (
         <div className="w-[460px] shrink-0 border-l border-border flex flex-col bg-card overflow-hidden">
           <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2"><Scale className="w-4 h-4 text-red-600" /><h3 className="font-semibold text-foreground text-sm">FINTRAC Regulatory Mapping</h3></div>
-            <button onClick={() => setShowFINTRAC(false)} className="p-1 rounded hover:bg-muted transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
+            <button onClick={() => setActiveRegPanel(null)} className="p-1 rounded hover:bg-muted transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {(() => {
@@ -870,7 +918,7 @@ export default function SuiteAlertRules() {
                     <div className="px-4 py-2.5 border-t border-border bg-card">
                       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Mapped Rules ({matchedRules.length})</p>
                       <div className="space-y-1">{matchedRules.map(r => (
-                        <div key={r.id} onClick={() => { setSelected(r.id); setShowFINTRAC(false); }} className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors group">
+                        <div key={r.id} onClick={() => { setSelected(r.id); setActiveRegPanel(null); }} className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors group">
                           <div className="flex items-center gap-2 min-w-0"><ChevronRight className="w-3 h-3 text-muted-foreground group-hover:text-primary shrink-0" /><span className="text-[11px] font-medium text-foreground truncate">{r.name}</span></div>
                           <div className="flex items-center gap-1.5 shrink-0"><span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[r.priority])}>{r.priority}</span><span className={cn("w-1.5 h-1.5 rounded-full", r.enabled ? "bg-emerald-500" : "bg-muted-foreground/30")} /></div>
                         </div>
@@ -900,11 +948,11 @@ export default function SuiteAlertRules() {
       )}
 
       {/* Right panel - FCA (UK) Mapping */}
-      {showFCA && (
+      {activeRegPanel === "fca" && (
         <div className="w-[460px] shrink-0 border-l border-border flex flex-col bg-card overflow-hidden">
           <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2"><Scale className="w-4 h-4 text-indigo-600" /><h3 className="font-semibold text-foreground text-sm">FCA (UK) Regulatory Mapping</h3></div>
-            <button onClick={() => setShowFCA(false)} className="p-1 rounded hover:bg-muted transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
+            <button onClick={() => setActiveRegPanel(null)} className="p-1 rounded hover:bg-muted transition-colors"><X className="w-4 h-4 text-muted-foreground" /></button>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {(() => {
@@ -943,7 +991,7 @@ export default function SuiteAlertRules() {
                     <div className="px-4 py-2.5 border-t border-border bg-card">
                       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Mapped Rules ({matchedRules.length})</p>
                       <div className="space-y-1">{matchedRules.map(r => (
-                        <div key={r.id} onClick={() => { setSelected(r.id); setShowFCA(false); }} className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors group">
+                        <div key={r.id} onClick={() => { setSelected(r.id); setActiveRegPanel(null); }} className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors group">
                           <div className="flex items-center gap-2 min-w-0"><ChevronRight className="w-3 h-3 text-muted-foreground group-hover:text-primary shrink-0" /><span className="text-[11px] font-medium text-foreground truncate">{r.name}</span></div>
                           <div className="flex items-center gap-1.5 shrink-0"><span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[r.priority])}>{r.priority}</span><span className={cn("w-1.5 h-1.5 rounded-full", r.enabled ? "bg-emerald-500" : "bg-muted-foreground/30")} /></div>
                         </div>
