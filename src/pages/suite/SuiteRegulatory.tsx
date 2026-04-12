@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import {
   FileText, Clock, Scale, ExternalLink, AlertTriangle,
   CheckCircle2, Calendar, Building2, Shield, Info,
+  CalendarClock, Timer, ArrowRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { format, differenceInDays, addYears, addMonths, isPast, isFuture, setMonth, setDate } from "date-fns";
 
 /* ─── Regulator knowledge base ─── */
 interface ReportObligation {
