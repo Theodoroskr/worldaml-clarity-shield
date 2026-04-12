@@ -468,6 +468,17 @@ export default function SuiteCases() {
               ))}
             </div>
 
+            {/* Validation Summary */}
+            {validationErrors.length > 0 && (
+              <div className="bg-red-50 border-2 border-red-400 rounded-xl p-3 flex items-start gap-2 animate-fade-in">
+                <XCircle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-red-800">Missing mandatory fields — please complete before exporting</p>
+                  <p className="text-[10px] text-red-600 mt-0.5">Fields highlighted in red below must be filled to comply with PCMLTFA/PCMLTFR requirements.</p>
+                </div>
+              </div>
+            )}
+
             {/* ── Manual Entry Forms ── */}
             <div className="space-y-4 mt-4">
               {/* Section 1: Starting Action */}
