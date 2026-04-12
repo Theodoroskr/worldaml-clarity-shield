@@ -835,6 +835,31 @@ export default function SuiteOnboarding() {
         </div>
       </div>
 
+      {/* Section: Document Upload */}
+      <div className="mb-6">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Corporate Documents</h3>
+        <p className="text-xs text-muted-foreground mb-3">Upload Certificate of Incorporation, Articles of Association, or proof of address. Max 10MB per file.</p>
+        <label className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/40 transition-colors">
+          <Upload className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Click to upload document</span>
+          <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple onChange={handleFileSelect(setKybFiles)} />
+        </label>
+        {kybFiles.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {kybFiles.map((f, i) => (
+              <div key={i} className="flex items-center gap-2 bg-muted/50 rounded-md px-3 py-2 text-sm">
+                <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="truncate flex-1">{f.name}</span>
+                <span className="text-xs text-muted-foreground shrink-0">{(f.size / 1024).toFixed(0)} KB</span>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => removeFile(setKybFiles, i)}>
+                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="flex justify-end gap-2 pt-2 border-t border-border">
         <Button variant="outline" size="sm" onClick={cancelOnboarding}>Cancel</Button>
         <Button size="sm" onClick={submitKYB} disabled={saving}>
