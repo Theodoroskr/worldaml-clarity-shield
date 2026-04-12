@@ -53,7 +53,7 @@ interface AIAnalysis {
 }
 
 const HIGH_RISK = ["RU", "IR", "PA", "KP", "SY"];
-const EMPTY_BULK: BulkRow = { customer_name: "", amount: "", currency: "EUR", direction: "inbound", counterparty: "", counterparty_country: "", description: "" };
+const EMPTY_BULK: BulkRow = { customer_name: "", amount: "", currency: "EUR", direction: "inbound", counterparty: "", counterparty_country: "", description: "", date: "" };
 
 const triggerMonitoring = async (userId: string, transactionId: string) => {
   try {
