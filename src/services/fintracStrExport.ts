@@ -87,7 +87,6 @@ export interface FINTRACSTRExportOptions {
   reportingEntityRef?: string;
   strType: "str" | "lctr" | "eftr";
   manualFields?: FINTRACManualFields;
-  targetWindow?: Window | null;
 }
 
 const MARGIN = 20;
