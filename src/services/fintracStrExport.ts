@@ -58,6 +58,18 @@ export interface FINTRACManualFields {
   // Part F — Declaration
   camloName: string;
   actionTaken: string;
+  // TPR-specific fields
+  tprTerroristEntityName: string;
+  tprTerroristEntityType: string;
+  tprListedUnder: string;
+  tprPropertyType: string;
+  tprPropertyDescription: string;
+  tprPropertyValue: string;
+  tprPropertyCurrency: string;
+  tprPropertyLocation: string;
+  tprDispositionAction: string;
+  tprDateDiscovered: string;
+  tprRelationshipToEntity: string;
 }
 
 export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
@@ -75,6 +87,17 @@ export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
   selectedIndicators: [],
   camloName: "",
   actionTaken: "",
+  tprTerroristEntityName: "",
+  tprTerroristEntityType: "individual",
+  tprListedUnder: "",
+  tprPropertyType: "",
+  tprPropertyDescription: "",
+  tprPropertyValue: "",
+  tprPropertyCurrency: "CAD",
+  tprPropertyLocation: "",
+  tprDispositionAction: "",
+  tprDateDiscovered: "",
+  tprRelationshipToEntity: "",
 };
 
 export interface FINTRACSTRExportOptions {
@@ -85,7 +108,7 @@ export interface FINTRACSTRExportOptions {
   submittedBy: string;
   reportingEntity: string;
   reportingEntityRef?: string;
-  strType: "str" | "lctr" | "eftr";
+  strType: "str" | "lctr" | "eftr" | "tpr";
   manualFields?: FINTRACManualFields;
 }
 
@@ -98,6 +121,7 @@ const STR_TYPE_LABELS: Record<string, string> = {
   str: "Suspicious Transaction Report (STR)",
   lctr: "Large Cash Transaction Report (LCTR)",
   eftr: "Electronic Funds Transfer Report (EFTR)",
+  tpr: "Terrorist Property Report (TPR)",
 };
 
 function header(doc: jsPDF, title: string, y: number): number {
