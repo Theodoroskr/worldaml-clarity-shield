@@ -1,10 +1,102 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, MapPin, AlertTriangle, Shield } from "lucide-react";
+import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, MapPin, AlertTriangle, Shield, CheckCircle2, XCircle, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { exportSAR } from "@/services/sarExport";
 import { exportFINTRACStr } from "@/services/fintracStrExport";
+
+/* ── FINTRAC STR Field Mapping ── */
+interface FieldMapping {
+  fintracField: string;
+  fintracPart: string;
+  description: string;
+  sourceTable: string;
+  sourceColumn: string | null;
+  required: boolean;
+}
+
+const FINTRAC_FIELD_MAP: FieldMapping[] = [
+  // Part A — Report Identification
+  { fintracPart: "A", fintracField: "Report Reference Number", description: "Unique identifier assigned by reporting entity", sourceTable: "suite_cases", sourceColumn: "id", required: true },
+  { fintracPart: "A", fintracField: "Report Type", description: "STR, LCTR, or EFTR", sourceTable: "system", sourceColumn: "strType", required: true },
+  { fintracPart: "A", fintracField: "Reporting Entity Name", description: "Legal name of the reporting entity", sourceTable: "profiles", sourceColumn: "company_name", required: true },
+  { fintracPart: "A", fintracField: "CAMLO / Reporting Officer", description: "Name of the compliance officer filing", sourceTable: "auth.users", sourceColumn: "email", required: true },
+  { fintracPart: "A", fintracField: "Report Date", description: "Date the report is generated", sourceTable: "system", sourceColumn: "now()", required: true },
+  { fintracPart: "A", fintracField: "Filing Deadline", description: "3 business days (STR) or 15 calendar days (LCTR/EFTR)", sourceTable: "system", sourceColumn: "computed", required: true },
+  // Part B — Subject Information
+  { fintracPart: "B", fintracField: "Subject Full Legal Name", description: "Individual or entity name", sourceTable: "suite_customers", sourceColumn: "name", required: true },
+  { fintracPart: "B", fintracField: "Subject Type", description: "Individual or legal entity", sourceTable: "suite_customers", sourceColumn: "type", required: true },
+  { fintracPart: "B", fintracField: "Date of Birth", description: "For individuals only", sourceTable: "suite_customers", sourceColumn: "date_of_birth", required: false },
+  { fintracPart: "B", fintracField: "Country of Residence", description: "Country of residence or incorporation", sourceTable: "suite_customers", sourceColumn: "country", required: true },
+  { fintracPart: "B", fintracField: "Business Operating Name", description: "Trade name if different from legal name", sourceTable: "suite_customers", sourceColumn: "company_name", required: false },
+  { fintracPart: "B", fintracField: "Business Registration No.", description: "Corporate registration number", sourceTable: "suite_customers", sourceColumn: "registration_number", required: false },
+  { fintracPart: "B", fintracField: "Email / Contact", description: "Email address or phone", sourceTable: "suite_customers", sourceColumn: "email", required: false },
+  { fintracPart: "B", fintracField: "Risk Classification", description: "Client risk level (low/medium/high/critical)", sourceTable: "suite_customers", sourceColumn: "risk_level", required: true },
+  // Part C — Transaction Details (Starting Action)
+  { fintracPart: "C", fintracField: "Transaction Date", description: "Date of each transaction", sourceTable: "suite_transactions", sourceColumn: "created_at", required: true },
+  { fintracPart: "C", fintracField: "Transaction Amount", description: "Value of funds or virtual currency", sourceTable: "suite_transactions", sourceColumn: "amount", required: true },
+  { fintracPart: "C", fintracField: "Currency", description: "Currency code (CAD, USD, EUR, etc.)", sourceTable: "suite_transactions", sourceColumn: "currency", required: true },
+  { fintracPart: "C", fintracField: "Direction (In/Out)", description: "Whether funds flow inbound or outbound", sourceTable: "suite_transactions", sourceColumn: "direction", required: true },
+  { fintracPart: "C", fintracField: "Counterparty Name", description: "Person or entity on the other side", sourceTable: "suite_transactions", sourceColumn: "counterparty", required: true },
+  { fintracPart: "C", fintracField: "Counterparty Country", description: "Country of the counterparty", sourceTable: "suite_transactions", sourceColumn: "counterparty_country", required: true },
+  { fintracPart: "C", fintracField: "Transaction Description", description: "Purpose or nature of the transaction", sourceTable: "suite_transactions", sourceColumn: "description", required: false },
+  { fintracPart: "C", fintracField: "Monitoring Status", description: "Whether flagged by monitoring rules", sourceTable: "suite_transactions", sourceColumn: "monitoring_status", required: false },
+  { fintracPart: "C", fintracField: "Risk Flag", description: "Whether the transaction was risk-flagged", sourceTable: "suite_transactions", sourceColumn: "risk_flag", required: false },
+  // Part C — Starting Action (missing from DB)
+  { fintracPart: "C-SA", fintracField: "Method of Transaction", description: "In-person, online, telephone, mail, etc.", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  { fintracPart: "C-SA", fintracField: "Source of Funds", description: "How the conductor obtained the funds", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  { fintracPart: "C-SA", fintracField: "Conductor Name", description: "Person who physically conducted the transaction", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  { fintracPart: "C-SA", fintracField: "Third Party Indicator", description: "Whether transaction was on behalf of a third party", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  // Part C — Completing Action (missing from DB)
+  { fintracPart: "C-CA", fintracField: "Disposition Details", description: "How the funds were ultimately used", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  { fintracPart: "C-CA", fintracField: "Beneficiary Name", description: "Person or entity who benefited from the transaction", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  // Part D — Grounds for Suspicion
+  { fintracPart: "D", fintracField: "Suspicion Type", description: "ML, TF, or sanctions evasion", sourceTable: "manual", sourceColumn: null, required: true },
+  { fintracPart: "D", fintracField: "ML/TF Indicators", description: "Checkboxes from FINTRAC indicator guidance", sourceTable: "system", sourceColumn: "indicators_checklist", required: true },
+  { fintracPart: "D", fintracField: "PEP Status", description: "Whether subject is a politically exposed person", sourceTable: "suite_customers", sourceColumn: null, required: true },
+  // Part E — Narrative
+  { fintracPart: "E", fintracField: "Investigation Narrative", description: "Facts + context + indicators = grounds", sourceTable: "suite_case_notes", sourceColumn: "content", required: true },
+  // Part F — Declaration
+  { fintracPart: "F", fintracField: "CAMLO Signature", description: "Physical or electronic signature", sourceTable: "manual", sourceColumn: null, required: true },
+  { fintracPart: "F", fintracField: "Action Taken", description: "Steps taken: enhanced monitoring, account freeze, etc.", sourceTable: "manual", sourceColumn: null, required: true },
+];
+
+function getFieldStatus(field: FieldMapping, customer: any, transactions: any[], notes: any[]): "mapped" | "partial" | "missing" {
+  if (field.sourceTable === "manual" || field.sourceTable === "system") {
+    if (field.sourceColumn === "indicators_checklist") return "mapped"; // rendered in PDF
+    if (field.sourceColumn === "computed" || field.sourceColumn === "now()" || field.sourceColumn === "strType") return "mapped";
+    return "missing"; // manual entry needed
+  }
+  if (field.sourceColumn === null) return "missing";
+  if (field.sourceTable === "suite_customers") {
+    if (!customer) return "missing";
+    const val = customer[field.sourceColumn];
+    return val != null && val !== "" ? "mapped" : "partial";
+  }
+  if (field.sourceTable === "suite_transactions") {
+    if (transactions.length === 0) return "missing";
+    const filled = transactions.filter(t => t[field.sourceColumn!] != null && t[field.sourceColumn!] !== "").length;
+    return filled === transactions.length ? "mapped" : filled > 0 ? "partial" : "missing";
+  }
+  if (field.sourceTable === "suite_case_notes") {
+    return notes.length > 0 ? "mapped" : "missing";
+  }
+  if (field.sourceTable === "suite_cases") return "mapped";
+  if (field.sourceTable === "profiles" || field.sourceTable === "auth.users") return "mapped";
+  return "missing";
+}
+
+const PART_LABELS: Record<string, string> = {
+  "A": "Part A — Report Identification",
+  "B": "Part B — Subject Information",
+  "C": "Part C — Transaction Details",
+  "C-SA": "Part C — Starting Action (Conductor)",
+  "C-CA": "Part C — Completing Action (Beneficiary)",
+  "D": "Part D — Grounds for Suspicion",
+  "E": "Part E — Investigation Narrative",
+  "F": "Part F — Declaration & Action Taken",
+};
 
 interface CaseItem {
   id: string;
@@ -56,7 +148,10 @@ export default function SuiteCases() {
   const [notes, setNotes] = useState<CaseNote[]>([]);
   const [newNote, setNewNote] = useState("");
   const [showFintracPanel, setShowFintracPanel] = useState(false);
+  const [showFieldMapping, setShowFieldMapping] = useState(false);
   const [fintracStrType, setFintracStrType] = useState<"str" | "lctr" | "eftr">("str");
+  const [caseCustomer, setCaseCustomer] = useState<any>(null);
+  const [caseTransactions, setCaseTransactions] = useState<any[]>([]);
 
   const fetchCases = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -116,10 +211,23 @@ export default function SuiteCases() {
   const openCase = async (c: CaseItem) => {
     setSelectedCase(c);
     setShowFintracPanel(false);
+    setShowFieldMapping(false);
+    setCaseCustomer(null);
+    setCaseTransactions([]);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const { data } = await supabase.from("suite_case_notes").select("*").eq("case_id", c.id).eq("user_id", user.id).order("created_at", { ascending: true });
     setNotes(data || []);
+
+    // Fetch customer & transactions for field mapping
+    if (c.customer_id) {
+      const [custRes, txRes] = await Promise.all([
+        supabase.from("suite_customers").select("*").eq("id", c.customer_id).single(),
+        supabase.from("suite_transactions").select("*").eq("customer_id", c.customer_id).eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
+      ]);
+      setCaseCustomer(custRes.data);
+      setCaseTransactions(txRes.data || []);
+    }
   };
 
   const addNote = async () => {
@@ -306,8 +414,102 @@ export default function SuiteCases() {
                 className="flex items-center gap-1.5 text-xs px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
                 <Download className="w-3.5 h-3.5" /> Export {fintracStrType.toUpperCase()} PDF
               </button>
+              <button onClick={() => setShowFieldMapping(!showFieldMapping)}
+                className="flex items-center gap-1.5 text-xs px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-100 font-medium">
+                <Info className="w-3.5 h-3.5" /> {showFieldMapping ? "Hide" : "Show"} Field Mapping
+              </button>
               <span className="text-[10px] text-red-500">PCMLTFA s.7 · PCMLTFR Part 1</span>
             </div>
+
+            {/* Field Mapping Panel */}
+            {showFieldMapping && (() => {
+              const parts = Object.keys(PART_LABELS);
+              const grouped = parts.map(part => ({
+                part,
+                label: PART_LABELS[part],
+                fields: FINTRAC_FIELD_MAP.filter(f => f.fintracPart === part),
+              }));
+              const allStatuses = FINTRAC_FIELD_MAP.map(f => getFieldStatus(f, caseCustomer, caseTransactions, notes));
+              const mapped = allStatuses.filter(s => s === "mapped").length;
+              const partial = allStatuses.filter(s => s === "partial").length;
+              const missing = allStatuses.filter(s => s === "missing").length;
+              const pct = Math.round((mapped / allStatuses.length) * 100);
+
+              return (
+                <div className="mt-4 bg-white border border-red-200 rounded-xl overflow-hidden">
+                  {/* Coverage header */}
+                  <div className="px-5 py-4 border-b border-red-100 bg-red-50/50">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-sm font-bold text-red-900">FINTRAC STR Field Mapping — Data Completeness</h3>
+                      <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full",
+                        pct >= 80 ? "bg-emerald-100 text-emerald-700" : pct >= 50 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+                      )}>{pct}% mapped</span>
+                    </div>
+                    <div className="w-full h-2 bg-red-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                    </div>
+                    <div className="flex gap-4 mt-2 text-[11px]">
+                      <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-emerald-600" /> {mapped} mapped</span>
+                      <span className="flex items-center gap-1"><AlertTriangle className="w-3 h-3 text-amber-500" /> {partial} partial</span>
+                      <span className="flex items-center gap-1"><XCircle className="w-3 h-3 text-red-500" /> {missing} missing</span>
+                    </div>
+                  </div>
+
+                  {/* Field table grouped by part */}
+                  <div className="max-h-[400px] overflow-y-auto">
+                    {grouped.map(g => (
+                      <div key={g.part}>
+                        <div className="px-5 py-2 bg-red-50 border-b border-red-100">
+                          <span className="text-xs font-bold text-red-800">{g.label}</span>
+                        </div>
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="border-b border-red-50 bg-red-25">
+                              <th className="px-5 py-1.5 text-left text-[10px] font-semibold text-red-600 uppercase w-[200px]">FINTRAC Field</th>
+                              <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-red-600 uppercase">Description</th>
+                              <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-red-600 uppercase w-[170px]">Source</th>
+                              <th className="px-3 py-1.5 text-center text-[10px] font-semibold text-red-600 uppercase w-[80px]">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-red-50">
+                            {g.fields.map(f => {
+                              const status = getFieldStatus(f, caseCustomer, caseTransactions, notes);
+                              return (
+                                <tr key={f.fintracField} className={cn("hover:bg-red-50/30", status === "missing" && f.required && "bg-red-50/40")}>
+                                  <td className="px-5 py-2 font-medium text-foreground">
+                                    {f.fintracField}
+                                    {f.required && <span className="text-red-500 ml-0.5">*</span>}
+                                  </td>
+                                  <td className="px-3 py-2 text-muted-foreground">{f.description}</td>
+                                  <td className="px-3 py-2 font-mono text-[10px]">
+                                    {f.sourceColumn
+                                      ? <span className="text-foreground">{f.sourceTable}.{f.sourceColumn}</span>
+                                      : <span className="text-red-500 italic">Manual entry required</span>
+                                    }
+                                  </td>
+                                  <td className="px-3 py-2 text-center">
+                                    {status === "mapped" && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 mx-auto" />}
+                                    {status === "partial" && <AlertTriangle className="w-3.5 h-3.5 text-amber-500 mx-auto" />}
+                                    {status === "missing" && <XCircle className="w-3.5 h-3.5 text-red-400 mx-auto" />}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Legend */}
+                  <div className="px-5 py-3 border-t border-red-100 bg-red-50/30 text-[10px] text-red-600 space-y-1">
+                    <p><strong>*</strong> = Required by FINTRAC for STR submission (PCMLTFR)</p>
+                    <p><strong>Manual entry required</strong> = Not stored in database; must be provided at filing time (signature, PEP status, etc.)</p>
+                    <p><strong>Starting Action / Completing Action</strong> fields not yet in the transaction schema — consider adding method_of_transaction, source_of_funds, conductor_name, third_party_indicator, disposition, beneficiary_name columns.</p>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 

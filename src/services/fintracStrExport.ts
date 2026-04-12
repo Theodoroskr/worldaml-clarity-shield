@@ -20,6 +20,8 @@ export interface FINTRACTransaction {
   counterparty_country?: string | null;
   created_at: string;
   description?: string | null;
+  monitoring_status?: string | null;
+  risk_flag?: boolean;
 }
 
 export interface FINTRACCase {
@@ -183,19 +185,19 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
   }
   y += 2;
 
-  // PART C: Transaction Details
+  // PART C: Transaction Details — Starting & Completing Actions
   y = checkPage(doc, y, 40);
-  y = header(doc, "Part C — Transaction Details", y);
+  y = header(doc, "Part C — Transaction Details (Starting & Completing Actions)", y);
   if (transactions.length === 0) {
     y = field(doc, "Transactions", "No linked transactions. See investigation notes for narrative.", y);
   } else {
-    // Table header
+    // Transaction table
     doc.setFontSize(7.5);
     doc.setFont("helvetica", "bold");
     doc.setFillColor(245, 245, 245);
     doc.rect(MARGIN, y, CONTENT_W, 7, "F");
-    const cols = [MARGIN + 2, MARGIN + 30, MARGIN + 55, MARGIN + 80, MARGIN + 110, MARGIN + 140];
-    const headers = ["Date", "Amount", "Currency", "Direction", "Counterparty", "Country"];
+    const cols = [MARGIN + 2, MARGIN + 22, MARGIN + 47, MARGIN + 67, MARGIN + 87, MARGIN + 112, MARGIN + 140];
+    const headers = ["Date", "Amount", "Currency", "Direction", "Counterparty", "Country", "Status"];
     headers.forEach((h, i) => doc.text(h, cols[i], y + 5));
     y += 9;
     doc.setFont("helvetica", "normal");
@@ -209,8 +211,9 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
       doc.text(amt, cols[1], y + 4);
       doc.text(tx.currency, cols[2], y + 4);
       doc.text(tx.direction, cols[3], y + 4);
-      doc.text((tx.counterparty ?? "—").slice(0, 18), cols[4], y + 4);
+      doc.text((tx.counterparty ?? "—").slice(0, 16), cols[4], y + 4);
       doc.text(tx.counterparty_country ?? "—", cols[5], y + 4);
+      doc.text(tx.monitoring_status ?? "—", cols[6], y + 4);
       doc.setDrawColor(230, 230, 230);
       doc.line(MARGIN, y + 6, MARGIN + CONTENT_W, y + 6);
       y += 8;
@@ -225,11 +228,63 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
     // Summary
     y = checkPage(doc, y, 15);
     const totalAmount = transactions.reduce((s, t) => s + t.amount, 0);
+    const flaggedCount = transactions.filter(t => t.risk_flag).length;
     y = fieldPair(doc,
       "Total Transactions", String(transactions.length),
       "Aggregate Value", `${totalAmount.toLocaleString("en-CA", { minimumFractionDigits: 2 })} ${transactions[0]?.currency ?? "CAD"}`,
       y
     );
+    y = fieldPair(doc,
+      "Risk-Flagged Transactions", `${flaggedCount} of ${transactions.length}`,
+      "Flagged Percentage", `${transactions.length > 0 ? Math.round((flaggedCount / transactions.length) * 100) : 0}%`,
+      y
+    );
+
+    // Starting Action section
+    y = checkPage(doc, y, 40);
+    y += 2;
+    doc.setFillColor(255, 240, 240);
+    doc.rect(MARGIN, y, CONTENT_W, 7, "F");
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(120, 20, 20);
+    doc.text("STARTING ACTION — CONDUCTOR & SOURCE (PCMLTFR s.132)", MARGIN + 3, y + 5);
+    doc.setTextColor(0, 0, 0);
+    y += 10;
+
+    const startingFields = [
+      { label: "Method of Transaction", value: "☐ In-person  ☐ Online  ☐ Telephone  ☐ Mail  ☐ Other: ___________" },
+      { label: "Source of Funds", value: "☐ Employment  ☐ Business revenue  ☐ Savings  ☐ Investment  ☐ Loan  ☐ Other: ___________" },
+      { label: "Conductor Name", value: customer ? customer.name : "__________________ (enter name of person who conducted the transaction)" },
+      { label: "Third Party Determination", value: "☐ Transaction conducted on own behalf  ☐ On behalf of third party: __________________" },
+    ];
+    for (const sf of startingFields) {
+      y = checkPage(doc, y, 12);
+      y = field(doc, sf.label, sf.value, y);
+    }
+
+    // Completing Action section
+    y = checkPage(doc, y, 40);
+    y += 2;
+    doc.setFillColor(255, 240, 240);
+    doc.rect(MARGIN, y, CONTENT_W, 7, "F");
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(120, 20, 20);
+    doc.text("COMPLETING ACTION — DISPOSITION & BENEFICIARY (PCMLTFR s.133)", MARGIN + 3, y + 5);
+    doc.setTextColor(0, 0, 0);
+    y += 10;
+
+    const completingFields = [
+      { label: "Disposition of Funds", value: "☐ Cash withdrawal  ☐ Wire transfer  ☐ Draft/cheque  ☐ Account credit  ☐ VC transfer  ☐ Other: ___________" },
+      { label: "Beneficiary Name", value: "__________________ (person or entity who benefited)" },
+      { label: "Beneficiary Account", value: "__________________ (account number or virtual currency address, if applicable)" },
+      { label: "Beneficiary Country", value: "__________________ " },
+    ];
+    for (const cf of completingFields) {
+      y = checkPage(doc, y, 12);
+      y = field(doc, cf.label, cf.value, y);
+    }
   }
   y += 2;
 
