@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye } from "lucide-react";
+import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -115,6 +115,215 @@ const emptyKYB: KYBForm = {
   annualTurnover: "", numberOfEmployees: "", sourceOfFunds: "",
   uboName: "", uboNationality: "", uboOwnership: "",
 };
+
+const KYC_STATUSES = ["pending", "in_review", "verified", "rejected"];
+const RISK_LEVELS = ["low", "medium", "high", "critical"];
+
+function CustomerDetailPanel({ customer, onClose, onUpdated }: {
+  customer: Customer;
+  onClose: () => void;
+  onUpdated: (c: Customer) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [edit, setEdit] = useState({
+    name: customer.name,
+    email: customer.email || "",
+    country: customer.country || "",
+    company_name: customer.company_name || "",
+    registration_number: customer.registration_number || "",
+    risk_level: customer.risk_level,
+    kyc_status: customer.kyc_status,
+  });
+
+  // Sync when customer changes
+  useEffect(() => {
+    setEdit({
+      name: customer.name,
+      email: customer.email || "",
+      country: customer.country || "",
+      company_name: customer.company_name || "",
+      registration_number: customer.registration_number || "",
+      risk_level: customer.risk_level,
+      kyc_status: customer.kyc_status,
+    });
+    setEditing(false);
+  }, [customer.id]);
+
+  const saveChanges = async () => {
+    if (!edit.name.trim()) { toast.error("Name is required"); return; }
+    setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSaving(false); return; }
+
+    const updates: Record<string, any> = {
+      name: edit.name.trim(),
+      email: edit.email.trim() || null,
+      country: edit.country || null,
+      risk_level: edit.risk_level,
+      kyc_status: edit.kyc_status,
+    };
+    if (customer.type === "business") {
+      updates.company_name = edit.company_name.trim() || null;
+      updates.registration_number = edit.registration_number.trim() || null;
+    }
+
+    const { error } = await supabase.from("suite_customers").update(updates).eq("id", customer.id);
+    if (error) { toast.error(error.message); setSaving(false); return; }
+
+    // Build change summary for audit
+    const changes: string[] = [];
+    if (edit.name !== customer.name) changes.push(`name → ${edit.name}`);
+    if (edit.risk_level !== customer.risk_level) changes.push(`risk ${customer.risk_level} → ${edit.risk_level}`);
+    if (edit.kyc_status !== customer.kyc_status) changes.push(`status ${customer.kyc_status} → ${edit.kyc_status}`);
+    if (edit.country !== (customer.country || "")) changes.push(`country → ${edit.country}`);
+
+    if (changes.length > 0) {
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: `Customer updated: ${customer.name}`,
+        entity_type: "customer",
+        entity_id: customer.id,
+        details: { changes },
+      });
+    }
+
+    toast.success("Customer updated");
+    onUpdated({ ...customer, ...updates });
+    setEditing(false);
+    setSaving(false);
+  };
+
+  return (
+    <div className="fixed inset-y-0 right-0 w-[420px] bg-card border-l border-border shadow-xl z-50 overflow-y-auto animate-fade-in">
+      {/* Header */}
+      <div className="sticky top-0 bg-card border-b border-border px-5 py-3 flex items-center justify-between z-10">
+        <h2 className="font-semibold text-foreground text-sm">Customer Details</h2>
+        <div className="flex items-center gap-1">
+          {editing ? (
+            <>
+              <Button variant="default" size="sm" className="h-7 text-xs" onClick={saveChanges} disabled={saving}>
+                <Save className="w-3.5 h-3.5 mr-1" />{saving ? "Saving…" : "Save"}
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => { setEditing(false); setEdit({ name: customer.name, email: customer.email || "", country: customer.country || "", company_name: customer.company_name || "", registration_number: customer.registration_number || "", risk_level: customer.risk_level, kyc_status: customer.kyc_status }); }}>
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </>
+          ) : (
+            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setEditing(true)}>
+              <Pencil className="w-3.5 h-3.5 mr-1" />Edit
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={onClose}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="p-5 space-y-5">
+        {/* Identity */}
+        <div>
+          <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Identity</h3>
+          <div className="space-y-3">
+            <div>
+              <span className="text-xs text-muted-foreground block mb-0.5">Name</span>
+              {editing ? <Input value={edit.name} onChange={e => setEdit(f => ({ ...f, name: e.target.value }))} className="h-8 text-sm" /> : <p className="text-sm font-medium">{customer.name}</p>}
+            </div>
+            <div>
+              <span className="text-xs text-muted-foreground block mb-0.5">Type</span>
+              <p className="text-sm capitalize">{customer.type}</p>
+            </div>
+            <div>
+              <span className="text-xs text-muted-foreground block mb-0.5">Email</span>
+              {editing ? <Input value={edit.email} onChange={e => setEdit(f => ({ ...f, email: e.target.value }))} className="h-8 text-sm" /> : <p className="text-sm">{customer.email || "—"}</p>}
+            </div>
+            <div>
+              <span className="text-xs text-muted-foreground block mb-0.5">Country</span>
+              {editing ? (
+                <Select value={edit.country} onValueChange={v => setEdit(f => ({ ...f, country: v }))}>
+                  <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select…" /></SelectTrigger>
+                  <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+              ) : <p className="text-sm font-mono">{customer.country || "—"}</p>}
+            </div>
+            {customer.date_of_birth && (
+              <div><span className="text-xs text-muted-foreground block mb-0.5">Date of Birth</span><p className="text-sm">{customer.date_of_birth}</p></div>
+            )}
+          </div>
+        </div>
+
+        {/* Business fields */}
+        {customer.type === "business" && (
+          <div>
+            <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Business Details</h3>
+            <div className="space-y-3">
+              <div>
+                <span className="text-xs text-muted-foreground block mb-0.5">Company Name</span>
+                {editing ? <Input value={edit.company_name} onChange={e => setEdit(f => ({ ...f, company_name: e.target.value }))} className="h-8 text-sm" /> : <p className="text-sm">{customer.company_name || "—"}</p>}
+              </div>
+              <div>
+                <span className="text-xs text-muted-foreground block mb-0.5">Registration Number</span>
+                {editing ? <Input value={edit.registration_number} onChange={e => setEdit(f => ({ ...f, registration_number: e.target.value }))} className="h-8 text-sm" /> : <p className="text-sm font-mono">{customer.registration_number || "—"}</p>}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Compliance Status */}
+        <div>
+          <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Compliance Status</h3>
+          <div className="space-y-3">
+            <div>
+              <span className="text-xs text-muted-foreground block mb-0.5">KYC/KYB Status</span>
+              {editing ? (
+                <Select value={edit.kyc_status} onValueChange={v => setEdit(f => ({ ...f, kyc_status: v }))}>
+                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {KYC_STATUSES.map(s => <SelectItem key={s} value={s}>{kycStatusLabel[s] || s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              ) : <Badge className={cn("text-xs", statusColor(customer.kyc_status))}>{kycStatusLabel[customer.kyc_status] || customer.kyc_status}</Badge>}
+            </div>
+            <div>
+              <span className="text-xs text-muted-foreground block mb-0.5">Risk Level</span>
+              {editing ? (
+                <Select value={edit.risk_level} onValueChange={v => setEdit(f => ({ ...f, risk_level: v }))}>
+                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {RISK_LEVELS.map(r => <SelectItem key={r} value={r} className="capitalize">{r}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              ) : <Badge className={cn("text-xs capitalize", riskBadge(customer.risk_level))}>{customer.risk_level}</Badge>}
+            </div>
+          </div>
+        </div>
+
+        {/* Metadata */}
+        <div>
+          <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Record Info</h3>
+          <div className="text-xs text-muted-foreground space-y-1">
+            <p>Created: {new Date(customer.created_at).toLocaleString()}</p>
+            <p className="font-mono text-[10px] break-all">ID: {customer.id}</p>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="pt-2 border-t border-border space-y-2">
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={() => {
+              sessionStorage.setItem("screenCustomerId", customer.id);
+              sessionStorage.setItem("screenCustomerName", customer.name);
+              window.location.href = "/suite/screening";
+            }}>Screen Customer</Button>
+            <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={() => {
+              window.location.href = "/suite/cases";
+            }}>Open Case</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function FormField({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
@@ -625,36 +834,14 @@ export default function SuiteOnboarding() {
       {step === "kyb-form" && renderKYBForm()}
 
       {/* Customer detail panel */}
-      {selectedCustomer && (
-        <div className="fixed inset-y-0 right-0 w-96 bg-card border-l border-border shadow-xl z-50 overflow-y-auto p-6 animate-fade-in">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-foreground">Customer Details</h2>
-            <Button variant="ghost" size="sm" onClick={() => setSelectedCustomer(null)}>✕</Button>
-          </div>
-          <div className="space-y-3 text-sm">
-            <div><span className="text-xs text-muted-foreground">Name</span><p className="font-medium">{selectedCustomer.name}</p></div>
-            <div><span className="text-xs text-muted-foreground">Type</span><p className="capitalize">{selectedCustomer.type}</p></div>
-            <div><span className="text-xs text-muted-foreground">Email</span><p>{selectedCustomer.email || "—"}</p></div>
-            <div><span className="text-xs text-muted-foreground">Country</span><p className="font-mono">{selectedCustomer.country || "—"}</p></div>
-            {selectedCustomer.company_name && <div><span className="text-xs text-muted-foreground">Company</span><p>{selectedCustomer.company_name}</p></div>}
-            {selectedCustomer.registration_number && <div><span className="text-xs text-muted-foreground">Reg. Number</span><p className="font-mono">{selectedCustomer.registration_number}</p></div>}
-            {selectedCustomer.date_of_birth && <div><span className="text-xs text-muted-foreground">Date of Birth</span><p>{selectedCustomer.date_of_birth}</p></div>}
-            <div><span className="text-xs text-muted-foreground">Risk Level</span><p><Badge className={cn("text-xs capitalize", riskBadge(selectedCustomer.risk_level))}>{selectedCustomer.risk_level}</Badge></p></div>
-            <div><span className="text-xs text-muted-foreground">KYC Status</span><p><Badge className={cn("text-xs", statusColor(selectedCustomer.kyc_status))}>{kycStatusLabel[selectedCustomer.kyc_status] || selectedCustomer.kyc_status}</Badge></p></div>
-            <div><span className="text-xs text-muted-foreground">Created</span><p className="font-mono text-xs">{new Date(selectedCustomer.created_at).toLocaleString()}</p></div>
-          </div>
-          <div className="flex gap-2 mt-6">
-            <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={() => {
-              sessionStorage.setItem("screenCustomerId", selectedCustomer.id);
-              sessionStorage.setItem("screenCustomerName", selectedCustomer.name);
-              window.location.href = "/suite/screening";
-            }}>Screen</Button>
-            <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={() => {
-              window.location.href = "/suite/cases";
-            }}>Open Case</Button>
-          </div>
-        </div>
-      )}
+      {selectedCustomer && <CustomerDetailPanel
+        customer={selectedCustomer}
+        onClose={() => setSelectedCustomer(null)}
+        onUpdated={(updated) => {
+          setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
+          setSelectedCustomer(updated);
+        }}
+      />}
 
       {/* Stats & table (only when not in form mode) */}
       {!showForm && step === "select" && (
