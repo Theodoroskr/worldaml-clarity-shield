@@ -1,0 +1,2 @@
+ALTER TABLE public.suite_cases DROP CONSTRAINT suite_cases_status_check;
+ALTER TABLE public.suite_cases ADD CONSTRAINT suite_cases_status_check CHECK (status = ANY (ARRAY['open'::text, 'investigating'::text, 'sar_filed'::text, 'str_filed'::text, 'closed'::text]));
