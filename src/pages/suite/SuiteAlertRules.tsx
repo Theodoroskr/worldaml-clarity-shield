@@ -264,6 +264,10 @@ export default function SuiteAlertRules() {
             {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
             {aiLoading ? "Analyzing…" : "AI Suggest Rules"}
           </button>
+          <button onClick={() => { setShowFinCEN(!showFinCEN); setShowAiPanel(false); setShowAnalysis(false); }} className={cn("flex items-center justify-center gap-1.5 text-xs px-2.5 py-2 rounded-lg border transition-colors font-medium w-full", showFinCEN ? "border-blue-500 bg-blue-100 text-blue-800" : "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100")}>
+            <Scale className="w-3.5 h-3.5" />
+            FinCEN / BSA Mapping
+          </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
           {rules.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">No rules yet. Click New to create one.</p>}
