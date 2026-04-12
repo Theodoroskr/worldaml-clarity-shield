@@ -713,6 +713,23 @@ export default function SuiteOnboarding() {
     if (kybForm.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(kybForm.contactEmail)) {
       toast.error("Invalid contact email"); return;
     }
+
+    // Validate UBO ownership totals
+    const filledUbos = kybForm.ubos.filter(u => u.name.trim());
+    const totalOwnership = filledUbos.reduce((sum, u) => sum + (parseFloat(u.ownershipPct) || 0), 0);
+    if (totalOwnership > 100) {
+      toast.error(`Total UBO ownership is ${totalOwnership}% — cannot exceed 100%`); return;
+    }
+    for (const u of filledUbos) {
+      const pct = parseFloat(u.ownershipPct);
+      if (isNaN(pct) || pct <= 0 || pct > 100) {
+        toast.error(`UBO "${u.name}" has invalid ownership percentage`); return;
+      }
+    }
+
+    // Validate directors
+    const filledDirectors = kybForm.directors.filter(d => d.name.trim());
+
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
@@ -730,15 +747,16 @@ export default function SuiteOnboarding() {
 
     if (error) { toast.error(error.message); setSaving(false); return; }
 
-    // Add UBO if provided
-    if (kybForm.uboName.trim() && customer) {
-      await supabase.from("suite_ubo").insert({
+    // Add UBOs
+    if (filledUbos.length > 0 && customer) {
+      const uboInserts = filledUbos.map(u => ({
         user_id: user.id,
         customer_id: customer.id,
-        name: kybForm.uboName.trim(),
-        nationality: kybForm.uboNationality || null,
-        ownership_pct: parseFloat(kybForm.uboOwnership) || 0,
-      });
+        name: u.name.trim(),
+        nationality: u.nationality || null,
+        ownership_pct: parseFloat(u.ownershipPct) || 0,
+      }));
+      await supabase.from("suite_ubo").insert(uboInserts);
     }
 
     // Auto-provision regulatory baseline rules
@@ -758,7 +776,8 @@ export default function SuiteOnboarding() {
         industry: kybForm.industry,
         registration_number: kybForm.registrationNumber,
         annual_turnover: kybForm.annualTurnover,
-        ubo_provided: !!kybForm.uboName.trim(),
+        directors: filledDirectors.map(d => ({ name: d.name, role: d.role, pep: d.pep })),
+        ubos: filledUbos.map(u => ({ name: u.name, ownership_pct: u.ownershipPct, pep: u.pep })),
         ...(Object.keys(customFieldValues).length > 0 && { custom_fields: customFieldValues }),
       },
     });
