@@ -153,8 +153,13 @@ export default function SuiteCases() {
   const [caseCustomer, setCaseCustomer] = useState<any>(null);
   const [caseTransactions, setCaseTransactions] = useState<any[]>([]);
   const [manualFields, setManualFields] = useState<FINTRACManualFields>({ ...DEFAULT_MANUAL_FIELDS });
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const mf = manualFields;
-  const setMF = (patch: Partial<FINTRACManualFields>) => setManualFields(prev => ({ ...prev, ...patch }));
+  const setMF = (patch: Partial<FINTRACManualFields>) => {
+    setManualFields(prev => ({ ...prev, ...patch }));
+    // Clear validation errors for the changed fields
+    if (validationErrors.length > 0) setValidationErrors([]);
+  };
 
   const fetchCases = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -280,8 +285,48 @@ export default function SuiteCases() {
     toast.success("SAR PDF downloaded");
   };
 
+  const validateFintracFields = (): string[] => {
+    const errors: string[] = [];
+    if (!mf.methodOfTransaction) errors.push("methodOfTransaction");
+    if (!mf.sourceOfFunds) errors.push("sourceOfFunds");
+    if (!mf.conductorName && !caseCustomer?.name) errors.push("conductorName");
+    if (mf.thirdPartyIndicator === "third_party" && !mf.thirdPartyName) errors.push("thirdPartyName");
+    if (!mf.dispositionOfFunds) errors.push("dispositionOfFunds");
+    if (!mf.beneficiaryName) errors.push("beneficiaryName");
+    if (!mf.suspicionType) errors.push("suspicionType");
+    if (mf.selectedIndicators.length === 0) errors.push("selectedIndicators");
+    if (!mf.camloName) errors.push("camloName");
+    if (!mf.actionTaken) errors.push("actionTaken");
+    if (notes.length === 0) errors.push("notes");
+    return errors;
+  };
+
   const handleExportFINTRAC = async () => {
     if (!selectedCase) return;
+
+    // Validate mandatory fields
+    const errors = validateFintracFields();
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      const labels: Record<string, string> = {
+        methodOfTransaction: "Method of Transaction",
+        sourceOfFunds: "Source of Funds",
+        conductorName: "Conductor Name",
+        thirdPartyName: "Third Party Name",
+        dispositionOfFunds: "Disposition of Funds",
+        beneficiaryName: "Beneficiary Name",
+        suspicionType: "Suspicion Type",
+        selectedIndicators: "At least 1 ML/TF Indicator",
+        camloName: "CAMLO Name",
+        actionTaken: "Action Taken",
+        notes: "Investigation Narrative (add case notes)",
+      };
+      const missing = errors.map(e => labels[e] || e).join(", ");
+      toast.error(`Missing mandatory fields: ${missing}`, { duration: 6000 });
+      return;
+    }
+    setValidationErrors([]);
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { toast.error("Please log in to export"); return; }
@@ -423,6 +468,17 @@ export default function SuiteCases() {
               ))}
             </div>
 
+            {/* Validation Summary */}
+            {validationErrors.length > 0 && (
+              <div className="bg-red-50 border-2 border-red-400 rounded-xl p-3 flex items-start gap-2 animate-fade-in">
+                <XCircle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-red-800">Missing mandatory fields — please complete before exporting</p>
+                  <p className="text-[10px] text-red-600 mt-0.5">Fields highlighted in red below must be filled to comply with PCMLTFA/PCMLTFR requirements.</p>
+                </div>
+              </div>
+            )}
+
             {/* ── Manual Entry Forms ── */}
             <div className="space-y-4 mt-4">
               {/* Section 1: Starting Action */}
@@ -435,7 +491,8 @@ export default function SuiteCases() {
                   <div>
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Method of Transaction *</label>
                     <select value={mf.methodOfTransaction} onChange={e => setMF({ methodOfTransaction: e.target.value })}
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("methodOfTransaction") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
                       <option value="">Select method…</option>
                       <option value="In-person">In-person</option>
                       <option value="Online / Electronic">Online / Electronic</option>
@@ -449,7 +506,8 @@ export default function SuiteCases() {
                   <div>
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Source of Funds *</label>
                     <select value={mf.sourceOfFunds} onChange={e => setMF({ sourceOfFunds: e.target.value })}
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("sourceOfFunds") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
                       <option value="">Select source…</option>
                       <option value="Employment / Salary">Employment / Salary</option>
                       <option value="Business revenue">Business revenue</option>
@@ -466,7 +524,8 @@ export default function SuiteCases() {
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Conductor Name *</label>
                     <input value={mf.conductorName} onChange={e => setMF({ conductorName: e.target.value })}
                       placeholder={caseCustomer?.name || "Person who conducted the transaction"}
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("conductorName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
                     <p className="text-[9px] text-red-500 mt-0.5">The individual who physically or electronically initiated the transaction</p>
                   </div>
                   <div>
@@ -482,7 +541,8 @@ export default function SuiteCases() {
                       <label className="text-[10px] font-semibold text-red-800 mb-1 block">Third Party Name *</label>
                       <input value={mf.thirdPartyName} onChange={e => setMF({ thirdPartyName: e.target.value })}
                         placeholder="Full legal name of the third party"
-                        className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                        className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                          validationErrors.includes("thirdPartyName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
                     </div>
                   )}
                 </div>
@@ -498,7 +558,8 @@ export default function SuiteCases() {
                   <div>
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Disposition of Funds *</label>
                     <select value={mf.dispositionOfFunds} onChange={e => setMF({ dispositionOfFunds: e.target.value })}
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("dispositionOfFunds") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
                       <option value="">Select disposition…</option>
                       <option value="Cash withdrawal">Cash withdrawal</option>
                       <option value="Wire transfer (domestic)">Wire transfer (domestic)</option>
@@ -515,7 +576,8 @@ export default function SuiteCases() {
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Beneficiary Name *</label>
                     <input value={mf.beneficiaryName} onChange={e => setMF({ beneficiaryName: e.target.value })}
                       placeholder="Person or entity who benefited"
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("beneficiaryName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
                   </div>
                   <div>
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Beneficiary Account</label>
@@ -561,7 +623,10 @@ export default function SuiteCases() {
                     <p className="text-[9px] text-red-500 mt-0.5">Politically Exposed Person per PCMLTFR s.2</p>
                   </div>
                 </div>
-                <label className="text-[10px] font-semibold text-red-800 mb-2 block">ML/TF Indicators (select all that apply)</label>
+                <label className={cn("text-[10px] font-semibold mb-2 block",
+                  validationErrors.includes("selectedIndicators") ? "text-red-600" : "text-red-800")}>
+                  ML/TF Indicators (select at least 1) {validationErrors.includes("selectedIndicators") && <span className="text-red-500 font-bold">⚠ Required</span>}
+                </label>
                 <div className="space-y-1.5">
                   {[
                     "Transaction inconsistent with client's known business or occupation",
@@ -599,13 +664,15 @@ export default function SuiteCases() {
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">CAMLO / Signing Officer Name *</label>
                     <input value={mf.camloName} onChange={e => setMF({ camloName: e.target.value })}
                       placeholder="Full name of the signing officer"
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("camloName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
                     <p className="text-[9px] text-red-500 mt-0.5">Chief Anti-Money Laundering Officer or authorised delegate</p>
                   </div>
                   <div>
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Action Taken *</label>
                     <select value={mf.actionTaken} onChange={e => setMF({ actionTaken: e.target.value })}
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("actionTaken") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
                       <option value="">Select action…</option>
                       <option value="Enhanced monitoring applied">Enhanced monitoring applied</option>
                       <option value="Account restricted / frozen">Account restricted / frozen</option>
@@ -621,7 +688,7 @@ export default function SuiteCases() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <button onClick={handleExportFINTRAC}
                 className="flex items-center gap-1.5 text-xs px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
                 <Download className="w-3.5 h-3.5" /> Export {fintracStrType.toUpperCase()} PDF
@@ -630,6 +697,11 @@ export default function SuiteCases() {
                 className="flex items-center gap-1.5 text-xs px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-100 font-medium">
                 <Info className="w-3.5 h-3.5" /> {showFieldMapping ? "Hide" : "Show"} Field Mapping
               </button>
+              {validationErrors.includes("notes") && (
+                <span className="text-[10px] text-red-600 font-semibold flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> Add investigation notes (Part E) before exporting
+                </span>
+              )}
               <span className="text-[10px] text-red-500">PCMLTFA s.7 · PCMLTFR Part 1</span>
             </div>
 
