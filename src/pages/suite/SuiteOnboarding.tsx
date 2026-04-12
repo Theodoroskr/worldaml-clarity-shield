@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X } from "lucide-react";
+import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Upload, FileText, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -353,6 +353,29 @@ export default function SuiteOnboarding() {
   const [kybForm, setKybForm] = useState<KYBForm>(emptyKYB);
   const [saving, setSaving] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [kycFiles, setKycFiles] = useState<File[]>([]);
+  const [kybFiles, setKybFiles] = useState<File[]>([]);
+
+  const handleFileSelect = (setter: React.Dispatch<React.SetStateAction<File[]>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const valid = files.filter(f => f.size <= 10 * 1024 * 1024); // 10MB max
+    if (valid.length < files.length) toast.error("Some files exceeded 10MB limit and were skipped");
+    setter(prev => [...prev, ...valid]);
+    e.target.value = "";
+  };
+
+  const removeFile = (setter: React.Dispatch<React.SetStateAction<File[]>>, index: number) => {
+    setter(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadDocuments = async (userId: string, customerId: string, files: File[]) => {
+    for (const file of files) {
+      const ext = file.name.split(".").pop() || "bin";
+      const path = `${userId}/${customerId}/${Date.now()}_${file.name}`;
+      const { error } = await supabase.storage.from("customer-documents").upload(path, file, { contentType: file.type });
+      if (error) console.error("Upload error:", error.message);
+    }
+  };
 
   const fetchCustomers = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -366,8 +389,8 @@ export default function SuiteOnboarding() {
 
   const startOnboarding = (type: "kyc-form" | "kyb-form") => {
     setStep(type);
-    if (type === "kyc-form") setKycForm(emptyKYC);
-    else setKybForm(emptyKYB);
+    if (type === "kyc-form") { setKycForm(emptyKYC); setKycFiles([]); }
+    else { setKybForm(emptyKYB); setKybFiles([]); }
   };
 
   const cancelOnboarding = () => {
@@ -387,16 +410,21 @@ export default function SuiteOnboarding() {
     if (!user) { setSaving(false); return; }
 
     const fullName = `${kycForm.firstName.trim()} ${kycForm.lastName.trim()}`;
-    const { error } = await supabase.from("suite_customers").insert({
+    const { data: customer, error } = await supabase.from("suite_customers").insert({
       user_id: user.id,
       name: fullName,
       type: "individual",
       email: kycForm.email.trim() || null,
       country: kycForm.country || null,
       date_of_birth: kycForm.dateOfBirth || null,
-    });
+    }).select("id").single();
 
     if (error) { toast.error(error.message); setSaving(false); return; }
+
+    // Upload documents
+    if (kycFiles.length > 0 && customer) {
+      await uploadDocuments(user.id, customer.id, kycFiles);
+    }
 
     await supabase.from("suite_audit_log").insert({
       user_id: user.id,
@@ -440,6 +468,11 @@ export default function SuiteOnboarding() {
     }).select("id").single();
 
     if (error) { toast.error(error.message); setSaving(false); return; }
+
+    // Upload documents
+    if (kybFiles.length > 0 && customer) {
+      await uploadDocuments(user.id, customer.id, kybFiles);
+    }
 
     // Add UBO if provided
     if (kybForm.uboName.trim() && customer) {
@@ -597,6 +630,31 @@ export default function SuiteOnboarding() {
             </Select>
           </FormField>
         </div>
+      </div>
+
+      {/* Section: Document Upload */}
+      <div className="mb-6">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Identity Documents</h3>
+        <p className="text-xs text-muted-foreground mb-3">Upload a copy of passport, national ID, or driving licence. Max 10MB per file.</p>
+        <label className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/40 transition-colors">
+          <Upload className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Click to upload document</span>
+          <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple onChange={handleFileSelect(setKycFiles)} />
+        </label>
+        {kycFiles.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {kycFiles.map((f, i) => (
+              <div key={i} className="flex items-center gap-2 bg-muted/50 rounded-md px-3 py-2 text-sm">
+                <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="truncate flex-1">{f.name}</span>
+                <span className="text-xs text-muted-foreground shrink-0">{(f.size / 1024).toFixed(0)} KB</span>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => removeFile(setKycFiles, i)}>
+                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-2 pt-2 border-t border-border">
@@ -775,6 +833,31 @@ export default function SuiteOnboarding() {
             <FormInput value={kybForm.uboOwnership} onChange={v => setKybForm(f => ({ ...f, uboOwnership: v }))} placeholder="51" type="number" />
           </FormField>
         </div>
+      </div>
+
+      {/* Section: Document Upload */}
+      <div className="mb-6">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Corporate Documents</h3>
+        <p className="text-xs text-muted-foreground mb-3">Upload Certificate of Incorporation, Articles of Association, or proof of address. Max 10MB per file.</p>
+        <label className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/40 transition-colors">
+          <Upload className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Click to upload document</span>
+          <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple onChange={handleFileSelect(setKybFiles)} />
+        </label>
+        {kybFiles.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {kybFiles.map((f, i) => (
+              <div key={i} className="flex items-center gap-2 bg-muted/50 rounded-md px-3 py-2 text-sm">
+                <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="truncate flex-1">{f.name}</span>
+                <span className="text-xs text-muted-foreground shrink-0">{(f.size / 1024).toFixed(0)} KB</span>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => removeFile(setKybFiles, i)}>
+                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-2 pt-2 border-t border-border">
