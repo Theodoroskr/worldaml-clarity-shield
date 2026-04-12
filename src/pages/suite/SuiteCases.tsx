@@ -406,6 +406,7 @@ export default function SuiteCases() {
   if (selectedCase) {
     return (
       <>
+      <div className="p-6 space-y-5 h-full overflow-y-auto animate-fade-in">
         <div className="flex items-center gap-4">
           <button onClick={() => setSelectedCase(null)} className="text-xs text-muted-foreground hover:text-foreground">← Back</button>
           <div className="flex-1">
@@ -875,6 +876,7 @@ export default function SuiteCases() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </>
     );
   }
 
