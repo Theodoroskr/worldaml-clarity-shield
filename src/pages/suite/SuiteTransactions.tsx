@@ -28,7 +28,10 @@ interface AlertRow {
   created_at: string;
   rule_id: string | null;
   description: string | null;
+  rule_name?: string;
 }
+
+interface RuleInfo { id: string; name: string; severity: string; }
 
 interface Customer { id: string; name: string; risk_level?: string; country?: string; }
 
