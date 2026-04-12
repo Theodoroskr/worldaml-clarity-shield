@@ -1,9 +1,85 @@
-import { Settings, Users, Shield, Bell } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Settings, Users, Shield, Bell, Scale } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
+
+const REGULATOR_OPTIONS = [
+  { value: "fincen", label: "FinCEN", country: "United States" },
+  { value: "fintrac", label: "FINTRAC", country: "Canada" },
+  { value: "fca", label: "FCA", country: "United Kingdom" },
+  { value: "cysec", label: "CySEC", country: "Cyprus" },
+  { value: "icpac", label: "ICPAC", country: "Cyprus" },
+  { value: "cbc", label: "Central Bank of Cyprus", country: "Cyprus" },
+  { value: "dfsa", label: "DFSA", country: "UAE (DIFC)" },
+  { value: "cbuae", label: "Central Bank of UAE", country: "UAE" },
+  { value: "bog", label: "Bank of Greece", country: "Greece" },
+  { value: "amld", label: "EU AMLD", country: "European Union" },
+];
 
 export default function SuiteSettings() {
+  const { user } = useAuth();
+  const [regulator, setRegulator] = useState<string>("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("regulator")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        setRegulator(data?.regulator ?? "");
+      });
+  }, [user]);
+
+  const handleRegulatorChange = async (value: string) => {
+    if (!user) return;
+    setRegulator(value);
+    setSaving(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ regulator: value || null })
+      .eq("user_id", user.id);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Error", description: "Failed to update regulator.", variant: "destructive" });
+    } else {
+      toast({ title: "Regulator updated", description: `Set to ${REGULATOR_OPTIONS.find(r => r.value === value)?.label || "None"}.` });
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 h-full overflow-y-auto">
       <div><h1 className="text-xl font-bold text-foreground">Settings</h1><p className="text-xs text-muted-foreground mt-0.5">System configuration and team management</p></div>
+
+      {/* Regulator selector — full width at top */}
+      <div className="bg-card rounded-xl border border-border p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center"><Scale className="w-4 h-4 text-primary" /></div>
+          <div>
+            <h3 className="font-semibold text-foreground">Regulatory Jurisdiction</h3>
+            <p className="text-xs text-muted-foreground">Select the regulator your entity is supervised by. This populates the Regulatory Hub, compliance calendar, alert rules, and available report types.</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <select
+            value={regulator}
+            onChange={(e) => handleRegulatorChange(e.target.value)}
+            disabled={saving}
+            className="flex-1 max-w-md h-9 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="">— Select regulator —</option>
+            {REGULATOR_OPTIONS.map((r) => (
+              <option key={r.value} value={r.value}>
+                {r.label} — {r.country}
+              </option>
+            ))}
+          </select>
+          {saving && <span className="text-xs text-muted-foreground">Saving…</span>}
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-5">
         <div className="bg-card rounded-xl border border-border p-5">
