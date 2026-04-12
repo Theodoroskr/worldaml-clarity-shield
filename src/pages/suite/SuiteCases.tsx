@@ -343,17 +343,8 @@ export default function SuiteCases() {
         customer = data;
       }
 
-      let transactions: any[] = [];
-      if (selectedCase.customer_id) {
-        const { data } = await supabase
-          .from("suite_transactions")
-          .select("*")
-          .eq("customer_id", selectedCase.customer_id)
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(50);
-        transactions = data || [];
-      }
+      // Use only selected transactions
+      const transactions = caseTransactions.filter(t => selectedTxIds.has(t.id));
 
       const result = await exportFINTRACStr({
         caseItem: selectedCase,
@@ -369,12 +360,30 @@ export default function SuiteCases() {
 
       setPdfPreview(result);
 
+      // Persist STR report to database
+      const { data: strReport } = await supabase.from("str_reports").insert({
+        user_id: user.id,
+        case_id: selectedCase.id,
+        customer_id: selectedCase.customer_id,
+        filing_status: "draft",
+        camlo_name: mf.camloName,
+        action_taken: mf.actionTaken,
+        grounds_for_suspicion: mf.suspicionType,
+      }).select("id").single();
+
+      // Link selected transactions to the STR report
+      if (strReport && transactions.length > 0) {
+        await supabase.from("str_report_transactions").insert(
+          transactions.map(tx => ({ report_id: strReport.id, transaction_id: tx.id }))
+        );
+      }
+
       await supabase.from("suite_audit_log").insert({
         user_id: user.id,
         action: `FINTRAC ${fintracStrType.toUpperCase()} exported: ${selectedCase.title}`,
         entity_type: "case",
         entity_id: selectedCase.id,
-        details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada" },
+        details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada", str_report_id: strReport?.id, transactions_count: transactions.length },
       });
     } catch (err: any) {
       console.error("FINTRAC export error:", err);
