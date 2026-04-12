@@ -614,6 +614,9 @@ export type Database = {
           id: string
           phone: string | null
           status: string
+          subscription_tier: string
+          suite_access_granted_at: string | null
+          suite_access_granted_by: string | null
           updated_at: string
           user_id: string
         }
@@ -625,6 +628,9 @@ export type Database = {
           id?: string
           phone?: string | null
           status?: string
+          subscription_tier?: string
+          suite_access_granted_at?: string | null
+          suite_access_granted_by?: string | null
           updated_at?: string
           user_id: string
         }
@@ -636,6 +642,9 @@ export type Database = {
           id?: string
           phone?: string | null
           status?: string
+          subscription_tier?: string
+          suite_access_granted_at?: string | null
+          suite_access_granted_by?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -760,9 +769,11 @@ export type Database = {
           description: string | null
           id: string
           resolved_at: string | null
+          rule_id: string | null
           severity: string
           status: string
           title: string
+          transaction_id: string | null
           updated_at: string
           user_id: string
         }
@@ -774,9 +785,11 @@ export type Database = {
           description?: string | null
           id?: string
           resolved_at?: string | null
+          rule_id?: string | null
           severity?: string
           status?: string
           title: string
+          transaction_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -788,9 +801,11 @@ export type Database = {
           description?: string | null
           id?: string
           resolved_at?: string | null
+          rule_id?: string | null
           severity?: string
           status?: string
           title?: string
+          transaction_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1073,6 +1088,7 @@ export type Database = {
           description: string | null
           direction: string
           id: string
+          monitoring_status: string
           risk_flag: boolean
           user_id: string
         }
@@ -1086,6 +1102,7 @@ export type Database = {
           description?: string | null
           direction?: string
           id?: string
+          monitoring_status?: string
           risk_flag?: boolean
           user_id: string
         }
@@ -1099,6 +1116,7 @@ export type Database = {
           description?: string | null
           direction?: string
           id?: string
+          monitoring_status?: string
           risk_flag?: boolean
           user_id?: string
         }
@@ -1211,8 +1229,38 @@ export type Database = {
           },
         ]
       }
+      suite_access: {
+        Row: {
+          email: string | null
+          has_suite_access: boolean | null
+          subscription_tier: string | null
+          user_id: string | null
+        }
+        Insert: {
+          email?: string | null
+          has_suite_access?: never
+          subscription_tier?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          email?: string | null
+          has_suite_access?: never
+          subscription_tier?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      admin_grant_suite_access: {
+        Args: { target_email: string }
+        Returns: undefined
+      }
+      admin_revoke_suite_access: {
+        Args: { target_email: string }
+        Returns: undefined
+      }
+      current_user_has_suite_access: { Args: never; Returns: boolean }
       get_certificate_by_token: { Args: { _token: string }; Returns: Json }
       has_role: {
         Args: {
