@@ -39,6 +39,44 @@ export interface FINTRACNote {
   created_at: string;
 }
 
+export interface FINTRACManualFields {
+  // Starting Action
+  methodOfTransaction: string;
+  sourceOfFunds: string;
+  conductorName: string;
+  thirdPartyIndicator: string;
+  thirdPartyName: string;
+  // Completing Action
+  dispositionOfFunds: string;
+  beneficiaryName: string;
+  beneficiaryAccount: string;
+  beneficiaryCountry: string;
+  // Part D — Suspicion
+  suspicionType: string;
+  isPEP: string;
+  selectedIndicators: number[];
+  // Part F — Declaration
+  camloName: string;
+  actionTaken: string;
+}
+
+export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
+  methodOfTransaction: "",
+  sourceOfFunds: "",
+  conductorName: "",
+  thirdPartyIndicator: "own_behalf",
+  thirdPartyName: "",
+  dispositionOfFunds: "",
+  beneficiaryName: "",
+  beneficiaryAccount: "",
+  beneficiaryCountry: "",
+  suspicionType: "ml",
+  isPEP: "no",
+  selectedIndicators: [],
+  camloName: "",
+  actionTaken: "",
+};
+
 export interface FINTRACSTRExportOptions {
   caseItem: FINTRACCase;
   notes: FINTRACNote[];
@@ -48,6 +86,7 @@ export interface FINTRACSTRExportOptions {
   reportingEntity: string;
   reportingEntityRef?: string;
   strType: "str" | "lctr" | "eftr";
+  manualFields?: FINTRACManualFields;
 }
 
 const MARGIN = 20;
