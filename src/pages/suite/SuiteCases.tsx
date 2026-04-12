@@ -231,6 +231,10 @@ export default function SuiteCases() {
       ]);
       setCaseCustomer(custRes.data);
       setCaseTransactions(txRes.data || []);
+      // Auto-populate PEP status from customer record
+      if (custRes.data?.pep_status && custRes.data.pep_status !== "no") {
+        setManualFields(prev => ({ ...prev, isPEP: custRes.data.pep_status }));
+      }
     }
   };
 
