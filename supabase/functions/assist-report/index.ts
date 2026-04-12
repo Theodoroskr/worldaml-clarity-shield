@@ -83,7 +83,11 @@ ${JSON.stringify(currentContent || {}, null, 2)}
 
     const systemPrompt = `You are a senior AML/CFT compliance consultant helping prepare a ${reportTitle} for submission to ${regulator.toUpperCase()}.
 
-Your task is to draft the qualitative sections of this periodic report based on the database statistics provided. Write in a professional, regulatory-appropriate tone suitable for submission to the supervisory authority.
+Your task is to:
+1. Draft the qualitative sections of this periodic report based on the database statistics provided.
+2. Identify compliance gaps and generate actionable remediation tasks to avoid regulatory penalties.
+
+Write in a professional, regulatory-appropriate tone suitable for submission to the supervisory authority.
 
 RULES:
 1. Use the actual statistics from the database to support your narrative.
@@ -94,6 +98,7 @@ RULES:
 6. Keep each field concise but thorough (2-4 sentences for short fields, 1-2 paragraphs for long fields).
 7. For risk assessment: identify real patterns from the data (e.g., high-risk ratio, match rates).
 8. For recommendations: base them on actual gaps visible in the data.
+9. For compliance tasks: analyze the data for gaps that could trigger regulatory penalties (e.g., no independent audit, low screening coverage, unresolved alerts, missing training records, high-risk customers without EDD). Generate 3-8 prioritized tasks.
 
 ${statsContext}`;
 
