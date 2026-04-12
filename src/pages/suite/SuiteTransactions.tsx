@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from "react";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, TrendingUp, Globe, RefreshCw, Plus, Upload, FileText, Sparkles, X, Check, Loader2, ChevronDown, ChevronRight, Shield, Clock, Eye, Filter } from "lucide-react";
+import { AlertTriangle, TrendingUp, Globe, RefreshCw, Plus, Upload, FileText, Sparkles, X, Check, Loader2, ChevronDown, ChevronRight, Shield, Clock, Eye, Filter, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -91,6 +91,7 @@ export default function SuiteTransactions() {
   const [rulesMap, setRulesMap] = useState<Record<string, RuleInfo>>({});
   const [ruleFilter, setRuleFilter] = useState<string>("all");
   const [ruleTxMap, setRuleTxMap] = useState<Record<string, Set<string>>>({});
+  const [showRulesPanel, setShowRulesPanel] = useState(false);
 
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -612,7 +613,64 @@ export default function SuiteTransactions() {
             </button>
           )}
         </div>
+        <div className="h-4 w-px bg-border" />
+        <button
+          onClick={() => setShowRulesPanel(!showRulesPanel)}
+          className={cn("flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border font-medium transition-colors", showRulesPanel ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary")}
+        >
+          <BookOpen className="w-3 h-3" />
+          Rules ({Object.keys(rulesMap).length})
+          {showRulesPanel ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+        </button>
       </div>
+
+      {/* Expandable Rules Panel */}
+      {showRulesPanel && (
+        <div className="px-5 py-3 border-b border-border bg-card animate-fade-in max-h-[300px] overflow-y-auto shrink-0">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+              <BookOpen className="w-3.5 h-3.5 text-primary" />
+              Active Alert Rules ({Object.keys(rulesMap).length})
+            </h3>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setShowRulesPanel(false)}>
+              <X className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+          {Object.keys(rulesMap).length === 0 ? (
+            <p className="text-xs text-muted-foreground py-2">No rules configured. Use "AI Suggest Rules" to get started.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {Object.values(rulesMap).map(rule => {
+                const txCount = ruleTxMap[rule.id]?.size || 0;
+                const isSelected = ruleFilter === rule.id;
+                return (
+                  <div
+                    key={rule.id}
+                    onClick={() => setRuleFilter(isSelected ? "all" : rule.id)}
+                    className={cn(
+                      "border rounded-lg p-2.5 cursor-pointer transition-all",
+                      isSelected
+                        ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                        : "border-border bg-background hover:border-primary/40 hover:bg-muted/30"
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className="text-[11px] font-semibold text-foreground leading-tight truncate flex-1">{rule.name}</span>
+                      <span className={cn("px-1.5 py-0.5 rounded border text-[9px] font-medium shrink-0", sevColor(rule.severity))}>{rule.severity}</span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <span className="text-[10px] font-mono text-muted-foreground">ID: {rule.id.slice(0, 8)}…</span>
+                      <span className={cn("text-[10px] font-semibold", txCount > 0 ? "text-destructive" : "text-emerald-600")}>
+                        {txCount} hit{txCount !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Table */}
       <div className="flex-1 overflow-y-auto">
