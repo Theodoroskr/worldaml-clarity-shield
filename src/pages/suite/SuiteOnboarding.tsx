@@ -930,11 +930,19 @@ export default function SuiteOnboarding() {
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-border">
-        <Button variant="outline" size="sm" onClick={cancelOnboarding}>Cancel</Button>
-        <Button size="sm" onClick={submitKYB} disabled={saving}>
-          {saving ? "Saving…" : "Submit KYB Application"}
+      {/* Custom fields */}
+      {renderCustomFieldsSection(kybCustomFields)}
+
+      <div className="flex justify-between items-center pt-2 border-t border-border">
+        <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-7" onClick={() => setShowBuilder("kyb")}>
+          <Settings2 className="w-3.5 h-3.5 mr-1" /> Configure Fields
         </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={cancelOnboarding}>Cancel</Button>
+          <Button size="sm" onClick={submitKYB} disabled={saving}>
+            {saving ? "Saving…" : "Submit KYB Application"}
+          </Button>
+        </div>
       </div>
     </div>
   );
