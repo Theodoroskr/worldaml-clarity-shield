@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
-  TrendingUp, Users, Activity, AlertTriangle, Briefcase, Clock, CheckCircle, Bell, ChevronRight
+  TrendingUp, Users, Activity, AlertTriangle, Briefcase, Clock, CheckCircle, Bell, ChevronRight,
+  CalendarClock,
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid,
@@ -9,6 +10,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Timeline, TimelineEvent } from "@/components/ui/timeline";
 import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
+import { format, differenceInDays, addMonths, isPast } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 const trendData = [
   { date: "30/01", flagged: 0, clear: 29, pending: 0 },
