@@ -357,6 +357,15 @@ export default function SuiteOnboarding() {
   const [saving, setSaving] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
+  // Custom field builder state
+  const [kycCustomFields, setKycCustomFields] = useState<CustomField[]>([]);
+  const [kybCustomFields, setKybCustomFields] = useState<CustomField[]>([]);
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
+  const [showBuilder, setShowBuilder] = useState<"kyc" | "kyb" | null>(null);
+  const [builderSaving, setBuilderSaving] = useState(false);
+  const [kycTemplateId, setKycTemplateId] = useState<string | null>(null);
+  const [kybTemplateId, setKybTemplateId] = useState<string | null>(null);
+
   const fetchCustomers = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -365,7 +374,27 @@ export default function SuiteOnboarding() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchCustomers(); }, []);
+  const fetchCustomFieldTemplates = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase.from("admin_form_templates")
+      .select("*")
+      .eq("created_by", user.id)
+      .in("form_type", ["kyc_onboarding", "kyb_onboarding"]);
+
+    (data || []).forEach((tpl: any) => {
+      const fields = (tpl.fields || []) as CustomField[];
+      if (tpl.form_type === "kyc_onboarding") {
+        setKycCustomFields(fields);
+        setKycTemplateId(tpl.id);
+      } else {
+        setKybCustomFields(fields);
+        setKybTemplateId(tpl.id);
+      }
+    });
+  };
+
+  useEffect(() => { fetchCustomers(); fetchCustomFieldTemplates(); }, []);
 
   const startOnboarding = (type: "kyc-form" | "kyb-form") => {
     setStep(type);
