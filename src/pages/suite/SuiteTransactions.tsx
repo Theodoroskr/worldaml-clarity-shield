@@ -43,6 +43,7 @@ interface BulkRow {
   counterparty: string;
   counterparty_country: string;
   description: string;
+  date: string;
 }
 
 interface AIAnalysis {
