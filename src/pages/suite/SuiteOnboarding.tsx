@@ -989,10 +989,32 @@ export default function SuiteOnboarding() {
         )}
       </div>
 
+      {/* Form builder */}
+      {showBuilder === "kyc" && (
+        <FormFieldBuilder
+          fields={kycCustomFields}
+          onChange={setKycCustomFields}
+          onClose={() => setShowBuilder(null)}
+          onSave={() => saveFieldTemplate("kyc")}
+          saving={builderSaving}
+          formType="kyc"
+        />
+      )}
+      {showBuilder === "kyb" && (
+        <FormFieldBuilder
+          fields={kybCustomFields}
+          onChange={setKybCustomFields}
+          onClose={() => setShowBuilder(null)}
+          onSave={() => saveFieldTemplate("kyb")}
+          saving={builderSaving}
+          formType="kyb"
+        />
+      )}
+
       {/* New customer flow */}
-      {showForm && step === "select" && renderTypeSelector()}
-      {step === "kyc-form" && renderKYCForm()}
-      {step === "kyb-form" && renderKYBForm()}
+      {!showBuilder && showForm && step === "select" && renderTypeSelector()}
+      {!showBuilder && step === "kyc-form" && renderKYCForm()}
+      {!showBuilder && step === "kyb-form" && renderKYBForm()}
 
       {/* Customer detail panel */}
       {selectedCustomer && <CustomerDetailPanel
