@@ -69,12 +69,15 @@ export default function SuiteDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [customersRes, alertsRes, screeningsRes, auditRes] = await Promise.all([
+      const [customersRes, alertsRes, screeningsRes, auditRes, profileRes] = await Promise.all([
         supabase.from("suite_customers").select("id, risk_level").eq("user_id", user.id),
         supabase.from("suite_alerts").select("id, status").eq("user_id", user.id),
         supabase.from("suite_screenings").select("id").eq("user_id", user.id),
         supabase.from("suite_audit_log").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
+        supabase.from("profiles").select("regulator").eq("user_id", user.id).single(),
       ]);
+
+      setRegulator(profileRes.data?.regulator ?? null);
 
       const customers = customersRes.data || [];
       const alerts = alertsRes.data || [];
