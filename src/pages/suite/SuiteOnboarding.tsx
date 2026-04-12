@@ -25,6 +25,7 @@ interface Customer {
   company_name: string | null;
   registration_number: string | null;
   date_of_birth: string | null;
+  regulator: string | null;
   created_at: string;
 }
 
