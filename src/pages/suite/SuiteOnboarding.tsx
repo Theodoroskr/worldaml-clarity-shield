@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye } from "lucide-react";
+import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -625,36 +625,14 @@ export default function SuiteOnboarding() {
       {step === "kyb-form" && renderKYBForm()}
 
       {/* Customer detail panel */}
-      {selectedCustomer && (
-        <div className="fixed inset-y-0 right-0 w-96 bg-card border-l border-border shadow-xl z-50 overflow-y-auto p-6 animate-fade-in">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-foreground">Customer Details</h2>
-            <Button variant="ghost" size="sm" onClick={() => setSelectedCustomer(null)}>✕</Button>
-          </div>
-          <div className="space-y-3 text-sm">
-            <div><span className="text-xs text-muted-foreground">Name</span><p className="font-medium">{selectedCustomer.name}</p></div>
-            <div><span className="text-xs text-muted-foreground">Type</span><p className="capitalize">{selectedCustomer.type}</p></div>
-            <div><span className="text-xs text-muted-foreground">Email</span><p>{selectedCustomer.email || "—"}</p></div>
-            <div><span className="text-xs text-muted-foreground">Country</span><p className="font-mono">{selectedCustomer.country || "—"}</p></div>
-            {selectedCustomer.company_name && <div><span className="text-xs text-muted-foreground">Company</span><p>{selectedCustomer.company_name}</p></div>}
-            {selectedCustomer.registration_number && <div><span className="text-xs text-muted-foreground">Reg. Number</span><p className="font-mono">{selectedCustomer.registration_number}</p></div>}
-            {selectedCustomer.date_of_birth && <div><span className="text-xs text-muted-foreground">Date of Birth</span><p>{selectedCustomer.date_of_birth}</p></div>}
-            <div><span className="text-xs text-muted-foreground">Risk Level</span><p><Badge className={cn("text-xs capitalize", riskBadge(selectedCustomer.risk_level))}>{selectedCustomer.risk_level}</Badge></p></div>
-            <div><span className="text-xs text-muted-foreground">KYC Status</span><p><Badge className={cn("text-xs", statusColor(selectedCustomer.kyc_status))}>{kycStatusLabel[selectedCustomer.kyc_status] || selectedCustomer.kyc_status}</Badge></p></div>
-            <div><span className="text-xs text-muted-foreground">Created</span><p className="font-mono text-xs">{new Date(selectedCustomer.created_at).toLocaleString()}</p></div>
-          </div>
-          <div className="flex gap-2 mt-6">
-            <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={() => {
-              sessionStorage.setItem("screenCustomerId", selectedCustomer.id);
-              sessionStorage.setItem("screenCustomerName", selectedCustomer.name);
-              window.location.href = "/suite/screening";
-            }}>Screen</Button>
-            <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={() => {
-              window.location.href = "/suite/cases";
-            }}>Open Case</Button>
-          </div>
-        </div>
-      )}
+      {selectedCustomer && <CustomerDetailPanel
+        customer={selectedCustomer}
+        onClose={() => setSelectedCustomer(null)}
+        onUpdated={(updated) => {
+          setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
+          setSelectedCustomer(updated);
+        }}
+      />}
 
       {/* Stats & table (only when not in form mode) */}
       {!showForm && step === "select" && (
