@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Upload, FileText, Trash2, Clock, ShieldCheck, AlertTriangle, UserCheck } from "lucide-react";
+import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import FormFieldBuilder, { type CustomField } from "@/components/suite/FormFieldBuilder";
 
 interface Customer {
   id: string;
@@ -119,14 +122,6 @@ const emptyKYB: KYBForm = {
 const KYC_STATUSES = ["pending", "in_review", "verified", "rejected"];
 const RISK_LEVELS = ["low", "medium", "high", "critical"];
 
-interface AuditEvent {
-  id: string;
-  action: string;
-  created_at: string;
-  details: any;
-  entity_type: string;
-}
-
 function CustomerDetailPanel({ customer, onClose, onUpdated }: {
   customer: Customer;
   onClose: () => void;
@@ -134,8 +129,6 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
 }) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [timeline, setTimeline] = useState<AuditEvent[]>([]);
-  const [timelineLoading, setTimelineLoading] = useState(true);
   const [edit, setEdit] = useState({
     name: customer.name,
     email: customer.email || "",
@@ -145,19 +138,6 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
     risk_level: customer.risk_level,
     kyc_status: customer.kyc_status,
   });
-
-  const fetchTimeline = async () => {
-    setTimelineLoading(true);
-    const { data } = await supabase
-      .from("suite_audit_log")
-      .select("id, action, created_at, details, entity_type")
-      .eq("entity_id", customer.id)
-      .eq("entity_type", "customer")
-      .order("created_at", { ascending: false })
-      .limit(20);
-    setTimeline((data || []) as AuditEvent[]);
-    setTimelineLoading(false);
-  };
 
   // Sync when customer changes
   useEffect(() => {
@@ -171,7 +151,6 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
       kyc_status: customer.kyc_status,
     });
     setEditing(false);
-    fetchTimeline();
   }, [customer.id]);
 
   const saveChanges = async () => {
@@ -216,7 +195,6 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
     onUpdated({ ...customer, ...updates });
     setEditing(false);
     setSaving(false);
-    fetchTimeline();
   };
 
   return (
@@ -332,62 +310,6 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
           </div>
         </div>
 
-        {/* Status Timeline */}
-        <div>
-          <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">Activity Timeline</h3>
-          {timelineLoading ? (
-            <p className="text-xs text-muted-foreground">Loading…</p>
-          ) : timeline.length === 0 ? (
-            <p className="text-xs text-muted-foreground italic">No activity recorded yet</p>
-          ) : (
-            <div className="relative pl-5">
-              {/* Vertical line */}
-              <div className="absolute left-[7px] top-1 bottom-1 w-px bg-border" />
-              <div className="space-y-4">
-                {timeline.map((event, idx) => {
-                  const isOnboarding = event.action.toLowerCase().includes("onboarding");
-                  const isUpdate = event.action.toLowerCase().includes("updated");
-                  const isStatusChange = event.details?.changes?.some?.((c: string) => c.includes("status"));
-                  const isRiskChange = event.details?.changes?.some?.((c: string) => c.includes("risk"));
-
-                  let icon = <Clock className="w-3 h-3" />;
-                  let dotColor = "bg-muted-foreground";
-                  if (isOnboarding) { icon = <UserCheck className="w-3 h-3" />; dotColor = "bg-primary"; }
-                  else if (isStatusChange) { icon = <ShieldCheck className="w-3 h-3" />; dotColor = "bg-blue-500"; }
-                  else if (isRiskChange) { icon = <AlertTriangle className="w-3 h-3" />; dotColor = "bg-amber-500"; }
-
-                  return (
-                    <div key={event.id} className="relative">
-                      {/* Dot */}
-                      <div className={cn("absolute -left-5 top-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center text-white", dotColor)}>
-                        {icon}
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-foreground leading-tight">{event.action}</p>
-                        {event.details?.changes && (
-                          <ul className="mt-0.5 space-y-0.5">
-                            {(event.details.changes as string[]).map((c: string, ci: number) => (
-                              <li key={ci} className="text-[11px] text-muted-foreground font-mono">• {c}</li>
-                            ))}
-                          </ul>
-                        )}
-                        {event.details?.type && !event.details?.changes && (
-                          <p className="text-[11px] text-muted-foreground capitalize mt-0.5">Type: {event.details.type}</p>
-                        )}
-                        <p className="text-[10px] text-muted-foreground mt-1">
-                          {new Date(event.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
-                          {" "}
-                          {new Date(event.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Actions */}
         <div className="pt-2 border-t border-border space-y-2">
           <div className="flex gap-2">
@@ -434,29 +356,15 @@ export default function SuiteOnboarding() {
   const [kybForm, setKybForm] = useState<KYBForm>(emptyKYB);
   const [saving, setSaving] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [kycFiles, setKycFiles] = useState<File[]>([]);
-  const [kybFiles, setKybFiles] = useState<File[]>([]);
 
-  const handleFileSelect = (setter: React.Dispatch<React.SetStateAction<File[]>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const valid = files.filter(f => f.size <= 10 * 1024 * 1024); // 10MB max
-    if (valid.length < files.length) toast.error("Some files exceeded 10MB limit and were skipped");
-    setter(prev => [...prev, ...valid]);
-    e.target.value = "";
-  };
-
-  const removeFile = (setter: React.Dispatch<React.SetStateAction<File[]>>, index: number) => {
-    setter(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const uploadDocuments = async (userId: string, customerId: string, files: File[]) => {
-    for (const file of files) {
-      const ext = file.name.split(".").pop() || "bin";
-      const path = `${userId}/${customerId}/${Date.now()}_${file.name}`;
-      const { error } = await supabase.storage.from("customer-documents").upload(path, file, { contentType: file.type });
-      if (error) console.error("Upload error:", error.message);
-    }
-  };
+  // Custom field builder state
+  const [kycCustomFields, setKycCustomFields] = useState<CustomField[]>([]);
+  const [kybCustomFields, setKybCustomFields] = useState<CustomField[]>([]);
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
+  const [showBuilder, setShowBuilder] = useState<"kyc" | "kyb" | null>(null);
+  const [builderSaving, setBuilderSaving] = useState(false);
+  const [kycTemplateId, setKycTemplateId] = useState<string | null>(null);
+  const [kybTemplateId, setKybTemplateId] = useState<string | null>(null);
 
   const fetchCustomers = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -466,17 +374,150 @@ export default function SuiteOnboarding() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchCustomers(); }, []);
+  const fetchCustomFieldTemplates = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase.from("admin_form_templates")
+      .select("*")
+      .eq("created_by", user.id)
+      .in("form_type", ["kyc_onboarding", "kyb_onboarding"]);
+
+    (data || []).forEach((tpl: any) => {
+      const fields = (tpl.fields || []) as CustomField[];
+      if (tpl.form_type === "kyc_onboarding") {
+        setKycCustomFields(fields);
+        setKycTemplateId(tpl.id);
+      } else {
+        setKybCustomFields(fields);
+        setKybTemplateId(tpl.id);
+      }
+    });
+  };
+
+  useEffect(() => { fetchCustomers(); fetchCustomFieldTemplates(); }, []);
 
   const startOnboarding = (type: "kyc-form" | "kyb-form") => {
     setStep(type);
-    if (type === "kyc-form") { setKycForm(emptyKYC); setKycFiles([]); }
-    else { setKybForm(emptyKYB); setKybFiles([]); }
+    setCustomFieldValues({});
+    if (type === "kyc-form") setKycForm(emptyKYC);
+    else setKybForm(emptyKYB);
   };
 
   const cancelOnboarding = () => {
     setStep("select");
     setShowForm(false);
+    setShowBuilder(null);
+  };
+
+  const saveFieldTemplate = async (formType: "kyc" | "kyb") => {
+    setBuilderSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setBuilderSaving(false); return; }
+
+    const fields = formType === "kyc" ? kycCustomFields : kybCustomFields;
+    const templateId = formType === "kyc" ? kycTemplateId : kybTemplateId;
+    const dbFormType = formType === "kyc" ? "kyc_onboarding" : "kyb_onboarding";
+
+    if (templateId) {
+      await supabase.from("admin_form_templates").update({
+        fields: fields as any,
+        updated_at: new Date().toISOString(),
+      }).eq("id", templateId);
+    } else {
+      const { data } = await supabase.from("admin_form_templates").insert({
+        name: `${formType.toUpperCase()} Onboarding Template`,
+        form_type: dbFormType,
+        fields: fields as any,
+        created_by: user.id,
+        is_active: true,
+      }).select("id").single();
+      if (data) {
+        if (formType === "kyc") setKycTemplateId(data.id);
+        else setKybTemplateId(data.id);
+      }
+    }
+
+    toast.success("Form template saved");
+    setBuilderSaving(false);
+    setShowBuilder(null);
+  };
+
+  // Render a dynamic custom field
+  const renderCustomField = (field: CustomField) => {
+    const value = customFieldValues[field.key] || "";
+    const setValue = (v: string) => setCustomFieldValues(prev => ({ ...prev, [field.key]: v }));
+
+    switch (field.type) {
+      case "text":
+      case "email":
+      case "number":
+      case "date":
+        return (
+          <FormField label={field.label} required={field.required} key={field.id}>
+            <FormInput value={value} onChange={setValue} placeholder={field.placeholder} type={field.type} />
+          </FormField>
+        );
+      case "textarea":
+        return (
+          <FormField label={field.label} required={field.required} key={field.id}>
+            <Textarea value={value} onChange={e => setValue(e.target.value)} placeholder={field.placeholder}
+              className="text-sm min-h-[60px]" />
+          </FormField>
+        );
+      case "select":
+        return (
+          <FormField label={field.label} required={field.required} key={field.id}>
+            <Select value={value} onValueChange={setValue}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select…" /></SelectTrigger>
+              <SelectContent>
+                {(field.options || []).map(opt => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+        );
+      case "country":
+        return (
+          <FormField label={field.label} required={field.required} key={field.id}>
+            <Select value={value} onValueChange={setValue}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select…" /></SelectTrigger>
+              <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+            </Select>
+          </FormField>
+        );
+      case "checkbox":
+        return (
+          <div key={field.id} className="flex items-center gap-2 col-span-3">
+            <Checkbox checked={value === "true"} onCheckedChange={v => setValue(v ? "true" : "false")} id={field.key} />
+            <label htmlFor={field.key} className="text-xs font-medium text-foreground cursor-pointer">
+              {field.label}{field.required && <span className="text-destructive ml-0.5">*</span>}
+            </label>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Group custom fields by section
+  const renderCustomFieldsSection = (fields: CustomField[]) => {
+    if (fields.length === 0) return null;
+    const sections = new Map<string, CustomField[]>();
+    fields.forEach(f => {
+      const sec = f.section || "Custom Fields";
+      if (!sections.has(sec)) sections.set(sec, []);
+      sections.get(sec)!.push(f);
+    });
+
+    return Array.from(sections.entries()).map(([section, sectionFields]) => (
+      <div key={section} className="mb-6">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">{section}</h3>
+        <div className="grid grid-cols-3 gap-4">
+          {sectionFields.map(f => renderCustomField(f))}
+        </div>
+      </div>
+    ));
   };
 
   const submitKYC = async () => {
@@ -491,21 +532,16 @@ export default function SuiteOnboarding() {
     if (!user) { setSaving(false); return; }
 
     const fullName = `${kycForm.firstName.trim()} ${kycForm.lastName.trim()}`;
-    const { data: customer, error } = await supabase.from("suite_customers").insert({
+    const { error } = await supabase.from("suite_customers").insert({
       user_id: user.id,
       name: fullName,
       type: "individual",
       email: kycForm.email.trim() || null,
       country: kycForm.country || null,
       date_of_birth: kycForm.dateOfBirth || null,
-    }).select("id").single();
+    });
 
     if (error) { toast.error(error.message); setSaving(false); return; }
-
-    // Upload documents
-    if (kycFiles.length > 0 && customer) {
-      await uploadDocuments(user.id, customer.id, kycFiles);
-    }
 
     await supabase.from("suite_audit_log").insert({
       user_id: user.id,
@@ -519,6 +555,7 @@ export default function SuiteOnboarding() {
         occupation: kycForm.occupation,
         pep: kycForm.pep,
         source_of_funds: kycForm.sourceOfFunds,
+        ...(Object.keys(customFieldValues).length > 0 && { custom_fields: customFieldValues }),
       },
     });
 
@@ -550,11 +587,6 @@ export default function SuiteOnboarding() {
 
     if (error) { toast.error(error.message); setSaving(false); return; }
 
-    // Upload documents
-    if (kybFiles.length > 0 && customer) {
-      await uploadDocuments(user.id, customer.id, kybFiles);
-    }
-
     // Add UBO if provided
     if (kybForm.uboName.trim() && customer) {
       await supabase.from("suite_ubo").insert({
@@ -578,6 +610,7 @@ export default function SuiteOnboarding() {
         registration_number: kybForm.registrationNumber,
         annual_turnover: kybForm.annualTurnover,
         ubo_provided: !!kybForm.uboName.trim(),
+        ...(Object.keys(customFieldValues).length > 0 && { custom_fields: customFieldValues }),
       },
     });
 
@@ -713,36 +746,19 @@ export default function SuiteOnboarding() {
         </div>
       </div>
 
-      {/* Section: Document Upload */}
-      <div className="mb-6">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Identity Documents</h3>
-        <p className="text-xs text-muted-foreground mb-3">Upload a copy of passport, national ID, or driving licence. Max 10MB per file.</p>
-        <label className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/40 transition-colors">
-          <Upload className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">Click to upload document</span>
-          <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple onChange={handleFileSelect(setKycFiles)} />
-        </label>
-        {kycFiles.length > 0 && (
-          <div className="mt-3 space-y-2">
-            {kycFiles.map((f, i) => (
-              <div key={i} className="flex items-center gap-2 bg-muted/50 rounded-md px-3 py-2 text-sm">
-                <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="truncate flex-1">{f.name}</span>
-                <span className="text-xs text-muted-foreground shrink-0">{(f.size / 1024).toFixed(0)} KB</span>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => removeFile(setKycFiles, i)}>
-                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Custom fields */}
+      {renderCustomFieldsSection(kycCustomFields)}
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-border">
-        <Button variant="outline" size="sm" onClick={cancelOnboarding}>Cancel</Button>
-        <Button size="sm" onClick={submitKYC} disabled={saving}>
-          {saving ? "Saving…" : "Submit KYC Application"}
+      <div className="flex justify-between items-center pt-2 border-t border-border">
+        <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-7" onClick={() => setShowBuilder("kyc")}>
+          <Settings2 className="w-3.5 h-3.5 mr-1" /> Configure Fields
         </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={cancelOnboarding}>Cancel</Button>
+          <Button size="sm" onClick={submitKYC} disabled={saving}>
+            {saving ? "Saving…" : "Submit KYC Application"}
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -916,36 +932,19 @@ export default function SuiteOnboarding() {
         </div>
       </div>
 
-      {/* Section: Document Upload */}
-      <div className="mb-6">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Corporate Documents</h3>
-        <p className="text-xs text-muted-foreground mb-3">Upload Certificate of Incorporation, Articles of Association, or proof of address. Max 10MB per file.</p>
-        <label className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/40 transition-colors">
-          <Upload className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">Click to upload document</span>
-          <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple onChange={handleFileSelect(setKybFiles)} />
-        </label>
-        {kybFiles.length > 0 && (
-          <div className="mt-3 space-y-2">
-            {kybFiles.map((f, i) => (
-              <div key={i} className="flex items-center gap-2 bg-muted/50 rounded-md px-3 py-2 text-sm">
-                <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="truncate flex-1">{f.name}</span>
-                <span className="text-xs text-muted-foreground shrink-0">{(f.size / 1024).toFixed(0)} KB</span>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => removeFile(setKybFiles, i)}>
-                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Custom fields */}
+      {renderCustomFieldsSection(kybCustomFields)}
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-border">
-        <Button variant="outline" size="sm" onClick={cancelOnboarding}>Cancel</Button>
-        <Button size="sm" onClick={submitKYB} disabled={saving}>
-          {saving ? "Saving…" : "Submit KYB Application"}
+      <div className="flex justify-between items-center pt-2 border-t border-border">
+        <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-7" onClick={() => setShowBuilder("kyb")}>
+          <Settings2 className="w-3.5 h-3.5 mr-1" /> Configure Fields
         </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={cancelOnboarding}>Cancel</Button>
+          <Button size="sm" onClick={submitKYB} disabled={saving}>
+            {saving ? "Saving…" : "Submit KYB Application"}
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -992,10 +991,32 @@ export default function SuiteOnboarding() {
         )}
       </div>
 
+      {/* Form builder */}
+      {showBuilder === "kyc" && (
+        <FormFieldBuilder
+          fields={kycCustomFields}
+          onChange={setKycCustomFields}
+          onClose={() => setShowBuilder(null)}
+          onSave={() => saveFieldTemplate("kyc")}
+          saving={builderSaving}
+          formType="kyc"
+        />
+      )}
+      {showBuilder === "kyb" && (
+        <FormFieldBuilder
+          fields={kybCustomFields}
+          onChange={setKybCustomFields}
+          onClose={() => setShowBuilder(null)}
+          onSave={() => saveFieldTemplate("kyb")}
+          saving={builderSaving}
+          formType="kyb"
+        />
+      )}
+
       {/* New customer flow */}
-      {showForm && step === "select" && renderTypeSelector()}
-      {step === "kyc-form" && renderKYCForm()}
-      {step === "kyb-form" && renderKYBForm()}
+      {!showBuilder && showForm && step === "select" && renderTypeSelector()}
+      {!showBuilder && step === "kyc-form" && renderKYCForm()}
+      {!showBuilder && step === "kyb-form" && renderKYBForm()}
 
       {/* Customer detail panel */}
       {selectedCustomer && <CustomerDetailPanel
