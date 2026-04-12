@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Plus, Trash2, Play, Pause, Settings2, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus, Trash2, Play, Pause, Settings2, CheckCircle, AlertCircle, Sparkles, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -24,6 +24,9 @@ export default function SuiteAlertRules() {
   const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState<any>(null);
+  const [showAiPanel, setShowAiPanel] = useState(false);
 
   const fetchRules = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -97,14 +100,59 @@ export default function SuiteAlertRules() {
     setRules(prev => prev.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r));
   };
 
+  const suggestRules = async () => {
+    setAiLoading(true);
+    setShowAiPanel(true);
+    setAiResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("suggest-rules");
+      if (error) throw error;
+      setAiResult(data);
+    } catch (e: any) {
+      toast.error(e.message || "AI analysis failed");
+      setShowAiPanel(false);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const adoptRule = async (suggested: any) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const conditions = (suggested.conditions || []).map((c: any) => ({
+      id: uid(),
+      field: c.field || "transaction.amount",
+      operator: c.operator === "gt" ? ">" : c.operator === "eq" ? "==" : c.operator === "in" ? "IN" : c.operator === "contains" ? "CONTAINS" : ">",
+      value: String(c.value),
+      logic: "AND",
+      action: suggested.severity === "critical" ? "Block" : "Flag",
+    }));
+    const { error } = await supabase.from("suite_alert_rules").insert({
+      user_id: user.id,
+      name: suggested.name,
+      conditions,
+      severity: suggested.severity || "medium",
+      is_active: false,
+    });
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Rule "${suggested.name}" added`);
+    fetchRules();
+  };
+
   if (loading) return <div className="flex items-center justify-center h-full text-sm text-muted-foreground">Loading rules…</div>;
 
   return (
     <div className="flex h-full overflow-hidden bg-background">
       <div className="w-72 shrink-0 border-r border-border flex flex-col bg-card">
-        <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
-          <div><h2 className="font-semibold text-foreground text-sm">Alert Rules</h2><p className="text-xs text-muted-foreground">{rules.filter(r => r.enabled).length}/{rules.length} active</p></div>
-          <button onClick={addRule} className="flex items-center gap-1 text-xs px-2.5 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3" />New</button>
+        <div className="px-4 py-3 border-b border-border flex flex-col gap-2 shrink-0">
+          <div className="flex items-center justify-between">
+            <div><h2 className="font-semibold text-foreground text-sm">Alert Rules</h2><p className="text-xs text-muted-foreground">{rules.filter(r => r.enabled).length}/{rules.length} active</p></div>
+            <button onClick={addRule} className="flex items-center gap-1 text-xs px-2.5 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"><Plus className="w-3 h-3" />New</button>
+          </div>
+          <button onClick={suggestRules} disabled={aiLoading} className="flex items-center justify-center gap-1.5 text-xs px-2.5 py-2 rounded-lg border border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors font-medium w-full">
+            {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            {aiLoading ? "Analyzing…" : "AI Suggest Rules"}
+          </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
           {rules.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">No rules yet. Click New to create one.</p>}
@@ -202,6 +250,74 @@ export default function SuiteAlertRules() {
       ) : (
         <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
           {rules.length === 0 ? "Create your first alert rule" : "Select a rule to edit"}
+        </div>
+      )}
+
+
+      {showAiPanel && (
+        <div className="w-96 shrink-0 border-l border-border flex flex-col bg-card overflow-hidden">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-purple-600" /><h3 className="font-semibold text-foreground text-sm">AI Analysis</h3></div>
+            <button onClick={() => setShowAiPanel(false)} className="text-xs text-muted-foreground hover:text-foreground">✕</button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {aiLoading && (
+              <div className="flex flex-col items-center justify-center py-12 gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+                <p className="text-xs text-muted-foreground">Analyzing transactions & suggesting rules…</p>
+              </div>
+            )}
+            {aiResult && (
+              <>
+                {aiResult.summary && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-xl p-3">
+                    <h4 className="text-xs font-semibold text-purple-800 mb-1">Summary</h4>
+                    <p className="text-xs text-purple-700 leading-relaxed">{aiResult.summary}</p>
+                  </div>
+                )}
+                {aiResult.flagged_patterns?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-foreground mb-2">Flagged Patterns</h4>
+                    <div className="space-y-2">
+                      {aiResult.flagged_patterns.map((p: any, i: number) => (
+                        <div key={i} className="border border-border rounded-lg p-2.5">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium capitalize", priorityStyle[p.severity] || priorityStyle.medium)}>{p.severity}</span>
+                            <span className="text-[10px] text-muted-foreground">{p.affected_count} txns</span>
+                          </div>
+                          <p className="text-xs text-foreground">{p.pattern}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {aiResult.suggested_rules?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-foreground mb-2">Suggested Rules</h4>
+                    <div className="space-y-2">
+                      {aiResult.suggested_rules.map((r: any, i: number) => (
+                        <div key={i} className="border border-border rounded-xl p-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-foreground">{r.name}</span>
+                            <span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[r.severity] || priorityStyle.medium)}>{r.severity}</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">{r.rationale}</p>
+                          <div className="flex flex-wrap gap-1">
+                            {r.conditions?.map((c: any, ci: number) => (
+                              <span key={ci} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{c.field} {c.operator} {String(c.value)}</span>
+                            ))}
+                          </div>
+                          <button onClick={() => adoptRule(r)} className="w-full text-xs py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
+                            <Plus className="w-3 h-3 inline mr-1" />Adopt Rule
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
