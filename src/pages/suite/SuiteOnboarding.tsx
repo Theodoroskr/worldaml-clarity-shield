@@ -469,6 +469,11 @@ export default function SuiteOnboarding() {
 
     if (error) { toast.error(error.message); setSaving(false); return; }
 
+    // Upload documents
+    if (kybFiles.length > 0 && customer) {
+      await uploadDocuments(user.id, customer.id, kybFiles);
+    }
+
     // Add UBO if provided
     if (kybForm.uboName.trim() && customer) {
       await supabase.from("suite_ubo").insert({
