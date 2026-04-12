@@ -51,6 +51,8 @@ serve(async (req) => {
     const totalCases = cases.count || 0;
     const totalSTRs = strs.count || 0;
     const filedSTRs = (strs.data || []).filter((s: any) => s.filing_status === "filed").length;
+    const openAlerts = (alerts.data || []).filter((a: any) => a.status === "open").length;
+    const openCases = (cases.data || []).filter((c: any) => c.status === "open").length;
 
     const countries = [...new Set((customers.data || []).map((c: any) => c.country).filter(Boolean))];
     const companyName = profile.data?.company_name || "the firm";
@@ -71,10 +73,11 @@ DATABASE STATISTICS (auto-populated from the compliance platform):
 - Screenings with matches: ${matchScreenings} (${totalScreenings > 0 ? ((matchScreenings / totalScreenings) * 100).toFixed(1) : 0}% match rate)
 - Total alerts generated: ${totalAlerts}
 - Alerts resolved: ${resolvedAlerts} (${totalAlerts > 0 ? ((resolvedAlerts / totalAlerts) * 100).toFixed(1) : 0}% resolution rate)
+- Open/unresolved alerts: ${openAlerts}
 - High/Critical severity alerts: ${highSeverityAlerts}
 - Total transactions monitored: ${totalTransactions}
 - Flagged transactions: ${flaggedTransactions} (${totalTransactions > 0 ? ((flaggedTransactions / totalTransactions) * 100).toFixed(1) : 0}% flag rate)
-- Cases opened: ${totalCases}
+- Cases opened: ${totalCases} (${openCases} still open)
 - STR/SAR reports: ${totalSTRs} total, ${filedSTRs} filed
 
 CURRENT CONTENT (fields already filled by the user — do NOT overwrite non-empty fields):
@@ -83,7 +86,11 @@ ${JSON.stringify(currentContent || {}, null, 2)}
 
     const systemPrompt = `You are a senior AML/CFT compliance consultant helping prepare a ${reportTitle} for submission to ${regulator.toUpperCase()}.
 
-Your task is to draft the qualitative sections of this periodic report based on the database statistics provided. Write in a professional, regulatory-appropriate tone suitable for submission to the supervisory authority.
+Your task is to:
+1. Draft the qualitative sections of this periodic report based on the database statistics provided.
+2. Identify compliance gaps and generate actionable remediation tasks to avoid regulatory penalties.
+
+Write in a professional, regulatory-appropriate tone suitable for submission to the supervisory authority.
 
 RULES:
 1. Use the actual statistics from the database to support your narrative.
@@ -94,6 +101,16 @@ RULES:
 6. Keep each field concise but thorough (2-4 sentences for short fields, 1-2 paragraphs for long fields).
 7. For risk assessment: identify real patterns from the data (e.g., high-risk ratio, match rates).
 8. For recommendations: base them on actual gaps visible in the data.
+9. For compliance tasks: analyze the data for gaps that could trigger regulatory penalties. Focus on:
+   - Missing independent audits or outdated policies
+   - Low screening coverage or unresolved screening matches
+   - Open/unresolved alerts (especially high severity)
+   - Open cases without resolution
+   - Missing or outdated staff training records
+   - High-risk customers without documented EDD
+   - STR/SAR filing gaps
+   - Upcoming filing deadlines at risk
+   Generate 3-8 prioritized tasks with specific deadlines and regulatory citations.
 
 ${statsContext}`;
 
@@ -112,7 +129,7 @@ ${statsContext}`;
           { role: "system", content: systemPrompt },
           {
             role: "user",
-            content: `Generate the content for all qualitative fields of this ${reportTitle}. Return ONLY a valid JSON object with these exact keys matching the content fields. Each value should be a string with the drafted text. Do not include any markdown formatting, code fences, or explanation — just the raw JSON object.
+            content: `Generate the content for all qualitative fields of this ${reportTitle}, AND identify compliance gaps that need remediation tasks to avoid regulatory penalties.
 
 Fields to fill:
 - complianceOfficer: Name and role
@@ -126,7 +143,16 @@ Fields to fill:
 - keyRisksIdentified: Specific risks identified from the data
 - mitigatingControls: Controls in place to address identified risks
 - actionsTaken: Remediation actions taken during the period
-- recommendations: Forward-looking recommendations`,
+- recommendations: Forward-looking recommendations
+
+Also generate compliance_tasks: 3-8 prioritized remediation tasks based on gaps. Focus on:
+- Missing independent audits
+- Low screening coverage or high match rates without resolution
+- Unresolved alerts or cases
+- Missing/outdated training records
+- High-risk customers without enhanced due diligence
+- Missing or outdated policies
+- Filing deadlines at risk`,
           },
         ],
         tools: [
@@ -134,7 +160,7 @@ Fields to fill:
             type: "function",
             function: {
               name: "fill_report_fields",
-              description: "Fill in the qualitative fields of the periodic compliance report",
+              description: "Fill in the qualitative fields and generate compliance remediation tasks",
               parameters: {
                 type: "object",
                 properties: {
@@ -150,12 +176,28 @@ Fields to fill:
                   mitigatingControls: { type: "string" },
                   actionsTaken: { type: "string" },
                   recommendations: { type: "string" },
+                  compliance_tasks: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        title: { type: "string" },
+                        description: { type: "string" },
+                        priority: { type: "string", enum: ["critical", "high", "medium", "low"] },
+                        deadline: { type: "string" },
+                        regulation: { type: "string" },
+                      },
+                      required: ["title", "description", "priority", "deadline", "regulation"],
+                      additionalProperties: false,
+                    },
+                  },
                 },
                 required: [
                   "complianceOfficer", "officerQualifications", "policiesLastUpdated",
                   "trainingConducted", "trainingDates", "independentAudit",
                   "auditFindings", "riskAssessmentSummary", "keyRisksIdentified",
                   "mitigatingControls", "actionsTaken", "recommendations",
+                  "compliance_tasks",
                 ],
                 additionalProperties: false,
               },
@@ -184,13 +226,17 @@ Fields to fill:
 
     const aiResult = await aiResponse.json();
 
-    let generated: Record<string, string> = {};
+    let generated: Record<string, any> = {};
     const toolCall = aiResult.choices?.[0]?.message?.tool_calls?.[0];
     if (toolCall?.function?.arguments) {
       generated = typeof toolCall.function.arguments === "string"
         ? JSON.parse(toolCall.function.arguments)
         : toolCall.function.arguments;
     }
+
+    // Extract compliance tasks before merging content
+    const complianceTasks = generated.compliance_tasks || [];
+    delete generated.compliance_tasks;
 
     // Merge: keep user content if non-empty
     const merged: Record<string, string> = {};
@@ -199,11 +245,11 @@ Fields to fill:
       if (existing && String(existing).trim().length > 0) {
         merged[key] = existing;
       } else {
-        merged[key] = val;
+        merged[key] = String(val);
       }
     }
 
-    return new Response(JSON.stringify({ content: merged }), {
+    return new Response(JSON.stringify({ content: merged, compliance_tasks: complianceTasks }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
