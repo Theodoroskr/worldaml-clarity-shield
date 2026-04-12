@@ -782,6 +782,8 @@ function ReportEditForm({ report, regulator, regulatorFullName, onSave, onCancel
   const [content, setContent] = useState<Record<string, any>>(report.content);
   const [notes, setNotes] = useState(report.notes || "");
   const [aiLoading, setAiLoading] = useState(false);
+  const [complianceTasks, setComplianceTasks] = useState<ComplianceTask[]>([]);
+  const [dismissedTasks, setDismissedTasks] = useState<Set<string>>(new Set());
 
   const updateField = (key: string, value: string) => {
     setContent(prev => ({ ...prev, [key]: value }));
@@ -809,6 +811,13 @@ function ReportEditForm({ report, regulator, regulatorFullName, onSave, onCancel
       if (data?.content) {
         setContent(data.content);
         onContentUpdate(data.content);
+      }
+
+      if (data?.compliance_tasks?.length > 0) {
+        setComplianceTasks(data.compliance_tasks);
+        setDismissedTasks(new Set());
+        toast.success(`AI drafted report sections and identified ${data.compliance_tasks.length} compliance tasks.`);
+      } else {
         toast.success("AI has drafted the qualitative sections. Review and edit as needed.");
       }
     } catch (err: any) {
@@ -818,6 +827,8 @@ function ReportEditForm({ report, regulator, regulatorFullName, onSave, onCancel
       setAiLoading(false);
     }
   };
+
+  const activeTasks = complianceTasks.filter(t => !dismissedTasks.has(t.title));
 
   return (
     <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
@@ -847,8 +858,30 @@ function ReportEditForm({ report, regulator, regulatorFullName, onSave, onCancel
           <Loader2 className="w-4 h-4 animate-spin text-primary" />
           <p className="text-xs text-muted-foreground">
             AI is analyzing your database and drafting report sections for <strong>{regulatorFullName}</strong>. 
-            Existing content will be preserved...
+            Identifying compliance gaps and remediation tasks...
           </p>
+        </div>
+      )}
+
+      {/* Compliance Tasks Panel */}
+      {activeTasks.length > 0 && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <h4 className="text-sm font-semibold text-foreground">
+              Compliance Gap Tasks ({activeTasks.length})
+            </h4>
+            <span className="text-[10px] text-muted-foreground ml-auto">AI-identified actions to avoid penalties</span>
+          </div>
+          <div className="space-y-2">
+            {activeTasks.map((task, idx) => (
+              <ComplianceTaskCard
+                key={idx}
+                task={task}
+                onDismiss={() => setDismissedTasks(prev => new Set([...prev, task.title]))}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -881,6 +914,59 @@ function ReportEditForm({ report, regulator, regulatorFullName, onSave, onCancel
         <Button size="sm" onClick={() => onSave(report, content, notes)}>Save</Button>
         <Button size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
       </div>
+    </div>
+  );
+}
+
+/* ─── Compliance Task Types & Card ─── */
+interface ComplianceTask {
+  title: string;
+  description: string;
+  priority: "critical" | "high" | "medium" | "low";
+  deadline: string;
+  regulation: string;
+}
+
+const PRIORITY_CONFIG = {
+  critical: { icon: CircleAlert, color: "text-red-600", bg: "bg-red-500/10 border-red-500/20", label: "Critical" },
+  high: { icon: AlertTriangle, color: "text-orange-600", bg: "bg-orange-500/10 border-orange-500/20", label: "High" },
+  medium: { icon: Info, color: "text-amber-600", bg: "bg-amber-500/10 border-amber-500/20", label: "Medium" },
+  low: { icon: Info, color: "text-blue-600", bg: "bg-blue-500/10 border-blue-500/20", label: "Low" },
+};
+
+function ComplianceTaskCard({ task, onDismiss }: { task: ComplianceTask; onDismiss: () => void }) {
+  const config = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.medium;
+  const PriorityIcon = config.icon;
+
+  return (
+    <div className={`flex items-start gap-3 rounded-md border px-3 py-2.5 ${config.bg}`}>
+      <PriorityIcon className={`w-4 h-4 mt-0.5 shrink-0 ${config.color}`} />
+      <div className="flex-1 min-w-0 space-y-1">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium text-foreground">{task.title}</p>
+          <Badge variant="outline" className={`text-[10px] shrink-0 ${config.bg}`}>
+            {config.label}
+          </Badge>
+        </div>
+        <p className="text-xs text-muted-foreground">{task.description}</p>
+        <div className="flex items-center gap-3 text-[10px] text-muted-foreground/80">
+          <span className="flex items-center gap-1">
+            <Clock className="w-3 h-3" /> {task.deadline}
+          </span>
+          <span className="flex items-center gap-1">
+            <FileText className="w-3 h-3" /> {task.regulation}
+          </span>
+        </div>
+      </div>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="shrink-0 h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+        onClick={onDismiss}
+        title="Mark as addressed"
+      >
+        <CheckSquare className="w-3.5 h-3.5" />
+      </Button>
     </div>
   );
 }
