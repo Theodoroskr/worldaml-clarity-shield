@@ -1,12 +1,63 @@
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, MapPin, AlertTriangle, Shield, CheckCircle2, XCircle, Info, X } from "lucide-react";
+import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, MapPin, AlertTriangle, Shield, CheckCircle2, XCircle, Info, X, ClipboardCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { exportSAR } from "@/services/sarExport";
 import { exportFINTRACStr, DEFAULT_MANUAL_FIELDS, type FINTRACManualFields } from "@/services/fintracStrExport";
 import { exportMOKASStr, DEFAULT_MOKAS_FIELDS, type MOKASManualFields } from "@/services/mokasStrExport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+
+/* ── Regulator → Required Reports Mapping ── */
+interface ReportObligation {
+  id: string;
+  name: string;
+  regulator: string;
+  description: string;
+  deadline: string;
+  threshold?: string;
+  legalBasis: string;
+  exportKey: "sar" | "fintrac" | "mokas";
+}
+
+const REGULATOR_REPORTS: Record<string, ReportObligation[]> = {
+  FinCEN: [
+    { id: "sar", name: "SAR", regulator: "FinCEN", description: "Suspicious Activity Report", deadline: "30 calendar days", legalBasis: "BSA 31 CFR §1020.320", exportKey: "sar" },
+    { id: "ctr", name: "CTR", regulator: "FinCEN", description: "Currency Transaction Report (cash ≥ $10,000)", deadline: "15 calendar days", threshold: "$10,000 cash", legalBasis: "BSA 31 CFR §1010.311", exportKey: "sar" },
+  ],
+  FINTRAC: [
+    { id: "str", name: "STR", regulator: "FINTRAC", description: "Suspicious Transaction Report", deadline: "3 business days", legalBasis: "PCMLTFA s.7", exportKey: "fintrac" },
+    { id: "lctr", name: "LCTR", regulator: "FINTRAC", description: "Large Cash Transaction Report (≥ CAD 10,000)", deadline: "15 calendar days", threshold: "CAD 10,000", legalBasis: "PCMLTFR s.132", exportKey: "fintrac" },
+    { id: "eftr", name: "EFTR", regulator: "FINTRAC", description: "Electronic Funds Transfer Report (≥ CAD 10,000)", deadline: "15 calendar days", threshold: "CAD 10,000", legalBasis: "PCMLTFR s.12", exportKey: "fintrac" },
+    { id: "tpr", name: "TPR", regulator: "FINTRAC", description: "Terrorist Property Report", deadline: "Immediately", legalBasis: "PCMLTFA s.7.1 / Criminal Code s.83.08", exportKey: "fintrac" },
+  ],
+  FCA: [
+    { id: "sar_uk", name: "SAR (NCA)", regulator: "FCA", description: "Suspicious Activity Report to NCA", deadline: "As soon as practicable", legalBasis: "POCA 2002 s.330-332", exportKey: "sar" },
+    { id: "daml", name: "DAML", regulator: "FCA", description: "Defence Against Money Laundering", deadline: "Before proceeding with transaction", legalBasis: "POCA 2002 s.335", exportKey: "sar" },
+  ],
+  "EU AMLD": [
+    { id: "str_eu", name: "STR", regulator: "EU AMLD", description: "Suspicious Transaction Report to FIU", deadline: "Without delay", legalBasis: "6AMLD Art. 33", exportKey: "sar" },
+    { id: "threshold_eu", name: "Threshold Report", regulator: "EU AMLD", description: "Cash transactions ≥ €10,000", deadline: "Within reporting period", threshold: "€10,000", legalBasis: "6AMLD Art. 11", exportKey: "sar" },
+  ],
+  CySEC: [
+    { id: "mokas_str", name: "STR (MOKAS)", regulator: "CySEC", description: "Suspicious Transaction Report to MOKAS", deadline: "3 working days", legalBasis: "AML Law 188(I)/2007 Art. 27", exportKey: "mokas" },
+    { id: "mokas_threshold", name: "Threshold Report", regulator: "CySEC", description: "Cash transactions ≥ €10,000", deadline: "Within reporting period", threshold: "€10,000", legalBasis: "AML Law 188(I)/2007 Art. 58", exportKey: "mokas" },
+  ],
+  ICPAC: [
+    { id: "mokas_str_icpac", name: "STR (MOKAS)", regulator: "ICPAC", description: "Suspicious Transaction Report to MOKAS", deadline: "3 working days", legalBasis: "AML Law 188(I)/2007 Art. 27", exportKey: "mokas" },
+  ],
+  "CBA Cyprus": [
+    { id: "mokas_str_cba", name: "STR (MOKAS)", regulator: "CBA Cyprus", description: "Suspicious Transaction Report to MOKAS", deadline: "3 working days", legalBasis: "AML Law 188(I)/2007 Art. 27", exportKey: "mokas" },
+  ],
+};
+
+// Which export buttons to show per regulator
+function getAvailableExports(regulator: string | null): Set<string> {
+  if (!regulator) return new Set(["sar", "fintrac", "mokas"]); // show all if unknown
+  const reports = REGULATOR_REPORTS[regulator];
+  if (!reports) return new Set(["sar", "fintrac", "mokas"]);
+  return new Set(reports.map(r => r.exportKey));
+}
 
 /* ── FINTRAC STR Field Mapping ── */
 interface FieldMapping {
@@ -173,15 +224,24 @@ export default function SuiteCases() {
     if (mokasValidationErrors.length > 0) setMokasValidationErrors([]);
   };
 
+  // ── Regulator auto-detection ──
+  const [userRegulator, setUserRegulator] = useState<string | null>(null);
+  const [showChecklist, setShowChecklist] = useState(false);
+  const [filedReports, setFiledReports] = useState<Set<string>>(new Set());
+  const availableExports = getAvailableExports(userRegulator);
+  const regulatorReports = userRegulator ? (REGULATOR_REPORTS[userRegulator] || []) : [];
+
   const fetchCases = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const [cRes, aRes] = await Promise.all([
+    const [cRes, aRes, profileRes] = await Promise.all([
       supabase.from("suite_cases").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("suite_alerts").select("id, title").eq("user_id", user.id).eq("status", "open"),
+      supabase.from("profiles").select("regulator").eq("user_id", user.id).maybeSingle(),
     ]);
     setCases(cRes.data || []);
     setAlerts(aRes.data || []);
+    if (profileRes.data?.regulator) setUserRegulator(profileRes.data.regulator);
     setLoading(false);
   };
 
@@ -553,6 +613,11 @@ export default function SuiteCases() {
             </div>
           </div>
           <div className="flex gap-1.5 flex-wrap">
+            <button onClick={() => setShowChecklist(!showChecklist)}
+              className={cn("flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors",
+                showChecklist ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-foreground border-border hover:bg-muted/80")}>
+              <ClipboardCheck className="w-3 h-3" /> Compliance Checklist
+            </button>
             {selectedCase.status === "open" && (
               <button onClick={() => updateStatus(selectedCase.id, "investigating")}
                 className="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100">
@@ -561,18 +626,24 @@ export default function SuiteCases() {
             )}
             {selectedCase.status === "investigating" && (
               <>
-                <button onClick={() => updateStatus(selectedCase.id, "sar_filed")}
-                  className="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg hover:bg-purple-100">
-                  File SAR (FinCEN)
-                </button>
-                <button onClick={() => updateStatus(selectedCase.id, "str_filed")}
-                  className="text-xs px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100">
-                  File STR (FINTRAC)
-                </button>
-                <button onClick={() => updateStatus(selectedCase.id, "str_filed")}
-                  className="text-xs px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-100">
-                  File STR (MOKAS)
-                </button>
+                {availableExports.has("sar") && (
+                  <button onClick={() => updateStatus(selectedCase.id, "sar_filed")}
+                    className="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg hover:bg-purple-100">
+                    File SAR (FinCEN)
+                  </button>
+                )}
+                {availableExports.has("fintrac") && (
+                  <button onClick={() => updateStatus(selectedCase.id, "str_filed")}
+                    className="text-xs px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100">
+                    File STR (FINTRAC)
+                  </button>
+                )}
+                {availableExports.has("mokas") && (
+                  <button onClick={() => updateStatus(selectedCase.id, "str_filed")}
+                    className="text-xs px-3 py-1.5 bg-teal-50 text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-100">
+                    File STR (MOKAS)
+                  </button>
+                )}
               </>
             )}
             {selectedCase.status !== "closed" && (
@@ -581,7 +652,7 @@ export default function SuiteCases() {
                 Close
               </button>
             )}
-            {(selectedCase.status === "sar_filed" || selectedCase.status === "closed") && (
+            {(selectedCase.status === "sar_filed" || selectedCase.status === "closed") && availableExports.has("sar") && (
               <button onClick={handleExportSAR}
                 className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-medium">
                 <Download className="w-3 h-3" /> SAR PDF
@@ -589,18 +660,139 @@ export default function SuiteCases() {
             )}
             {(selectedCase.status === "str_filed" || selectedCase.status === "sar_filed" || selectedCase.status === "closed") && (
               <>
-                <button onClick={() => { setShowFintracPanel(!showFintracPanel); setShowMokasPanel(false); }}
-                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
-                  <Flag className="w-3 h-3" /> FINTRAC Report
-                </button>
-                <button onClick={() => { setShowMokasPanel(!showMokasPanel); setShowFintracPanel(false); }}
-                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium">
-                  <MapPin className="w-3 h-3" /> MOKAS Report
-                </button>
+                {availableExports.has("fintrac") && (
+                  <button onClick={() => { setShowFintracPanel(!showFintracPanel); setShowMokasPanel(false); }}
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                    <Flag className="w-3 h-3" /> FINTRAC Report
+                  </button>
+                )}
+                {availableExports.has("mokas") && (
+                  <button onClick={() => { setShowMokasPanel(!showMokasPanel); setShowFintracPanel(false); }}
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium">
+                    <MapPin className="w-3 h-3" /> MOKAS Report
+                  </button>
+                )}
               </>
             )}
           </div>
         </div>
+
+        {/* Compliance Checklist Panel */}
+        {showChecklist && (
+          <div className="bg-card border border-border rounded-xl overflow-hidden animate-fade-in">
+            <div className="px-5 py-4 border-b border-border bg-muted/30 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ClipboardCheck className="w-4 h-4 text-primary" />
+                <h2 className="font-semibold text-foreground text-sm">
+                  Regulatory Reporting Obligations
+                  {userRegulator && (
+                    <span className="ml-2 text-xs font-normal px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                      {userRegulator}
+                    </span>
+                  )}
+                </h2>
+              </div>
+              {!userRegulator && (
+                <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full font-medium">
+                  No regulator set — showing all obligations
+                </span>
+              )}
+            </div>
+            {regulatorReports.length > 0 ? (
+              <div className="divide-y divide-border">
+                {regulatorReports.map(report => {
+                  const isFiled = filedReports.has(report.id) ||
+                    (report.exportKey === "sar" && (selectedCase.status === "sar_filed" || selectedCase.status === "closed")) ||
+                    (report.exportKey === "fintrac" && selectedCase.status === "str_filed") ||
+                    (report.exportKey === "mokas" && selectedCase.status === "str_filed");
+                  return (
+                    <div key={report.id} className={cn("px-5 py-3 flex items-center gap-4", isFiled && "bg-emerald-50/30")}>
+                      <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                        isFiled ? "border-emerald-500 bg-emerald-100" : "border-muted-foreground/30 bg-background"
+                      )}>
+                        {isFiled && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-foreground">{report.name}</span>
+                          <span className="text-[10px] text-muted-foreground">— {report.description}</span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-0.5">
+                          <span className="text-[10px] text-muted-foreground">
+                            <strong>Deadline:</strong> {report.deadline}
+                          </span>
+                          {report.threshold && (
+                            <span className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-medium">
+                              Threshold: {report.threshold}
+                            </span>
+                          )}
+                          <span className="text-[10px] text-muted-foreground font-mono">{report.legalBasis}</span>
+                        </div>
+                      </div>
+                      <div>
+                        {isFiled ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold">
+                            Filed
+                          </span>
+                        ) : (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200 font-semibold">
+                            Pending
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="px-5 py-6">
+                <p className="text-sm text-muted-foreground mb-3">All jurisdictions' reporting obligations are available:</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {Object.entries(REGULATOR_REPORTS).map(([reg, reports]) => (
+                    <div key={reg} className="border border-border rounded-lg p-3">
+                      <h4 className="text-xs font-bold text-foreground mb-1.5">{reg}</h4>
+                      <div className="space-y-1">
+                        {reports.map(r => (
+                          <div key={r.id} className="flex items-center gap-2">
+                            <span className="text-[10px] font-semibold text-primary">{r.name}</span>
+                            <span className="text-[10px] text-muted-foreground">{r.description}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {regulatorReports.length > 0 && (() => {
+              const filed = regulatorReports.filter(r =>
+                filedReports.has(r.id) ||
+                (r.exportKey === "sar" && (selectedCase.status === "sar_filed" || selectedCase.status === "closed")) ||
+                (r.exportKey === "fintrac" && selectedCase.status === "str_filed") ||
+                (r.exportKey === "mokas" && selectedCase.status === "str_filed")
+              ).length;
+              const total = regulatorReports.length;
+              const pct = Math.round((filed / total) * 100);
+              return (
+                <div className="px-5 py-3 border-t border-border bg-muted/20 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                      <div className={cn("h-full rounded-full transition-all",
+                        pct === 100 ? "bg-emerald-500" : pct >= 50 ? "bg-amber-500" : "bg-red-400"
+                      )} style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="text-[11px] font-semibold text-muted-foreground">{filed}/{total} obligations addressed</span>
+                  </div>
+                  <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full",
+                    pct === 100 ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                  )}>
+                    {pct === 100 ? "✓ Compliant" : `${pct}% Complete`}
+                  </span>
+                </div>
+              );
+            })()}
+          </div>
+        )}
 
         {/* FINTRAC Export Panel */}
         {showFintracPanel && (
@@ -1523,7 +1715,12 @@ export default function SuiteCases() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-foreground">Case Management — SAR / STR Filing</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">FinCEN SAR · FINTRAC STR/LCTR/EFTR/TPR · MOKAS STR (Cyprus) · Multi-jurisdiction reporting</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {userRegulator
+              ? `${userRegulator} · ${(REGULATOR_REPORTS[userRegulator] || []).map(r => r.name).join(" · ")} · Auto-detected from profile`
+              : "FinCEN SAR · FINTRAC STR/LCTR/EFTR/TPR · MOKAS STR (Cyprus) · Multi-jurisdiction reporting"
+            }
+          </p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium"><Plus className="w-3.5 h-3.5" /> New Case</button>
       </div>
