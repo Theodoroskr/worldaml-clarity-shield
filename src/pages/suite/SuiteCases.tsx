@@ -164,6 +164,15 @@ export default function SuiteCases() {
     if (validationErrors.length > 0) setValidationErrors([]);
   };
 
+  // MOKAS (Cyprus) state
+  const [showMokasPanel, setShowMokasPanel] = useState(false);
+  const [mokasFields, setMokasFields] = useState<MOKASManualFields>({ ...DEFAULT_MOKAS_FIELDS });
+  const [mokasValidationErrors, setMokasValidationErrors] = useState<string[]>([]);
+  const setMokasF = (patch: Partial<MOKASManualFields>) => {
+    setMokasFields(prev => ({ ...prev, ...patch }));
+    if (mokasValidationErrors.length > 0) setMokasValidationErrors([]);
+  };
+
   const fetchCases = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
