@@ -348,6 +348,13 @@ export default function SuiteCases() {
         camloName: "CAMLO Name",
         actionTaken: "Action Taken",
         notes: "Investigation Narrative (add case notes)",
+        tprTerroristEntityName: "Listed Entity Name",
+        tprListedUnder: "Listed Under (Regulation)",
+        tprDateDiscovered: "Date Property Discovered",
+        tprPropertyType: "Property Type",
+        tprPropertyValue: "Property Value",
+        tprPropertyDescription: "Property Description",
+        tprDispositionAction: "Disposition Action",
       };
       const missing = errors.map(e => labels[e] || e).join(", ");
       toast.error(`Missing mandatory fields: ${missing}`, { duration: 6000 });
