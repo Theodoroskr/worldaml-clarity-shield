@@ -613,6 +613,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          regulator: string | null
           status: string
           subscription_tier: string
           suite_access_granted_at: string | null
@@ -627,6 +628,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          regulator?: string | null
           status?: string
           subscription_tier?: string
           suite_access_granted_at?: string | null
@@ -641,6 +643,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          regulator?: string | null
           status?: string
           subscription_tier?: string
           suite_access_granted_at?: string | null
@@ -1372,10 +1375,12 @@ export type Database = {
       }
     }
     Functions: {
-      admin_grant_suite_access: {
-        Args: { target_email: string }
-        Returns: undefined
-      }
+      admin_grant_suite_access:
+        | { Args: { target_email: string }; Returns: undefined }
+        | {
+            Args: { target_email: string; target_regulator?: string }
+            Returns: undefined
+          }
       admin_revoke_suite_access: {
         Args: { target_email: string }
         Returns: undefined
