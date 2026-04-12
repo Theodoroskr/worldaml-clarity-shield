@@ -673,7 +673,7 @@ export default function SuiteTransactions() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 );
               })}
             </tbody>
