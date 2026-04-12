@@ -819,13 +819,14 @@ function formatFieldLabel(key: string): string {
 }
 
 /* ─── Edit Form with AI Assist ─── */
-function ReportEditForm({ report, regulator, regulatorFullName, onSave, onCancel, onContentUpdate }: {
+function ReportEditForm({ report, regulator, regulatorFullName, onSave, onCancel, onContentUpdate, onAIAssisted }: {
   report: PeriodicReport;
   regulator: string;
   regulatorFullName: string;
   onSave: (report: PeriodicReport, content: Record<string, any>, notes: string) => void;
   onCancel: () => void;
   onContentUpdate: (content: Record<string, any>) => void;
+  onAIAssisted?: () => void;
 }) {
   const [content, setContent] = useState<Record<string, any>>(report.content);
   const [notes, setNotes] = useState(report.notes || "");
