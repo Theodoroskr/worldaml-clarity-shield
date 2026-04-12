@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   FileText, AlertTriangle, Shield, Scale, Flag, Download,
   ChevronDown, ChevronRight, Search, BookOpen, MapPin, Gavel,
+  CheckSquare, ClipboardList,
 } from "lucide-react";
 
 interface HelpSection {
