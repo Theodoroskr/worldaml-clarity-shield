@@ -82,12 +82,13 @@ interface KYCForm {
   occupation: string;
   sourceOfFunds: string;
   pep: string;
+  regulator: string;
 }
 
 const emptyKYC: KYCForm = {
   firstName: "", lastName: "", email: "", dateOfBirth: "", nationality: "", country: "",
   address: "", city: "", postalCode: "", idType: "passport", idNumber: "",
-  occupation: "", sourceOfFunds: "", pep: "no",
+  occupation: "", sourceOfFunds: "", pep: "no", regulator: "",
 };
 
 // KYB form state
@@ -111,6 +112,7 @@ interface KYBForm {
   uboName: string;
   uboNationality: string;
   uboOwnership: string;
+  regulator: string;
 }
 
 const emptyKYB: KYBForm = {
@@ -118,8 +120,98 @@ const emptyKYB: KYBForm = {
   legalStructure: "limited", industry: "", website: "", registeredAddress: "",
   city: "", postalCode: "", contactName: "", contactEmail: "", contactPhone: "",
   annualTurnover: "", numberOfEmployees: "", sourceOfFunds: "",
-  uboName: "", uboNationality: "", uboOwnership: "",
+  uboName: "", uboNationality: "", uboOwnership: "", regulator: "",
 };
+
+// Auto-provision baseline alert rules for the selected regulator
+async function provisionRegulatoryRules(userId: string, regulatorId: string, customerName: string) {
+  const profile = REGULATORY_PROFILES[regulatorId];
+  if (!profile) return;
+
+  // Check which rules already exist for this user to avoid duplicates
+  const { data: existing } = await supabase.from("suite_alert_rules")
+    .select("name")
+    .eq("user_id", userId);
+  const existingNames = new Set((existing || []).map(r => r.name));
+
+  const newRules = profile.baselineRules.filter(r => !existingNames.has(r.name));
+  if (newRules.length === 0) return;
+
+  const inserts = newRules.map(rule => ({
+    user_id: userId,
+    name: rule.name,
+    severity: rule.severity,
+    conditions: rule.conditions,
+    is_active: true,
+  }));
+
+  const { error } = await supabase.from("suite_alert_rules").insert(inserts);
+  if (error) {
+    console.error("Failed to provision rules:", error);
+  } else {
+    toast.success(`${newRules.length} ${profile.shortName} alert rules auto-configured`);
+    // Audit log
+    await supabase.from("suite_audit_log").insert({
+      user_id: userId,
+      action: `Auto-provisioned ${newRules.length} ${profile.shortName} rules for ${customerName}`,
+      entity_type: "alert_rule",
+      details: { regulator: regulatorId, rules_added: newRules.map(r => r.name) },
+    });
+  }
+}
+
+// Regulator picker component
+function RegulatorPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const selected = value ? REGULATORY_PROFILES[value] : null;
+
+  return (
+    <div className="mb-6">
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-1.5">
+        <Shield className="w-3.5 h-3.5" /> Regulatory Jurisdiction
+      </h3>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="col-span-2">
+          <FormField label="Reporting Regulator" required>
+            <Select value={value} onValueChange={onChange}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select regulator…" /></SelectTrigger>
+              <SelectContent>
+                {REGULATOR_OPTIONS.map(r => (
+                  <SelectItem key={r.id} value={r.id}>
+                    <span className="font-medium">{r.label}</span>
+                    <span className="text-muted-foreground ml-1.5">({r.country})</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+        </div>
+      </div>
+
+      {selected && (
+        <div className="mt-3 p-3 bg-muted/30 border border-border rounded-lg space-y-2 animate-fade-in">
+          <p className="text-xs font-medium text-foreground">{selected.name}</p>
+          <p className="text-[10px] text-muted-foreground">{selected.legislation}</p>
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {selected.reportingObligations.map(ob => (
+              <span key={ob.code} className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">
+                <FileText className="w-2.5 h-2.5" /> {ob.code}
+                {ob.threshold && <span className="text-muted-foreground">({ob.threshold})</span>}
+              </span>
+            ))}
+          </div>
+          <div className="mt-2">
+            <p className="text-[10px] font-medium text-muted-foreground mb-1">Auto-configured on submit:</p>
+            <ul className="text-[10px] text-muted-foreground space-y-0.5">
+              <li className="flex items-center gap-1"><AlertTriangle className="w-2.5 h-2.5 text-amber-500" /> {selected.baselineRules.length} monitoring rules</li>
+              <li className="flex items-center gap-1"><Shield className="w-2.5 h-2.5 text-primary" /> Risk weights: Country {selected.riskWeights.countryRisk}%, Screening {selected.riskWeights.screeningMatches}%, Transactions {selected.riskWeights.transactions}%</li>
+              <li className="flex items-center gap-1"><FileText className="w-2.5 h-2.5 text-emerald-500" /> {selected.reportingObligations.length} reporting obligations</li>
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const KYC_STATUSES = ["pending", "in_review", "verified", "rejected"];
 const RISK_LEVELS = ["low", "medium", "high", "critical"];
