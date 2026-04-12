@@ -211,10 +211,23 @@ export default function SuiteCases() {
   const openCase = async (c: CaseItem) => {
     setSelectedCase(c);
     setShowFintracPanel(false);
+    setShowFieldMapping(false);
+    setCaseCustomer(null);
+    setCaseTransactions([]);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const { data } = await supabase.from("suite_case_notes").select("*").eq("case_id", c.id).eq("user_id", user.id).order("created_at", { ascending: true });
     setNotes(data || []);
+
+    // Fetch customer & transactions for field mapping
+    if (c.customer_id) {
+      const [custRes, txRes] = await Promise.all([
+        supabase.from("suite_customers").select("*").eq("id", c.customer_id).single(),
+        supabase.from("suite_transactions").select("*").eq("customer_id", c.customer_id).eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
+      ]);
+      setCaseCustomer(custRes.data);
+      setCaseTransactions(txRes.data || []);
+    }
   };
 
   const addNote = async () => {
