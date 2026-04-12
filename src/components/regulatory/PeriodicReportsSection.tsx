@@ -486,6 +486,17 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
     });
   }, [user]);
 
+  const logAudit = useCallback(async (action: string, entityId: string, details?: Record<string, any>) => {
+    if (!user) return;
+    await supabase.from("suite_audit_log").insert({
+      user_id: user.id,
+      action,
+      entity_type: "periodic_report",
+      entity_id: entityId,
+      details: details || {},
+    });
+  }, [user]);
+
   useEffect(() => { fetchReports(); fetchStats(); }, [fetchReports, fetchStats]);
 
   const actionableObligations = periodicObligations.filter(o => o.frequencyMonths || (o.month !== undefined));
