@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
-  TrendingUp, Users, Activity, AlertTriangle, Briefcase, Clock, CheckCircle, Bell, ChevronRight
+  TrendingUp, Users, Activity, AlertTriangle, Briefcase, Clock, CheckCircle, Bell, ChevronRight,
+  CalendarClock,
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid,
@@ -9,6 +10,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Timeline, TimelineEvent } from "@/components/ui/timeline";
 import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
+import { format, differenceInDays, addMonths, isPast } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 const trendData = [
   { date: "30/01", flagged: 0, clear: 29, pending: 0 },
@@ -48,6 +52,7 @@ export default function SuiteDashboard() {
   const [customerCount, setCustomerCount] = useState(0);
   const [openAlerts, setOpenAlerts] = useState(0);
   const [screeningCount, setScreeningCount] = useState(0);
+  const [regulator, setRegulator] = useState<string | null>(null);
   const [riskDistribution, setRiskDistribution] = useState([
     { name: "High Risk", value: 0, color: "hsl(0,84%,60%)" },
     { name: "Medium Risk", value: 0, color: "hsl(36,95%,53%)" },
@@ -56,6 +61,7 @@ export default function SuiteDashboard() {
   ]);
   const [auditEvents, setAuditEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -63,12 +69,15 @@ export default function SuiteDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [customersRes, alertsRes, screeningsRes, auditRes] = await Promise.all([
+      const [customersRes, alertsRes, screeningsRes, auditRes, profileRes] = await Promise.all([
         supabase.from("suite_customers").select("id, risk_level").eq("user_id", user.id),
         supabase.from("suite_alerts").select("id, status").eq("user_id", user.id),
         supabase.from("suite_screenings").select("id").eq("user_id", user.id),
         supabase.from("suite_audit_log").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
+        supabase.from("profiles").select("regulator").eq("user_id", user.id).single(),
       ]);
+
+      setRegulator(profileRes.data?.regulator ?? null);
 
       const customers = customersRes.data || [];
       const alerts = alertsRes.data || [];
@@ -102,6 +111,72 @@ export default function SuiteDashboard() {
     };
     fetchData();
   }, []);
+
+  /* ─── Compliance Calendar from Regulatory Hub data ─── */
+  const PERIODIC_BY_REGULATOR: Record<string, { title: string; deadline: string; month?: number; day?: number; frequencyMonths?: number }[]> = {
+    fincen: [
+      { title: "BSA/AML Compliance Program Review", deadline: "Annual", frequencyMonths: 12 },
+      { title: "OFAC Sanctions List Update", deadline: "Continuous" },
+    ],
+    fintrac: [
+      { title: "Two-Year Effectiveness Review", deadline: "Every 2 years", frequencyMonths: 24 },
+      { title: "Risk Assessment Update", deadline: "As needed / ongoing" },
+    ],
+    fca: [
+      { title: "REP-CRIM (Annual Financial Crime Report)", deadline: "Annually (30 business days after period end)", frequencyMonths: 12 },
+      { title: "AML/CTF Risk Assessment", deadline: "Ongoing / Annual review", frequencyMonths: 12 },
+    ],
+    cysec: [
+      { title: "Annual Compliance Report (ACR)", deadline: "By 30 April", month: 3, day: 30 },
+      { title: "Internal Audit Report", deadline: "Annually", frequencyMonths: 12 },
+    ],
+    icpac: [
+      { title: "Internal Assessment Report (IAR)", deadline: "Annually", frequencyMonths: 12 },
+      { title: "AML Compliance Questionnaire", deadline: "Annually", frequencyMonths: 12 },
+    ],
+    amld: [
+      { title: "Risk Assessment Review", deadline: "Ongoing" },
+    ],
+  };
+
+  const calendarItems = useMemo(() => {
+    if (!regulator) return [];
+    const obligations = PERIODIC_BY_REGULATOR[regulator.toLowerCase()] ?? [];
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    return obligations
+      .map((ob) => {
+        let nextDue: Date | null = null;
+        let daysUntil: number | null = null;
+
+        if (ob.month !== undefined && ob.day !== undefined) {
+          nextDue = new Date(currentYear, ob.month, ob.day);
+          if (isPast(nextDue)) nextDue = new Date(currentYear + 1, ob.month, ob.day);
+          daysUntil = differenceInDays(nextDue, now);
+        } else if (ob.frequencyMonths) {
+          nextDue = new Date(currentYear, ob.frequencyMonths - 1, 1);
+          while (isPast(nextDue)) nextDue = addMonths(nextDue, ob.frequencyMonths);
+          daysUntil = differenceInDays(nextDue, now);
+        }
+
+        const status =
+          daysUntil !== null && daysUntil < 0 ? "overdue"
+          : daysUntil !== null && daysUntil <= 30 ? "urgent"
+          : daysUntil !== null && daysUntil <= 90 ? "upcoming"
+          : nextDue ? "on-track"
+          : "continuous";
+
+        return { title: ob.title, deadline: ob.deadline, nextDue, daysUntil, status };
+      })
+      .sort((a, b) => {
+        const order: Record<string, number> = { overdue: 0, urgent: 1, upcoming: 2, "on-track": 3, continuous: 4 };
+        const diff = (order[a.status] ?? 5) - (order[b.status] ?? 5);
+        if (diff !== 0) return diff;
+        if (a.daysUntil !== null && b.daysUntil !== null) return a.daysUntil - b.daysUntil;
+        return 0;
+      });
+  }, [regulator]);
 
   const kpiData = [
     { label: "Active Customers", value: customerCount.toLocaleString(), change: "live", positive: true, icon: Users, color: "text-primary", bg: "bg-primary/10", spark: [30,35,32,40,38,44,50,48,52, customerCount] },
@@ -200,7 +275,78 @@ export default function SuiteDashboard() {
         </div>
       </div>
 
-      {/* Activity Feed */}
+      {/* Compliance Calendar Widget */}
+      <div className="bg-card rounded-xl border border-border">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <CalendarClock className="w-4 h-4 text-primary" />
+            <div>
+              <h2 className="font-semibold text-foreground">Compliance Calendar</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Upcoming periodic filing deadlines</p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/suite/regulatory")}
+            className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+          >
+            View all <ChevronRight className="w-3 h-3" />
+          </button>
+        </div>
+        <div className="p-4">
+          {!regulator ? (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              Set your regulator in{" "}
+              <button onClick={() => navigate("/suite/settings")} className="text-primary underline underline-offset-2 hover:text-primary/80">
+                Settings
+              </button>{" "}
+              to see filing deadlines.
+            </p>
+          ) : calendarItems.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No periodic obligations found for your regulator.</p>
+          ) : (
+            <div className="divide-y divide-border">
+              {calendarItems.map((item, i) => (
+                <div key={i} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                  <div className="shrink-0">
+                    {item.status === "overdue" ? (
+                      <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+                    ) : item.status === "urgent" ? (
+                      <div className="w-2 h-2 rounded-full bg-orange-500" />
+                    ) : item.status === "upcoming" ? (
+                      <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                    ) : item.status === "on-track" ? (
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                    ) : (
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground/30" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium text-foreground truncate block">{item.title}</span>
+                  </div>
+                  <div className="text-right shrink-0">
+                    {item.nextDue ? (
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-medium text-foreground">{format(item.nextDue, "d MMM yyyy")}</div>
+                        <div className={cn("text-[10px]",
+                          item.daysUntil !== null && item.daysUntil <= 30 ? "text-destructive font-semibold" : "text-muted-foreground"
+                        )}>
+                          {item.daysUntil !== null && item.daysUntil >= 0
+                            ? `${item.daysUntil}d left`
+                            : item.daysUntil !== null
+                            ? `${Math.abs(item.daysUntil)}d overdue`
+                            : ""}
+                        </div>
+                      </div>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">{item.deadline}</Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
       <div className="bg-card rounded-xl border border-border">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h2 className="font-semibold text-foreground">Recent Activity</h2>
