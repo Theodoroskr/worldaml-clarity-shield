@@ -258,7 +258,11 @@ export default function SuiteTransactions() {
     if (!txAlerts[txId]) {
       setAlertsLoading(txId);
       const { data } = await supabase.from("suite_alerts").select("id, title, severity, status, created_at, rule_id, description").eq("transaction_id", txId).order("created_at", { ascending: false });
-      setTxAlerts(prev => ({ ...prev, [txId]: (data as AlertRow[]) || [] }));
+      const enriched = (data || []).map((a: any) => ({
+        ...a,
+        rule_name: a.rule_id && rulesMap[a.rule_id] ? rulesMap[a.rule_id].name : null,
+      }));
+      setTxAlerts(prev => ({ ...prev, [txId]: enriched as AlertRow[] }));
       setAlertsLoading(null);
     }
   };
