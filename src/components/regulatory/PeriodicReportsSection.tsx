@@ -486,6 +486,17 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
     });
   }, [user]);
 
+  const logAudit = useCallback(async (action: string, entityId: string, details?: Record<string, any>) => {
+    if (!user) return;
+    await supabase.from("suite_audit_log").insert({
+      user_id: user.id,
+      action,
+      entity_type: "periodic_report",
+      entity_id: entityId,
+      details: details || {},
+    });
+  }, [user]);
+
   useEffect(() => { fetchReports(); fetchStats(); }, [fetchReports, fetchStats]);
 
   const actionableObligations = periodicObligations.filter(o => o.frequencyMonths || (o.month !== undefined));
@@ -526,6 +537,7 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
       return;
     }
     toast.success("Report draft created with regulator-specific template");
+    await logAudit("created", (data as any).id, { report_type: reportType, regulator, period_year: currentYear });
     await fetchReports();
     setExpandedId((data as any).id);
     setEditingId((data as any).id);
@@ -553,6 +565,7 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
       .eq("id", report.id);
     if (error) { toast.error("Update failed"); return; }
     toast.success(`Report marked as ${newStatus}`);
+    await logAudit(newStatus, report.id, { report_type: report.report_type, regulator: report.regulator });
     fetchReports();
   };
 
@@ -751,6 +764,7 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
                             r.id === report.id ? { ...r, content: updatedContent } : r
                           ));
                         }}
+                        onAIAssisted={() => logAudit("ai_assisted", report.id, { report_type: report.report_type, regulator: report.regulator })}
                       />
                     )}
 
@@ -805,13 +819,14 @@ function formatFieldLabel(key: string): string {
 }
 
 /* ─── Edit Form with AI Assist ─── */
-function ReportEditForm({ report, regulator, regulatorFullName, onSave, onCancel, onContentUpdate }: {
+function ReportEditForm({ report, regulator, regulatorFullName, onSave, onCancel, onContentUpdate, onAIAssisted }: {
   report: PeriodicReport;
   regulator: string;
   regulatorFullName: string;
   onSave: (report: PeriodicReport, content: Record<string, any>, notes: string) => void;
   onCancel: () => void;
   onContentUpdate: (content: Record<string, any>) => void;
+  onAIAssisted?: () => void;
 }) {
   const [content, setContent] = useState<Record<string, any>>(report.content);
   const [notes, setNotes] = useState(report.notes || "");
@@ -854,6 +869,7 @@ function ReportEditForm({ report, regulator, regulatorFullName, onSave, onCancel
       } else {
         toast.success("AI has drafted the qualitative sections. Review and edit as needed.");
       }
+      onAIAssisted?.();
     } catch (err: any) {
       console.error("AI assist error:", err);
       toast.error(err?.message || "AI assistance failed. Please try again.");
