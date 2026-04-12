@@ -356,7 +356,7 @@ export default function SuiteAlertRules() {
     }
   };
 
-  const adoptRule = async (suggested: any) => {
+  const adoptRule = async (suggested: any, sourceRegulator?: string, sourceCitation?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const conditions = (suggested.conditions || []).map((c: any) => ({
@@ -367,15 +367,18 @@ export default function SuiteAlertRules() {
       logic: "AND",
       action: suggested.severity === "critical" ? "Block" : "Flag",
     }));
-    const { error } = await supabase.from("suite_alert_rules").insert({
+    const insertData: any = {
       user_id: user.id,
       name: suggested.name,
       conditions,
       severity: suggested.severity || "medium",
       is_active: false,
-    });
+    };
+    if (sourceRegulator) insertData.source_regulator = sourceRegulator;
+    if (sourceCitation) insertData.source_citation = sourceCitation;
+    const { error } = await supabase.from("suite_alert_rules").insert(insertData);
     if (error) { toast.error(error.message); return; }
-    toast.success(`Rule "${suggested.name}" added`);
+    toast.success(`Rule "${suggested.name}" added${sourceRegulator ? ` (${sourceRegulator})` : ""}`);
     fetchRules();
   };
 
