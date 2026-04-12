@@ -1196,7 +1196,7 @@ export default function SuiteOnboarding() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    {["Customer", "Type", "Country", "Risk", "KYC Status", "Started", ""].map(h => (
+                    {["Customer", "Type", "Regulator", "Country", "Risk", "KYC Status", "Started", ""].map(h => (
                       <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold text-muted-foreground uppercase">{h}</th>
                     ))}
                   </tr>
