@@ -1141,6 +1141,110 @@ export type Database = {
           },
         ]
       }
+      suite_org_members: {
+        Row: {
+          created_at: string
+          id: string
+          invited_email: string | null
+          joined_at: string | null
+          organization_id: string
+          role: Database["public"]["Enums"]["org_member_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_email?: string | null
+          joined_at?: string | null
+          organization_id: string
+          role?: Database["public"]["Enums"]["org_member_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_email?: string | null
+          joined_at?: string | null
+          organization_id?: string
+          role?: Database["public"]["Enums"]["org_member_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_org_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_organizations: {
+        Row: {
+          address: string | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          industry: string | null
+          max_api_requests_per_day: number
+          max_screenings_per_month: number
+          max_users: number
+          name: string
+          primary_contact_email: string | null
+          primary_contact_name: string | null
+          primary_contact_phone: string | null
+          registration_number: string | null
+          regulator: string | null
+          status: string
+          subscription_tier: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          industry?: string | null
+          max_api_requests_per_day?: number
+          max_screenings_per_month?: number
+          max_users?: number
+          name: string
+          primary_contact_email?: string | null
+          primary_contact_name?: string | null
+          primary_contact_phone?: string | null
+          registration_number?: string | null
+          regulator?: string | null
+          status?: string
+          subscription_tier?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          industry?: string | null
+          max_api_requests_per_day?: number
+          max_screenings_per_month?: number
+          max_users?: number
+          name?: string
+          primary_contact_email?: string | null
+          primary_contact_name?: string | null
+          primary_contact_phone?: string | null
+          registration_number?: string | null
+          regulator?: string | null
+          status?: string
+          subscription_tier?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       suite_screenings: {
         Row: {
           created_at: string
@@ -1401,6 +1505,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      org_member_role:
+        | "admin"
+        | "mlro"
+        | "compliance_officer"
+        | "analyst"
+        | "viewer"
       partner_status: "pending" | "approved" | "rejected"
       partner_type: "referral" | "affiliate" | "reseller"
       referral_status: "clicked" | "signed_up" | "converted"
@@ -1532,6 +1642,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      org_member_role: [
+        "admin",
+        "mlro",
+        "compliance_officer",
+        "analyst",
+        "viewer",
+      ],
       partner_status: ["pending", "approved", "rejected"],
       partner_type: ["referral", "affiliate", "reseller"],
       referral_status: ["clicked", "signed_up", "converted"],

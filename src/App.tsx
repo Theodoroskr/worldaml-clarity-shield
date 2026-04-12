@@ -90,6 +90,7 @@ const AdminAlertRules = lazy(() => import("./pages/admin/AdminAlertRules"));
 const AdminForms = lazy(() => import("./pages/admin/AdminForms"));
 const AdminWorkflows = lazy(() => import("./pages/admin/AdminWorkflows"));
 const AdminPricing = lazy(() => import("./pages/admin/AdminPricing"));
+const AdminOrganizations = lazy(() => import("./pages/admin/AdminOrganizations"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
@@ -137,6 +138,7 @@ const App = () => (
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route path="users" element={<AdminUsers />} />
+                  <Route path="organizations" element={<AdminOrganizations />} />
                   <Route path="alert-rules" element={<AdminAlertRules />} />
                   <Route path="forms" element={<AdminForms />} />
                   <Route path="workflows" element={<AdminWorkflows />} />
