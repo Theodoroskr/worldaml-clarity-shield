@@ -95,16 +95,24 @@ export default function SuiteTransactions() {
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const [tRes, cRes, rRes] = await Promise.all([
+    const [tRes, cRes, rRes, aRes] = await Promise.all([
       supabase.from("suite_transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(500),
       supabase.from("suite_customers").select("id, name, risk_level, country").eq("user_id", user.id),
       supabase.from("suite_alert_rules").select("id, name, severity").eq("user_id", user.id),
+      supabase.from("suite_alerts").select("rule_id, transaction_id").eq("user_id", user.id).not("rule_id", "is", null).not("transaction_id", "is", null),
     ]);
     setTxs(tRes.data || []);
     setCustomers(cRes.data || []);
     const rm: Record<string, RuleInfo> = {};
     (rRes.data || []).forEach((r: RuleInfo) => { rm[r.id] = r; });
     setRulesMap(rm);
+    // Build rule → transaction_id set
+    const rtm: Record<string, Set<string>> = {};
+    (aRes.data || []).forEach((a: any) => {
+      if (!rtm[a.rule_id]) rtm[a.rule_id] = new Set();
+      rtm[a.rule_id].add(a.transaction_id);
+    });
+    setRuleTxMap(rtm);
     if (cRes.data && cRes.data.length > 0 && !form.customer_id) {
       setForm(f => ({ ...f, customer_id: cRes.data![0].id }));
     }
