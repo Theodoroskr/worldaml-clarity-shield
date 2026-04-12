@@ -198,6 +198,16 @@ const FCA_REQUIREMENTS: FinCENRequirement[] = [
   { id: "fca-threshold", regulation: "Occasional Transaction Threshold (€15,000)", citation: "MLR 2017 Reg 27(1)(b)", description: "CDD must be applied to occasional transactions amounting to €15,000 or more, whether carried out in a single operation or several linked operations. Wire transfers ≥ €1,000 also trigger CDD.", rulePatterns: ["P-TLO", "P-TLI", "Large Transaction"], suggestedRules: [{ name: "[FCA-OT] Occasional transaction ≥ €15,000", severity: "high", rationale: "MLR 2017 requires CDD for occasional transactions of €15,000+. This rule flags transactions at the EU-aligned threshold for UK compliance.", conditions: [{ field: "transaction.amount", operator: ">", value: "15000" }] }] },
 ];
 
+const REGULATOR_MAP: Record<string, { key: "fincen" | "fintrac" | "fca"; label: string; color: string; activeColor: string }> = {
+  fincen: { key: "fincen", label: "FinCEN / BSA", color: "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100", activeColor: "border-blue-500 bg-blue-100 text-blue-800" },
+  fintrac: { key: "fintrac", label: "FINTRAC", color: "border-red-300 bg-red-50 text-red-700 hover:bg-red-100", activeColor: "border-red-500 bg-red-100 text-red-800" },
+  fca: { key: "fca", label: "FCA (UK)", color: "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100", activeColor: "border-indigo-500 bg-indigo-100 text-indigo-800" },
+  eu_amld: { key: "fca", label: "EU AMLD", color: "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100", activeColor: "border-indigo-500 bg-indigo-100 text-indigo-800" },
+  cysec: { key: "fca", label: "CySEC", color: "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100", activeColor: "border-indigo-500 bg-indigo-100 text-indigo-800" },
+  icpac: { key: "fca", label: "ICPAC", color: "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100", activeColor: "border-indigo-500 bg-indigo-100 text-indigo-800" },
+  cba_cyprus: { key: "fca", label: "CBA Cyprus", color: "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100", activeColor: "border-indigo-500 bg-indigo-100 text-indigo-800" },
+};
+
 export default function SuiteAlertRules() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -209,9 +219,9 @@ export default function SuiteAlertRules() {
   const [analysing, setAnalysing] = useState(false);
   const [ruleAnalysis, setRuleAnalysis] = useState<any>(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
-  const [showFinCEN, setShowFinCEN] = useState(false);
-  const [showFINTRAC, setShowFINTRAC] = useState(false);
-  const [showFCA, setShowFCA] = useState(false);
+  const [activeRegPanel, setActiveRegPanel] = useState<"fincen" | "fintrac" | "fca" | null>(null);
+  const [userRegulator, setUserRegulator] = useState<string | null>(null);
+  const [showOtherRegs, setShowOtherRegs] = useState(false);
 
   const fetchRules = async () => {
     const { data: { user } } = await supabase.auth.getUser();
