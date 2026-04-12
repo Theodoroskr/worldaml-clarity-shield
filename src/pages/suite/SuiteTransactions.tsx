@@ -583,12 +583,35 @@ export default function SuiteTransactions() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-1.5 px-5 py-2 border-b border-border bg-card shrink-0">
-        {(["All", "flagged", "clean"] as const).map(s => (
-          <button key={s} onClick={() => setFilter(s)} className={cn("text-xs px-3 py-1 rounded-full border font-medium transition-colors capitalize", filter === s ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary")}>
-            {s}
-          </button>
-        ))}
+      <div className="flex items-center gap-3 px-5 py-2 border-b border-border bg-card shrink-0">
+        <div className="flex items-center gap-1.5">
+          {(["All", "flagged", "clean"] as const).map(s => (
+            <button key={s} onClick={() => setFilter(s)} className={cn("text-xs px-3 py-1 rounded-full border font-medium transition-colors capitalize", filter === s ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary")}>
+              {s}
+            </button>
+          ))}
+        </div>
+        <div className="h-4 w-px bg-border" />
+        <div className="flex items-center gap-1.5">
+          <Filter className="w-3 h-3 text-muted-foreground" />
+          <select
+            value={ruleFilter}
+            onChange={e => setRuleFilter(e.target.value)}
+            className={cn("text-xs border rounded-md px-2 py-1 bg-background text-foreground min-w-[180px]", ruleFilter !== "all" && "border-primary text-primary font-medium")}
+          >
+            <option value="all">All Rules</option>
+            {Object.values(rulesMap).map(r => (
+              <option key={r.id} value={r.id}>
+                {r.name} ({ruleTxMap[r.id]?.size || 0})
+              </option>
+            ))}
+          </select>
+          {ruleFilter !== "all" && (
+            <button onClick={() => setRuleFilter("all")} className="text-muted-foreground hover:text-foreground">
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Table */}
