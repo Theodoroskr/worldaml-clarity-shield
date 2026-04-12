@@ -405,7 +405,7 @@ export default function SuiteCases() {
   // ── Case Detail View ──
   if (selectedCase) {
     return (
-      <div className="p-6 space-y-5 h-full overflow-y-auto animate-fade-in">
+      <>
         <div className="flex items-center gap-4">
           <button onClick={() => setSelectedCase(null)} className="text-xs text-muted-foreground hover:text-foreground">← Back</button>
           <div className="flex-1">
