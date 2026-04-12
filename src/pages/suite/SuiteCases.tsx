@@ -733,14 +733,20 @@ export default function SuiteCases() {
             )}
             {(selectedCase.status === "str_filed" || selectedCase.status === "sar_filed" || selectedCase.status === "closed") && (
               <>
+                {availableExports.has("sar") && (
+                  <button onClick={() => { setShowCtrPanel(!showCtrPanel); setShowFintracPanel(false); setShowMokasPanel(false); }}
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-blue-700 text-white rounded-lg hover:bg-blue-800 font-medium">
+                    <FileText className="w-3 h-3" /> CTR Report
+                  </button>
+                )}
                 {availableExports.has("fintrac") && (
-                  <button onClick={() => { setShowFintracPanel(!showFintracPanel); setShowMokasPanel(false); }}
+                  <button onClick={() => { setShowFintracPanel(!showFintracPanel); setShowMokasPanel(false); setShowCtrPanel(false); }}
                     className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
                     <Flag className="w-3 h-3" /> FINTRAC Report
                   </button>
                 )}
                 {availableExports.has("mokas") && (
-                  <button onClick={() => { setShowMokasPanel(!showMokasPanel); setShowFintracPanel(false); }}
+                  <button onClick={() => { setShowMokasPanel(!showMokasPanel); setShowFintracPanel(false); setShowCtrPanel(false); }}
                     className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium">
                     <MapPin className="w-3 h-3" /> MOKAS Report
                   </button>
