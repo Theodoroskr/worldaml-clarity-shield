@@ -210,6 +210,8 @@ export default function SuiteAlertRules() {
   const [ruleAnalysis, setRuleAnalysis] = useState<any>(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [showFinCEN, setShowFinCEN] = useState(false);
+  const [showFINTRAC, setShowFINTRAC] = useState(false);
+  const [showFCA, setShowFCA] = useState(false);
 
   const fetchRules = async () => {
     const { data: { user } } = await supabase.auth.getUser();
