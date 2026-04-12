@@ -378,7 +378,7 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
       precious: "Precious Metals / Stones",
       other: "Other Property",
     };
-    y = fieldPair(doc, "Property Type", propTypes[mf.tprPropertyType] ?? mf.tprPropertyType || "Not specified",
+    y = fieldPair(doc, "Property Type", (propTypes[mf.tprPropertyType] ?? mf.tprPropertyType) || "Not specified",
       "Estimated Value", `${mf.tprPropertyCurrency || "CAD"} ${mf.tprPropertyValue || "—"}`, y);
     y = field(doc, "Property Description", mf.tprPropertyDescription || "Not specified — describe the property or asset in detail", y);
     y = field(doc, "Location of Property", mf.tprPropertyLocation || "Not specified — branch, address, account number, or jurisdiction", y);
@@ -395,7 +395,7 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
       released: "Property Released (with FINTRAC/court order)",
       other: "Other — See Notes",
     };
-    y = field(doc, "Disposition Action", dispActions[mf.tprDispositionAction] ?? mf.tprDispositionAction || "Not specified", y);
+    y = field(doc, "Disposition Action", (dispActions[mf.tprDispositionAction] ?? mf.tprDispositionAction) || "Not specified", y);
     doc.setFontSize(7.5);
     doc.setFont("helvetica", "italic");
     doc.setTextColor(120, 20, 20);
