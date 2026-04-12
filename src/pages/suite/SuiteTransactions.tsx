@@ -448,7 +448,7 @@ export default function SuiteTransactions() {
                   <div className="max-h-[200px] overflow-y-auto border border-border rounded-lg">
                     <table className="w-full text-[11px]">
                       <thead className="bg-muted sticky top-0">
-                        <tr>{["Customer", "Amount", "Currency", "Dir", "Counterparty", "Country"].map(h => <th key={h} className="px-2 py-1.5 text-left font-semibold text-muted-foreground">{h}</th>)}</tr>
+                        <tr>{["Customer", "Amount", "Currency", "Dir", "Counterparty", "Country", "Date"].map(h => <th key={h} className="px-2 py-1.5 text-left font-semibold text-muted-foreground">{h}</th>)}</tr>
                       </thead>
                       <tbody className="divide-y divide-border">
                         {csvData.slice(0, 50).map((r, i) => {
