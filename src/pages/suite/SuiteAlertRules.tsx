@@ -253,5 +253,73 @@ export default function SuiteAlertRules() {
         </div>
       )}
     </div>
+
+      {showAiPanel && (
+        <div className="w-96 shrink-0 border-l border-border flex flex-col bg-card overflow-hidden">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-purple-600" /><h3 className="font-semibold text-foreground text-sm">AI Analysis</h3></div>
+            <button onClick={() => setShowAiPanel(false)} className="text-xs text-muted-foreground hover:text-foreground">✕</button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {aiLoading && (
+              <div className="flex flex-col items-center justify-center py-12 gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+                <p className="text-xs text-muted-foreground">Analyzing transactions & suggesting rules…</p>
+              </div>
+            )}
+            {aiResult && (
+              <>
+                {aiResult.summary && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-xl p-3">
+                    <h4 className="text-xs font-semibold text-purple-800 mb-1">Summary</h4>
+                    <p className="text-xs text-purple-700 leading-relaxed">{aiResult.summary}</p>
+                  </div>
+                )}
+                {aiResult.flagged_patterns?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-foreground mb-2">Flagged Patterns</h4>
+                    <div className="space-y-2">
+                      {aiResult.flagged_patterns.map((p: any, i: number) => (
+                        <div key={i} className="border border-border rounded-lg p-2.5">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium capitalize", priorityStyle[p.severity] || priorityStyle.medium)}>{p.severity}</span>
+                            <span className="text-[10px] text-muted-foreground">{p.affected_count} txns</span>
+                          </div>
+                          <p className="text-xs text-foreground">{p.pattern}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {aiResult.suggested_rules?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-foreground mb-2">Suggested Rules</h4>
+                    <div className="space-y-2">
+                      {aiResult.suggested_rules.map((r: any, i: number) => (
+                        <div key={i} className="border border-border rounded-xl p-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-foreground">{r.name}</span>
+                            <span className={cn("text-[10px] px-1.5 py-0.5 rounded border font-medium capitalize", priorityStyle[r.severity] || priorityStyle.medium)}>{r.severity}</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">{r.rationale}</p>
+                          <div className="flex flex-wrap gap-1">
+                            {r.conditions?.map((c: any, ci: number) => (
+                              <span key={ci} className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{c.field} {c.operator} {String(c.value)}</span>
+                            ))}
+                          </div>
+                          <button onClick={() => adoptRule(r)} className="w-full text-xs py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
+                            <Plus className="w-3 h-3 inline mr-1" />Adopt Rule
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
