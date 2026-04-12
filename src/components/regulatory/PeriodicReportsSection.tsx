@@ -537,6 +537,7 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
       return;
     }
     toast.success("Report draft created with regulator-specific template");
+    await logAudit("created", (data as any).id, { report_type: reportType, regulator, period_year: currentYear });
     await fetchReports();
     setExpandedId((data as any).id);
     setEditingId((data as any).id);
