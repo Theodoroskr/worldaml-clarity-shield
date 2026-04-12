@@ -869,6 +869,7 @@ function ReportEditForm({ report, regulator, regulatorFullName, onSave, onCancel
       } else {
         toast.success("AI has drafted the qualitative sections. Review and edit as needed.");
       }
+      onAIAssisted?.();
     } catch (err: any) {
       console.error("AI assist error:", err);
       toast.error(err?.message || "AI assistance failed. Please try again.");
