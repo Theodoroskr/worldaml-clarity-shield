@@ -259,7 +259,14 @@ export default function SuiteTransactions() {
 
   const customerName = (id: string) => customers.find(c => c.id === id)?.name || "Unknown";
   const customerInfo = (id: string) => customers.find(c => c.id === id);
-  const filtered = filter === "All" ? txs : filter === "flagged" ? txs.filter(t => t.risk_flag) : txs.filter(t => !t.risk_flag);
+  const filtered = useMemo(() => {
+    let list = filter === "All" ? txs : filter === "flagged" ? txs.filter(t => t.risk_flag) : txs.filter(t => !t.risk_flag);
+    if (ruleFilter !== "all" && ruleTxMap[ruleFilter]) {
+      const txIds = ruleTxMap[ruleFilter];
+      list = list.filter(t => txIds.has(t.id));
+    }
+    return list;
+  }, [txs, filter, ruleFilter, ruleTxMap]);
   const stats = { total: txs.length, flagged: txs.filter(t => t.risk_flag).length, volume: txs.reduce((s, t) => s + Number(t.amount), 0) };
 
   const toggleExpand = async (txId: string) => {
