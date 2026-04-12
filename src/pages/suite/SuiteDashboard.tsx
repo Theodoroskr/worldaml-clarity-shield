@@ -52,6 +52,7 @@ export default function SuiteDashboard() {
   const [customerCount, setCustomerCount] = useState(0);
   const [openAlerts, setOpenAlerts] = useState(0);
   const [screeningCount, setScreeningCount] = useState(0);
+  const [regulator, setRegulator] = useState<string | null>(null);
   const [riskDistribution, setRiskDistribution] = useState([
     { name: "High Risk", value: 0, color: "hsl(0,84%,60%)" },
     { name: "Medium Risk", value: 0, color: "hsl(36,95%,53%)" },
@@ -60,6 +61,7 @@ export default function SuiteDashboard() {
   ]);
   const [auditEvents, setAuditEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
