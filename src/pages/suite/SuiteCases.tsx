@@ -623,7 +623,10 @@ export default function SuiteCases() {
                     <p className="text-[9px] text-red-500 mt-0.5">Politically Exposed Person per PCMLTFR s.2</p>
                   </div>
                 </div>
-                <label className="text-[10px] font-semibold text-red-800 mb-2 block">ML/TF Indicators (select all that apply)</label>
+                <label className={cn("text-[10px] font-semibold mb-2 block",
+                  validationErrors.includes("selectedIndicators") ? "text-red-600" : "text-red-800")}>
+                  ML/TF Indicators (select at least 1) {validationErrors.includes("selectedIndicators") && <span className="text-red-500 font-bold">⚠ Required</span>}
+                </label>
                 <div className="space-y-1.5">
                   {[
                     "Transaction inconsistent with client's known business or occupation",
@@ -661,13 +664,15 @@ export default function SuiteCases() {
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">CAMLO / Signing Officer Name *</label>
                     <input value={mf.camloName} onChange={e => setMF({ camloName: e.target.value })}
                       placeholder="Full name of the signing officer"
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("camloName") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")} />
                     <p className="text-[9px] text-red-500 mt-0.5">Chief Anti-Money Laundering Officer or authorised delegate</p>
                   </div>
                   <div>
                     <label className="text-[10px] font-semibold text-red-800 mb-1 block">Action Taken *</label>
                     <select value={mf.actionTaken} onChange={e => setMF({ actionTaken: e.target.value })}
-                      className="w-full border border-red-200 rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                      className={cn("w-full border rounded-lg px-2.5 py-1.5 text-xs bg-white text-foreground focus:ring-1 focus:outline-none",
+                        validationErrors.includes("actionTaken") ? "border-red-500 ring-2 ring-red-300 bg-red-50" : "border-red-200 focus:ring-red-300")}>
                       <option value="">Select action…</option>
                       <option value="Enhanced monitoring applied">Enhanced monitoring applied</option>
                       <option value="Account restricted / frozen">Account restricted / frozen</option>
