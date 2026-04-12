@@ -234,6 +234,107 @@ export default function SuiteRegulatory() {
   const eventReports = profile.reports.filter((r) => r.frequency === "event");
   const periodicObs = profile.periodicObligations;
 
+  /* ─── Compliance Calendar logic ─── */
+  const calendarItems = useMemo(() => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    interface CalendarItem {
+      title: string;
+      type: "periodic" | "event-triggered";
+      nextDue: Date | null;
+      daysUntil: number | null;
+      deadline: string;
+      description: string;
+      status: "overdue" | "urgent" | "upcoming" | "on-track" | "continuous";
+    }
+
+    const items: CalendarItem[] = [];
+
+    // Periodic obligations with fixed dates
+    for (const ob of periodicObs) {
+      if (ob.month !== undefined && ob.day !== undefined) {
+        // Fixed annual date (e.g., ACR by 30 April → month=3, day=30)
+        let nextDue = new Date(currentYear, ob.month, ob.day);
+        if (isPast(nextDue)) {
+          nextDue = new Date(currentYear + 1, ob.month, ob.day);
+        }
+        const days = differenceInDays(nextDue, now);
+        items.push({
+          title: ob.title,
+          type: "periodic",
+          nextDue,
+          daysUntil: days,
+          deadline: ob.deadline,
+          description: ob.description,
+          status: days < 0 ? "overdue" : days <= 30 ? "urgent" : days <= 90 ? "upcoming" : "on-track",
+        });
+      } else if (ob.frequencyMonths) {
+        // Rolling frequency — assume next due is start of next period from now
+        const monthsAhead = ob.frequencyMonths;
+        // Approximate: next due = first day of the month that is `frequencyMonths` from Jan 1 of current year
+        let nextDue = new Date(currentYear, monthsAhead - 1, 1);
+        while (isPast(nextDue)) {
+          nextDue = addMonths(nextDue, ob.frequencyMonths);
+        }
+        const days = differenceInDays(nextDue, now);
+        items.push({
+          title: ob.title,
+          type: "periodic",
+          nextDue,
+          daysUntil: days,
+          deadline: ob.deadline,
+          description: ob.description,
+          status: days <= 30 ? "urgent" : days <= 90 ? "upcoming" : "on-track",
+        });
+      } else {
+        // Continuous / ongoing
+        items.push({
+          title: ob.title,
+          type: "periodic",
+          nextDue: null,
+          daysUntil: null,
+          deadline: ob.deadline,
+          description: ob.description,
+          status: "continuous",
+        });
+      }
+    }
+
+    // Transaction-triggered reports — show as standing obligations
+    for (const r of eventReports) {
+      items.push({
+        title: `${r.name} (${r.code})`,
+        type: "event-triggered",
+        nextDue: null,
+        daysUntil: null,
+        deadline: r.deadline,
+        description: r.trigger,
+        status: "continuous",
+      });
+    }
+
+    // Sort: overdue first, then by days until due, then continuous at end
+    const statusOrder: Record<string, number> = { overdue: 0, urgent: 1, upcoming: 2, "on-track": 3, continuous: 4 };
+    items.sort((a, b) => {
+      const oa = statusOrder[a.status] ?? 5;
+      const ob2 = statusOrder[b.status] ?? 5;
+      if (oa !== ob2) return oa - ob2;
+      if (a.daysUntil !== null && b.daysUntil !== null) return a.daysUntil - b.daysUntil;
+      return 0;
+    });
+
+    return items;
+  }, [periodicObs, eventReports]);
+
+  const statusConfig: Record<string, { label: string; badgeClass: string }> = {
+    overdue: { label: "Overdue", badgeClass: "bg-destructive/10 text-destructive border-destructive/20" },
+    urgent: { label: "Due Soon", badgeClass: "bg-orange-500/10 text-orange-600 border-orange-500/20" },
+    upcoming: { label: "Upcoming", badgeClass: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20" },
+    "on-track": { label: "On Track", badgeClass: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
+    continuous: { label: "Ongoing", badgeClass: "bg-muted text-muted-foreground border-border" },
+  };
+
   return (
     <div className="max-w-5xl mx-auto py-8 px-6 space-y-8">
       <SEO title={`Regulatory Hub — ${profile.name}`} description={`Regulatory obligations for ${profile.fullName}`} noindex />
