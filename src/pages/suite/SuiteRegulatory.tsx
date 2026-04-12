@@ -206,36 +206,12 @@ export default function SuiteRegulatory() {
   }, [user]);
 
   const profile = regulator ? REGULATORY_PROFILES[regulator.toLowerCase()] : null;
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-24 text-sm text-muted-foreground">Loading…</div>
-    );
-  }
-
-  if (!regulator || !profile) {
-    return (
-      <div className="max-w-2xl mx-auto py-16 px-6 text-center space-y-4">
-        <SEO title="Regulatory Hub" description="View your regulatory obligations." noindex />
-        <div className="w-14 h-14 mx-auto rounded-2xl bg-muted flex items-center justify-center">
-          <Building2 className="w-7 h-7 text-muted-foreground" />
-        </div>
-        <h1 className="text-xl font-bold text-foreground">No Regulator Selected</h1>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          To see your regulatory obligations, reporting requirements, and filing deadlines, please set your regulator in{" "}
-          <a href="/suite/settings" className="text-primary underline underline-offset-2 hover:text-primary/80">
-            Settings
-          </a>.
-        </p>
-      </div>
-    );
-  }
-
-  const eventReports = profile.reports.filter((r) => r.frequency === "event");
-  const periodicObs = profile.periodicObligations;
+  const eventReports = profile?.reports.filter((r) => r.frequency === "event") ?? [];
+  const periodicObs = profile?.periodicObligations ?? [];
 
   /* ─── Compliance Calendar logic ─── */
   const calendarItems = useMemo(() => {
+    if (!profile) return [];
     const now = new Date();
     const currentYear = now.getFullYear();
 
