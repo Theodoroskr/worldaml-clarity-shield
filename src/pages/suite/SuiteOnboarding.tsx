@@ -828,6 +828,9 @@ export default function SuiteOnboarding() {
         </div>
       </div>
 
+      {/* Section: Regulatory Jurisdiction */}
+      <RegulatorPicker value={kycForm.regulator} onChange={v => setKycForm(f => ({ ...f, regulator: v }))} />
+
       {/* Section: Risk & Compliance */}
       <div className="mb-6">
         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Risk & Compliance</h3>
