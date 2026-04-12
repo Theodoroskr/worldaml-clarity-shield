@@ -1027,6 +1027,9 @@ export default function SuiteOnboarding() {
         </div>
       </div>
 
+      {/* Section: Regulatory Jurisdiction */}
+      <RegulatorPicker value={kybForm.regulator} onChange={v => setKybForm(f => ({ ...f, regulator: v }))} />
+
       {/* Section: UBO */}
       <div className="mb-6">
         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Ultimate Beneficial Owner (UBO)</h3>
