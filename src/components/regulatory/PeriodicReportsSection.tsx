@@ -764,6 +764,7 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
                             r.id === report.id ? { ...r, content: updatedContent } : r
                           ));
                         }}
+                        onAIAssisted={() => logAudit("ai_assisted", report.id, { report_type: report.report_type, regulator: report.regulator })}
                       />
                     )}
 
