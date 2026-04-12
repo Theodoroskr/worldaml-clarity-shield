@@ -12,6 +12,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import FormFieldBuilder, { type CustomField } from "@/components/suite/FormFieldBuilder";
 import { REGULATORY_PROFILES, REGULATOR_OPTIONS, type RegulatoryProfile } from "@/data/regulatoryProfiles";
+import {
+  scoreCountry, scoreScreening, scoreTransactions, scoreCustomerType, scoreKycStatus,
+  computeComposite, riskColor, riskBg, riskLabel, riskBadgeClass, WEIGHTS,
+  type RiskBreakdown,
+} from "@/lib/riskScoring";
 
 interface Customer {
   id: string;
