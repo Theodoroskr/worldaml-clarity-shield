@@ -672,6 +672,7 @@ export default function SuiteOnboarding() {
   const submitKYB = async () => {
     if (!kybForm.companyName.trim()) { toast.error("Company name is required"); return; }
     if (!kybForm.country) { toast.error("Country of incorporation is required"); return; }
+    if (!kybForm.regulator) { toast.error("Please select a reporting regulator"); return; }
     if (kybForm.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(kybForm.contactEmail)) {
       toast.error("Invalid contact email"); return;
     }
@@ -687,6 +688,7 @@ export default function SuiteOnboarding() {
       country: kybForm.country || null,
       company_name: kybForm.companyName.trim(),
       registration_number: kybForm.registrationNumber.trim() || null,
+      regulator: kybForm.regulator || null,
     }).select("id").single();
 
     if (error) { toast.error(error.message); setSaving(false); return; }
@@ -702,12 +704,18 @@ export default function SuiteOnboarding() {
       });
     }
 
+    // Auto-provision regulatory baseline rules
+    if (kybForm.regulator) {
+      await provisionRegulatoryRules(user.id, kybForm.regulator, kybForm.companyName);
+    }
+
     await supabase.from("suite_audit_log").insert({
       user_id: user.id,
       action: `KYB onboarding: ${kybForm.companyName}`,
       entity_type: "customer",
       details: {
         type: "business",
+        regulator: kybForm.regulator,
         country: kybForm.country,
         legal_structure: kybForm.legalStructure,
         industry: kybForm.industry,
