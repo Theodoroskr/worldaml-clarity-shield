@@ -215,6 +215,7 @@ export default function SuiteCases() {
     setSelectedCase(c);
     setShowFintracPanel(false);
     setShowFieldMapping(false);
+    setManualFields({ ...DEFAULT_MANUAL_FIELDS });
     setCaseCustomer(null);
     setCaseTransactions([]);
     const { data: { user } } = await supabase.auth.getUser();
