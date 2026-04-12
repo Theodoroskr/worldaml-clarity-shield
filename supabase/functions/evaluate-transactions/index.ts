@@ -123,8 +123,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const body = await req.json();
-    const { user_id, transaction_ids, force } = body;
+    const { data: rules, error: ruleErr } = await supabaseAdmin
+      .from("suite_alert_rules").select("*").eq("user_id", user_id).eq("is_active", true);
 
     if (ruleErr) throw ruleErr;
     if (!rules || rules.length === 0) {
@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
     let txQuery = supabaseAdmin.from("suite_transactions").select("*").eq("user_id", user_id);
     if (transaction_ids?.length) {
       txQuery = txQuery.in("id", transaction_ids);
-    } else {
+    } else if (!force) {
       txQuery = txQuery.eq("monitoring_status", "pending");
     }
 
