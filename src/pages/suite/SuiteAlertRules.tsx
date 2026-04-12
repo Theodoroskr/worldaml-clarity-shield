@@ -244,6 +244,19 @@ export default function SuiteAlertRules() {
 
   useEffect(() => { fetchRules(); }, []);
 
+  // Fetch user's assigned regulator
+  useEffect(() => {
+    const fetchRegulator = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase.from("profiles").select("regulator").eq("user_id", user.id).single();
+      if (profile?.regulator) {
+        setUserRegulator(profile.regulator as string);
+      }
+    };
+    fetchRegulator();
+  }, []);
+
   const activeRule = rules.find(r => r.id === selected);
   const updateRule = (update: Partial<Rule>) => { setRules(prev => prev.map(r => r.id === selected ? { ...r, ...update } : r)); };
   const addCondition = () => { updateRule({ conditions: [...(activeRule?.conditions ?? []), { id: uid(), field: "transaction.amount", operator: ">", value: "1000" }] }); };
