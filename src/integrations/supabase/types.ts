@@ -1491,6 +1491,7 @@ export type Database = {
       }
       current_user_has_suite_access: { Args: never; Returns: boolean }
       get_certificate_by_token: { Args: { _token: string }; Returns: Json }
+      get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
