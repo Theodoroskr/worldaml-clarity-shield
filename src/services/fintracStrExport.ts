@@ -449,24 +449,37 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
   }
 
   const fileName = `FINTRAC_${strType.toUpperCase()}_${refNum.replace(/[^A-Z0-9]/gi, "_")}_${now.toISOString().slice(0, 10)}.pdf`;
+  const pdfDataUri = doc.output("datauristring", { filename: fileName });
+
+  // If a pre-opened window was provided, navigate it to the PDF
+  if (targetWindow && !targetWindow.closed) {
+    try {
+      targetWindow.location.href = pdfDataUri;
+      return;
+    } catch {
+      // cross-origin or sandbox restriction — fall through
+    }
+  }
+
+  // Try opening in a new tab
+  const opened = window.open(pdfDataUri, "_blank");
+  if (opened) return;
+
+  // Try blob URL in new tab
   const pdfBlob = doc.output("blob");
   const blobUrl = URL.createObjectURL(pdfBlob);
-
-  if (targetWindow && !targetWindow.closed) {
-    targetWindow.location.href = blobUrl;
-    targetWindow.document.title = fileName;
+  const opened2 = window.open(blobUrl, "_blank");
+  if (opened2) {
     setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
     return;
   }
 
-  const opened = window.open(blobUrl, "_blank");
-  if (!opened) {
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-  setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
+  // Final fallback: anchor download
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
 }
