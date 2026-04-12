@@ -464,6 +464,7 @@ export default function SuiteTransactions() {
                               <td className="px-2 py-1">{r.direction}</td>
                               <td className="px-2 py-1">{r.counterparty}</td>
                               <td className="px-2 py-1">{r.counterparty_country}</td>
+                              <td className="px-2 py-1 font-mono">{r.date || "—"}</td>
                             </tr>
                           );
                         })}
