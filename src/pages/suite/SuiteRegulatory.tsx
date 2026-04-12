@@ -570,6 +570,13 @@ export default function SuiteRegulatory() {
           </CardContent>
         </Card>
       </section>
+      {/* Periodic Reports Generation */}
+      <PeriodicReportsSection
+        regulator={regulator!}
+        regulatorFullName={profile.fullName}
+        periodicObligations={periodicObs}
+      />
+
       <section className="space-y-3">
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-orange-500" />
