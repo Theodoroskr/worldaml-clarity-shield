@@ -237,7 +237,9 @@ export default function SuiteCases() {
         supabase.from("suite_transactions").select("*").eq("customer_id", c.customer_id).eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
       ]);
       setCaseCustomer(custRes.data);
-      setCaseTransactions(txRes.data || []);
+      const txs = txRes.data || [];
+      setCaseTransactions(txs);
+      setSelectedTxIds(new Set(txs.map((t: any) => t.id)));
       // Auto-populate PEP status from customer record
       if (custRes.data?.pep_status && custRes.data.pep_status !== "no") {
         setManualFields(prev => ({ ...prev, isPEP: custRes.data.pep_status }));
