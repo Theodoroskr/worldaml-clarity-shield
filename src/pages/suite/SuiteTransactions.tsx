@@ -584,7 +584,7 @@ export default function SuiteTransactions() {
                 const cust = customerInfo(tx.customer_id);
                 const alerts = txAlerts[tx.id] || [];
                 return (
-                  <>
+                  <Fragment key={tx.id}>
                     <tr key={tx.id} className={cn("hover:bg-muted/30 transition-colors cursor-pointer", tx.risk_flag && "bg-destructive/5")} onClick={() => toggleExpand(tx.id)}>
                       <td className="px-2 py-2.5 text-muted-foreground">
                         {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
