@@ -378,6 +378,7 @@ export default function SuiteCases() {
         reportingEntityRef: `FINTRAC-${fintracStrType.toUpperCase()}-${selectedCase.id.slice(0, 8).toUpperCase()}`,
         strType: fintracStrType,
         manualFields,
+        targetWindow: previewWindow,
       });
 
       await supabase.from("suite_audit_log").insert({
@@ -388,8 +389,9 @@ export default function SuiteCases() {
         details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada" },
       });
 
-      toast.success(`FINTRAC ${fintracStrType.toUpperCase()} PDF downloaded`);
+      toast.success(`FINTRAC ${fintracStrType.toUpperCase()} PDF opened`);
     } catch (err: any) {
+      closePreviewWindow();
       console.error("FINTRAC export error:", err);
       toast.error(`PDF export failed: ${err?.message || "Unknown error"}`);
     }
