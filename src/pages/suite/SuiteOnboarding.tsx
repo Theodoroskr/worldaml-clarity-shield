@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle } from "lucide-react";
+import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -91,6 +91,36 @@ const emptyKYC: KYCForm = {
   occupation: "", sourceOfFunds: "", pep: "no", regulator: "",
 };
 
+// Director entry
+interface DirectorEntry {
+  id: string;
+  name: string;
+  nationality: string;
+  dateOfBirth: string;
+  role: string;
+  pep: string;
+}
+
+const emptyDirector = (): DirectorEntry => ({
+  id: crypto.randomUUID(),
+  name: "", nationality: "", dateOfBirth: "", role: "director", pep: "no",
+});
+
+// UBO entry
+interface UBOEntry {
+  id: string;
+  name: string;
+  nationality: string;
+  ownershipPct: string;
+  dateOfBirth: string;
+  pep: string;
+}
+
+const emptyUBO = (): UBOEntry => ({
+  id: crypto.randomUUID(),
+  name: "", nationality: "", ownershipPct: "", dateOfBirth: "", pep: "no",
+});
+
 // KYB form state
 interface KYBForm {
   companyName: string;
@@ -109,9 +139,8 @@ interface KYBForm {
   annualTurnover: string;
   numberOfEmployees: string;
   sourceOfFunds: string;
-  uboName: string;
-  uboNationality: string;
-  uboOwnership: string;
+  directors: DirectorEntry[];
+  ubos: UBOEntry[];
   regulator: string;
 }
 
@@ -120,7 +149,7 @@ const emptyKYB: KYBForm = {
   legalStructure: "limited", industry: "", website: "", registeredAddress: "",
   city: "", postalCode: "", contactName: "", contactEmail: "", contactPhone: "",
   annualTurnover: "", numberOfEmployees: "", sourceOfFunds: "",
-  uboName: "", uboNationality: "", uboOwnership: "", regulator: "",
+  directors: [emptyDirector()], ubos: [emptyUBO()], regulator: "",
 };
 
 // Auto-provision baseline alert rules for the selected regulator
@@ -684,6 +713,23 @@ export default function SuiteOnboarding() {
     if (kybForm.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(kybForm.contactEmail)) {
       toast.error("Invalid contact email"); return;
     }
+
+    // Validate UBO ownership totals
+    const filledUbos = kybForm.ubos.filter(u => u.name.trim());
+    const totalOwnership = filledUbos.reduce((sum, u) => sum + (parseFloat(u.ownershipPct) || 0), 0);
+    if (totalOwnership > 100) {
+      toast.error(`Total UBO ownership is ${totalOwnership}% — cannot exceed 100%`); return;
+    }
+    for (const u of filledUbos) {
+      const pct = parseFloat(u.ownershipPct);
+      if (isNaN(pct) || pct <= 0 || pct > 100) {
+        toast.error(`UBO "${u.name}" has invalid ownership percentage`); return;
+      }
+    }
+
+    // Validate directors
+    const filledDirectors = kybForm.directors.filter(d => d.name.trim());
+
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
@@ -701,15 +747,16 @@ export default function SuiteOnboarding() {
 
     if (error) { toast.error(error.message); setSaving(false); return; }
 
-    // Add UBO if provided
-    if (kybForm.uboName.trim() && customer) {
-      await supabase.from("suite_ubo").insert({
+    // Add UBOs
+    if (filledUbos.length > 0 && customer) {
+      const uboInserts = filledUbos.map(u => ({
         user_id: user.id,
         customer_id: customer.id,
-        name: kybForm.uboName.trim(),
-        nationality: kybForm.uboNationality || null,
-        ownership_pct: parseFloat(kybForm.uboOwnership) || 0,
-      });
+        name: u.name.trim(),
+        nationality: u.nationality || null,
+        ownership_pct: parseFloat(u.ownershipPct) || 0,
+      }));
+      await supabase.from("suite_ubo").insert(uboInserts);
     }
 
     // Auto-provision regulatory baseline rules
@@ -729,7 +776,8 @@ export default function SuiteOnboarding() {
         industry: kybForm.industry,
         registration_number: kybForm.registrationNumber,
         annual_turnover: kybForm.annualTurnover,
-        ubo_provided: !!kybForm.uboName.trim(),
+        directors: filledDirectors.map(d => ({ name: d.name, role: d.role, pep: d.pep })),
+        ubos: filledUbos.map(u => ({ name: u.name, ownership_pct: u.ownershipPct, pep: u.pep })),
         ...(Object.keys(customFieldValues).length > 0 && { custom_fields: customFieldValues }),
       },
     });
@@ -1038,24 +1086,129 @@ export default function SuiteOnboarding() {
       {/* Section: Regulatory Jurisdiction */}
       <RegulatorPicker value={kybForm.regulator} onChange={v => setKybForm(f => ({ ...f, regulator: v }))} />
 
-      {/* Section: UBO */}
+      {/* Section: Directors */}
       <div className="mb-6">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Ultimate Beneficial Owner (UBO)</h3>
-        <p className="text-xs text-muted-foreground mb-3">Any individual holding ≥ 25% ownership or exercising significant control</p>
-        <div className="grid grid-cols-3 gap-4">
-          <FormField label="Full Name">
-            <FormInput value={kybForm.uboName} onChange={v => setKybForm(f => ({ ...f, uboName: v }))} placeholder="John Doe" />
-          </FormField>
-          <FormField label="Nationality">
-            <Select value={kybForm.uboNationality} onValueChange={v => setKybForm(f => ({ ...f, uboNationality: v }))}>
-              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select…" /></SelectTrigger>
-              <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-            </Select>
-          </FormField>
-          <FormField label="Ownership %">
-            <FormInput value={kybForm.uboOwnership} onChange={v => setKybForm(f => ({ ...f, uboOwnership: v }))} placeholder="51" type="number" />
-          </FormField>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Directors & Officers</h3>
+          <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setKybForm(f => ({ ...f, directors: [...f.directors, emptyDirector()] }))}>
+            <Plus className="w-3 h-3 mr-1" /> Add Director
+          </Button>
         </div>
+        <div className="space-y-3">
+          {kybForm.directors.map((dir, idx) => (
+            <div key={dir.id} className="p-3 border border-border rounded-lg bg-muted/20">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-semibold text-muted-foreground">Director {idx + 1}</span>
+                {kybForm.directors.length > 1 && (
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive hover:text-destructive" onClick={() => setKybForm(f => ({ ...f, directors: f.directors.filter(d => d.id !== dir.id) }))}>
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <FormField label="Full Name" required>
+                  <FormInput value={dir.name} onChange={v => setKybForm(f => ({ ...f, directors: f.directors.map(d => d.id === dir.id ? { ...d, name: v } : d) }))} placeholder="Jane Smith" />
+                </FormField>
+                <FormField label="Nationality">
+                  <Select value={dir.nationality} onValueChange={v => setKybForm(f => ({ ...f, directors: f.directors.map(d => d.id === dir.id ? { ...d, nationality: v } : d) }))}>
+                    <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select…" /></SelectTrigger>
+                    <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                  </Select>
+                </FormField>
+                <FormField label="Role">
+                  <Select value={dir.role} onValueChange={v => setKybForm(f => ({ ...f, directors: f.directors.map(d => d.id === dir.id ? { ...d, role: v } : d) }))}>
+                    <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="director">Director</SelectItem>
+                      <SelectItem value="managing_director">Managing Director</SelectItem>
+                      <SelectItem value="chairman">Chairman</SelectItem>
+                      <SelectItem value="secretary">Company Secretary</SelectItem>
+                      <SelectItem value="ceo">CEO</SelectItem>
+                      <SelectItem value="cfo">CFO</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormField>
+                <FormField label="Date of Birth">
+                  <FormInput value={dir.dateOfBirth} onChange={v => setKybForm(f => ({ ...f, directors: f.directors.map(d => d.id === dir.id ? { ...d, dateOfBirth: v } : d) }))} type="date" />
+                </FormField>
+                <FormField label="PEP Status">
+                  <Select value={dir.pep} onValueChange={v => setKybForm(f => ({ ...f, directors: f.directors.map(d => d.id === dir.id ? { ...d, pep: v } : d) }))}>
+                    <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="no">No</SelectItem>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="rca">Related/Close Associate</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormField>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Section: UBOs */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Ultimate Beneficial Owners (UBO)</h3>
+          <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setKybForm(f => ({ ...f, ubos: [...f.ubos, emptyUBO()] }))}>
+            <Plus className="w-3 h-3 mr-1" /> Add UBO
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">Any individual holding ≥ 25% ownership or exercising significant control</p>
+        {(() => {
+          const totalPct = kybForm.ubos.reduce((sum, u) => sum + (parseFloat(u.ownershipPct) || 0), 0);
+          return (
+            <>
+              {totalPct > 0 && (
+                <div className={cn("text-xs font-medium mb-3 px-3 py-1.5 rounded-lg border", totalPct > 100 ? "bg-destructive/10 text-destructive border-destructive/30" : totalPct === 100 ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-amber-50 text-amber-700 border-amber-200")}>
+                  Total ownership: {totalPct.toFixed(1)}%{totalPct > 100 ? " — exceeds 100%" : totalPct < 100 ? ` — ${(100 - totalPct).toFixed(1)}% unaccounted` : " ✓"}
+                </div>
+              )}
+              <div className="space-y-3">
+                {kybForm.ubos.map((ubo, idx) => (
+                  <div key={ubo.id} className="p-3 border border-border rounded-lg bg-muted/20">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-semibold text-muted-foreground">UBO {idx + 1}</span>
+                      {kybForm.ubos.length > 1 && (
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive hover:text-destructive" onClick={() => setKybForm(f => ({ ...f, ubos: f.ubos.filter(u => u.id !== ubo.id) }))}>
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <FormField label="Full Name" required>
+                        <FormInput value={ubo.name} onChange={v => setKybForm(f => ({ ...f, ubos: f.ubos.map(u => u.id === ubo.id ? { ...u, name: v } : u) }))} placeholder="John Doe" />
+                      </FormField>
+                      <FormField label="Nationality">
+                        <Select value={ubo.nationality} onValueChange={v => setKybForm(f => ({ ...f, ubos: f.ubos.map(u => u.id === ubo.id ? { ...u, nationality: v } : u) }))}>
+                          <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select…" /></SelectTrigger>
+                          <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </FormField>
+                      <FormField label="Ownership %" required>
+                        <FormInput value={ubo.ownershipPct} onChange={v => setKybForm(f => ({ ...f, ubos: f.ubos.map(u => u.id === ubo.id ? { ...u, ownershipPct: v } : u) }))} placeholder="51" type="number" />
+                      </FormField>
+                      <FormField label="Date of Birth">
+                        <FormInput value={ubo.dateOfBirth} onChange={v => setKybForm(f => ({ ...f, ubos: f.ubos.map(u => u.id === ubo.id ? { ...u, dateOfBirth: v } : u) }))} type="date" />
+                      </FormField>
+                      <FormField label="PEP Status">
+                        <Select value={ubo.pep} onValueChange={v => setKybForm(f => ({ ...f, ubos: f.ubos.map(u => u.id === ubo.id ? { ...u, pep: v } : u) }))}>
+                          <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="no">No</SelectItem>
+                            <SelectItem value="yes">Yes</SelectItem>
+                            <SelectItem value="rca">Related/Close Associate</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormField>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          );
+        })()}
       </div>
 
       {/* Custom fields */}
