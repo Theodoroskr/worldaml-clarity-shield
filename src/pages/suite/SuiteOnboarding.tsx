@@ -618,6 +618,9 @@ export default function SuiteOnboarding() {
     if (!kycForm.firstName.trim() || !kycForm.lastName.trim()) {
       toast.error("First name and last name are required"); return;
     }
+    if (!kycForm.regulator) {
+      toast.error("Please select a reporting regulator"); return;
+    }
     if (kycForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(kycForm.email)) {
       toast.error("Invalid email address"); return;
     }
@@ -633,9 +636,15 @@ export default function SuiteOnboarding() {
       email: kycForm.email.trim() || null,
       country: kycForm.country || null,
       date_of_birth: kycForm.dateOfBirth || null,
+      regulator: kycForm.regulator || null,
     });
 
     if (error) { toast.error(error.message); setSaving(false); return; }
+
+    // Auto-provision regulatory baseline rules
+    if (kycForm.regulator) {
+      await provisionRegulatoryRules(user.id, kycForm.regulator, fullName);
+    }
 
     await supabase.from("suite_audit_log").insert({
       user_id: user.id,
@@ -643,6 +652,7 @@ export default function SuiteOnboarding() {
       entity_type: "customer",
       details: {
         type: "individual",
+        regulator: kycForm.regulator,
         nationality: kycForm.nationality,
         country: kycForm.country,
         id_type: kycForm.idType,
