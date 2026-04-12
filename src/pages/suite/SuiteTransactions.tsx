@@ -654,24 +654,31 @@ export default function SuiteTransactions() {
                               </div>
                             </div>
 
-                            {/* Triggered Alerts */}
+                            {/* Triggered Rules & Alerts */}
                             <div>
                               <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                                <AlertTriangle className="w-3 h-3" /> Triggered Alerts ({alertsLoading === tx.id ? "…" : alerts.length})
+                                <AlertTriangle className="w-3 h-3" /> Rules Triggered ({alertsLoading === tx.id ? "…" : alerts.length})
                               </h4>
                               {alertsLoading === tx.id ? (
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin" /> Loading alerts…</div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin" /> Loading…</div>
                               ) : alerts.length === 0 ? (
-                                <p className="text-xs text-muted-foreground">No alerts triggered for this transaction.</p>
+                                <p className="text-xs text-muted-foreground">No rules triggered for this transaction.</p>
                               ) : (
-                                <div className="space-y-1.5 max-h-[160px] overflow-y-auto">
+                                <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
                                   {alerts.map(a => (
                                     <div key={a.id} className="border border-border rounded p-2 bg-background">
                                       <div className="flex items-center gap-1.5 mb-0.5">
                                         <span className={cn("px-1.5 py-0.5 rounded border text-[9px] font-medium", sevColor(a.severity))}>{a.severity}</span>
-                                        <span className="text-[11px] font-medium text-foreground truncate">{a.title}</span>
+                                        {a.rule_name ? (
+                                          <span className="text-[11px] font-semibold text-foreground truncate">{a.rule_name}</span>
+                                        ) : (
+                                          <span className="text-[11px] font-medium text-foreground truncate">{a.title}</span>
+                                        )}
                                       </div>
-                                      {a.description && <p className="text-[10px] text-muted-foreground truncate">{a.description}</p>}
+                                      {a.rule_id && (
+                                        <div className="text-[9px] text-muted-foreground font-mono mt-0.5">Rule ID: {a.rule_id.slice(0, 8)}…</div>
+                                      )}
+                                      {a.description && <p className="text-[10px] text-muted-foreground mt-0.5">{a.description}</p>}
                                       <div className="flex items-center gap-2 mt-1">
                                         <span className={cn("px-1.5 py-0.5 rounded text-[9px] capitalize", a.status === "open" ? "bg-amber-50 text-amber-700" : "bg-muted text-muted-foreground")}>{a.status}</span>
                                         <span className="text-[9px] text-muted-foreground font-mono">{new Date(a.created_at).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
