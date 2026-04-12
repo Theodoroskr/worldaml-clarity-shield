@@ -153,6 +153,7 @@ export default function SuiteCases() {
   const [fintracStrType, setFintracStrType] = useState<"str" | "lctr" | "eftr">("str");
   const [caseCustomer, setCaseCustomer] = useState<any>(null);
   const [caseTransactions, setCaseTransactions] = useState<any[]>([]);
+  const [selectedTxIds, setSelectedTxIds] = useState<Set<string>>(new Set());
   const [manualFields, setManualFields] = useState<FINTRACManualFields>({ ...DEFAULT_MANUAL_FIELDS });
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [pdfPreview, setPdfPreview] = useState<{ blobUrl: string; fileName: string } | null>(null);
