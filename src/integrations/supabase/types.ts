@@ -951,6 +951,7 @@ export type Database = {
           id: string
           kyc_status: string
           name: string
+          pep_status: string | null
           registration_number: string | null
           risk_level: string
           status: string
@@ -967,6 +968,7 @@ export type Database = {
           id?: string
           kyc_status?: string
           name: string
+          pep_status?: string | null
           registration_number?: string | null
           risk_level?: string
           status?: string
@@ -983,6 +985,7 @@ export type Database = {
           id?: string
           kyc_status?: string
           name?: string
+          pep_status?: string | null
           registration_number?: string | null
           risk_level?: string
           status?: string
