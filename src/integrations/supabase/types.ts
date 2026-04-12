@@ -834,6 +834,8 @@ export type Database = {
           is_active: boolean
           name: string
           severity: string
+          source_citation: string | null
+          source_regulator: string | null
           updated_at: string
           user_id: string
         }
@@ -844,6 +846,8 @@ export type Database = {
           is_active?: boolean
           name: string
           severity?: string
+          source_citation?: string | null
+          source_regulator?: string | null
           updated_at?: string
           user_id: string
         }
@@ -854,6 +858,8 @@ export type Database = {
           is_active?: boolean
           name?: string
           severity?: string
+          source_citation?: string | null
+          source_regulator?: string | null
           updated_at?: string
           user_id?: string
         }
