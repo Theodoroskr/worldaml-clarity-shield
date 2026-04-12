@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from "react";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, TrendingUp, Globe, RefreshCw, Plus, Upload, FileText, Sparkles, X, Check, Loader2, ChevronDown, ChevronRight, Shield, Clock, Eye } from "lucide-react";
+import { AlertTriangle, TrendingUp, Globe, RefreshCw, Plus, Upload, FileText, Sparkles, X, Check, Loader2, ChevronDown, ChevronRight, Shield, Clock, Eye, Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -89,20 +89,30 @@ export default function SuiteTransactions() {
   const [txAlerts, setTxAlerts] = useState<Record<string, AlertRow[]>>({});
   const [alertsLoading, setAlertsLoading] = useState<string | null>(null);
   const [rulesMap, setRulesMap] = useState<Record<string, RuleInfo>>({});
+  const [ruleFilter, setRuleFilter] = useState<string>("all");
+  const [ruleTxMap, setRuleTxMap] = useState<Record<string, Set<string>>>({});
 
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const [tRes, cRes, rRes] = await Promise.all([
+    const [tRes, cRes, rRes, aRes] = await Promise.all([
       supabase.from("suite_transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(500),
       supabase.from("suite_customers").select("id, name, risk_level, country").eq("user_id", user.id),
       supabase.from("suite_alert_rules").select("id, name, severity").eq("user_id", user.id),
+      supabase.from("suite_alerts").select("rule_id, transaction_id").eq("user_id", user.id).not("rule_id", "is", null).not("transaction_id", "is", null),
     ]);
     setTxs(tRes.data || []);
     setCustomers(cRes.data || []);
     const rm: Record<string, RuleInfo> = {};
     (rRes.data || []).forEach((r: RuleInfo) => { rm[r.id] = r; });
     setRulesMap(rm);
+    // Build rule → transaction_id set
+    const rtm: Record<string, Set<string>> = {};
+    (aRes.data || []).forEach((a: any) => {
+      if (!rtm[a.rule_id]) rtm[a.rule_id] = new Set();
+      rtm[a.rule_id].add(a.transaction_id);
+    });
+    setRuleTxMap(rtm);
     if (cRes.data && cRes.data.length > 0 && !form.customer_id) {
       setForm(f => ({ ...f, customer_id: cRes.data![0].id }));
     }
@@ -249,7 +259,14 @@ export default function SuiteTransactions() {
 
   const customerName = (id: string) => customers.find(c => c.id === id)?.name || "Unknown";
   const customerInfo = (id: string) => customers.find(c => c.id === id);
-  const filtered = filter === "All" ? txs : filter === "flagged" ? txs.filter(t => t.risk_flag) : txs.filter(t => !t.risk_flag);
+  const filtered = useMemo(() => {
+    let list = filter === "All" ? txs : filter === "flagged" ? txs.filter(t => t.risk_flag) : txs.filter(t => !t.risk_flag);
+    if (ruleFilter !== "all" && ruleTxMap[ruleFilter]) {
+      const txIds = ruleTxMap[ruleFilter];
+      list = list.filter(t => txIds.has(t.id));
+    }
+    return list;
+  }, [txs, filter, ruleFilter, ruleTxMap]);
   const stats = { total: txs.length, flagged: txs.filter(t => t.risk_flag).length, volume: txs.reduce((s, t) => s + Number(t.amount), 0) };
 
   const toggleExpand = async (txId: string) => {
@@ -566,12 +583,35 @@ export default function SuiteTransactions() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-1.5 px-5 py-2 border-b border-border bg-card shrink-0">
-        {(["All", "flagged", "clean"] as const).map(s => (
-          <button key={s} onClick={() => setFilter(s)} className={cn("text-xs px-3 py-1 rounded-full border font-medium transition-colors capitalize", filter === s ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary")}>
-            {s}
-          </button>
-        ))}
+      <div className="flex items-center gap-3 px-5 py-2 border-b border-border bg-card shrink-0">
+        <div className="flex items-center gap-1.5">
+          {(["All", "flagged", "clean"] as const).map(s => (
+            <button key={s} onClick={() => setFilter(s)} className={cn("text-xs px-3 py-1 rounded-full border font-medium transition-colors capitalize", filter === s ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary")}>
+              {s}
+            </button>
+          ))}
+        </div>
+        <div className="h-4 w-px bg-border" />
+        <div className="flex items-center gap-1.5">
+          <Filter className="w-3 h-3 text-muted-foreground" />
+          <select
+            value={ruleFilter}
+            onChange={e => setRuleFilter(e.target.value)}
+            className={cn("text-xs border rounded-md px-2 py-1 bg-background text-foreground min-w-[180px]", ruleFilter !== "all" && "border-primary text-primary font-medium")}
+          >
+            <option value="all">All Rules</option>
+            {Object.values(rulesMap).map(r => (
+              <option key={r.id} value={r.id}>
+                {r.name} ({ruleTxMap[r.id]?.size || 0})
+              </option>
+            ))}
+          </select>
+          {ruleFilter !== "all" && (
+            <button onClick={() => setRuleFilter("all")} className="text-muted-foreground hover:text-foreground">
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Table */}
