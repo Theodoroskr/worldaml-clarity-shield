@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
     );
 
     const body = await req.json();
-    const { user_id, transaction_ids } = body;
+    const { user_id, transaction_ids, force } = body;
 
     if (!user_id) {
       return new Response(JSON.stringify({ error: "user_id required" }), {
@@ -123,8 +123,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { data: rules, error: ruleErr } = await supabaseAdmin
-      .from("suite_alert_rules").select("*").eq("user_id", user_id).eq("is_active", true);
+    const body = await req.json();
+    const { user_id, transaction_ids, force } = body;
 
     if (ruleErr) throw ruleErr;
     if (!rules || rules.length === 0) {
