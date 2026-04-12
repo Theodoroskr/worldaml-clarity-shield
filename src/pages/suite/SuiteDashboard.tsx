@@ -137,6 +137,22 @@ export default function SuiteDashboard() {
     amld: [
       { title: "Risk Assessment Review", deadline: "Ongoing" },
     ],
+    dfsa: [
+      { title: "Annual MLRO Report to Senior Management", deadline: "Annually", frequencyMonths: 12 },
+      { title: "Independent AML/CFT Audit", deadline: "Annually", frequencyMonths: 12 },
+    ],
+    cbuae: [
+      { title: "Annual Compliance Officer Report", deadline: "Annually", frequencyMonths: 12 },
+      { title: "Independent AML/CFT Audit", deadline: "Annually", frequencyMonths: 12 },
+    ],
+    cbc: [
+      { title: "Annual AML/CFT Compliance Report", deadline: "Annually", frequencyMonths: 12 },
+      { title: "Internal Audit Report", deadline: "Annually", frequencyMonths: 12 },
+    ],
+    bog: [
+      { title: "Annual AML/CFT Compliance Report", deadline: "Annually", frequencyMonths: 12 },
+      { title: "Internal Audit Report", deadline: "Annually", frequencyMonths: 12 },
+    ],
   };
 
   const calendarItems = useMemo(() => {
