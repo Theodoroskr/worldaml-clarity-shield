@@ -398,6 +398,7 @@ export default function SuiteOnboarding() {
 
   const startOnboarding = (type: "kyc-form" | "kyb-form") => {
     setStep(type);
+    setCustomFieldValues({});
     if (type === "kyc-form") setKycForm(emptyKYC);
     else setKybForm(emptyKYB);
   };
@@ -405,6 +406,118 @@ export default function SuiteOnboarding() {
   const cancelOnboarding = () => {
     setStep("select");
     setShowForm(false);
+    setShowBuilder(null);
+  };
+
+  const saveFieldTemplate = async (formType: "kyc" | "kyb") => {
+    setBuilderSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setBuilderSaving(false); return; }
+
+    const fields = formType === "kyc" ? kycCustomFields : kybCustomFields;
+    const templateId = formType === "kyc" ? kycTemplateId : kybTemplateId;
+    const dbFormType = formType === "kyc" ? "kyc_onboarding" : "kyb_onboarding";
+
+    if (templateId) {
+      await supabase.from("admin_form_templates").update({
+        fields: fields as any,
+        updated_at: new Date().toISOString(),
+      }).eq("id", templateId);
+    } else {
+      const { data } = await supabase.from("admin_form_templates").insert({
+        name: `${formType.toUpperCase()} Onboarding Template`,
+        form_type: dbFormType,
+        fields: fields as any,
+        created_by: user.id,
+        is_active: true,
+      }).select("id").single();
+      if (data) {
+        if (formType === "kyc") setKycTemplateId(data.id);
+        else setKybTemplateId(data.id);
+      }
+    }
+
+    toast.success("Form template saved");
+    setBuilderSaving(false);
+    setShowBuilder(null);
+  };
+
+  // Render a dynamic custom field
+  const renderCustomField = (field: CustomField) => {
+    const value = customFieldValues[field.key] || "";
+    const setValue = (v: string) => setCustomFieldValues(prev => ({ ...prev, [field.key]: v }));
+
+    switch (field.type) {
+      case "text":
+      case "email":
+      case "number":
+      case "date":
+        return (
+          <FormField label={field.label} required={field.required} key={field.id}>
+            <FormInput value={value} onChange={setValue} placeholder={field.placeholder} type={field.type} />
+          </FormField>
+        );
+      case "textarea":
+        return (
+          <FormField label={field.label} required={field.required} key={field.id}>
+            <Textarea value={value} onChange={e => setValue(e.target.value)} placeholder={field.placeholder}
+              className="text-sm min-h-[60px]" />
+          </FormField>
+        );
+      case "select":
+        return (
+          <FormField label={field.label} required={field.required} key={field.id}>
+            <Select value={value} onValueChange={setValue}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select…" /></SelectTrigger>
+              <SelectContent>
+                {(field.options || []).map(opt => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+        );
+      case "country":
+        return (
+          <FormField label={field.label} required={field.required} key={field.id}>
+            <Select value={value} onValueChange={setValue}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select…" /></SelectTrigger>
+              <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+            </Select>
+          </FormField>
+        );
+      case "checkbox":
+        return (
+          <div key={field.id} className="flex items-center gap-2 col-span-3">
+            <Checkbox checked={value === "true"} onCheckedChange={v => setValue(v ? "true" : "false")} id={field.key} />
+            <label htmlFor={field.key} className="text-xs font-medium text-foreground cursor-pointer">
+              {field.label}{field.required && <span className="text-destructive ml-0.5">*</span>}
+            </label>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Group custom fields by section
+  const renderCustomFieldsSection = (fields: CustomField[]) => {
+    if (fields.length === 0) return null;
+    const sections = new Map<string, CustomField[]>();
+    fields.forEach(f => {
+      const sec = f.section || "Custom Fields";
+      if (!sections.has(sec)) sections.set(sec, []);
+      sections.get(sec)!.push(f);
+    });
+
+    return Array.from(sections.entries()).map(([section, sectionFields]) => (
+      <div key={section} className="mb-6">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">{section}</h3>
+        <div className="grid grid-cols-3 gap-4">
+          {sectionFields.map(f => renderCustomField(f))}
+        </div>
+      </div>
+    ));
   };
 
   const submitKYC = async () => {
