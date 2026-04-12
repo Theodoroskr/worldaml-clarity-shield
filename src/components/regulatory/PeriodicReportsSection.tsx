@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { generatePeriodicReportPDF, PeriodicReportPDFData } from "@/services/periodicReportExport";
 import {
   FileText, Plus, Download, CheckCircle2, Clock, Send,
-  ChevronDown, ChevronUp, Pencil, Trash2, Eye,
+  ChevronDown, ChevronUp, Pencil, Trash2, Eye, Sparkles, Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -60,6 +59,318 @@ interface DbStats {
   totalSTRs: number;
 }
 
+/* ─── Regulator-specific content templates ─── */
+const REGULATOR_CONTENT_TEMPLATES: Record<string, Record<string, Record<string, string>>> = {
+  // ICPAC
+  icpac: {
+    IAR: {
+      complianceOfficer: "",
+      officerQualifications: "",
+      policiesLastUpdated: "",
+      trainingConducted: "",
+      trainingDates: "",
+      independentAudit: "",
+      auditFindings: "",
+      riskAssessmentSummary: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      actionsTaken: "",
+      recommendations: "",
+      icpacSubmissionMethod: "",
+      clientCategorisation: "",
+    },
+    AML_QUESTIONNAIRE: {
+      complianceOfficer: "",
+      amlPoliciesAdopted: "",
+      cddProcedures: "",
+      ongoingMonitoring: "",
+      staffTrainingDetails: "",
+      internalReportingProcedures: "",
+      recordKeepingPractices: "",
+      riskAssessmentMethodology: "",
+      highRiskClientMeasures: "",
+      sanctionsScreeningProcess: "",
+    },
+  },
+  // CySEC
+  cysec: {
+    ACR: {
+      complianceOfficer: "",
+      officerQualifications: "",
+      policiesLastUpdated: "",
+      trainingConducted: "",
+      trainingDates: "",
+      independentAudit: "",
+      auditFindings: "",
+      riskAssessmentSummary: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      actionsTaken: "",
+      recommendations: "",
+      camloDetails: "",
+      cysecNotifications: "",
+    },
+    IAR: {
+      complianceOfficer: "",
+      officerQualifications: "",
+      auditScope: "",
+      auditMethodology: "",
+      auditFindings: "",
+      complianceDeficiencies: "",
+      remediationPlan: "",
+      riskAssessmentSummary: "",
+      keyRisksIdentified: "",
+      recommendations: "",
+    },
+  },
+  // FinCEN
+  fincen: {
+    BSA_REVIEW: {
+      complianceOfficer: "",
+      officerQualifications: "",
+      policiesLastUpdated: "",
+      trainingConducted: "",
+      trainingDates: "",
+      independentAudit: "",
+      auditFindings: "",
+      riskAssessmentSummary: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      actionsTaken: "",
+      recommendations: "",
+      bsaFilingsSummary: "",
+      ctrsFiledCount: "",
+      sarFiledCount: "",
+    },
+  },
+  // FINTRAC
+  fintrac: {
+    EFFECTIVENESS_REVIEW: {
+      complianceOfficer: "",
+      officerQualifications: "",
+      reviewScope: "",
+      reviewMethodology: "",
+      policiesEffectiveness: "",
+      trainingEffectiveness: "",
+      riskAssessmentEffectiveness: "",
+      recordKeepingEffectiveness: "",
+      reportingEffectiveness: "",
+      deficienciesIdentified: "",
+      remediationPlan: "",
+      recommendations: "",
+    },
+  },
+  // FCA
+  fca: {
+    REP_CRIM: {
+      complianceOfficer: "",
+      officerQualifications: "",
+      policiesLastUpdated: "",
+      trainingConducted: "",
+      trainingDates: "",
+      independentAudit: "",
+      auditFindings: "",
+      riskAssessmentSummary: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      sarsFiled: "",
+      damlRequests: "",
+      actionsTaken: "",
+      recommendations: "",
+    },
+    RISK_ASSESSMENT: {
+      complianceOfficer: "",
+      riskAssessmentSummary: "",
+      customerRiskProfile: "",
+      geographicRisks: "",
+      productServiceRisks: "",
+      deliveryChannelRisks: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      residualRiskRating: "",
+      actionsTaken: "",
+      recommendations: "",
+    },
+  },
+  // DFSA
+  dfsa: {
+    MLRO_REPORT: {
+      complianceOfficer: "",
+      officerQualifications: "",
+      policiesLastUpdated: "",
+      trainingConducted: "",
+      trainingDates: "",
+      independentAudit: "",
+      auditFindings: "",
+      riskAssessmentSummary: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      actionsTaken: "",
+      recommendations: "",
+      goAMLFilings: "",
+      sanctionsScreeningSummary: "",
+      seniorManagementBriefing: "",
+    },
+    AML_AUDIT: {
+      auditFirm: "",
+      auditScope: "",
+      auditMethodology: "",
+      auditFindings: "",
+      complianceGaps: "",
+      remediationTimeline: "",
+      riskAssessmentSummary: "",
+      recommendations: "",
+    },
+    BRA_UPDATE: {
+      riskAssessmentSummary: "",
+      customerRiskProfile: "",
+      geographicRisks: "",
+      productServiceRisks: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      residualRiskRating: "",
+      changesFromPriorYear: "",
+      recommendations: "",
+    },
+  },
+  // CBUAE
+  cbuae: {
+    CO_REPORT: {
+      complianceOfficer: "",
+      officerQualifications: "",
+      policiesLastUpdated: "",
+      trainingConducted: "",
+      trainingDates: "",
+      independentAudit: "",
+      auditFindings: "",
+      riskAssessmentSummary: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      actionsTaken: "",
+      recommendations: "",
+      goAMLFilings: "",
+      sanctionsScreeningSummary: "",
+      boardReportDate: "",
+    },
+    AML_AUDIT: {
+      auditFirm: "",
+      auditScope: "",
+      auditMethodology: "",
+      auditFindings: "",
+      complianceGaps: "",
+      remediationTimeline: "",
+      riskAssessmentSummary: "",
+      recommendations: "",
+    },
+    RISK_ASSESSMENT: {
+      riskAssessmentSummary: "",
+      customerRiskProfile: "",
+      geographicRisks: "",
+      productServiceRisks: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      residualRiskRating: "",
+      recommendations: "",
+    },
+  },
+  // CBC
+  cbc: {
+    AML_COMPLIANCE: {
+      complianceOfficer: "",
+      officerQualifications: "",
+      policiesLastUpdated: "",
+      trainingConducted: "",
+      trainingDates: "",
+      independentAudit: "",
+      auditFindings: "",
+      riskAssessmentSummary: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      actionsTaken: "",
+      recommendations: "",
+      mokasFilings: "",
+      sanctionsScreeningSummary: "",
+    },
+    IAR: {
+      auditScope: "",
+      auditMethodology: "",
+      auditFindings: "",
+      complianceDeficiencies: "",
+      remediationPlan: "",
+      riskAssessmentSummary: "",
+      recommendations: "",
+    },
+  },
+  // Bank of Greece
+  bog: {
+    AML_COMPLIANCE: {
+      complianceOfficer: "",
+      officerQualifications: "",
+      policiesLastUpdated: "",
+      trainingConducted: "",
+      trainingDates: "",
+      independentAudit: "",
+      auditFindings: "",
+      riskAssessmentSummary: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      actionsTaken: "",
+      recommendations: "",
+      hellenicFIUFilings: "",
+      emiLicenseCompliance: "",
+      paymentServicesCompliance: "",
+    },
+    IAR: {
+      auditScope: "",
+      auditMethodology: "",
+      auditFindings: "",
+      complianceDeficiencies: "",
+      remediationPlan: "",
+      riskAssessmentSummary: "",
+      recommendations: "",
+    },
+    RISK_ASSESSMENT: {
+      riskAssessmentSummary: "",
+      customerRiskProfile: "",
+      geographicRisks: "",
+      productServiceRisks: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      residualRiskRating: "",
+      recommendations: "",
+    },
+  },
+  // EU AMLD
+  amld: {
+    RISK_ASSESSMENT: {
+      riskAssessmentSummary: "",
+      customerRiskProfile: "",
+      geographicRisks: "",
+      productServiceRisks: "",
+      keyRisksIdentified: "",
+      mitigatingControls: "",
+      residualRiskRating: "",
+      recommendations: "",
+    },
+  },
+};
+
+/* ─── Default content template when no regulator-specific one exists ─── */
+const DEFAULT_CONTENT_TEMPLATE: Record<string, string> = {
+  complianceOfficer: "",
+  officerQualifications: "",
+  policiesLastUpdated: "",
+  trainingConducted: "",
+  trainingDates: "",
+  independentAudit: "",
+  auditFindings: "",
+  riskAssessmentSummary: "",
+  keyRisksIdentified: "",
+  mitigatingControls: "",
+  actionsTaken: "",
+  recommendations: "",
+};
+
 const REPORT_TYPE_MAP: Record<string, string> = {
   "Annual Compliance Report (ACR)": "ACR",
   "Internal Audit Report": "IAR",
@@ -83,6 +394,14 @@ const STATUS_CONFIG: Record<string, { label: string; icon: typeof Clock; badgeCl
   completed: { label: "Completed", icon: CheckCircle2, badgeClass: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
   filed: { label: "Filed", icon: Send, badgeClass: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
 };
+
+function getContentTemplate(regulator: string, reportType: string): Record<string, string> {
+  const regulatorTemplates = REGULATOR_CONTENT_TEMPLATES[regulator];
+  if (regulatorTemplates && regulatorTemplates[reportType]) {
+    return { ...regulatorTemplates[reportType] };
+  }
+  return { ...DEFAULT_CONTENT_TEMPLATE };
+}
 
 export default function PeriodicReportsSection({ regulator, regulatorFullName, periodicObligations }: Props) {
   const { user } = useAuth();
@@ -151,6 +470,12 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
       return;
     }
 
+    const contentTemplate = getContentTemplate(regulator, reportType);
+    // Pre-fill compliance officer from profile
+    if (contentTemplate.complianceOfficer !== undefined) {
+      contentTemplate.complianceOfficer = profile?.full_name || "";
+    }
+
     const { data, error } = await supabase
       .from("periodic_reports")
       .insert({
@@ -159,20 +484,7 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
         report_title: obligation.title,
         regulator,
         period_year: currentYear,
-        content: {
-          complianceOfficer: profile?.full_name || "",
-          officerQualifications: "",
-          policiesLastUpdated: "",
-          trainingConducted: "",
-          trainingDates: "",
-          independentAudit: "",
-          auditFindings: "",
-          riskAssessmentSummary: "",
-          keyRisksIdentified: "",
-          mitigatingControls: "",
-          actionsTaken: "",
-          recommendations: "",
-        },
+        content: contentTemplate,
       } as any)
       .select()
       .single();
@@ -181,7 +493,7 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
       toast.error("Failed to create report: " + error.message);
       return;
     }
-    toast.success("Report draft created");
+    toast.success("Report draft created with regulator-specific template");
     await fetchReports();
     setExpandedId((data as any).id);
     setEditingId((data as any).id);
@@ -392,14 +704,27 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
                       )}
                     </div>
 
-                    {isEditing && <ReportEditForm report={report} onSave={handleSave} onCancel={() => setEditingId(null)} />}
+                    {isEditing && (
+                      <ReportEditForm
+                        report={report}
+                        regulator={regulator}
+                        regulatorFullName={regulatorFullName}
+                        onSave={handleSave}
+                        onCancel={() => setEditingId(null)}
+                        onContentUpdate={(updatedContent) => {
+                          setReports(prev => prev.map(r =>
+                            r.id === report.id ? { ...r, content: updatedContent } : r
+                          ));
+                        }}
+                      />
+                    )}
 
                     {!isEditing && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                         {Object.entries(report.content).map(([key, val]) => (
-                          <div key={key}>
+                          <div key={key} className={LONG_FIELDS.includes(key) ? "col-span-full" : ""}>
                             <span className="text-xs text-muted-foreground">{formatFieldLabel(key)}</span>
-                            <p className="text-sm text-foreground mt-0.5">{(val as string) || "—"}</p>
+                            <p className="text-sm text-foreground mt-0.5 whitespace-pre-wrap">{(val as string) || "—"}</p>
                           </div>
                         ))}
                         {report.notes && (
@@ -428,31 +753,109 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
   );
 }
 
+/* ─── Constants ─── */
+const LONG_FIELDS = [
+  "riskAssessmentSummary", "actionsTaken", "recommendations", "auditFindings",
+  "complianceDeficiencies", "remediationPlan", "auditScope", "auditMethodology",
+  "policiesEffectiveness", "trainingEffectiveness", "riskAssessmentEffectiveness",
+  "recordKeepingEffectiveness", "reportingEffectiveness", "deficienciesIdentified",
+  "customerRiskProfile", "geographicRisks", "productServiceRisks", "deliveryChannelRisks",
+  "highRiskClientMeasures", "complianceGaps", "remediationTimeline", "changesFromPriorYear",
+  "cddProcedures", "ongoingMonitoring", "internalReportingProcedures",
+  "emiLicenseCompliance", "paymentServicesCompliance",
+];
+
 function formatFieldLabel(key: string): string {
   return key.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase());
 }
 
-function ReportEditForm({ report, onSave, onCancel }: {
+/* ─── Edit Form with AI Assist ─── */
+function ReportEditForm({ report, regulator, regulatorFullName, onSave, onCancel, onContentUpdate }: {
   report: PeriodicReport;
+  regulator: string;
+  regulatorFullName: string;
   onSave: (report: PeriodicReport, content: Record<string, any>, notes: string) => void;
   onCancel: () => void;
+  onContentUpdate: (content: Record<string, any>) => void;
 }) {
   const [content, setContent] = useState<Record<string, any>>(report.content);
   const [notes, setNotes] = useState(report.notes || "");
+  const [aiLoading, setAiLoading] = useState(false);
 
   const updateField = (key: string, value: string) => {
     setContent(prev => ({ ...prev, [key]: value }));
   };
 
-  const longFields = ["riskAssessmentSummary", "actionsTaken", "recommendations", "auditFindings"];
+  const handleAIAssist = async () => {
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("assist-report", {
+        body: {
+          regulator,
+          reportType: report.report_type,
+          reportTitle: report.report_title,
+          periodYear: report.period_year,
+          currentContent: content,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      if (data?.content) {
+        setContent(data.content);
+        onContentUpdate(data.content);
+        toast.success("AI has drafted the qualitative sections. Review and edit as needed.");
+      }
+    } catch (err: any) {
+      console.error("AI assist error:", err);
+      toast.error(err?.message || "AI assistance failed. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium text-foreground">Edit Report Content</p>
+        <Button
+          size="sm"
+          variant="outline"
+          className="gap-1.5 text-xs border-primary/30 text-primary hover:bg-primary/10"
+          onClick={handleAIAssist}
+          disabled={aiLoading}
+        >
+          {aiLoading ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> AI Drafting...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-3.5 h-3.5" /> AI Assist
+            </>
+          )}
+        </Button>
+      </div>
+
+      {aiLoading && (
+        <div className="flex items-center gap-2 rounded-md bg-primary/5 border border-primary/20 px-3 py-2">
+          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+          <p className="text-xs text-muted-foreground">
+            AI is analyzing your database and drafting report sections for <strong>{regulatorFullName}</strong>. 
+            Existing content will be preserved...
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {Object.entries(content).map(([key, val]) => (
-          <div key={key} className={longFields.includes(key) ? "col-span-full" : ""}>
+          <div key={key} className={LONG_FIELDS.includes(key) ? "col-span-full" : ""}>
             <Label className="text-xs">{formatFieldLabel(key)}</Label>
-            {longFields.includes(key) ? (
+            {LONG_FIELDS.includes(key) ? (
               <Textarea
                 value={(val as string) || ""}
                 onChange={e => updateField(key, e.target.value)}
