@@ -583,6 +583,70 @@ export default function SuiteCases() {
     }
   };
 
+  // ── CTR (FinCEN) Validation & Export ──
+  const validateCtrFields = (): string[] => {
+    const errors: string[] = [];
+    if (!ctrFields.conductorName && !caseCustomer?.name) errors.push("conductorName");
+    if (!ctrFields.conductorIDType) errors.push("conductorIDType");
+    if (!ctrFields.conductorIDNumber) errors.push("conductorIDNumber");
+    if (!ctrFields.cashInAmount && !ctrFields.cashOutAmount && caseTransactions.length === 0) errors.push("cashAmount");
+    if (!ctrFields.fiName) errors.push("fiName");
+    if (!ctrFields.contactName) errors.push("contactName");
+    return errors;
+  };
+
+  const handleExportCTR = async () => {
+    if (!selectedCase) return;
+    const errors = validateCtrFields();
+    if (errors.length > 0) {
+      setCtrValidationErrors(errors);
+      const labels: Record<string, string> = {
+        conductorName: "Conductor Name",
+        conductorIDType: "ID Type",
+        conductorIDNumber: "ID Number",
+        cashAmount: "Cash In or Cash Out Amount",
+        fiName: "Financial Institution Name",
+        contactName: "Contact Person",
+      };
+      toast.error(`Missing: ${errors.map(e => labels[e] || e).join(", ")}`, { duration: 6000 });
+      return;
+    }
+    setCtrValidationErrors([]);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error("Please log in"); return; }
+
+      let customer = null;
+      if (selectedCase.customer_id) {
+        const { data } = await supabase.from("suite_customers").select("*").eq("id", selectedCase.customer_id).single();
+        customer = data;
+      }
+      const transactions = caseTransactions.filter(t => selectedTxIds.has(t.id));
+
+      const result = exportCTR({
+        caseItem: selectedCase,
+        customer,
+        transactions,
+        submittedBy: user.email ?? "BSA Officer",
+        reportingEntity: "WorldAML Client",
+        manualFields: ctrFields,
+      });
+      setPdfPreview(result);
+
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: `CTR exported: ${selectedCase.title}`,
+        entity_type: "case",
+        entity_id: selectedCase.id,
+        details: { report_type: "ctr", jurisdiction: "FinCEN-US", transactions_count: transactions.length },
+      });
+    } catch (err: any) {
+      console.error("CTR export error:", err);
+      toast.error(`CTR export failed: ${err?.message || "Unknown error"}`);
+    }
+  };
+
   const handleDownloadPdf = () => {
     if (!pdfPreview) return;
     const link = document.createElement("a");
