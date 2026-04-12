@@ -151,7 +151,7 @@ export default function SuiteCases() {
   const [newNote, setNewNote] = useState("");
   const [showFintracPanel, setShowFintracPanel] = useState(false);
   const [showFieldMapping, setShowFieldMapping] = useState(false);
-  const [fintracStrType, setFintracStrType] = useState<"str" | "lctr" | "eftr">("str");
+  const [fintracStrType, setFintracStrType] = useState<"str" | "lctr" | "eftr" | "tpr">("str");
   const [caseCustomer, setCaseCustomer] = useState<any>(null);
   const [caseTransactions, setCaseTransactions] = useState<any[]>([]);
   const [selectedTxIds, setSelectedTxIds] = useState<Set<string>>(new Set());
