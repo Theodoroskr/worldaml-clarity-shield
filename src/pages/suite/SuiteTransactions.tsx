@@ -88,16 +88,21 @@ export default function SuiteTransactions() {
   const [expandedTx, setExpandedTx] = useState<string | null>(null);
   const [txAlerts, setTxAlerts] = useState<Record<string, AlertRow[]>>({});
   const [alertsLoading, setAlertsLoading] = useState<string | null>(null);
+  const [rulesMap, setRulesMap] = useState<Record<string, RuleInfo>>({});
 
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const [tRes, cRes] = await Promise.all([
+    const [tRes, cRes, rRes] = await Promise.all([
       supabase.from("suite_transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(500),
       supabase.from("suite_customers").select("id, name, risk_level, country").eq("user_id", user.id),
+      supabase.from("suite_alert_rules").select("id, name, severity").eq("user_id", user.id),
     ]);
     setTxs(tRes.data || []);
     setCustomers(cRes.data || []);
+    const rm: Record<string, RuleInfo> = {};
+    (rRes.data || []).forEach((r: RuleInfo) => { rm[r.id] = r; });
+    setRulesMap(rm);
     if (cRes.data && cRes.data.length > 0 && !form.customer_id) {
       setForm(f => ({ ...f, customer_id: cRes.data![0].id }));
     }
