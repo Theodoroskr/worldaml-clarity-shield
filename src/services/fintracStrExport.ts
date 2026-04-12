@@ -448,18 +448,20 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<v
   }
 
   const fileName = `FINTRAC_${strType.toUpperCase()}_${refNum.replace(/[^A-Z0-9]/gi, "_")}_${now.toISOString().slice(0, 10)}.pdf`;
-  
-  try {
-    const pdfBlob = doc.output("blob");
-    const url = URL.createObjectURL(pdfBlob);
+
+  // Use window.open with blob URL — works in sandboxed iframes where anchor downloads are blocked
+  const pdfBlob = doc.output("blob");
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  const opened = window.open(blobUrl, "_blank");
+  if (!opened) {
+    // Popup blocked — fall back to anchor click, then direct save
     const link = document.createElement("a");
-    link.href = url;
+    link.href = blobUrl;
     link.download = fileName;
+    link.target = "_blank";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch {
-    doc.save(fileName);
   }
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
 }
