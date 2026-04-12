@@ -590,11 +590,12 @@ export default function SuiteCases() {
             <p className="text-xs text-red-700 mb-4">
               Select the report type per PCMLTFA/PCMLTFR requirements. STR must be filed within 3 business days of determination. LCTR/EFTR within 15 calendar days.
             </p>
-            <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="grid grid-cols-4 gap-3 mb-4">
               {([
                 { value: "str" as const, label: "STR", desc: "Suspicious Transaction Report", icon: AlertTriangle, deadline: "3 business days" },
                 { value: "lctr" as const, label: "LCTR", desc: "Large Cash Transaction (≥ CAD 10,000)", icon: FileText, deadline: "15 calendar days" },
                 { value: "eftr" as const, label: "EFTR", desc: "Electronic Funds Transfer (≥ CAD 10,000)", icon: Shield, deadline: "15 calendar days" },
+                { value: "tpr" as const, label: "TPR", desc: "Terrorist Property Report (s.7.1)", icon: Flag, deadline: "Immediately" },
               ]).map(t => (
                 <button key={t.value} onClick={() => setFintracStrType(t.value)}
                   className={cn(
