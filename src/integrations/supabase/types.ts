@@ -727,6 +727,102 @@ export type Database = {
         }
         Relationships: []
       }
+      str_report_transactions: {
+        Row: {
+          created_at: string
+          id: string
+          report_id: string
+          transaction_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          report_id: string
+          transaction_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          report_id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "str_report_transactions_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "str_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "str_report_transactions_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "suite_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      str_reports: {
+        Row: {
+          action_taken: string | null
+          camlo_name: string | null
+          case_id: string | null
+          created_at: string
+          customer_id: string | null
+          filed_at: string | null
+          filing_status: string
+          grounds_for_suspicion: string | null
+          id: string
+          report_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_taken?: string | null
+          camlo_name?: string | null
+          case_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          filed_at?: string | null
+          filing_status?: string
+          grounds_for_suspicion?: string | null
+          id?: string
+          report_number?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_taken?: string | null
+          camlo_name?: string | null
+          case_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          filed_at?: string | null
+          filing_status?: string
+          grounds_for_suspicion?: string | null
+          id?: string
+          report_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "str_reports_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "suite_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "str_reports_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_alert_rules: {
         Row: {
           conditions: Json

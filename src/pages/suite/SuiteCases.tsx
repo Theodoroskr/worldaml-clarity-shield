@@ -153,6 +153,7 @@ export default function SuiteCases() {
   const [fintracStrType, setFintracStrType] = useState<"str" | "lctr" | "eftr">("str");
   const [caseCustomer, setCaseCustomer] = useState<any>(null);
   const [caseTransactions, setCaseTransactions] = useState<any[]>([]);
+  const [selectedTxIds, setSelectedTxIds] = useState<Set<string>>(new Set());
   const [manualFields, setManualFields] = useState<FINTRACManualFields>({ ...DEFAULT_MANUAL_FIELDS });
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [pdfPreview, setPdfPreview] = useState<{ blobUrl: string; fileName: string } | null>(null);
@@ -236,7 +237,9 @@ export default function SuiteCases() {
         supabase.from("suite_transactions").select("*").eq("customer_id", c.customer_id).eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
       ]);
       setCaseCustomer(custRes.data);
-      setCaseTransactions(txRes.data || []);
+      const txs = txRes.data || [];
+      setCaseTransactions(txs);
+      setSelectedTxIds(new Set(txs.map((t: any) => t.id)));
       // Auto-populate PEP status from customer record
       if (custRes.data?.pep_status && custRes.data.pep_status !== "no") {
         setManualFields(prev => ({ ...prev, isPEP: custRes.data.pep_status }));
@@ -340,17 +343,8 @@ export default function SuiteCases() {
         customer = data;
       }
 
-      let transactions: any[] = [];
-      if (selectedCase.customer_id) {
-        const { data } = await supabase
-          .from("suite_transactions")
-          .select("*")
-          .eq("customer_id", selectedCase.customer_id)
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(50);
-        transactions = data || [];
-      }
+      // Use only selected transactions
+      const transactions = caseTransactions.filter(t => selectedTxIds.has(t.id));
 
       const result = await exportFINTRACStr({
         caseItem: selectedCase,
@@ -366,12 +360,30 @@ export default function SuiteCases() {
 
       setPdfPreview(result);
 
+      // Persist STR report to database
+      const { data: strReport } = await supabase.from("str_reports").insert({
+        user_id: user.id,
+        case_id: selectedCase.id,
+        customer_id: selectedCase.customer_id,
+        filing_status: "draft",
+        camlo_name: mf.camloName,
+        action_taken: mf.actionTaken,
+        grounds_for_suspicion: mf.suspicionType,
+      }).select("id").single();
+
+      // Link selected transactions to the STR report
+      if (strReport && transactions.length > 0) {
+        await supabase.from("str_report_transactions").insert(
+          transactions.map(tx => ({ report_id: strReport.id, transaction_id: tx.id }))
+        );
+      }
+
       await supabase.from("suite_audit_log").insert({
         user_id: user.id,
         action: `FINTRAC ${fintracStrType.toUpperCase()} exported: ${selectedCase.title}`,
         entity_type: "case",
         entity_id: selectedCase.id,
-        details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada" },
+        details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada", str_report_id: strReport?.id, transactions_count: transactions.length },
       });
     } catch (err: any) {
       console.error("FINTRAC export error:", err);
@@ -489,6 +501,48 @@ export default function SuiteCases() {
                 </button>
               ))}
             </div>
+
+            {/* Transaction Selection */}
+            {caseTransactions.length > 0 && (
+              <div className="bg-white border border-red-200 rounded-xl p-4 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-bold text-red-900 flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5" /> Select Transactions for Report
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setSelectedTxIds(new Set(caseTransactions.map(t => t.id)))}
+                      className="text-[10px] text-red-600 hover:text-red-800 underline">Select all</button>
+                    <button onClick={() => setSelectedTxIds(new Set())}
+                      className="text-[10px] text-red-600 hover:text-red-800 underline">Clear</button>
+                    <span className="text-[10px] font-semibold text-red-700">{selectedTxIds.size}/{caseTransactions.length} selected</span>
+                  </div>
+                </div>
+                <div className="max-h-[200px] overflow-y-auto border border-red-100 rounded-lg divide-y divide-red-50">
+                  {caseTransactions.map(tx => (
+                    <label key={tx.id} className="flex items-center gap-3 px-3 py-2 hover:bg-red-50/50 cursor-pointer">
+                      <input type="checkbox" checked={selectedTxIds.has(tx.id)}
+                        onChange={e => {
+                          const next = new Set(selectedTxIds);
+                          e.target.checked ? next.add(tx.id) : next.delete(tx.id);
+                          setSelectedTxIds(next);
+                        }}
+                        className="rounded border-red-300 text-red-600 focus:ring-red-300" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-semibold",
+                            tx.direction === "inbound" ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"
+                          )}>{tx.direction}</span>
+                          <span className="text-xs font-semibold text-foreground">{tx.currency} {Number(tx.amount).toLocaleString()}</span>
+                          {tx.counterparty && <span className="text-[11px] text-muted-foreground">→ {tx.counterparty}</span>}
+                          {tx.risk_flag && <span className="text-[9px] bg-red-100 text-red-700 px-1 rounded font-bold">FLAGGED</span>}
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">{new Date(tx.created_at).toLocaleDateString()}{tx.description ? ` · ${tx.description}` : ''}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Validation Summary */}
             {validationErrors.length > 0 && (
