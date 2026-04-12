@@ -245,7 +245,7 @@ export default function SuiteTransactions() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
             toast.info("Running rule engine…");
-            const { data, error } = await supabase.functions.invoke("evaluate-transactions", { body: { user_id: user.id } });
+            const { data, error } = await supabase.functions.invoke("evaluate-transactions", { body: { user_id: user.id, force: true } });
             if (error) { toast.error("Rule engine failed"); return; }
             toast.success(`Evaluated ${data?.evaluated || 0} transactions, ${data?.alerts_created || 0} alerts created`);
             fetchData();

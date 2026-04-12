@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
     );
 
     const body = await req.json();
-    const { user_id, transaction_ids } = body;
+    const { user_id, transaction_ids, force } = body;
 
     if (!user_id) {
       return new Response(JSON.stringify({ error: "user_id required" }), {
@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
     let txQuery = supabaseAdmin.from("suite_transactions").select("*").eq("user_id", user_id);
     if (transaction_ids?.length) {
       txQuery = txQuery.in("id", transaction_ids);
-    } else {
+    } else if (!force) {
       txQuery = txQuery.eq("monitoring_status", "pending");
     }
 
@@ -204,7 +204,7 @@ Deno.serve(async (req) => {
       rules_applied: rules.length, rule_hits: ruleHits,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = err instanceof Error ? err.message : JSON.stringify(err);
     console.error("Evaluate error:", message);
     return new Response(JSON.stringify({ error: message }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
