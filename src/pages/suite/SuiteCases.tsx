@@ -401,6 +401,97 @@ export default function SuiteCases() {
     }
   };
 
+  // ── MOKAS (Cyprus) Validation & Export ──
+  const validateMokasFields = (): string[] => {
+    const errors: string[] = [];
+    if (!mokasFields.complianceOfficerName) errors.push("complianceOfficerName");
+    if (!mokasFields.sourceOfFunds) errors.push("sourceOfFunds");
+    if (!mokasFields.destinationOfFunds) errors.push("destinationOfFunds");
+    if (!mokasFields.methodOfPayment) errors.push("methodOfPayment");
+    if (!mokasFields.suspicionType) errors.push("suspicionType");
+    if (mokasFields.selectedIndicators.length === 0) errors.push("selectedIndicators");
+    if (!mokasFields.actionTaken) errors.push("actionTaken");
+    if (notes.length === 0) errors.push("notes");
+    return errors;
+  };
+
+  const handleExportMOKAS = async () => {
+    if (!selectedCase) return;
+
+    const errors = validateMokasFields();
+    if (errors.length > 0) {
+      setMokasValidationErrors(errors);
+      const labels: Record<string, string> = {
+        complianceOfficerName: "AMLCO Name",
+        sourceOfFunds: "Source of Funds",
+        destinationOfFunds: "Destination of Funds",
+        methodOfPayment: "Method of Payment",
+        suspicionType: "Suspicion Type",
+        selectedIndicators: "At least 1 Indicator",
+        actionTaken: "Action Taken",
+        notes: "Investigation Narrative (add case notes)",
+      };
+      const missing = errors.map(e => labels[e] || e).join(", ");
+      toast.error(`Missing mandatory fields: ${missing}`, { duration: 6000 });
+      return;
+    }
+    setMokasValidationErrors([]);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error("Please log in to export"); return; }
+
+      let customer = null;
+      if (selectedCase.customer_id) {
+        const { data } = await supabase.from("suite_customers").select("*").eq("id", selectedCase.customer_id).single();
+        customer = data;
+      }
+
+      const transactions = caseTransactions.filter(t => selectedTxIds.has(t.id));
+
+      const result = await exportMOKASStr({
+        caseItem: selectedCase,
+        notes,
+        customer,
+        transactions,
+        submittedBy: user.email ?? "AMLCO",
+        reportingEntity: "WorldAML Client",
+        reportingEntityRef: `MOKAS-STR-${selectedCase.id.slice(0, 8).toUpperCase()}`,
+        manualFields: mokasFields,
+      });
+
+      setPdfPreview(result);
+
+      // Persist STR report
+      const { data: strReport } = await supabase.from("str_reports").insert({
+        user_id: user.id,
+        case_id: selectedCase.id,
+        customer_id: selectedCase.customer_id,
+        filing_status: "draft",
+        camlo_name: mokasFields.complianceOfficerName,
+        action_taken: mokasFields.actionTaken,
+        grounds_for_suspicion: mokasFields.suspicionType,
+      }).select("id").single();
+
+      if (strReport && transactions.length > 0) {
+        await supabase.from("str_report_transactions").insert(
+          transactions.map(tx => ({ report_id: strReport.id, transaction_id: tx.id }))
+        );
+      }
+
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: `MOKAS STR exported: ${selectedCase.title}`,
+        entity_type: "case",
+        entity_id: selectedCase.id,
+        details: { report_type: "mokas_str", jurisdiction: "CySEC-Cyprus", str_report_id: strReport?.id, transactions_count: transactions.length },
+      });
+    } catch (err: any) {
+      console.error("MOKAS export error:", err);
+      toast.error(`PDF export failed: ${err?.message || "Unknown error"}`);
+    }
+  };
+
   const handleDownloadPdf = () => {
     if (!pdfPreview) return;
     const link = document.createElement("a");
