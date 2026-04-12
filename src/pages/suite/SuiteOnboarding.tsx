@@ -91,6 +91,36 @@ const emptyKYC: KYCForm = {
   occupation: "", sourceOfFunds: "", pep: "no", regulator: "",
 };
 
+// Director entry
+interface DirectorEntry {
+  id: string;
+  name: string;
+  nationality: string;
+  dateOfBirth: string;
+  role: string;
+  pep: string;
+}
+
+const emptyDirector = (): DirectorEntry => ({
+  id: crypto.randomUUID(),
+  name: "", nationality: "", dateOfBirth: "", role: "director", pep: "no",
+});
+
+// UBO entry
+interface UBOEntry {
+  id: string;
+  name: string;
+  nationality: string;
+  ownershipPct: string;
+  dateOfBirth: string;
+  pep: string;
+}
+
+const emptyUBO = (): UBOEntry => ({
+  id: crypto.randomUUID(),
+  name: "", nationality: "", ownershipPct: "", dateOfBirth: "", pep: "no",
+});
+
 // KYB form state
 interface KYBForm {
   companyName: string;
@@ -109,9 +139,8 @@ interface KYBForm {
   annualTurnover: string;
   numberOfEmployees: string;
   sourceOfFunds: string;
-  uboName: string;
-  uboNationality: string;
-  uboOwnership: string;
+  directors: DirectorEntry[];
+  ubos: UBOEntry[];
   regulator: string;
 }
 
@@ -120,7 +149,7 @@ const emptyKYB: KYBForm = {
   legalStructure: "limited", industry: "", website: "", registeredAddress: "",
   city: "", postalCode: "", contactName: "", contactEmail: "", contactPhone: "",
   annualTurnover: "", numberOfEmployees: "", sourceOfFunds: "",
-  uboName: "", uboNationality: "", uboOwnership: "", regulator: "",
+  directors: [emptyDirector()], ubos: [emptyUBO()], regulator: "",
 };
 
 // Auto-provision baseline alert rules for the selected regulator
