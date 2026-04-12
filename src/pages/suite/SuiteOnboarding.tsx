@@ -257,6 +257,8 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
 }) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [riskBreakdown, setRiskBreakdown] = useState<RiskBreakdown | null>(null);
+  const [riskLoading, setRiskLoading] = useState(true);
   const [edit, setEdit] = useState({
     name: customer.name,
     email: customer.email || "",
@@ -266,6 +268,34 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
     risk_level: customer.risk_level,
     kyc_status: customer.kyc_status,
   });
+
+  // Fetch screening + transaction data for risk scoring
+  const fetchRiskData = useCallback(async () => {
+    setRiskLoading(true);
+    const [screenings, transactions] = await Promise.all([
+      supabase.from("suite_screenings").select("match_count").eq("customer_id", customer.id),
+      supabase.from("suite_transactions").select("risk_flag, amount").eq("customer_id", customer.id),
+    ]);
+    const totalMatches = (screenings.data || []).reduce((s, r: any) => s + (r.match_count || 0), 0);
+    const hasMatches = totalMatches > 0;
+    const txData = transactions.data || [];
+    const flaggedCount = txData.filter((t: any) => t.risk_flag).length;
+    const totalVolume = txData.reduce((s, t: any) => s + (Number(t.amount) || 0), 0);
+
+    const b = {
+      country: scoreCountry(customer.country),
+      screening: scoreScreening(totalMatches, hasMatches),
+      transaction: scoreTransactions(flaggedCount, txData.length, totalVolume),
+      customerType: scoreCustomerType(customer.type),
+      kycStatus: scoreKycStatus(customer.kyc_status),
+      composite: 0,
+    };
+    b.composite = computeComposite(b);
+    setRiskBreakdown(b);
+    setRiskLoading(false);
+  }, [customer.id, customer.country, customer.type, customer.kyc_status]);
+
+  useEffect(() => { fetchRiskData(); }, [fetchRiskData]);
 
   // Sync when customer changes
   useEffect(() => {
