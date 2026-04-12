@@ -566,10 +566,16 @@ export default function SuiteCases() {
               </button>
             )}
             {(selectedCase.status === "str_filed" || selectedCase.status === "sar_filed" || selectedCase.status === "closed") && (
-              <button onClick={() => setShowFintracPanel(!showFintracPanel)}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
-                <Flag className="w-3 h-3" /> FINTRAC Report
-              </button>
+              <>
+                <button onClick={() => { setShowFintracPanel(!showFintracPanel); setShowMokasPanel(false); }}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                  <Flag className="w-3 h-3" /> FINTRAC Report
+                </button>
+                <button onClick={() => { setShowMokasPanel(!showMokasPanel); setShowFintracPanel(false); }}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium">
+                  <MapPin className="w-3 h-3" /> MOKAS Report
+                </button>
+              </>
             )}
           </div>
         </div>
