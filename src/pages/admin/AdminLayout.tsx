@@ -12,10 +12,6 @@ const NAV = [
   { label: "Forms", path: "/admin/forms", icon: FileText },
   { label: "Workflows", path: "/admin/workflows", icon: GitBranch },
   { label: "Pricing", path: "/admin/pricing", icon: CreditCard },
-  { label: "Leads", path: "/admin/leads", icon: Megaphone },
-  { label: "Partners", path: "/admin/partners", icon: Handshake },
-  { label: "Trusted Domains", path: "/admin/trusted-domains", icon: Globe },
-  { label: "Suite Access", path: "/admin/suite-access", icon: KeyRound },
   { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText },
 ];
 

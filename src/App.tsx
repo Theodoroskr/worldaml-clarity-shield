@@ -148,10 +148,6 @@ const App = () => (
                   <Route path="forms" element={<AdminForms />} />
                   <Route path="workflows" element={<AdminWorkflows />} />
                   <Route path="pricing" element={<AdminPricing />} />
-                  <Route path="leads" element={<AdminLeads />} />
-                  <Route path="partners" element={<AdminPartners />} />
-                  <Route path="trusted-domains" element={<AdminTrustedDomains />} />
-                  <Route path="suite-access" element={<AdminSuiteAccess />} />
                   <Route path="audit-log" element={<AdminAuditLog />} />
                 </Route>
                 <Route path="/forgot-password" element={<ForgotPassword />} />
