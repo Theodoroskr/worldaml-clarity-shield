@@ -571,6 +571,7 @@ function FormInput({ value, onChange, placeholder, type = "text" }: { value: str
 }
 
 export default function SuiteOnboarding() {
+  const { orgId, userId, org } = useOrganisation();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
@@ -586,7 +587,6 @@ export default function SuiteOnboarding() {
   const [saving, setSaving] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
-  // Custom field builder state
   const [kycCustomFields, setKycCustomFields] = useState<CustomField[]>([]);
   const [kybCustomFields, setKybCustomFields] = useState<CustomField[]>([]);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
@@ -596,9 +596,8 @@ export default function SuiteOnboarding() {
   const [kybTemplateId, setKybTemplateId] = useState<string | null>(null);
 
   const fetchCustomers = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data } = await supabase.from("suite_customers").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    if (!orgId) return;
+    const { data } = await supabase.from("suite_customers").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false });
     setCustomers((data || []) as Customer[]);
     setLoading(false);
   };
