@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
-  ChevronRight, CalendarClock, RefreshCw,
+  ChevronRight, CalendarClock, RefreshCw, Users, AlertTriangle,
+  Shield, FileText, TrendingUp, Activity, BarChart3, ArrowUpRight, Clock,
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid,
