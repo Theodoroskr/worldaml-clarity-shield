@@ -91,6 +91,7 @@ const AdminForms = lazy(() => import("./pages/admin/AdminForms"));
 const AdminWorkflows = lazy(() => import("./pages/admin/AdminWorkflows"));
 const AdminPricing = lazy(() => import("./pages/admin/AdminPricing"));
 const AdminOrganizations = lazy(() => import("./pages/admin/AdminOrganizations"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
@@ -138,6 +139,8 @@ const App = () => (
                 <Route path="/pending-approval" element={<PendingApproval />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                  <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="users" element={<AdminUsers />} />
                   <Route path="organizations" element={<AdminOrganizations />} />
                   <Route path="alert-rules" element={<AdminAlertRules />} />
