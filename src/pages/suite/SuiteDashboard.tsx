@@ -1,49 +1,19 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
-  TrendingUp, Users, Activity, AlertTriangle, Briefcase, Clock, CheckCircle, Bell, ChevronRight,
-  CalendarClock, RefreshCw, Shield, FileText, ArrowUpRight, Eye,
+  ChevronRight, CalendarClock, RefreshCw,
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid,
-  LineChart, Line, PieChart, Pie, Cell, BarChart, Bar,
+  PieChart, Pie, Cell,
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { Timeline, TimelineEvent } from "@/components/ui/timeline";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { format, differenceInDays, addMonths, isPast, formatDistanceToNow, subDays } from "date-fns";
+import { format, differenceInDays, addMonths, isPast, formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useOrganisation } from "@/hooks/useOrganisation";
-
-/* ─── animated counter ─── */
-function useCountUp(target: number, duration = 900) {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (target === 0) { setValue(0); return; }
-    let cur = 0;
-    const step = Math.max(1, Math.ceil(target / (duration / 16)));
-    const id = setInterval(() => {
-      cur = Math.min(cur + step, target);
-      setValue(cur);
-      if (cur >= target) clearInterval(id);
-    }, 16);
-    return () => clearInterval(id);
-  }, [target, duration]);
-  return value;
-}
-
-function SparkLine({ data, positive }: { data: number[]; positive: boolean }) {
-  const points = data.map((v, i) => ({ v, i }));
-  return (
-    <ResponsiveContainer width={80} height={32}>
-      <LineChart data={points} margin={{ top: 2, bottom: 2, left: 0, right: 0 }}>
-        <Line type="monotone" dataKey="v" stroke={positive ? "hsl(142,71%,45%)" : "hsl(0,84%,60%)"} strokeWidth={1.5} dot={false} />
-      </LineChart>
-    </ResponsiveContainer>
-  );
-}
 
 const RADIAN = Math.PI / 180;
 const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
@@ -57,27 +27,8 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent
   ) : null;
 };
 
-/* ─── Activity item type for the feed ─── */
-interface FeedItem {
-  id: string;
-  type: "customer" | "alert" | "screening" | "case" | "transaction";
-  label: string;
-  detail: string;
-  time: string;
-  severity?: string;
-  route?: string;
-}
-
 export default function SuiteDashboard() {
   const { orgId, org, isLoading: orgLoading } = useOrganisation();
-  const [customerCount, setCustomerCount] = useState(0);
-  const [openAlerts, setOpenAlerts] = useState(0);
-  const [totalAlerts, setTotalAlerts] = useState(0);
-  const [screeningCount, setScreeningCount] = useState(0);
-  const [caseCount, setCaseCount] = useState(0);
-  const [openCases, setOpenCases] = useState(0);
-  const [txnCount, setTxnCount] = useState(0);
-  const [flaggedTxn, setFlaggedTxn] = useState(0);
   const [regulator, setRegulator] = useState<string | null>(null);
   const [riskDistribution, setRiskDistribution] = useState([
     { name: "High Risk", value: 0, color: "hsl(0,84%,60%)" },
@@ -86,7 +37,6 @@ export default function SuiteDashboard() {
     { name: "Critical", value: 0, color: "hsl(280,70%,50%)" },
   ]);
   const [auditEvents, setAuditEvents] = useState<TimelineEvent[]>([]);
-  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
@@ -97,38 +47,15 @@ export default function SuiteDashboard() {
     if (!silent) setLoading(true);
     else setRefreshing(true);
 
-    const [
-      customersRes, alertsRes, screeningsRes, casesRes, txnRes, flaggedRes,
-      auditRes, recentCustomers, recentAlerts, recentScreenings,
-    ] = await Promise.all([
+    const [customersRes, auditRes] = await Promise.all([
       supabase.from("suite_customers").select("id, risk_level").eq("organisation_id", orgId),
-      supabase.from("suite_alerts").select("id, status").eq("organisation_id", orgId),
-      supabase.from("suite_screenings").select("id").eq("organisation_id", orgId),
-      supabase.from("suite_cases").select("id, status").eq("organisation_id", orgId),
-      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("risk_flag", true),
       supabase.from("suite_audit_log").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(10),
-      supabase.from("suite_customers").select("id, name, type, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(4),
-      supabase.from("suite_alerts").select("id, title, severity, status, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(4),
-      supabase.from("suite_screenings").select("id, screening_type, result, created_at, suite_customers(name)").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(4),
     ]);
 
     setRegulator(org?.regulator ?? null);
 
     const customers = customersRes.data || [];
-    const alerts = alertsRes.data || [];
-    const screenings = screeningsRes.data || [];
-    const cases = casesRes.data || [];
     const audit = auditRes.data || [];
-
-    setCustomerCount(customers.length);
-    setTotalAlerts(alerts.length);
-    setOpenAlerts(alerts.filter(a => a.status === "open" || a.status === "reviewing").length);
-    setScreeningCount(screenings.length);
-    setCaseCount(cases.length);
-    setOpenCases(cases.filter(c => c.status === "open" || c.status === "in_progress").length);
-    setTxnCount(txnRes.count ?? 0);
-    setFlaggedTxn(flaggedRes.count ?? 0);
 
     const riskCounts = { low: 0, medium: 0, high: 0, critical: 0 };
     customers.forEach(c => { if (c.risk_level in riskCounts) riskCounts[c.risk_level as keyof typeof riskCounts]++; });
@@ -149,26 +76,6 @@ export default function SuiteDashboard() {
       detail: typeof a.details === "object" && a.details !== null ? (a.details as any).detail || "" : "",
     })));
 
-    // Build activity feed
-    const feed: FeedItem[] = [];
-    (recentCustomers.data ?? []).forEach(c => feed.push({
-      id: c.id, type: "customer", label: c.name, detail: `${c.type} onboarded`,
-      time: c.created_at, route: "/suite/onboarding",
-    }));
-    (recentAlerts.data ?? []).forEach(a => feed.push({
-      id: a.id, type: "alert", label: a.title, detail: a.status,
-      time: a.created_at, severity: a.severity, route: "/suite/alerts",
-    }));
-    (recentScreenings.data ?? []).forEach(s => {
-      const custName = (s as any).suite_customers?.name ?? "Entity";
-      feed.push({
-        id: s.id, type: "screening", label: custName,
-        detail: `${s.screening_type} — ${s.result}`, time: s.created_at, route: "/suite/screening",
-      });
-    });
-    feed.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-    setFeedItems(feed.slice(0, 10));
-
     setLoading(false);
     setRefreshing(false);
     setLastRefresh(new Date());
@@ -181,17 +88,6 @@ export default function SuiteDashboard() {
     const id = setInterval(() => fetchData(true), 30000);
     return () => clearInterval(id);
   }, [fetchData]);
-
-  /* ─── animated values ─── */
-  const animCustomers = useCountUp(customerCount);
-  const animAlerts = useCountUp(openAlerts);
-  const animScreenings = useCountUp(screeningCount);
-  const animCases = useCountUp(openCases);
-  const animTxn = useCountUp(txnCount);
-  const animFlagged = useCountUp(flaggedTxn);
-
-  const alertRate = totalAlerts > 0 ? Math.round((openAlerts / totalAlerts) * 100) : 0;
-  const flagRate = txnCount > 0 ? Math.round((flaggedTxn / txnCount) * 100) : 0;
 
   /* ─── Compliance Calendar ─── */
   const PERIODIC_BY_REGULATOR: Record<string, { title: string; deadline: string; month?: number; day?: number; frequencyMonths?: number }[]> = {
@@ -280,28 +176,6 @@ export default function SuiteDashboard() {
     { date: "28/02", flagged: 5, clear: 37, pending: 3 },
   ];
 
-  const feedIcon = (type: string, severity?: string) => {
-    switch (type) {
-      case "alert": return <AlertTriangle className={cn("h-4 w-4",
-        severity === "critical" ? "text-destructive" : severity === "high" ? "text-orange-600" : "text-amber-600"
-      )} />;
-      case "customer": return <Users className="h-4 w-4 text-primary" />;
-      case "screening": return <Shield className="h-4 w-4 text-primary" />;
-      case "case": return <FileText className="h-4 w-4 text-blue-600" />;
-      default: return <Activity className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
-
-  const feedBg = (type: string, severity?: string) => {
-    switch (type) {
-      case "alert": return severity === "critical" ? "bg-destructive/10" : severity === "high" ? "bg-orange-50" : "bg-amber-50";
-      case "customer": return "bg-primary/10";
-      case "screening": return "bg-primary/10";
-      case "case": return "bg-blue-50";
-      default: return "bg-muted";
-    }
-  };
-
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       {/* Header with refresh */}
@@ -322,121 +196,6 @@ export default function SuiteDashboard() {
           <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
           Refresh
         </Button>
-      </div>
-
-      {/* ══════════ KPI CARDS — 6 clickable cards ══════════ */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {/* Customers */}
-        <div
-          onClick={() => navigate("/suite/onboarding")}
-          className="bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all cursor-pointer p-5 group"
-        >
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-              <Users className="w-4 h-4" />
-            </div>
-            <SparkLine data={[30,35,32,40,38,44,50,48,52,customerCount]} positive />
-          </div>
-          <div className="text-2xl font-bold text-foreground font-mono">{animCustomers.toLocaleString()}</div>
-          <div className="text-xs text-muted-foreground mt-0.5">Customers</div>
-          <div className="text-xs text-primary mt-1 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ArrowUpRight className="h-3 w-3" /> View all →
-          </div>
-        </div>
-
-        {/* Open Alerts */}
-        <div
-          onClick={() => navigate("/suite/alerts")}
-          className="bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-destructive/30 transition-all cursor-pointer p-5 group"
-        >
-          <div className="flex items-start justify-between mb-3">
-            <div className={cn("p-2 rounded-lg transition-colors",
-              openAlerts > 0 ? "bg-destructive/10 text-destructive group-hover:bg-destructive group-hover:text-white" : "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white"
-            )}>
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-            <SparkLine data={[8,10,9,11,10,12,13,12,14,openAlerts]} positive={openAlerts === 0} />
-          </div>
-          <div className="text-2xl font-bold text-foreground font-mono">{animAlerts}</div>
-          <div className="text-xs text-muted-foreground mt-0.5">Open Alerts</div>
-          <div className="mt-1.5 flex items-center gap-2">
-            <Progress value={alertRate} className="h-1 flex-1" />
-            <span className="text-[10px] text-muted-foreground">{alertRate}%</span>
-          </div>
-        </div>
-
-        {/* Screenings */}
-        <div
-          onClick={() => navigate("/suite/screening")}
-          className="bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all cursor-pointer p-5 group"
-        >
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-              <Shield className="w-4 h-4" />
-            </div>
-            <SparkLine data={[20,25,22,30,28,35,32,38,37,screeningCount]} positive />
-          </div>
-          <div className="text-2xl font-bold text-foreground font-mono">{animScreenings.toLocaleString()}</div>
-          <div className="text-xs text-muted-foreground mt-0.5">Screenings</div>
-          <div className="text-xs text-primary mt-1 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ArrowUpRight className="h-3 w-3" /> View all →
-          </div>
-        </div>
-
-        {/* Open Cases */}
-        <div
-          onClick={() => navigate("/suite/cases")}
-          className="bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-amber-400/30 transition-all cursor-pointer p-5 group"
-        >
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2 rounded-lg bg-amber-50 text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-              <Briefcase className="w-4 h-4" />
-            </div>
-            <SparkLine data={[3,4,3,5,4,6,5,7,6,openCases]} positive={openCases === 0} />
-          </div>
-          <div className="text-2xl font-bold text-foreground font-mono">{animCases}</div>
-          <div className="text-xs text-muted-foreground mt-0.5">Open Cases</div>
-          <div className="text-xs text-muted-foreground mt-1">of {caseCount} total</div>
-        </div>
-
-        {/* Transactions */}
-        <div
-          onClick={() => navigate("/suite/transactions")}
-          className="bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-blue-400/30 transition-all cursor-pointer p-5 group"
-        >
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-              <TrendingUp className="w-4 h-4" />
-            </div>
-            <SparkLine data={[100,120,110,140,130,155,145,160,150,txnCount]} positive />
-          </div>
-          <div className="text-2xl font-bold text-foreground font-mono">{animTxn.toLocaleString()}</div>
-          <div className="text-xs text-muted-foreground mt-0.5">Transactions</div>
-          <div className="text-xs text-primary mt-1 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ArrowUpRight className="h-3 w-3" /> Monitor →
-          </div>
-        </div>
-
-        {/* Flagged TXNs */}
-        <div
-          onClick={() => navigate("/suite/transactions")}
-          className="bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-destructive/30 transition-all cursor-pointer p-5 group"
-        >
-          <div className="flex items-start justify-between mb-3">
-            <div className={cn("p-2 rounded-lg transition-colors",
-              flaggedTxn > 0 ? "bg-destructive/10 text-destructive group-hover:bg-destructive group-hover:text-white" : "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white"
-            )}>
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-            <SparkLine data={[5,3,2,4,1,2,0,1,3,flaggedTxn]} positive={flaggedTxn === 0} />
-          </div>
-          <div className="text-2xl font-bold text-foreground font-mono">{animFlagged}</div>
-          <div className="text-xs text-muted-foreground mt-0.5">Flagged TXNs</div>
-          <div className="mt-1.5 flex items-center gap-2">
-            <Progress value={flagRate} className="h-1 flex-1" />
-            <span className="text-[10px] text-muted-foreground">{flagRate}%</span>
-          </div>
-        </div>
       </div>
 
       {/* ══════════ CHARTS ROW ══════════ */}
@@ -503,125 +262,82 @@ export default function SuiteDashboard() {
         </div>
       </div>
 
-      {/* ══════════ LIVE ACTIVITY FEED + COMPLIANCE CALENDAR ══════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Live Activity Feed */}
-        <div className="bg-card rounded-xl border border-border">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-primary" />
-              <div>
-                <h2 className="font-semibold text-foreground">Live Activity</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Latest events across your workspace</p>
-              </div>
+      {/* ══════════ COMPLIANCE CALENDAR ══════════ */}
+      <div className="bg-card rounded-xl border border-border">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <CalendarClock className="w-4 h-4 text-primary" />
+            <div>
+              <h2 className="font-semibold text-foreground">Compliance Calendar</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Upcoming periodic filing deadlines</p>
             </div>
-            {refreshing && <RefreshCw className="w-3.5 h-3.5 text-muted-foreground animate-spin" />}
           </div>
-          <div className="divide-y divide-border max-h-[320px] overflow-y-auto">
-            {feedItems.length === 0 && !loading ? (
-              <p className="text-sm text-muted-foreground text-center py-8">No activity yet. Start by adding a customer.</p>
-            ) : feedItems.map((item) => (
-              <div
-                key={`${item.type}-${item.id}`}
-                onClick={() => item.route && navigate(item.route)}
-                className="flex items-center gap-3 px-5 py-3 hover:bg-muted/30 transition-colors cursor-pointer group"
-              >
-                <div className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center", feedBg(item.type, item.severity))}>
-                  {feedIcon(item.type, item.severity)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{item.label}</p>
-                  <p className="text-xs text-muted-foreground truncate">{item.detail}</p>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Badge variant="outline" className="text-[10px] capitalize px-1.5">{item.type}</Badge>
-                  <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                    {formatDistanceToNow(new Date(item.time), { addSuffix: true })}
-                  </span>
-                </div>
-                <Eye className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            ))}
-          </div>
+          <button
+            onClick={() => navigate("/suite/regulatory")}
+            className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+          >
+            View all <ChevronRight className="w-3 h-3" />
+          </button>
         </div>
-
-        {/* Compliance Calendar */}
-        <div className="bg-card rounded-xl border border-border">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <div className="flex items-center gap-2">
-              <CalendarClock className="w-4 h-4 text-primary" />
-              <div>
-                <h2 className="font-semibold text-foreground">Compliance Calendar</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Upcoming periodic filing deadlines</p>
-              </div>
-            </div>
-            <button
-              onClick={() => navigate("/suite/regulatory")}
-              className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors"
-            >
-              View all <ChevronRight className="w-3 h-3" />
-            </button>
-          </div>
-          <div className="p-4 max-h-[320px] overflow-y-auto">
-            {!regulator ? (
-              <p className="text-sm text-muted-foreground text-center py-6">
-                Set your regulator in{" "}
-                <button onClick={() => navigate("/suite/settings")} className="text-primary underline underline-offset-2 hover:text-primary/80">
-                  Settings
-                </button>{" "}
-                to see filing deadlines.
-              </p>
-            ) : calendarItems.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">No periodic obligations found for your regulator.</p>
-            ) : (
-              <div className="divide-y divide-border">
-                {calendarItems.map((item, i) => (
-                  <div key={i} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
-                    <div className="shrink-0">
-                      {item.status === "overdue" ? (
-                        <div className="w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
-                      ) : item.status === "urgent" ? (
-                        <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                      ) : item.status === "upcoming" ? (
-                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                      ) : item.status === "on-track" ? (
-                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                      ) : (
-                        <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/30" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm font-medium text-foreground truncate block">{item.title}</span>
-                    </div>
-                    <div className="text-right shrink-0">
-                      {item.nextDue ? (
-                        <div className="space-y-0.5">
-                          <div className="text-xs font-medium text-foreground">{format(item.nextDue, "d MMM yyyy")}</div>
-                          <Badge
-                            variant="outline"
-                            className={cn("text-[10px] px-1.5 py-0",
-                              item.status === "overdue" && "border-destructive/40 text-destructive bg-destructive/5",
-                              item.status === "urgent" && "border-orange-300 text-orange-700 bg-orange-50",
-                              item.status === "upcoming" && "border-yellow-300 text-yellow-700 bg-yellow-50",
-                              item.status === "on-track" && "border-emerald-300 text-emerald-700 bg-emerald-50",
-                            )}
-                          >
-                            {item.daysUntil !== null && item.daysUntil >= 0
-                              ? `${item.daysUntil}d left`
-                              : item.daysUntil !== null
-                              ? `${Math.abs(item.daysUntil)}d overdue`
-                              : ""}
-                          </Badge>
-                        </div>
-                      ) : (
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">{item.deadline}</Badge>
-                      )}
-                    </div>
+        <div className="p-4 max-h-[320px] overflow-y-auto">
+          {!regulator ? (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              Set your regulator in{" "}
+              <button onClick={() => navigate("/suite/settings")} className="text-primary underline underline-offset-2 hover:text-primary/80">
+                Settings
+              </button>{" "}
+              to see filing deadlines.
+            </p>
+          ) : calendarItems.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No periodic obligations found for your regulator.</p>
+          ) : (
+            <div className="divide-y divide-border">
+              {calendarItems.map((item, i) => (
+                <div key={i} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                  <div className="shrink-0">
+                    {item.status === "overdue" ? (
+                      <div className="w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
+                    ) : item.status === "urgent" ? (
+                      <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
+                    ) : item.status === "upcoming" ? (
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+                    ) : item.status === "on-track" ? (
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    ) : (
+                      <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/30" />
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium text-foreground truncate block">{item.title}</span>
+                  </div>
+                  <div className="text-right shrink-0">
+                    {item.nextDue ? (
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-medium text-foreground">{format(item.nextDue, "d MMM yyyy")}</div>
+                        <Badge
+                          variant="outline"
+                          className={cn("text-[10px] px-1.5 py-0",
+                            item.status === "overdue" && "border-destructive/40 text-destructive bg-destructive/5",
+                            item.status === "urgent" && "border-orange-300 text-orange-700 bg-orange-50",
+                            item.status === "upcoming" && "border-yellow-300 text-yellow-700 bg-yellow-50",
+                            item.status === "on-track" && "border-emerald-300 text-emerald-700 bg-emerald-50",
+                          )}
+                        >
+                          {item.daysUntil !== null && item.daysUntil >= 0
+                            ? `${item.daysUntil}d left`
+                            : item.daysUntil !== null
+                            ? `${Math.abs(item.daysUntil)}d overdue`
+                            : ""}
+                        </Badge>
+                      </div>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">{item.deadline}</Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
