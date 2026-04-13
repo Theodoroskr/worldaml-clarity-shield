@@ -93,6 +93,7 @@ const AdminPricing = lazy(() => import("./pages/admin/AdminPricing"));
 const AdminOrganizations = lazy(() => import("./pages/admin/AdminOrganizations"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
+const AdminRegulatoryHub = lazy(() => import("./pages/admin/AdminRegulatoryHub"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
@@ -149,6 +150,7 @@ const App = () => (
                   <Route path="workflows" element={<AdminWorkflows />} />
                   <Route path="pricing" element={<AdminPricing />} />
                   <Route path="audit-log" element={<AdminAuditLog />} />
+                  <Route path="regulatory" element={<AdminRegulatoryHub />} />
                 </Route>
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />

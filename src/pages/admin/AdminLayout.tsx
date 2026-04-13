@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -13,6 +13,7 @@ const NAV = [
   { label: "Workflows", path: "/admin/workflows", icon: GitBranch },
   { label: "Pricing", path: "/admin/pricing", icon: CreditCard },
   { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText },
+  { label: "Regulatory Hub", path: "/admin/regulatory", icon: Landmark },
 ];
 
 export default function AdminLayout() {
