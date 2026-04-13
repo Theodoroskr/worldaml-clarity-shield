@@ -92,10 +92,7 @@ const AdminWorkflows = lazy(() => import("./pages/admin/AdminWorkflows"));
 const AdminPricing = lazy(() => import("./pages/admin/AdminPricing"));
 const AdminOrganizations = lazy(() => import("./pages/admin/AdminOrganizations"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
-const AdminPartners = lazy(() => import("./pages/admin/AdminPartners"));
-const AdminTrustedDomains = lazy(() => import("./pages/admin/AdminTrustedDomains"));
-const AdminSuiteAccess = lazy(() => import("./pages/admin/AdminSuiteAccess"));
+const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
@@ -147,14 +144,11 @@ const App = () => (
                   <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="users" element={<AdminUsers />} />
                   <Route path="organizations" element={<AdminOrganizations />} />
-                  <Route path="leads" element={<AdminLeads />} />
-                  <Route path="partners" element={<AdminPartners />} />
                   <Route path="alert-rules" element={<AdminAlertRules />} />
                   <Route path="forms" element={<AdminForms />} />
                   <Route path="workflows" element={<AdminWorkflows />} />
                   <Route path="pricing" element={<AdminPricing />} />
-                  <Route path="trusted-domains" element={<AdminTrustedDomains />} />
-                  <Route path="suite-access" element={<AdminSuiteAccess />} />
+                  <Route path="audit-log" element={<AdminAuditLog />} />
                 </Route>
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />

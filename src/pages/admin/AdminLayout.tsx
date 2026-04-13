@@ -1,21 +1,18 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, Inbox, Handshake, Globe, KeyRound } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { label: "Dashboard", path: "/admin/dashboard", icon: Shield },
   { label: "Users", path: "/admin/users", icon: Users },
   { label: "Organizations", path: "/admin/organizations", icon: Building2 },
-  { label: "Leads / CRM", path: "/admin/leads", icon: Inbox },
-  { label: "Partners", path: "/admin/partners", icon: Handshake },
   { label: "Alert Rules", path: "/admin/alert-rules", icon: Bell },
   { label: "Forms", path: "/admin/forms", icon: FileText },
   { label: "Workflows", path: "/admin/workflows", icon: GitBranch },
   { label: "Pricing", path: "/admin/pricing", icon: CreditCard },
-  { label: "Suite Access", path: "/admin/suite-access", icon: KeyRound },
-  { label: "Trusted Domains", path: "/admin/trusted-domains", icon: Globe },
+  { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText },
 ];
 
 export default function AdminLayout() {
