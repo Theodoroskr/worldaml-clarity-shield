@@ -192,7 +192,7 @@ const priorityStyle: Record<string, string> = {
 };
 
 export default function SuiteCases() {
-  const { orgId, userId, isLoading: orgLoading } = useOrganisation();
+  const { orgId, org, userId, isLoading: orgLoading } = useOrganisation();
   const [cases, setCases] = useState<CaseItem[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
@@ -261,8 +261,7 @@ export default function SuiteCases() {
     }
   }, [orgId]);
 
-  // Need org reference
-  const { org } = useOrganisation();
+  // org already destructured above
 
   const createCase = async () => {
     if (!form.title.trim()) { toast.error("Title required"); return; }
