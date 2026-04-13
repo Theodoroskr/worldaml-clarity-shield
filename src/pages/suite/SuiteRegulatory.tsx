@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useOrganisation } from "@/hooks/useOrganisation";
 import SEO from "@/components/SEO";
 import PeriodicReportsSection from "@/components/regulatory/PeriodicReportsSection";
 import {
@@ -301,6 +302,7 @@ const REGULATORY_PROFILES: Record<string, RegulatoryProfile> = {
 
 export default function SuiteRegulatory() {
   const { user } = useAuth();
+  const { org } = useOrganisation();
   const [regulator, setRegulator] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 

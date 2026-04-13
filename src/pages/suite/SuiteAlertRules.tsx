@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Plus, Trash2, Settings2, AlertCircle, Sparkles, Loader2, BarChart3, Shield, Target, TrendingUp, Lightbulb, ChevronRight, X, Scale, CheckCircle2, AlertOctagon, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useOrganisation } from "@/hooks/useOrganisation";
 import { toast } from "sonner";
 import { REGULATORY_PROFILES } from "@/data/regulatoryProfiles";
 
@@ -255,10 +256,11 @@ export default function SuiteAlertRules() {
   const [userRegulator, setUserRegulator] = useState<string | null>(null);
   const [showOtherRegs, setShowOtherRegs] = useState(false);
 
+  const { orgId, org, userId, isLoading: orgLoading } = useOrganisation();
+
   const fetchRules = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data } = await supabase.from("suite_alert_rules").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    if (!orgId) return;
+    const { data } = await supabase.from("suite_alert_rules").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false });
     const mapped: Rule[] = (data || []).map(r => ({
       id: r.id,
       name: r.name,
@@ -274,30 +276,28 @@ export default function SuiteAlertRules() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchRules(); }, []);
+  useEffect(() => { if (orgId) fetchRules(); }, [orgId]);
 
-  // Fetch user's assigned regulator & auto-provision baseline rules
+  // Fetch org regulator & auto-provision baseline rules
   useEffect(() => {
-    const fetchRegulatorAndProvision = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data: profile } = await supabase.from("profiles").select("regulator").eq("user_id", user.id).single();
-      if (!profile?.regulator) return;
-      const reg = profile.regulator as string;
-      setUserRegulator(reg);
+    if (!orgId || !org?.regulator || !userId) return;
+    const reg = org.regulator;
+    setUserRegulator(reg);
 
-      // Auto-provision baseline rules if user has none yet
+    // Auto-provision baseline rules if org has none yet
+    const provision = async () => {
       const { count } = await supabase
         .from("suite_alert_rules")
         .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id);
+        .eq("organisation_id", orgId);
 
       if (count === 0) {
         const regProfile = REGULATORY_PROFILES[reg];
         if (regProfile && regProfile.baselineRules.length > 0) {
           const regLabel = REGULATOR_MAP[reg]?.label || regProfile.shortName;
           const rows = regProfile.baselineRules.map(br => ({
-            user_id: user.id,
+            user_id: userId,
+            organisation_id: orgId,
             name: br.name,
             conditions: br.conditions.map(c => ({
               id: uid(),
@@ -320,8 +320,8 @@ export default function SuiteAlertRules() {
         }
       }
     };
-    fetchRegulatorAndProvision();
-  }, []);
+    provision();
+  }, [orgId, org?.regulator, userId]);
 
   const activeRule = rules.find(r => r.id === selected);
   const updateRule = (update: Partial<Rule>) => { setRules(prev => prev.map(r => r.id === selected ? { ...r, ...update } : r)); };
@@ -330,10 +330,10 @@ export default function SuiteAlertRules() {
   const updateCondition = (cid: string, patch: Partial<Condition>) => { updateRule({ conditions: activeRule?.conditions.map(c => c.id === cid ? { ...c, ...patch } : c) ?? [] }); };
 
   const addRule = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!userId || !orgId) return;
     const { data, error } = await supabase.from("suite_alert_rules").insert({
-      user_id: user.id,
+      user_id: userId,
+      organisation_id: orgId,
       name: "New Rule",
       conditions: [{ id: uid(), field: "transaction.amount", operator: ">", value: "0", logic: "AND", action: "Flag" }],
       severity: "medium",
@@ -392,8 +392,7 @@ export default function SuiteAlertRules() {
   };
 
   const adoptRule = async (suggested: any, sourceRegulator?: string, sourceCitation?: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!userId || !orgId) return;
     const conditions = (suggested.conditions || []).map((c: any) => ({
       id: uid(),
       field: c.field || "transaction.amount",
@@ -403,7 +402,8 @@ export default function SuiteAlertRules() {
       action: suggested.severity === "critical" ? "Block" : "Flag",
     }));
     const insertData: any = {
-      user_id: user.id,
+      user_id: userId,
+      organisation_id: orgId,
       name: suggested.name,
       conditions,
       severity: suggested.severity || "medium",

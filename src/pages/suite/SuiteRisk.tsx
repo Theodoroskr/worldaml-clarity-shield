@@ -4,6 +4,7 @@ import { AlertTriangle, ChevronRight, Search, Loader2, Shield, Globe, Users, Arr
 import CountryRiskTable from "@/components/risk-assessment/CountryRiskTable";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
+import { useOrganisation } from "@/hooks/useOrganisation";
 import { Badge } from "@/components/ui/badge";
 import {
   BASEL_AML_SCORES, WEIGHTS, type RiskBreakdown,
@@ -59,6 +60,7 @@ const MATRIX_COLORS: Record<string, string> = {
 
 /* ─── Component ─── */
 export default function SuiteRisk() {
+  const { orgId } = useOrganisation();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"risk" | "name">("risk");
   const [customers, setCustomers] = useState<ScoredCustomer[]>([]);
@@ -71,9 +73,9 @@ export default function SuiteRisk() {
   useEffect(() => {
     const fetchAll = async () => {
       const [{ data: custs }, { data: screenings }, { data: transactions }] = await Promise.all([
-        supabase.from("suite_customers").select("id, name, risk_level, kyc_status, country, type, email, created_at").order("created_at", { ascending: false }),
-        supabase.from("suite_screenings").select("customer_id, match_count, result"),
-        supabase.from("suite_transactions").select("customer_id, risk_flag, amount"),
+        supabase.from("suite_customers").select("id, name, risk_level, kyc_status, country, type, email, created_at").eq("organisation_id", orgId!).order("created_at", { ascending: false }),
+        supabase.from("suite_screenings").select("customer_id, match_count, result").eq("organisation_id", orgId!),
+        supabase.from("suite_transactions").select("customer_id, risk_flag, amount").eq("organisation_id", orgId!),
       ]);
 
       const screeningMap = new Map<string, { totalMatches: number; hasMatches: boolean }>();
