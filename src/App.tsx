@@ -92,10 +92,6 @@ const AdminWorkflows = lazy(() => import("./pages/admin/AdminWorkflows"));
 const AdminPricing = lazy(() => import("./pages/admin/AdminPricing"));
 const AdminOrganizations = lazy(() => import("./pages/admin/AdminOrganizations"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
-const AdminPartners = lazy(() => import("./pages/admin/AdminPartners"));
-const AdminTrustedDomains = lazy(() => import("./pages/admin/AdminTrustedDomains"));
-const AdminSuiteAccess = lazy(() => import("./pages/admin/AdminSuiteAccess"));
 const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
