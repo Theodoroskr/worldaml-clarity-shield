@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAccess } from "@/hooks/useAccess";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
@@ -61,6 +62,7 @@ interface ActivityItem {
 
 const Dashboard = () => {
   const { user, profile, isLoading, isApproved, isAdmin, signOut } = useAuth();
+  const { hasSuiteAccess } = useAccess();
   const navigate = useNavigate();
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
   const historyRef = useRef<SearchHistoryHandle>(null);
@@ -237,8 +239,8 @@ const Dashboard = () => {
             </Button>
           </div>
 
-          {/* ══════════ LIVE STATS GRID ══════════ */}
-          <div className="mb-8">
+          {/* ══════════ LIVE STATS GRID (suite/enterprise only) ══════════ */}
+          {hasSuiteAccess && <div className="mb-8">
             <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
               <Activity className="h-5 w-5 text-teal" /> Live Overview
             </h2>
@@ -374,10 +376,10 @@ const Dashboard = () => {
                 </Card>
               </div>
             )}
-          </div>
+          </div>}
 
-          {/* ══════════ RECENT ACTIVITY FEED ══════════ */}
-          {stats && stats.recentActivity.length > 0 && (
+          {/* ══════════ RECENT ACTIVITY FEED (suite/enterprise only) ══════════ */}
+          {hasSuiteAccess && stats && stats.recentActivity.length > 0 && (
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
                 <Clock className="h-5 w-5 text-navy" /> Recent Activity
