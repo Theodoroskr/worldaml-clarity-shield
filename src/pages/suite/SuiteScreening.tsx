@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { runScreening, type ScreeningResult, type ScreeningResponse } from "@/services/screeningProvider";
 import { useNavigate } from "react-router-dom";
+import { useOrganisation } from "@/hooks/useOrganisation";
 
 interface StoredScreening {
   id: string;
