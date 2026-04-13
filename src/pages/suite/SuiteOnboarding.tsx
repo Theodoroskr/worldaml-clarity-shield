@@ -844,7 +844,7 @@ export default function SuiteOnboarding() {
   const submitKYB = async () => {
     if (!kybForm.companyName.trim()) { toast.error("Company name is required"); return; }
     if (!kybForm.country) { toast.error("Country of incorporation is required"); return; }
-    if (!kybForm.regulator) { toast.error("Please select a reporting regulator"); return; }
+    
     if (kybForm.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(kybForm.contactEmail)) {
       toast.error("Invalid contact email"); return;
     }
@@ -1225,8 +1225,6 @@ export default function SuiteOnboarding() {
         </div>
       </div>
 
-      {/* Section: Regulatory Jurisdiction */}
-      <RegulatorPicker value={kybForm.regulator} onChange={v => setKybForm(f => ({ ...f, regulator: v }))} />
 
       {/* Section: Directors */}
       <div className="mb-6">
