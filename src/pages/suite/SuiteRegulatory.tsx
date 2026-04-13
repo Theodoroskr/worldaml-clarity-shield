@@ -302,6 +302,7 @@ const REGULATORY_PROFILES: Record<string, RegulatoryProfile> = {
 
 export default function SuiteRegulatory() {
   const { user } = useAuth();
+  const { org } = useOrganisation();
   const [regulator, setRegulator] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 

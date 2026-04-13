@@ -35,6 +35,7 @@ const statusLabel: Record<string, string> = {
 };
 
 export default function SuiteIDV() {
+  const { orgId, userId } = useOrganisation();
   const [sessions, setSessions] = useState<IDVSession[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,11 +45,10 @@ export default function SuiteIDV() {
   const [form, setForm] = useState({ customer_id: "", document_type: "passport", liveness_result: "" });
 
   const fetchData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!orgId || !userId) return;
     const [sRes, cRes] = await Promise.all([
-      supabase.from("suite_idv_sessions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("suite_customers").select("id, name").eq("user_id", user.id),
+      supabase.from("suite_idv_sessions").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false }),
+      supabase.from("suite_customers").select("id, name").eq("organisation_id", orgId),
     ]);
     setSessions(sRes.data || []);
     setCustomers(cRes.data || []);
@@ -58,23 +58,22 @@ export default function SuiteIDV() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { if (orgId) fetchData(); }, [orgId]);
 
   const createSession = async () => {
     if (!form.customer_id) { toast.error("Select a customer"); return; }
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!orgId || !userId) return;
 
     const { error } = await supabase.from("suite_idv_sessions").insert({
       customer_id: form.customer_id,
-      user_id: user.id,
+      user_id: userId, organisation_id: orgId,
       document_type: form.document_type,
       liveness_result: form.liveness_result || null,
     });
     if (error) { toast.error(error.message); return; }
 
     await supabase.from("suite_audit_log").insert({
-      user_id: user.id,
+      user_id: userId, organisation_id: orgId,
       action: `IDV session created for ${customers.find(c => c.id === form.customer_id)?.name || "customer"}`,
       entity_type: "idv",
       details: { detail: `Document: ${form.document_type}` },
