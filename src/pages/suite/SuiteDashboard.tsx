@@ -45,15 +45,63 @@ export default function SuiteDashboard() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const navigate = useNavigate();
 
+  // KPI stats
+  const [kpi, setKpi] = useState({
+    totalCustomers: 0, openAlerts: 0, totalAlerts: 0,
+    totalScreenings: 0, openCases: 0, totalCases: 0,
+    totalTransactions: 0, flaggedTransactions: 0,
+  });
+  const [recentActivity, setRecentActivity] = useState<{ id: string; type: string; label: string; detail: string; time: string; severity?: string }[]>([]);
+
   const fetchData = useCallback(async (silent = false) => {
     if (!orgId) return;
     if (!silent) setLoading(true);
     else setRefreshing(true);
 
-    const [customersRes, auditRes] = await Promise.all([
+    const [
+      customersRes, auditRes,
+      { count: totalCustomers },
+      { count: totalAlerts },
+      { count: openAlerts },
+      { count: totalScreenings },
+      { count: totalCases },
+      { count: openCases },
+      { count: totalTransactions },
+      { count: flaggedTransactions },
+      { data: recentCustomers },
+      { data: recentAlerts },
+    ] = await Promise.all([
       supabase.from("suite_customers").select("id, risk_level").eq("organisation_id", orgId),
       supabase.from("suite_audit_log").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(10),
+      supabase.from("suite_customers").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
+      supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
+      supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_review"]),
+      supabase.from("suite_screenings").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
+      supabase.from("suite_cases").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
+      supabase.from("suite_cases").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_progress"]),
+      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
+      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("risk_flag", true),
+      supabase.from("suite_customers").select("id, name, type, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(3),
+      supabase.from("suite_alerts").select("id, title, severity, status, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(5),
     ]);
+
+    setKpi({
+      totalCustomers: totalCustomers ?? 0,
+      openAlerts: openAlerts ?? 0,
+      totalAlerts: totalAlerts ?? 0,
+      totalScreenings: totalScreenings ?? 0,
+      openCases: openCases ?? 0,
+      totalCases: totalCases ?? 0,
+      totalTransactions: totalTransactions ?? 0,
+      flaggedTransactions: flaggedTransactions ?? 0,
+    });
+
+    // Build recent activity
+    const activity: typeof recentActivity = [];
+    (recentCustomers ?? []).forEach(c => activity.push({ id: c.id, type: "Customer", label: c.name, detail: `${c.type} onboarded`, time: c.created_at }));
+    (recentAlerts ?? []).forEach(a => activity.push({ id: a.id, type: "Alert", label: a.title, detail: a.status, time: a.created_at, severity: a.severity }));
+    activity.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+    setRecentActivity(activity.slice(0, 8));
 
     setRegulator(org?.regulator ?? null);
 
