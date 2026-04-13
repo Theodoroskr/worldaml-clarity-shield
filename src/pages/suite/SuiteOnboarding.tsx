@@ -624,6 +624,44 @@ export default function SuiteOnboarding() {
 
   useEffect(() => { fetchCustomers(); fetchCustomFieldTemplates(); }, []);
 
+  // Batch-compute composite risk scores for all customers
+  useEffect(() => {
+    if (customers.length === 0) return;
+    const compute = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const ids = customers.map(c => c.id);
+      const [{ data: screenings }, { data: transactions }] = await Promise.all([
+        supabase.from("suite_screenings").select("customer_id, match_count, result").eq("user_id", user.id).in("customer_id", ids),
+        supabase.from("suite_transactions").select("customer_id, risk_flag, amount").eq("user_id", user.id).in("customer_id", ids),
+      ]);
+      const scores: Record<string, number> = {};
+      for (const c of customers) {
+        const cScreenings = (screenings || []).filter(s => s.customer_id === c.id);
+        const totalMatches = cScreenings.reduce((a, s) => a + (s.match_count || 0), 0);
+        const hasMatches = cScreenings.some(s => s.result !== "clear");
+        const cTxns = (transactions || []).filter(t => t.customer_id === c.id);
+        const flagged = cTxns.filter(t => t.risk_flag).length;
+        const totalVol = cTxns.reduce((a, t) => a + Number(t.amount || 0), 0);
+        const b = {
+          country: scoreCountry(c.country),
+          screening: scoreScreening(totalMatches, hasMatches),
+          transaction: scoreTransactions(flagged, cTxns.length, totalVol),
+          customerType: scoreCustomerType(c.type),
+          kycStatus: scoreKycStatus(c.kyc_status),
+        };
+        scores[c.id] = computeComposite(b);
+      }
+      setCustomerScores(scores);
+    };
+    compute();
+  }, [customers]);
+
+  const toggleSort = (field: "name" | "score" | "created_at") => {
+    if (sortField === field) setSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setSortField(field); setSortDir(field === "name" ? "asc" : "desc"); }
+  };
+
   const startOnboarding = (type: "kyc-form" | "kyb-form") => {
     setStep(type);
     setCustomFieldValues({});
