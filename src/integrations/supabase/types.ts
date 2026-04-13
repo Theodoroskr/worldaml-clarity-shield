@@ -476,6 +476,24 @@ export type Database = {
         }
         Relationships: []
       }
+      fatf_country_risk: {
+        Row: {
+          country_code: string
+          risk_category: string
+          updated_at: string
+        }
+        Insert: {
+          country_code: string
+          risk_category: string
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          risk_category?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       form_submissions: {
         Row: {
           account_type: string | null
@@ -614,6 +632,7 @@ export type Database = {
           filing_status: string
           id: string
           notes: string | null
+          organisation_id: string | null
           period_year: number
           regulator: string
           report_title: string
@@ -629,6 +648,7 @@ export type Database = {
           filing_status?: string
           id?: string
           notes?: string | null
+          organisation_id?: string | null
           period_year?: number
           regulator: string
           report_title: string
@@ -644,6 +664,7 @@ export type Database = {
           filing_status?: string
           id?: string
           notes?: string | null
+          organisation_id?: string | null
           period_year?: number
           regulator?: string
           report_title?: string
@@ -651,7 +672,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "periodic_reports_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -825,6 +854,7 @@ export type Database = {
           filing_status: string
           grounds_for_suspicion: string | null
           id: string
+          organisation_id: string | null
           report_number: string
           updated_at: string
           user_id: string
@@ -839,6 +869,7 @@ export type Database = {
           filing_status?: string
           grounds_for_suspicion?: string | null
           id?: string
+          organisation_id?: string | null
           report_number?: string
           updated_at?: string
           user_id: string
@@ -853,6 +884,7 @@ export type Database = {
           filing_status?: string
           grounds_for_suspicion?: string | null
           id?: string
+          organisation_id?: string | null
           report_number?: string
           updated_at?: string
           user_id?: string
@@ -872,6 +904,13 @@ export type Database = {
             referencedRelation: "suite_customers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "str_reports_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       suite_alert_rules: {
@@ -881,6 +920,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          organisation_id: string | null
           severity: string
           source_citation: string | null
           source_regulator: string | null
@@ -893,6 +933,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          organisation_id?: string | null
           severity?: string
           source_citation?: string | null
           source_regulator?: string | null
@@ -905,13 +946,22 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          organisation_id?: string | null
           severity?: string
           source_citation?: string | null
           source_regulator?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "suite_alert_rules_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suite_alerts: {
         Row: {
@@ -921,6 +971,7 @@ export type Database = {
           customer_id: string | null
           description: string | null
           id: string
+          organisation_id: string | null
           resolved_at: string | null
           rule_id: string | null
           severity: string
@@ -937,6 +988,7 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           id?: string
+          organisation_id?: string | null
           resolved_at?: string | null
           rule_id?: string | null
           severity?: string
@@ -953,6 +1005,7 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           id?: string
+          organisation_id?: string | null
           resolved_at?: string | null
           rule_id?: string | null
           severity?: string
@@ -970,6 +1023,13 @@ export type Database = {
             referencedRelation: "suite_customers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "suite_alerts_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       suite_audit_log: {
@@ -981,6 +1041,7 @@ export type Database = {
           entity_type: string
           id: string
           ip_address: string | null
+          organisation_id: string | null
           user_id: string
         }
         Insert: {
@@ -991,6 +1052,7 @@ export type Database = {
           entity_type: string
           id?: string
           ip_address?: string | null
+          organisation_id?: string | null
           user_id: string
         }
         Update: {
@@ -1001,9 +1063,18 @@ export type Database = {
           entity_type?: string
           id?: string
           ip_address?: string | null
+          organisation_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "suite_audit_log_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suite_case_notes: {
         Row: {
@@ -1011,6 +1082,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          organisation_id: string | null
           user_id: string
         }
         Insert: {
@@ -1018,6 +1090,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          organisation_id?: string | null
           user_id: string
         }
         Update: {
@@ -1025,6 +1098,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          organisation_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1033,6 +1107,13 @@ export type Database = {
             columns: ["case_id"]
             isOneToOne: false
             referencedRelation: "suite_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_case_notes_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1044,6 +1125,7 @@ export type Database = {
           created_at: string
           customer_id: string | null
           id: string
+          organisation_id: string | null
           priority: string
           resolution: string | null
           status: string
@@ -1057,6 +1139,7 @@ export type Database = {
           created_at?: string
           customer_id?: string | null
           id?: string
+          organisation_id?: string | null
           priority?: string
           resolution?: string | null
           status?: string
@@ -1070,6 +1153,7 @@ export type Database = {
           created_at?: string
           customer_id?: string | null
           id?: string
+          organisation_id?: string | null
           priority?: string
           resolution?: string | null
           status?: string
@@ -1092,6 +1176,13 @@ export type Database = {
             referencedRelation: "suite_customers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "suite_cases_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       suite_customers: {
@@ -1104,10 +1195,15 @@ export type Database = {
           id: string
           kyc_status: string
           name: string
+          organisation_id: string | null
           pep_status: string | null
           registration_number: string | null
           regulator: string | null
           risk_level: string
+          risk_score: number
+          risk_score_factors: Json
+          risk_score_version: number
+          risk_scored_at: string | null
           status: string
           type: string
           updated_at: string
@@ -1122,10 +1218,15 @@ export type Database = {
           id?: string
           kyc_status?: string
           name: string
+          organisation_id?: string | null
           pep_status?: string | null
           registration_number?: string | null
           regulator?: string | null
           risk_level?: string
+          risk_score?: number
+          risk_score_factors?: Json
+          risk_score_version?: number
+          risk_scored_at?: string | null
           status?: string
           type?: string
           updated_at?: string
@@ -1140,16 +1241,29 @@ export type Database = {
           id?: string
           kyc_status?: string
           name?: string
+          organisation_id?: string | null
           pep_status?: string | null
           registration_number?: string | null
           regulator?: string | null
           risk_level?: string
+          risk_score?: number
+          risk_score_factors?: Json
+          risk_score_version?: number
+          risk_scored_at?: string | null
           status?: string
           type?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "suite_customers_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suite_idv_sessions: {
         Row: {
@@ -1158,6 +1272,7 @@ export type Database = {
           document_type: string | null
           id: string
           liveness_result: string | null
+          organisation_id: string | null
           reviewed_by: string | null
           status: string
           updated_at: string
@@ -1169,6 +1284,7 @@ export type Database = {
           document_type?: string | null
           id?: string
           liveness_result?: string | null
+          organisation_id?: string | null
           reviewed_by?: string | null
           status?: string
           updated_at?: string
@@ -1180,6 +1296,7 @@ export type Database = {
           document_type?: string | null
           id?: string
           liveness_result?: string | null
+          organisation_id?: string | null
           reviewed_by?: string | null
           status?: string
           updated_at?: string
@@ -1191,6 +1308,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_idv_sessions_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1305,6 +1429,7 @@ export type Database = {
           customer_id: string
           id: string
           match_count: number
+          organisation_id: string | null
           result: string
           screened_at: string
           screening_type: string
@@ -1315,6 +1440,7 @@ export type Database = {
           customer_id: string
           id?: string
           match_count?: number
+          organisation_id?: string | null
           result?: string
           screened_at?: string
           screening_type?: string
@@ -1325,6 +1451,7 @@ export type Database = {
           customer_id?: string
           id?: string
           match_count?: number
+          organisation_id?: string | null
           result?: string
           screened_at?: string
           screening_type?: string
@@ -1336,6 +1463,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_screenings_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1356,6 +1490,7 @@ export type Database = {
           id: string
           method_of_transaction: string | null
           monitoring_status: string
+          organisation_id: string | null
           risk_flag: boolean
           source_of_funds: string | null
           third_party_indicator: string | null
@@ -1376,6 +1511,7 @@ export type Database = {
           id?: string
           method_of_transaction?: string | null
           monitoring_status?: string
+          organisation_id?: string | null
           risk_flag?: boolean
           source_of_funds?: string | null
           third_party_indicator?: string | null
@@ -1396,6 +1532,7 @@ export type Database = {
           id?: string
           method_of_transaction?: string | null
           monitoring_status?: string
+          organisation_id?: string | null
           risk_flag?: boolean
           source_of_funds?: string | null
           third_party_indicator?: string | null
@@ -1409,6 +1546,13 @@ export type Database = {
             referencedRelation: "suite_customers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "suite_transactions_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       suite_ubo: {
@@ -1419,6 +1563,7 @@ export type Database = {
           is_verified: boolean
           name: string
           nationality: string | null
+          organisation_id: string | null
           ownership_pct: number
           user_id: string
         }
@@ -1429,6 +1574,7 @@ export type Database = {
           is_verified?: boolean
           name: string
           nationality?: string | null
+          organisation_id?: string | null
           ownership_pct?: number
           user_id: string
         }
@@ -1439,6 +1585,7 @@ export type Database = {
           is_verified?: boolean
           name?: string
           nationality?: string | null
+          organisation_id?: string | null
           ownership_pct?: number
           user_id?: string
         }
@@ -1448,6 +1595,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_ubo_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1543,7 +1697,12 @@ export type Database = {
         Args: { target_email: string }
         Returns: undefined
       }
+      calculate_customer_risk_score: {
+        Args: { p_customer_id: string }
+        Returns: Json
+      }
       current_user_has_suite_access: { Args: never; Returns: boolean }
+      current_user_org_id: { Args: never; Returns: string }
       get_certificate_by_token: { Args: { _token: string }; Returns: Json }
       get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {

@@ -3,18 +3,19 @@ import { cn } from "@/lib/utils";
 import { Search, Download } from "lucide-react";
 import { Timeline, TimelineEvent } from "@/components/ui/timeline";
 import { supabase } from "@/integrations/supabase/client";
+import { useOrganisation } from "@/hooks/useOrganisation";
 
 export default function SuiteAudit() {
+  const { orgId, isLoading: orgLoading } = useOrganisation();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (orgLoading || !orgId) return;
     const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase.from("suite_audit_log").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100);
+      const { data } = await supabase.from("suite_audit_log").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(100);
       setEvents((data || []).map(a => ({
         id: a.id,
         timestamp: new Date(a.created_at).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }),
@@ -26,7 +27,7 @@ export default function SuiteAudit() {
       setLoading(false);
     };
     load();
-  }, []);
+  }, [orgId, orgLoading]);
 
   const types = ["All", ...Array.from(new Set(events.map(e => e.type)))];
   const filtered = events.filter(e =>

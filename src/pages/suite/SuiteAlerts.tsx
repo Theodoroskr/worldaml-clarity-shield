@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { AlertTriangle, CheckCircle, Clock, ChevronRight, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useOrganisation } from "@/hooks/useOrganisation";
 
 interface Alert {
   id: string;
@@ -37,20 +38,20 @@ const statusIcon: Record<string, React.ElementType> = {
 };
 
 export default function SuiteAlerts() {
+  const { orgId, isLoading: orgLoading } = useOrganisation();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
 
   const fetchAlerts = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data } = await supabase.from("suite_alerts").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    if (!orgId) return;
+    const { data } = await supabase.from("suite_alerts").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false });
     setAlerts(data || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchAlerts(); }, []);
+  useEffect(() => { if (!orgLoading && orgId) fetchAlerts(); }, [orgId, orgLoading]);
 
   const updateStatus = async (alertId: string, newStatus: string) => {
     const { error } = await supabase.from("suite_alerts").update({

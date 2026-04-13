@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { runScreening, type ScreeningResult, type ScreeningResponse } from "@/services/screeningProvider";
 import { useNavigate } from "react-router-dom";
+import { useOrganisation } from "@/hooks/useOrganisation";
 
 interface StoredScreening {
   id: string;
@@ -44,6 +45,7 @@ function listBadge(listType: string) {
 
 export default function SuiteScreening() {
   const navigate = useNavigate();
+  const { orgId, userId, isLoading: orgLoading } = useOrganisation();
   const [searchName, setSearchName] = useState("");
   const [searching, setSearching] = useState(false);
   const [response, setResponse] = useState<ScreeningResponse | null>(null);
@@ -53,17 +55,15 @@ export default function SuiteScreening() {
   const [dismissedResults, setDismissedResults] = useState<Set<string>>(new Set());
 
   const loadHistory = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!orgId) return;
     const [sRes, cRes] = await Promise.all([
-      supabase.from("suite_screenings").select("*").eq("user_id", user.id)
+      supabase.from("suite_screenings").select("*").eq("organisation_id", orgId)
         .order("screened_at", { ascending: false }).limit(50),
-      supabase.from("suite_customers").select("id, name").eq("user_id", user.id),
+      supabase.from("suite_customers").select("id, name").eq("organisation_id", orgId),
     ]);
     setHistory(sRes.data ?? []);
     setCustomers(cRes.data ?? []);
 
-    // Pick up customer pre-selected from Onboarding "Screen Now" button
     const preselectId = sessionStorage.getItem("screening_preselect_customer_id");
     const preselectName = sessionStorage.getItem("screening_preselect_customer_name");
     if (preselectId) {
@@ -74,9 +74,9 @@ export default function SuiteScreening() {
     } else if (cRes.data?.length && !selectedCustomerId) {
       setSelectedCustomerId(cRes.data[0].id);
     }
-  }, [selectedCustomerId]);
+  }, [orgId, selectedCustomerId]);
 
-  useEffect(() => { loadHistory(); }, []);
+  useEffect(() => { if (!orgLoading && orgId) loadHistory(); }, [orgId, orgLoading]);
 
   const runSearch = async () => {
     if (!searchName.trim()) { toast.error("Enter a name to search"); return; }
