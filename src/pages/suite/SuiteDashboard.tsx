@@ -1,19 +1,17 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
-  TrendingUp, Users, Activity, AlertTriangle, Briefcase, Clock, CheckCircle, Bell, ChevronRight,
-  CalendarClock, RefreshCw, Shield, FileText, ArrowUpRight, Eye,
+  ChevronRight, CalendarClock, RefreshCw, AlertTriangle,
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid,
-  LineChart, Line, PieChart, Pie, Cell, BarChart, Bar,
+  PieChart, Pie, Cell,
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { Timeline, TimelineEvent } from "@/components/ui/timeline";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { format, differenceInDays, addMonths, isPast, formatDistanceToNow, subDays } from "date-fns";
+import { format, differenceInDays, addMonths, isPast, formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useOrganisation } from "@/hooks/useOrganisation";
 
