@@ -188,8 +188,7 @@ export default function SuiteTransactions() {
   const importTransactions = async (rows: BulkRow[]) => {
     if (rows.length === 0) { toast.error("No rows to import"); return; }
     setImporting(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setImporting(false); return; }
+    if (!userId || !orgId) { setImporting(false); return; }
 
     const customerMap = new Map(customers.map(c => [c.name.toLowerCase(), c.id]));
     let imported = 0, skipped = 0;
@@ -206,7 +205,7 @@ export default function SuiteTransactions() {
       const createdAt = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : undefined;
 
       const { data, error } = await supabase.from("suite_transactions").insert({
-        customer_id: custId, user_id: user.id, amount, currency: row.currency || "EUR",
+        customer_id: custId, user_id: userId, organisation_id: orgId, amount, currency: row.currency || "EUR",
         direction: row.direction || "inbound", counterparty: row.counterparty || null,
         counterparty_country: row.counterparty_country || null, risk_flag: riskFlag,
         description: row.description || null,
@@ -216,12 +215,12 @@ export default function SuiteTransactions() {
       if (!error && data) {
         imported++;
         if (riskFlag) {
-          await supabase.from("suite_alerts").insert({ customer_id: custId, user_id: user.id, alert_type: "transaction", severity: amount > 30000 ? "critical" : "high", title: `Flagged import: ${row.currency || "EUR"} ${amount.toLocaleString()}`, description: `Imported transaction flagged${isHighRisk ? " (high-risk jurisdiction)" : ""}` });
+          await supabase.from("suite_alerts").insert({ customer_id: custId, user_id: userId, organisation_id: orgId, alert_type: "transaction", severity: amount > 30000 ? "critical" : "high", title: `Flagged import: ${row.currency || "EUR"} ${amount.toLocaleString()}`, description: `Imported transaction flagged${isHighRisk ? " (high-risk jurisdiction)" : ""}` });
         }
       } else { skipped++; }
     }
 
-    await supabase.from("suite_audit_log").insert({ user_id: user.id, action: `Bulk import: ${imported} transactions imported, ${skipped} skipped`, entity_type: "transaction", details: { imported, skipped, total: rows.length } });
+    await supabase.from("suite_audit_log").insert({ user_id: userId, organisation_id: orgId, action: `Bulk import: ${imported} transactions imported, ${skipped} skipped`, entity_type: "transaction", details: { imported, skipped, total: rows.length } });
 
     toast.success(`Imported ${imported} transactions${skipped > 0 ? `, ${skipped} skipped` : ""}`);
     setImporting(false);
@@ -248,14 +247,12 @@ export default function SuiteTransactions() {
   };
 
   const saveRule = async (index: number) => {
-    if (!aiAnalysis) return;
+    if (!aiAnalysis || !userId || !orgId) return;
     const rule = aiAnalysis.suggested_rules[index];
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
     setSavingRules(prev => new Set(prev).add(index));
 
     const { error } = await supabase.from("suite_alert_rules").insert({
-      user_id: user.id, name: rule.name, severity: rule.severity, conditions: rule.conditions as any, is_active: true,
+      user_id: userId, organisation_id: orgId, name: rule.name, severity: rule.severity, conditions: rule.conditions as any, is_active: true,
     });
 
     if (error) toast.error(error.message);
