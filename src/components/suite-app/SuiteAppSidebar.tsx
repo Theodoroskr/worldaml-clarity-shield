@@ -5,6 +5,7 @@ import {
   LayoutDashboard, Users, Shield, CreditCard, AlertTriangle,
   FileText, BarChart3, Settings, ChevronRight, Activity,
   UserCheck, Fingerprint, ClipboardList, Menu, Scale, ShieldCheck, HelpCircle, Radio,
+  LogOut, ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -184,12 +185,21 @@ export default function SuiteAppSidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-sidebar-border flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          <span className="text-xs text-sidebar-foreground/70">Active</span>
+      <div className="px-3 py-3 border-t border-sidebar-border space-y-1.5">
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="flex items-center gap-2 w-full text-left px-2.5 py-2 rounded-lg text-sm font-medium transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+        >
+          <ArrowLeft className="w-4 h-4 shrink-0 opacity-70" />
+          <span>Exit Suite</span>
+        </button>
+        <div className="flex items-center justify-between px-2.5">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="text-xs text-sidebar-foreground/70">Active</span>
+          </div>
+          <span className="text-[10px] font-mono text-sidebar-foreground/40">v1.0.0</span>
         </div>
-        <span className="text-[10px] font-mono text-sidebar-foreground/40">v1.0.0</span>
       </div>
     </aside>
   );
