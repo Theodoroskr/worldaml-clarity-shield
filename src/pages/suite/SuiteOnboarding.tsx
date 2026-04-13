@@ -1466,7 +1466,7 @@ export default function SuiteOnboarding() {
             ))}
           </div>
 
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
             <div className="relative flex-1 max-w-xs">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search customers…"
@@ -1480,6 +1480,14 @@ export default function SuiteOnboarding() {
                   )}>{s === "All" ? "All" : kycStatusLabel[s] || s}</button>
               ))}
             </div>
+            <div className="flex gap-1.5">
+              {(["All", "Critical", "High", "Medium", "Low"] as const).map(r => (
+                <button key={r} onClick={() => setRiskFilter(r)}
+                  className={cn("text-[10px] px-2.5 py-1 rounded-full font-medium border transition-colors",
+                    riskFilter === r ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:border-primary/50"
+                  )}>{r === "All" ? "All Risk" : r}</button>
+              ))}
+            </div>
           </div>
 
           <div className="bg-card border border-border rounded-xl overflow-hidden">
@@ -1491,44 +1499,67 @@ export default function SuiteOnboarding() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    {["Customer", "Type", "Regulator", "Country", "Risk", "KYC Status", "Started", ""].map(h => (
-                      <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold text-muted-foreground uppercase">{h}</th>
-                    ))}
+                    <th className="px-4 py-2.5 text-left text-[10px] font-semibold text-muted-foreground uppercase cursor-pointer select-none hover:text-foreground" onClick={() => toggleSort("name")}>
+                      Customer {sortField === "name" && (sortDir === "asc" ? "↑" : "↓")}
+                    </th>
+                    <th className="px-4 py-2.5 text-left text-[10px] font-semibold text-muted-foreground uppercase">Type</th>
+                    <th className="px-4 py-2.5 text-left text-[10px] font-semibold text-muted-foreground uppercase">Regulator</th>
+                    <th className="px-4 py-2.5 text-left text-[10px] font-semibold text-muted-foreground uppercase">Country</th>
+                    <th className="px-4 py-2.5 text-left text-[10px] font-semibold text-muted-foreground uppercase cursor-pointer select-none hover:text-foreground" onClick={() => toggleSort("score")}>
+                      Score {sortField === "score" && (sortDir === "asc" ? "↑" : "↓")}
+                    </th>
+                    <th className="px-4 py-2.5 text-left text-[10px] font-semibold text-muted-foreground uppercase">Risk</th>
+                    <th className="px-4 py-2.5 text-left text-[10px] font-semibold text-muted-foreground uppercase">KYC Status</th>
+                    <th className="px-4 py-2.5 text-left text-[10px] font-semibold text-muted-foreground uppercase cursor-pointer select-none hover:text-foreground" onClick={() => toggleSort("created_at")}>
+                      Started {sortField === "created_at" && (sortDir === "asc" ? "↑" : "↓")}
+                    </th>
+                    <th className="px-4 py-2.5"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {filtered.map(c => (
-                    <tr key={c.id} className="hover:bg-muted/20 transition-colors cursor-pointer" onClick={() => setSelectedCustomer(c)}>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            {c.type === "individual" ? <User className="w-3 h-3 text-primary" /> : <Building2 className="w-3 h-3 text-primary" />}
+                  {filtered.map(c => {
+                    const score = customerScores[c.id] ?? 0;
+                    return (
+                      <tr key={c.id} className="hover:bg-muted/20 transition-colors cursor-pointer" onClick={() => setSelectedCustomer(c)}>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                              {c.type === "individual" ? <User className="w-3 h-3 text-primary" /> : <Building2 className="w-3 h-3 text-primary" />}
+                            </div>
+                            <div>
+                              <div className="text-xs font-semibold text-foreground">{c.name}</div>
+                              {c.email && <div className="text-[10px] text-muted-foreground">{c.email}</div>}
+                            </div>
                           </div>
-                          <div>
-                            <div className="text-xs font-semibold text-foreground">{c.name}</div>
-                            {c.email && <div className="text-[10px] text-muted-foreground">{c.email}</div>}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground capitalize">{c.type}</td>
+                        <td className="px-4 py-3">
+                          {c.regulator ? (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">
+                              {REGULATORY_PROFILES[c.regulator]?.shortName || c.regulator}
+                            </span>
+                          ) : <span className="text-xs text-muted-foreground">—</span>}
+                        </td>
+                        <td className="px-4 py-3 text-xs font-mono text-muted-foreground">{c.country || "—"}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className={cn("text-xs font-bold tabular-nums", riskColor(score))}>{score}</span>
+                            <div className="w-10 h-1.5 bg-muted rounded-full overflow-hidden">
+                              <div className={cn("h-full rounded-full", riskBg(score))} style={{ width: `${score}%` }} />
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground capitalize">{c.type}</td>
-                      <td className="px-4 py-3">
-                        {c.regulator ? (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">
-                            {REGULATORY_PROFILES[c.regulator]?.shortName || c.regulator}
-                          </span>
-                        ) : <span className="text-xs text-muted-foreground">—</span>}
-                      </td>
-                      <td className="px-4 py-3 text-xs font-mono text-muted-foreground">{c.country || "—"}</td>
-                      <td className="px-4 py-3"><span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-semibold capitalize", riskBadge(c.risk_level))}>{c.risk_level}</span></td>
-                      <td className="px-4 py-3"><span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-semibold", statusColor(c.kyc_status))}>{kycStatusLabel[c.kyc_status] || c.kyc_status}</span></td>
-                      <td className="px-4 py-3 text-xs font-mono text-muted-foreground">{new Date(c.created_at).toLocaleDateString("en-GB")}</td>
-                      <td className="px-4 py-3">
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={e => { e.stopPropagation(); setSelectedCustomer(c); }}>
-                          <Eye className="w-3.5 h-3.5 text-muted-foreground" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-4 py-3"><span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-semibold", riskBadgeClass(score))}>{riskLabel(score)}</span></td>
+                        <td className="px-4 py-3"><span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-semibold", statusColor(c.kyc_status))}>{kycStatusLabel[c.kyc_status] || c.kyc_status}</span></td>
+                        <td className="px-4 py-3 text-xs font-mono text-muted-foreground">{new Date(c.created_at).toLocaleDateString("en-GB")}</td>
+                        <td className="px-4 py-3">
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={e => { e.stopPropagation(); setSelectedCustomer(c); }}>
+                            <Eye className="w-3.5 h-3.5 text-muted-foreground" />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
