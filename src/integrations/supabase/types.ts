@@ -476,6 +476,24 @@ export type Database = {
         }
         Relationships: []
       }
+      fatf_country_risk: {
+        Row: {
+          country_code: string
+          risk_category: string
+          updated_at: string
+        }
+        Insert: {
+          country_code: string
+          risk_category: string
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          risk_category?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       form_submissions: {
         Row: {
           account_type: string | null
@@ -1182,6 +1200,10 @@ export type Database = {
           registration_number: string | null
           regulator: string | null
           risk_level: string
+          risk_score: number
+          risk_score_factors: Json
+          risk_score_version: number
+          risk_scored_at: string | null
           status: string
           type: string
           updated_at: string
@@ -1201,6 +1223,10 @@ export type Database = {
           registration_number?: string | null
           regulator?: string | null
           risk_level?: string
+          risk_score?: number
+          risk_score_factors?: Json
+          risk_score_version?: number
+          risk_scored_at?: string | null
           status?: string
           type?: string
           updated_at?: string
@@ -1220,6 +1246,10 @@ export type Database = {
           registration_number?: string | null
           regulator?: string | null
           risk_level?: string
+          risk_score?: number
+          risk_score_factors?: Json
+          risk_score_version?: number
+          risk_scored_at?: string | null
           status?: string
           type?: string
           updated_at?: string
@@ -1666,6 +1696,10 @@ export type Database = {
       admin_revoke_suite_access: {
         Args: { target_email: string }
         Returns: undefined
+      }
+      calculate_customer_risk_score: {
+        Args: { p_customer_id: string }
+        Returns: Json
       }
       current_user_has_suite_access: { Args: never; Returns: boolean }
       current_user_org_id: { Args: never; Returns: string }
