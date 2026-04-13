@@ -574,6 +574,10 @@ export default function SuiteOnboarding() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
+  const [customerScores, setCustomerScores] = useState<Record<string, number>>({});
+  const [sortField, setSortField] = useState<"name" | "score" | "created_at">("created_at");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [riskFilter, setRiskFilter] = useState<"All" | "Critical" | "High" | "Medium" | "Low">("All");
   const [step, setStep] = useState<OnboardingStep>("select");
   const [showForm, setShowForm] = useState(false);
   const [kycForm, setKycForm] = useState<KYCForm>(emptyKYC);
