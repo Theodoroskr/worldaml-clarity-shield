@@ -113,7 +113,7 @@ export default function SuiteDashboard() {
       supabase.from("suite_screenings").select("id, screening_type, result, created_at, suite_customers(name)").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(4),
     ]);
 
-    setRegulator(profileRes.data?.regulator ?? null);
+    setRegulator(org?.regulator ?? null);
 
     const customers = customersRes.data || [];
     const alerts = alertsRes.data || [];
@@ -172,9 +172,9 @@ export default function SuiteDashboard() {
     setLoading(false);
     setRefreshing(false);
     setLastRefresh(new Date());
-  }, []);
+  }, [orgId, org]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { if (orgId) fetchData(); }, [fetchData]);
 
   // Auto-refresh every 30s
   useEffect(() => {
