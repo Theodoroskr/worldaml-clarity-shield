@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAccess } from "@/hooks/useAccess";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
@@ -61,6 +62,7 @@ interface ActivityItem {
 
 const Dashboard = () => {
   const { user, profile, isLoading, isApproved, isAdmin, signOut } = useAuth();
+  const { hasSuiteAccess } = useAccess();
   const navigate = useNavigate();
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
   const historyRef = useRef<SearchHistoryHandle>(null);
