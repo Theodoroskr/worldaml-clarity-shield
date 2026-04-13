@@ -192,6 +192,7 @@ const priorityStyle: Record<string, string> = {
 };
 
 export default function SuiteCases() {
+  const { orgId, userId, isLoading: orgLoading } = useOrganisation();
   const [cases, setCases] = useState<CaseItem[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
@@ -242,28 +243,34 @@ export default function SuiteCases() {
   const regulatorReports = userRegulator ? (REGULATOR_REPORTS[userRegulator] || []) : [];
 
   const fetchCases = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const [cRes, aRes, profileRes] = await Promise.all([
-      supabase.from("suite_cases").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("suite_alerts").select("id, title").eq("user_id", user.id).eq("status", "open"),
-      supabase.from("profiles").select("regulator").eq("user_id", user.id).maybeSingle(),
+    if (!orgId) return;
+    const [cRes, aRes] = await Promise.all([
+      supabase.from("suite_cases").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false }),
+      supabase.from("suite_alerts").select("id, title").eq("organisation_id", orgId).eq("status", "open"),
     ]);
     setCases(cRes.data || []);
     setAlerts(aRes.data || []);
-    if (profileRes.data?.regulator) setUserRegulator(profileRes.data.regulator);
     setLoading(false);
   };
 
-  useEffect(() => { fetchCases(); }, []);
+  useEffect(() => {
+    if (orgId) {
+      fetchCases();
+      // Set regulator from org
+      if (org?.regulator) setUserRegulator(org.regulator);
+    }
+  }, [orgId]);
+
+  // Need org reference
+  const { org } = useOrganisation();
 
   const createCase = async () => {
     if (!form.title.trim()) { toast.error("Title required"); return; }
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!userId || !orgId) return;
 
     const { error } = await supabase.from("suite_cases").insert({
-      user_id: user.id,
+      user_id: userId,
+      organisation_id: orgId,
       title: form.title.trim(),
       alert_id: form.alert_id || null,
       priority: form.priority,
@@ -271,7 +278,8 @@ export default function SuiteCases() {
     if (error) { toast.error(error.message); return; }
 
     await supabase.from("suite_audit_log").insert({
-      user_id: user.id,
+      user_id: userId,
+      organisation_id: orgId,
       action: `Case created: ${form.title}`,
       entity_type: "case",
       details: { detail: `Priority: ${form.priority}` },
