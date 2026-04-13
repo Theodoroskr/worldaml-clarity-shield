@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2 } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, Megaphone, Handshake, Globe, KeyRound, ScrollText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -12,6 +12,11 @@ const NAV = [
   { label: "Forms", path: "/admin/forms", icon: FileText },
   { label: "Workflows", path: "/admin/workflows", icon: GitBranch },
   { label: "Pricing", path: "/admin/pricing", icon: CreditCard },
+  { label: "Leads", path: "/admin/leads", icon: Megaphone },
+  { label: "Partners", path: "/admin/partners", icon: Handshake },
+  { label: "Trusted Domains", path: "/admin/trusted-domains", icon: Globe },
+  { label: "Suite Access", path: "/admin/suite-access", icon: KeyRound },
+  { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText },
 ];
 
 export default function AdminLayout() {
