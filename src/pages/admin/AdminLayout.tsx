@@ -5,6 +5,7 @@ import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bel
 import { cn } from "@/lib/utils";
 
 const NAV = [
+  { label: "Dashboard", path: "/admin/dashboard", icon: Shield },
   { label: "Users", path: "/admin/users", icon: Users },
   { label: "Organizations", path: "/admin/organizations", icon: Building2 },
   { label: "Alert Rules", path: "/admin/alert-rules", icon: Bell },
