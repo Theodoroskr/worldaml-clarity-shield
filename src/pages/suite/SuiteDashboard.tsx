@@ -347,40 +347,7 @@ export default function SuiteDashboard() {
         </div>
       </div>
 
-      {/* ══════════ RECENT ACTIVITY FEED ══════════ */}
-      {recentActivity.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Clock className="h-4.5 w-4.5 text-foreground" /> Recent Activity
-          </h2>
-          <div className="bg-card rounded-xl border border-border divide-y divide-border">
-            {recentActivity.map((item) => (
-              <div key={`${item.type}-${item.id}`} className="flex items-center gap-4 px-5 py-3 hover:bg-muted/30 transition-colors">
-                <div className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
-                  item.type === "Alert"
-                    ? item.severity === "critical" ? "bg-destructive/10" : item.severity === "high" ? "bg-orange-50" : "bg-amber-50"
-                    : "bg-primary/10"
-                )}>
-                  {item.type === "Alert" && <AlertTriangle className={cn("h-4 w-4", item.severity === "critical" ? "text-destructive" : item.severity === "high" ? "text-orange-600" : "text-amber-600")} />}
-                  {item.type === "Customer" && <Users className="h-4 w-4 text-primary" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.detail}</p>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Badge variant="outline" className="text-xs capitalize">{item.type}</Badge>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {formatDistanceToNow(new Date(item.time), { addSuffix: true })}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ══════════ CHARTS ROW ══════════ */}
+      {/* ══════════ CHARTS ROW (widgets) ══════════ */}
       <div className="grid grid-cols-[1fr_300px] gap-5">
         <div className="bg-card rounded-xl border border-border">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
@@ -444,85 +411,125 @@ export default function SuiteDashboard() {
         </div>
       </div>
 
-      {/* ══════════ COMPLIANCE CALENDAR ══════════ */}
-      <div className="bg-card rounded-xl border border-border">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <CalendarClock className="w-4 h-4 text-primary" />
-            <div>
-              <h2 className="font-semibold text-foreground">Compliance Calendar</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Upcoming periodic filing deadlines</p>
+      {/* ══════════ COMPLIANCE CALENDAR + RECENT ACTIVITY ══════════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Compliance Calendar */}
+        <div className="bg-card rounded-xl border border-border">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            <div className="flex items-center gap-2">
+              <CalendarClock className="w-4 h-4 text-primary" />
+              <div>
+                <h2 className="font-semibold text-foreground">Compliance Calendar</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Upcoming periodic filing deadlines</p>
+              </div>
             </div>
+            <button
+              onClick={() => navigate("/suite/regulatory")}
+              className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+            >
+              View all <ChevronRight className="w-3 h-3" />
+            </button>
           </div>
-          <button
-            onClick={() => navigate("/suite/regulatory")}
-            className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors"
-          >
-            View all <ChevronRight className="w-3 h-3" />
-          </button>
+          <div className="p-4 max-h-[320px] overflow-y-auto">
+            {!regulator ? (
+              <p className="text-sm text-muted-foreground text-center py-6">
+                Set your regulator in{" "}
+                <button onClick={() => navigate("/suite/settings")} className="text-primary underline underline-offset-2 hover:text-primary/80">
+                  Settings
+                </button>{" "}
+                to see filing deadlines.
+              </p>
+            ) : calendarItems.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">No periodic obligations found for your regulator.</p>
+            ) : (
+              <div className="divide-y divide-border">
+                {calendarItems.map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                    <div className="shrink-0">
+                      {item.status === "overdue" ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
+                      ) : item.status === "urgent" ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
+                      ) : item.status === "upcoming" ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+                      ) : item.status === "on-track" ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                      ) : (
+                        <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/30" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium text-foreground truncate block">{item.title}</span>
+                    </div>
+                    <div className="text-right shrink-0">
+                      {item.nextDue ? (
+                        <div className="space-y-0.5">
+                          <div className="text-xs font-medium text-foreground">{format(item.nextDue, "d MMM yyyy")}</div>
+                          <Badge
+                            variant="outline"
+                            className={cn("text-[10px] px-1.5 py-0",
+                              item.status === "overdue" && "border-destructive/40 text-destructive bg-destructive/5",
+                              item.status === "urgent" && "border-orange-300 text-orange-700 bg-orange-50",
+                              item.status === "upcoming" && "border-yellow-300 text-yellow-700 bg-yellow-50",
+                              item.status === "on-track" && "border-emerald-300 text-emerald-700 bg-emerald-50",
+                            )}
+                          >
+                            {item.daysUntil !== null && item.daysUntil >= 0
+                              ? `${item.daysUntil}d left`
+                              : item.daysUntil !== null
+                              ? `${Math.abs(item.daysUntil)}d overdue`
+                              : ""}
+                          </Badge>
+                        </div>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">{item.deadline}</Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="p-4 max-h-[320px] overflow-y-auto">
-          {!regulator ? (
-            <p className="text-sm text-muted-foreground text-center py-6">
-              Set your regulator in{" "}
-              <button onClick={() => navigate("/suite/settings")} className="text-primary underline underline-offset-2 hover:text-primary/80">
-                Settings
-              </button>{" "}
-              to see filing deadlines.
-            </p>
-          ) : calendarItems.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No periodic obligations found for your regulator.</p>
-          ) : (
-            <div className="divide-y divide-border">
-              {calendarItems.map((item, i) => (
-                <div key={i} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
-                  <div className="shrink-0">
-                    {item.status === "overdue" ? (
-                      <div className="w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
-                    ) : item.status === "urgent" ? (
-                      <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                    ) : item.status === "upcoming" ? (
-                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                    ) : item.status === "on-track" ? (
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                    ) : (
-                      <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/30" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-medium text-foreground truncate block">{item.title}</span>
-                  </div>
-                  <div className="text-right shrink-0">
-                    {item.nextDue ? (
-                      <div className="space-y-0.5">
-                        <div className="text-xs font-medium text-foreground">{format(item.nextDue, "d MMM yyyy")}</div>
-                        <Badge
-                          variant="outline"
-                          className={cn("text-[10px] px-1.5 py-0",
-                            item.status === "overdue" && "border-destructive/40 text-destructive bg-destructive/5",
-                            item.status === "urgent" && "border-orange-300 text-orange-700 bg-orange-50",
-                            item.status === "upcoming" && "border-yellow-300 text-yellow-700 bg-yellow-50",
-                            item.status === "on-track" && "border-emerald-300 text-emerald-700 bg-emerald-50",
-                          )}
-                        >
-                          {item.daysUntil !== null && item.daysUntil >= 0
-                            ? `${item.daysUntil}d left`
-                            : item.daysUntil !== null
-                            ? `${Math.abs(item.daysUntil)}d overdue`
-                            : ""}
-                        </Badge>
-                      </div>
-                    ) : (
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">{item.deadline}</Badge>
-                    )}
-                  </div>
+
+        {/* Recent Activity */}
+        <div className="bg-card rounded-xl border border-border">
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="font-semibold text-foreground flex items-center gap-2">
+              <Clock className="w-4 h-4 text-muted-foreground" /> Recent Activity
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Latest onboarding & alert events</p>
+          </div>
+          <div className="max-h-[320px] overflow-y-auto divide-y divide-border">
+            {recentActivity.length > 0 ? recentActivity.map((item) => (
+              <div key={`${item.type}-${item.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-muted/30 transition-colors">
+                <div className={cn("flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center",
+                  item.type === "Alert"
+                    ? item.severity === "critical" ? "bg-destructive/10" : item.severity === "high" ? "bg-orange-50" : "bg-amber-50"
+                    : "bg-primary/10"
+                )}>
+                  {item.type === "Alert" && <AlertTriangle className={cn("h-3.5 w-3.5", item.severity === "critical" ? "text-destructive" : item.severity === "high" ? "text-orange-600" : "text-amber-600")} />}
+                  {item.type === "Customer" && <Users className="h-3.5 w-3.5 text-primary" />}
                 </div>
-              ))}
-            </div>
-          )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">{item.detail}</p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Badge variant="outline" className="text-[10px] capitalize">{item.type}</Badge>
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                    {formatDistanceToNow(new Date(item.time), { addSuffix: true })}
+                  </span>
+                </div>
+              </div>
+            )) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                {loading ? "Loading…" : "No recent activity yet."}
+              </p>
+            )}
+          </div>
         </div>
       </div>
-
     </div>
   );
 }
