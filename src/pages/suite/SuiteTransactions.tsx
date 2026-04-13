@@ -65,6 +65,7 @@ const triggerMonitoring = async (userId: string, transactionId: string) => {
 };
 
 export default function SuiteTransactions() {
+  const { orgId, userId, isLoading: orgLoading } = useOrganisation();
   const [txs, setTxs] = useState<TxRow[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,20 +97,18 @@ export default function SuiteTransactions() {
   const [showRulesPanel, setShowRulesPanel] = useState(false);
 
   const fetchData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!orgId) return;
     const [tRes, cRes, rRes, aRes] = await Promise.all([
-      supabase.from("suite_transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(500),
-      supabase.from("suite_customers").select("id, name, risk_level, country").eq("user_id", user.id),
-      supabase.from("suite_alert_rules").select("id, name, severity").eq("user_id", user.id),
-      supabase.from("suite_alerts").select("rule_id, transaction_id").eq("user_id", user.id).not("rule_id", "is", null).not("transaction_id", "is", null),
+      supabase.from("suite_transactions").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(500),
+      supabase.from("suite_customers").select("id, name, risk_level, country").eq("organisation_id", orgId),
+      supabase.from("suite_alert_rules").select("id, name, severity").eq("organisation_id", orgId),
+      supabase.from("suite_alerts").select("rule_id, transaction_id").eq("organisation_id", orgId).not("rule_id", "is", null).not("transaction_id", "is", null),
     ]);
     setTxs(tRes.data || []);
     setCustomers(cRes.data || []);
     const rm: Record<string, RuleInfo> = {};
     (rRes.data || []).forEach((r: RuleInfo) => { rm[r.id] = r; });
     setRulesMap(rm);
-    // Build rule → transaction_id set
     const rtm: Record<string, Set<string>> = {};
     (aRes.data || []).forEach((a: any) => {
       if (!rtm[a.rule_id]) rtm[a.rule_id] = new Set();
@@ -122,27 +121,26 @@ export default function SuiteTransactions() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { if (orgId) fetchData(); }, [orgId]);
 
   const addTransaction = async () => {
     if (!form.customer_id || !form.amount) { toast.error("Customer and amount required"); return; }
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!userId || !orgId) return;
     const isHighRisk = HIGH_RISK.includes((form.counterparty_country || "").toUpperCase());
     const amount = parseFloat(form.amount);
     const riskFlag = isHighRisk || amount > 10000;
 
     const { data, error } = await supabase.from("suite_transactions").insert({
-      customer_id: form.customer_id, user_id: user.id, amount, currency: form.currency, direction: form.direction,
+      customer_id: form.customer_id, user_id: userId, organisation_id: orgId, amount, currency: form.currency, direction: form.direction,
       counterparty: form.counterparty || null, counterparty_country: form.counterparty_country || null, risk_flag: riskFlag, description: form.description || null,
     }).select().single();
 
     if (error) { toast.error(error.message); return; }
-    await supabase.from("suite_audit_log").insert({ user_id: user.id, action: `Transaction recorded: ${form.currency} ${amount} ${form.direction}`, entity_type: "transaction", details: { detail: `Counterparty: ${form.counterparty || "N/A"}, Country: ${form.counterparty_country || "N/A"}` } });
+    await supabase.from("suite_audit_log").insert({ user_id: userId, organisation_id: orgId, action: `Transaction recorded: ${form.currency} ${amount} ${form.direction}`, entity_type: "transaction", details: { detail: `Counterparty: ${form.counterparty || "N/A"}, Country: ${form.counterparty_country || "N/A"}` } });
     if (riskFlag) {
-      await supabase.from("suite_alerts").insert({ customer_id: form.customer_id, user_id: user.id, alert_type: "transaction", severity: amount > 30000 ? "critical" : "high", title: `Flagged transaction: ${form.currency} ${amount.toLocaleString()}`, description: `${form.direction} transaction${isHighRisk ? " to high-risk jurisdiction (" + form.counterparty_country + ")" : ""} exceeds threshold` });
+      await supabase.from("suite_alerts").insert({ customer_id: form.customer_id, user_id: userId, organisation_id: orgId, alert_type: "transaction", severity: amount > 30000 ? "critical" : "high", title: `Flagged transaction: ${form.currency} ${amount.toLocaleString()}`, description: `${form.direction} transaction${isHighRisk ? " to high-risk jurisdiction (" + form.counterparty_country + ")" : ""} exceeds threshold` });
     }
-    if (data) triggerMonitoring(user.id, data.id);
+    if (data) triggerMonitoring(userId, data.id);
     toast.success("Transaction recorded");
     setForm({ customer_id: form.customer_id, amount: "", currency: "EUR", direction: "inbound", counterparty: "", counterparty_country: "", description: "" });
     setShowForm(false);
