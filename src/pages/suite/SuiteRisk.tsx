@@ -4,6 +4,7 @@ import { AlertTriangle, ChevronRight, Search, Loader2, Shield, Globe, Users, Arr
 import CountryRiskTable from "@/components/risk-assessment/CountryRiskTable";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
+import { useOrganisation } from "@/hooks/useOrganisation";
 import { Badge } from "@/components/ui/badge";
 import {
   BASEL_AML_SCORES, WEIGHTS, type RiskBreakdown,

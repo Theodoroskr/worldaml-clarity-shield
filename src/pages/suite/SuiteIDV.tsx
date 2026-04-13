@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Plus, Search, ChevronRight, Fingerprint, Camera, Smartphone, UserCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useOrganisation } from "@/hooks/useOrganisation";
 import { toast } from "sonner";
 
 interface IDVSession {

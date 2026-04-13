@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useOrganisation } from "@/hooks/useOrganisation";
 import SEO from "@/components/SEO";
 import PeriodicReportsSection from "@/components/regulatory/PeriodicReportsSection";
 import {
