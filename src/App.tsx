@@ -95,6 +95,7 @@ const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
 const AdminPartners = lazy(() => import("./pages/admin/AdminPartners"));
 const AdminTrustedDomains = lazy(() => import("./pages/admin/AdminTrustedDomains"));
+const AdminSuiteAccess = lazy(() => import("./pages/admin/AdminSuiteAccess"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
@@ -153,6 +154,7 @@ const App = () => (
                   <Route path="workflows" element={<AdminWorkflows />} />
                   <Route path="pricing" element={<AdminPricing />} />
                   <Route path="trusted-domains" element={<AdminTrustedDomains />} />
+                  <Route path="suite-access" element={<AdminSuiteAccess />} />
                 </Route>
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
