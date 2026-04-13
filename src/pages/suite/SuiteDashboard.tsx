@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
-  ChevronRight, CalendarClock, RefreshCw,
+  ChevronRight, CalendarClock, RefreshCw, Users, AlertTriangle,
+  Shield, FileText, TrendingUp, Activity, BarChart3, ArrowUpRight, Clock,
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid,
@@ -10,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { Timeline, TimelineEvent } from "@/components/ui/timeline";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays, addMonths, isPast, formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -42,15 +45,63 @@ export default function SuiteDashboard() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const navigate = useNavigate();
 
+  // KPI stats
+  const [kpi, setKpi] = useState({
+    totalCustomers: 0, openAlerts: 0, totalAlerts: 0,
+    totalScreenings: 0, openCases: 0, totalCases: 0,
+    totalTransactions: 0, flaggedTransactions: 0,
+  });
+  const [recentActivity, setRecentActivity] = useState<{ id: string; type: string; label: string; detail: string; time: string; severity?: string }[]>([]);
+
   const fetchData = useCallback(async (silent = false) => {
     if (!orgId) return;
     if (!silent) setLoading(true);
     else setRefreshing(true);
 
-    const [customersRes, auditRes] = await Promise.all([
+    const [
+      customersRes, auditRes,
+      { count: totalCustomers },
+      { count: totalAlerts },
+      { count: openAlerts },
+      { count: totalScreenings },
+      { count: totalCases },
+      { count: openCases },
+      { count: totalTransactions },
+      { count: flaggedTransactions },
+      { data: recentCustomers },
+      { data: recentAlerts },
+    ] = await Promise.all([
       supabase.from("suite_customers").select("id, risk_level").eq("organisation_id", orgId),
       supabase.from("suite_audit_log").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(10),
+      supabase.from("suite_customers").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
+      supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
+      supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_review"]),
+      supabase.from("suite_screenings").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
+      supabase.from("suite_cases").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
+      supabase.from("suite_cases").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_progress"]),
+      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
+      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("risk_flag", true),
+      supabase.from("suite_customers").select("id, name, type, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(3),
+      supabase.from("suite_alerts").select("id, title, severity, status, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(5),
     ]);
+
+    setKpi({
+      totalCustomers: totalCustomers ?? 0,
+      openAlerts: openAlerts ?? 0,
+      totalAlerts: totalAlerts ?? 0,
+      totalScreenings: totalScreenings ?? 0,
+      openCases: openCases ?? 0,
+      totalCases: totalCases ?? 0,
+      totalTransactions: totalTransactions ?? 0,
+      flaggedTransactions: flaggedTransactions ?? 0,
+    });
+
+    // Build recent activity
+    const activity: typeof recentActivity = [];
+    (recentCustomers ?? []).forEach(c => activity.push({ id: c.id, type: "Customer", label: c.name, detail: `${c.type} onboarded`, time: c.created_at }));
+    (recentAlerts ?? []).forEach(a => activity.push({ id: a.id, type: "Alert", label: a.title, detail: a.status, time: a.created_at, severity: a.severity }));
+    activity.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+    setRecentActivity(activity.slice(0, 8));
 
     setRegulator(org?.regulator ?? null);
 
@@ -197,6 +248,149 @@ export default function SuiteDashboard() {
           Refresh
         </Button>
       </div>
+
+      {/* ══════════ LIVE OVERVIEW KPI CARDS ══════════ */}
+      <div>
+        <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+          <Activity className="h-4.5 w-4.5 text-primary" /> Live Overview
+        </h2>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/onboarding")}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Customers</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{kpi.totalCustomers.toLocaleString()}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Users className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                <ArrowUpRight className="h-3 w-3 text-primary" /> View onboarding →
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/alerts")}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Open Alerts</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{kpi.openAlerts.toLocaleString()}</p>
+                </div>
+                <div className={cn("p-2 rounded-lg transition-colors", kpi.openAlerts > 0 ? "bg-destructive/10 text-destructive" : "bg-emerald-50 text-emerald-600")}>
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <Progress value={kpi.totalAlerts > 0 ? Math.round((kpi.openAlerts / kpi.totalAlerts) * 100) : 0} className="h-1.5 flex-1" />
+                <span className="text-xs text-muted-foreground">{kpi.totalAlerts > 0 ? Math.round((kpi.openAlerts / kpi.totalAlerts) * 100) : 0}% open</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/screening")}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Screenings</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{kpi.totalScreenings.toLocaleString()}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Shield className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                <BarChart3 className="h-3 w-3" /> All-time total
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/cases")}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Open Cases</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{kpi.openCases.toLocaleString()}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-amber-50 text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                  <FileText className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">of {kpi.totalCases} total cases</p>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/transactions")}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Transactions</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{kpi.totalTransactions.toLocaleString()}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <TrendingUp className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                <Activity className="h-3 w-3" /> Monitored volume
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/transactions")}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Flagged TXNs</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{kpi.flaggedTransactions.toLocaleString()}</p>
+                </div>
+                <div className={cn("p-2 rounded-lg transition-colors", kpi.flaggedTransactions > 0 ? "bg-destructive/10 text-destructive" : "bg-emerald-50 text-emerald-600")}>
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <Progress value={kpi.totalTransactions > 0 ? Math.round((kpi.flaggedTransactions / kpi.totalTransactions) * 100) : 0} className="h-1.5 flex-1" />
+                <span className="text-xs text-muted-foreground">{kpi.totalTransactions > 0 ? Math.round((kpi.flaggedTransactions / kpi.totalTransactions) * 100) : 0}% flagged</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* ══════════ RECENT ACTIVITY FEED ══════════ */}
+      {recentActivity.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+            <Clock className="h-4.5 w-4.5 text-foreground" /> Recent Activity
+          </h2>
+          <div className="bg-card rounded-xl border border-border divide-y divide-border">
+            {recentActivity.map((item) => (
+              <div key={`${item.type}-${item.id}`} className="flex items-center gap-4 px-5 py-3 hover:bg-muted/30 transition-colors">
+                <div className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
+                  item.type === "Alert"
+                    ? item.severity === "critical" ? "bg-destructive/10" : item.severity === "high" ? "bg-orange-50" : "bg-amber-50"
+                    : "bg-primary/10"
+                )}>
+                  {item.type === "Alert" && <AlertTriangle className={cn("h-4 w-4", item.severity === "critical" ? "text-destructive" : item.severity === "high" ? "text-orange-600" : "text-amber-600")} />}
+                  {item.type === "Customer" && <Users className="h-4 w-4 text-primary" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">{item.detail}</p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Badge variant="outline" className="text-xs capitalize">{item.type}</Badge>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {formatDistanceToNow(new Date(item.time), { addSuffix: true })}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ══════════ CHARTS ROW ══════════ */}
       <div className="grid grid-cols-[1fr_300px] gap-5">
