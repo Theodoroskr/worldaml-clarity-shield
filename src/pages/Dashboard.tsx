@@ -239,8 +239,8 @@ const Dashboard = () => {
             </Button>
           </div>
 
-          {/* ══════════ LIVE STATS GRID ══════════ */}
-          <div className="mb-8">
+          {/* ══════════ LIVE STATS GRID (suite/enterprise only) ══════════ */}
+          {hasSuiteAccess && <div className="mb-8">
             <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
               <Activity className="h-5 w-5 text-teal" /> Live Overview
             </h2>
@@ -376,10 +376,10 @@ const Dashboard = () => {
                 </Card>
               </div>
             )}
-          </div>
+          </div>}
 
-          {/* ══════════ RECENT ACTIVITY FEED ══════════ */}
-          {stats && stats.recentActivity.length > 0 && (
+          {/* ══════════ RECENT ACTIVITY FEED (suite/enterprise only) ══════════ */}
+          {hasSuiteAccess && stats && stats.recentActivity.length > 0 && (
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
                 <Clock className="h-5 w-5 text-navy" /> Recent Activity
