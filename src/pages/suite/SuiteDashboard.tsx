@@ -8,7 +8,6 @@ import {
   PieChart, Pie, Cell,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { Timeline, TimelineEvent } from "@/components/ui/timeline";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -39,7 +38,6 @@ export default function SuiteDashboard() {
     { name: "Low Risk", value: 0, color: "hsl(142,71%,45%)" },
     { name: "Critical", value: 0, color: "hsl(280,70%,50%)" },
   ]);
-  const [auditEvents, setAuditEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
