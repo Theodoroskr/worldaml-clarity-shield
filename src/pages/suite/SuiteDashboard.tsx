@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { format, differenceInDays, addMonths, isPast, formatDistanceToNow, subDays } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { useOrganisation } from "@/hooks/useOrganisation";
 
 /* ─── animated counter ─── */
 function useCountUp(target: number, duration = 900) {
@@ -68,6 +69,7 @@ interface FeedItem {
 }
 
 export default function SuiteDashboard() {
+  const { orgId, org, isLoading: orgLoading } = useOrganisation();
   const [customerCount, setCustomerCount] = useState(0);
   const [openAlerts, setOpenAlerts] = useState(0);
   const [totalAlerts, setTotalAlerts] = useState(0);
@@ -91,27 +93,24 @@ export default function SuiteDashboard() {
   const navigate = useNavigate();
 
   const fetchData = useCallback(async (silent = false) => {
+    if (!orgId) return;
     if (!silent) setLoading(true);
     else setRefreshing(true);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
     const [
       customersRes, alertsRes, screeningsRes, casesRes, txnRes, flaggedRes,
-      auditRes, profileRes, recentCustomers, recentAlerts, recentScreenings,
+      auditRes, recentCustomers, recentAlerts, recentScreenings,
     ] = await Promise.all([
-      supabase.from("suite_customers").select("id, risk_level").eq("user_id", user.id),
-      supabase.from("suite_alerts").select("id, status").eq("user_id", user.id),
-      supabase.from("suite_screenings").select("id").eq("user_id", user.id),
-      supabase.from("suite_cases").select("id, status").eq("user_id", user.id),
-      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("risk_flag", true),
-      supabase.from("suite_audit_log").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
-      supabase.from("profiles").select("regulator").eq("user_id", user.id).single(),
-      supabase.from("suite_customers").select("id, name, type, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(4),
-      supabase.from("suite_alerts").select("id, title, severity, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(4),
-      supabase.from("suite_screenings").select("id, screening_type, result, created_at, suite_customers(name)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(4),
+      supabase.from("suite_customers").select("id, risk_level").eq("organisation_id", orgId),
+      supabase.from("suite_alerts").select("id, status").eq("organisation_id", orgId),
+      supabase.from("suite_screenings").select("id").eq("organisation_id", orgId),
+      supabase.from("suite_cases").select("id, status").eq("organisation_id", orgId),
+      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
+      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("risk_flag", true),
+      supabase.from("suite_audit_log").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(10),
+      supabase.from("suite_customers").select("id, name, type, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(4),
+      supabase.from("suite_alerts").select("id, title, severity, status, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(4),
+      supabase.from("suite_screenings").select("id, screening_type, result, created_at, suite_customers(name)").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(4),
     ]);
 
     setRegulator(profileRes.data?.regulator ?? null);
