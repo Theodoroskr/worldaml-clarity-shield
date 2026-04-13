@@ -101,6 +101,7 @@ const SuiteOnboarding = lazy(() => import("./pages/suite/SuiteOnboarding"));
 const SuiteIDV = lazy(() => import("./pages/suite/SuiteIDV"));
 const SuiteScreening = lazy(() => import("./pages/suite/SuiteScreening"));
 const SuiteTransactions = lazy(() => import("./pages/suite/SuiteTransactions"));
+const SuiteMonitoring = lazy(() => import("./pages/suite/SuiteMonitoring"));
 const SuiteAlerts = lazy(() => import("./pages/suite/SuiteAlerts"));
 const SuiteAlertRules = lazy(() => import("./pages/suite/SuiteAlertRules"));
 const SuiteRisk = lazy(() => import("./pages/suite/SuiteRisk"));
@@ -249,6 +250,7 @@ const App = () => (
                   <Route path="idv" element={<SuiteIDV />} />
                   <Route path="screening" element={<SuiteScreening />} />
                   <Route path="transactions" element={<SuiteTransactions />} />
+                  <Route path="monitoring" element={<SuiteMonitoring />} />
                   <Route path="alerts" element={<SuiteAlerts />} />
                   <Route path="alerts/rules" element={<SuiteAlertRules />} />
                   <Route path="risk" element={<SuiteRisk />} />
