@@ -927,7 +927,14 @@ export default function SuiteOnboarding() {
     const matchStatus = filter === "All" || c.kyc_status === filter;
     const q = search.toLowerCase();
     const matchSearch = !q || c.name.toLowerCase().includes(q) || (c.email || "").toLowerCase().includes(q) || (c.company_name || "").toLowerCase().includes(q);
-    return matchStatus && matchSearch;
+    const score = customerScores[c.id] ?? 0;
+    const matchRisk = riskFilter === "All" || riskLabel(score) === riskFilter;
+    return matchStatus && matchSearch && matchRisk;
+  }).sort((a, b) => {
+    const dir = sortDir === "asc" ? 1 : -1;
+    if (sortField === "name") return dir * a.name.localeCompare(b.name);
+    if (sortField === "score") return dir * ((customerScores[a.id] ?? 0) - (customerScores[b.id] ?? 0));
+    return dir * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
   });
 
   const statuses = ["All", "pending", "in_review", "verified", "rejected"];
