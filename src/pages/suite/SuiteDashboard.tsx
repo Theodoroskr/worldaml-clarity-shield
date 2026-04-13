@@ -249,6 +249,149 @@ export default function SuiteDashboard() {
         </Button>
       </div>
 
+      {/* ══════════ LIVE OVERVIEW KPI CARDS ══════════ */}
+      <div>
+        <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+          <Activity className="h-4.5 w-4.5 text-primary" /> Live Overview
+        </h2>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/onboarding")}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Customers</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{kpi.totalCustomers.toLocaleString()}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Users className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                <ArrowUpRight className="h-3 w-3 text-primary" /> View onboarding →
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/alerts")}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Open Alerts</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{kpi.openAlerts.toLocaleString()}</p>
+                </div>
+                <div className={cn("p-2 rounded-lg transition-colors", kpi.openAlerts > 0 ? "bg-destructive/10 text-destructive" : "bg-emerald-50 text-emerald-600")}>
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <Progress value={kpi.totalAlerts > 0 ? Math.round((kpi.openAlerts / kpi.totalAlerts) * 100) : 0} className="h-1.5 flex-1" />
+                <span className="text-xs text-muted-foreground">{kpi.totalAlerts > 0 ? Math.round((kpi.openAlerts / kpi.totalAlerts) * 100) : 0}% open</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/screening")}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Screenings</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{kpi.totalScreenings.toLocaleString()}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Shield className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                <BarChart3 className="h-3 w-3" /> All-time total
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/cases")}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Open Cases</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{kpi.openCases.toLocaleString()}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-amber-50 text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                  <FileText className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">of {kpi.totalCases} total cases</p>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/transactions")}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Transactions</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{kpi.totalTransactions.toLocaleString()}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <TrendingUp className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                <Activity className="h-3 w-3" /> Monitored volume
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/transactions")}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Flagged TXNs</p>
+                  <p className="text-3xl font-bold text-foreground mt-1">{kpi.flaggedTransactions.toLocaleString()}</p>
+                </div>
+                <div className={cn("p-2 rounded-lg transition-colors", kpi.flaggedTransactions > 0 ? "bg-destructive/10 text-destructive" : "bg-emerald-50 text-emerald-600")}>
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <Progress value={kpi.totalTransactions > 0 ? Math.round((kpi.flaggedTransactions / kpi.totalTransactions) * 100) : 0} className="h-1.5 flex-1" />
+                <span className="text-xs text-muted-foreground">{kpi.totalTransactions > 0 ? Math.round((kpi.flaggedTransactions / kpi.totalTransactions) * 100) : 0}% flagged</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* ══════════ RECENT ACTIVITY FEED ══════════ */}
+      {recentActivity.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+            <Clock className="h-4.5 w-4.5 text-foreground" /> Recent Activity
+          </h2>
+          <div className="bg-card rounded-xl border border-border divide-y divide-border">
+            {recentActivity.map((item) => (
+              <div key={`${item.type}-${item.id}`} className="flex items-center gap-4 px-5 py-3 hover:bg-muted/30 transition-colors">
+                <div className={cn("flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
+                  item.type === "Alert"
+                    ? item.severity === "critical" ? "bg-destructive/10" : item.severity === "high" ? "bg-orange-50" : "bg-amber-50"
+                    : "bg-primary/10"
+                )}>
+                  {item.type === "Alert" && <AlertTriangle className={cn("h-4 w-4", item.severity === "critical" ? "text-destructive" : item.severity === "high" ? "text-orange-600" : "text-amber-600")} />}
+                  {item.type === "Customer" && <Users className="h-4 w-4 text-primary" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">{item.detail}</p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Badge variant="outline" className="text-xs capitalize">{item.type}</Badge>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {formatDistanceToNow(new Date(item.time), { addSuffix: true })}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ══════════ CHARTS ROW ══════════ */}
       <div className="grid grid-cols-[1fr_300px] gap-5">
         <div className="bg-card rounded-xl border border-border">
