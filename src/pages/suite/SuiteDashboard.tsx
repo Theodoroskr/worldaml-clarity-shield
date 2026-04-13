@@ -57,7 +57,7 @@ export default function SuiteDashboard() {
     else setRefreshing(true);
 
     const [
-      customersRes, auditRes,
+      customersRes,
       { count: totalCustomers },
       { count: totalAlerts },
       { count: openAlerts },
@@ -70,7 +70,6 @@ export default function SuiteDashboard() {
       { data: recentAlerts },
     ] = await Promise.all([
       supabase.from("suite_customers").select("id, risk_level").eq("organisation_id", orgId),
-      supabase.from("suite_audit_log").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(10),
       supabase.from("suite_customers").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
       supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
       supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_review"]),
@@ -104,7 +103,6 @@ export default function SuiteDashboard() {
     setRegulator(org?.regulator ?? null);
 
     const customers = customersRes.data || [];
-    const audit = auditRes.data || [];
 
     const riskCounts = { low: 0, medium: 0, high: 0, critical: 0 };
     customers.forEach(c => { if (c.risk_level in riskCounts) riskCounts[c.risk_level as keyof typeof riskCounts]++; });
@@ -116,14 +114,6 @@ export default function SuiteDashboard() {
       { name: "Critical", value: Math.round((riskCounts.critical / total) * 100), color: "hsl(280,70%,50%)" },
     ]);
 
-    setAuditEvents(audit.map(a => ({
-      id: a.id,
-      timestamp: new Date(a.created_at).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }),
-      actor: "You",
-      action: a.action,
-      type: a.entity_type as any,
-      detail: typeof a.details === "object" && a.details !== null ? (a.details as any).detail || "" : "",
-    })));
 
     setLoading(false);
     setRefreshing(false);
@@ -533,27 +523,6 @@ export default function SuiteDashboard() {
         </div>
       </div>
 
-      {/* ══════════ AUDIT TRAIL ══════════ */}
-      <div className="bg-card rounded-xl border border-border">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h2 className="font-semibold text-foreground">Audit Trail</h2>
-          <button
-            onClick={() => navigate("/suite/audit")}
-            className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors"
-          >
-            View full log <ChevronRight className="w-3 h-3" />
-          </button>
-        </div>
-        <div className="p-4 overflow-y-auto max-h-[340px]">
-          {auditEvents.length > 0 ? (
-            <Timeline events={auditEvents} />
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              {loading ? "Loading activity…" : "No activity yet. Start by adding a customer."}
-            </p>
-          )}
-        </div>
-      </div>
     </div>
   );
 }
