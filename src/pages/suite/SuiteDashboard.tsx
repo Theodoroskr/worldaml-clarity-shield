@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { Timeline, TimelineEvent } from "@/components/ui/timeline";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays, addMonths, isPast, formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
