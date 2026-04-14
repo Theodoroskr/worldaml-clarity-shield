@@ -338,7 +338,7 @@ export default function SuiteCases() {
     if (!newNote.trim() || !selectedCase) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const { error } = await supabase.from("suite_case_notes").insert({ case_id: selectedCase.id, user_id: user.id, content: newNote.trim() });
+    const { error } = await supabase.from("suite_case_notes").insert({ case_id: selectedCase.id, user_id: user.id, content: newNote.trim(), organisation_id: orgId });
     if (error) { toast.error(error.message); return; }
     toast.success("Note added");
     setNewNote("");
