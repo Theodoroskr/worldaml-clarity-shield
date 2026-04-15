@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Loader2, User, Building2, LogOut, CreditCard, ShieldAlert,
-  GraduationCap, Award, Share2, ExternalLink, Copy, Globe
+  GraduationCap, Award, Share2, ExternalLink, Copy, Globe,
+  Search, BookOpen, Shield, ChevronRight, Sparkles
 } from "lucide-react";
 import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
 import { SearchHistoryPanel, SearchHistoryHandle } from "@/components/sanctions/SearchHistoryPanel";
