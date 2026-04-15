@@ -102,20 +102,95 @@ const Dashboard = () => {
             </div>
           )}
 
-          <div className="mb-6 p-5 rounded-lg border border-teal/20 bg-gradient-to-r from-teal/5 to-navy/5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-teal/10 text-teal">
-                <Globe className="h-5 w-5" />
+          {/* Suite banner – only for suite/enterprise users */}
+          {hasSuiteAccess && (
+            <div className="mb-6 p-5 rounded-lg border border-teal/20 bg-gradient-to-r from-teal/5 to-navy/5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-teal/10 text-teal">
+                  <Globe className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-semibold text-navy text-sm">WorldAML Suite</p>
+                  <p className="text-text-secondary text-xs">Onboarding, screening, monitoring, alerts & compliance — all in one place</p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-navy text-sm">WorldAML Suite</p>
-                <p className="text-text-secondary text-xs">Onboarding, screening, monitoring, alerts & compliance — all in one place</p>
+              <Button variant="accent" size="sm" onClick={() => navigate("/suite")}>
+                Go to WorldAML Suite <ExternalLink className="ml-1 h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+
+          {/* ══════════ WELCOME / ONBOARDING (free users) ══════════ */}
+          {!hasSuiteAccess && !isAdmin && (
+            <div className="mb-8">
+              <div className="rounded-xl border border-teal/20 bg-gradient-to-br from-navy/[0.03] via-teal/[0.04] to-transparent p-6 mb-6">
+                <div className="flex items-start gap-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-teal/20 to-navy/10 text-teal flex-shrink-0">
+                    <Sparkles className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-lg font-bold text-navy mb-1">Welcome to WorldAML</h2>
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      Get started with free compliance tools. Explore sanctions screening, earn certifications, and upgrade when you're ready.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <h3 className="text-sm font-semibold text-navy mb-3 flex items-center gap-2">
+                <ChevronRight className="h-4 w-4 text-teal" /> Getting Started
+              </h3>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card className="border-dashed hover:border-teal/30 hover:shadow-sm transition-all cursor-pointer group" onClick={() => navigate("/free-aml-check")}>
+                  <CardContent className="p-4 flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-teal/10 flex items-center justify-center flex-shrink-0 group-hover:bg-teal/20 transition-colors">
+                      <Search className="h-4 w-4 text-teal" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-navy mb-0.5">Run a Free AML Check</p>
+                      <p className="text-xs text-text-secondary">Screen a name against global sanctions lists</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-dashed hover:border-teal/30 hover:shadow-sm transition-all cursor-pointer group" onClick={() => navigate("/academy")}>
+                  <CardContent className="p-4 flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-teal/10 flex items-center justify-center flex-shrink-0 group-hover:bg-teal/20 transition-colors">
+                      <BookOpen className="h-4 w-4 text-teal" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-navy mb-0.5">Take a Course</p>
+                      <p className="text-xs text-text-secondary">Learn AML best practices & earn certificates</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-dashed hover:border-teal/30 hover:shadow-sm transition-all cursor-pointer group" onClick={() => navigate("/eu-sanctions-map")}>
+                  <CardContent className="p-4 flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-navy/10 flex items-center justify-center flex-shrink-0 group-hover:bg-navy/15 transition-colors">
+                      <Globe className="h-4 w-4 text-navy" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-navy mb-0.5">EU Sanctions Map</p>
+                      <p className="text-xs text-text-secondary">Explore restrictive measures by country</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-dashed hover:border-navy/20 hover:shadow-sm transition-all cursor-pointer group" onClick={() => navigate("/pricing")}>
+                  <CardContent className="p-4 flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-navy/10 flex items-center justify-center flex-shrink-0 group-hover:bg-navy/15 transition-colors">
+                      <Shield className="h-4 w-4 text-navy" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-navy mb-0.5">Upgrade Plan</p>
+                      <p className="text-xs text-text-secondary">Unlock API access, Suite & full monitoring</p>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
-            <Button variant="accent" size="sm" onClick={() => navigate("/suite")}>
-              Go to WorldAML Suite <ExternalLink className="ml-1 h-3.5 w-3.5" />
-            </Button>
-          </div>
+          )}
 
           {/* ══════════ PROFILE / SUBSCRIPTIONS / ACADEMY ══════════ */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
