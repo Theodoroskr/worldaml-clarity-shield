@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 const NOTIFY_EMAIL = "info@worldaml.com";
+const COMPLIANCE_EMAIL = "compliance@infocreditgroup.com";
 const FROM_EMAIL = "WorldAML <forms@worldaml.com>";
 
 /** Escape special HTML characters to prevent HTML injection */
@@ -75,7 +76,7 @@ Deno.serve(async (req) => {
     const resend = new Resend(resendApiKey);
 
     // HTML-escape all user-supplied values before interpolation
-    const displayName = escapeHtml(full_name || "—");
+    const displayName = escapeHtml(full_name || "there");
     const displayCompany = escapeHtml(company_name || "—");
     const safeEmail = escapeHtml(email);
     const signupTime = signed_up_at
@@ -136,14 +137,68 @@ Deno.serve(async (req) => {
 
     const subjectPrefix = auto_approved ? "Auto-Approved" : "Action Required";
 
+    // 1. Welcome email to the new user
+    const welcomeHtml = `
+      <div style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;background:#fff;">
+        <div style="background:#1e3a5f;padding:28px 32px;">
+          <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;letter-spacing:0.5px;">Welcome to WorldAML</h1>
+        </div>
+        <div style="padding:28px 32px;">
+          <p style="color:#374151;font-size:15px;margin:0 0 20px;">Hi ${displayName},</p>
+          <p style="color:#374151;font-size:15px;margin:0 0 20px;">Thank you for creating your WorldAML account. Here's what you can do right away:</p>
+
+          <div style="background:#f0fdfa;border-left:4px solid #0d9488;padding:16px 20px;margin:0 0 16px;border-radius:0 6px 6px 0;">
+            <h3 style="color:#1e3a5f;font-size:15px;margin:0 0 6px;font-weight:700;">🔍 AML &amp; Sanctions Screening</h3>
+            <p style="color:#374151;font-size:13px;margin:0;line-height:1.5;">Screen individuals and companies against global sanctions lists, PEP databases, and adverse media sources — all in seconds.</p>
+          </div>
+          <div style="background:#f0fdfa;border-left:4px solid #0d9488;padding:16px 20px;margin:0 0 16px;border-radius:0 6px 6px 0;">
+            <h3 style="color:#1e3a5f;font-size:15px;margin:0 0 6px;font-weight:700;">📋 KYC &amp; KYB Onboarding</h3>
+            <p style="color:#374151;font-size:13px;margin:0;line-height:1.5;">Onboard individuals and businesses with built-in identity verification, document checks, and risk scoring.</p>
+          </div>
+          <div style="background:#f0fdfa;border-left:4px solid #0d9488;padding:16px 20px;margin:0 0 16px;border-radius:0 6px 6px 0;">
+            <h3 style="color:#1e3a5f;font-size:15px;margin:0 0 6px;font-weight:700;">💳 Transaction Monitoring</h3>
+            <p style="color:#374151;font-size:13px;margin:0;line-height:1.5;">Monitor transactions in real time with customisable alert rules to detect suspicious activity automatically.</p>
+          </div>
+          <div style="background:#f0fdfa;border-left:4px solid #0d9488;padding:16px 20px;margin:0 0 16px;border-radius:0 6px 6px 0;">
+            <h3 style="color:#1e3a5f;font-size:15px;margin:0 0 6px;font-weight:700;">📊 Risk Assessment</h3>
+            <p style="color:#374151;font-size:13px;margin:0;line-height:1.5;">Automated, multi-factor risk scoring covering geography, PEP status, customer type, screening history, and transaction behaviour.</p>
+          </div>
+          <div style="background:#f0fdfa;border-left:4px solid #0d9488;padding:16px 20px;margin:0 0 16px;border-radius:0 6px 6px 0;">
+            <h3 style="color:#1e3a5f;font-size:15px;margin:0 0 6px;font-weight:700;">🎓 WorldAML Academy</h3>
+            <p style="color:#374151;font-size:13px;margin:0;line-height:1.5;">Free compliance courses with quizzes and shareable certificates. Build your AML expertise today.</p>
+          </div>
+
+          <div style="text-align:center;margin:28px 0 8px;">
+            <a href="https://worldaml.com/dashboard" style="display:inline-block;background:#0d9488;color:#fff;text-decoration:none;padding:14px 32px;border-radius:6px;font-weight:700;font-size:15px;">Go to Your Dashboard →</a>
+          </div>
+          <p style="color:#6b7280;font-size:13px;margin:24px 0 0;text-align:center;">
+            Need help? Visit our <a href="https://worldaml.com/support" style="color:#0d9488;text-decoration:none;font-weight:600;">Support Centre</a> or reply to this email.
+          </p>
+        </div>
+        <div style="padding:16px 32px;border-top:1px solid #e5e7eb;">
+          <p style="color:#9ca3af;font-size:12px;margin:0;text-align:center;">© ${new Date().getFullYear()} WorldAML · AML, KYC &amp; KYB Software for Regulated Businesses</p>
+        </div>
+      </div>
+    `;
+
+    await sendEmailWithRetry(resend, {
+      from: FROM_EMAIL,
+      to: [email],
+      subject: `Welcome to WorldAML — Your Compliance Toolkit is Ready`,
+      html: welcomeHtml,
+    });
+    console.log(`✅ Welcome email sent to: ${safeEmail}`);
+
+    // 2. Admin notification + CC compliance
     await sendEmailWithRetry(resend, {
       from: FROM_EMAIL,
       to: [NOTIFY_EMAIL],
+      cc: [COMPLIANCE_EMAIL],
       subject: `New Registration: ${displayName} (${displayCompany}) — ${subjectPrefix}`,
       html,
     });
+    console.log(`✅ Admin notification sent for: ${safeEmail} (cc: ${COMPLIANCE_EMAIL})`);
 
-    console.log(`✅ Admin notification sent for new signup: ${safeEmail} (auto_approved: ${!!auto_approved})`);
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
