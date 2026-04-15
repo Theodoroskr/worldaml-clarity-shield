@@ -19,6 +19,7 @@ const regionColors: Record<string, string> = {
 };
 
 const EUSanctionsMap = () => {
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
 
