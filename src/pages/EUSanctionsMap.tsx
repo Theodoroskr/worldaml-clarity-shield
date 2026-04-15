@@ -67,7 +67,7 @@ const EUSanctionsMap = () => {
 
       {/* Breadcrumbs */}
       <nav className="bg-muted/50 border-b border-border" aria-label="Breadcrumb">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <ol className="flex items-center gap-2 text-sm text-muted-foreground">
             {breadcrumbs.map((bc, i) => (
               <li key={bc.url} className="flex items-center gap-2">
