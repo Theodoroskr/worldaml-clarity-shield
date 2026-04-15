@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAccess } from "@/hooks/useAccess";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -23,8 +24,17 @@ const Dashboard = () => {
   const { user, profile, isLoading, isApproved, isAdmin, signOut } = useAuth();
   const { hasSuiteAccess } = useAccess();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
   const historyRef = useRef<SearchHistoryHandle>(null);
+  const sanctionsRef = useRef<HTMLDivElement>(null);
+
+  /* ─── scroll to sanctions widget if ?scroll=sanctions ─── */
+  useEffect(() => {
+    if (searchParams.get("scroll") === "sanctions" && sanctionsRef.current) {
+      setTimeout(() => sanctionsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+    }
+  }, [searchParams]);
   const [certificates, setCertificates] = useState<any[]>([]);
   const [certsLoading, setCertsLoading] = useState(true);
 
@@ -141,7 +151,7 @@ const Dashboard = () => {
                 <ChevronRight className="h-4 w-4 text-teal" /> Getting Started
               </h3>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="border-dashed hover:border-teal/30 hover:shadow-sm transition-all cursor-pointer group" onClick={() => navigate("/free-aml-check")}>
+                <Card className="border-dashed hover:border-teal/30 hover:shadow-sm transition-all cursor-pointer group" onClick={() => sanctionsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
                   <CardContent className="p-4 flex items-start gap-3">
                     <div className="w-9 h-9 rounded-lg bg-teal/10 flex items-center justify-center flex-shrink-0 group-hover:bg-teal/20 transition-colors">
                       <Search className="h-4 w-4 text-teal" />
@@ -261,7 +271,9 @@ const Dashboard = () => {
                 <Button size="sm" variant="outline" onClick={() => navigate("/eu-sanctions-map")}>Explore Map</Button>
               </CardContent>
             </Card>
-            <DashboardSanctionsWidget onSearchComplete={() => historyRef.current?.refresh()} />
+            <div ref={sanctionsRef}>
+              <DashboardSanctionsWidget onSearchComplete={() => historyRef.current?.refresh()} />
+            </div>
             <SearchHistoryPanel ref={historyRef} />
           </div>
 

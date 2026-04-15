@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
+import { useAuth } from "@/contexts/AuthContext";
 import { allEUSanctionsRegimes, regionLabels } from "@/data/euSanctionsRegimes";
-import { Shield, Globe, Search, ExternalLink, ChevronRight, Filter, Map } from "lucide-react";
+import { Shield, Globe, Search, ExternalLink, ChevronRight, Filter, Map, ArrowLeft } from "lucide-react";
 import InteractiveSanctionsMap from "@/components/sanctions/InteractiveSanctionsMap";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ const regionColors: Record<string, string> = {
 };
 
 const EUSanctionsMap = () => {
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
 
@@ -65,7 +67,7 @@ const EUSanctionsMap = () => {
 
       {/* Breadcrumbs */}
       <nav className="bg-muted/50 border-b border-border" aria-label="Breadcrumb">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <ol className="flex items-center gap-2 text-sm text-muted-foreground">
             {breadcrumbs.map((bc, i) => (
               <li key={bc.url} className="flex items-center gap-2">
@@ -78,6 +80,11 @@ const EUSanctionsMap = () => {
               </li>
             ))}
           </ol>
+          {user && (
+            <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1">
+              <ArrowLeft className="h-3.5 w-3.5" /> Dashboard
+            </Link>
+          )}
         </div>
       </nav>
 
