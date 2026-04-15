@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin } from "lucide-react";
+import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin } from "lucide-react";
 
 const difficultyColor: Record<string, string> = {
   beginner: "bg-emerald-100 text-emerald-700",
@@ -138,7 +138,12 @@ const Academy = () => {
         {/* Hero */}
         <section className="relative bg-navy overflow-hidden">
           <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
-          <div className="container-enterprise section-padding relative">
+           <div className="container-enterprise section-padding relative">
+              {user && (
+                <Link to="/dashboard" className="inline-flex items-center gap-1 text-slate-light/70 hover:text-white text-body-sm mb-4 transition-colors">
+                  <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+                </Link>
+              )}
             <div className="max-w-3xl mx-auto text-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-teal-light text-body-sm font-medium mb-6">
                 <GraduationCap className="h-4 w-4" />
