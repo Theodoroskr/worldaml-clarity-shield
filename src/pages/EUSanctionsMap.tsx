@@ -80,6 +80,11 @@ const EUSanctionsMap = () => {
               </li>
             ))}
           </ol>
+          {user && (
+            <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1">
+              <ArrowLeft className="h-3.5 w-3.5" /> Dashboard
+            </Link>
+          )}
         </div>
       </nav>
 
