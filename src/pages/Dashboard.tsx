@@ -44,8 +44,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!isLoading && !user) navigate("/login");
-    else if (!isLoading && user && !isAdmin) navigate("/academy");
-  }, [user, isLoading, isAdmin, navigate]);
+  }, [user, isLoading, navigate]);
 
   const handleSignOut = async () => { await signOut(); navigate("/"); };
 
