@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
+import { useAuth } from "@/contexts/AuthContext";
 import { allEUSanctionsRegimes, regionLabels } from "@/data/euSanctionsRegimes";
-import { Shield, Globe, Search, ExternalLink, ChevronRight, Filter, Map } from "lucide-react";
+import { Shield, Globe, Search, ExternalLink, ChevronRight, Filter, Map, ArrowLeft } from "lucide-react";
 import InteractiveSanctionsMap from "@/components/sanctions/InteractiveSanctionsMap";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
