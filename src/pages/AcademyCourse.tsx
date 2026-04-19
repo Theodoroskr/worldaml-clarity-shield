@@ -19,7 +19,10 @@ const AcademyCourse = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<"learn" | "quiz">("learn");
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<"learn" | "quiz">(
+    searchParams.get("tab") === "quiz" ? "quiz" : "learn"
+  );
   const [activeModule, setActiveModule] = useState(0);
   const [completedModules, setCompletedModules] = useState<string[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
