@@ -8,19 +8,58 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin } from "lucide-react";
+import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle } from "lucide-react";
 
 const difficultyColor: Record<string, string> = {
-  beginner: "bg-emerald-100 text-emerald-700",
-  intermediate: "bg-amber-100 text-amber-700",
-  advanced: "bg-rose-100 text-rose-700",
+  beginner: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  intermediate: "bg-amber-100 text-amber-700 border-amber-200",
+  advanced: "bg-rose-100 text-rose-700 border-rose-200",
 };
 
-const categoryConfig: Record<string, { label: string; color: string; icon: typeof Globe }> = {
-  foundational: { label: "Foundational", color: "bg-sky-100 text-sky-700", icon: BookOpen },
-  regional: { label: "Regional", color: "bg-violet-100 text-violet-700", icon: MapPin },
-  "global-specialisation": { label: "Specialisation", color: "bg-teal-100 text-teal-700", icon: Layers },
-  global: { label: "Global", color: "bg-slate-100 text-slate-700", icon: Globe },
+const categoryConfig: Record<string, { label: string; color: string; icon: typeof Globe; gradient: string; iconBg: string }> = {
+  foundational: {
+    label: "Foundational",
+    color: "bg-sky-100 text-sky-700",
+    icon: BookOpen,
+    gradient: "from-sky-500 via-blue-600 to-indigo-700",
+    iconBg: "bg-sky-500/20",
+  },
+  regional: {
+    label: "Regional",
+    color: "bg-violet-100 text-violet-700",
+    icon: MapPin,
+    gradient: "from-violet-500 via-purple-600 to-fuchsia-700",
+    iconBg: "bg-violet-500/20",
+  },
+  "global-specialisation": {
+    label: "Specialisation",
+    color: "bg-teal-100 text-teal-700",
+    icon: Layers,
+    gradient: "from-teal-500 via-cyan-600 to-emerald-700",
+    iconBg: "bg-teal-500/20",
+  },
+  specialisation: {
+    label: "Specialisation",
+    color: "bg-teal-100 text-teal-700",
+    icon: Layers,
+    gradient: "from-teal-500 via-cyan-600 to-emerald-700",
+    iconBg: "bg-teal-500/20",
+  },
+  global: {
+    label: "Global",
+    color: "bg-slate-100 text-slate-700",
+    icon: Globe,
+    gradient: "from-slate-500 via-gray-600 to-zinc-700",
+    iconBg: "bg-slate-500/20",
+  },
+};
+
+const CATEGORY_ORDER = ["foundational", "regional", "global-specialisation", "specialisation"];
+const CATEGORY_SECTION_TITLES: Record<string, string> = {
+  foundational: "Foundational",
+  regional: "Regional Compliance",
+  "global-specialisation": "Specialisations",
+  specialisation: "Advanced Specialisations",
 };
 
 type FilterTab = "all" | "in-progress" | "completed";
@@ -77,6 +116,21 @@ const Academy = () => {
         .eq("user_id", user!.id);
       if (error) throw error;
       return data;
+    },
+  });
+
+  const { data: moduleCounts } = useQuery({
+    queryKey: ["academy-module-counts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("academy_modules")
+        .select("course_id");
+      if (error) throw error;
+      const counts: Record<string, number> = {};
+      (data || []).forEach((m: any) => {
+        counts[m.course_id] = (counts[m.course_id] || 0) + 1;
+      });
+      return counts;
     },
   });
 
@@ -311,111 +365,253 @@ const Academy = () => {
               </div>
             </div>
 
-            {isLoading ? (
-              <div className="grid md:grid-cols-3 gap-6">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="rounded-xl border border-border bg-card p-6 animate-pulse">
-                    <div className="h-6 bg-muted rounded w-1/3 mb-4" />
-                    <div className="h-5 bg-muted rounded w-2/3 mb-3" />
-                    <div className="h-4 bg-muted rounded w-full mb-2" />
-                    <div className="h-4 bg-muted rounded w-4/5" />
+            {(() => {
+              if (isLoading) {
+                return (
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className="rounded-xl border border-border bg-card overflow-hidden animate-pulse">
+                        <div className="h-32 bg-muted" />
+                        <div className="p-5">
+                          <div className="h-5 bg-muted rounded w-2/3 mb-3" />
+                          <div className="h-4 bg-muted rounded w-full mb-2" />
+                          <div className="h-4 bg-muted rounded w-4/5" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ) : filteredCourses && filteredCourses.length > 0 ? (
-              <div className="grid md:grid-cols-3 gap-6">
-                {filteredCourses.map((course) => {
-                  const status = getCourseStatus(course.id);
-                  const cert = certMap.get(course.id);
-                  const catConfig = categoryConfig[(course as any).category] || categoryConfig.global;
-                  const cpd = (course as any).cpd_hours as number;
-                  const CatIcon = catConfig.icon;
-                  return (
-                    <Link
-                      key={course.id}
-                      to={status === "completed" && cert ? `/academy/certificate/${cert.share_token}` : `/academy/${course.slug}`}
-                      className="group rounded-xl border border-border bg-card p-6 hover:shadow-lg hover:border-primary/20 transition-all duration-300 relative"
+                );
+              }
+
+              if (!filteredCourses || filteredCourses.length === 0) {
+                return (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">No courses found for these filters.</p>
+                    <button
+                      onClick={() => { setCategoryFilter("all"); setDifficultyFilter("all"); setFilter("all"); }}
+                      className="text-primary text-body-sm font-medium mt-2 hover:underline"
                     >
-                      {/* Status Badge */}
+                      Clear all filters
+                    </button>
+                  </div>
+                );
+              }
+
+              const renderCard = (course: any, opts?: { featured?: boolean }) => {
+                const status = getCourseStatus(course.id);
+                const cert = certMap.get(course.id);
+                const catConfig = categoryConfig[course.category] || categoryConfig.global;
+                const cpd = course.cpd_hours as number;
+                const CatIcon = catConfig.icon;
+                const moduleCount = moduleCounts?.[course.id] ?? 0;
+                const prog = progressMap.get(course.id);
+                const completedMods = (prog?.completed_modules as string[] | null)?.length ?? 0;
+                const progressPct = moduleCount > 0 ? Math.round((completedMods / moduleCount) * 100) : 0;
+                const featured = opts?.featured;
+
+                return (
+                  <Link
+                    key={course.id}
+                    to={status === "completed" && cert ? `/academy/certificate/${cert.share_token}` : `/academy/${course.slug}`}
+                    className={`group rounded-xl border border-border bg-card overflow-hidden hover:shadow-xl hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-300 flex flex-col ${
+                      featured ? "md:col-span-3 md:flex-row" : ""
+                    }`}
+                  >
+                    {/* Thumbnail */}
+                    <div
+                      className={`relative bg-gradient-to-br ${catConfig.gradient} overflow-hidden flex-shrink-0 ${
+                        featured ? "md:w-2/5 min-h-[220px]" : "h-32"
+                      }`}
+                    >
+                      {/* decorative pattern */}
+                      <div
+                        className="absolute inset-0 opacity-20"
+                        style={{
+                          backgroundImage:
+                            "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+                        }}
+                      />
+                      <div className={`absolute inset-0 flex items-center justify-center`}>
+                        <div className={`${featured ? "h-20 w-20" : "h-14 w-14"} rounded-2xl ${catConfig.iconBg} backdrop-blur-sm border border-white/20 flex items-center justify-center`}>
+                          <CatIcon className={`${featured ? "h-10 w-10" : "h-7 w-7"} text-white`} />
+                        </div>
+                      </div>
+
+                      {/* Featured badge */}
+                      {featured && (
+                        <div className="absolute top-4 left-4">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/95 text-primary text-xs font-semibold shadow-sm">
+                            <Star className="h-3 w-3 fill-current" /> Most Popular
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Status pill */}
                       {status === "completed" && (
-                        <div className="absolute top-4 right-4">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium">
+                        <div className="absolute top-3 right-3">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/95 text-white text-[11px] font-medium shadow-sm">
                             <CheckCircle className="h-3 w-3" /> Completed
                           </span>
                         </div>
                       )}
                       {status === "in-progress" && (
-                        <div className="absolute top-4 right-4">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
-                            <BarChart3 className="h-3 w-3" /> In Progress
+                        <div className="absolute top-3 right-3">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/95 text-white text-[11px] font-medium shadow-sm">
+                            <BarChart3 className="h-3 w-3" /> {progressPct}%
                           </span>
                         </div>
                       )}
+                    </div>
 
-                      <div className="flex flex-wrap items-center gap-2 mb-4">
-                        <Badge className={difficultyColor[course.difficulty] || ""}>
+                    {/* Content */}
+                    <div className={`p-5 flex-1 flex flex-col ${featured ? "md:p-7" : ""}`}>
+                      <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                        <Badge variant="outline" className={`${difficultyColor[course.difficulty] || ""} text-[10px] uppercase tracking-wide font-semibold border`}>
                           {course.difficulty}
                         </Badge>
-                        <Badge className={catConfig.color}>
-                          <CatIcon className="h-3 w-3 mr-1" />
+                        <Badge variant="outline" className={`${catConfig.color} text-[10px] border-0`}>
                           {catConfig.label}
                         </Badge>
                       </div>
 
-                      <h3 className="text-subtitle font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                      <h3 className={`font-semibold text-foreground mb-2 group-hover:text-primary transition-colors ${featured ? "text-2xl" : "text-subtitle"}`}>
                         {course.title}
                       </h3>
-                      <p className="text-body-sm text-muted-foreground mb-4 line-clamp-3">
+                      <p className={`text-body-sm text-muted-foreground mb-4 ${featured ? "line-clamp-4" : "line-clamp-2"}`}>
                         {course.description}
                       </p>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-caption text-muted-foreground">
+                      {/* Meta row */}
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-caption text-muted-foreground mb-4">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          {course.duration_minutes} min
+                        </span>
+                        {moduleCount > 0 && (
                           <span className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" />
-                            {course.duration_minutes} min
+                            <FileText className="h-3.5 w-3.5" />
+                            {moduleCount} module{moduleCount !== 1 ? "s" : ""}
                           </span>
-                          {cpd > 0 && (
-                            <span className="flex items-center gap-1 text-primary font-medium">
-                              <Award className="h-3.5 w-3.5" />
-                              {formatCpd(cpd)}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            title="Share on LinkedIn"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://worldaml-clarity-shield.lovable.app/academy/${course.slug}`)}`;
-                              window.open(url, "_blank");
-                            }}
-                            className="p-1.5 rounded-md text-muted-foreground hover:text-[#0A66C2] hover:bg-[#0A66C2]/10 transition-colors"
-                          >
-                            <Linkedin className="h-4 w-4" />
-                          </button>
-                          <span className="text-body-sm font-medium text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
-                            {status === "completed" ? "View" : status === "in-progress" ? "Continue" : "Start"} <ArrowRight className="h-4 w-4" />
+                        )}
+                        {cpd > 0 && (
+                          <span className="flex items-center gap-1 text-primary font-medium">
+                            <Award className="h-3.5 w-3.5" />
+                            {formatCpd(cpd)}
                           </span>
-                        </div>
+                        )}
                       </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No courses found for these filters.</p>
-                <button
-                  onClick={() => { setCategoryFilter("all"); setDifficultyFilter("all"); setFilter("all"); }}
-                  className="text-primary text-body-sm font-medium mt-2 hover:underline"
-                >
-                  Clear all filters
-                </button>
-              </div>
-            )}
+
+                      {/* Progress bar (logged-in, in-progress) */}
+                      {user && status === "in-progress" && moduleCount > 0 && (
+                        <div className="mb-4">
+                          <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all"
+                              style={{ width: `${progressPct}%` }}
+                            />
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-1">{completedMods} of {moduleCount} modules complete</p>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between mt-auto pt-2 border-t border-border/50">
+                        <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                          {status === "completed" ? (
+                            <>View Certificate <Award className="h-4 w-4" /></>
+                          ) : status === "in-progress" ? (
+                            <>Continue Learning <PlayCircle className="h-4 w-4" /></>
+                          ) : (
+                            <>Start Course <ArrowRight className="h-4 w-4" /></>
+                          )}
+                        </span>
+                        <button
+                          type="button"
+                          title="Share on LinkedIn"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://worldaml-clarity-shield.lovable.app/academy/${course.slug}`)}`;
+                            window.open(url, "_blank");
+                          }}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-[#0A66C2] hover:bg-[#0A66C2]/10 transition-colors"
+                        >
+                          <Linkedin className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              };
+
+              // Determine featured course = first course (AML Fundamentals) only when no filters applied
+              const noFilters = categoryFilter === "all" && difficultyFilter === "all" && filter === "all";
+              const featuredCourse = noFilters ? filteredCourses.find((c) => c.slug === "aml-fundamentals") : null;
+              const restCourses = featuredCourse ? filteredCourses.filter((c) => c.id !== featuredCourse.id) : filteredCourses;
+
+              // Group remaining by category
+              const grouped: Record<string, typeof restCourses> = {};
+              restCourses.forEach((c: any) => {
+                const key = c.category || "global";
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push(c);
+              });
+
+              const orderedCategories = [
+                ...CATEGORY_ORDER.filter((k) => grouped[k]?.length),
+                ...Object.keys(grouped).filter((k) => !CATEGORY_ORDER.includes(k)),
+              ];
+
+              return (
+                <div className="space-y-12">
+                  {/* Featured course hero */}
+                  {featuredCourse && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <Sparkles className="h-4 w-4 text-accent" />
+                        <h3 className="text-body font-semibold text-foreground uppercase tracking-wide">Start Here</h3>
+                      </div>
+                      <div className="grid md:grid-cols-3 gap-6">
+                        {renderCard(featuredCourse, { featured: true })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Grouped grids */}
+                  {noFilters ? (
+                    orderedCategories.map((catKey) => {
+                      const cfg = categoryConfig[catKey] || categoryConfig.global;
+                      const CatIcon = cfg.icon;
+                      return (
+                        <div key={catKey}>
+                          <div className="flex items-center justify-between gap-4 mb-4 pb-3 border-b border-border">
+                            <div className="flex items-center gap-3">
+                              <div className={`h-9 w-9 rounded-lg bg-gradient-to-br ${cfg.gradient} flex items-center justify-center`}>
+                                <CatIcon className="h-4 w-4 text-white" />
+                              </div>
+                              <div>
+                                <h3 className="text-subtitle font-semibold text-foreground">
+                                  {CATEGORY_SECTION_TITLES[catKey] || cfg.label}
+                                </h3>
+                                <p className="text-caption text-muted-foreground">
+                                  {grouped[catKey].length} course{grouped[catKey].length !== 1 ? "s" : ""}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {grouped[catKey].map((c) => renderCard(c))}
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredCourses.map((c) => renderCard(c))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </section>
 
