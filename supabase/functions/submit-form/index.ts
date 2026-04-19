@@ -207,10 +207,13 @@ Deno.serve(async (req) => {
             <p style="margin-top:16px;font-size:12px;color:#6b7280;">This notification was sent automatically by WorldAML Forms.</p>
           </div>`;
 
+        const leadScore = Number((metadata as any)?.lead_score ?? 0);
+        const scoreFlag = leadScore >= 70 ? "🔥 HOT LEAD " : leadScore >= 40 ? "⭐ Qualified " : "";
+        const scoreSuffix = leadScore > 0 ? ` (score ${leadScore})` : "";
         await sendEmailWithRetry(resend, {
           from: FROM_EMAIL,
           to: [NOTIFY_EMAIL],
-          subject: `New ${escapeHtml(form_type)} from ${escapeHtml(first_name)} ${escapeHtml(last_name)}`,
+          subject: `${scoreFlag}New ${escapeHtml(form_type)} from ${escapeHtml(first_name)} ${escapeHtml(last_name)}${scoreSuffix}`,
           html,
         });
       }

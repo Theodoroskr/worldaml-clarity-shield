@@ -10,6 +10,7 @@ import { RiskDecisioningSection } from "@/components/suite/RiskDecisioningSectio
 import { SuiteLogsAuditSection } from "@/components/suite/SuiteLogsAuditSection";
 import { SuiteIntegrationSection } from "@/components/suite/SuiteIntegrationSection";
 import { SuiteCTASection } from "@/components/suite/SuiteCTASection";
+import StickyDemoCTA from "@/components/StickyDemoCTA";
 
 const softwareData = {
   "@context": "https://schema.org",
@@ -132,6 +133,7 @@ const PlatformSuite = () => {
         <SuiteCTASection />
       </main>
       <Footer />
+      <StickyDemoCTA label="Book a Suite Demo" />
     </div>
   );
 };

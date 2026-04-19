@@ -7,6 +7,7 @@ import KYCFeaturesSection from "@/components/kyc-kyb/KYCFeaturesSection";
 import KYCHowItWorksSection from "@/components/kyc-kyb/KYCHowItWorksSection";
 import KYCUseCasesSection from "@/components/kyc-kyb/KYCUseCasesSection";
 import KYCCTASection from "@/components/kyc-kyb/KYCCTASection";
+import StickyDemoCTA from "@/components/StickyDemoCTA";
 
 const softwareData = {
   "@context": "https://schema.org",
@@ -108,6 +109,7 @@ const PlatformKYCKYB = () => (
       <KYCCTASection />
     </main>
     <Footer />
+    <StickyDemoCTA product="kyc" label="Book a KYC/KYB Demo" />
   </div>
 );
 
