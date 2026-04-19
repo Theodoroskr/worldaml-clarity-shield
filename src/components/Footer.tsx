@@ -286,7 +286,7 @@ export const Footer = () => {
 
           <div className="pt-4 text-center">
             <p className="text-caption text-text-tertiary inline-flex items-center gap-1.5 flex-wrap justify-center">
-              Developed with <span className="text-red-500" aria-label="love">♥</span> by{" "}
+              Developed with <span className="text-destructive" aria-label="love">♥</span> by{" "}
               <a
                 href="https://www.blenddigital.com"
                 target="_blank"
