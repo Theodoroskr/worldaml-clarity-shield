@@ -7,6 +7,7 @@ import AMLFeaturesSection from "@/components/aml-screening/AMLFeaturesSection";
 import AMLDataSourcesSection from "@/components/aml-screening/AMLDataSourcesSection";
 import AMLUseCasesSection from "@/components/aml-screening/AMLUseCasesSection";
 import AMLCTASection from "@/components/aml-screening/AMLCTASection";
+import StickyDemoCTA from "@/components/StickyDemoCTA";
 
 const softwareData = {
   "@context": "https://schema.org",
@@ -116,6 +117,7 @@ const PlatformAMLScreening = () => (
       <AMLCTASection />
     </main>
     <Footer />
+    <StickyDemoCTA product="aml" label="Book an AML Demo" />
   </div>
 );
 

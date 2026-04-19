@@ -8,6 +8,7 @@ import { APIArchitectureSection } from "@/components/api/APIArchitectureSection"
 import { GovernanceAuditSection } from "@/components/api/GovernanceAuditSection";
 import { APIUseCasesSection } from "@/components/api/APIUseCasesSection";
 import { APICTASection } from "@/components/api/APICTASection";
+import StickyDemoCTA from "@/components/StickyDemoCTA";
 
 const softwareData = {
   "@context": "https://schema.org",
@@ -148,6 +149,7 @@ const PlatformAPI = () => {
         <APICTASection />
       </main>
       <Footer />
+      <StickyDemoCTA product="aml" label="Talk to Sales" />
     </div>
   );
 };
