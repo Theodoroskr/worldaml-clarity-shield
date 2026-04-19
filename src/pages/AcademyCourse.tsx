@@ -99,6 +99,22 @@ const AcademyCourse = () => {
     }
   }, [progress]);
 
+  // Auto-jump to first incomplete module when resuming from dashboard (?resume=1)
+  useEffect(() => {
+    if (searchParams.get("resume") !== "1") return;
+    if (!modules || modules.length === 0) return;
+
+    const completedSet = new Set(completedModules);
+    const firstIncompleteIdx = modules.findIndex((m: any) => !completedSet.has(m.id));
+    const targetIdx = firstIncompleteIdx === -1 ? modules.length - 1 : firstIncompleteIdx;
+
+    setActiveTab("learn");
+    setActiveModule(targetIdx);
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 100);
+  }, [modules, completedModules, searchParams]);
+
   const markModuleComplete = async (moduleId: string) => {
     const updated = [...new Set([...completedModules, moduleId])];
     setCompletedModules(updated);
