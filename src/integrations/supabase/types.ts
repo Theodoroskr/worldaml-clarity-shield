@@ -208,6 +208,38 @@ export type Database = {
           },
         ]
       }
+      academy_reminders_sent: {
+        Row: {
+          course_id: string
+          id: string
+          reminder_number: number
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          reminder_number?: number
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          reminder_number?: number
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_reminders_sent_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_form_submissions: {
         Row: {
           created_at: string
