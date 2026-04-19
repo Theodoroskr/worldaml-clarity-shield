@@ -283,6 +283,20 @@ export const Footer = () => {
               </Link>
             </div>
           </div>
+
+          <div className="pt-4 text-center">
+            <p className="text-caption text-text-tertiary inline-flex items-center gap-1.5 flex-wrap justify-center">
+              Developed with <span className="text-red-500" aria-label="love">♥</span> by{" "}
+              <a
+                href="https://www.blenddigital.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-text-secondary transition-colors underline-offset-2 hover:underline"
+              >
+                Blend Digital
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>
