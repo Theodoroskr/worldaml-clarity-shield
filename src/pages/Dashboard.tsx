@@ -255,7 +255,7 @@ const Dashboard = () => {
                   <Card
                     key={p.course_id}
                     className="border-teal/20 hover:shadow-md hover:border-teal/40 transition-all cursor-pointer group"
-                    onClick={() => navigate(`/academy/${p.academy_courses.slug}`)}
+                    onClick={() => navigate(`/academy/${p.academy_courses.slug}?resume=1`)}
                   >
                     <CardContent className="p-5">
                       <div className="flex items-start gap-3 mb-4">
