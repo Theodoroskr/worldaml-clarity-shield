@@ -84,7 +84,7 @@ const Dashboard = () => {
           const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
           return { ...p, completed, total, pct };
         })
-        .filter((p: any) => p.completed > 0 && p.pct < 100 && p.academy_courses);
+        .filter((p: any) => p.completed > 0 && !p.quiz_passed && p.academy_courses);
 
       setInProgressCourses(enriched);
     })();
