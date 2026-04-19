@@ -257,7 +257,13 @@ const AcademyCourse = () => {
               Learn ({modules?.length || 0} modules)
             </button>
             <button
-              onClick={() => user ? setActiveTab("quiz") : toast({ title: "Sign in required", description: "Please sign in to take the quiz.", variant: "destructive" })}
+              onClick={() => {
+                if (user) {
+                  setActiveTab("quiz");
+                } else {
+                  navigate(`/signup?redirect=${encodeURIComponent(`/academy/${slug}?tab=quiz`)}`);
+                }
+              }}
               className={`px-6 py-3 text-body-sm font-medium border-b-2 transition-colors ${
                 activeTab === "quiz" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
