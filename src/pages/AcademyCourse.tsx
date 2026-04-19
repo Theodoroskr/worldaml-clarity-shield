@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +19,10 @@ const AcademyCourse = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<"learn" | "quiz">("learn");
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<"learn" | "quiz">(
+    searchParams.get("tab") === "quiz" ? "quiz" : "learn"
+  );
   const [activeModule, setActiveModule] = useState(0);
   const [completedModules, setCompletedModules] = useState<string[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
@@ -227,13 +230,18 @@ const AcademyCourse = () => {
               <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {course.duration_minutes} min</span>
               <Badge variant="secondary">{course.difficulty}</Badge>
             </div>
-            {user && (
+            {user ? (
               <div className="mt-4 max-w-sm">
                 <div className="flex justify-between text-caption text-slate-light mb-1">
                   <span>Progress</span>
                   <span>{Math.round(progressPercent)}%</span>
                 </div>
                 <Progress value={progressPercent} className="h-2" />
+              </div>
+            ) : (
+              <div className="mt-4 inline-flex items-center gap-2 text-caption text-slate-light bg-white/5 border border-white/10 rounded-md px-3 py-1.5">
+                <BookOpen className="h-3.5 w-3.5" />
+                <span>Reading freely — <Link to="/signup" className="text-white underline hover:text-accent">sign up</Link> to save progress and earn a certificate.</span>
               </div>
             )}
           </div>
@@ -252,7 +260,13 @@ const AcademyCourse = () => {
               Learn ({modules?.length || 0} modules)
             </button>
             <button
-              onClick={() => user ? setActiveTab("quiz") : toast({ title: "Sign in required", description: "Please sign in to take the quiz.", variant: "destructive" })}
+              onClick={() => {
+                if (user) {
+                  setActiveTab("quiz");
+                } else {
+                  navigate(`/signup?redirect=${encodeURIComponent(`/academy/${slug}?tab=quiz`)}`);
+                }
+              }}
               className={`px-6 py-3 text-body-sm font-medium border-b-2 transition-colors ${
                 activeTab === "quiz" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
@@ -371,8 +385,17 @@ const AcademyCourse = () => {
                         </Button>
                       )}
                       {activeModule === modules.length - 1 && allModulesComplete && (
-                        <Button variant="accent" onClick={() => setActiveTab("quiz")}>
-                          Take the Quiz <ArrowRight className="h-4 w-4 ml-2" />
+                        <Button
+                          variant="accent"
+                          onClick={() => {
+                            if (user) {
+                              setActiveTab("quiz");
+                            } else {
+                              navigate(`/signup?redirect=${encodeURIComponent(`/academy/${slug}?tab=quiz`)}`);
+                            }
+                          }}
+                        >
+                          {user ? "Take the Quiz" : "Sign Up & Take the Quiz"} <ArrowRight className="h-4 w-4 ml-2" />
                         </Button>
                       )}
                     </div>
