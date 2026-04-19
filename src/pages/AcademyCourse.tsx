@@ -227,13 +227,18 @@ const AcademyCourse = () => {
               <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {course.duration_minutes} min</span>
               <Badge variant="secondary">{course.difficulty}</Badge>
             </div>
-            {user && (
+            {user ? (
               <div className="mt-4 max-w-sm">
                 <div className="flex justify-between text-caption text-slate-light mb-1">
                   <span>Progress</span>
                   <span>{Math.round(progressPercent)}%</span>
                 </div>
                 <Progress value={progressPercent} className="h-2" />
+              </div>
+            ) : (
+              <div className="mt-4 inline-flex items-center gap-2 text-caption text-slate-light bg-white/5 border border-white/10 rounded-md px-3 py-1.5">
+                <BookOpen className="h-3.5 w-3.5" />
+                <span>Reading freely — <Link to="/signup" className="text-white underline hover:text-accent">sign up</Link> to save progress and earn a certificate.</span>
               </div>
             )}
           </div>
