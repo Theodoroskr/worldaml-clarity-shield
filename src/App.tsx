@@ -43,6 +43,7 @@ const Support = lazy(() => import("./pages/Support"));
 const About = lazy(() => import("./pages/About"));
 const GetStarted = lazy(() => import("./pages/GetStarted"));
 const ContactSales = lazy(() => import("./pages/ContactSales"));
+const BookDemo = lazy(() => import("./pages/BookDemo"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const News = lazy(() => import("./pages/News"));
 const Demo = lazy(() => import("./pages/Demo"));
@@ -200,6 +201,7 @@ const App = () => (
                 <Route path="/about-us/why-worldaml" element={<WhyWorldAML />} />
                 <Route path="/get-started" element={<GetStarted />} />
                 <Route path="/contact-sales" element={<ContactSales />} />
+                <Route path="/book-demo" element={<BookDemo />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/news" element={<News />} />
                 <Route path="/demo" element={<Demo />} />

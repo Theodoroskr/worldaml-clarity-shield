@@ -175,7 +175,7 @@ const BookDemoForm = () => {
           required
         />
         {emailWarning && (
-          <p className="mt-1 text-xs text-amber-600">
+          <p className="mt-1 text-xs text-destructive">
             Please use a work email — we prioritize demos for company addresses.
           </p>
         )}
