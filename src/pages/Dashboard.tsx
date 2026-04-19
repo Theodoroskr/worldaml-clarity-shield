@@ -12,8 +12,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import {
   Loader2, User, Building2, LogOut, CreditCard, ShieldAlert,
   GraduationCap, Award, Share2, ExternalLink, Copy, Globe,
-  Search, BookOpen, Shield, ChevronRight, Sparkles
+  Search, BookOpen, Shield, ChevronRight, Sparkles, PlayCircle
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
 import { SearchHistoryPanel, SearchHistoryHandle } from "@/components/sanctions/SearchHistoryPanel";
 import { toast } from "sonner";
