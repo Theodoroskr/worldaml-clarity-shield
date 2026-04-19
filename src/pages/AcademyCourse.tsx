@@ -382,8 +382,17 @@ const AcademyCourse = () => {
                         </Button>
                       )}
                       {activeModule === modules.length - 1 && allModulesComplete && (
-                        <Button variant="accent" onClick={() => setActiveTab("quiz")}>
-                          Take the Quiz <ArrowRight className="h-4 w-4 ml-2" />
+                        <Button
+                          variant="accent"
+                          onClick={() => {
+                            if (user) {
+                              setActiveTab("quiz");
+                            } else {
+                              navigate(`/signup?redirect=${encodeURIComponent(`/academy/${slug}?tab=quiz`)}`);
+                            }
+                          }}
+                        >
+                          {user ? "Take the Quiz" : "Sign Up & Take the Quiz"} <ArrowRight className="h-4 w-4 ml-2" />
                         </Button>
                       )}
                     </div>
