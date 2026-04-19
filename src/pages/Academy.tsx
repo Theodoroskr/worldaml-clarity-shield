@@ -8,19 +8,58 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin } from "lucide-react";
+import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle } from "lucide-react";
 
 const difficultyColor: Record<string, string> = {
-  beginner: "bg-emerald-100 text-emerald-700",
-  intermediate: "bg-amber-100 text-amber-700",
-  advanced: "bg-rose-100 text-rose-700",
+  beginner: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  intermediate: "bg-amber-100 text-amber-700 border-amber-200",
+  advanced: "bg-rose-100 text-rose-700 border-rose-200",
 };
 
-const categoryConfig: Record<string, { label: string; color: string; icon: typeof Globe }> = {
-  foundational: { label: "Foundational", color: "bg-sky-100 text-sky-700", icon: BookOpen },
-  regional: { label: "Regional", color: "bg-violet-100 text-violet-700", icon: MapPin },
-  "global-specialisation": { label: "Specialisation", color: "bg-teal-100 text-teal-700", icon: Layers },
-  global: { label: "Global", color: "bg-slate-100 text-slate-700", icon: Globe },
+const categoryConfig: Record<string, { label: string; color: string; icon: typeof Globe; gradient: string; iconBg: string }> = {
+  foundational: {
+    label: "Foundational",
+    color: "bg-sky-100 text-sky-700",
+    icon: BookOpen,
+    gradient: "from-sky-500 via-blue-600 to-indigo-700",
+    iconBg: "bg-sky-500/20",
+  },
+  regional: {
+    label: "Regional",
+    color: "bg-violet-100 text-violet-700",
+    icon: MapPin,
+    gradient: "from-violet-500 via-purple-600 to-fuchsia-700",
+    iconBg: "bg-violet-500/20",
+  },
+  "global-specialisation": {
+    label: "Specialisation",
+    color: "bg-teal-100 text-teal-700",
+    icon: Layers,
+    gradient: "from-teal-500 via-cyan-600 to-emerald-700",
+    iconBg: "bg-teal-500/20",
+  },
+  specialisation: {
+    label: "Specialisation",
+    color: "bg-teal-100 text-teal-700",
+    icon: Layers,
+    gradient: "from-teal-500 via-cyan-600 to-emerald-700",
+    iconBg: "bg-teal-500/20",
+  },
+  global: {
+    label: "Global",
+    color: "bg-slate-100 text-slate-700",
+    icon: Globe,
+    gradient: "from-slate-500 via-gray-600 to-zinc-700",
+    iconBg: "bg-slate-500/20",
+  },
+};
+
+const CATEGORY_ORDER = ["foundational", "regional", "global-specialisation", "specialisation"];
+const CATEGORY_SECTION_TITLES: Record<string, string> = {
+  foundational: "Foundational",
+  regional: "Regional Compliance",
+  "global-specialisation": "Specialisations",
+  specialisation: "Advanced Specialisations",
 };
 
 type FilterTab = "all" | "in-progress" | "completed";
