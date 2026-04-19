@@ -239,6 +239,55 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/* ══════════ CONTINUE LEARNING ══════════ */}
+          {inProgressCourses.length > 0 && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xl font-semibold text-navy flex items-center gap-2">
+                  <PlayCircle className="h-5 w-5 text-teal" /> Continue Learning
+                </h2>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/academy")}>
+                  Browse all →
+                </Button>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {inProgressCourses.slice(0, 3).map((p) => (
+                  <Card
+                    key={p.course_id}
+                    className="border-teal/20 hover:shadow-md hover:border-teal/40 transition-all cursor-pointer group"
+                    onClick={() => navigate(`/academy/${p.academy_courses.slug}`)}
+                  >
+                    <CardContent className="p-5">
+                      <div className="flex items-start gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal/20 to-navy/10 flex items-center justify-center flex-shrink-0">
+                          <BookOpen className="h-5 w-5 text-teal" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-navy line-clamp-2 group-hover:text-teal transition-colors">
+                            {p.academy_courses.title}
+                          </p>
+                          <p className="text-xs text-text-secondary capitalize mt-0.5">
+                            {p.academy_courses.difficulty} · {p.completed}/{p.total} modules
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-1.5 mb-3">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-text-secondary">Progress</span>
+                          <span className="font-semibold text-navy">{p.pct}%</span>
+                        </div>
+                        <Progress value={p.pct} className="h-1.5" />
+                      </div>
+                      <Button size="sm" variant="accent" className="w-full">
+                        <PlayCircle className="h-4 w-4 mr-1.5" /> Resume Course
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* ══════════ PROFILE / SUBSCRIPTIONS / ACADEMY ══════════ */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card>
