@@ -119,6 +119,21 @@ const Academy = () => {
     },
   });
 
+  const { data: moduleCounts } = useQuery({
+    queryKey: ["academy-module-counts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("academy_modules")
+        .select("course_id");
+      if (error) throw error;
+      const counts: Record<string, number> = {};
+      (data || []).forEach((m: any) => {
+        counts[m.course_id] = (counts[m.course_id] || 0) + 1;
+      });
+      return counts;
+    },
+  });
+
   const progressMap = new Map(progressData?.map((p) => [p.course_id, p]) || []);
   const certMap = new Map(certificates?.map((c) => [c.course_id, c]) || []);
 
