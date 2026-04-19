@@ -38,20 +38,56 @@ const Dashboard = () => {
   }, [searchParams]);
   const [certificates, setCertificates] = useState<any[]>([]);
   const [certsLoading, setCertsLoading] = useState(true);
+  const [inProgressCourses, setInProgressCourses] = useState<any[]>([]);
 
-  /* ─── fetch certificates ─── */
+  /* ─── fetch certificates + in-progress courses ─── */
   useEffect(() => {
-    if (user) {
-      supabase
-        .from("academy_certificates")
-        .select("*, academy_courses(title, slug)")
+    if (!user) return;
+
+    supabase
+      .from("academy_certificates")
+      .select("*, academy_courses(title, slug)")
+      .eq("user_id", user.id)
+      .order("issued_at", { ascending: false })
+      .then(({ data }) => {
+        setCertificates(data ?? []);
+        setCertsLoading(false);
+      });
+
+    (async () => {
+      const { data: progress } = await supabase
+        .from("academy_progress")
+        .select("course_id, completed_modules, quiz_passed, academy_courses(id, title, slug, category, difficulty, duration_minutes)")
         .eq("user_id", user.id)
-        .order("issued_at", { ascending: false })
-        .then(({ data }) => {
-          setCertificates(data ?? []);
-          setCertsLoading(false);
-        });
-    }
+        .eq("quiz_passed", false);
+
+      if (!progress || progress.length === 0) {
+        setInProgressCourses([]);
+        return;
+      }
+
+      const courseIds = progress.map((p: any) => p.course_id);
+      const { data: modules } = await supabase
+        .from("academy_modules")
+        .select("course_id")
+        .in("course_id", courseIds);
+
+      const totals: Record<string, number> = {};
+      (modules ?? []).forEach((m: any) => {
+        totals[m.course_id] = (totals[m.course_id] || 0) + 1;
+      });
+
+      const enriched = progress
+        .map((p: any) => {
+          const completed = Array.isArray(p.completed_modules) ? p.completed_modules.length : 0;
+          const total = totals[p.course_id] || 0;
+          const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+          return { ...p, completed, total, pct };
+        })
+        .filter((p: any) => p.completed > 0 && p.pct < 100 && p.academy_courses);
+
+      setInProgressCourses(enriched);
+    })();
   }, [user]);
 
   useEffect(() => {
