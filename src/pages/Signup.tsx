@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { isFreeEmail, WORK_EMAIL_ERROR } from "@/lib/workEmail";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -24,6 +25,16 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isFreeEmail(email)) {
+      toast({
+        title: "Company email required",
+        description: WORK_EMAIL_ERROR,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     const { error } = await signUp(email, password, {
@@ -115,6 +126,9 @@ const Signup = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
+                <p className="text-xs text-text-secondary">
+                  Company email required — free providers (Gmail, Outlook, Yahoo, etc.) are not accepted.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
