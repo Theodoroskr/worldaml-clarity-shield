@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,10 +8,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, ArrowLeft, CheckCircle, XCircle, Award, Clock, BookOpen, Lock, Search, ChevronDown, ChevronRight, X } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, XCircle, Award, Clock, BookOpen, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ModuleContent, { computeReadingMinutes } from "@/components/academy/ModuleContent";
+import ModuleTOC from "@/components/academy/ModuleTOC";
 
 const PASS_THRESHOLD = 80;
 
@@ -26,9 +27,6 @@ const AcademyCourse = () => {
   );
   const [activeModule, setActiveModule] = useState(0);
   const [completedModules, setCompletedModules] = useState<string[]>([]);
-  const [justCompletedId, setJustCompletedId] = useState<string | null>(null);
-  const [moduleSearch, setModuleSearch] = useState("");
-  const [navCollapsed, setNavCollapsed] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
@@ -120,16 +118,8 @@ const AcademyCourse = () => {
   }, [modules, completedModules, searchParams]);
 
   const markModuleComplete = async (moduleId: string) => {
-    const wasAlreadyComplete = completedModules.includes(moduleId);
     const updated = [...new Set([...completedModules, moduleId])];
     setCompletedModules(updated);
-
-    if (!wasAlreadyComplete) {
-      setJustCompletedId(moduleId);
-      window.setTimeout(() => {
-        setJustCompletedId((curr) => (curr === moduleId ? null : curr));
-      }, 2400);
-    }
 
     if (user && course) {
       await supabase.from("academy_progress").upsert(
@@ -314,142 +304,52 @@ const AcademyCourse = () => {
                 {/* Module sidebar */}
                 <aside className="lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto">
                   <div className="rounded-xl border border-border bg-card p-4">
-                    <div className="mb-4 pb-4 border-b border-border">
-                      <div className="flex items-center justify-between mb-2">
-                        <button
-                          onClick={() => setNavCollapsed((c) => !c)}
-                          className="flex items-center gap-1.5 text-caption font-semibold text-foreground uppercase tracking-wide hover:text-primary transition-colors"
-                          aria-expanded={!navCollapsed}
-                          aria-label={navCollapsed ? "Expand module list" : "Collapse module list"}
-                        >
-                          {navCollapsed ? (
-                            <ChevronRight className="h-3.5 w-3.5" />
-                          ) : (
-                            <ChevronDown className="h-3.5 w-3.5" />
-                          )}
-                          Course Modules
-                        </button>
-                        <span className="text-caption font-medium text-foreground tabular-nums">
-                          {completedModules.length}/{modules?.length || 0}
-                        </span>
-                      </div>
-                      <Progress value={progressPercent} className="h-1.5" />
-                      <p className="text-caption text-muted-foreground mt-2">
-                        {allModulesComplete
-                          ? "All modules complete — ready for the quiz."
-                          : `${Math.round(progressPercent)}% complete`}
+                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-border">
+                      <p className="text-caption font-semibold text-foreground uppercase tracking-wide">
+                        Course Modules
                       </p>
+                      <span className="text-caption text-muted-foreground">
+                        {completedModules.length}/{modules?.length || 0}
+                      </span>
                     </div>
-
-                    {!navCollapsed && (
-                      <>
-                        {modules && modules.length > 3 && (
-                          <div className="relative mb-3">
-                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-                            <Input
-                              type="search"
-                              value={moduleSearch}
-                              onChange={(e) => setModuleSearch(e.target.value)}
-                              placeholder="Search modules..."
-                              className="h-8 pl-8 pr-7 text-body-sm"
-                              aria-label="Search modules"
-                            />
-                            {moduleSearch && (
-                              <button
-                                onClick={() => setModuleSearch("")}
-                                className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-secondary text-muted-foreground"
-                                aria-label="Clear search"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
+                    <nav className="space-y-1">
+                      {modules?.map((mod, i) => {
+                        const isComplete = completedModules.includes(mod.id);
+                        const isActive = i === activeModule;
+                        return (
+                          <button
+                            key={mod.id}
+                            onClick={() => {
+                              setActiveModule(i);
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                            className={`w-full text-left px-3 py-2.5 rounded-lg text-body-sm transition-all flex items-start gap-2.5 ${
+                              isActive
+                                ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
+                                : "text-muted-foreground hover:bg-secondary border-l-2 border-transparent"
+                            }`}
+                          >
+                            {isComplete ? (
+                              <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                            ) : (
+                              <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-semibold ${
+                                isActive ? "bg-primary text-primary-foreground" : "border border-border"
+                              }`}>
+                                {i + 1}
+                              </span>
                             )}
-                          </div>
-                        )}
-
-                        <nav className="space-y-1">
-                          {(() => {
-                            const q = moduleSearch.trim().toLowerCase();
-                            const filtered = modules?.map((mod, i) => ({ mod, i })).filter(({ mod }) => {
-                              if (!q) return true;
-                              const inTitle = mod.title.toLowerCase().includes(q);
-                              const inContent = mod.content?.toLowerCase().includes(q);
-                              return inTitle || inContent;
-                            }) || [];
-
-                            if (q && filtered.length === 0) {
-                              return (
-                                <p className="text-caption text-muted-foreground px-3 py-4 text-center">
-                                  No modules match "{moduleSearch}"
-                                </p>
-                              );
-                            }
-
-                            const highlight = (text: string) => {
-                              if (!q) return text;
-                              const idx = text.toLowerCase().indexOf(q);
-                              if (idx === -1) return text;
-                              return (
-                                <>
-                                  {text.slice(0, idx)}
-                                  <mark className="bg-primary/20 text-foreground rounded px-0.5">
-                                    {text.slice(idx, idx + q.length)}
-                                  </mark>
-                                  {text.slice(idx + q.length)}
-                                </>
-                              );
-                            };
-
-                            return filtered.map(({ mod, i }) => {
-                              const isComplete = completedModules.includes(mod.id);
-                              const isActive = i === activeModule;
-                              const justDone = justCompletedId === mod.id;
-                              const matchedInContentOnly =
-                                q && !mod.title.toLowerCase().includes(q) && mod.content?.toLowerCase().includes(q);
-                              return (
-                                <button
-                                  key={mod.id}
-                                  onClick={() => {
-                                    setActiveModule(i);
-                                    window.scrollTo({ top: 0, behavior: "smooth" });
-                                  }}
-                                  className={`w-full text-left px-3 py-2.5 rounded-lg text-body-sm transition-all flex items-start gap-2.5 ${
-                                    isActive
-                                      ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
-                                      : "text-muted-foreground hover:bg-secondary border-l-2 border-transparent"
-                                  } ${justDone ? "ring-2 ring-emerald-500/40" : ""}`}
-                                >
-                                  {isComplete ? (
-                                    <CheckCircle className={`h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5 ${justDone ? "animate-in zoom-in-50 duration-300" : ""}`} />
-                                  ) : (
-                                    <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-semibold ${
-                                      isActive ? "bg-primary text-primary-foreground" : "border border-border"
-                                    }`}>
-                                      {i + 1}
-                                    </span>
-                                  )}
-                                  <span className="leading-snug min-w-0 flex-1">
-                                    {highlight(mod.title)}
-                                    {matchedInContentOnly && (
-                                      <span className="block text-caption text-muted-foreground mt-0.5 italic">
-                                        match in content
-                                      </span>
-                                    )}
-                                  </span>
-                                </button>
-                              );
-                            });
-                          })()}
-                        </nav>
-
-                        {modules && modules.length > 0 && (
-                          <div className="mt-4 pt-4 border-t border-border">
-                            <div className="flex items-center gap-2 text-caption text-muted-foreground">
-                              <Clock className="h-3.5 w-3.5" />
-                              <span>~{Math.ceil(course.duration_minutes / modules.length)} min per module</span>
-                            </div>
-                          </div>
-                        )}
-                      </>
+                            <span className="leading-snug">{mod.title}</span>
+                          </button>
+                        );
+                      })}
+                    </nav>
+                    {modules && modules.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-border">
+                        <div className="flex items-center gap-2 text-caption text-muted-foreground">
+                          <Clock className="h-3.5 w-3.5" />
+                          <span>~{modules.reduce((s, m) => s + computeReadingMinutes(m.content), 0)} min total reading</span>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </aside>
@@ -458,265 +358,47 @@ const AcademyCourse = () => {
                 {modules && modules[activeModule] && (
                   <article className="min-w-0 max-w-3xl">
                     {/* Module header */}
-                    <div className="mb-8 pb-6 border-b border-border">
+                    <div className="mb-6 pb-6 border-b border-border">
                       <p className="text-caption text-primary font-semibold uppercase tracking-wide mb-2">
                         Module {activeModule + 1} of {modules.length}
                       </p>
-                      <h2 className="text-3xl md:text-4xl font-bold text-foreground leading-tight tracking-tight">
+                      <h2 className="text-3xl md:text-4xl font-bold text-foreground leading-tight tracking-tight mb-3">
                         {modules[activeModule].title}
                       </h2>
+                      <div className="flex items-center gap-4 text-caption text-muted-foreground">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5" />
+                          {computeReadingMinutes(modules[activeModule].content)} min read
+                        </span>
+                        <span aria-hidden>·</span>
+                        <span>{modules[activeModule].content.replace(/\\n/g, " ").split(/\s+/).filter(Boolean).length} words</span>
+                      </div>
                     </div>
+
+                    {/* In-page table of contents (auto-built from headings) */}
+                    <ModuleTOC content={modules[activeModule].content} />
 
                     {/* Article body */}
-                    <div className="mb-10">
-                      {(() => {
-                        // Inline formatter: handles **bold**, *italic*, and `code`
-                        const renderInline = (text: string, keyPrefix: string) => {
-                          const tokens: React.ReactNode[] = [];
-                          const regex = /(\*\*([^*]+)\*\*|(?<!\*)\*([^*\n]+)\*(?!\*)|`([^`]+)`)/g;
-                          let lastIndex = 0;
-                          let match: RegExpExecArray | null;
-                          let idx = 0;
-                          while ((match = regex.exec(text)) !== null) {
-                            if (match.index > lastIndex) {
-                              tokens.push(text.slice(lastIndex, match.index));
-                            }
-                            if (match[2] !== undefined) {
-                              tokens.push(
-                                <strong key={`${keyPrefix}-b-${idx++}`} className="font-semibold text-foreground">
-                                  {match[2]}
-                                </strong>
-                              );
-                            } else if (match[3] !== undefined) {
-                              tokens.push(
-                                <em key={`${keyPrefix}-i-${idx++}`} className="italic text-foreground/90">
-                                  {match[3]}
-                                </em>
-                              );
-                            } else if (match[4] !== undefined) {
-                              tokens.push(
-                                <code
-                                  key={`${keyPrefix}-c-${idx++}`}
-                                  className="px-1.5 py-0.5 rounded bg-secondary text-foreground font-mono text-[0.875em]"
-                                >
-                                  {match[4]}
-                                </code>
-                              );
-                            }
-                            lastIndex = match.index + match[0].length;
-                          }
-                          if (lastIndex < text.length) {
-                            tokens.push(text.slice(lastIndex));
-                          }
-                          return tokens.length ? tokens : [text];
-                        };
+                    <ModuleContent content={modules[activeModule].content} className="mb-10" />
 
-                        const lines = modules[activeModule].content
-                          .replace(/\\n/g, "\n")
-                          .split("\n");
-
-                        const elements: React.ReactNode[] = [];
-                        let listBuffer: { type: "ul" | "ol"; items: { content: string; marker?: string }[] } | null = null;
-
-                        const flushList = () => {
-                          if (!listBuffer) return;
-                          const { type, items } = listBuffer;
-                          const key = `list-${elements.length}`;
-                          if (type === "ul") {
-                            elements.push(
-                              <ul key={key} className="my-4 space-y-2">
-                                {items.map((it, ii) => (
-                                  <li key={ii} className="flex items-start gap-3 pl-1">
-                                    <span className="mt-[0.7em] flex-shrink-0 h-1.5 w-1.5 rounded-full bg-primary" />
-                                    <span className="text-foreground/85 text-body leading-[1.7]">
-                                      {renderInline(it.content, `${key}-${ii}`)}
-                                    </span>
-                                  </li>
-                                ))}
-                              </ul>
-                            );
-                          } else {
-                            elements.push(
-                              <ol key={key} className="my-4 space-y-2">
-                                {items.map((it, ii) => (
-                                  <li key={ii} className="flex items-start gap-3 pl-1">
-                                    <span className="text-primary font-semibold flex-shrink-0 min-w-[1.5rem] text-body leading-[1.7]">
-                                      {it.marker}
-                                    </span>
-                                    <span className="text-foreground/85 text-body leading-[1.7]">
-                                      {renderInline(it.content, `${key}-${ii}`)}
-                                    </span>
-                                  </li>
-                                ))}
-                              </ol>
-                            );
-                          }
-                          listBuffer = null;
-                        };
-
-                        lines.forEach((line, i) => {
-                          const trimmed = line.trim();
-                          const key = `l-${i}`;
-
-                          if (!trimmed) {
-                            flushList();
-                            return;
-                          }
-
-                          // Markdown headings: #, ##, ###, ####
-                          const headingMatch = trimmed.match(/^(#{1,4})\s+(.*)$/);
-                          if (headingMatch) {
-                            flushList();
-                            const level = headingMatch[1].length;
-                            const text = headingMatch[2].replace(/\*\*/g, "");
-                            if (level === 1) {
-                              elements.push(
-                                <h2 key={key} className="text-2xl md:text-3xl font-bold text-foreground mt-12 mb-4 scroll-mt-24 tracking-tight">
-                                  {text}
-                                </h2>
-                              );
-                            } else if (level === 2) {
-                              elements.push(
-                                <h3 key={key} className="text-xl md:text-2xl font-semibold text-foreground mt-10 mb-3 scroll-mt-24 tracking-tight">
-                                  {text}
-                                </h3>
-                              );
-                            } else if (level === 3) {
-                              elements.push(
-                                <h4 key={key} className="text-lg md:text-xl font-semibold text-foreground mt-8 mb-2 scroll-mt-24">
-                                  {text}
-                                </h4>
-                              );
-                            } else {
-                              elements.push(
-                                <h5 key={key} className="text-base font-semibold text-foreground mt-6 mb-2 uppercase tracking-wide">
-                                  {text}
-                                </h5>
-                              );
-                            }
-                            return;
-                          }
-
-                          // Bold-only line treated as section heading (legacy content support)
-                          if (/^\*\*[^*]+\*\*:?$/.test(trimmed)) {
-                            flushList();
-                            elements.push(
-                              <h3 key={key} className="text-xl md:text-2xl font-semibold text-foreground mt-10 mb-3 scroll-mt-24 tracking-tight">
-                                {trimmed.replace(/\*\*/g, "").replace(/:$/, "")}
-                              </h3>
-                            );
-                            return;
-                          }
-
-                          // Blockquote
-                          if (trimmed.startsWith("> ")) {
-                            flushList();
-                            elements.push(
-                              <blockquote key={key} className="my-5 pl-4 border-l-4 border-primary/40 bg-secondary/30 py-3 pr-4 rounded-r-md text-foreground/85 text-body leading-[1.7] italic">
-                                {renderInline(trimmed.slice(2), key)}
-                              </blockquote>
-                            );
-                            return;
-                          }
-
-                          // Bullet list item
-                          if (/^[-*]\s+/.test(trimmed)) {
-                            const content = trimmed.replace(/^[-*]\s+/, "");
-                            if (!listBuffer || listBuffer.type !== "ul") {
-                              flushList();
-                              listBuffer = { type: "ul", items: [] };
-                            }
-                            listBuffer.items.push({ content });
-                            return;
-                          }
-
-                          // Ordered list item
-                          const olMatch = trimmed.match(/^(\d+)[\.\)]\s+(.*)$/);
-                          if (olMatch) {
-                            if (!listBuffer || listBuffer.type !== "ol") {
-                              flushList();
-                              listBuffer = { type: "ol", items: [] };
-                            }
-                            listBuffer.items.push({ marker: `${olMatch[1]}.`, content: olMatch[2] });
-                            return;
-                          }
-
-                          // Paragraph
-                          flushList();
-                          elements.push(
-                            <p key={key} className="text-foreground/85 text-body leading-[1.75] my-3">
-                              {renderInline(trimmed, key)}
-                            </p>
-                          );
-                        });
-
-                        flushList();
-                        return elements;
-                      })()}
-                    </div>
-
-                    {/* Mark as complete card / inline success */}
-                    {(() => {
-                      const currentId = modules[activeModule].id;
-                      const isComplete = completedModules.includes(currentId);
-                      const justDone = justCompletedId === currentId;
-
-                      if (isComplete) {
-                        return (
-                          <div
-                            className={`mb-6 rounded-xl border p-5 flex items-center justify-between gap-4 flex-wrap transition-colors ${
-                              justDone
-                                ? "border-emerald-500/40 bg-emerald-500/10 animate-in fade-in slide-in-from-bottom-2 duration-300"
-                                : "border-border bg-secondary/30"
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
-                                <CheckCircle className={`h-5 w-5 text-emerald-500 ${justDone ? "animate-in zoom-in-50 duration-300" : ""}`} />
-                              </div>
-                              <div>
-                                <p className="text-body font-medium text-foreground">
-                                  {justDone ? "Module complete — nice work!" : "Module completed"}
-                                </p>
-                                <p className="text-body-sm text-muted-foreground">
-                                  {completedModules.length}/{modules.length} modules done
-                                  {allModulesComplete ? " — you're ready for the quiz." : ""}
-                                </p>
-                              </div>
-                            </div>
-                            {activeModule < modules.length - 1 && (
-                              <Button
-                                variant="ghost"
-                                onClick={() => {
-                                  setActiveModule(activeModule + 1);
-                                  window.scrollTo({ top: 0, behavior: "smooth" });
-                                }}
-                              >
-                                Continue <ArrowRight className="h-4 w-4 ml-2" />
-                              </Button>
-                            )}
+                    {/* Mark as complete card */}
+                    {!completedModules.includes(modules[activeModule].id) && (
+                      <div className="mb-6 rounded-xl border border-border bg-secondary/30 p-5 flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <CheckCircle className="h-5 w-5 text-primary" />
                           </div>
-                        );
-                      }
-
-                      return (
-                        <div className="mb-6 rounded-xl border border-border bg-secondary/30 p-5 flex items-center justify-between gap-4 flex-wrap">
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                              <CheckCircle className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                              <p className="text-body font-medium text-foreground">Finished reading?</p>
-                              <p className="text-body-sm text-muted-foreground">Mark this module complete to track your progress.</p>
-                            </div>
+                          <div>
+                            <p className="text-body font-medium text-foreground">Finished reading?</p>
+                            <p className="text-body-sm text-muted-foreground">Mark this module complete to track your progress.</p>
                           </div>
-                          <Button onClick={() => markModuleComplete(currentId)}>
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Mark Complete
-                          </Button>
                         </div>
-                      );
-                    })()}
+                        <Button onClick={() => markModuleComplete(modules[activeModule].id)}>
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Mark Complete
+                        </Button>
+                      </div>
+                    )}
 
                     {/* Prev/Next navigation */}
                     <div className="flex items-center justify-between gap-4 pt-6 border-t border-border">
