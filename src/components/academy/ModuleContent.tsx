@@ -452,7 +452,7 @@ const ModuleContent: React.FC<Props> = ({ content, className }) => {
       if (trimmed.startsWith("> ")) {
         flushAll();
         out.push(
-          <blockquote key={key} className="my-5 pl-4 border-l-4 border-primary/40 bg-secondary/30 py-3 pr-4 rounded-r-md text-foreground/85 text-body leading-[1.7] italic">
+          <blockquote key={key} className="my-5 pl-4 border-l-4 border-accent bg-accent/5 py-3 pr-4 rounded-r-md text-foreground/90 text-body leading-[1.7] italic">
             {renderInline(trimmed.slice(2), key)}
           </blockquote>
         );
