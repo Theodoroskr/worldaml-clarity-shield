@@ -16,6 +16,15 @@ import ModuleTOC from "@/components/academy/ModuleTOC";
 import ContentProtection from "@/components/academy/ContentProtection";
 import { getCourseDiagram } from "@/assets/academy";
 import { useCourseGate } from "@/hooks/useCourseGate";
+import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/academyPricing";
+import { useRegion } from "@/contexts/RegionContext";
+import { AcademyCurrency, convertEurCents, formatPrice } from "@/lib/academyFx";
+
+const REGION_TO_CURRENCY: Record<string, AcademyCurrency> = {
+  "eu-me": "eur",
+  "uk-ie": "gbp",
+  na: "usd",
+};
 
 const PASS_THRESHOLD = 70;
 
@@ -26,6 +35,8 @@ const AcademyCourse = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const gate = useCourseGate(slug);
+  const { region } = useRegion();
+  const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [activeTab, setActiveTab] = useState<"learn" | "quiz">(
     searchParams.get("tab") === "quiz" ? "quiz" : "learn"
   );
@@ -338,6 +349,24 @@ const AcademyCourse = () => {
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-body-sm text-slate-light">
               <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {course.duration_minutes} min</span>
               <Badge variant="secondary">{course.difficulty}</Badge>
+              {(() => {
+                if (FREE_ACADEMY_COURSES.has(course.slug)) {
+                  return (
+                    <Badge variant="outline" className="border-accent/40 text-accent bg-accent/10">
+                      Free
+                    </Badge>
+                  );
+                }
+                if (isPaidCourse(course.slug)) {
+                  const cents = convertEurCents(ACADEMY_PRICING[course.slug].eurCents, currency);
+                  return (
+                    <Badge variant="outline" className="border-primary/40 text-primary-foreground bg-primary/20">
+                      {formatPrice(cents, currency)}
+                    </Badge>
+                  );
+                }
+                return null;
+              })()}
             </div>
             {user ? (
               <div className="mt-4 max-w-sm">
