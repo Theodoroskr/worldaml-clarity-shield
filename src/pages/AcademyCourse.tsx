@@ -311,18 +311,27 @@ const AcademyCourse = () => {
                 {/* Module sidebar */}
                 <aside className="lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto">
                   <div className="rounded-xl border border-border bg-card p-4">
-                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-border">
-                      <p className="text-caption font-semibold text-foreground uppercase tracking-wide">
-                        Course Modules
+                    <div className="mb-4 pb-4 border-b border-border">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-caption font-semibold text-foreground uppercase tracking-wide">
+                          Course Modules
+                        </p>
+                        <span className="text-caption font-medium text-foreground tabular-nums">
+                          {completedModules.length}/{modules?.length || 0}
+                        </span>
+                      </div>
+                      <Progress value={progressPercent} className="h-1.5" />
+                      <p className="text-caption text-muted-foreground mt-2">
+                        {allModulesComplete
+                          ? "All modules complete — ready for the quiz."
+                          : `${Math.round(progressPercent)}% complete`}
                       </p>
-                      <span className="text-caption text-muted-foreground">
-                        {completedModules.length}/{modules?.length || 0}
-                      </span>
                     </div>
                     <nav className="space-y-1">
                       {modules?.map((mod, i) => {
                         const isComplete = completedModules.includes(mod.id);
                         const isActive = i === activeModule;
+                        const justDone = justCompletedId === mod.id;
                         return (
                           <button
                             key={mod.id}
@@ -334,10 +343,10 @@ const AcademyCourse = () => {
                               isActive
                                 ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
                                 : "text-muted-foreground hover:bg-secondary border-l-2 border-transparent"
-                            }`}
+                            } ${justDone ? "ring-2 ring-emerald-500/40" : ""}`}
                           >
                             {isComplete ? (
-                              <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                              <CheckCircle className={`h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5 ${justDone ? "animate-in zoom-in-50 duration-300" : ""}`} />
                             ) : (
                               <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-semibold ${
                                 isActive ? "bg-primary text-primary-foreground" : "border border-border"
