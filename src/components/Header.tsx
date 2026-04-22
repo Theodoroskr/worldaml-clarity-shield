@@ -141,8 +141,9 @@ export const Header = () => {
       <div className="container-enterprise">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center shrink-0 mr-4">
-            <Logo size="md" />
+          <Link to="/" className="flex items-center shrink-0 mr-4" aria-label="WorldAML home">
+            <Logo size="md" className="hidden sm:flex" />
+            <Logo size="md" iconOnly className="sm:hidden text-navy" />
           </Link>
 
           {/* Desktop Navigation */}
