@@ -146,7 +146,7 @@ export const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden xl:flex items-center gap-0.5 flex-1 justify-end min-w-0 ml-8">
+          <nav className="hidden 2xl:flex items-center gap-0.5 flex-1 justify-end min-w-0 ml-8">
             {navLinks.map((link) =>
               link.groups ? (
                 /* Grouped two-column dropdown (WorldAML Suite) */
@@ -239,7 +239,7 @@ export const Header = () => {
           </nav>
 
           {/* Desktop CTA & Region */}
-          <div className="hidden xl:flex items-center gap-2 shrink-0">
+          <div className="hidden 2xl:flex items-center gap-2 shrink-0">
             <RegionSelector />
             {user ? (
               <>
@@ -268,7 +268,7 @@ export const Header = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="xl:hidden p-2 text-text-secondary hover:text-navy"
+            className="2xl:hidden p-2 text-text-secondary hover:text-navy"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -278,7 +278,7 @@ export const Header = () => {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="xl:hidden py-4 border-t border-divider animate-slide-down max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="2xl:hidden py-4 border-t border-divider animate-slide-down max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="mb-4">
               <RegionSelector />
             </div>
