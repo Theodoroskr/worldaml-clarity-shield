@@ -1,26 +1,23 @@
 
+## Fix lint warning on Academy.tsx
 
-## Plan: Add LinkedIn Share Button to Academy Course Cards
+Run the linter against `src/pages/Academy.tsx`, identify the flagged warning(s), and resolve them without changing UI behaviour.
 
-### What changes
-Add a LinkedIn share button to each course card on the Academy page, allowing users to share individual courses directly to LinkedIn.
+### Likely fixes
+Based on recent edits to this file, the warning is most likely one of:
+- An unused import (e.g. an icon imported but no longer rendered after the cover-image refactor).
+- A `react-hooks/exhaustive-deps` dependency missing from a `useEffect`/`useMemo`.
+- A `react-refresh/only-export-components` warning from a non-component export living next to the page component.
 
-### Implementation
+### Steps
+1. Run ESLint on `src/pages/Academy.tsx` to get the exact rule + line.
+2. Apply the minimal fix:
+   - Unused import → remove the import.
+   - Missing dep → add the dep, or wrap the value in `useCallback`/`useMemo` if adding it would cause a loop.
+   - Non-component export → move the constant/helper into a sibling file (e.g. `src/pages/academyConfig.ts`) and import it back.
+3. Re-run the linter on the file to confirm zero warnings.
+4. Run `npm run build` to confirm the preview build is clean.
 
-**File: `src/pages/Academy.tsx`**
-
-1. Import `Linkedin` icon from `lucide-react`
-2. Add a small LinkedIn share button inside each course card (near the bottom, next to the duration/CPD info)
-3. The button will use the same LinkedIn share-offsite pattern already used in `AcademyCertificate.tsx` and `Dashboard.tsx`:
-   ```
-   https://www.linkedin.com/sharing/share-offsite/?url=<published-url>/academy/<slug>
-   ```
-4. The button click will call `e.preventDefault()` + `e.stopPropagation()` to avoid navigating via the parent `<Link>` wrapper
-5. Style as a small icon button matching the card's muted aesthetic, with a hover state highlighting LinkedIn blue
-
-### Technical details
-- Published URL: `https://worldaml-clarity-shield.lovable.app`
-- Share URL per course: `https://worldaml-clarity-shield.lovable.app/academy/${course.slug}`
-- Uses `window.open()` with `noopener,noreferrer` (existing pattern)
-- Single file change only
-
+### Out of scope
+- No visual or behavioural changes.
+- No refactors to other files unless step 2 requires extracting a helper to satisfy `react-refresh/only-export-components`.
