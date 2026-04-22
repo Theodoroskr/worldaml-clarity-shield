@@ -61,21 +61,26 @@ export default function AdminPricing() {
   const [tiers, setTiers] = useState<Tier[]>([]);
   const [subs, setSubs] = useState<UserSub[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Tier | null>(null);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [syncingId, setSyncingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [featureInput, setFeatureInput] = useState("");
 
   const fetchAll = async () => {
     setLoading(true);
-    const [{ data: t }, { data: s }, { data: p }] = await Promise.all([
+    const [{ data: t }, { data: s }, { data: p }, { data: c }] = await Promise.all([
       supabase.from("admin_subscription_tiers").select("*").order("sort_order"),
       supabase.from("admin_user_subscriptions").select("*"),
       supabase.from("profiles").select("user_id, email, full_name"),
+      supabase.from("academy_courses").select("*").order("sort_order"),
     ]);
     setTiers((t || []).map((d: any) => ({ ...d, features: (d.features || []) as string[] })));
     setSubs((s || []) as UserSub[]);
     setProfiles((p || []) as Profile[]);
+    setCourses((c || []) as Course[]);
     setLoading(false);
   };
 
@@ -88,6 +93,67 @@ export default function AdminPricing() {
       features: [], is_active: true, sort_order: tiers.length,
     });
     setFeatureInput("");
+  };
+
+  const newCourse = () => setEditingCourse({
+    id: "", slug: "", title: "", description: "", category: "global", difficulty: "beginner",
+    duration_minutes: 30, cpd_hours: 0, is_published: false, sort_order: courses.length,
+    price_eur_cents: 2900, stripe_product_id: null, stripe_price_id: null,
+  });
+
+  const saveCourse = async () => {
+    if (!editingCourse) return;
+    if (!editingCourse.slug.trim() || !editingCourse.title.trim()) {
+      toast.error("Slug and title are required"); return;
+    }
+    setSaving(true);
+    const payload = {
+      slug: editingCourse.slug.trim(),
+      title: editingCourse.title.trim(),
+      description: editingCourse.description,
+      category: editingCourse.category,
+      difficulty: editingCourse.difficulty,
+      duration_minutes: editingCourse.duration_minutes,
+      cpd_hours: editingCourse.cpd_hours,
+      is_published: editingCourse.is_published,
+      sort_order: editingCourse.sort_order,
+      price_eur_cents: editingCourse.price_eur_cents,
+    };
+    const { error } = editingCourse.id
+      ? await supabase.from("academy_courses").update(payload).eq("id", editingCourse.id)
+      : await supabase.from("academy_courses").insert(payload);
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(editingCourse.id ? "Course saved" : "Course created");
+    setEditingCourse(null);
+    fetchAll();
+  };
+
+  const deleteCourse = async (id: string) => {
+    if (!confirm("Delete this course? Existing purchases and progress remain.")) return;
+    const { error } = await supabase.from("academy_courses").delete().eq("id", id);
+    if (error) toast.error(error.message); else { toast.success("Deleted"); fetchAll(); }
+  };
+
+  const togglePublish = async (c: Course) => {
+    const { error } = await supabase.from("academy_courses")
+      .update({ is_published: !c.is_published }).eq("id", c.id);
+    if (error) toast.error(error.message); else fetchAll();
+  };
+
+  const syncStripe = async (c: Course) => {
+    if (c.price_eur_cents <= 0) { toast.error("Set a price first"); return; }
+    setSyncingId(c.id);
+    const { data, error } = await supabase.functions.invoke("admin-sync-course-stripe", {
+      body: { courseId: c.id },
+    });
+    setSyncingId(null);
+    if (error || (data as any)?.error) {
+      toast.error((data as any)?.error || error?.message || "Sync failed");
+      return;
+    }
+    toast.success("Synced to Stripe");
+    fetchAll();
   };
 
   const addFeature = () => {
