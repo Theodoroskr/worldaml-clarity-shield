@@ -80,24 +80,37 @@ type DifficultyFilter = "all" | "beginner" | "intermediate" | "advanced";
 const Academy = () => {
   const { user } = useAuth();
   const cart = useCart();
-  const { purchasedSlugs } = useAcademyPurchases();
+  const { purchasedSlugs, refetch: refetchPurchases } = useAcademyPurchases();
   const { region, regionConfig, wasAutoDetected, isLoading: regionLoading } = useRegion();
   const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Slugs that were just purchased — drives the on-screen success banner.
+  const [justPurchasedSlugs, setJustPurchasedSlugs] = useState<string[]>([]);
 
   // Post-checkout success toast (Stripe redirects back with ?purchase=success)
   useEffect(() => {
     const purchase = searchParams.get("purchase");
     if (purchase === "success") {
+      // Snapshot cart contents BEFORE clearing so we can show what was unlocked.
+      const unlocked = Array.from(cart.items);
+      if (unlocked.length > 0) setJustPurchasedSlugs(unlocked);
+
       toast.success("Payment received — your courses are unlocked.", {
-        description: "It may take a moment to appear. Refresh if you don't see access yet.",
-        duration: 8000,
+        description: "Scroll down to start learning.",
+        duration: 6000,
       });
       // Clear cart locally; the webhook has recorded the purchase server-side.
       cart.clear();
+      // Refetch purchases so card CTAs flip from "Unlock course" to "Start course".
+      // Webhook may take a moment; retry a few times.
+      void refetchPurchases();
+      const t1 = setTimeout(() => { void refetchPurchases(); }, 1500);
+      const t2 = setTimeout(() => { void refetchPurchases(); }, 4000);
       const next = new URLSearchParams(searchParams);
       next.delete("purchase");
       setSearchParams(next, { replace: true });
+      return () => { clearTimeout(t1); clearTimeout(t2); };
     } else if (purchase === "cancelled") {
       toast("Checkout cancelled.", { description: "Your basket is still saved." });
       const next = new URLSearchParams(searchParams);
