@@ -52,6 +52,48 @@ export type Database = {
           },
         ]
       }
+      academy_course_purchases: {
+        Row: {
+          amount_cents: number
+          course_slug: string
+          created_at: string
+          currency: string
+          id: string
+          paid_at: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          course_slug: string
+          created_at?: string
+          currency?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          course_slug?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       academy_courses: {
         Row: {
           category: string
