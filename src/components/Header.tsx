@@ -147,7 +147,7 @@ export const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-0.5 flex-1 justify-center min-w-0">
             {navLinks.map((link) =>
               link.groups ? (
                 /* Grouped two-column dropdown (WorldAML Suite) */
@@ -155,14 +155,14 @@ export const Header = () => {
                   <DropdownMenuTrigger asChild>
                     <button
                       className={cn(
-                        "px-4 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-1",
+                        "px-2.5 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-0.5 whitespace-nowrap",
                         link.href && location.pathname.startsWith(link.href)
                           ? "text-navy bg-secondary"
                           : "text-text-secondary hover:text-navy hover:bg-secondary/50"
                       )}
                     >
                       {link.label}
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown className="h-3.5 w-3.5" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="p-3 w-auto">
@@ -196,14 +196,14 @@ export const Header = () => {
                   <DropdownMenuTrigger asChild>
                     <button
                       className={cn(
-                        "px-4 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-1",
+                        "px-2.5 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-0.5 whitespace-nowrap",
                         link.href && location.pathname.startsWith(link.href)
                           ? "text-navy bg-secondary"
                           : "text-text-secondary hover:text-navy hover:bg-secondary/50"
                       )}
                     >
                       {link.label}
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown className="h-3.5 w-3.5" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="w-48">
@@ -227,7 +227,7 @@ export const Header = () => {
                   key={link.href}
                   to={link.href!}
                   className={cn(
-                    "px-4 py-2 text-body-sm font-medium transition-colors rounded-md",
+                    "px-2.5 py-2 text-body-sm font-medium transition-colors rounded-md whitespace-nowrap",
                     location.pathname === link.href
                       ? "text-navy bg-secondary"
                       : "text-text-secondary hover:text-navy hover:bg-secondary/50"
@@ -240,7 +240,7 @@ export const Header = () => {
           </nav>
 
           {/* Desktop CTA & Region */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2 shrink-0">
             <RegionSelector />
             {user ? (
               <>
@@ -269,7 +269,7 @@ export const Header = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-text-secondary hover:text-navy"
+            className="lg:hidden p-2 text-text-secondary hover:text-navy"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -279,7 +279,7 @@ export const Header = () => {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-divider animate-slide-down max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="lg:hidden py-4 border-t border-divider animate-slide-down max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="mb-4">
               <RegionSelector />
             </div>
