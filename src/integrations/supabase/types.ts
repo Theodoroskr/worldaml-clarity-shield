@@ -1859,6 +1859,13 @@ export type Database = {
       }
     }
     Functions: {
+      academy_course_question_counts: {
+        Args: never
+        Returns: {
+          question_count: number
+          slug: string
+        }[]
+      }
       admin_grant_suite_access:
         | { Args: { target_email: string }; Returns: undefined }
         | {
