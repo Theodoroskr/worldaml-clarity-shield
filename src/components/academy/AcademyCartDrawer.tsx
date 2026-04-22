@@ -186,10 +186,12 @@ function AcademyCartDrawerContent() {
       {items.length > 0 && (
         <div className="border-t border-border pt-4 space-y-3">
           <div className="flex items-center justify-between text-body-sm">
-            <span className="text-muted-foreground">Subtotal</span>
+            <span className="text-muted-foreground">
+              Subtotal ({items.length} {items.length === 1 ? "course" : "courses"})
+            </span>
             <span className="text-foreground">{formatPrice(totals.subtotal, currency)}</span>
           </div>
-          {totals.discountPct > 0 && (
+          {totals.discountAmount > 0 && (
             <div className="flex items-center justify-between text-body-sm text-accent">
               <span>{discount.label}</span>
               <span>−{formatPrice(totals.discountAmount, currency)}</span>
@@ -199,6 +201,9 @@ function AcademyCartDrawerContent() {
             <span className="text-subtitle font-semibold text-foreground">Total</span>
             <span className="text-subtitle font-bold text-foreground">{formatPrice(totals.total, currency)}</span>
           </div>
+          <p className="text-caption text-muted-foreground">
+            VAT / sales tax will be calculated at checkout based on your billing location.
+          </p>
           <p className="text-caption text-muted-foreground">
             Each course includes 1 month of access from purchase date. Certificates earned remain yours forever.
           </p>
