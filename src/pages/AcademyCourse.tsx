@@ -316,9 +316,19 @@ const AcademyCourse = () => {
                   <div className="rounded-xl border border-border bg-card p-4">
                     <div className="mb-4 pb-4 border-b border-border">
                       <div className="flex items-center justify-between mb-2">
-                        <p className="text-caption font-semibold text-foreground uppercase tracking-wide">
+                        <button
+                          onClick={() => setNavCollapsed((c) => !c)}
+                          className="flex items-center gap-1.5 text-caption font-semibold text-foreground uppercase tracking-wide hover:text-primary transition-colors"
+                          aria-expanded={!navCollapsed}
+                          aria-label={navCollapsed ? "Expand module list" : "Collapse module list"}
+                        >
+                          {navCollapsed ? (
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          ) : (
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          )}
                           Course Modules
-                        </p>
+                        </button>
                         <span className="text-caption font-medium text-foreground tabular-nums">
                           {completedModules.length}/{modules?.length || 0}
                         </span>
@@ -330,45 +340,116 @@ const AcademyCourse = () => {
                           : `${Math.round(progressPercent)}% complete`}
                       </p>
                     </div>
-                    <nav className="space-y-1">
-                      {modules?.map((mod, i) => {
-                        const isComplete = completedModules.includes(mod.id);
-                        const isActive = i === activeModule;
-                        const justDone = justCompletedId === mod.id;
-                        return (
-                          <button
-                            key={mod.id}
-                            onClick={() => {
-                              setActiveModule(i);
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                            }}
-                            className={`w-full text-left px-3 py-2.5 rounded-lg text-body-sm transition-all flex items-start gap-2.5 ${
-                              isActive
-                                ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
-                                : "text-muted-foreground hover:bg-secondary border-l-2 border-transparent"
-                            } ${justDone ? "ring-2 ring-emerald-500/40" : ""}`}
-                          >
-                            {isComplete ? (
-                              <CheckCircle className={`h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5 ${justDone ? "animate-in zoom-in-50 duration-300" : ""}`} />
-                            ) : (
-                              <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-semibold ${
-                                isActive ? "bg-primary text-primary-foreground" : "border border-border"
-                              }`}>
-                                {i + 1}
-                              </span>
+
+                    {!navCollapsed && (
+                      <>
+                        {modules && modules.length > 3 && (
+                          <div className="relative mb-3">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                            <Input
+                              type="search"
+                              value={moduleSearch}
+                              onChange={(e) => setModuleSearch(e.target.value)}
+                              placeholder="Search modules..."
+                              className="h-8 pl-8 pr-7 text-body-sm"
+                              aria-label="Search modules"
+                            />
+                            {moduleSearch && (
+                              <button
+                                onClick={() => setModuleSearch("")}
+                                className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-secondary text-muted-foreground"
+                                aria-label="Clear search"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
                             )}
-                            <span className="leading-snug">{mod.title}</span>
-                          </button>
-                        );
-                      })}
-                    </nav>
-                    {modules && modules.length > 0 && (
-                      <div className="mt-4 pt-4 border-t border-border">
-                        <div className="flex items-center gap-2 text-caption text-muted-foreground">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>~{Math.ceil(course.duration_minutes / modules.length)} min per module</span>
-                        </div>
-                      </div>
+                          </div>
+                        )}
+
+                        <nav className="space-y-1">
+                          {(() => {
+                            const q = moduleSearch.trim().toLowerCase();
+                            const filtered = modules?.map((mod, i) => ({ mod, i })).filter(({ mod }) => {
+                              if (!q) return true;
+                              const inTitle = mod.title.toLowerCase().includes(q);
+                              const inContent = mod.content?.toLowerCase().includes(q);
+                              return inTitle || inContent;
+                            }) || [];
+
+                            if (q && filtered.length === 0) {
+                              return (
+                                <p className="text-caption text-muted-foreground px-3 py-4 text-center">
+                                  No modules match "{moduleSearch}"
+                                </p>
+                              );
+                            }
+
+                            const highlight = (text: string) => {
+                              if (!q) return text;
+                              const idx = text.toLowerCase().indexOf(q);
+                              if (idx === -1) return text;
+                              return (
+                                <>
+                                  {text.slice(0, idx)}
+                                  <mark className="bg-primary/20 text-foreground rounded px-0.5">
+                                    {text.slice(idx, idx + q.length)}
+                                  </mark>
+                                  {text.slice(idx + q.length)}
+                                </>
+                              );
+                            };
+
+                            return filtered.map(({ mod, i }) => {
+                              const isComplete = completedModules.includes(mod.id);
+                              const isActive = i === activeModule;
+                              const justDone = justCompletedId === mod.id;
+                              const matchedInContentOnly =
+                                q && !mod.title.toLowerCase().includes(q) && mod.content?.toLowerCase().includes(q);
+                              return (
+                                <button
+                                  key={mod.id}
+                                  onClick={() => {
+                                    setActiveModule(i);
+                                    window.scrollTo({ top: 0, behavior: "smooth" });
+                                  }}
+                                  className={`w-full text-left px-3 py-2.5 rounded-lg text-body-sm transition-all flex items-start gap-2.5 ${
+                                    isActive
+                                      ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
+                                      : "text-muted-foreground hover:bg-secondary border-l-2 border-transparent"
+                                  } ${justDone ? "ring-2 ring-emerald-500/40" : ""}`}
+                                >
+                                  {isComplete ? (
+                                    <CheckCircle className={`h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5 ${justDone ? "animate-in zoom-in-50 duration-300" : ""}`} />
+                                  ) : (
+                                    <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-semibold ${
+                                      isActive ? "bg-primary text-primary-foreground" : "border border-border"
+                                    }`}>
+                                      {i + 1}
+                                    </span>
+                                  )}
+                                  <span className="leading-snug min-w-0 flex-1">
+                                    {highlight(mod.title)}
+                                    {matchedInContentOnly && (
+                                      <span className="block text-caption text-muted-foreground mt-0.5 italic">
+                                        match in content
+                                      </span>
+                                    )}
+                                  </span>
+                                </button>
+                              );
+                            });
+                          })()}
+                        </nav>
+
+                        {modules && modules.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-border">
+                            <div className="flex items-center gap-2 text-caption text-muted-foreground">
+                              <Clock className="h-3.5 w-3.5" />
+                              <span>~{Math.ceil(course.duration_minutes / modules.length)} min per module</span>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </aside>
