@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { RegionProvider } from "@/contexts/RegionContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
 import Layout from "@/components/Layout";
 import ScrollToTop from "@/components/ScrollToTop";
 import { lazy, Suspense } from "react";
@@ -127,6 +128,7 @@ const App = () => (
     <TooltipProvider>
       <RegionProvider>
         <AuthProvider>
+          <CartProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -271,6 +273,7 @@ const App = () => (
               </Suspense>
             </Layout>
           </BrowserRouter>
+          </CartProvider>
         </AuthProvider>
       </RegionProvider>
     </TooltipProvider>

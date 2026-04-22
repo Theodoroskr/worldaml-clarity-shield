@@ -8,9 +8,20 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock } from "lucide-react";
+import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock, ShoppingBag, Check } from "lucide-react";
 import { getCourseCover } from "@/assets/academy";
 import AcademyLogo from "@/components/AcademyLogo";
+import AcademyCartButton from "@/components/academy/AcademyCartDrawer";
+import { useCart } from "@/contexts/CartContext";
+import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/academyPricing";
+import { useRegion } from "@/contexts/RegionContext";
+import { AcademyCurrency, convertEurCents, formatPrice } from "@/lib/academyFx";
+
+const REGION_TO_CURRENCY: Record<string, AcademyCurrency> = {
+  "eu-me": "eur",
+  "uk-ie": "gbp",
+  na: "usd",
+};
 
 const difficultyColor: Record<string, string> = {
   beginner: "bg-emerald-100 text-emerald-700 border-emerald-200",
@@ -70,6 +81,9 @@ type DifficultyFilter = "all" | "beginner" | "intermediate" | "advanced";
 
 const Academy = () => {
   const { user } = useAuth();
+  const cart = useCart();
+  const { region } = useRegion();
+  const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [filter, setFilter] = useState<FilterTab>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
@@ -273,12 +287,13 @@ const Academy = () => {
                   </span>
                 </div>
               )}
-              <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <div className="mt-6 flex flex-wrap justify-center gap-3 items-center">
                 <Button asChild variant="accent" size="lg">
                   <Link to="/academy/templates">
                     <FileText className="h-4 w-4" /> Browse MLRO Toolkit
                   </Link>
                 </Button>
+                <AcademyCartButton />
               </div>
             </div>
           </div>
@@ -631,6 +646,24 @@ const Academy = () => {
                         <Badge variant="outline" className={`${catConfig.color} text-[10px] border-0`}>
                           {catConfig.label}
                         </Badge>
+                        {(() => {
+                          if (FREE_ACADEMY_COURSES.has(course.slug)) {
+                            return (
+                              <Badge variant="outline" className="text-[10px] border-accent/40 text-accent bg-accent/10">
+                                Free
+                              </Badge>
+                            );
+                          }
+                          if (isPaidCourse(course.slug)) {
+                            const cents = convertEurCents(ACADEMY_PRICING[course.slug].eurCents, currency);
+                            return (
+                              <Badge variant="outline" className="text-[10px] border-primary/40 text-primary bg-primary/10">
+                                {formatPrice(cents, currency)}
+                              </Badge>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
 
                       <h3 className={`font-semibold text-foreground mb-2 group-hover:text-primary transition-colors ${featured ? "text-2xl" : "text-subtitle"}`}>

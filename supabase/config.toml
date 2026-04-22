@@ -2,3 +2,6 @@ project_id = "uxjjxnnyrjkhcggptihx"
 
 [functions.send-signup-followup]
 verify_jwt = false
+
+[functions.stripe-academy-webhook]
+verify_jwt = false
