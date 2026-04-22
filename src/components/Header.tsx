@@ -25,7 +25,7 @@ type NavLink =
 
 const navLinks: NavLink[] = [
   {
-    label: "WorldAML Suite",
+    label: "Platform",
     href: "/platform",
     groups: [
       {
@@ -56,7 +56,7 @@ const navLinks: NavLink[] = [
       },
     ],
   },
-  { href: "/platform/api", label: "WorldAML API" },
+  { href: "/platform/api", label: "API" },
   
   {
     label: "Markets",
