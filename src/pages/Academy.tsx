@@ -80,24 +80,37 @@ type DifficultyFilter = "all" | "beginner" | "intermediate" | "advanced";
 const Academy = () => {
   const { user } = useAuth();
   const cart = useCart();
-  const { purchasedSlugs } = useAcademyPurchases();
+  const { purchasedSlugs, refetch: refetchPurchases } = useAcademyPurchases();
   const { region, regionConfig, wasAutoDetected, isLoading: regionLoading } = useRegion();
   const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Slugs that were just purchased — drives the on-screen success banner.
+  const [justPurchasedSlugs, setJustPurchasedSlugs] = useState<string[]>([]);
 
   // Post-checkout success toast (Stripe redirects back with ?purchase=success)
   useEffect(() => {
     const purchase = searchParams.get("purchase");
     if (purchase === "success") {
+      // Snapshot cart contents BEFORE clearing so we can show what was unlocked.
+      const unlocked = Array.from(cart.items);
+      if (unlocked.length > 0) setJustPurchasedSlugs(unlocked);
+
       toast.success("Payment received — your courses are unlocked.", {
-        description: "It may take a moment to appear. Refresh if you don't see access yet.",
-        duration: 8000,
+        description: "Scroll down to start learning.",
+        duration: 6000,
       });
       // Clear cart locally; the webhook has recorded the purchase server-side.
       cart.clear();
+      // Refetch purchases so card CTAs flip from "Unlock course" to "Start course".
+      // Webhook may take a moment; retry a few times.
+      void refetchPurchases();
+      const t1 = setTimeout(() => { void refetchPurchases(); }, 1500);
+      const t2 = setTimeout(() => { void refetchPurchases(); }, 4000);
       const next = new URLSearchParams(searchParams);
       next.delete("purchase");
       setSearchParams(next, { replace: true });
+      return () => { clearTimeout(t1); clearTimeout(t2); };
     } else if (purchase === "cancelled") {
       toast("Checkout cancelled.", { description: "Your basket is still saved." });
       const next = new URLSearchParams(searchParams);
@@ -404,6 +417,50 @@ const Academy = () => {
                   <div className="text-center">
                     <p className="text-headline font-bold text-foreground">{certsCount}</p>
                     <p className="text-caption text-muted-foreground">Certificates</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Just-purchased success banner */}
+        {justPurchasedSlugs.length > 0 && (
+          <section className="bg-background pt-8">
+            <div className="container-enterprise">
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-6 relative">
+                <button
+                  onClick={() => setJustPurchasedSlugs([])}
+                  className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Dismiss"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+                <div className="flex items-start gap-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                    <CheckCircle className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-xl font-bold text-foreground mb-1">
+                      You're enrolled — {justPurchasedSlugs.length === 1 ? "1 course" : `${justPurchasedSlugs.length} courses`} unlocked
+                    </h2>
+                    <p className="text-body-sm text-muted-foreground mb-4">
+                      Your purchase is confirmed and access is active. Jump in below to start a course.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {justPurchasedSlugs.map((slug) => {
+                        const c = courses?.find((row) => row.slug === slug);
+                        const title = c?.title ?? slug;
+                        return (
+                          <Button key={slug} size="sm" asChild>
+                            <Link to={`/academy/${slug}`}>
+                              <PlayCircle className="h-4 w-4 mr-1.5" />
+                              Start: {title}
+                            </Link>
+                          </Button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
