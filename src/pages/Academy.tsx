@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,11 +8,12 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock, ShoppingBag, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock, ShoppingBag, Check, LogIn } from "lucide-react";
 import { getCourseCover } from "@/assets/academy";
 import AcademyLogo from "@/components/AcademyLogo";
 import AcademyCartButton from "@/components/academy/AcademyCartDrawer";
 import { useCart } from "@/contexts/CartContext";
+import { useAcademyPurchases } from "@/hooks/useAcademyPurchases";
 import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/academyPricing";
 import { useRegion } from "@/contexts/RegionContext";
 import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY, currencyCode } from "@/lib/academyFx";
@@ -79,8 +80,32 @@ type DifficultyFilter = "all" | "beginner" | "intermediate" | "advanced";
 const Academy = () => {
   const { user } = useAuth();
   const cart = useCart();
+  const { purchasedSlugs } = useAcademyPurchases();
   const { region, regionConfig, wasAutoDetected, isLoading: regionLoading } = useRegion();
   const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Post-checkout success toast (Stripe redirects back with ?purchase=success)
+  useEffect(() => {
+    const purchase = searchParams.get("purchase");
+    if (purchase === "success") {
+      toast.success("Payment received — your courses are unlocked.", {
+        description: "It may take a moment to appear. Refresh if you don't see access yet.",
+        duration: 8000,
+      });
+      // Clear cart locally; the webhook has recorded the purchase server-side.
+      cart.clear();
+      const next = new URLSearchParams(searchParams);
+      next.delete("purchase");
+      setSearchParams(next, { replace: true });
+    } else if (purchase === "cancelled") {
+      toast("Checkout cancelled.", { description: "Your basket is still saved." });
+      const next = new URLSearchParams(searchParams);
+      next.delete("purchase");
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // First-visit toast: announce auto-detected region once per browser.
   useEffect(() => {
@@ -733,15 +758,45 @@ const Academy = () => {
                       )}
 
                       <div className="flex items-center justify-between mt-auto pt-2 border-t border-border/50">
-                        <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-                          {status === "completed" ? (
-                            <>View Certificate <Award className="h-4 w-4" /></>
-                          ) : status === "in-progress" ? (
-                            <>Continue Learning <PlayCircle className="h-4 w-4" /></>
-                          ) : (
-                            <>Start Course <ArrowRight className="h-4 w-4" /></>
-                          )}
-                        </span>
+                        {(() => {
+                          const isFree = FREE_ACADEMY_COURSES.has(course.slug);
+                          const purchased = purchasedSlugs.has(course.slug);
+                          const requiresPurchase = !isFree && !purchased;
+
+                          if (status === "completed") {
+                            return (
+                              <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                                View Certificate <Award className="h-4 w-4" />
+                              </span>
+                            );
+                          }
+                          if (!user) {
+                            return (
+                              <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                                <LogIn className="h-4 w-4" /> Sign up to start
+                              </span>
+                            );
+                          }
+                          if (requiresPurchase) {
+                            return (
+                              <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                                <ShoppingBag className="h-4 w-4" /> Unlock course
+                              </span>
+                            );
+                          }
+                          if (status === "in-progress") {
+                            return (
+                              <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                                Continue Learning <PlayCircle className="h-4 w-4" />
+                              </span>
+                            );
+                          }
+                          return (
+                            <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                              Start Course <ArrowRight className="h-4 w-4" />
+                            </span>
+                          );
+                        })()}
                         <button
                           type="button"
                           title="Share on LinkedIn"
