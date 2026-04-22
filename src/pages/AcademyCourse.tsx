@@ -571,24 +571,68 @@ const AcademyCourse = () => {
                       })()}
                     </div>
 
-                    {/* Mark as complete card */}
-                    {!completedModules.includes(modules[activeModule].id) && (
-                      <div className="mb-6 rounded-xl border border-border bg-secondary/30 p-5 flex items-center justify-between gap-4 flex-wrap">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <CheckCircle className="h-5 w-5 text-primary" />
+                    {/* Mark as complete card / inline success */}
+                    {(() => {
+                      const currentId = modules[activeModule].id;
+                      const isComplete = completedModules.includes(currentId);
+                      const justDone = justCompletedId === currentId;
+
+                      if (isComplete) {
+                        return (
+                          <div
+                            className={`mb-6 rounded-xl border p-5 flex items-center justify-between gap-4 flex-wrap transition-colors ${
+                              justDone
+                                ? "border-emerald-500/40 bg-emerald-500/10 animate-in fade-in slide-in-from-bottom-2 duration-300"
+                                : "border-border bg-secondary/30"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+                                <CheckCircle className={`h-5 w-5 text-emerald-500 ${justDone ? "animate-in zoom-in-50 duration-300" : ""}`} />
+                              </div>
+                              <div>
+                                <p className="text-body font-medium text-foreground">
+                                  {justDone ? "Module complete — nice work!" : "Module completed"}
+                                </p>
+                                <p className="text-body-sm text-muted-foreground">
+                                  {completedModules.length}/{modules.length} modules done
+                                  {allModulesComplete ? " — you're ready for the quiz." : ""}
+                                </p>
+                              </div>
+                            </div>
+                            {activeModule < modules.length - 1 && (
+                              <Button
+                                variant="ghost"
+                                onClick={() => {
+                                  setActiveModule(activeModule + 1);
+                                  window.scrollTo({ top: 0, behavior: "smooth" });
+                                }}
+                              >
+                                Continue <ArrowRight className="h-4 w-4 ml-2" />
+                              </Button>
+                            )}
                           </div>
-                          <div>
-                            <p className="text-body font-medium text-foreground">Finished reading?</p>
-                            <p className="text-body-sm text-muted-foreground">Mark this module complete to track your progress.</p>
+                        );
+                      }
+
+                      return (
+                        <div className="mb-6 rounded-xl border border-border bg-secondary/30 p-5 flex items-center justify-between gap-4 flex-wrap">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                              <CheckCircle className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="text-body font-medium text-foreground">Finished reading?</p>
+                              <p className="text-body-sm text-muted-foreground">Mark this module complete to track your progress.</p>
+                            </div>
                           </div>
+                          <Button onClick={() => markModuleComplete(currentId)}>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Mark Complete
+                          </Button>
                         </div>
-                        <Button onClick={() => markModuleComplete(modules[activeModule].id)}>
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Mark Complete
-                        </Button>
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     {/* Prev/Next navigation */}
                     <div className="flex items-center justify-between gap-4 pt-6 border-t border-border">
