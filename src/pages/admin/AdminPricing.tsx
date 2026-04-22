@@ -2,13 +2,30 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Loader2, Plus, Save, Trash2, CreditCard, Users, BarChart3 } from "lucide-react";
+import { Loader2, Plus, Save, Trash2, CreditCard, Users, GraduationCap, RefreshCw, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+interface Course {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  difficulty: string;
+  duration_minutes: number;
+  cpd_hours: number;
+  is_published: boolean;
+  sort_order: number;
+  price_eur_cents: number;
+  stripe_product_id: string | null;
+  stripe_price_id: string | null;
+}
 
 interface Tier {
   id: string;
