@@ -238,14 +238,14 @@ const AcademyCourse = () => {
       <Header />
       <main className="flex-1">
         {/* Course Header */}
-        <section className="bg-navy py-8">
+        <section className="bg-navy py-6 sm:py-8">
           <div className="container-enterprise">
-            <Link to="/academy" className="text-slate-light text-body-sm hover:text-white inline-flex items-center gap-1 mb-4">
+            <Link to="/academy" className="text-slate-light text-body-sm hover:text-white inline-flex items-center gap-1 mb-3 sm:mb-4">
               <ArrowLeft className="h-4 w-4" /> Back to Academy
             </Link>
-            <h1 className="text-headline text-primary-foreground mb-2">{course.title}</h1>
-            <p className="text-body text-slate-light mb-4">{course.description}</p>
-            <div className="flex items-center gap-4 text-body-sm text-slate-light">
+            <h1 className="text-2xl sm:text-3xl md:text-headline text-primary-foreground mb-2 leading-tight">{course.title}</h1>
+            <p className="text-body-sm sm:text-body text-slate-light mb-4">{course.description}</p>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-body-sm text-slate-light">
               <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {course.duration_minutes} min</span>
               <Badge variant="secondary">{course.difficulty}</Badge>
             </div>
@@ -258,9 +258,9 @@ const AcademyCourse = () => {
                 <Progress value={progressPercent} className="h-2" />
               </div>
             ) : (
-              <div className="mt-4 inline-flex items-center gap-2 text-caption text-slate-light bg-white/5 border border-white/10 rounded-md px-3 py-1.5">
-                <BookOpen className="h-3.5 w-3.5" />
-                <span>Reading freely — <Link to="/signup" className="text-white underline hover:text-accent">sign up</Link> to save progress and earn a certificate.</span>
+              <div className="mt-4 inline-flex items-start gap-2 text-caption text-slate-light bg-white/5 border border-white/10 rounded-md px-3 py-2 max-w-full">
+                <BookOpen className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+                <span className="leading-snug">Reading freely — <Link to="/signup" className="text-white underline hover:text-accent">sign up</Link> to save progress and earn a certificate.</span>
               </div>
             )}
           </div>
