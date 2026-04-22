@@ -96,9 +96,9 @@ export const Logo = ({ className, iconOnly = false, size = "md", showTagline = f
   }
 
   return (
-    <div className={cn("flex items-center gap-2.5", className)}>
-      <LogoIcon size={size} className="text-navy" />
-      <div className="flex flex-col">
+    <div className={cn("flex items-center gap-2.5 shrink-0 whitespace-nowrap", className)}>
+      <LogoIcon size={size} className="text-navy shrink-0" />
+      <div className="flex flex-col shrink-0">
         <div className="flex items-baseline gap-0.5">
           <span className={cn("font-normal tracking-tight text-navy", textSizeMap[size])}>
             World
