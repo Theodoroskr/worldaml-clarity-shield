@@ -35,6 +35,8 @@ const AcademyCourse = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const gate = useCourseGate(slug);
+  const { region } = useRegion();
+  const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [activeTab, setActiveTab] = useState<"learn" | "quiz">(
     searchParams.get("tab") === "quiz" ? "quiz" : "learn"
   );
