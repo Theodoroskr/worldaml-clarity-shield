@@ -129,7 +129,7 @@ const Academy = () => {
         .select("course_id");
       if (error) throw error;
       const counts: Record<string, number> = {};
-      (data || []).forEach((m: any) => {
+      (data || []).forEach((m: { course_id: string }) => {
         counts[m.course_id] = (counts[m.course_id] || 0) + 1;
       });
       return counts;
@@ -164,7 +164,7 @@ const Academy = () => {
 
   const filteredCourses = courses?.filter((course) => {
     // Category filter
-    if (categoryFilter !== "all" && (course as any).category !== categoryFilter) return false;
+    if (categoryFilter !== "all" && (course as { category?: string }).category !== categoryFilter) return false;
     // Difficulty filter
     if (difficultyFilter !== "all" && course.difficulty !== difficultyFilter) return false;
     // Progress filter (logged-in only)
@@ -430,7 +430,7 @@ const Academy = () => {
                 );
               }
 
-              const renderCard = (course: any, opts?: { featured?: boolean }) => {
+              const renderCard = (course: NonNullable<typeof courses>[number], opts?: { featured?: boolean }) => {
                 const status = getCourseStatus(course.id);
                 const cert = certMap.get(course.id);
                 const catConfig = categoryConfig[course.category] || categoryConfig.global;
@@ -598,7 +598,7 @@ const Academy = () => {
 
               // Group remaining by category
               const grouped: Record<string, typeof restCourses> = {};
-              restCourses.forEach((c: any) => {
+              restCourses.forEach((c) => {
                 const key = c.category || "global";
                 if (!grouped[key]) grouped[key] = [];
                 grouped[key].push(c);
