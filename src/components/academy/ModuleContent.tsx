@@ -73,7 +73,7 @@ const renderInline = (text: string, keyPrefix: string): React.ReactNode[] => {
           href={match[3]}
           target={match[3].startsWith("http") ? "_blank" : undefined}
           rel={match[3].startsWith("http") ? "noopener noreferrer" : undefined}
-          className="text-primary underline underline-offset-2 hover:text-primary/80"
+          className="text-accent underline underline-offset-2 decoration-accent/40 hover:decoration-accent transition-colors"
         >
           {match[2]}
         </a>
@@ -94,7 +94,7 @@ const renderInline = (text: string, keyPrefix: string): React.ReactNode[] => {
       tokens.push(
         <code
           key={`${keyPrefix}-c-${idx++}`}
-          className="px-1.5 py-0.5 rounded bg-secondary text-foreground font-mono text-[0.875em]"
+          className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-mono text-[0.875em] border border-primary/15"
         >
           {match[7]}
         </code>
@@ -106,7 +106,7 @@ const renderInline = (text: string, keyPrefix: string): React.ReactNode[] => {
           href={match[8]}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary underline underline-offset-2 hover:text-primary/80 break-all"
+          className="text-accent underline underline-offset-2 decoration-accent/40 hover:decoration-accent break-all transition-colors"
         >
           {match[8]}
         </a>
@@ -213,7 +213,7 @@ const ModuleContent: React.FC<Props> = ({ content, className }) => {
       out.push(
         <div key={key} className="my-6 overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-body-sm">
-            <thead className="bg-secondary/50">
+            <thead className="bg-primary/5">
               <tr>
                 {header.map((h, hi) => (
                   <th key={hi} className="text-left font-semibold text-foreground px-4 py-2.5 border-b border-border">
@@ -410,13 +410,13 @@ const ModuleContent: React.FC<Props> = ({ content, className }) => {
         const id = headingId(text);
         if (level === 1) {
           out.push(
-            <h2 key={key} id={id} className="text-2xl md:text-3xl font-bold text-foreground mt-12 mb-4 scroll-mt-24 tracking-tight">
+            <h2 key={key} id={id} className="text-2xl md:text-3xl font-bold text-primary mt-12 mb-4 scroll-mt-24 tracking-tight pl-4 border-l-4 border-accent">
               {text}
             </h2>
           );
         } else if (level === 2) {
           out.push(
-            <h3 key={key} id={id} className="text-xl md:text-2xl font-semibold text-foreground mt-10 mb-3 scroll-mt-24 tracking-tight">
+            <h3 key={key} id={id} className="text-xl md:text-2xl font-semibold text-primary mt-10 mb-3 scroll-mt-24 tracking-tight">
               {text}
             </h3>
           );
@@ -452,7 +452,7 @@ const ModuleContent: React.FC<Props> = ({ content, className }) => {
       if (trimmed.startsWith("> ")) {
         flushAll();
         out.push(
-          <blockquote key={key} className="my-5 pl-4 border-l-4 border-primary/40 bg-secondary/30 py-3 pr-4 rounded-r-md text-foreground/85 text-body leading-[1.7] italic">
+          <blockquote key={key} className="my-5 pl-4 border-l-4 border-accent bg-accent/5 py-3 pr-4 rounded-r-md text-foreground/90 text-body leading-[1.7] italic">
             {renderInline(trimmed.slice(2), key)}
           </blockquote>
         );
@@ -475,6 +475,25 @@ const ModuleContent: React.FC<Props> = ({ content, className }) => {
           listBuffer = { type: "ol", items: [] };
         }
         listBuffer.items.push({ marker: `${ol[1]}.`, content: ol[2] });
+        return;
+      }
+
+      // Emoji callout auto-detection
+      const emojiMatch = trimmed.match(/^(💡|⚠️|✅|📌)\s+(.*)$/);
+      if (emojiMatch) {
+        flushAll();
+        const kindMap: Record<string, string> = {
+          "💡": "tip",
+          "⚠️": "warning",
+          "✅": "tip",
+          "📌": "key",
+        };
+        const kind = kindMap[emojiMatch[1]] || "info";
+        out.push(
+          <Callout key={key} kind={kind}>
+            <p>{renderInline(emojiMatch[2], key)}</p>
+          </Callout>
+        );
         return;
       }
 
