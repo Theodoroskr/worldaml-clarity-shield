@@ -400,7 +400,9 @@ const AcademyCourse = () => {
                     )}
 
                     {/* Article body */}
-                    <ModuleContent content={modules[activeModule].content} className="mb-10" />
+                    <ContentProtection watermarkLabel={user?.email || "WorldAML Academy"}>
+                      <ModuleContent content={modules[activeModule].content} className="mb-10" />
+                    </ContentProtection>
 
                     {/* Mark as complete card */}
                     {!completedModules.includes(modules[activeModule].id) && (
