@@ -8,7 +8,7 @@ export const AnnouncementBar = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="sticky top-0 z-[60] bg-navy text-white py-2 px-4 relative">
+    <div className="relative bg-navy text-white py-2 px-4">
       <div className="container-enterprise flex items-center justify-center gap-2 text-body-sm">
         <span className="hidden sm:inline">Ready to streamline your compliance screening?</span>
         <Link 
