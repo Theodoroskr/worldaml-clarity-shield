@@ -150,6 +150,17 @@ const AcademyCourse = () => {
     }, 100);
   }, [modules, completedModules, searchParams]);
 
+  // Hard-block ?tab=quiz deep links when modules aren't all complete
+  // (or learner isn't signed in). Forces them back to the learn tab.
+  useEffect(() => {
+    if (searchParams.get("tab") !== "quiz") return;
+    if (!modules || modules.length === 0) return;
+    const allDone = completedModules.length >= modules.length;
+    if (!user || !allDone) {
+      setActiveTab("learn");
+    }
+  }, [searchParams, modules, completedModules, user]);
+
   const markModuleComplete = async (moduleId: string) => {
     const updated = [...new Set([...completedModules, moduleId])];
     setCompletedModules(updated);
