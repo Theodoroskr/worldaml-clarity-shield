@@ -1,19 +1,18 @@
 
 
-## Highlight selected quiz answer (option + radio button)
+## Add "Data Sources" link to Suite top menu
 
-Make the currently selected quiz answer visually obvious before submission by highlighting both the radio button and the surrounding option row.
+The Suite header navigation is missing a Data Sources entry, causing the menu to feel incomplete. Add it alongside the existing Suite product/section links.
 
-### Change (single file: `src/pages/AcademyCourse.tsx`)
+### Change
+**File:** `src/components/suite/SuiteHeader.tsx`
 
-In the quiz rendering loop (pre-submit state), each answer option is currently a plain `<label>` wrapping a `<RadioGroupItem>` and the option text. Update so the selected option:
-
-- **Row**: teal-tinted background (`bg-teal/10`), teal border (`border-teal`), and stronger text weight. Unselected rows keep the current neutral border and add a subtle `hover:bg-secondary` state.
-- **Radio dot**: teal fill via `text-teal border-teal` on `RadioGroupItem` when `quizAnswers[question.id] === option`.
-- Keep accessibility: the entire row remains a `<label htmlFor>` so clicking anywhere on the row selects the option (already the case).
-- No change to review-mode highlighting (green/red for correct/incorrect after submission stays as-is).
+- Add a new nav item **"Data Sources"** linking to `/data-sources` (existing public route, rendered by `src/pages/DataSources.tsx`).
+- Place it in the primary nav array next to the other product links so it inherits the existing styling, active-state highlight, and mobile menu behavior — no bespoke markup.
+- Mobile drawer picks it up automatically since it iterates the same nav array.
 
 ### Out of scope
-- No logic changes — selection state, submission, scoring, and review mode are untouched.
-- No changes to other pages or shared `RadioGroupItem` component.
+- No changes to the Data Sources page itself.
+- No changes to the marketing site `Header.tsx` (this fix is scoped to the Suite header the user flagged).
+- No new routes, icons, or copy beyond the single label.
 
