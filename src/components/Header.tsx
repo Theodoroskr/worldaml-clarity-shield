@@ -227,7 +227,7 @@ export const Header = () => {
                   key={link.href}
                   to={link.href!}
                   className={cn(
-                    "px-4 py-2 text-body-sm font-medium transition-colors rounded-md",
+                    "px-2.5 py-2 text-body-sm font-medium transition-colors rounded-md whitespace-nowrap",
                     location.pathname === link.href
                       ? "text-navy bg-secondary"
                       : "text-text-secondary hover:text-navy hover:bg-secondary/50"
