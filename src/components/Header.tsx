@@ -240,7 +240,7 @@ export const Header = () => {
           </nav>
 
           {/* Desktop CTA & Region */}
-          <div className="hidden lg:flex items-center gap-2 shrink-0">
+          <div className="hidden xl:flex items-center gap-2 shrink-0">
             <RegionSelector />
             {user ? (
               <>
@@ -269,7 +269,7 @@ export const Header = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden p-2 text-text-secondary hover:text-navy"
+            className="xl:hidden p-2 text-text-secondary hover:text-navy"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -279,7 +279,7 @@ export const Header = () => {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-divider animate-slide-down max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="xl:hidden py-4 border-t border-divider animate-slide-down max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="mb-4">
               <RegionSelector />
             </div>
