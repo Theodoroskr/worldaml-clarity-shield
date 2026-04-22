@@ -184,6 +184,7 @@ export const SuiteHeader = ({
 
               {/* Static links */}
               {[
+                { href: "/data-sources", label: "Data Sources" },
                 { href: "/pricing", label: "Pricing" },
                 { href: "https://worldaml.readme.io", label: "Docs", external: true },
               ].map((link) =>
