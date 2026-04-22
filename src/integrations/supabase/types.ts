@@ -1866,6 +1866,16 @@ export type Database = {
           slug: string
         }[]
       }
+      academy_question_bank_audit: {
+        Args: never
+        Returns: {
+          correct_index: number
+          correct_option: string
+          options_length: number
+          slug: string
+          sort_order: number
+        }[]
+      }
       admin_grant_suite_access:
         | { Args: { target_email: string }; Returns: undefined }
         | {
