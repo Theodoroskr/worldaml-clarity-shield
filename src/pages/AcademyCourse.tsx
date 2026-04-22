@@ -295,74 +295,126 @@ const AcademyCourse = () => {
         </section>
 
         {/* Content */}
-        <section className="section-padding bg-background">
+        <section className="py-8 md:py-12 bg-background">
           <div className="container-enterprise">
             {activeTab === "learn" ? (
-              <div className="grid lg:grid-cols-[280px_1fr] gap-8">
+              <div className="grid lg:grid-cols-[300px_1fr] gap-8 lg:gap-12">
                 {/* Module sidebar */}
-                <nav className="space-y-1">
-                  {modules?.map((mod, i) => {
-                    const isComplete = completedModules.includes(mod.id);
-                    return (
-                      <button
-                        key={mod.id}
-                        onClick={() => setActiveModule(i)}
-                        className={`w-full text-left px-4 py-3 rounded-lg text-body-sm transition-colors flex items-center gap-2 ${
-                          i === activeModule
-                            ? "bg-primary/10 text-primary font-medium"
-                            : "text-muted-foreground hover:bg-secondary"
-                        }`}
-                      >
-                        {isComplete ? (
-                          <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />
-                        ) : (
-                          <span className="w-4 h-4 rounded-full border border-border flex-shrink-0 text-center text-[10px] leading-4">
-                            {i + 1}
-                          </span>
-                        )}
-                        {mod.title}
-                      </button>
-                    );
-                  })}
-                </nav>
+                <aside className="lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto">
+                  <div className="rounded-xl border border-border bg-card p-4">
+                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-border">
+                      <p className="text-caption font-semibold text-foreground uppercase tracking-wide">
+                        Course Modules
+                      </p>
+                      <span className="text-caption text-muted-foreground">
+                        {completedModules.length}/{modules?.length || 0}
+                      </span>
+                    </div>
+                    <nav className="space-y-1">
+                      {modules?.map((mod, i) => {
+                        const isComplete = completedModules.includes(mod.id);
+                        const isActive = i === activeModule;
+                        return (
+                          <button
+                            key={mod.id}
+                            onClick={() => {
+                              setActiveModule(i);
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                            className={`w-full text-left px-3 py-2.5 rounded-lg text-body-sm transition-all flex items-start gap-2.5 ${
+                              isActive
+                                ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
+                                : "text-muted-foreground hover:bg-secondary border-l-2 border-transparent"
+                            }`}
+                          >
+                            {isComplete ? (
+                              <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                            ) : (
+                              <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-semibold ${
+                                isActive ? "bg-primary text-primary-foreground" : "border border-border"
+                              }`}>
+                                {i + 1}
+                              </span>
+                            )}
+                            <span className="leading-snug">{mod.title}</span>
+                          </button>
+                        );
+                      })}
+                    </nav>
+                    {modules && modules.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-border">
+                        <div className="flex items-center gap-2 text-caption text-muted-foreground">
+                          <Clock className="h-3.5 w-3.5" />
+                          <span>~{Math.ceil(course.duration_minutes / modules.length)} min per module</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </aside>
 
                 {/* Module content */}
                 {modules && modules[activeModule] && (
-                  <div className="min-w-0">
-                    <h2 className="text-subtitle font-semibold text-foreground mb-6">
-                      {modules[activeModule].title}
-                    </h2>
-                    <div className="prose prose-slate dark:prose-invert max-w-none mb-8 space-y-1">
+                  <article className="min-w-0 max-w-3xl">
+                    {/* Module header */}
+                    <div className="mb-8 pb-6 border-b border-border">
+                      <p className="text-caption text-primary font-semibold uppercase tracking-wide mb-2">
+                        Module {activeModule + 1} of {modules.length}
+                      </p>
+                      <h2 className="text-3xl md:text-4xl font-bold text-foreground leading-tight tracking-tight">
+                        {modules[activeModule].title}
+                      </h2>
+                    </div>
+
+                    {/* Article body */}
+                    <div className="space-y-2 mb-10">
                       {modules[activeModule].content
                         .replace(/\\n/g, "\n")
                         .split("\n")
                         .map((line, i) => {
                           const trimmed = line.trim();
-                          if (!trimmed) return <div key={i} className="h-3" />;
+                          if (!trimmed) return <div key={i} className="h-4" />;
                           if (trimmed.startsWith("**") && trimmed.endsWith("**")) {
                             return (
-                              <h3 key={i} className="text-lg font-semibold text-foreground mt-6 mb-2">
+                              <h3 key={i} className="text-xl md:text-2xl font-semibold text-foreground mt-10 mb-3 scroll-mt-24">
                                 {trimmed.replace(/\*\*/g, "")}
                               </h3>
                             );
                           }
                           if (trimmed.startsWith("- ")) {
+                            const inner = trimmed.slice(2);
+                            const parts = inner.split(/\*\*(.*?)\*\*/g);
                             return (
-                              <div key={i} className="flex items-start gap-2 pl-4 py-0.5">
-                                <span className="text-primary mt-1.5 flex-shrink-0">•</span>
-                                <span className="text-muted-foreground text-body leading-relaxed">
-                                  {trimmed.slice(2).replace(/\*\*(.*?)\*\*/g, "$1")}
+                              <div key={i} className="flex items-start gap-3 pl-1 py-1">
+                                <span className="text-primary mt-2.5 flex-shrink-0 h-1.5 w-1.5 rounded-full bg-primary" />
+                                <span className="text-foreground/85 text-body leading-[1.7]">
+                                  {parts.map((part, pi) =>
+                                    pi % 2 === 1 ? (
+                                      <strong key={pi} className="text-foreground font-semibold">{part}</strong>
+                                    ) : (
+                                      <span key={pi}>{part}</span>
+                                    )
+                                  )}
                                 </span>
                               </div>
                             );
                           }
                           if (/^\d+\.?\s/.test(trimmed)) {
-                            const match = trimmed.match(/^(\d+\.?\s)(.*)/);
+                            const match = trimmed.match(/^(\d+\.?)\s(.*)/);
+                            const inner = match?.[2] || "";
+                            const parts = inner.split(/\*\*(.*?)\*\*/g);
                             return (
-                              <div key={i} className="flex items-start gap-2 pl-4 py-0.5">
-                                <span className="text-primary font-medium flex-shrink-0">{match?.[1]}</span>
-                                <span className="text-muted-foreground text-body leading-relaxed">
-                                  {(match?.[2] || "").replace(/\*\*(.*?)\*\*/g, "$1")}
+                              <div key={i} className="flex items-start gap-3 pl-1 py-1">
+                                <span className="text-primary font-semibold flex-shrink-0 min-w-[1.5rem] text-body leading-[1.7]">
+                                  {match?.[1]}
+                                </span>
+                                <span className="text-foreground/85 text-body leading-[1.7]">
+                                  {parts.map((part, pi) =>
+                                    pi % 2 === 1 ? (
+                                      <strong key={pi} className="text-foreground font-semibold">{part}</strong>
+                                    ) : (
+                                      <span key={pi}>{part}</span>
+                                    )
+                                  )}
                                 </span>
                               </div>
                             );
@@ -370,10 +422,10 @@ const AcademyCourse = () => {
                           // Inline bold handling
                           const parts = trimmed.split(/\*\*(.*?)\*\*/g);
                           return (
-                            <p key={i} className="text-muted-foreground text-body leading-relaxed">
+                            <p key={i} className="text-foreground/85 text-body leading-[1.75] mb-2">
                               {parts.map((part, pi) =>
                                 pi % 2 === 1 ? (
-                                  <strong key={pi} className="text-foreground font-medium">{part}</strong>
+                                  <strong key={pi} className="text-foreground font-semibold">{part}</strong>
                                 ) : (
                                   <span key={pi}>{part}</span>
                                 )
@@ -382,40 +434,78 @@ const AcademyCourse = () => {
                           );
                         })}
                     </div>
-                    <div className="flex items-center gap-4 pt-4 border-t border-border">
-                      {!completedModules.includes(modules[activeModule].id) && (
+
+                    {/* Mark as complete card */}
+                    {!completedModules.includes(modules[activeModule].id) && (
+                      <div className="mb-6 rounded-xl border border-border bg-secondary/30 p-5 flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <CheckCircle className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-body font-medium text-foreground">Finished reading?</p>
+                            <p className="text-body-sm text-muted-foreground">Mark this module complete to track your progress.</p>
+                          </div>
+                        </div>
                         <Button onClick={() => markModuleComplete(modules[activeModule].id)}>
                           <CheckCircle className="h-4 w-4 mr-2" />
-                          Mark as Complete
+                          Mark Complete
                         </Button>
-                      )}
-                      {activeModule < modules.length - 1 && (
+                      </div>
+                    )}
+
+                    {/* Prev/Next navigation */}
+                    <div className="flex items-center justify-between gap-4 pt-6 border-t border-border">
+                      <Button
+                        variant="outline"
+                        disabled={activeModule === 0}
+                        onClick={() => {
+                          setActiveModule(activeModule - 1);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                      >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Previous
+                      </Button>
+
+                      {activeModule < modules.length - 1 ? (
                         <Button
-                          variant="outline"
+                          variant="default"
                           onClick={() => {
                             markModuleComplete(modules[activeModule].id);
                             setActiveModule(activeModule + 1);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
                           }}
                         >
                           Next Module <ArrowRight className="h-4 w-4 ml-2" />
                         </Button>
-                      )}
-                      {activeModule === modules.length - 1 && allModulesComplete && (
+                      ) : allModulesComplete ? (
                         <Button
                           variant="accent"
                           onClick={() => {
                             if (user) {
                               setActiveTab("quiz");
+                              window.scrollTo({ top: 0, behavior: "smooth" });
                             } else {
                               navigate(`/signup?redirect=${encodeURIComponent(`/academy/${slug}?tab=quiz`)}`);
                             }
                           }}
                         >
-                          {user ? "Take the Quiz" : "Sign Up & Take the Quiz"} <ArrowRight className="h-4 w-4 ml-2" />
+                          <Award className="h-4 w-4 mr-2" />
+                          {user ? "Take the Quiz" : "Sign Up & Take the Quiz"}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="default"
+                          onClick={() => markModuleComplete(modules[activeModule].id)}
+                          disabled={completedModules.includes(modules[activeModule].id)}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          {completedModules.includes(modules[activeModule].id) ? "Completed" : "Mark Complete"}
                         </Button>
                       )}
                     </div>
-                  </div>
+                  </article>
                 )}
               </div>
             ) : !user ? (
