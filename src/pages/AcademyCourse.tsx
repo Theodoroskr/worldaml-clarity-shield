@@ -347,7 +347,7 @@ const AcademyCourse = () => {
                       <div className="mt-4 pt-4 border-t border-border">
                         <div className="flex items-center gap-2 text-caption text-muted-foreground">
                           <Clock className="h-3.5 w-3.5" />
-                          <span>~{Math.ceil(course.duration_minutes / modules.length)} min per module</span>
+                          <span>~{modules.reduce((s, m) => s + computeReadingMinutes(m.content), 0)} min total reading</span>
                         </div>
                       </div>
                     )}
