@@ -453,7 +453,9 @@ const Academy = () => {
                     {/* Thumbnail */}
                     <div
                       className={`relative bg-gradient-to-br ${catConfig.gradient} overflow-hidden flex-shrink-0 ${
-                        featured ? "md:w-2/5 min-h-[220px]" : "h-32"
+                        featured
+                          ? "aspect-[16/10] md:aspect-auto md:w-2/5 md:min-h-[260px]"
+                          : "aspect-[16/9] sm:aspect-[16/10] md:aspect-auto md:h-40"
                       }`}
                     >
                       {(() => {
@@ -463,7 +465,7 @@ const Academy = () => {
                             src={cover}
                             alt={course.title}
                             loading="lazy"
-                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                           />
                         ) : (
                           <>
@@ -485,7 +487,7 @@ const Academy = () => {
 
                       {/* Featured badge */}
                       {featured && (
-                        <div className="absolute top-4 left-4">
+                        <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/95 text-primary text-xs font-semibold shadow-sm">
                             <Star className="h-3 w-3 fill-current" /> Most Popular
                           </span>
