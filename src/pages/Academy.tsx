@@ -424,6 +424,50 @@ const Academy = () => {
           </section>
         )}
 
+        {/* Just-purchased success banner */}
+        {justPurchasedSlugs.length > 0 && (
+          <section className="bg-background pt-8">
+            <div className="container-enterprise">
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-6 relative">
+                <button
+                  onClick={() => setJustPurchasedSlugs([])}
+                  className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Dismiss"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+                <div className="flex items-start gap-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                    <CheckCircle className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-xl font-bold text-foreground mb-1">
+                      You're enrolled — {justPurchasedSlugs.length === 1 ? "1 course" : `${justPurchasedSlugs.length} courses`} unlocked
+                    </h2>
+                    <p className="text-body-sm text-muted-foreground mb-4">
+                      Your purchase is confirmed and access is active. Jump in below to start a course.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {justPurchasedSlugs.map((slug) => {
+                        const c = courses?.find((row) => row.slug === slug);
+                        const title = c?.title ?? slug;
+                        return (
+                          <Button key={slug} size="sm" asChild>
+                            <Link to={`/academy/${slug}`}>
+                              <PlayCircle className="h-4 w-4 mr-1.5" />
+                              Start: {title}
+                            </Link>
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Courses Grid */}
         <section className="section-padding bg-background">
           <div className="container-enterprise">
