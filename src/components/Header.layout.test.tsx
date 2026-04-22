@@ -90,7 +90,7 @@ describe("Header desktop layout — wordmark / nav overlap guard", () => {
       expect(wordmark!.className).toMatch(/\bshrink-0\b/);
 
       // Invariant 2: desktop nav has a hard left gutter and absorbs overflow.
-      expect(desktopNav!.className).toMatch(/\bml-8\b/);
+      expect(desktopNav!.className).toMatch(/\bml-(6|8)\b/);
       expect(desktopNav!.className).toMatch(/\bmin-w-0\b/);
 
       // Invariant 3: logo is a previous sibling of the nav inside a flex row.
