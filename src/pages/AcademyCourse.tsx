@@ -16,7 +16,7 @@ import ModuleTOC from "@/components/academy/ModuleTOC";
 import ContentProtection from "@/components/academy/ContentProtection";
 import { getCourseDiagram } from "@/assets/academy";
 
-const PASS_THRESHOLD = 80;
+const PASS_THRESHOLD = 70;
 
 const AcademyCourse = () => {
   const { slug } = useParams();
@@ -93,6 +93,33 @@ const AcademyCourse = () => {
       return data;
     },
   });
+
+  // Existing certificate (source of truth for "passed this course")
+  const { data: existingCertificate } = useQuery({
+    queryKey: ["academy-course-certificate", course?.id, user?.id],
+    enabled: !!course?.id && !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("academy_certificates")
+        .select("share_token, score")
+        .eq("course_id", course!.id)
+        .eq("user_id", user!.id)
+        .order("issued_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  // If a certificate already exists, hydrate the token so the banner
+  // can link to it after a fresh pass or on revisit.
+  useEffect(() => {
+    if (existingCertificate?.share_token && !certificateToken) {
+      setCertificateToken(existingCertificate.share_token);
+    }
+  }, [existingCertificate, certificateToken]);
+
+  const hasPassed = !!existingCertificate || (quizScore !== null && quizScore >= PASS_THRESHOLD);
 
   useEffect(() => {
     if (progress) {
@@ -539,16 +566,20 @@ const AcademyCourse = () => {
                       )}
                       <div className="flex-1 min-w-0">
                         <h3 className="text-xl font-bold text-foreground mb-1">
-                          {quizScore >= PASS_THRESHOLD ? "Congratulations — you passed! 🎉" : "Not quite — review and retry"}
+                          {quizScore >= PASS_THRESHOLD
+                            ? `Passed — ${quizScore}% · Certificate unlocked 🎉`
+                            : `Did not pass — ${quizScore}% · ${PASS_THRESHOLD}% required`}
                         </h3>
                         <p className="text-body-sm text-muted-foreground mb-4">
-                          You scored <span className="font-semibold text-foreground">{quizScore}%</span>
-                          {" "}({Object.values(quizAnswers).filter((ans, i) => {
-                            const q = questions?.[i];
-                            return q && correctAnswers[q.id] === ans;
-                          }).length} of {questions?.length || 0} correct).
-                          {" "}Pass mark: {PASS_THRESHOLD}%.
-                          {" "}Review every question and explanation below.
+                          You answered <span className="font-semibold text-foreground">
+                            {Object.values(quizAnswers).filter((ans, i) => {
+                              const q = questions?.[i];
+                              return q && correctAnswers[q.id] === ans;
+                            }).length} of {questions?.length || 0}
+                          </span> correctly.
+                          {quizScore >= PASS_THRESHOLD
+                            ? " Your certificate is ready to view and share."
+                            : ` You need ${PASS_THRESHOLD}% to unlock your certificate. Review every question and explanation below, then retake the quiz.`}
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {quizScore >= PASS_THRESHOLD && certificateToken && (
@@ -560,21 +591,22 @@ const AcademyCourse = () => {
                               View Certificate
                             </Button>
                           )}
-                          {quizScore < PASS_THRESHOLD && (
-                            <Button
-                              onClick={() => {
-                                setQuizAnswers({});
-                                setQuizSubmitted(false);
-                                setQuizScore(null);
-                                setCorrectAnswers({});
-                                setReviewMode(false);
+                          <Button
+                            variant={quizScore >= PASS_THRESHOLD ? "outline" : "default"}
+                            onClick={() => {
+                              setQuizAnswers({});
+                              setQuizSubmitted(false);
+                              setQuizScore(null);
+                              setCorrectAnswers({});
+                              setReviewMode(false);
+                              if (quizScore < PASS_THRESHOLD) {
                                 setCertificateToken(null);
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                              }}
-                            >
-                              Retake Quiz
-                            </Button>
-                          )}
+                              }
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                          >
+                            Retake Quiz
+                          </Button>
                           <Button variant="outline" asChild>
                             <Link to="/academy">Back to Academy</Link>
                           </Button>

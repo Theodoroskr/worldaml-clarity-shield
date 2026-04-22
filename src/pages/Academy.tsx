@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle } from "lucide-react";
+import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock } from "lucide-react";
 import { getCourseCover } from "@/assets/academy";
 import AcademyLogo from "@/components/AcademyLogo";
 
@@ -161,6 +161,37 @@ const Academy = () => {
     }
     return null;
   };
+
+  // Sequential unlock: a course is locked if the previous course (same category,
+  // lower sort_order) hasn't been passed yet (no certificate).
+  // The first course in each category is always unlocked.
+  const lockInfo = (() => {
+    const map = new Map<string, { locked: boolean; prereqTitle?: string }>();
+    if (!courses) return map;
+    const byCategory: Record<string, typeof courses> = {};
+    courses.forEach((c) => {
+      const key = (c as { category?: string }).category || "global";
+      (byCategory[key] ||= []).push(c);
+    });
+    Object.values(byCategory).forEach((list) => {
+      const ordered = [...list].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      ordered.forEach((c, idx) => {
+        if (idx === 0) {
+          map.set(c.id, { locked: false });
+          return;
+        }
+        const prev = ordered[idx - 1];
+        const prevPassed = certMap.has(prev.id);
+        map.set(c.id, prevPassed ? { locked: false } : { locked: true, prereqTitle: prev.title });
+      });
+    });
+    return map;
+  })();
+
+  // Logged-out visitors browse freely (gating only kicks in once signed in).
+  const isCourseLocked = (courseId: string) =>
+    !!user && (lockInfo.get(courseId)?.locked ?? false);
+  const getPrereqTitle = (courseId: string) => lockInfo.get(courseId)?.prereqTitle;
 
   const filteredCourses = courses?.filter((course) => {
     // Category filter
@@ -442,13 +473,93 @@ const Academy = () => {
                 const progressPct = moduleCount > 0 ? Math.round((completedMods / moduleCount) * 100) : 0;
                 const featured = opts?.featured;
 
+                const locked = isCourseLocked(course.id);
+                const prereqTitle = getPrereqTitle(course.id);
+                const cardClassName = `group rounded-xl border border-border bg-card overflow-hidden transition-all duration-300 flex flex-col ${
+                  featured ? "md:col-span-3 md:flex-row" : ""
+                } ${
+                  locked
+                    ? "opacity-70 cursor-not-allowed"
+                    : "hover:shadow-xl hover:border-primary/30 hover:-translate-y-0.5"
+                }`;
+
+                if (locked) {
+                  return (
+                    <div
+                      key={course.id}
+                      className={cardClassName}
+                      aria-disabled="true"
+                      title={`Pass ${prereqTitle ?? "the previous course"} (70%+) to unlock this course`}
+                    >
+                      {/* Thumbnail */}
+                      <div
+                        className={`relative bg-gradient-to-br ${catConfig.gradient} overflow-hidden flex-shrink-0 grayscale ${
+                          featured
+                            ? "aspect-[16/10] md:aspect-auto md:w-2/5 md:min-h-[260px]"
+                            : "aspect-[16/9] sm:aspect-[16/10] md:aspect-auto md:h-40"
+                        }`}
+                      >
+                        {(() => {
+                          const cover = getCourseCover(course.slug);
+                          return cover ? (
+                            <img src={cover} alt={course.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover object-center" />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className={`${featured ? "h-20 w-20" : "h-14 w-14"} rounded-2xl ${catConfig.iconBg} backdrop-blur-sm border border-white/20 flex items-center justify-center`}>
+                                <CatIcon className={`${featured ? "h-10 w-10" : "h-7 w-7"} text-white`} />
+                              </div>
+                            </div>
+                          );
+                        })()}
+                        <div className="absolute inset-0 bg-background/40" />
+                        <div className="absolute top-3 right-3">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted-foreground/90 text-background text-[11px] font-medium shadow-sm">
+                            <Lock className="h-3 w-3" /> Locked
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className={`p-5 flex-1 flex flex-col ${featured ? "md:p-7" : ""}`}>
+                        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                          <Badge variant="outline" className={`${difficultyColor[course.difficulty] || ""} text-[10px] uppercase tracking-wide font-semibold border`}>
+                            {course.difficulty}
+                          </Badge>
+                          <Badge variant="outline" className={`${catConfig.color} text-[10px] border-0`}>
+                            {catConfig.label}
+                          </Badge>
+                        </div>
+                        <h3 className={`font-semibold text-foreground mb-2 ${featured ? "text-2xl" : "text-subtitle"}`}>
+                          {course.title}
+                        </h3>
+                        <p className={`text-body-sm text-muted-foreground mb-4 ${featured ? "line-clamp-4" : "line-clamp-2"}`}>
+                          {course.description}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-caption text-muted-foreground mb-4">
+                          <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{course.duration_minutes} min</span>
+                          {moduleCount > 0 && (
+                            <span className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{moduleCount} module{moduleCount !== 1 ? "s" : ""}</span>
+                          )}
+                          {cpd > 0 && (
+                            <span className="flex items-center gap-1 text-primary font-medium"><Award className="h-3.5 w-3.5" />{formatCpd(cpd)}</span>
+                          )}
+                        </div>
+                        <div className="mt-auto pt-2 border-t border-border/50">
+                          <p className="text-body-sm font-semibold text-muted-foreground flex items-center gap-1.5">
+                            <Lock className="h-4 w-4" />
+                            Complete <span className="text-foreground">{prereqTitle ?? "the previous course"}</span> (70%+) to unlock
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
                 return (
                   <Link
                     key={course.id}
                     to={status === "completed" && cert ? `/academy/certificate/${cert.share_token}` : `/academy/${course.slug}`}
-                    className={`group rounded-xl border border-border bg-card overflow-hidden hover:shadow-xl hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-300 flex flex-col ${
-                      featured ? "md:col-span-3 md:flex-row" : ""
-                    }`}
+                    className={cardClassName}
                   >
                     {/* Thumbnail */}
                     <div
@@ -671,7 +782,7 @@ const Academy = () => {
               {[
                 { step: "1", title: "Choose a Course", desc: "Pick from our library of compliance courses" },
                 { step: "2", title: "Learn the Material", desc: "Work through concise, expert-written modules" },
-                { step: "3", title: "Pass the Quiz", desc: "Score 80% or higher to earn your certificate" },
+                { step: "3", title: "Pass the Quiz", desc: "Score 70% or higher to earn your certificate" },
                 { step: "4", title: "Share & Showcase", desc: "Download your certificate or share on LinkedIn" },
               ].map((item) => (
                 <div key={item.step} className="text-center">
