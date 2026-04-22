@@ -46,18 +46,17 @@ const navLinks: NavLink[] = [
           { href: "/platform/security", label: "Security" },
         ],
       },
+      {
+        groupLabel: "Data Sources",
+        items: [
+          { href: "/data-sources", label: "Overview" },
+          { href: "/data-sources/worldcompliance", label: "WorldCompliance®" },
+          { href: "/data-sources/bridger-xg", label: "Bridger Insight XG®" },
+        ],
+      },
     ],
   },
   { href: "/platform/api", label: "WorldAML API" },
-  {
-    label: "Data Sources",
-    href: "/data-sources",
-    children: [
-      { href: "/data-sources", label: "Overview" },
-      { href: "/data-sources/worldcompliance", label: "WorldCompliance®" },
-      { href: "/data-sources/bridger-xg", label: "Bridger Insight XG®" },
-    ],
-  },
   
   {
     label: "Markets",
@@ -166,7 +165,7 @@ export const Header = () => {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="p-3 w-auto">
-                    <div className="grid grid-cols-2 gap-x-4">
+                    <div className="grid grid-cols-3 gap-x-4">
                       {link.groups.map((group) => (
                         <div key={group.groupLabel}>
                           <DropdownMenuLabel className="text-caption font-semibold text-text-tertiary uppercase tracking-wider px-2 pb-1">
