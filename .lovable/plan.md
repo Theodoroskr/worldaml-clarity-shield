@@ -1,34 +1,56 @@
 
 
-## Cart drawer: detailed price breakdown
+## Currency/region indicator for Academy pricing
 
-Expand the Academy cart drawer summary so users see a clear line-item breakdown before they hit Checkout.
+Make it obvious to users which currency they're seeing on Academy prices, why, and how to change it.
 
-### What changes for the user
+### What the user sees
 
-In the drawer footer (above the Checkout button), replace the single "Total" row with a structured summary:
+**1. Inline currency hint next to prices**
+
+On the Academy catalog cards, course detail header, and cart drawer summary, append a small muted suffix to the first price shown per view:
 
 ```text
-Subtotal (3 courses)         €87.00
-Bundle discount (10% off)   −€8.70
-─────────────────────────────────
-Total                        €78.30
-VAT will be calculated at checkout
+€29  EUR · EU & Middle East
 ```
 
-- **Subtotal** — sum of list prices in the user's region currency, with item count.
-- **Bundle discount** — only shown when `discountPct > 0`; uses the existing tier label ("5% bundle discount (2 courses)" / "10% bundle discount (3+ courses)") in muted/accent green.
-- **Total** — bold, larger, in the regional currency.
-- **Tax note** — small muted line stating VAT/sales tax is handled by Stripe Checkout (Stripe Tax computes and displays it on the hosted page; we don't pre-compute it).
-- **Empty cart** — unchanged (existing empty state).
+On cards (space-tight) just show the ISO code in a small muted chip: `EUR`. On the course detail header and cart drawer (more room), show full `EUR · EU & Middle East`.
+
+**2. Currency control in the cart drawer**
+
+Above the price breakdown, add a compact row:
+
+```text
+Prices shown in  [ EUR — EU & Middle East ▾ ]   ⓘ
+```
+
+- The dropdown reuses the existing `RegionSelector` logic (writes to `RegionContext`, persists in the `worldaml_region` cookie). Changing it instantly re-renders all prices.
+- The ⓘ tooltip (Radix `Tooltip`) explains:
+  > "Prices are converted from EUR using fixed reference rates (USD ×1.08, GBP ×0.86). Final charge happens in your selected currency at Stripe Checkout, where VAT/sales tax is added based on your billing address."
+
+**3. Course detail page**
+
+Next to the price badge in `AcademyCourse.tsx`, render the same small `EUR · EU & Middle East` muted caption with the ⓘ tooltip (no dropdown here — keep the header clean; users change region from the cart drawer or global region selector).
+
+**4. Auto-detection indicator (first visit only)**
+
+When `RegionContext` has just auto-detected the region via IP (no saved cookie yet), show a one-time dismissible toast on `/academy`:
+
+> "Showing prices in EUR for EU & Middle East. Change region anytime from the cart." [Dismiss]
+
+Stored under `localStorage` key `academy_region_toast_dismissed` so it never re-appears.
 
 ### Technical details
 
-- File: `src/components/academy/AcademyCartDrawer.tsx`.
-- Pull `subtotal`, `discountPct`, `discountAmount`, `total` from the existing `computeTotals(currency)` in `CartContext` — no new math, no schema change.
-- Use `formatPrice` from `src/lib/academyFx.ts` for all amounts; pull `currency` from `RegionContext` the same way the rest of the drawer does.
-- Pull the discount label from `computeDiscount(items.length).label` in `src/lib/academyDiscount.ts` to stay in sync with the checkout edge function.
-- Conditionally render the discount row only when `discountAmount > 0`.
-- Keep existing line-item list and Checkout button untouched; only the summary block between them changes.
-- No backend, migration, or Stripe changes — Stripe Checkout already shows tax on its hosted page when Stripe Tax is enabled.
+- **New component**: `src/components/academy/CurrencyIndicator.tsx`
+  - Props: `variant: "compact" | "full"`, optional `showTooltip?: boolean`.
+  - Reads `region` + `regionConfig` from `useRegion()` and maps to currency via the existing `REGION_TO_CURRENCY` record (lift it into `src/lib/academyFx.ts` so all callers share one source).
+  - `compact` → `<span class="text-caption text-muted-foreground">EUR</span>`.
+  - `full` → `EUR · EU & Middle East` + optional `<Tooltip>` with the FX/tax explanation.
+- **Lift `REGION_TO_CURRENCY`** from `AcademyCourse.tsx` into `src/lib/academyFx.ts` and export it. Reuse in catalog cards, course detail, and cart drawer.
+- **`AcademyCartDrawer.tsx`**: add a header row above the line items (or directly above the breakdown) with `Prices shown in` label + an inline `<Select>` mirroring `RegionSelector`'s options + `<Tooltip>` trigger. Reuses `useRegion().setRegion`.
+- **`Academy.tsx`** (catalog cards): append `<CurrencyIndicator variant="compact" />` next to each price badge.
+- **`AcademyCourse.tsx`**: replace local `REGION_TO_CURRENCY` import; render `<CurrencyIndicator variant="full" showTooltip />` next to the price badge.
+- **First-visit toast**: in `Academy.tsx`, on mount check `!isLoading && !localStorage.getItem("academy_region_toast_dismissed") && !cookieExisted`. Use the existing `sonner` toast. To detect "auto-detected vs saved", expose a `wasAutoDetected: boolean` flag from `RegionContext` (set to `true` when no cookie was found at mount).
+- **No backend, schema, Stripe, or pricing-math changes** — purely a presentation + transparency layer over existing region/FX state.
 
