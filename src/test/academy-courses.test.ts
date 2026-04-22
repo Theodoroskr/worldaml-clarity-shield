@@ -7,6 +7,7 @@ const SUPABASE_ANON_KEY =
 
 const MIN_QUIZ_QUESTIONS = 9;
 const MIN_LEARNING_OUTCOMES = 3;
+const MIN_PAID_DURATION_MINUTES = 20;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -55,6 +56,28 @@ describe("Academy paid-credential standard", () => {
       offenders,
       `Courses below ${MIN_QUIZ_QUESTIONS} questions: ${offenders
         .map((r) => `${r.slug} (${r.question_count})`)
+        .join(", ")}`,
+    ).toEqual([]);
+  });
+
+  it(`every paid (non-beginner) course is at least ${MIN_PAID_DURATION_MINUTES} minutes`, async () => {
+    const { data: courses, error } = await supabase
+      .from("academy_courses")
+      .select("slug, difficulty, duration_minutes")
+      .eq("is_published", true)
+      .neq("difficulty", "beginner");
+
+    expect(error).toBeNull();
+    expect(courses).toBeTruthy();
+
+    const offenders = (courses ?? []).filter(
+      (c) => (c.duration_minutes ?? 0) < MIN_PAID_DURATION_MINUTES,
+    );
+
+    expect(
+      offenders,
+      `Paid courses below ${MIN_PAID_DURATION_MINUTES} min: ${offenders
+        .map((c) => `${c.slug} (${c.duration_minutes}m)`)
         .join(", ")}`,
     ).toEqual([]);
   });
