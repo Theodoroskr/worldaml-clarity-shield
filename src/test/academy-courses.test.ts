@@ -45,12 +45,12 @@ describe("Academy paid-credential standard", () => {
 
     const counts = await Promise.all(
       (courses ?? []).map(async (c) => {
-        const { count, error } = await supabase
+        const { data, error } = await supabase
           .from("academy_questions_safe")
-          .select("*", { count: "exact", head: true })
+          .select("id")
           .eq("course_id", c.id);
         expect(error).toBeNull();
-        return { slug: c.slug, count: count ?? 0 };
+        return { slug: c.slug, count: data?.length ?? 0 };
       }),
     );
 
