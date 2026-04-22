@@ -8,6 +8,8 @@ const SUPABASE_ANON_KEY =
 const MIN_QUIZ_QUESTIONS = 9;
 const MIN_LEARNING_OUTCOMES = 3;
 const MIN_PAID_DURATION_MINUTES = 20;
+const MIN_MODULES_ANY = 1;
+const MIN_MODULES_PAID = 3;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
