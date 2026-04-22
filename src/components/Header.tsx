@@ -240,7 +240,7 @@ export const Header = () => {
           </nav>
 
           {/* Desktop CTA & Region */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2 shrink-0">
             <RegionSelector />
             {user ? (
               <>
@@ -269,7 +269,7 @@ export const Header = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-text-secondary hover:text-navy"
+            className="lg:hidden p-2 text-text-secondary hover:text-navy"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
