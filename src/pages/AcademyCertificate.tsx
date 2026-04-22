@@ -88,11 +88,16 @@ const AcademyCertificate = () => {
     doc.setFillColor(13, 148, 136); // teal
     doc.rect(mx, my, w - mx * 2, 3, "F");
 
+    // Logo
+    try {
+      doc.addImage(worldAmlLogo, "PNG", w / 2 - 22, 18, 44, 14);
+    } catch { /* logo optional */ }
+
     // Header
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
+    doc.setFontSize(20);
     doc.setTextColor(30, 58, 95);
-    doc.text("WorldAML Academy", w / 2, 38, { align: "center" });
+    doc.text("WorldAML Academy", w / 2, 40, { align: "center" });
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
