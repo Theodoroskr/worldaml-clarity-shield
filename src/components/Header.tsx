@@ -46,6 +46,14 @@ const navLinks: NavLink[] = [
           { href: "/platform/security", label: "Security" },
         ],
       },
+      {
+        groupLabel: "Data Sources",
+        items: [
+          { href: "/data-sources", label: "Overview" },
+          { href: "/data-sources/worldcompliance", label: "WorldCompliance®" },
+          { href: "/data-sources/bridger-xg", label: "Bridger Insight XG®" },
+        ],
+      },
     ],
   },
   { href: "/platform/api", label: "WorldAML API" },
