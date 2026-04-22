@@ -281,11 +281,20 @@ const AcademyCourse = () => {
             </button>
             <button
               onClick={() => {
-                if (user) {
-                  setActiveTab("quiz");
-                } else {
+                if (!user) {
                   navigate(`/signup?redirect=${encodeURIComponent(`/academy/${slug}?tab=quiz`)}`);
+                  return;
                 }
+                if (!allModulesComplete) {
+                  toast({
+                    title: "Complete all modules first",
+                    description: `Finish all ${modules?.length || 0} modules to unlock the quiz.`,
+                    variant: "destructive",
+                  });
+                  setActiveTab("learn");
+                  return;
+                }
+                setActiveTab("quiz");
               }}
               className={`px-6 py-3 text-body-sm font-medium border-b-2 transition-colors ${
                 activeTab === "quiz" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
@@ -293,7 +302,7 @@ const AcademyCourse = () => {
             >
               <Award className="h-4 w-4 inline mr-1.5" />
               Quiz & Certificate
-              {!user && <Lock className="h-3 w-3 inline ml-1" />}
+              {(!user || !allModulesComplete) && <Lock className="h-3 w-3 inline ml-1" />}
             </button>
           </div>
         </section>
@@ -484,6 +493,29 @@ const AcademyCourse = () => {
                 <p className="text-muted-foreground mb-6">Create a free account to take the quiz and earn your certificate.</p>
                 <Button asChild>
                   <Link to="/signup">Create Free Account</Link>
+                </Button>
+              </div>
+            ) : !allModulesComplete ? (
+              <div className="max-w-md mx-auto text-center py-12">
+                <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-subtitle font-semibold mb-2">Complete all modules to unlock the quiz</h3>
+                <p className="text-muted-foreground mb-6">
+                  You've completed {completedModules.length} of {modules?.length || 0} modules.
+                  Finish the remaining {(modules?.length || 0) - completedModules.length} to take the quiz and earn your certificate.
+                </p>
+                <div className="max-w-xs mx-auto mb-6">
+                  <Progress value={progressPercent} className="h-2" />
+                </div>
+                <Button
+                  onClick={() => {
+                    setActiveTab("learn");
+                    const firstIncompleteIdx = (modules || []).findIndex((m: any) => !completedModules.includes(m.id));
+                    if (firstIncompleteIdx >= 0) setActiveModule(firstIncompleteIdx);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                >
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Continue Learning
                 </Button>
               </div>
             ) : (
