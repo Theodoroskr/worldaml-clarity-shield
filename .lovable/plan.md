@@ -1,23 +1,32 @@
 
-## Fix lint warning on Academy.tsx
+## Protect Academy course & quiz content from copy/print/screenshot
 
-Run the linter against `src/pages/Academy.tsx`, identify the flagged warning(s), and resolve them without changing UI behaviour.
+Add a content protection layer to Academy course pages and quizzes that discourages casual copying, right-click saving, text selection, and printing. True screenshot blocking isn't possible in a browser, but we can make it inconvenient and visibly watermark.
 
-### Likely fixes
-Based on recent edits to this file, the warning is most likely one of:
-- An unused import (e.g. an icon imported but no longer rendered after the cover-image refactor).
-- A `react-hooks/exhaustive-deps` dependency missing from a `useEffect`/`useMemo`.
-- A `react-refresh/only-export-components` warning from a non-component export living next to the page component.
+### Scope
+- `src/pages/AcademyCourse.tsx` (course lessons + quiz)
+- `src/components/academy/ModuleContent.tsx` (rendered lesson markdown)
+- New: `src/components/academy/ContentProtection.tsx` (wrapper + global print CSS + watermark)
 
-### Steps
-1. Run ESLint on `src/pages/Academy.tsx` to get the exact rule + line.
-2. Apply the minimal fix:
-   - Unused import → remove the import.
-   - Missing dep → add the dep, or wrap the value in `useCallback`/`useMemo` if adding it would cause a loop.
-   - Non-component export → move the constant/helper into a sibling file (e.g. `src/pages/academyConfig.ts`) and import it back.
-3. Re-run the linter on the file to confirm zero warnings.
-4. Run `npm run build` to confirm the preview build is clean.
+### What it does
+1. **Disable text selection** on protected regions via `select-none` + `user-select: none`.
+2. **Block right-click context menu** with `onContextMenu={e => e.preventDefault()}`.
+3. **Block copy / cut / drag** via `onCopy`, `onCut`, `onDragStart` handlers.
+4. **Block keyboard shortcuts** (Ctrl/Cmd+C, Ctrl/Cmd+P, Ctrl/Cmd+S, Ctrl/Cmd+A, PrintScreen) with a window keydown listener while mounted; clear clipboard on PrintScreen.
+5. **Hide content when printing** via injected `@media print { .academy-protected { display: none !important; } body::after { content: "Printing protected content is not allowed — © WorldAML Academy"; } }`.
+6. **Diagonal watermark overlay** with the user's email (or "WorldAML Academy") repeated, `pointer-events-none`, low opacity — discourages screenshots.
+7. **Blur on tab blur** (optional small touch) so screenshots from screen-recorders capturing background tabs are less useful.
+
+### Implementation
+- Create `ContentProtection.tsx` exporting a `<ContentProtection>` wrapper component that:
+  - Renders children inside a div with the protection handlers and `academy-protected` class.
+  - Mounts a global `<style>` for print rules (only once via a module-level guard).
+  - Renders the watermark overlay.
+  - Registers/cleans up the keydown listener.
+- Wrap the lesson body + quiz body in `AcademyCourse.tsx` with `<ContentProtection>`.
+- Pass the user's email from `useAuth()` as the watermark label.
 
 ### Out of scope
-- No visual or behavioural changes.
-- No refactors to other files unless step 2 requires extracting a helper to satisfy `react-refresh/only-export-components`.
+- No backend/DRM changes.
+- No changes to public marketing pages or certificates.
+- We will note in the summary that browser-based protection is deterrent-only.
