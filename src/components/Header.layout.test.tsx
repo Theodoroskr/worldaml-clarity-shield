@@ -1,9 +1,20 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({
+    user: null,
+    session: null,
+    loading: false,
+    signIn: async () => ({ error: null }),
+    signUp: async () => ({ error: null }),
+    signOut: async () => {},
+  }),
+}));
+
 import { Header } from "./Header";
-import { AuthContext } from "@/contexts/AuthContext";
 import { RegionProvider } from "@/contexts/RegionContext";
 
 /**
@@ -28,24 +39,13 @@ import { RegionProvider } from "@/contexts/RegionContext";
 
 const COMMON_DESKTOP_WIDTHS = [1280, 1366, 1440, 1536, 1920];
 
-const authValue = {
-  user: null,
-  session: null,
-  loading: false,
-  signIn: async () => ({ error: null }) as never,
-  signUp: async () => ({ error: null }) as never,
-  signOut: async () => {},
-} as unknown as React.ContextType<typeof AuthContext>;
-
 const renderHeader = () =>
   render(
     <HelmetProvider>
       <MemoryRouter>
-        <AuthContext.Provider value={authValue}>
-          <RegionProvider>
-            <Header />
-          </RegionProvider>
-        </AuthContext.Provider>
+        <RegionProvider>
+          <Header />
+        </RegionProvider>
       </MemoryRouter>
     </HelmetProvider>,
   );
