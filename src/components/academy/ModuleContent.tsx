@@ -73,7 +73,7 @@ const renderInline = (text: string, keyPrefix: string): React.ReactNode[] => {
           href={match[3]}
           target={match[3].startsWith("http") ? "_blank" : undefined}
           rel={match[3].startsWith("http") ? "noopener noreferrer" : undefined}
-          className="text-primary underline underline-offset-2 hover:text-primary/80"
+          className="text-accent underline underline-offset-2 decoration-accent/40 hover:decoration-accent transition-colors"
         >
           {match[2]}
         </a>
