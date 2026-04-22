@@ -146,7 +146,7 @@ export const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden 2xl:flex items-center gap-0.5 flex-1 justify-end min-w-0 ml-8">
+          <nav className="hidden 2xl:flex items-center gap-0.5 ml-8 mr-4 flex-shrink min-w-0 overflow-hidden">
             {navLinks.map((link) =>
               link.groups ? (
                 /* Grouped two-column dropdown (WorldAML Suite) */
