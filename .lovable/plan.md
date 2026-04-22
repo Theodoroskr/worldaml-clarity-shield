@@ -1,34 +1,38 @@
 
 
-## Load 30-question exam banks for Courses 1, 2, and 3
+## Enforce 70% pass requirement for certificate + next-course unlock
 
-Replace the existing quiz questions in `academy_questions` for the three foundational courses with the full 30-question banks (10 easy, 10 medium, 10 advanced) provided.
+Lock the certificate and any "next course" navigation behind a 70%+ score on the course exam. Learners who fail see their score, the pass threshold, and a Retake button — no certificate token is issued, no progression allowed.
 
-### Courses targeted
-- **Course 1** — AML Fundamentals (`aml-fundamentals`)
-- **Course 2** — CDD & KYC (`kyc-customer-due-diligence`, id `a1000000-0000-0000-0000-000000000002`)
-- **Course 3** — Suspicious Activity & Reporting (`transaction-monitoring-sar`, id `0db4258d-3806-4aea-83e4-d7d1d3e334d4`)
+### Current behaviour
+- Quiz submits to `submit-quiz` edge function which already calculates score and only persists a certificate when `score >= pass_mark` (existing 70%).
+- `AcademyCourse.tsx` review banner currently shows "View Certificate" whenever a `certificateToken` is returned — this already aligns with passing, but the UI doesn't make the gate explicit and there's no enforcement on navigating to the next course.
 
-I'll resolve Course 1's id by slug before insert.
+### Changes
 
-### What gets written
-For each course, in a single migration:
-1. `DELETE FROM academy_questions WHERE course_id = <id>` to clear the existing bank.
-2. `INSERT` 30 rows with:
-   - `question` — the prompt (medium/advanced single-line prompts converted to full questions, e.g. "Which stage hides origin of funds?").
-   - `options` — JSONB array of 3–4 plausible distractors plus the correct answer (medium/advanced items only have the correct answer in source, so I'll author 2–3 sensible distractors per question grounded in the lesson content already loaded).
-   - `correct_index` — index of the ✅ answer.
-   - `sort_order` — 1–30 (easy 1–10, medium 11–20, advanced 21–30).
-   - `explanation` — one-sentence rationale tied to the lesson material.
+**1. `src/pages/AcademyCourse.tsx` — review banner clarity**
+- Track `lastScore`, `passMark` (default 70), and `passed` (`score >= passMark`) from the submit response.
+- Pass banner (emerald): "Passed — {score}% · Certificate unlocked" + **View Certificate** + **Retake** buttons.
+- Fail banner (rose): "Did not pass — {score}% · {passMark}% required" + **Retake Quiz** button only. No certificate link rendered. Explanation/review of answers still shown so learners can study.
+- Hide any "Next course" / "Continue" CTA unless `passed === true`.
 
-### Quality guardrails
-- Every question gets 4 options where feasible (minimum 3) so the quiz feels substantive.
-- Distractors are domain-plausible (drawn from neighbouring AML concepts), never joke answers.
-- Pass mark stays at 70% (existing app behaviour); 30 questions × 70% = 21 correct to pass.
-- The existing `academy-courses.test.ts` requirement of ≥9 questions per course is comfortably exceeded.
+**2. `src/pages/AcademyCourse.tsx` — next-course gating**
+- Where the page links to the next course in the curriculum (footer CTA / "Continue to next course" button), wrap it in a check: if the learner does not have a passing certificate for the current course, render the button disabled with a tooltip "Pass this course's exam (70%) to unlock the next course." Otherwise link normally.
+- Source of truth: query `academy_certificates` for the current `user_id` + `course_id` on mount; expose `hasPassed` boolean. Reuse the same flag to gate the "View Certificate" button after a fresh pass.
+
+**3. `src/pages/Academy.tsx` — course list gating**
+- In the course catalogue, mark each course card with one of three states:
+  - **Available** — first course, or previous course passed.
+  - **Locked** — previous course not yet passed. Card shows lock icon + "Complete {previous course} (70%+) to unlock" and the "Start course" button is disabled.
+  - **Completed** — passed; show certificate link.
+- Compute by fetching the learner's `academy_certificates` rows once and walking the ordered course list.
+
+**4. No backend changes**
+- `submit-quiz` already enforces the 70% threshold for certificate issuance — no edge-function or DB change required.
+- No migration; gating reads existing `academy_certificates` rows.
 
 ### Out of scope
-- No changes to lesson content, course metadata, images, or UI.
-- No changes to certificate or scoring logic.
-- Other courses' question banks remain untouched.
+- Pass mark stays at 70% (unchanged).
+- No changes to question banks, randomization, review mode, or module-completion gating.
+- No retake cooldown or attempt-limit logic.
 
