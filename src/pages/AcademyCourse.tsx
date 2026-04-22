@@ -525,19 +525,72 @@ const AcademyCourse = () => {
               </div>
             ) : (
               <div className="max-w-2xl mx-auto">
-                {quizSubmitted && quizScore !== null && quizScore >= PASS_THRESHOLD ? (
+                {quizSubmitted && quizScore !== null && (
+                  <div className={`mb-8 rounded-xl border p-6 ${
+                    quizScore >= PASS_THRESHOLD
+                      ? "border-emerald-500/40 bg-emerald-50"
+                      : "border-rose-500/40 bg-rose-50"
+                  }`}>
+                    <div className="flex items-start gap-4">
+                      {quizScore >= PASS_THRESHOLD ? (
+                        <Award className="h-10 w-10 text-emerald-600 flex-shrink-0" />
+                      ) : (
+                        <XCircle className="h-10 w-10 text-rose-600 flex-shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl font-bold text-foreground mb-1">
+                          {quizScore >= PASS_THRESHOLD ? "Congratulations — you passed! 🎉" : "Not quite — review and retry"}
+                        </h3>
+                        <p className="text-body-sm text-muted-foreground mb-4">
+                          You scored <span className="font-semibold text-foreground">{quizScore}%</span>
+                          {" "}({Object.values(quizAnswers).filter((ans, i) => {
+                            const q = questions?.[i];
+                            return q && correctAnswers[q.id] === ans;
+                          }).length} of {questions?.length || 0} correct).
+                          {" "}Pass mark: {PASS_THRESHOLD}%.
+                          {" "}Review every question and explanation below.
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {quizScore >= PASS_THRESHOLD && certificateToken && (
+                            <Button
+                              variant="accent"
+                              onClick={() => navigate(`/academy/certificate/${certificateToken}`)}
+                            >
+                              <Award className="h-4 w-4 mr-2" />
+                              View Certificate
+                            </Button>
+                          )}
+                          {quizScore < PASS_THRESHOLD && (
+                            <Button
+                              onClick={() => {
+                                setQuizAnswers({});
+                                setQuizSubmitted(false);
+                                setQuizScore(null);
+                                setCorrectAnswers({});
+                                setReviewMode(false);
+                                setCertificateToken(null);
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                              }}
+                            >
+                              Retake Quiz
+                            </Button>
+                          )}
+                          <Button variant="outline" asChild>
+                            <Link to="/academy">Back to Academy</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {false ? (
                   <div className="text-center py-8">
                     <Award className="h-16 w-16 text-accent mx-auto mb-4" />
-                    <h3 className="text-headline text-foreground mb-2">Congratulations! 🎉</h3>
-                    <p className="text-body-lg text-muted-foreground mb-2">
-                      You scored <span className="font-bold text-foreground">{quizScore}%</span> and earned your certificate!
-                    </p>
-                    <p className="text-body-sm text-muted-foreground mb-6">Your certificate is ready — showcase it on LinkedIn to strengthen your professional profile.</p>
                   </div>
                 ) : (
                   <>
                     <h2 className="text-subtitle font-semibold text-foreground mb-2">
-                      {course.title} — Quiz
+                      {quizSubmitted ? `${course.title} — Review` : `${course.title} — Quiz`}
                     </h2>
                     <p className="text-body-sm text-muted-foreground mb-8">
                       Answer all questions. You need {PASS_THRESHOLD}% to pass and earn your certificate.
