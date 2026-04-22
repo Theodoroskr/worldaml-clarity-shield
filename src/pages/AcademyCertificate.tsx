@@ -9,6 +9,7 @@ import { Award, Linkedin, Share2, ArrowLeft, CheckCircle, BookOpen, ExternalLink
 import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import worldAmlLogo from "@/assets/worldaml-logo.png";
 
 const PUBLISHED_ORIGIN = "https://worldaml.com";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -87,11 +88,16 @@ const AcademyCertificate = () => {
     doc.setFillColor(13, 148, 136); // teal
     doc.rect(mx, my, w - mx * 2, 3, "F");
 
+    // Logo
+    try {
+      doc.addImage(worldAmlLogo, "PNG", w / 2 - 22, 18, 44, 14);
+    } catch { /* logo optional */ }
+
     // Header
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
+    doc.setFontSize(20);
     doc.setTextColor(30, 58, 95);
-    doc.text("WorldAML Academy", w / 2, 38, { align: "center" });
+    doc.text("WorldAML Academy", w / 2, 40, { align: "center" });
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
@@ -260,6 +266,7 @@ const AcademyCertificate = () => {
                 <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-primary/30 rounded-br-lg" />
 
                 <div className="mb-6">
+                  <img src={worldAmlLogo} alt="WorldAML" className="h-12 mx-auto mb-4" />
                   <h3 className="text-2xl font-bold text-primary tracking-tight">WorldAML Academy</h3>
                   <p className="text-body-sm text-muted-foreground">Compliance Education &amp; Certification</p>
                   <div className="w-16 h-px bg-border mx-auto mt-4 mb-4" />
