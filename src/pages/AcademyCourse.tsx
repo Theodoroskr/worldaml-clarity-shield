@@ -667,22 +667,7 @@ const AcademyCourse = () => {
                           </p>
                         )}
                       </div>
-                    ) : quizScore !== null && quizScore < PASS_THRESHOLD && (
-                      <div className="mt-8 text-center">
-                        <p className="text-body text-muted-foreground mb-4">
-                          You scored {quizScore}%. Review the material and try again!
-                        </p>
-                        <Button
-                          onClick={() => {
-                            setQuizAnswers({});
-                            setQuizSubmitted(false);
-                            setQuizScore(null);
-                          }}
-                        >
-                          Retake Quiz
-                        </Button>
-                      </div>
-                    )}
+                    ) : null}
                   </>
                 )}
               </div>
