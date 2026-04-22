@@ -213,7 +213,7 @@ const ModuleContent: React.FC<Props> = ({ content, className }) => {
       out.push(
         <div key={key} className="my-6 overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-body-sm">
-            <thead className="bg-secondary/50">
+            <thead className="bg-primary/5">
               <tr>
                 {header.map((h, hi) => (
                   <th key={hi} className="text-left font-semibold text-foreground px-4 py-2.5 border-b border-border">
