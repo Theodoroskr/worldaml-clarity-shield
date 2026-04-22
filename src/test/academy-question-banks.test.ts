@@ -119,62 +119,54 @@ const EXPECTED_CORRECT: Record<string, Record<number, string>> = {
   },
 };
 
+type AuditRow = {
+  slug: string;
+  sort_order: number;
+  correct_option: string;
+  options_length: number;
+  correct_index: number;
+};
+
 describe("Foundational course question banks", () => {
   for (const slug of Object.keys(EXPECTED_CORRECT)) {
     describe(slug, () => {
       it(`has exactly ${REQUIRED_COUNT} questions and correct_index points to the ✅ option`, async () => {
-        const { data: course, error: courseError } = await supabase
-          .from("academy_courses")
-          .select("id")
-          .eq("slug", slug)
-          .maybeSingle();
+        const { data, error } = await supabase.rpc(
+          "academy_question_bank_audit",
+        );
 
-        expect(courseError).toBeNull();
-        expect(course, `Course ${slug} not found`).toBeTruthy();
+        expect(error).toBeNull();
+        expect(data).toBeTruthy();
 
-        const { data: questions, error: qError } = await supabase
-          .from("academy_questions")
-          .select("question, options, correct_index, sort_order")
-          .eq("course_id", course!.id)
-          .order("sort_order", { ascending: true });
-
-        expect(qError).toBeNull();
-        expect(questions).toBeTruthy();
+        const rows = ((data ?? []) as AuditRow[]).filter(
+          (r) => r.slug === slug,
+        );
 
         // 1. Exactly 30 questions
         expect(
-          questions!.length,
-          `${slug} has ${questions!.length} questions, expected ${REQUIRED_COUNT}`,
+          rows.length,
+          `${slug} has ${rows.length} questions, expected ${REQUIRED_COUNT}`,
         ).toBe(REQUIRED_COUNT);
 
-        // 2. correct_index must be a valid index into options
-        // 3. options[correct_index] must equal the expected ✅ answer
+        // 2. correct_index in range, and 3. matches the expected ✅ option
         const expected = EXPECTED_CORRECT[slug];
         const mismatches: string[] = [];
 
-        for (const q of questions!) {
-          const opts = q.options as unknown as string[];
-          if (!Array.isArray(opts) || opts.length < 2) {
-            mismatches.push(
-              `Q${q.sort_order}: options is not a valid array`,
-            );
-            continue;
-          }
+        for (const r of rows) {
           if (
-            typeof q.correct_index !== "number" ||
-            q.correct_index < 0 ||
-            q.correct_index >= opts.length
+            typeof r.correct_index !== "number" ||
+            r.correct_index < 0 ||
+            r.correct_index >= r.options_length
           ) {
             mismatches.push(
-              `Q${q.sort_order}: correct_index ${q.correct_index} out of range (0..${opts.length - 1})`,
+              `Q${r.sort_order}: correct_index ${r.correct_index} out of range (0..${r.options_length - 1})`,
             );
             continue;
           }
-          const actual = opts[q.correct_index];
-          const want = expected[q.sort_order];
-          if (want && actual !== want) {
+          const want = expected[r.sort_order];
+          if (want && r.correct_option !== want) {
             mismatches.push(
-              `Q${q.sort_order}: correct option is "${actual}", expected "${want}"`,
+              `Q${r.sort_order}: correct option is "${r.correct_option}", expected "${want}"`,
             );
           }
         }
