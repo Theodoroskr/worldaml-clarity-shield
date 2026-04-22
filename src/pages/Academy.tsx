@@ -401,10 +401,10 @@ const Academy = () => {
             {(() => {
               if (isLoading) {
                 return (
-                  <div className="grid md:grid-cols-3 gap-6">
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {[1, 2, 3, 4, 5, 6].map((i) => (
                       <div key={i} className="rounded-xl border border-border bg-card overflow-hidden animate-pulse">
-                        <div className="h-32 bg-muted" />
+                        <div className="aspect-[16/9] sm:aspect-[16/10] md:h-40 bg-muted" />
                         <div className="p-5">
                           <div className="h-5 bg-muted rounded w-2/3 mb-3" />
                           <div className="h-4 bg-muted rounded w-full mb-2" />
