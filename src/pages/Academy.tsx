@@ -646,6 +646,24 @@ const Academy = () => {
                         <Badge variant="outline" className={`${catConfig.color} text-[10px] border-0`}>
                           {catConfig.label}
                         </Badge>
+                        {(() => {
+                          if (FREE_ACADEMY_COURSES.has(course.slug)) {
+                            return (
+                              <Badge variant="outline" className="text-[10px] border-accent/40 text-accent bg-accent/10">
+                                Free
+                              </Badge>
+                            );
+                          }
+                          if (isPaidCourse(course.slug)) {
+                            const cents = convertEurCents(ACADEMY_PRICING[course.slug].eurCents, currency);
+                            return (
+                              <Badge variant="outline" className="text-[10px] border-primary/40 text-primary bg-primary/10">
+                                {formatPrice(cents, currency)}
+                              </Badge>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
 
                       <h3 className={`font-semibold text-foreground mb-2 group-hover:text-primary transition-colors ${featured ? "text-2xl" : "text-subtitle"}`}>
