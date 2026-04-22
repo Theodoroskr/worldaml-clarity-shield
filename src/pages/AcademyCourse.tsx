@@ -27,6 +27,8 @@ const AcademyCourse = () => {
   const [activeModule, setActiveModule] = useState(0);
   const [completedModules, setCompletedModules] = useState<string[]>([]);
   const [justCompletedId, setJustCompletedId] = useState<string | null>(null);
+  const [moduleSearch, setModuleSearch] = useState("");
+  const [navCollapsed, setNavCollapsed] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
