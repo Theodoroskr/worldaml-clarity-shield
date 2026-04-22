@@ -165,7 +165,7 @@ export const Header = () => {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="p-3 w-auto">
-                    <div className="grid grid-cols-2 gap-x-4">
+                    <div className="grid grid-cols-3 gap-x-4">
                       {link.groups.map((group) => (
                         <div key={group.groupLabel}>
                           <DropdownMenuLabel className="text-caption font-semibold text-text-tertiary uppercase tracking-wider px-2 pb-1">
