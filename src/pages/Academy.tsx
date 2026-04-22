@@ -81,6 +81,9 @@ type DifficultyFilter = "all" | "beginner" | "intermediate" | "advanced";
 
 const Academy = () => {
   const { user } = useAuth();
+  const cart = useCart();
+  const { region } = useRegion();
+  const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [filter, setFilter] = useState<FilterTab>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
