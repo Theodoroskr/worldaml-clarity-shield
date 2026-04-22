@@ -15,6 +15,7 @@ import ModuleContent, { computeReadingMinutes } from "@/components/academy/Modul
 import ModuleTOC from "@/components/academy/ModuleTOC";
 import ContentProtection from "@/components/academy/ContentProtection";
 import { getCourseDiagram } from "@/assets/academy";
+import { useCourseGate } from "@/hooks/useCourseGate";
 
 const PASS_THRESHOLD = 70;
 
@@ -24,6 +25,7 @@ const AcademyCourse = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const gate = useCourseGate(slug);
   const [activeTab, setActiveTab] = useState<"learn" | "quiz">(
     searchParams.get("tab") === "quiz" ? "quiz" : "learn"
   );
