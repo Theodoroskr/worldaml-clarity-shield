@@ -112,6 +112,8 @@ serve(async (req) => {
       }
       resolved[slug] = { eurCents: fallback.eurCents, stripeProductId: fallback.stripeProductId };
     }
+
+    // Drop courses the user already has active access to
     const { data: existing } = await serviceClient
       .from("academy_course_purchases")
       .select("course_slug, expires_at")
@@ -144,7 +146,7 @@ serve(async (req) => {
 
     // Build line items
     const lineItems = slugsToBuy.map((slug) => {
-      const { eurCents, stripeProductId } = PRICING[slug];
+      const { eurCents, stripeProductId } = resolved[slug];
       const unitAmount = convert(eurCents, currency);
       return {
         quantity: 1,
@@ -188,7 +190,7 @@ serve(async (req) => {
 
     // Insert pending rows (one per course) sharing the session id
     const subtotalCents = slugsToBuy.reduce(
-      (sum, slug) => sum + convert(PRICING[slug].eurCents, currency),
+      (sum, slug) => sum + convert(resolved[slug].eurCents, currency),
       0,
     );
     const totalAfterDiscount = Math.round(subtotalCents * (1 - discountPct / 100));
@@ -196,7 +198,7 @@ serve(async (req) => {
     // Distribute discount proportionally; absorb any rounding remainder on the last row
     let allocated = 0;
     const rows = slugsToBuy.map((slug, idx) => {
-      const lineCents = convert(PRICING[slug].eurCents, currency);
+      const lineCents = convert(resolved[slug].eurCents, currency);
       let chargeable: number;
       if (idx === slugsToBuy.length - 1) {
         chargeable = totalAfterDiscount - allocated;
