@@ -1,5 +1,5 @@
-// Send 1-day follow-up email to new signups from Evgenios Georgiou
-// Triggered hourly by pg_cron
+// Send 1-day follow-up email to new signups (signed by Evgenios Georgiou)
+// Triggered hourly by pg_cron, also supports manual test mode via { test: true, to: "..." }
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -9,7 +9,10 @@ const corsHeaders = {
 };
 
 const FROM = "WorldAML <info@worldaml.com>";
-const CC = ["compliance@infocreditgroup.com"];
+const REQUIRED_CC = "compliance@infocreditgroup.com";
+const CC = [REQUIRED_CC];
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const buildHtml = (firstName: string) => `
 <div style="font-family: Arial, sans-serif; font-size: 14px; color: #1a1a2e; line-height: 1.6; max-width: 600px;">
@@ -53,6 +56,106 @@ Compliance Advisory Team
 Infocredit Group | WorldAML
 www.worldaml.com`;
 
+// Build Resend payload + assert CC is present and valid before sending
+function buildPayload(toEmail: string, firstName: string, subject: string) {
+  if (!EMAIL_RE.test(toEmail)) {
+    throw new Error(`Invalid recipient email: ${toEmail}`);
+  }
+  const cc = Array.from(new Set(CC.filter((e) => EMAIL_RE.test(e))));
+  if (!cc.includes(REQUIRED_CC)) {
+    throw new Error(
+      `CC validation failed: required address ${REQUIRED_CC} missing from CC list`,
+    );
+  }
+
+  const payload = {
+    from: FROM,
+    to: [toEmail],
+    cc,
+    reply_to: "info@worldaml.com",
+    subject,
+    html: buildHtml(firstName),
+    text: buildText(firstName),
+  };
+
+  // Final guard — never send without compliance CC
+  if (!payload.cc.includes(REQUIRED_CC)) {
+    throw new Error("CC guard tripped — refusing to send without compliance CC");
+  }
+
+  return payload;
+}
+
+// Translate Resend errors into a clear human-readable reason
+function explainResendError(status: number, body: any): string {
+  const name = body?.name ?? body?.error ?? "unknown_error";
+  const message = body?.message ?? JSON.stringify(body);
+  if (status === 401 || status === 403) {
+    return `Auth error (${status}): ${message}. Check RESEND_API_KEY.`;
+  }
+  if (status === 422) {
+    return `Validation error (422): ${message}. Likely an unverified sender domain or malformed payload.`;
+  }
+  if (status === 429) {
+    return `Rate limited (429): ${message}. Resend will retry on next cron tick.`;
+  }
+  if (status >= 500) {
+    return `Resend server error (${status}): ${message}.`;
+  }
+  return `Resend ${status} ${name}: ${message}`;
+}
+
+async function sendOne(
+  resendKey: string,
+  toEmail: string,
+  firstName: string,
+  subject: string,
+): Promise<
+  | { ok: true; messageId: string | null; cc: string[] }
+  | { ok: false; reason: string; status?: number }
+> {
+  let payload;
+  try {
+    payload = buildPayload(toEmail, firstName, subject);
+  } catch (e) {
+    return { ok: false, reason: `Payload build failed: ${(e as Error).message}` };
+  }
+
+  let resp: Response;
+  try {
+    resp = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${resendKey}`,
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    return {
+      ok: false,
+      reason: `Network error contacting Resend: ${(e as Error).message}`,
+    };
+  }
+
+  let body: any = null;
+  try {
+    body = await resp.json();
+  } catch {
+    body = { message: await resp.text() };
+  }
+
+  if (!resp.ok) {
+    return {
+      ok: false,
+      status: resp.status,
+      reason: explainResendError(resp.status, body),
+    };
+  }
+
+  return { ok: true, messageId: body?.id ?? null, cc: payload.cc };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -65,14 +168,73 @@ Deno.serve(async (req) => {
 
     if (!RESEND_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "RESEND_API_KEY not configured" }),
+        JSON.stringify({ ok: false, error: "RESEND_API_KEY not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+    // Parse body once (tolerate empty cron POSTs)
+    let body: any = {};
+    try {
+      const raw = await req.text();
+      body = raw ? JSON.parse(raw) : {};
+    } catch {
+      body = {};
+    }
 
-    // Find approved profiles created >24h ago that haven't received a follow-up yet
+    // ---- Test mode ----
+    // Usage: POST { "test": true, "to": "you@example.com", "name": "Optional First" }
+    if (body?.test === true) {
+      const to = String(body.to ?? "").trim();
+      if (!EMAIL_RE.test(to)) {
+        return new Response(
+          JSON.stringify({
+            ok: false,
+            error: "Provide a valid 'to' email address for the test send.",
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      const firstName = String(body.name ?? "").trim();
+      const result = await sendOne(
+        RESEND_API_KEY,
+        to,
+        firstName,
+        "[TEST] Welcome to WorldAML — Let's schedule a demo",
+      );
+
+      if (!result.ok) {
+        console.error(`[followup][test] FAILED to=${to}: ${result.reason}`);
+        return new Response(
+          JSON.stringify({
+            ok: false,
+            test: true,
+            to,
+            cc_required: REQUIRED_CC,
+            reason: result.reason,
+            status: result.status ?? null,
+          }),
+          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      console.log(
+        `[followup][test] sent to=${to} cc=${result.cc.join(",")} id=${result.messageId}`,
+      );
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          test: true,
+          to,
+          cc: result.cc,
+          message_id: result.messageId,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // ---- Normal cron mode ----
+    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
     const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
     const { data: candidates, error: fetchErr } = await supabase
@@ -86,12 +248,11 @@ Deno.serve(async (req) => {
 
     if (!candidates || candidates.length === 0) {
       return new Response(
-        JSON.stringify({ message: "No candidates", processed: 0 }),
+        JSON.stringify({ ok: true, message: "No candidates", processed: 0 }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Filter out users who've already been emailed
     const userIds = candidates.map((c) => c.user_id);
     const { data: alreadySent } = await supabase
       .from("signup_followups_sent")
@@ -101,72 +262,60 @@ Deno.serve(async (req) => {
     const sentSet = new Set((alreadySent ?? []).map((r) => r.user_id));
     const toSend = candidates.filter((c) => !sentSet.has(c.user_id) && c.email);
 
-    console.log(`[followup] candidates=${candidates.length} pending=${toSend.length}`);
+    console.log(
+      `[followup] candidates=${candidates.length} pending=${toSend.length}`,
+    );
 
     let success = 0;
     let failed = 0;
+    const failures: Array<{ email: string; reason: string }> = [];
 
     for (const user of toSend) {
       const firstName = (user.full_name ?? "").split(" ")[0] ?? "";
-      try {
-        const resp = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-          },
-          body: JSON.stringify({
-            from: FROM,
-            to: [user.email],
-            cc: CC,
-            reply_to: "info@worldaml.com",
-            subject: "Welcome to WorldAML — Let's schedule a demo",
-            html: buildHtml(firstName),
-            text: buildText(firstName),
-          }),
-        });
+      const result = await sendOne(
+        RESEND_API_KEY,
+        user.email!,
+        firstName,
+        "Welcome to WorldAML — Let's schedule a demo",
+      );
 
-        const result = await resp.json();
-
-        if (!resp.ok) {
-          console.error(`[followup] failed for ${user.email}:`, result);
-          await supabase.from("signup_followups_sent").insert({
-            user_id: user.user_id,
-            email: user.email,
-            status: "failed",
-            error_message: JSON.stringify(result).slice(0, 500),
-          });
-          failed++;
-          continue;
-        }
-
-        await supabase.from("signup_followups_sent").insert({
-          user_id: user.user_id,
-          email: user.email,
-          status: "sent",
-          resend_message_id: result.id ?? null,
-        });
-        success++;
-      } catch (err) {
-        console.error(`[followup] error for ${user.email}:`, err);
+      if (!result.ok) {
+        console.error(`[followup] FAILED user=${user.user_id} email=${user.email} reason=${result.reason}`);
         await supabase.from("signup_followups_sent").insert({
           user_id: user.user_id,
           email: user.email,
           status: "failed",
-          error_message: String(err).slice(0, 500),
+          error_message: result.reason.slice(0, 500),
         });
         failed++;
+        failures.push({ email: user.email!, reason: result.reason });
+        continue;
       }
+
+      await supabase.from("signup_followups_sent").insert({
+        user_id: user.user_id,
+        email: user.email,
+        status: "sent",
+        resend_message_id: result.messageId,
+      });
+      success++;
     }
 
     return new Response(
-      JSON.stringify({ processed: toSend.length, success, failed }),
+      JSON.stringify({
+        ok: true,
+        processed: toSend.length,
+        success,
+        failed,
+        cc_applied: REQUIRED_CC,
+        failures: failures.slice(0, 10),
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
     console.error("[followup] fatal:", e);
     return new Response(
-      JSON.stringify({ error: String(e) }),
+      JSON.stringify({ ok: false, error: String(e) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
