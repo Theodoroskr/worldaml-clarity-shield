@@ -35,31 +35,26 @@ describe("Academy paid-credential standard", () => {
   });
 
   it(`every published course has at least ${MIN_QUIZ_QUESTIONS} quiz questions`, async () => {
-    const { data: courses, error: cErr } = await supabase
-      .from("academy_courses")
-      .select("id, slug")
-      .eq("is_published", true);
-
-    expect(cErr).toBeNull();
-    expect(courses).toBeTruthy();
-
-    const counts = await Promise.all(
-      (courses ?? []).map(async (c) => {
-        const { data, error } = await supabase
-          .from("academy_questions_safe")
-          .select("id")
-          .eq("course_id", c.id);
-        expect(error).toBeNull();
-        return { slug: c.slug, count: data?.length ?? 0 };
-      }),
+    const { data, error } = await supabase.rpc(
+      "academy_course_question_counts",
     );
 
-    const offenders = counts.filter((c) => c.count < MIN_QUIZ_QUESTIONS);
+    expect(error).toBeNull();
+    expect(data).toBeTruthy();
+
+    const rows = (data ?? []) as Array<{
+      slug: string;
+      question_count: number;
+    }>;
+
+    const offenders = rows.filter(
+      (r) => Number(r.question_count) < MIN_QUIZ_QUESTIONS,
+    );
 
     expect(
       offenders,
       `Courses below ${MIN_QUIZ_QUESTIONS} questions: ${offenders
-        .map((c) => `${c.slug} (${c.count})`)
+        .map((r) => `${r.slug} (${r.question_count})`)
         .join(", ")}`,
     ).toEqual([]);
   });
