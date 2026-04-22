@@ -32,6 +32,7 @@ const AcademyCourse = () => {
   const [searchParams] = useSearchParams();
   const gate = useCourseGate(slug);
   const { region } = useRegion();
+  const cart = useCart();
   const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [activeTab, setActiveTab] = useState<"learn" | "quiz">(
     searchParams.get("tab") === "quiz" ? "quiz" : "learn"
