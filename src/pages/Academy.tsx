@@ -218,8 +218,8 @@ const Academy = () => {
                 <GraduationCap className="h-4 w-4" />
                 Free Compliance Training
               </div>
-              <div className="flex justify-center mb-5">
-                <AcademyLogo size="lg" variant="light" />
+              <div className="flex justify-center mb-5 px-2">
+                <AcademyLogo size="lg" variant="light" className="max-w-full" />
               </div>
               <h1 className="text-display text-primary-foreground mb-4">
                 WorldAML Academy
@@ -401,10 +401,10 @@ const Academy = () => {
             {(() => {
               if (isLoading) {
                 return (
-                  <div className="grid md:grid-cols-3 gap-6">
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {[1, 2, 3, 4, 5, 6].map((i) => (
                       <div key={i} className="rounded-xl border border-border bg-card overflow-hidden animate-pulse">
-                        <div className="h-32 bg-muted" />
+                        <div className="aspect-[16/9] sm:aspect-[16/10] md:h-40 bg-muted" />
                         <div className="p-5">
                           <div className="h-5 bg-muted rounded w-2/3 mb-3" />
                           <div className="h-4 bg-muted rounded w-full mb-2" />
@@ -453,7 +453,9 @@ const Academy = () => {
                     {/* Thumbnail */}
                     <div
                       className={`relative bg-gradient-to-br ${catConfig.gradient} overflow-hidden flex-shrink-0 ${
-                        featured ? "md:w-2/5 min-h-[220px]" : "h-32"
+                        featured
+                          ? "aspect-[16/10] md:aspect-auto md:w-2/5 md:min-h-[260px]"
+                          : "aspect-[16/9] sm:aspect-[16/10] md:aspect-auto md:h-40"
                       }`}
                     >
                       {(() => {
@@ -463,7 +465,7 @@ const Academy = () => {
                             src={cover}
                             alt={course.title}
                             loading="lazy"
-                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                           />
                         ) : (
                           <>
@@ -485,7 +487,7 @@ const Academy = () => {
 
                       {/* Featured badge */}
                       {featured && (
-                        <div className="absolute top-4 left-4">
+                        <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/95 text-primary text-xs font-semibold shadow-sm">
                             <Star className="h-3 w-3 fill-current" /> Most Popular
                           </span>
@@ -616,7 +618,7 @@ const Academy = () => {
                         <Sparkles className="h-4 w-4 text-accent" />
                         <h3 className="text-body font-semibold text-foreground uppercase tracking-wide">Start Here</h3>
                       </div>
-                      <div className="grid md:grid-cols-3 gap-6">
+                      <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
                         {renderCard(featuredCourse, { featured: true })}
                       </div>
                     </div>
@@ -644,14 +646,14 @@ const Academy = () => {
                               </div>
                             </div>
                           </div>
-                          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {grouped[catKey].map((c) => renderCard(c))}
                           </div>
                         </div>
                       );
                     })
                   ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                       {filteredCourses.map((c) => renderCard(c))}
                     </div>
                   )}
