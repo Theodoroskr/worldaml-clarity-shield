@@ -366,73 +366,191 @@ const AcademyCourse = () => {
                     </div>
 
                     {/* Article body */}
-                    <div className="space-y-2 mb-10">
-                      {modules[activeModule].content
-                        .replace(/\\n/g, "\n")
-                        .split("\n")
-                        .map((line, i) => {
+                    <div className="mb-10">
+                      {(() => {
+                        // Inline formatter: handles **bold**, *italic*, and `code`
+                        const renderInline = (text: string, keyPrefix: string) => {
+                          const tokens: React.ReactNode[] = [];
+                          const regex = /(\*\*([^*]+)\*\*|(?<!\*)\*([^*\n]+)\*(?!\*)|`([^`]+)`)/g;
+                          let lastIndex = 0;
+                          let match: RegExpExecArray | null;
+                          let idx = 0;
+                          while ((match = regex.exec(text)) !== null) {
+                            if (match.index > lastIndex) {
+                              tokens.push(text.slice(lastIndex, match.index));
+                            }
+                            if (match[2] !== undefined) {
+                              tokens.push(
+                                <strong key={`${keyPrefix}-b-${idx++}`} className="font-semibold text-foreground">
+                                  {match[2]}
+                                </strong>
+                              );
+                            } else if (match[3] !== undefined) {
+                              tokens.push(
+                                <em key={`${keyPrefix}-i-${idx++}`} className="italic text-foreground/90">
+                                  {match[3]}
+                                </em>
+                              );
+                            } else if (match[4] !== undefined) {
+                              tokens.push(
+                                <code
+                                  key={`${keyPrefix}-c-${idx++}`}
+                                  className="px-1.5 py-0.5 rounded bg-secondary text-foreground font-mono text-[0.875em]"
+                                >
+                                  {match[4]}
+                                </code>
+                              );
+                            }
+                            lastIndex = match.index + match[0].length;
+                          }
+                          if (lastIndex < text.length) {
+                            tokens.push(text.slice(lastIndex));
+                          }
+                          return tokens.length ? tokens : [text];
+                        };
+
+                        const lines = modules[activeModule].content
+                          .replace(/\\n/g, "\n")
+                          .split("\n");
+
+                        const elements: React.ReactNode[] = [];
+                        let listBuffer: { type: "ul" | "ol"; items: { content: string; marker?: string }[] } | null = null;
+
+                        const flushList = () => {
+                          if (!listBuffer) return;
+                          const { type, items } = listBuffer;
+                          const key = `list-${elements.length}`;
+                          if (type === "ul") {
+                            elements.push(
+                              <ul key={key} className="my-4 space-y-2">
+                                {items.map((it, ii) => (
+                                  <li key={ii} className="flex items-start gap-3 pl-1">
+                                    <span className="mt-[0.7em] flex-shrink-0 h-1.5 w-1.5 rounded-full bg-primary" />
+                                    <span className="text-foreground/85 text-body leading-[1.7]">
+                                      {renderInline(it.content, `${key}-${ii}`)}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            );
+                          } else {
+                            elements.push(
+                              <ol key={key} className="my-4 space-y-2">
+                                {items.map((it, ii) => (
+                                  <li key={ii} className="flex items-start gap-3 pl-1">
+                                    <span className="text-primary font-semibold flex-shrink-0 min-w-[1.5rem] text-body leading-[1.7]">
+                                      {it.marker}
+                                    </span>
+                                    <span className="text-foreground/85 text-body leading-[1.7]">
+                                      {renderInline(it.content, `${key}-${ii}`)}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ol>
+                            );
+                          }
+                          listBuffer = null;
+                        };
+
+                        lines.forEach((line, i) => {
                           const trimmed = line.trim();
-                          if (!trimmed) return <div key={i} className="h-4" />;
-                          if (trimmed.startsWith("**") && trimmed.endsWith("**")) {
-                            return (
-                              <h3 key={i} className="text-xl md:text-2xl font-semibold text-foreground mt-10 mb-3 scroll-mt-24">
-                                {trimmed.replace(/\*\*/g, "")}
+                          const key = `l-${i}`;
+
+                          if (!trimmed) {
+                            flushList();
+                            return;
+                          }
+
+                          // Markdown headings: #, ##, ###, ####
+                          const headingMatch = trimmed.match(/^(#{1,4})\s+(.*)$/);
+                          if (headingMatch) {
+                            flushList();
+                            const level = headingMatch[1].length;
+                            const text = headingMatch[2].replace(/\*\*/g, "");
+                            if (level === 1) {
+                              elements.push(
+                                <h2 key={key} className="text-2xl md:text-3xl font-bold text-foreground mt-12 mb-4 scroll-mt-24 tracking-tight">
+                                  {text}
+                                </h2>
+                              );
+                            } else if (level === 2) {
+                              elements.push(
+                                <h3 key={key} className="text-xl md:text-2xl font-semibold text-foreground mt-10 mb-3 scroll-mt-24 tracking-tight">
+                                  {text}
+                                </h3>
+                              );
+                            } else if (level === 3) {
+                              elements.push(
+                                <h4 key={key} className="text-lg md:text-xl font-semibold text-foreground mt-8 mb-2 scroll-mt-24">
+                                  {text}
+                                </h4>
+                              );
+                            } else {
+                              elements.push(
+                                <h5 key={key} className="text-base font-semibold text-foreground mt-6 mb-2 uppercase tracking-wide">
+                                  {text}
+                                </h5>
+                              );
+                            }
+                            return;
+                          }
+
+                          // Bold-only line treated as section heading (legacy content support)
+                          if (/^\*\*[^*]+\*\*:?$/.test(trimmed)) {
+                            flushList();
+                            elements.push(
+                              <h3 key={key} className="text-xl md:text-2xl font-semibold text-foreground mt-10 mb-3 scroll-mt-24 tracking-tight">
+                                {trimmed.replace(/\*\*/g, "").replace(/:$/, "")}
                               </h3>
                             );
+                            return;
                           }
-                          if (trimmed.startsWith("- ")) {
-                            const inner = trimmed.slice(2);
-                            const parts = inner.split(/\*\*(.*?)\*\*/g);
-                            return (
-                              <div key={i} className="flex items-start gap-3 pl-1 py-1">
-                                <span className="text-primary mt-2.5 flex-shrink-0 h-1.5 w-1.5 rounded-full bg-primary" />
-                                <span className="text-foreground/85 text-body leading-[1.7]">
-                                  {parts.map((part, pi) =>
-                                    pi % 2 === 1 ? (
-                                      <strong key={pi} className="text-foreground font-semibold">{part}</strong>
-                                    ) : (
-                                      <span key={pi}>{part}</span>
-                                    )
-                                  )}
-                                </span>
-                              </div>
+
+                          // Blockquote
+                          if (trimmed.startsWith("> ")) {
+                            flushList();
+                            elements.push(
+                              <blockquote key={key} className="my-5 pl-4 border-l-4 border-primary/40 bg-secondary/30 py-3 pr-4 rounded-r-md text-foreground/85 text-body leading-[1.7] italic">
+                                {renderInline(trimmed.slice(2), key)}
+                              </blockquote>
                             );
+                            return;
                           }
-                          if (/^\d+\.?\s/.test(trimmed)) {
-                            const match = trimmed.match(/^(\d+\.?)\s(.*)/);
-                            const inner = match?.[2] || "";
-                            const parts = inner.split(/\*\*(.*?)\*\*/g);
-                            return (
-                              <div key={i} className="flex items-start gap-3 pl-1 py-1">
-                                <span className="text-primary font-semibold flex-shrink-0 min-w-[1.5rem] text-body leading-[1.7]">
-                                  {match?.[1]}
-                                </span>
-                                <span className="text-foreground/85 text-body leading-[1.7]">
-                                  {parts.map((part, pi) =>
-                                    pi % 2 === 1 ? (
-                                      <strong key={pi} className="text-foreground font-semibold">{part}</strong>
-                                    ) : (
-                                      <span key={pi}>{part}</span>
-                                    )
-                                  )}
-                                </span>
-                              </div>
-                            );
+
+                          // Bullet list item
+                          if (/^[-*]\s+/.test(trimmed)) {
+                            const content = trimmed.replace(/^[-*]\s+/, "");
+                            if (!listBuffer || listBuffer.type !== "ul") {
+                              flushList();
+                              listBuffer = { type: "ul", items: [] };
+                            }
+                            listBuffer.items.push({ content });
+                            return;
                           }
-                          // Inline bold handling
-                          const parts = trimmed.split(/\*\*(.*?)\*\*/g);
-                          return (
-                            <p key={i} className="text-foreground/85 text-body leading-[1.75] mb-2">
-                              {parts.map((part, pi) =>
-                                pi % 2 === 1 ? (
-                                  <strong key={pi} className="text-foreground font-semibold">{part}</strong>
-                                ) : (
-                                  <span key={pi}>{part}</span>
-                                )
-                              )}
+
+                          // Ordered list item
+                          const olMatch = trimmed.match(/^(\d+)[\.\)]\s+(.*)$/);
+                          if (olMatch) {
+                            if (!listBuffer || listBuffer.type !== "ol") {
+                              flushList();
+                              listBuffer = { type: "ol", items: [] };
+                            }
+                            listBuffer.items.push({ marker: `${olMatch[1]}.`, content: olMatch[2] });
+                            return;
+                          }
+
+                          // Paragraph
+                          flushList();
+                          elements.push(
+                            <p key={key} className="text-foreground/85 text-body leading-[1.75] my-3">
+                              {renderInline(trimmed, key)}
                             </p>
                           );
-                        })}
+                        });
+
+                        flushList();
+                        return elements;
+                      })()}
                     </div>
 
                     {/* Mark as complete card */}
