@@ -76,42 +76,14 @@ export const useCourseGate = (slug: string | undefined): GateResult => {
     };
   }
 
-  // Logged-out: only the first course of each category is accessible.
-  const passed = new Set(certs ?? []);
-  const category = currentCourse.category || "global";
-  const sameCategory = courses
-    .filter((c) => (c.category || "global") === category)
-    .sort((a, b) => a.sort_order - b.sort_order);
-
-  const idx = sameCategory.findIndex((c) => c.id === currentCourse.id);
-  if (idx <= 0) {
-    return {
-      loading: false,
-      isAccessible: true,
-      redirectSlug: null,
-      prereqTitle: null,
-      currentCourse,
-    };
-  }
-
-  const previous = sameCategory[idx - 1];
-  const prevPassed = !!user && passed.has(previous.id);
-
-  if (prevPassed) {
-    return {
-      loading: false,
-      isAccessible: true,
-      redirectSlug: null,
-      prereqTitle: null,
-      currentCourse,
-    };
-  }
-
+  // Prerequisite gating removed — all courses are accessible.
+  // Access for paid courses is enforced by checkout/purchase, not by previous-course completion.
+  void certs;
   return {
     loading: false,
-    isAccessible: false,
-    redirectSlug: previous.slug,
-    prereqTitle: previous.title,
+    isAccessible: true,
+    redirectSlug: null,
+    prereqTitle: null,
     currentCourse,
   };
 };
