@@ -18,13 +18,8 @@ import { getCourseDiagram } from "@/assets/academy";
 import { useCourseGate } from "@/hooks/useCourseGate";
 import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/academyPricing";
 import { useRegion } from "@/contexts/RegionContext";
-import { AcademyCurrency, convertEurCents, formatPrice } from "@/lib/academyFx";
-
-const REGION_TO_CURRENCY: Record<string, AcademyCurrency> = {
-  "eu-me": "eur",
-  "uk-ie": "gbp",
-  na: "usd",
-};
+import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY } from "@/lib/academyFx";
+import CurrencyIndicator from "@/components/academy/CurrencyIndicator";
 
 const PASS_THRESHOLD = 70;
 

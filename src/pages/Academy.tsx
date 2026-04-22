@@ -15,13 +15,10 @@ import AcademyCartButton from "@/components/academy/AcademyCartDrawer";
 import { useCart } from "@/contexts/CartContext";
 import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/academyPricing";
 import { useRegion } from "@/contexts/RegionContext";
-import { AcademyCurrency, convertEurCents, formatPrice } from "@/lib/academyFx";
-
-const REGION_TO_CURRENCY: Record<string, AcademyCurrency> = {
-  "eu-me": "eur",
-  "uk-ie": "gbp",
-  na: "usd",
-};
+import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY, currencyCode } from "@/lib/academyFx";
+import CurrencyIndicator from "@/components/academy/CurrencyIndicator";
+import { toast } from "sonner";
+import { REGIONS } from "@/types/regions";
 
 const difficultyColor: Record<string, string> = {
   beginner: "bg-emerald-100 text-emerald-700 border-emerald-200",
