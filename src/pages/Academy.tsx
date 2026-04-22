@@ -220,8 +220,8 @@ const Academy = () => {
                 WorldAML Academy
               </h1>
               <p className="text-body-lg text-slate-light mb-8 max-w-2xl mx-auto">
-                Build your compliance expertise with interactive courses. Pass the quiz, 
-                earn a certificate, and share it on LinkedIn — completely free.
+                Build your compliance expertise with interactive courses trusted by professionals worldwide. Pass the quiz, 
+                earn a shareable certificate, and showcase your credentials on LinkedIn — completely free.
               </p>
               <div className="flex flex-wrap justify-center gap-6 text-body-sm text-slate-light">
                 <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-teal-light" /> Interactive Courses</span>
@@ -551,8 +551,8 @@ const Academy = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://worldaml-clarity-shield.lovable.app/academy/${course.slug}`)}`;
-                            window.open(url, "_blank");
+                            const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://www.worldaml.com/academy/${course.slug}`)}`;
+                            window.open(url, "_blank", "noopener,noreferrer");
                           }}
                           className="p-1.5 rounded-md text-muted-foreground hover:text-[#0A66C2] hover:bg-[#0A66C2]/10 transition-colors"
                         >
