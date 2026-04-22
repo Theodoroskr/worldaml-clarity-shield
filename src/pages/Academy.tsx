@@ -237,6 +237,13 @@ const Academy = () => {
                   </span>
                 </div>
               )}
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <Button asChild variant="accent" size="lg">
+                  <Link to="/academy/templates">
+                    <FileText className="h-4 w-4" /> Browse MLRO Toolkit
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </section>
