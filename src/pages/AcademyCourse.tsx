@@ -379,6 +379,25 @@ const AcademyCourse = () => {
                     {/* In-page table of contents (auto-built from headings) */}
                     <ModuleTOC content={modules[activeModule].content} />
 
+                    {/* Course diagram - shown only for first module */}
+                    {activeModule === 0 && course?.slug && getCourseDiagram(course.slug) && (
+                      <div className="mb-8 rounded-xl border border-border bg-card overflow-hidden">
+                        <div className="aspect-video relative">
+                          <img
+                            src={getCourseDiagram(course.slug)}
+                            alt={`${course.title} concept diagram`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="px-4 py-3 bg-muted/30 border-t border-border">
+                          <p className="text-caption text-muted-foreground flex items-center gap-2">
+                            <ImageIcon className="h-3.5 w-3.5" />
+                            Key concepts visualized
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Article body */}
                     <ModuleContent content={modules[activeModule].content} className="mb-10" />
 
