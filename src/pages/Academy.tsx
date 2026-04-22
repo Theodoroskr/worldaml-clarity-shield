@@ -79,7 +79,7 @@ const Academy = () => {
 
   const dismissBanner = () => {
     setBannerDismissed(true);
-    try { sessionStorage.setItem("academy-new-courses-dismissed", "1"); } catch {}
+    try { sessionStorage.setItem("academy-new-courses-dismissed", "1"); } catch { /* ignore */ }
   };
 
   const { data: courses, isLoading } = useQuery({
