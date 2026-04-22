@@ -94,7 +94,7 @@ const renderInline = (text: string, keyPrefix: string): React.ReactNode[] => {
       tokens.push(
         <code
           key={`${keyPrefix}-c-${idx++}`}
-          className="px-1.5 py-0.5 rounded bg-secondary text-foreground font-mono text-[0.875em]"
+          className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-mono text-[0.875em] border border-primary/15"
         >
           {match[7]}
         </code>
@@ -106,7 +106,7 @@ const renderInline = (text: string, keyPrefix: string): React.ReactNode[] => {
           href={match[8]}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary underline underline-offset-2 hover:text-primary/80 break-all"
+          className="text-accent underline underline-offset-2 decoration-accent/40 hover:decoration-accent break-all transition-colors"
         >
           {match[8]}
         </a>
