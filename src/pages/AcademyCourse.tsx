@@ -13,6 +13,7 @@ import { ArrowRight, ArrowLeft, CheckCircle, XCircle, Award, Clock, BookOpen, Lo
 import { useToast } from "@/hooks/use-toast";
 import ModuleContent, { computeReadingMinutes } from "@/components/academy/ModuleContent";
 import ModuleTOC from "@/components/academy/ModuleTOC";
+import ContentProtection from "@/components/academy/ContentProtection";
 import { getCourseDiagram } from "@/assets/academy";
 
 const PASS_THRESHOLD = 80;
