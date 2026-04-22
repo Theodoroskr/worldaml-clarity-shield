@@ -154,7 +154,7 @@ export const Header = () => {
                   <DropdownMenuTrigger asChild>
                     <button
                       className={cn(
-                        "px-2.5 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-0.5 whitespace-nowrap",
+                        "px-2 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-0.5 whitespace-nowrap",
                         link.href && location.pathname.startsWith(link.href)
                           ? "text-navy bg-secondary"
                           : "text-text-secondary hover:text-navy hover:bg-secondary/50"
@@ -195,7 +195,7 @@ export const Header = () => {
                   <DropdownMenuTrigger asChild>
                     <button
                       className={cn(
-                        "px-2.5 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-0.5 whitespace-nowrap",
+                        "px-2 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-0.5 whitespace-nowrap",
                         link.href && location.pathname.startsWith(link.href)
                           ? "text-navy bg-secondary"
                           : "text-text-secondary hover:text-navy hover:bg-secondary/50"
@@ -226,7 +226,7 @@ export const Header = () => {
                   key={link.href}
                   to={link.href!}
                   className={cn(
-                    "px-2.5 py-2 text-body-sm font-medium transition-colors rounded-md whitespace-nowrap",
+                    "px-2 py-2 text-body-sm font-medium transition-colors rounded-md whitespace-nowrap",
                     location.pathname === link.href
                       ? "text-navy bg-secondary"
                       : "text-text-secondary hover:text-navy hover:bg-secondary/50"
