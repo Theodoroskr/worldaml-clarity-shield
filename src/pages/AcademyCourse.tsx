@@ -281,11 +281,20 @@ const AcademyCourse = () => {
             </button>
             <button
               onClick={() => {
-                if (user) {
-                  setActiveTab("quiz");
-                } else {
+                if (!user) {
                   navigate(`/signup?redirect=${encodeURIComponent(`/academy/${slug}?tab=quiz`)}`);
+                  return;
                 }
+                if (!allModulesComplete) {
+                  toast({
+                    title: "Complete all modules first",
+                    description: `Finish all ${modules?.length || 0} modules to unlock the quiz.`,
+                    variant: "destructive",
+                  });
+                  setActiveTab("learn");
+                  return;
+                }
+                setActiveTab("quiz");
               }}
               className={`px-6 py-3 text-body-sm font-medium border-b-2 transition-colors ${
                 activeTab === "quiz" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
@@ -293,7 +302,7 @@ const AcademyCourse = () => {
             >
               <Award className="h-4 w-4 inline mr-1.5" />
               Quiz & Certificate
-              {!user && <Lock className="h-3 w-3 inline ml-1" />}
+              {(!user || !allModulesComplete) && <Lock className="h-3 w-3 inline ml-1" />}
             </button>
           </div>
         </section>
