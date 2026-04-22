@@ -203,9 +203,10 @@ const Academy = () => {
   })();
 
   // Logged-out visitors browse freely (gating only kicks in once signed in).
-  const isCourseLocked = (courseId: string) =>
-    !!user && (lockInfo.get(courseId)?.locked ?? false);
-  const getPrereqTitle = (courseId: string) => lockInfo.get(courseId)?.prereqTitle;
+  // Prerequisite gating removed — every course is open to browse; paid courses still require purchase.
+  void lockInfo;
+  const isCourseLocked = (_courseId: string) => false;
+  const getPrereqTitle = (_courseId: string): string | undefined => undefined;
 
   const filteredCourses = courses?.filter((course) => {
     // Category filter
