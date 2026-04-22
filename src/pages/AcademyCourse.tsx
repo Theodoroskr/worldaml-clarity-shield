@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, ArrowLeft, CheckCircle, XCircle, Award, Clock, BookOpen, Lock, ImageIcon } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, XCircle, Award, Clock, BookOpen, Lock, ImageIcon, ShoppingBag, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ModuleContent, { computeReadingMinutes } from "@/components/academy/ModuleContent";
 import ModuleTOC from "@/components/academy/ModuleTOC";
@@ -20,6 +20,7 @@ import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/acad
 import { useRegion } from "@/contexts/RegionContext";
 import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY } from "@/lib/academyFx";
 import CurrencyIndicator from "@/components/academy/CurrencyIndicator";
+import { useCart } from "@/contexts/CartContext";
 
 const PASS_THRESHOLD = 70;
 
