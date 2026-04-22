@@ -1,101 +1,95 @@
 
 
-## Remaining Stripe + Academy Paywall Steps
+## Academy Cart + Bundle Discounts + 1-Month Access
 
-We've created 4 of 16 paid course products in Stripe so far. Here's everything left to do, in order.
+Adds a multi-course basket with automatic bundle discounts and a 1-month access window after purchase. This builds on the paywall work already in progress (Stripe products, `academy_course_purchases` table, inline `price_data` checkout).
 
-### 1. Finish Stripe product creation (12 remaining)
+### Pricing rules
 
-Continue creating EUR base products one per turn. Remaining paid courses:
+- 1 course → full price
+- 2 courses → **5% off the basket total**
+- 3+ courses → **10% off the basket total**
+- Free courses cannot be added to the basket (they're already free).
+- Discount applied as a single `coupon` line in Stripe Checkout (not per-line), so the user sees one clear discount row.
 
-**€29 courses (11 left):**
-- AML Compliance in the Caribbean
-- AML Compliance in the United States
-- Sanctions Compliance
-- PEP Screening & Adverse Media
-- Transaction Monitoring Fundamentals
-- Suspicious Activity Reporting (SAR/STR)
-- Risk-Based Approach (RBA)
-- Beneficial Ownership (UBO)
-- Compliance Officer Essentials
-- Regulatory Reporting Essentials
-- Travel Rule & Wire Transfers
+### Access window
 
-**€49 course (1 left):**
-- Crypto AML Essentials
+- Each `paid` purchase gets `expires_at = paid_at + 1 month`.
+- `useCourseAccess` treats a purchase as valid only if `now() < expires_at` (or `expires_at IS NULL` for legacy/free).
+- Expired courses re-show the paywall with a "Renew access" button (same checkout flow).
+- Certificates already earned remain valid forever and stay shareable — expiry only blocks course content access, not the certificate the user already earned.
 
-Free (no Stripe product needed): AML Fundamentals, Sanctions Screening Essentials.
+### Schema change (migration)
 
-> Note: We chose **inline `price_data`** for USD/GBP, so no extra price IDs need to be created in Stripe. Each Stripe product gets one EUR base price; USD/GBP are computed at checkout time using FX rates and passed inline.
+Add to `academy_course_purchases`:
+- `expires_at TIMESTAMPTZ` — set by webhook to `paid_at + interval '1 month'`.
+- Drop the partial unique index `idx_acp_user_slug_paid` and replace with a non-unique index — so a user can repurchase the same course after expiry.
 
-### 2. Add the `STRIPE_WEBHOOK_SECRET`
+### Cart implementation
 
-Required for the production-grade webhook to verify Stripe signatures. I'll request this secret once products are done.
+**State**: `src/contexts/CartContext.tsx` — React context, persisted to `localStorage` under `academy-cart`. Stores `string[]` of course slugs. Exposes `add`, `remove`, `clear`, `items`, `count`, plus computed `subtotal`, `discountPct`, `discountAmount`, `total` per currency.
 
-### 3. Build the `create-academy-checkout` edge function
+**UI surfaces**:
+1. **Course card** (`/academy`) — replace the per-course "Buy" button with **"Add to basket"** (or "In basket ✓" toggle). Free courses keep the existing "Start" button.
+2. **Course detail** (`/academy/courses/:slug`) — paywall card shows "Add to basket" + "View basket" instead of single-course "Unlock".
+3. **Basket drawer** — new component `AcademyCartDrawer.tsx`, opened from a basket icon in the Academy header showing item count. Drawer lists items with remove buttons, currency switcher (EUR/USD/GBP from `RegionContext`), live discount line ("2 courses — 5% off"), total, and **"Checkout"** button.
+4. **Empty state** in drawer with link back to course catalog.
 
-- Auth-required (uses Bearer token like existing checkouts).
-- Input: `{ courseSlug, currency: 'eur'|'usd'|'gbp' }`.
-- Looks up the course's EUR base price, converts to USD/GBP via fixed rates table (e.g. EUR→USD 1.08, EUR→GBP 0.86 — easy to update later).
-- Creates a Stripe Checkout Session in `mode: 'payment'` with inline `price_data` (product = pre-created Stripe product ID, unit_amount in chosen currency).
-- Inserts a `pending` row into `academy_course_purchases` with `stripe_session_id`.
-- Returns `{ url }` for redirect.
-- `success_url`: `/academy/{slug}?purchase=success`
-- `cancel_url`: `/academy/{slug}?purchase=cancelled`
+### Edge function changes
 
-### 4. Build the `stripe-academy-webhook` edge function
+Replace planned single-course `create-academy-checkout` with a basket-aware version:
 
-- `verify_jwt = false` in `supabase/config.toml` (webhook is public, signed by Stripe).
-- Verifies signature with `STRIPE_WEBHOOK_SECRET`.
-- Handles `checkout.session.completed`: marks the matching `academy_course_purchases` row `paid`, stores `stripe_payment_intent_id`, sets `paid_at`.
-- Handles `charge.refunded`: marks `refunded`.
-- Uses service role key (bypasses RLS — RLS already blocks direct user writes).
+- Input: `{ courseSlugs: string[], currency: 'eur'|'usd'|'gbp' }`.
+- Validates: all slugs exist, all are paid courses, user doesn't already have an active (non-expired) purchase for any of them (drops dupes).
+- Builds one `line_items` entry per course using inline `price_data` (linked to that course's pre-created Stripe product), unit prices in chosen currency via FX table.
+- If `courseSlugs.length >= 2`: creates a one-time Stripe coupon with `percent_off: 5` (or `10` for 3+) via Stripe API and attaches it as `discounts: [{ coupon }]` on the session.
+- Inserts one `pending` row per course in `academy_course_purchases`, all sharing the same `stripe_session_id`, each with proportional `amount_cents` (post-discount, rounded).
+- `success_url`: `/academy?purchase=success` (catalog, since multiple courses).
 
-### 5. Update `useCourseGate` (rename → `useCourseAccess`)
+**Webhook** (`stripe-academy-webhook`):
+- On `checkout.session.completed`: updates **all** rows matching `stripe_session_id` to `paid`, sets `paid_at = now()`, `expires_at = now() + interval '1 month'`.
+- On `charge.refunded`: marks all rows for that session `refunded` and clears `expires_at`.
 
-Add a new check alongside the existing prerequisite logic:
+### `useCourseAccess` updates
 
-- Course is free (slug in `FREE_COURSES` set) → accessible.
-- User has a `paid` row in `academy_course_purchases` for this slug → accessible.
-- Otherwise → blocked with `requiresPurchase: true` and the price.
+- Accessible if: free course OR has row where `status='paid' AND expires_at > now()`.
+- Returns `expiresAt` so course pages can show "Access expires in 12 days" banner.
+- Prerequisite gating still applies on top.
 
-Prerequisite gating still applies on top (you must pass course N-1 before you can even buy course N).
+### Frontend price + region helpers
 
-### 6. Frontend: course price map + paywall UI
+- `src/data/academyPricing.ts` — `{ slug → { eurCents, stripeProductId } }` (single source of truth; USD/GBP derived).
+- `src/lib/academyFx.ts` — `convert(eurCents, currency)` using fixed rates (mirrors edge function).
+- `src/lib/academyDiscount.ts` — `computeDiscount(itemCount) → { pct, label }`.
 
-- Add `src/data/academyPricing.ts` mapping `courseSlug → { eur, usd, gbp, stripeProductId }`.
-- On `/academy/courses/:slug`:
-  - If locked by prerequisite → existing redirect UX (unchanged).
-  - If locked by paywall → show **Purchase card** with currency switcher (EUR/USD/GBP, default from `RegionContext`: EU/ME→EUR, UK/IE→GBP, NA→USD), price, and "Unlock this course" button → calls `create-academy-checkout`.
-- On `/academy` index: show a small "€29" / "€49" / "Free" badge on each course card; replace "Locked" with "Buy" where applicable.
+### Files added
 
-### 7. Certificate gating
+- `supabase/migrations/<new>.sql` — adds `expires_at`, swaps the unique index.
+- `supabase/functions/create-academy-checkout/index.ts` — basket checkout (already planned; updated for cart).
+- `supabase/functions/stripe-academy-webhook/index.ts` — signature-verified, multi-row update with expiry.
+- `src/contexts/CartContext.tsx`
+- `src/components/academy/AcademyCartDrawer.tsx`
+- `src/components/academy/AcademyCartButton.tsx` (header trigger with badge count)
+- `src/data/academyPricing.ts`
+- `src/lib/academyFx.ts`
+- `src/lib/academyDiscount.ts`
 
-Certificate generation already requires passing the quiz. Add one extra check: certificate route also requires either free course OR `paid` purchase row. Free certificates remain free and shareable.
+### Files modified
 
-### 8. Admin visibility (light)
+- `src/App.tsx` — wrap Academy routes in `CartProvider`.
+- `src/pages/Academy.tsx` — "Add to basket" buttons, header cart icon, price badges.
+- `src/pages/AcademyCourse.tsx` — paywall card uses cart, expiry banner.
+- `src/hooks/useCourseGate.ts` → renamed `useCourseAccess.ts` — adds paywall + expiry checks.
+- `src/pages/AcademyCertificate.tsx` — still gated by quiz pass only (certs survive expiry).
+- `supabase/config.toml` — add `[functions.stripe-academy-webhook] verify_jwt = false`.
 
-Add a read-only "Course purchases" panel under `/admin` showing recent rows from `academy_course_purchases` (already covered by the admin RLS policy in the migration).
+### Outstanding prerequisites (carry over from previous plan)
 
----
+- Finish the remaining 12 Stripe products (one per turn).
+- Add `STRIPE_WEBHOOK_SECRET` for webhook signature verification.
 
-### Technical summary
+### Immediate next action after approval
 
-```text
-Stripe products (16)  ──┐
-                        ├─► create-academy-checkout (auth, inline price_data, FX) ──► Stripe Checkout
-DB: academy_course_purchases (pending row)
-                                                                ▼
-                                          stripe-academy-webhook (signed)
-                                                                ▼
-                                       UPDATE row → status='paid', paid_at=now()
-                                                                ▼
-useCourseAccess: free | paid | locked → gates content + certificate
-```
-
-FX rates live in a single constant in the edge function for now; can be moved to a DB table or live FX API later without UI changes.
-
-### Immediate next action
-
-Continue with **step 1**: create the next Stripe product ("Academy: AML Compliance in the Caribbean", €29). Approve the next tool call to proceed.
+1. Run the schema migration (add `expires_at`, swap index).
+2. Continue creating the next Stripe product, then build the cart context + drawer in parallel with the edge function.
 
