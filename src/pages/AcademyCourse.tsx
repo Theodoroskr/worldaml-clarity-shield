@@ -163,15 +163,20 @@ const AcademyCourse = () => {
       const result = data as { passed: boolean; score: number; certificate_id?: string; share_token?: string; correct_answers?: Record<string, number> };
       setQuizScore(result.score);
       setQuizSubmitted(true);
+      setReviewMode(true);
       if (result.correct_answers) {
         setCorrectAnswers(result.correct_answers);
       }
-      setQuizSubmitted(true);
+      if (result.share_token) {
+        setCertificateToken(result.share_token);
+      }
+      // Scroll to top of quiz to show summary
+      window.scrollTo({ top: 0, behavior: "smooth" });
 
       if (result.passed && result.share_token) {
         toast({
-          title: "🎉 Certificate Earned!",
-          description: "Congratulations! You can now download or share your certificate.",
+          title: "🎉 You passed!",
+          description: `Score: ${result.score}%. Review your answers below — your certificate is ready.`,
         });
 
         // Fire-and-forget certificate email
@@ -186,12 +191,10 @@ const AcademyCourse = () => {
             certificate_id: result.certificate_id,
           },
         }).catch(() => {});
-
-        navigate(`/academy/certificate/${result.share_token}`);
       } else {
         toast({
           title: "Not quite!",
-          description: `You scored ${result.score}%. You need ${PASS_THRESHOLD}% to pass. Try again!`,
+          description: `You scored ${result.score}%. Review the correct answers below, then try again.`,
           variant: "destructive",
         });
       }
