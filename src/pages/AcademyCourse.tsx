@@ -9,10 +9,11 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, ArrowLeft, CheckCircle, XCircle, Award, Clock, BookOpen, Lock } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, XCircle, Award, Clock, BookOpen, Lock, ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ModuleContent, { computeReadingMinutes } from "@/components/academy/ModuleContent";
 import ModuleTOC from "@/components/academy/ModuleTOC";
+import { getCourseDiagram } from "@/assets/academy";
 
 const PASS_THRESHOLD = 80;
 
