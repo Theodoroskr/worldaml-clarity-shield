@@ -1,38 +1,19 @@
 
 
-## Enforce 70% pass requirement for certificate + next-course unlock
+## Highlight selected quiz answer (option + radio button)
 
-Lock the certificate and any "next course" navigation behind a 70%+ score on the course exam. Learners who fail see their score, the pass threshold, and a Retake button — no certificate token is issued, no progression allowed.
+Make the currently selected quiz answer visually obvious before submission by highlighting both the radio button and the surrounding option row.
 
-### Current behaviour
-- Quiz submits to `submit-quiz` edge function which already calculates score and only persists a certificate when `score >= pass_mark` (existing 70%).
-- `AcademyCourse.tsx` review banner currently shows "View Certificate" whenever a `certificateToken` is returned — this already aligns with passing, but the UI doesn't make the gate explicit and there's no enforcement on navigating to the next course.
+### Change (single file: `src/pages/AcademyCourse.tsx`)
 
-### Changes
+In the quiz rendering loop (pre-submit state), each answer option is currently a plain `<label>` wrapping a `<RadioGroupItem>` and the option text. Update so the selected option:
 
-**1. `src/pages/AcademyCourse.tsx` — review banner clarity**
-- Track `lastScore`, `passMark` (default 70), and `passed` (`score >= passMark`) from the submit response.
-- Pass banner (emerald): "Passed — {score}% · Certificate unlocked" + **View Certificate** + **Retake** buttons.
-- Fail banner (rose): "Did not pass — {score}% · {passMark}% required" + **Retake Quiz** button only. No certificate link rendered. Explanation/review of answers still shown so learners can study.
-- Hide any "Next course" / "Continue" CTA unless `passed === true`.
-
-**2. `src/pages/AcademyCourse.tsx` — next-course gating**
-- Where the page links to the next course in the curriculum (footer CTA / "Continue to next course" button), wrap it in a check: if the learner does not have a passing certificate for the current course, render the button disabled with a tooltip "Pass this course's exam (70%) to unlock the next course." Otherwise link normally.
-- Source of truth: query `academy_certificates` for the current `user_id` + `course_id` on mount; expose `hasPassed` boolean. Reuse the same flag to gate the "View Certificate" button after a fresh pass.
-
-**3. `src/pages/Academy.tsx` — course list gating**
-- In the course catalogue, mark each course card with one of three states:
-  - **Available** — first course, or previous course passed.
-  - **Locked** — previous course not yet passed. Card shows lock icon + "Complete {previous course} (70%+) to unlock" and the "Start course" button is disabled.
-  - **Completed** — passed; show certificate link.
-- Compute by fetching the learner's `academy_certificates` rows once and walking the ordered course list.
-
-**4. No backend changes**
-- `submit-quiz` already enforces the 70% threshold for certificate issuance — no edge-function or DB change required.
-- No migration; gating reads existing `academy_certificates` rows.
+- **Row**: teal-tinted background (`bg-teal/10`), teal border (`border-teal`), and stronger text weight. Unselected rows keep the current neutral border and add a subtle `hover:bg-secondary` state.
+- **Radio dot**: teal fill via `text-teal border-teal` on `RadioGroupItem` when `quizAnswers[question.id] === option`.
+- Keep accessibility: the entire row remains a `<label htmlFor>` so clicking anywhere on the row selects the option (already the case).
+- No change to review-mode highlighting (green/red for correct/incorrect after submission stays as-is).
 
 ### Out of scope
-- Pass mark stays at 70% (unchanged).
-- No changes to question banks, randomization, review mode, or module-completion gating.
-- No retake cooldown or attempt-limit logic.
+- No logic changes — selection state, submission, scoring, and review mode are untouched.
+- No changes to other pages or shared `RadioGroupItem` component.
 
