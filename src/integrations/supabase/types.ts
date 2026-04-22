@@ -839,6 +839,36 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_followups_sent: {
+        Row: {
+          email: string
+          error_message: string | null
+          id: string
+          resend_message_id: string | null
+          sent_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          email: string
+          error_message?: string | null
+          id?: string
+          resend_message_id?: string | null
+          sent_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          email?: string
+          error_message?: string | null
+          id?: string
+          resend_message_id?: string | null
+          sent_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       str_report_transactions: {
         Row: {
           created_at: string
