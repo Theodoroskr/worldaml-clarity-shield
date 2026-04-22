@@ -2,13 +2,30 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Loader2, Plus, Save, Trash2, CreditCard, Users, BarChart3 } from "lucide-react";
+import { Loader2, Plus, Save, Trash2, CreditCard, Users, GraduationCap, RefreshCw, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+interface Course {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  difficulty: string;
+  duration_minutes: number;
+  cpd_hours: number;
+  is_published: boolean;
+  sort_order: number;
+  price_eur_cents: number;
+  stripe_product_id: string | null;
+  stripe_price_id: string | null;
+}
 
 interface Tier {
   id: string;
@@ -44,21 +61,26 @@ export default function AdminPricing() {
   const [tiers, setTiers] = useState<Tier[]>([]);
   const [subs, setSubs] = useState<UserSub[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Tier | null>(null);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [syncingId, setSyncingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [featureInput, setFeatureInput] = useState("");
 
   const fetchAll = async () => {
     setLoading(true);
-    const [{ data: t }, { data: s }, { data: p }] = await Promise.all([
+    const [{ data: t }, { data: s }, { data: p }, { data: c }] = await Promise.all([
       supabase.from("admin_subscription_tiers").select("*").order("sort_order"),
       supabase.from("admin_user_subscriptions").select("*"),
       supabase.from("profiles").select("user_id, email, full_name"),
+      supabase.from("academy_courses").select("*").order("sort_order"),
     ]);
     setTiers((t || []).map((d: any) => ({ ...d, features: (d.features || []) as string[] })));
     setSubs((s || []) as UserSub[]);
     setProfiles((p || []) as Profile[]);
+    setCourses((c || []) as Course[]);
     setLoading(false);
   };
 
@@ -71,6 +93,67 @@ export default function AdminPricing() {
       features: [], is_active: true, sort_order: tiers.length,
     });
     setFeatureInput("");
+  };
+
+  const newCourse = () => setEditingCourse({
+    id: "", slug: "", title: "", description: "", category: "global", difficulty: "beginner",
+    duration_minutes: 30, cpd_hours: 0, is_published: false, sort_order: courses.length,
+    price_eur_cents: 2900, stripe_product_id: null, stripe_price_id: null,
+  });
+
+  const saveCourse = async () => {
+    if (!editingCourse) return;
+    if (!editingCourse.slug.trim() || !editingCourse.title.trim()) {
+      toast.error("Slug and title are required"); return;
+    }
+    setSaving(true);
+    const payload = {
+      slug: editingCourse.slug.trim(),
+      title: editingCourse.title.trim(),
+      description: editingCourse.description,
+      category: editingCourse.category,
+      difficulty: editingCourse.difficulty,
+      duration_minutes: editingCourse.duration_minutes,
+      cpd_hours: editingCourse.cpd_hours,
+      is_published: editingCourse.is_published,
+      sort_order: editingCourse.sort_order,
+      price_eur_cents: editingCourse.price_eur_cents,
+    };
+    const { error } = editingCourse.id
+      ? await supabase.from("academy_courses").update(payload).eq("id", editingCourse.id)
+      : await supabase.from("academy_courses").insert(payload);
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(editingCourse.id ? "Course saved" : "Course created");
+    setEditingCourse(null);
+    fetchAll();
+  };
+
+  const deleteCourse = async (id: string) => {
+    if (!confirm("Delete this course? Existing purchases and progress remain.")) return;
+    const { error } = await supabase.from("academy_courses").delete().eq("id", id);
+    if (error) toast.error(error.message); else { toast.success("Deleted"); fetchAll(); }
+  };
+
+  const togglePublish = async (c: Course) => {
+    const { error } = await supabase.from("academy_courses")
+      .update({ is_published: !c.is_published }).eq("id", c.id);
+    if (error) toast.error(error.message); else fetchAll();
+  };
+
+  const syncStripe = async (c: Course) => {
+    if (c.price_eur_cents <= 0) { toast.error("Set a price first"); return; }
+    setSyncingId(c.id);
+    const { data, error } = await supabase.functions.invoke("admin-sync-course-stripe", {
+      body: { courseId: c.id },
+    });
+    setSyncingId(null);
+    if (error || (data as any)?.error) {
+      toast.error((data as any)?.error || error?.message || "Sync failed");
+      return;
+    }
+    toast.success("Synced to Stripe");
+    fetchAll();
   };
 
   const addFeature = () => {
@@ -133,12 +216,19 @@ export default function AdminPricing() {
   return (
     <div className="p-6 space-y-5">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-xl font-bold text-foreground">Pricing & Limits</h1><p className="text-xs text-muted-foreground">Manage subscription tiers and usage quotas</p></div>
-        <Button size="sm" onClick={createNew}><Plus className="w-3.5 h-3.5 mr-1" /> New Tier</Button>
+        <div><h1 className="text-xl font-bold text-foreground">Pricing & Limits</h1><p className="text-xs text-muted-foreground">Manage subscription tiers, academy courses, and Stripe mappings</p></div>
       </div>
 
       <Tabs defaultValue="tiers">
-        <TabsList><TabsTrigger value="tiers"><CreditCard className="w-3.5 h-3.5 mr-1" />Tiers</TabsTrigger><TabsTrigger value="users"><Users className="w-3.5 h-3.5 mr-1" />User Subscriptions</TabsTrigger></TabsList>
+        <TabsList>
+          <TabsTrigger value="tiers"><CreditCard className="w-3.5 h-3.5 mr-1" />Tiers</TabsTrigger>
+          <TabsTrigger value="users"><Users className="w-3.5 h-3.5 mr-1" />User Subscriptions</TabsTrigger>
+          <TabsTrigger value="courses"><GraduationCap className="w-3.5 h-3.5 mr-1" />Academy Courses</TabsTrigger>
+        </TabsList>
+
+        <div className="flex justify-end mt-3">
+          <Button size="sm" variant="outline" onClick={createNew}><Plus className="w-3.5 h-3.5 mr-1" /> New Tier</Button>
+        </div>
 
         <TabsContent value="tiers" className="mt-4">
           {loading ? <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div> : (
@@ -198,6 +288,68 @@ export default function AdminPricing() {
             </table>
           </div>
         </TabsContent>
+
+        {/* Academy courses */}
+        <TabsContent value="courses" className="mt-4 space-y-3">
+          <div className="flex justify-end">
+            <Button size="sm" onClick={newCourse}><Plus className="w-3.5 h-3.5 mr-1" /> New Course</Button>
+          </div>
+          {loading ? (
+            <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+          ) : (
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead><tr className="border-b border-border bg-muted/30">
+                  {["Course", "Price", "Stripe", "Status", "Actions"].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>
+                  ))}
+                </tr></thead>
+                <tbody className="divide-y divide-border">
+                  {courses.map(c => (
+                    <tr key={c.id} className="hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-foreground text-sm">{c.title}</div>
+                        <div className="text-xs text-muted-foreground font-mono">{c.slug}</div>
+                      </td>
+                      <td className="px-4 py-3 text-foreground">
+                        {c.price_eur_cents > 0 ? `€${(c.price_eur_cents / 100).toFixed(2)}` : <span className="text-muted-foreground">Free</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        {c.stripe_price_id ? (
+                          <a href={`https://dashboard.stripe.com/prices/${c.stripe_price_id}`} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 font-mono">
+                            {c.stripe_price_id.slice(0, 14)}… <ExternalLink className="w-3 h-3" />
+                          </a>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Not synced</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => togglePublish(c)} className="inline-flex">
+                          <Badge variant={c.is_published ? "default" : "outline"} className="text-xs cursor-pointer">
+                            {c.is_published ? "Published" : "Draft"}
+                          </Badge>
+                        </button>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setEditingCourse(c)}>Edit</Button>
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => syncStripe(c)} disabled={syncingId === c.id}>
+                            {syncingId === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+                            Sync Stripe
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => deleteCourse(c.id)}><Trash2 className="w-3 h-3" /></Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {courses.length === 0 && (
+                    <tr><td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">No courses yet.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </TabsContent>
       </Tabs>
 
       {/* Tier Editor */}
@@ -224,6 +376,83 @@ export default function AdminPricing() {
             </div>
           )}
           <DialogFooter><Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button><Button onClick={saveTier} disabled={saving}>{saving && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}<Save className="w-3.5 h-3.5 mr-1" />Save</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Course Editor */}
+      <Dialog open={!!editingCourse} onOpenChange={open => !open && setEditingCourse(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>{editingCourse?.id ? "Edit Course" : "New Course"}</DialogTitle></DialogHeader>
+          {editingCourse && (
+            <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Slug</label>
+                  <Input value={editingCourse.slug} onChange={e => setEditingCourse({ ...editingCourse, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") })} placeholder="aml-fundamentals" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Sort order</label>
+                  <Input type="number" value={editingCourse.sort_order} onChange={e => setEditingCourse({ ...editingCourse, sort_order: parseInt(e.target.value) || 0 })} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Title</label>
+                <Input value={editingCourse.title} onChange={e => setEditingCourse({ ...editingCourse, title: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Description</label>
+                <Textarea rows={3} value={editingCourse.description} onChange={e => setEditingCourse({ ...editingCourse, description: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Category</label>
+                  <Input value={editingCourse.category} onChange={e => setEditingCourse({ ...editingCourse, category: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Difficulty</label>
+                  <Input value={editingCourse.difficulty} onChange={e => setEditingCourse({ ...editingCourse, difficulty: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">CPD hours</label>
+                  <Input type="number" step="0.5" value={editingCourse.cpd_hours} onChange={e => setEditingCourse({ ...editingCourse, cpd_hours: parseFloat(e.target.value) || 0 })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Duration (min)</label>
+                  <Input type="number" value={editingCourse.duration_minutes} onChange={e => setEditingCourse({ ...editingCourse, duration_minutes: parseInt(e.target.value) || 0 })} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Price (EUR cents)</label>
+                  <Input type="number" value={editingCourse.price_eur_cents} onChange={e => setEditingCourse({ ...editingCourse, price_eur_cents: parseInt(e.target.value) || 0 })} placeholder="2900 = €29.00" />
+                </div>
+              </div>
+              {editingCourse.id && (
+                <div className="rounded-md border border-border bg-muted/20 p-3 text-xs space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Stripe Product</span>
+                    <span className="font-mono text-foreground">{editingCourse.stripe_product_id || "—"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Stripe Price</span>
+                    <span className="font-mono text-foreground">{editingCourse.stripe_price_id || "—"}</span>
+                  </div>
+                  <p className="text-muted-foreground pt-1">Save first, then click <strong>Sync Stripe</strong> on the row to push title and price to Stripe.</p>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Switch checked={editingCourse.is_published} onCheckedChange={v => setEditingCourse({ ...editingCourse, is_published: v })} />
+                <span className="text-sm text-muted-foreground">Published (visible in Academy)</span>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingCourse(null)}>Cancel</Button>
+            <Button onClick={saveCourse} disabled={saving}>
+              {saving && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
+              <Save className="w-3.5 h-3.5 mr-1" /> Save
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

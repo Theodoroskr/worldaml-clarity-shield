@@ -110,9 +110,12 @@ export type Database = {
           image_url: string | null
           is_published: boolean
           learning_outcomes: string[]
+          price_eur_cents: number
           role_track: string
           slug: string
           sort_order: number
+          stripe_price_id: string | null
+          stripe_product_id: string | null
           title: string
         }
         Insert: {
@@ -127,9 +130,12 @@ export type Database = {
           image_url?: string | null
           is_published?: boolean
           learning_outcomes?: string[]
+          price_eur_cents?: number
           role_track?: string
           slug: string
           sort_order?: number
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           title: string
         }
         Update: {
@@ -144,9 +150,12 @@ export type Database = {
           image_url?: string | null
           is_published?: boolean
           learning_outcomes?: string[]
+          price_eur_cents?: number
           role_track?: string
           slug?: string
           sort_order?: number
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           title?: string
         }
         Relationships: []
