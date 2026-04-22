@@ -80,8 +80,32 @@ type DifficultyFilter = "all" | "beginner" | "intermediate" | "advanced";
 const Academy = () => {
   const { user } = useAuth();
   const cart = useCart();
+  const { purchasedSlugs } = useAcademyPurchases();
   const { region, regionConfig, wasAutoDetected, isLoading: regionLoading } = useRegion();
   const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Post-checkout success toast (Stripe redirects back with ?purchase=success)
+  useEffect(() => {
+    const purchase = searchParams.get("purchase");
+    if (purchase === "success") {
+      toast.success("Payment received — your courses are unlocked.", {
+        description: "It may take a moment to appear. Refresh if you don't see access yet.",
+        duration: 8000,
+      });
+      // Clear cart locally; the webhook has recorded the purchase server-side.
+      cart.clear();
+      const next = new URLSearchParams(searchParams);
+      next.delete("purchase");
+      setSearchParams(next, { replace: true });
+    } else if (purchase === "cancelled") {
+      toast("Checkout cancelled.", { description: "Your basket is still saved." });
+      const next = new URLSearchParams(searchParams);
+      next.delete("purchase");
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // First-visit toast: announce auto-detected region once per browser.
   useEffect(() => {
