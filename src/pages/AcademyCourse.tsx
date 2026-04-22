@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ArrowRight, ArrowLeft, CheckCircle, XCircle, Award, Clock, BookOpen, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ModuleContent, { computeReadingMinutes } from "@/components/academy/ModuleContent";
+import ModuleTOC from "@/components/academy/ModuleTOC";
 
 const PASS_THRESHOLD = 80;
 
