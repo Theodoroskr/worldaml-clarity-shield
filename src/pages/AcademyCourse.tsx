@@ -653,20 +653,26 @@ const AcademyCourse = () => {
                                       key={oi}
                                       onClick={() => handleAnswer(q.id, oi)}
                                       disabled={quizSubmitted}
-                                      className={`w-full text-left px-4 py-3 rounded-lg border text-body-sm transition-all duration-150 flex items-center gap-3 ${
+                                      className={`w-full text-left px-4 py-3 rounded-lg border-2 text-body-sm transition-all duration-150 flex items-center gap-3 ${
                                         showCorrect
                                           ? "border-emerald-500 bg-emerald-50 text-emerald-800"
                                           : isSelected && isWrong
                                           ? "border-rose-500 bg-rose-50 text-rose-800"
                                           : isSelected
-                                          ? "border-primary bg-primary/10 text-primary font-medium shadow-sm"
-                                          : "border-border hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm text-muted-foreground hover:text-foreground cursor-pointer"
+                                          ? "border-teal bg-teal/10 text-foreground font-semibold shadow-sm ring-2 ring-teal/30"
+                                          : "border-border hover:border-teal/40 hover:bg-secondary hover:shadow-sm text-muted-foreground hover:text-foreground cursor-pointer"
                                       }`}
                                     >
                                       {showCorrect && <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />}
                                       {isSelected && isWrong && <XCircle className="h-4 w-4 text-rose-500 flex-shrink-0" />}
                                       {!showCorrect && !(isSelected && isWrong) && (
-                                        <span className="w-4 h-4 rounded-full border border-current flex-shrink-0" />
+                                        <span
+                                          className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
+                                            isSelected ? "border-teal" : "border-current"
+                                          }`}
+                                        >
+                                          {isSelected && <span className="w-2 h-2 rounded-full bg-teal" />}
+                                        </span>
                                       )}
                                       {opt}
                                     </button>
