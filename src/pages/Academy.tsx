@@ -491,7 +491,66 @@ const Academy = () => {
                       aria-disabled="true"
                       title={`Pass ${prereqTitle ?? "the previous course"} (70%+) to unlock this course`}
                     >
-                      {renderCardBody({ course, status, cert, catConfig, CatIcon, cpd, moduleCount, progressPct, completedMods, featured: !!featured, locked: true, prereqTitle })}
+                      {/* Thumbnail */}
+                      <div
+                        className={`relative bg-gradient-to-br ${catConfig.gradient} overflow-hidden flex-shrink-0 grayscale ${
+                          featured
+                            ? "aspect-[16/10] md:aspect-auto md:w-2/5 md:min-h-[260px]"
+                            : "aspect-[16/9] sm:aspect-[16/10] md:aspect-auto md:h-40"
+                        }`}
+                      >
+                        {(() => {
+                          const cover = getCourseCover(course.slug);
+                          return cover ? (
+                            <img src={cover} alt={course.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover object-center" />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className={`${featured ? "h-20 w-20" : "h-14 w-14"} rounded-2xl ${catConfig.iconBg} backdrop-blur-sm border border-white/20 flex items-center justify-center`}>
+                                <CatIcon className={`${featured ? "h-10 w-10" : "h-7 w-7"} text-white`} />
+                              </div>
+                            </div>
+                          );
+                        })()}
+                        <div className="absolute inset-0 bg-background/40" />
+                        <div className="absolute top-3 right-3">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted-foreground/90 text-background text-[11px] font-medium shadow-sm">
+                            <Lock className="h-3 w-3" /> Locked
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className={`p-5 flex-1 flex flex-col ${featured ? "md:p-7" : ""}`}>
+                        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                          <Badge variant="outline" className={`${difficultyColor[course.difficulty] || ""} text-[10px] uppercase tracking-wide font-semibold border`}>
+                            {course.difficulty}
+                          </Badge>
+                          <Badge variant="outline" className={`${catConfig.color} text-[10px] border-0`}>
+                            {catConfig.label}
+                          </Badge>
+                        </div>
+                        <h3 className={`font-semibold text-foreground mb-2 ${featured ? "text-2xl" : "text-subtitle"}`}>
+                          {course.title}
+                        </h3>
+                        <p className={`text-body-sm text-muted-foreground mb-4 ${featured ? "line-clamp-4" : "line-clamp-2"}`}>
+                          {course.description}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-caption text-muted-foreground mb-4">
+                          <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{course.duration_minutes} min</span>
+                          {moduleCount > 0 && (
+                            <span className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{moduleCount} module{moduleCount !== 1 ? "s" : ""}</span>
+                          )}
+                          {cpd > 0 && (
+                            <span className="flex items-center gap-1 text-primary font-medium"><Award className="h-3.5 w-3.5" />{formatCpd(cpd)}</span>
+                          )}
+                        </div>
+                        <div className="mt-auto pt-2 border-t border-border/50">
+                          <p className="text-body-sm font-semibold text-muted-foreground flex items-center gap-1.5">
+                            <Lock className="h-4 w-4" />
+                            Complete <span className="text-foreground">{prereqTitle ?? "the previous course"}</span> (70%+) to unlock
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   );
                 }
