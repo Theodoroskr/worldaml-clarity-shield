@@ -758,15 +758,45 @@ const Academy = () => {
                       )}
 
                       <div className="flex items-center justify-between mt-auto pt-2 border-t border-border/50">
-                        <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-                          {status === "completed" ? (
-                            <>View Certificate <Award className="h-4 w-4" /></>
-                          ) : status === "in-progress" ? (
-                            <>Continue Learning <PlayCircle className="h-4 w-4" /></>
-                          ) : (
-                            <>Start Course <ArrowRight className="h-4 w-4" /></>
-                          )}
-                        </span>
+                        {(() => {
+                          const isFree = FREE_ACADEMY_COURSES.has(course.slug);
+                          const purchased = purchasedSlugs.has(course.slug);
+                          const requiresPurchase = !isFree && !purchased;
+
+                          if (status === "completed") {
+                            return (
+                              <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                                View Certificate <Award className="h-4 w-4" />
+                              </span>
+                            );
+                          }
+                          if (!user) {
+                            return (
+                              <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                                <LogIn className="h-4 w-4" /> Sign up to start
+                              </span>
+                            );
+                          }
+                          if (requiresPurchase) {
+                            return (
+                              <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                                <ShoppingBag className="h-4 w-4" /> Unlock course
+                              </span>
+                            );
+                          }
+                          if (status === "in-progress") {
+                            return (
+                              <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                                Continue Learning <PlayCircle className="h-4 w-4" />
+                              </span>
+                            );
+                          }
+                          return (
+                            <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                              Start Course <ArrowRight className="h-4 w-4" />
+                            </span>
+                          );
+                        })()}
                         <button
                           type="button"
                           title="Share on LinkedIn"
