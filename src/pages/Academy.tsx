@@ -79,8 +79,33 @@ type DifficultyFilter = "all" | "beginner" | "intermediate" | "advanced";
 const Academy = () => {
   const { user } = useAuth();
   const cart = useCart();
-  const { region } = useRegion();
+  const { region, regionConfig, wasAutoDetected, isLoading: regionLoading } = useRegion();
   const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
+
+  // First-visit toast: announce auto-detected region once per browser.
+  useEffect(() => {
+    if (regionLoading || !wasAutoDetected) return;
+    try {
+      if (localStorage.getItem("academy_region_toast_dismissed") === "1") return;
+      const id = toast(
+        `Showing prices in ${currencyCode(currency)} for ${regionConfig.name}. Change region anytime from the cart.`,
+        {
+          duration: 8000,
+          action: {
+            label: "Got it",
+            onClick: () => {
+              try { localStorage.setItem("academy_region_toast_dismissed", "1"); } catch { /* ignore */ }
+              toast.dismiss(id);
+            },
+          },
+        }
+      );
+      // Mark as shown immediately so it never reappears even without explicit dismiss.
+      try { localStorage.setItem("academy_region_toast_dismissed", "1"); } catch { /* ignore */ }
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [regionLoading, wasAutoDetected]);
+
   const [filter, setFilter] = useState<FilterTab>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
@@ -655,9 +680,12 @@ const Academy = () => {
                           if (isPaidCourse(course.slug)) {
                             const cents = convertEurCents(ACADEMY_PRICING[course.slug].eurCents, currency);
                             return (
-                              <Badge variant="outline" className="text-[10px] border-primary/40 text-primary bg-primary/10">
-                                {formatPrice(cents, currency)}
-                              </Badge>
+                              <span className="inline-flex items-center gap-1.5">
+                                <Badge variant="outline" className="text-[10px] border-primary/40 text-primary bg-primary/10">
+                                  {formatPrice(cents, currency)}
+                                </Badge>
+                                <CurrencyIndicator variant="compact" />
+                              </span>
                             );
                           }
                           return null;
