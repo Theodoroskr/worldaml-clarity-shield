@@ -115,7 +115,7 @@ const EXPECTED_CORRECT: Record<string, Record<number, string>> = {
     27: "Do not disclose the report to the client",
     28: "Stop and wait for instructions; maintain records",
     29: "Personal legal exposure including criminal liability",
-    30: "Act on suspicion promptly and through the right channels",
+    30: "Act on suspicion promptly and properly",
   },
 };
 
