@@ -355,9 +355,14 @@ const AcademyCourse = () => {
                 if (isPaidCourse(course.slug)) {
                   const cents = convertEurCents(ACADEMY_PRICING[course.slug].eurCents, currency);
                   return (
-                    <Badge variant="outline" className="border-primary/40 text-primary-foreground bg-primary/20">
-                      {formatPrice(cents, currency)}
-                    </Badge>
+                    <span className="inline-flex items-center gap-2">
+                      <Badge variant="outline" className="border-primary/40 text-primary-foreground bg-primary/20">
+                        {formatPrice(cents, currency)}
+                      </Badge>
+                      <span className="text-slate-light">
+                        <CurrencyIndicator variant="full" showTooltip className="!text-slate-light" />
+                      </span>
+                    </span>
                   );
                 }
                 return null;
