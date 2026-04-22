@@ -134,6 +134,19 @@ const Academy = () => {
     },
   });
 
+  // Live social proof: total certificates issued across all learners
+  const { data: certifiedCount } = useQuery({
+    queryKey: ["academy-certified-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("academy_certificates")
+        .select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count ?? 0;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   const progressMap = new Map(progressData?.map((p) => [p.course_id, p]) || []);
   const certMap = new Map(certificates?.map((c) => [c.course_id, c]) || []);
 
