@@ -216,12 +216,19 @@ export default function AdminPricing() {
   return (
     <div className="p-6 space-y-5">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-xl font-bold text-foreground">Pricing & Limits</h1><p className="text-xs text-muted-foreground">Manage subscription tiers and usage quotas</p></div>
-        <Button size="sm" onClick={createNew}><Plus className="w-3.5 h-3.5 mr-1" /> New Tier</Button>
+        <div><h1 className="text-xl font-bold text-foreground">Pricing & Limits</h1><p className="text-xs text-muted-foreground">Manage subscription tiers, academy courses, and Stripe mappings</p></div>
       </div>
 
       <Tabs defaultValue="tiers">
-        <TabsList><TabsTrigger value="tiers"><CreditCard className="w-3.5 h-3.5 mr-1" />Tiers</TabsTrigger><TabsTrigger value="users"><Users className="w-3.5 h-3.5 mr-1" />User Subscriptions</TabsTrigger></TabsList>
+        <TabsList>
+          <TabsTrigger value="tiers"><CreditCard className="w-3.5 h-3.5 mr-1" />Tiers</TabsTrigger>
+          <TabsTrigger value="users"><Users className="w-3.5 h-3.5 mr-1" />User Subscriptions</TabsTrigger>
+          <TabsTrigger value="courses"><GraduationCap className="w-3.5 h-3.5 mr-1" />Academy Courses</TabsTrigger>
+        </TabsList>
+
+        <div className="flex justify-end mt-3">
+          <Button size="sm" variant="outline" onClick={createNew}><Plus className="w-3.5 h-3.5 mr-1" /> New Tier</Button>
+        </div>
 
         <TabsContent value="tiers" className="mt-4">
           {loading ? <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div> : (
