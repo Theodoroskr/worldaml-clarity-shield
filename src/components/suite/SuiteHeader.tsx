@@ -184,6 +184,7 @@ export const SuiteHeader = ({
 
               {/* Static links */}
               {[
+                { href: "/data-sources", label: "Data Sources" },
                 { href: "/pricing", label: "Pricing" },
                 { href: "https://worldaml.readme.io", label: "Docs", external: true },
               ].map((link) =>
@@ -292,6 +293,7 @@ export const SuiteHeader = ({
                 </Link>
               ))}
               <div className="pt-2 border-t border-[hsl(215_20%_92%)] mt-2 space-y-1">
+                <Link to="/data-sources" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 text-[13px] font-medium text-[hsl(215_20%_40%)] hover:text-[hsl(222_47%_11%)]">Data Sources</Link>
                 <Link to="/pricing" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 text-[13px] font-medium text-[hsl(215_20%_40%)] hover:text-[hsl(222_47%_11%)]">Pricing</Link>
                 <a href="https://worldaml.readme.io" target="_blank" rel="noopener noreferrer" className="block px-3 py-2.5 text-[13px] font-medium text-[hsl(215_20%_40%)]">Docs ↗</a>
               </div>
