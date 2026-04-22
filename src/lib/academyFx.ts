@@ -4,6 +4,16 @@
 
 export type AcademyCurrency = "eur" | "usd" | "gbp";
 
+/** Maps a Region id to the Academy currency we display prices in. */
+export const REGION_TO_CURRENCY: Record<string, AcademyCurrency> = {
+  "eu-me": "eur",
+  "uk-ie": "gbp",
+  na: "usd",
+};
+
+/** Currency ISO code in uppercase, for UI display. */
+export const currencyCode = (c: AcademyCurrency): string => c.toUpperCase();
+
 const RATES: Record<AcademyCurrency, number> = {
   eur: 1,
   usd: 1.08,

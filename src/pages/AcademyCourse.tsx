@@ -18,13 +18,8 @@ import { getCourseDiagram } from "@/assets/academy";
 import { useCourseGate } from "@/hooks/useCourseGate";
 import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/academyPricing";
 import { useRegion } from "@/contexts/RegionContext";
-import { AcademyCurrency, convertEurCents, formatPrice } from "@/lib/academyFx";
-
-const REGION_TO_CURRENCY: Record<string, AcademyCurrency> = {
-  "eu-me": "eur",
-  "uk-ie": "gbp",
-  na: "usd",
-};
+import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY } from "@/lib/academyFx";
+import CurrencyIndicator from "@/components/academy/CurrencyIndicator";
 
 const PASS_THRESHOLD = 70;
 
@@ -360,9 +355,14 @@ const AcademyCourse = () => {
                 if (isPaidCourse(course.slug)) {
                   const cents = convertEurCents(ACADEMY_PRICING[course.slug].eurCents, currency);
                   return (
-                    <Badge variant="outline" className="border-primary/40 text-primary-foreground bg-primary/20">
-                      {formatPrice(cents, currency)}
-                    </Badge>
+                    <span className="inline-flex items-center gap-2">
+                      <Badge variant="outline" className="border-primary/40 text-primary-foreground bg-primary/20">
+                        {formatPrice(cents, currency)}
+                      </Badge>
+                      <span className="text-slate-light">
+                        <CurrencyIndicator variant="full" showTooltip className="!text-slate-light" />
+                      </span>
+                    </span>
                   );
                 }
                 return null;

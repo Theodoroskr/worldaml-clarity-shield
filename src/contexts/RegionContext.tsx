@@ -6,6 +6,8 @@ interface RegionContextType {
   regionConfig: RegionConfig;
   setRegion: (region: Region) => void;
   isLoading: boolean;
+  /** True when the current region was auto-detected from IP (no saved cookie at mount). */
+  wasAutoDetected: boolean;
 }
 
 const RegionContext = createContext<RegionContextType | undefined>(undefined);
@@ -43,6 +45,7 @@ function setCookie(name: string, value: string, days: number = 365) {
 export function RegionProvider({ children }: { children: ReactNode }) {
   const [region, setRegionState] = useState<Region>('eu-me');
   const [isLoading, setIsLoading] = useState(true);
+  const [wasAutoDetected, setWasAutoDetected] = useState(false);
 
   useEffect(() => {
     const detectRegion = async () => {
@@ -50,6 +53,7 @@ export function RegionProvider({ children }: { children: ReactNode }) {
       const savedRegion = getCookie(REGION_COOKIE_KEY) as Region | null;
       if (savedRegion && REGIONS[savedRegion]) {
         setRegionState(savedRegion);
+        setWasAutoDetected(false);
         setIsLoading(false);
         return;
       }
@@ -62,9 +66,11 @@ export function RegionProvider({ children }: { children: ReactNode }) {
         const detectedRegion = countryToRegion[countryCode] || 'eu-me';
         setRegionState(detectedRegion);
         setCookie(REGION_COOKIE_KEY, detectedRegion);
+        setWasAutoDetected(true);
       } catch (error) {
         console.error('Failed to detect region:', error);
         setRegionState('eu-me'); // Default to EU & ME
+        setWasAutoDetected(true);
       }
       setIsLoading(false);
     };
@@ -75,6 +81,7 @@ export function RegionProvider({ children }: { children: ReactNode }) {
   const setRegion = (newRegion: Region) => {
     setRegionState(newRegion);
     setCookie(REGION_COOKIE_KEY, newRegion);
+    setWasAutoDetected(false);
   };
 
   return (
@@ -84,6 +91,7 @@ export function RegionProvider({ children }: { children: ReactNode }) {
         regionConfig: REGIONS[region],
         setRegion,
         isLoading,
+        wasAutoDetected,
       }}
     >
       {children}
