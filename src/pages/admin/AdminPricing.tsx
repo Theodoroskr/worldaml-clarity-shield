@@ -288,6 +288,68 @@ export default function AdminPricing() {
             </table>
           </div>
         </TabsContent>
+
+        {/* Academy courses */}
+        <TabsContent value="courses" className="mt-4 space-y-3">
+          <div className="flex justify-end">
+            <Button size="sm" onClick={newCourse}><Plus className="w-3.5 h-3.5 mr-1" /> New Course</Button>
+          </div>
+          {loading ? (
+            <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+          ) : (
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead><tr className="border-b border-border bg-muted/30">
+                  {["Course", "Price", "Stripe", "Status", "Actions"].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>
+                  ))}
+                </tr></thead>
+                <tbody className="divide-y divide-border">
+                  {courses.map(c => (
+                    <tr key={c.id} className="hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-foreground text-sm">{c.title}</div>
+                        <div className="text-xs text-muted-foreground font-mono">{c.slug}</div>
+                      </td>
+                      <td className="px-4 py-3 text-foreground">
+                        {c.price_eur_cents > 0 ? `€${(c.price_eur_cents / 100).toFixed(2)}` : <span className="text-muted-foreground">Free</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        {c.stripe_price_id ? (
+                          <a href={`https://dashboard.stripe.com/prices/${c.stripe_price_id}`} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 font-mono">
+                            {c.stripe_price_id.slice(0, 14)}… <ExternalLink className="w-3 h-3" />
+                          </a>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Not synced</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => togglePublish(c)} className="inline-flex">
+                          <Badge variant={c.is_published ? "default" : "outline"} className="text-xs cursor-pointer">
+                            {c.is_published ? "Published" : "Draft"}
+                          </Badge>
+                        </button>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setEditingCourse(c)}>Edit</Button>
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => syncStripe(c)} disabled={syncingId === c.id}>
+                            {syncingId === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+                            Sync Stripe
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => deleteCourse(c.id)}><Trash2 className="w-3 h-3" /></Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {courses.length === 0 && (
+                    <tr><td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">No courses yet.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </TabsContent>
       </Tabs>
 
       {/* Tier Editor */}
@@ -314,6 +376,83 @@ export default function AdminPricing() {
             </div>
           )}
           <DialogFooter><Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button><Button onClick={saveTier} disabled={saving}>{saving && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}<Save className="w-3.5 h-3.5 mr-1" />Save</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Course Editor */}
+      <Dialog open={!!editingCourse} onOpenChange={open => !open && setEditingCourse(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>{editingCourse?.id ? "Edit Course" : "New Course"}</DialogTitle></DialogHeader>
+          {editingCourse && (
+            <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Slug</label>
+                  <Input value={editingCourse.slug} onChange={e => setEditingCourse({ ...editingCourse, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") })} placeholder="aml-fundamentals" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Sort order</label>
+                  <Input type="number" value={editingCourse.sort_order} onChange={e => setEditingCourse({ ...editingCourse, sort_order: parseInt(e.target.value) || 0 })} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Title</label>
+                <Input value={editingCourse.title} onChange={e => setEditingCourse({ ...editingCourse, title: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Description</label>
+                <Textarea rows={3} value={editingCourse.description} onChange={e => setEditingCourse({ ...editingCourse, description: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Category</label>
+                  <Input value={editingCourse.category} onChange={e => setEditingCourse({ ...editingCourse, category: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Difficulty</label>
+                  <Input value={editingCourse.difficulty} onChange={e => setEditingCourse({ ...editingCourse, difficulty: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">CPD hours</label>
+                  <Input type="number" step="0.5" value={editingCourse.cpd_hours} onChange={e => setEditingCourse({ ...editingCourse, cpd_hours: parseFloat(e.target.value) || 0 })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Duration (min)</label>
+                  <Input type="number" value={editingCourse.duration_minutes} onChange={e => setEditingCourse({ ...editingCourse, duration_minutes: parseInt(e.target.value) || 0 })} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Price (EUR cents)</label>
+                  <Input type="number" value={editingCourse.price_eur_cents} onChange={e => setEditingCourse({ ...editingCourse, price_eur_cents: parseInt(e.target.value) || 0 })} placeholder="2900 = €29.00" />
+                </div>
+              </div>
+              {editingCourse.id && (
+                <div className="rounded-md border border-border bg-muted/20 p-3 text-xs space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Stripe Product</span>
+                    <span className="font-mono text-foreground">{editingCourse.stripe_product_id || "—"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Stripe Price</span>
+                    <span className="font-mono text-foreground">{editingCourse.stripe_price_id || "—"}</span>
+                  </div>
+                  <p className="text-muted-foreground pt-1">Save first, then click <strong>Sync Stripe</strong> on the row to push title and price to Stripe.</p>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Switch checked={editingCourse.is_published} onCheckedChange={v => setEditingCourse({ ...editingCourse, is_published: v })} />
+                <span className="text-sm text-muted-foreground">Published (visible in Academy)</span>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingCourse(null)}>Cancel</Button>
+            <Button onClick={saveCourse} disabled={saving}>
+              {saving && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
+              <Save className="w-3.5 h-3.5 mr-1" /> Save
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
