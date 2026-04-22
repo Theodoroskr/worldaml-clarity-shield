@@ -9,6 +9,8 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle } from "lucide-react";
+import { getCourseCover } from "@/assets/academy";
+import AcademyLogo from "@/components/AcademyLogo";
 
 const difficultyColor: Record<string, string> = {
   beginner: "bg-emerald-100 text-emerald-700 border-emerald-200",
@@ -215,6 +217,9 @@ const Academy = () => {
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-teal-light text-body-sm font-medium mb-6">
                 <GraduationCap className="h-4 w-4" />
                 Free Compliance Training
+              </div>
+              <div className="flex justify-center mb-5">
+                <AcademyLogo size="lg" variant="light" />
               </div>
               <h1 className="text-display text-primary-foreground mb-4">
                 WorldAML Academy
@@ -451,19 +456,32 @@ const Academy = () => {
                         featured ? "md:w-2/5 min-h-[220px]" : "h-32"
                       }`}
                     >
-                      {/* decorative pattern */}
-                      <div
-                        className="absolute inset-0 opacity-20"
-                        style={{
-                          backgroundImage:
-                            "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
-                        }}
-                      />
-                      <div className={`absolute inset-0 flex items-center justify-center`}>
-                        <div className={`${featured ? "h-20 w-20" : "h-14 w-14"} rounded-2xl ${catConfig.iconBg} backdrop-blur-sm border border-white/20 flex items-center justify-center`}>
-                          <CatIcon className={`${featured ? "h-10 w-10" : "h-7 w-7"} text-white`} />
-                        </div>
-                      </div>
+                      {(() => {
+                        const cover = getCourseCover(course.slug);
+                        return cover ? (
+                          <img
+                            src={cover}
+                            alt={course.title}
+                            loading="lazy"
+                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <>
+                            <div
+                              className="absolute inset-0 opacity-20"
+                              style={{
+                                backgroundImage:
+                                  "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+                              }}
+                            />
+                            <div className={`absolute inset-0 flex items-center justify-center`}>
+                              <div className={`${featured ? "h-20 w-20" : "h-14 w-14"} rounded-2xl ${catConfig.iconBg} backdrop-blur-sm border border-white/20 flex items-center justify-center`}>
+                                <CatIcon className={`${featured ? "h-10 w-10" : "h-7 w-7"} text-white`} />
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
 
                       {/* Featured badge */}
                       {featured && (
