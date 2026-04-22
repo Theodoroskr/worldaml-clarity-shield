@@ -190,7 +190,7 @@ function AcademyCartDrawerContent() {
             <span className="text-foreground">{formatPrice(totals.subtotal, currency)}</span>
           </div>
           {totals.discountPct > 0 && (
-            <div className="flex items-center justify-between text-body-sm text-emerald-600">
+            <div className="flex items-center justify-between text-body-sm text-accent">
               <span>{discount.label}</span>
               <span>−{formatPrice(totals.discountAmount, currency)}</span>
             </div>
