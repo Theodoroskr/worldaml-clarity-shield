@@ -241,12 +241,56 @@ const AcademyCourse = () => {
   const allModulesComplete = modules ? completedModules.length >= modules.length : false;
   const progressPercent = modules?.length ? (completedModules.length / modules.length) * 100 : 0;
 
-  if (!course) {
+  if (!course || gate.loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <p className="text-muted-foreground">Loading course...</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!gate.isAccessible) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <SEO
+          title="Course locked — WorldAML Academy"
+          description="Complete the previous course to unlock this one."
+          canonical={`/academy/${slug}`}
+          noindex
+        />
+        <Header />
+        <main className="flex-1 bg-background">
+          <div className="container-enterprise py-16">
+            <div className="max-w-lg mx-auto rounded-xl border border-border bg-card p-8 text-center">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Lock className="h-6 w-6 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground mb-2">Course locked</h1>
+              <p className="text-muted-foreground mb-6">
+                Finish <span className="font-semibold text-foreground">{gate.prereqTitle}</span> (score {PASS_THRESHOLD}% or higher on the exam) to unlock this course.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                {gate.redirectSlug && (
+                  <Button asChild>
+                    <Link to={`/academy/${gate.redirectSlug}`}>
+                      Continue with {gate.prereqTitle}
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Link>
+                  </Button>
+                )}
+                <Button variant="outline" asChild>
+                  <Link to="/academy">
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Academy
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
         </main>
         <Footer />
       </div>
