@@ -155,14 +155,14 @@ export const Header = () => {
                   <DropdownMenuTrigger asChild>
                     <button
                       className={cn(
-                        "px-4 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-1",
+                        "px-2.5 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-0.5 whitespace-nowrap",
                         link.href && location.pathname.startsWith(link.href)
                           ? "text-navy bg-secondary"
                           : "text-text-secondary hover:text-navy hover:bg-secondary/50"
                       )}
                     >
                       {link.label}
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown className="h-3.5 w-3.5" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="p-3 w-auto">
