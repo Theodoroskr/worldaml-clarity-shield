@@ -618,7 +618,7 @@ const Academy = () => {
                         <Sparkles className="h-4 w-4 text-accent" />
                         <h3 className="text-body font-semibold text-foreground uppercase tracking-wide">Start Here</h3>
                       </div>
-                      <div className="grid md:grid-cols-3 gap-6">
+                      <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
                         {renderCard(featuredCourse, { featured: true })}
                       </div>
                     </div>
@@ -646,14 +646,14 @@ const Academy = () => {
                               </div>
                             </div>
                           </div>
-                          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {grouped[catKey].map((c) => renderCard(c))}
                           </div>
                         </div>
                       );
                     })
                   ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                       {filteredCourses.map((c) => renderCard(c))}
                     </div>
                   )}
