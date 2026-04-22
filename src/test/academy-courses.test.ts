@@ -59,4 +59,26 @@ describe("Academy paid-credential standard", () => {
         .join(", ")}`,
     ).toEqual([]);
   });
+
+  it(`every paid (non-beginner) course is at least ${MIN_PAID_DURATION_MINUTES} minutes`, async () => {
+    const { data: courses, error } = await supabase
+      .from("academy_courses")
+      .select("slug, difficulty, duration_minutes")
+      .eq("is_published", true)
+      .neq("difficulty", "beginner");
+
+    expect(error).toBeNull();
+    expect(courses).toBeTruthy();
+
+    const offenders = (courses ?? []).filter(
+      (c) => (c.duration_minutes ?? 0) < MIN_PAID_DURATION_MINUTES,
+    );
+
+    expect(
+      offenders,
+      `Paid courses below ${MIN_PAID_DURATION_MINUTES} min: ${offenders
+        .map((c) => `${c.slug} (${c.duration_minutes}m)`)
+        .join(", ")}`,
+    ).toEqual([]);
+  });
 });
