@@ -410,13 +410,13 @@ const ModuleContent: React.FC<Props> = ({ content, className }) => {
         const id = headingId(text);
         if (level === 1) {
           out.push(
-            <h2 key={key} id={id} className="text-2xl md:text-3xl font-bold text-foreground mt-12 mb-4 scroll-mt-24 tracking-tight">
+            <h2 key={key} id={id} className="text-2xl md:text-3xl font-bold text-primary mt-12 mb-4 scroll-mt-24 tracking-tight pl-4 border-l-4 border-accent">
               {text}
             </h2>
           );
         } else if (level === 2) {
           out.push(
-            <h3 key={key} id={id} className="text-xl md:text-2xl font-semibold text-foreground mt-10 mb-3 scroll-mt-24 tracking-tight">
+            <h3 key={key} id={id} className="text-xl md:text-2xl font-semibold text-primary mt-10 mb-3 scroll-mt-24 tracking-tight">
               {text}
             </h3>
           );
