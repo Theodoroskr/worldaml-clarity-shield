@@ -69,24 +69,49 @@ serve(async (req) => {
     if (courseSlugs.length === 0) return json({ error: "No courses provided" }, 400);
     if (!RATES[currency]) return json({ error: "Unsupported currency" }, 400);
 
-    // Dedupe + validate paid + product configured
+    // Dedupe
     const unique = Array.from(new Set(courseSlugs));
     for (const slug of unique) {
       if (FREE_COURSES.has(slug)) {
         return json({ error: `${slug} is a free course and cannot be purchased.` }, 400);
       }
-      const entry = PRICING[slug];
-      if (!entry) return json({ error: `Unknown course: ${slug}` }, 400);
-      if (!entry.stripeProductId) {
-        return json({ error: `${slug} is not yet available for purchase.` }, 400);
-      }
     }
 
-    // Drop courses the user already has active access to
     const serviceClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    // Load DB-managed course pricing (overrides hardcoded PRICING when present)
+    const { data: dbCourses } = await serviceClient
+      .from("academy_courses")
+      .select("slug, price_eur_cents, stripe_product_id, stripe_price_id, is_published")
+      .in("slug", unique);
+
+    const dbBySlug = new Map<string, any>((dbCourses ?? []).map((c: any) => [c.slug, c]));
+
+    // Resolve pricing per slug (DB first, then hardcoded fallback)
+    const resolved: Record<string, { eurCents: number; stripeProductId: string; stripePriceId?: string }> = {};
+    for (const slug of unique) {
+      const db = dbBySlug.get(slug);
+      if (db && db.is_published === false) {
+        return json({ error: `${slug} is not currently available.` }, 400);
+      }
+      if (db?.stripe_product_id && db?.price_eur_cents > 0) {
+        resolved[slug] = {
+          eurCents: db.price_eur_cents,
+          stripeProductId: db.stripe_product_id,
+          stripePriceId: db.stripe_price_id ?? undefined,
+        };
+        continue;
+      }
+      const fallback = PRICING[slug];
+      if (!fallback) return json({ error: `Unknown course: ${slug}` }, 400);
+      if (!fallback.stripeProductId) {
+        return json({ error: `${slug} is not yet available for purchase.` }, 400);
+      }
+      resolved[slug] = { eurCents: fallback.eurCents, stripeProductId: fallback.stripeProductId };
+    }
     const { data: existing } = await serviceClient
       .from("academy_course_purchases")
       .select("course_slug, expires_at")
