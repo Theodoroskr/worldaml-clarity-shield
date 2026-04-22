@@ -83,4 +83,69 @@ describe("Academy paid-credential standard", () => {
         .join(", ")}`,
     ).toEqual([]);
   });
+
+  it(`every published course has at least ${MIN_MODULES_ANY} module`, async () => {
+    const { data: courses, error: coursesError } = await supabase
+      .from("academy_courses")
+      .select("id, slug")
+      .eq("is_published", true);
+
+    expect(coursesError).toBeNull();
+    expect(courses).toBeTruthy();
+
+    const { data: modules, error: modulesError } = await supabase
+      .from("academy_modules")
+      .select("course_id");
+
+    expect(modulesError).toBeNull();
+
+    const counts = new Map<string, number>();
+    for (const m of modules ?? []) {
+      counts.set(m.course_id, (counts.get(m.course_id) ?? 0) + 1);
+    }
+
+    const offenders = (courses ?? []).filter(
+      (c) => (counts.get(c.id) ?? 0) < MIN_MODULES_ANY,
+    );
+
+    expect(
+      offenders,
+      `Published courses with no modules: ${offenders
+        .map((c) => c.slug)
+        .join(", ")}`,
+    ).toEqual([]);
+  });
+
+  it(`every paid (non-beginner) published course has at least ${MIN_MODULES_PAID} modules`, async () => {
+    const { data: courses, error: coursesError } = await supabase
+      .from("academy_courses")
+      .select("id, slug, difficulty")
+      .eq("is_published", true)
+      .neq("difficulty", "beginner");
+
+    expect(coursesError).toBeNull();
+    expect(courses).toBeTruthy();
+
+    const { data: modules, error: modulesError } = await supabase
+      .from("academy_modules")
+      .select("course_id");
+
+    expect(modulesError).toBeNull();
+
+    const counts = new Map<string, number>();
+    for (const m of modules ?? []) {
+      counts.set(m.course_id, (counts.get(m.course_id) ?? 0) + 1);
+    }
+
+    const offenders = (courses ?? []).filter(
+      (c) => (counts.get(c.id) ?? 0) < MIN_MODULES_PAID,
+    );
+
+    expect(
+      offenders,
+      `Paid courses below ${MIN_MODULES_PAID} modules: ${offenders
+        .map((c) => `${c.slug} (${counts.get(c.id) ?? 0})`)
+        .join(", ")}`,
+    ).toEqual([]);
+  });
 });
