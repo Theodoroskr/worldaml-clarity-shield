@@ -117,8 +117,16 @@ const AcademyCourse = () => {
   }, [modules, completedModules, searchParams]);
 
   const markModuleComplete = async (moduleId: string) => {
+    const wasAlreadyComplete = completedModules.includes(moduleId);
     const updated = [...new Set([...completedModules, moduleId])];
     setCompletedModules(updated);
+
+    if (!wasAlreadyComplete) {
+      setJustCompletedId(moduleId);
+      window.setTimeout(() => {
+        setJustCompletedId((curr) => (curr === moduleId ? null : curr));
+      }, 2400);
+    }
 
     if (user && course) {
       await supabase.from("academy_progress").upsert(
