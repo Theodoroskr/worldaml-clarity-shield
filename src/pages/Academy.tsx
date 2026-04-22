@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle } from "lucide-react";
+import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock } from "lucide-react";
 import { getCourseCover } from "@/assets/academy";
 import AcademyLogo from "@/components/AcademyLogo";
 
@@ -161,6 +161,37 @@ const Academy = () => {
     }
     return null;
   };
+
+  // Sequential unlock: a course is locked if the previous course (same category,
+  // lower sort_order) hasn't been passed yet (no certificate).
+  // The first course in each category is always unlocked.
+  const lockInfo = (() => {
+    const map = new Map<string, { locked: boolean; prereqTitle?: string }>();
+    if (!courses) return map;
+    const byCategory: Record<string, typeof courses> = {};
+    courses.forEach((c) => {
+      const key = (c as { category?: string }).category || "global";
+      (byCategory[key] ||= []).push(c);
+    });
+    Object.values(byCategory).forEach((list) => {
+      const ordered = [...list].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      ordered.forEach((c, idx) => {
+        if (idx === 0) {
+          map.set(c.id, { locked: false });
+          return;
+        }
+        const prev = ordered[idx - 1];
+        const prevPassed = certMap.has(prev.id);
+        map.set(c.id, prevPassed ? { locked: false } : { locked: true, prereqTitle: prev.title });
+      });
+    });
+    return map;
+  })();
+
+  // Logged-out visitors browse freely (gating only kicks in once signed in).
+  const isCourseLocked = (courseId: string) =>
+    !!user && (lockInfo.get(courseId)?.locked ?? false);
+  const getPrereqTitle = (courseId: string) => lockInfo.get(courseId)?.prereqTitle;
 
   const filteredCourses = courses?.filter((course) => {
     // Category filter
@@ -671,7 +702,7 @@ const Academy = () => {
               {[
                 { step: "1", title: "Choose a Course", desc: "Pick from our library of compliance courses" },
                 { step: "2", title: "Learn the Material", desc: "Work through concise, expert-written modules" },
-                { step: "3", title: "Pass the Quiz", desc: "Score 80% or higher to earn your certificate" },
+                { step: "3", title: "Pass the Quiz", desc: "Score 70% or higher to earn your certificate" },
                 { step: "4", title: "Share & Showcase", desc: "Download your certificate or share on LinkedIn" },
               ].map((item) => (
                 <div key={item.step} className="text-center">
