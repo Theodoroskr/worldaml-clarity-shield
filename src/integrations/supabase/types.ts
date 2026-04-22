@@ -58,6 +58,7 @@ export type Database = {
           course_slug: string
           created_at: string
           currency: string
+          expires_at: string | null
           id: string
           paid_at: string | null
           status: string
@@ -71,6 +72,7 @@ export type Database = {
           course_slug: string
           created_at?: string
           currency?: string
+          expires_at?: string | null
           id?: string
           paid_at?: string | null
           status?: string
@@ -84,6 +86,7 @@ export type Database = {
           course_slug?: string
           created_at?: string
           currency?: string
+          expires_at?: string | null
           id?: string
           paid_at?: string | null
           status?: string
