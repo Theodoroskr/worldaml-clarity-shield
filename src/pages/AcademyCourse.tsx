@@ -593,7 +593,9 @@ const AcademyCourse = () => {
                       {quizSubmitted ? `${course.title} — Review` : `${course.title} — Quiz`}
                     </h2>
                     <p className="text-body-sm text-muted-foreground mb-8">
-                      Answer all questions. You need {PASS_THRESHOLD}% to pass and earn your certificate.
+                      {quizSubmitted
+                        ? "Correct answers are highlighted in green. Read the explanation under each question to reinforce the concept."
+                        : `Answer all questions. You need ${PASS_THRESHOLD}% to pass and earn your certificate.`}
                     </p>
 
                     <ContentProtection watermarkLabel={user?.email || "WorldAML Academy"}>
