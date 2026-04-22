@@ -18,7 +18,7 @@ import { useRegion } from "@/contexts/RegionContext";
 import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY, currencyCode } from "@/lib/academyFx";
 import CurrencyIndicator from "@/components/academy/CurrencyIndicator";
 import { toast } from "sonner";
-import { REGIONS } from "@/types/regions";
+
 
 const difficultyColor: Record<string, string> = {
   beginner: "bg-emerald-100 text-emerald-700 border-emerald-200",
