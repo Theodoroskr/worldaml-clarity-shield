@@ -218,8 +218,8 @@ const Academy = () => {
                 <GraduationCap className="h-4 w-4" />
                 Free Compliance Training
               </div>
-              <div className="flex justify-center mb-5">
-                <AcademyLogo size="lg" variant="light" />
+              <div className="flex justify-center mb-5 px-2">
+                <AcademyLogo size="lg" variant="light" className="max-w-full" />
               </div>
               <h1 className="text-display text-primary-foreground mb-4">
                 WorldAML Academy
