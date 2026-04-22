@@ -566,16 +566,20 @@ const AcademyCourse = () => {
                       )}
                       <div className="flex-1 min-w-0">
                         <h3 className="text-xl font-bold text-foreground mb-1">
-                          {quizScore >= PASS_THRESHOLD ? "Congratulations — you passed! 🎉" : "Not quite — review and retry"}
+                          {quizScore >= PASS_THRESHOLD
+                            ? `Passed — ${quizScore}% · Certificate unlocked 🎉`
+                            : `Did not pass — ${quizScore}% · ${PASS_THRESHOLD}% required`}
                         </h3>
                         <p className="text-body-sm text-muted-foreground mb-4">
-                          You scored <span className="font-semibold text-foreground">{quizScore}%</span>
-                          {" "}({Object.values(quizAnswers).filter((ans, i) => {
-                            const q = questions?.[i];
-                            return q && correctAnswers[q.id] === ans;
-                          }).length} of {questions?.length || 0} correct).
-                          {" "}Pass mark: {PASS_THRESHOLD}%.
-                          {" "}Review every question and explanation below.
+                          You answered <span className="font-semibold text-foreground">
+                            {Object.values(quizAnswers).filter((ans, i) => {
+                              const q = questions?.[i];
+                              return q && correctAnswers[q.id] === ans;
+                            }).length} of {questions?.length || 0}
+                          </span> correctly.
+                          {quizScore >= PASS_THRESHOLD
+                            ? " Your certificate is ready to view and share."
+                            : ` You need ${PASS_THRESHOLD}% to unlock your certificate. Review every question and explanation below, then retake the quiz.`}
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {quizScore >= PASS_THRESHOLD && certificateToken && (
@@ -587,21 +591,22 @@ const AcademyCourse = () => {
                               View Certificate
                             </Button>
                           )}
-                          {quizScore < PASS_THRESHOLD && (
-                            <Button
-                              onClick={() => {
-                                setQuizAnswers({});
-                                setQuizSubmitted(false);
-                                setQuizScore(null);
-                                setCorrectAnswers({});
-                                setReviewMode(false);
+                          <Button
+                            variant={quizScore >= PASS_THRESHOLD ? "outline" : "default"}
+                            onClick={() => {
+                              setQuizAnswers({});
+                              setQuizSubmitted(false);
+                              setQuizScore(null);
+                              setCorrectAnswers({});
+                              setReviewMode(false);
+                              if (quizScore < PASS_THRESHOLD) {
                                 setCertificateToken(null);
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                              }}
-                            >
-                              Retake Quiz
-                            </Button>
-                          )}
+                              }
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                          >
+                            Retake Quiz
+                          </Button>
                           <Button variant="outline" asChild>
                             <Link to="/academy">Back to Academy</Link>
                           </Button>
