@@ -506,57 +506,59 @@ const AcademyCourse = () => {
                       Answer all questions. You need {PASS_THRESHOLD}% to pass and earn your certificate.
                     </p>
 
-                    <div className="space-y-8">
-                      {questions?.map((q, qi) => {
-                        const options = q.options as string[];
-                        const answered = quizAnswers[q.id] !== undefined;
-                        const correctIdx = correctAnswers[q.id];
-                        const isCorrect = quizSubmitted && quizAnswers[q.id] === correctIdx;
-                        const isWrong = quizSubmitted && answered && quizAnswers[q.id] !== correctIdx;
+                    <ContentProtection watermarkLabel={user?.email || "WorldAML Academy"}>
+                      <div className="space-y-8">
+                        {questions?.map((q, qi) => {
+                          const options = q.options as string[];
+                          const answered = quizAnswers[q.id] !== undefined;
+                          const correctIdx = correctAnswers[q.id];
+                          const isCorrect = quizSubmitted && quizAnswers[q.id] === correctIdx;
+                          const isWrong = quizSubmitted && answered && quizAnswers[q.id] !== correctIdx;
 
-                        return (
-                          <div key={q.id} className="rounded-xl border border-border p-6">
-                            <p className="text-body font-medium text-foreground mb-4">
-                              {qi + 1}. {q.question}
-                            </p>
-                            <div className="space-y-2">
-                              {options.map((opt, oi) => {
-                                const isSelected = quizAnswers[q.id] === oi;
-                                const showCorrect = quizSubmitted && oi === correctIdx;
-                                return (
-                                  <button
-                                    key={oi}
-                                    onClick={() => handleAnswer(q.id, oi)}
-                                    disabled={quizSubmitted}
-                                    className={`w-full text-left px-4 py-3 rounded-lg border text-body-sm transition-all duration-150 flex items-center gap-3 ${
-                                      showCorrect
-                                        ? "border-emerald-500 bg-emerald-50 text-emerald-800"
-                                        : isSelected && isWrong
-                                        ? "border-rose-500 bg-rose-50 text-rose-800"
-                                        : isSelected
-                                        ? "border-primary bg-primary/10 text-primary font-medium shadow-sm"
-                                        : "border-border hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm text-muted-foreground hover:text-foreground cursor-pointer"
-                                    }`}
-                                  >
-                                    {showCorrect && <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />}
-                                    {isSelected && isWrong && <XCircle className="h-4 w-4 text-rose-500 flex-shrink-0" />}
-                                    {!showCorrect && !(isSelected && isWrong) && (
-                                      <span className="w-4 h-4 rounded-full border border-current flex-shrink-0" />
-                                    )}
-                                    {opt}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                            {quizSubmitted && q.explanation && (
-                              <p className="mt-3 text-body-sm text-muted-foreground bg-secondary/50 p-3 rounded-lg">
-                                💡 {q.explanation}
+                          return (
+                            <div key={q.id} className="rounded-xl border border-border p-6">
+                              <p className="text-body font-medium text-foreground mb-4">
+                                {qi + 1}. {q.question}
                               </p>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
+                              <div className="space-y-2">
+                                {options.map((opt, oi) => {
+                                  const isSelected = quizAnswers[q.id] === oi;
+                                  const showCorrect = quizSubmitted && oi === correctIdx;
+                                  return (
+                                    <button
+                                      key={oi}
+                                      onClick={() => handleAnswer(q.id, oi)}
+                                      disabled={quizSubmitted}
+                                      className={`w-full text-left px-4 py-3 rounded-lg border text-body-sm transition-all duration-150 flex items-center gap-3 ${
+                                        showCorrect
+                                          ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+                                          : isSelected && isWrong
+                                          ? "border-rose-500 bg-rose-50 text-rose-800"
+                                          : isSelected
+                                          ? "border-primary bg-primary/10 text-primary font-medium shadow-sm"
+                                          : "border-border hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm text-muted-foreground hover:text-foreground cursor-pointer"
+                                      }`}
+                                    >
+                                      {showCorrect && <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />}
+                                      {isSelected && isWrong && <XCircle className="h-4 w-4 text-rose-500 flex-shrink-0" />}
+                                      {!showCorrect && !(isSelected && isWrong) && (
+                                        <span className="w-4 h-4 rounded-full border border-current flex-shrink-0" />
+                                      )}
+                                      {opt}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              {quizSubmitted && q.explanation && (
+                                <p className="mt-3 text-body-sm text-muted-foreground bg-secondary/50 p-3 rounded-lg">
+                                  💡 {q.explanation}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </ContentProtection>
 
                     {!quizSubmitted ? (
                       <div className="mt-8">
