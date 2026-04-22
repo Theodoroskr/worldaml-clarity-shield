@@ -495,6 +495,29 @@ const AcademyCourse = () => {
                   <Link to="/signup">Create Free Account</Link>
                 </Button>
               </div>
+            ) : !allModulesComplete ? (
+              <div className="max-w-md mx-auto text-center py-12">
+                <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-subtitle font-semibold mb-2">Complete all modules to unlock the quiz</h3>
+                <p className="text-muted-foreground mb-6">
+                  You've completed {completedModules.length} of {modules?.length || 0} modules.
+                  Finish the remaining {(modules?.length || 0) - completedModules.length} to take the quiz and earn your certificate.
+                </p>
+                <div className="max-w-xs mx-auto mb-6">
+                  <Progress value={progressPercent} className="h-2" />
+                </div>
+                <Button
+                  onClick={() => {
+                    setActiveTab("learn");
+                    const firstIncompleteIdx = (modules || []).findIndex((m: any) => !completedModules.includes(m.id));
+                    if (firstIncompleteIdx >= 0) setActiveModule(firstIncompleteIdx);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                >
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Continue Learning
+                </Button>
+              </div>
             ) : (
               <div className="max-w-2xl mx-auto">
                 {quizSubmitted && quizScore !== null && quizScore >= PASS_THRESHOLD ? (
