@@ -271,12 +271,69 @@ const AcademyCourse = () => {
     );
   }
 
-  if (!gate.isAccessible) {
+  // Login wall — every course (free or paid) requires sign-in.
+  if (gate.requiresLogin) {
+    const redirectTo = encodeURIComponent(`/academy/${slug}`);
     return (
       <div className="min-h-screen flex flex-col">
         <SEO
-          title="Course locked — WorldAML Academy"
-          description="Complete the previous course to unlock this one."
+          title={`Sign in to start — ${course.title}`}
+          description="Create a free account to start this WorldAML Academy course."
+          canonical={`/academy/${slug}`}
+          noindex
+        />
+        <Header />
+        <main className="flex-1 bg-background">
+          <div className="container-enterprise py-16">
+            <div className="max-w-lg mx-auto rounded-xl border border-border bg-card p-8 text-center">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <LogIn className="h-6 w-6 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground mb-2">Sign in to start this course</h1>
+              <p className="text-muted-foreground mb-6">
+                Create a free account to access course modules, take the quiz, and earn your certificate for{" "}
+                <span className="font-semibold text-foreground">{course.title}</span>.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                <Button asChild>
+                  <Link to={`/signup?redirect=${redirectTo}`}>
+                    Create free account
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to={`/login?redirect=${redirectTo}`}>
+                    Sign in
+                  </Link>
+                </Button>
+              </div>
+              <p className="text-caption text-muted-foreground mt-4">
+                Two foundational courses are free with any account. Other courses unlock after purchase.
+              </p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Purchase wall — paid course, signed in, no active purchase yet.
+  if (gate.requiresPurchase) {
+    const priceEntry = ACADEMY_PRICING[course.slug];
+    const dbCents = (course as { price_eur_cents?: number }).price_eur_cents ?? 0;
+    const eurCents = priceEntry?.eurCents ?? dbCents;
+    const purchasable =
+      isPaidCourse(course.slug) ||
+      !!(course as { stripe_price_id?: string | null }).stripe_price_id;
+    const displayCents = eurCents > 0 ? convertEurCents(eurCents, currency) : 0;
+    const inCart = cart.has(course.slug);
+
+    return (
+      <div className="min-h-screen flex flex-col">
+        <SEO
+          title={`Unlock ${course.title} — WorldAML Academy`}
+          description="Purchase this course to access modules, take the quiz, and earn your certificate."
           canonical={`/academy/${slug}`}
           noindex
         />
@@ -287,26 +344,63 @@ const AcademyCourse = () => {
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <Lock className="h-6 w-6 text-primary" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">Course locked</h1>
+              <h1 className="text-2xl font-bold text-foreground mb-2">Unlock this course</h1>
               <p className="text-muted-foreground mb-6">
-                Finish <span className="font-semibold text-foreground">{gate.prereqTitle}</span> (score {PASS_THRESHOLD}% or higher on the exam) to unlock this course.
+                Purchase <span className="font-semibold text-foreground">{course.title}</span> to access all modules,
+                take the certified quiz, and earn your shareable WorldAML certificate.
               </p>
-              <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                {gate.redirectSlug && (
-                  <Button asChild>
-                    <Link to={`/academy/${gate.redirectSlug}`}>
-                      Continue with {gate.prereqTitle}
-                      <ArrowRight className="h-4 w-4 ml-2" />
+
+              {purchasable && displayCents > 0 && (
+                <div className="mb-6 inline-flex items-center gap-2">
+                  <Badge variant="outline" className="text-base px-3 py-1.5 border-primary/40 text-primary bg-primary/10 font-bold">
+                    {formatPrice(displayCents, currency)}
+                  </Badge>
+                  <CurrencyIndicator variant="full" showTooltip />
+                </div>
+              )}
+
+              {purchasable ? (
+                <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                  {inCart ? (
+                    <Button onClick={() => cart.open()}>
+                      <ShoppingBag className="h-4 w-4 mr-2" />
+                      View basket
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => {
+                        cart.add(course.slug);
+                        cart.open();
+                      }}
+                    >
+                      <ShoppingBag className="h-4 w-4 mr-2" />
+                      Add to basket
+                    </Button>
+                  )}
+                  <Button variant="outline" asChild>
+                    <Link to="/academy">
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Browse other courses
                     </Link>
                   </Button>
-                )}
-                <Button variant="outline" asChild>
-                  <Link to="/academy">
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Academy
-                  </Link>
-                </Button>
-              </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-body-sm text-muted-foreground">
+                    This course is not yet available for purchase. Check back soon.
+                  </p>
+                  <Button variant="outline" asChild>
+                    <Link to="/academy">
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back to Academy
+                    </Link>
+                  </Button>
+                </div>
+              )}
+
+              <p className="text-caption text-muted-foreground mt-6">
+                Buy 2+ courses for 5% off, 3+ for 10% off — applied automatically at checkout.
+              </p>
             </div>
           </div>
         </main>
