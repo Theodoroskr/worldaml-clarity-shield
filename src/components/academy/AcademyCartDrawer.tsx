@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingBag, X, Loader2, Trash2 } from "lucide-react";
+import { ShoppingBag, X, Loader2, Trash2, Info } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
@@ -9,22 +9,28 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ACADEMY_PRICING } from "@/data/academyPricing";
-import { AcademyCurrency, convertEurCents, formatPrice } from "@/lib/academyFx";
+import {
+  AcademyCurrency,
+  convertEurCents,
+  formatPrice,
+  REGION_TO_CURRENCY,
+  currencyCode,
+} from "@/lib/academyFx";
 import { computeDiscount } from "@/lib/academyDiscount";
+import { Region, REGIONS } from "@/types/regions";
 import { toast } from "sonner";
 
-const REGION_TO_CURRENCY: Record<string, AcademyCurrency> = {
-  "eu-me": "eur",
-  "uk-ie": "gbp",
-  na: "usd",
-};
-
-const CURRENCIES: { value: AcademyCurrency; label: string }[] = [
-  { value: "eur", label: "EUR" },
-  { value: "usd", label: "USD" },
-  { value: "gbp", label: "GBP" },
-];
+const FX_TOOLTIP =
+  "Prices are converted from EUR using fixed reference rates (USD ×1.08, GBP ×0.86). The final charge is processed in your selected currency at Stripe Checkout, where VAT or sales tax is added based on your billing address.";
 
 interface CartItemRowProps {
   slug: string;
@@ -79,9 +85,9 @@ export function AcademyCartButton() {
 
 function AcademyCartDrawerContent() {
   const { items, remove, clear, close, computeTotals } = useCart();
-  const { region } = useRegion();
+  const { region, setRegion, regionConfig } = useRegion();
   const { user } = useAuth();
-  const [currency, setCurrency] = useState<AcademyCurrency>(REGION_TO_CURRENCY[region] ?? "eur");
+  const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [loading, setLoading] = useState(false);
 
   const { data: courseTitles } = useQuery({
@@ -134,23 +140,41 @@ function AcademyCartDrawerContent() {
         </SheetTitle>
       </SheetHeader>
 
-      {/* Currency switcher */}
+      {/* Currency / region indicator */}
       {items.length > 0 && (
-        <div className="flex items-center gap-1 mt-4 p-1 bg-secondary rounded-lg w-fit">
-          {CURRENCIES.map((c) => (
-            <button
-              key={c.value}
-              type="button"
-              onClick={() => setCurrency(c.value)}
-              className={`px-3 py-1 rounded-md text-caption font-medium transition-colors ${
-                currency === c.value
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {c.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 mt-4">
+          <span className="text-caption text-muted-foreground">Prices shown in</span>
+          <Select value={region} onValueChange={(v) => setRegion(v as Region)}>
+            <SelectTrigger className="h-8 w-auto min-w-[180px] text-caption">
+              <SelectValue>
+                {currencyCode(currency)} — {regionConfig.name}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {Object.values(REGIONS).map((r) => {
+                const c = REGION_TO_CURRENCY[r.id] ?? "eur";
+                return (
+                  <SelectItem key={r.id} value={r.id} className="text-caption">
+                    {currencyCode(c)} — {r.name}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                aria-label="How prices are calculated"
+                className="inline-flex items-center justify-center rounded-full p-1 text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Info className="h-3.5 w-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs text-caption leading-relaxed">
+              {FX_TOOLTIP}
+            </TooltipContent>
+          </Tooltip>
         </div>
       )}
 
