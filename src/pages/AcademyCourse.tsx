@@ -25,6 +25,7 @@ const AcademyCourse = () => {
   );
   const [activeModule, setActiveModule] = useState(0);
   const [completedModules, setCompletedModules] = useState<string[]>([]);
+  const [justCompletedId, setJustCompletedId] = useState<string | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
@@ -116,8 +117,16 @@ const AcademyCourse = () => {
   }, [modules, completedModules, searchParams]);
 
   const markModuleComplete = async (moduleId: string) => {
+    const wasAlreadyComplete = completedModules.includes(moduleId);
     const updated = [...new Set([...completedModules, moduleId])];
     setCompletedModules(updated);
+
+    if (!wasAlreadyComplete) {
+      setJustCompletedId(moduleId);
+      window.setTimeout(() => {
+        setJustCompletedId((curr) => (curr === moduleId ? null : curr));
+      }, 2400);
+    }
 
     if (user && course) {
       await supabase.from("academy_progress").upsert(
@@ -302,18 +311,27 @@ const AcademyCourse = () => {
                 {/* Module sidebar */}
                 <aside className="lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto">
                   <div className="rounded-xl border border-border bg-card p-4">
-                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-border">
-                      <p className="text-caption font-semibold text-foreground uppercase tracking-wide">
-                        Course Modules
+                    <div className="mb-4 pb-4 border-b border-border">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-caption font-semibold text-foreground uppercase tracking-wide">
+                          Course Modules
+                        </p>
+                        <span className="text-caption font-medium text-foreground tabular-nums">
+                          {completedModules.length}/{modules?.length || 0}
+                        </span>
+                      </div>
+                      <Progress value={progressPercent} className="h-1.5" />
+                      <p className="text-caption text-muted-foreground mt-2">
+                        {allModulesComplete
+                          ? "All modules complete — ready for the quiz."
+                          : `${Math.round(progressPercent)}% complete`}
                       </p>
-                      <span className="text-caption text-muted-foreground">
-                        {completedModules.length}/{modules?.length || 0}
-                      </span>
                     </div>
                     <nav className="space-y-1">
                       {modules?.map((mod, i) => {
                         const isComplete = completedModules.includes(mod.id);
                         const isActive = i === activeModule;
+                        const justDone = justCompletedId === mod.id;
                         return (
                           <button
                             key={mod.id}
@@ -325,10 +343,10 @@ const AcademyCourse = () => {
                               isActive
                                 ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
                                 : "text-muted-foreground hover:bg-secondary border-l-2 border-transparent"
-                            }`}
+                            } ${justDone ? "ring-2 ring-emerald-500/40" : ""}`}
                           >
                             {isComplete ? (
-                              <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                              <CheckCircle className={`h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5 ${justDone ? "animate-in zoom-in-50 duration-300" : ""}`} />
                             ) : (
                               <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-semibold ${
                                 isActive ? "bg-primary text-primary-foreground" : "border border-border"
@@ -553,24 +571,68 @@ const AcademyCourse = () => {
                       })()}
                     </div>
 
-                    {/* Mark as complete card */}
-                    {!completedModules.includes(modules[activeModule].id) && (
-                      <div className="mb-6 rounded-xl border border-border bg-secondary/30 p-5 flex items-center justify-between gap-4 flex-wrap">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <CheckCircle className="h-5 w-5 text-primary" />
+                    {/* Mark as complete card / inline success */}
+                    {(() => {
+                      const currentId = modules[activeModule].id;
+                      const isComplete = completedModules.includes(currentId);
+                      const justDone = justCompletedId === currentId;
+
+                      if (isComplete) {
+                        return (
+                          <div
+                            className={`mb-6 rounded-xl border p-5 flex items-center justify-between gap-4 flex-wrap transition-colors ${
+                              justDone
+                                ? "border-emerald-500/40 bg-emerald-500/10 animate-in fade-in slide-in-from-bottom-2 duration-300"
+                                : "border-border bg-secondary/30"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+                                <CheckCircle className={`h-5 w-5 text-emerald-500 ${justDone ? "animate-in zoom-in-50 duration-300" : ""}`} />
+                              </div>
+                              <div>
+                                <p className="text-body font-medium text-foreground">
+                                  {justDone ? "Module complete — nice work!" : "Module completed"}
+                                </p>
+                                <p className="text-body-sm text-muted-foreground">
+                                  {completedModules.length}/{modules.length} modules done
+                                  {allModulesComplete ? " — you're ready for the quiz." : ""}
+                                </p>
+                              </div>
+                            </div>
+                            {activeModule < modules.length - 1 && (
+                              <Button
+                                variant="ghost"
+                                onClick={() => {
+                                  setActiveModule(activeModule + 1);
+                                  window.scrollTo({ top: 0, behavior: "smooth" });
+                                }}
+                              >
+                                Continue <ArrowRight className="h-4 w-4 ml-2" />
+                              </Button>
+                            )}
                           </div>
-                          <div>
-                            <p className="text-body font-medium text-foreground">Finished reading?</p>
-                            <p className="text-body-sm text-muted-foreground">Mark this module complete to track your progress.</p>
+                        );
+                      }
+
+                      return (
+                        <div className="mb-6 rounded-xl border border-border bg-secondary/30 p-5 flex items-center justify-between gap-4 flex-wrap">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                              <CheckCircle className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="text-body font-medium text-foreground">Finished reading?</p>
+                              <p className="text-body-sm text-muted-foreground">Mark this module complete to track your progress.</p>
+                            </div>
                           </div>
+                          <Button onClick={() => markModuleComplete(currentId)}>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Mark Complete
+                          </Button>
                         </div>
-                        <Button onClick={() => markModuleComplete(modules[activeModule].id)}>
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Mark Complete
-                        </Button>
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     {/* Prev/Next navigation */}
                     <div className="flex items-center justify-between gap-4 pt-6 border-t border-border">
