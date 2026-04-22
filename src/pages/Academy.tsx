@@ -229,6 +229,14 @@ const Academy = () => {
                 <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-teal-light" /> CPD-Accredited</span>
                 <span className="flex items-center gap-2"><Globe className="h-4 w-4 text-teal-light" /> Industry-Recognised</span>
               </div>
+              {typeof certifiedCount === "number" && certifiedCount > 0 && (
+                <div className="mt-8 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-teal-light/15 border border-teal-light/30 text-teal-light text-body-sm font-semibold">
+                  <CheckCircle className="h-4 w-4" />
+                  <span>
+                    <span className="text-white font-bold">{certifiedCount.toLocaleString()}</span> compliance professionals certified
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </section>
