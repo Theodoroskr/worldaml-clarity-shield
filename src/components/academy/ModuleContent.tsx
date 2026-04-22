@@ -478,6 +478,25 @@ const ModuleContent: React.FC<Props> = ({ content, className }) => {
         return;
       }
 
+      // Emoji callout auto-detection
+      const emojiMatch = trimmed.match(/^(💡|⚠️|✅|📌)\s+(.*)$/);
+      if (emojiMatch) {
+        flushAll();
+        const kindMap: Record<string, string> = {
+          "💡": "tip",
+          "⚠️": "warning",
+          "✅": "tip",
+          "📌": "key",
+        };
+        const kind = kindMap[emojiMatch[1]] || "info";
+        out.push(
+          <Callout key={key} kind={kind}>
+            <p>{renderInline(emojiMatch[2], key)}</p>
+          </Callout>
+        );
+        return;
+      }
+
       flushAll();
       out.push(
         <p key={key} className="text-foreground/85 text-body leading-[1.75] my-3">
