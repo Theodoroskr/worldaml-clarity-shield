@@ -244,6 +244,13 @@ const AcademyCertificate = () => {
             </Link>
 
             <div className="max-w-3xl mx-auto">
+              {/* Celebration Banner */}
+              <div className="mb-6 p-5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200/60 text-center">
+                <Award className="h-10 w-10 text-emerald-600 mx-auto mb-2" />
+                <h2 className="text-2xl font-bold text-emerald-900 mb-1">Congratulations, {cert.holder_name}!</h2>
+                <p className="text-emerald-700 text-body-sm">You've earned a verified certificate in <strong>{course?.title}</strong>.</p>
+              </div>
+
               {/* Certificate Card */}
               <div className="relative rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-white via-secondary/20 to-white p-8 md:p-12 text-center shadow-lg">
                 {/* Decorative corners */}
@@ -296,9 +303,42 @@ const AcademyCertificate = () => {
                 </div>
               </div>
 
-              {/* Shareable Badge */}
-              <div className="mt-8 p-6 rounded-xl border border-border bg-muted/30 text-center">
-                <p className="text-body-sm font-semibold text-foreground mb-3">Your Shareable Badge</p>
+              {/* Primary CTA: Share on LinkedIn */}
+              <div className="mt-8 p-8 rounded-2xl bg-gradient-to-br from-[#0A66C2]/5 to-[#0A66C2]/10 border border-[#0A66C2]/20 text-center">
+                <Linkedin className="h-8 w-8 text-[#0A66C2] mx-auto mb-3" />
+                <h3 className="text-subtitle font-semibold text-foreground mb-2">Share Your Achievement</h3>
+                <p className="text-body-sm text-muted-foreground mb-5 max-w-lg mx-auto">
+                  Let your network know you've earned a compliance certificate. Each share strengthens your professional profile and helps other compliance professionals discover WorldAML Academy.
+                </p>
+
+                <div className="bg-white rounded-lg border border-border p-4 mb-5 text-left max-w-lg mx-auto">
+                  <p className="text-body-sm text-foreground italic leading-relaxed">
+                    "{shareText}"
+                  </p>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(shareText);
+                      toast({ title: "Copied!", description: "Post text copied to clipboard." });
+                    }}
+                    className="mt-2 text-xs text-primary font-medium hover:underline"
+                  >
+                    Copy suggested post
+                  </button>
+                </div>
+
+                <Button
+                  size="lg"
+                  className="bg-[#0A66C2] hover:bg-[#084a8c] text-white border-0 px-8 h-12 text-body"
+                  onClick={shareLinkedIn}
+                >
+                  <Linkedin className="h-5 w-5 mr-2" />
+                  Share on LinkedIn
+                </Button>
+              </div>
+
+              {/* Shareable Badge Preview */}
+              <div className="mt-6 p-6 rounded-xl border border-border bg-muted/30 text-center">
+                <p className="text-body-sm font-semibold text-foreground mb-3">Badge Preview</p>
                 <div className="inline-flex items-center gap-3 bg-primary text-primary-foreground rounded-lg px-5 py-3 shadow-md">
                   <Award className="h-6 w-6 shrink-0" />
                   <div className="text-left">
@@ -308,19 +348,19 @@ const AcademyCertificate = () => {
                   <CheckCircle className="h-5 w-5 shrink-0 opacity-80" />
                 </div>
                 <p className="text-caption text-muted-foreground mt-3">
-                  Share this badge on your profile or resume
+                  Download this badge for your email signature or resume
                 </p>
               </div>
 
-              {/* Share Actions */}
+              {/* Secondary Actions */}
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <Button variant="default" onClick={downloadCertificatePDF}>
                   <FileDown className="h-4 w-4 mr-2" />
                   Download Certificate (PDF)
                 </Button>
-                <Button variant="outline" onClick={shareLinkedIn}>
-                  <Linkedin className="h-4 w-4 mr-2" />
-                  Share on LinkedIn
+                <Button variant="outline" onClick={downloadBadge}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Badge
                 </Button>
                 <Button variant="outline" onClick={shareX}>
                   <ExternalLink className="h-4 w-4 mr-2" />
@@ -336,14 +376,10 @@ const AcademyCertificate = () => {
                     Share
                   </Button>
                 )}
-                <Button variant="outline" onClick={downloadBadge}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Badge
-                </Button>
               </div>
 
-              <p className="text-center text-caption text-muted-foreground mt-4">
-                This certificate can be verified at this URL by anyone.
+              <p className="text-center text-caption text-muted-foreground mt-6">
+                This certificate can be verified by anyone at this URL. Employers and recruiters can validate your credential instantly.
               </p>
             </div>
           </div>

@@ -436,7 +436,7 @@ const AcademyCourse = () => {
                     <p className="text-body-lg text-muted-foreground mb-2">
                       You scored <span className="font-bold text-foreground">{quizScore}%</span> and earned your certificate!
                     </p>
-                    <p className="text-body-sm text-muted-foreground mb-6">Redirecting to your certificate...</p>
+                    <p className="text-body-sm text-muted-foreground mb-6">Your certificate is ready — showcase it on LinkedIn to strengthen your professional profile.</p>
                   </div>
                 ) : (
                   <>
