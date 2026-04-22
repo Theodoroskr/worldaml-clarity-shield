@@ -60,9 +60,12 @@ export type Database = {
           description: string
           difficulty: string
           duration_minutes: number
+          estimated_words: number
           id: string
           image_url: string | null
           is_published: boolean
+          learning_outcomes: string[]
+          role_track: string
           slug: string
           sort_order: number
           title: string
@@ -74,9 +77,12 @@ export type Database = {
           description: string
           difficulty?: string
           duration_minutes?: number
+          estimated_words?: number
           id?: string
           image_url?: string | null
           is_published?: boolean
+          learning_outcomes?: string[]
+          role_track?: string
           slug: string
           sort_order?: number
           title: string
@@ -88,9 +94,12 @@ export type Database = {
           description?: string
           difficulty?: string
           duration_minutes?: number
+          estimated_words?: number
           id?: string
           image_url?: string | null
           is_published?: boolean
+          learning_outcomes?: string[]
+          role_track?: string
           slug?: string
           sort_order?: number
           title?: string
@@ -125,6 +134,56 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_pro_certificates: {
+        Row: {
+          amount_cents: number
+          certificate_id: string
+          created_at: string
+          currency: string
+          id: string
+          paid_at: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents?: number
+          certificate_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          certificate_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_pro_certificates_certificate_id_fkey"
+            columns: ["certificate_id"]
+            isOneToOne: false
+            referencedRelation: "academy_certificates"
             referencedColumns: ["id"]
           },
         ]
@@ -239,6 +298,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      academy_templates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          file_format: string
+          file_size_kb: number | null
+          file_url: string
+          id: string
+          is_published: boolean
+          jurisdictions: string[]
+          preview_url: string | null
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          file_format?: string
+          file_size_kb?: number | null
+          file_url: string
+          id?: string
+          is_published?: boolean
+          jurisdictions?: string[]
+          preview_url?: string | null
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          file_format?: string
+          file_size_kb?: number | null
+          file_url?: string
+          id?: string
+          is_published?: boolean
+          jurisdictions?: string[]
+          preview_url?: string | null
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       admin_form_submissions: {
         Row: {
