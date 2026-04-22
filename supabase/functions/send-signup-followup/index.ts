@@ -8,7 +8,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const FROM = "Evgenios Georgiou <info@worldaml.com>";
+const FROM = "WorldAML <info@worldaml.com>";
 const CC = ["compliance@infocreditgroup.com"];
 
 const buildHtml = (firstName: string) => `
