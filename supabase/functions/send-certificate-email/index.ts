@@ -1,4 +1,5 @@
 import { Resend } from "npm:resend";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,6 +8,69 @@ const corsHeaders = {
 };
 
 const FROM_EMAIL = "WorldAML Academy <forms@worldaml.com>";
+const SALES_NOTIFY_TO = "compliance@infocreditgroup.com";
+
+// Insert a warm lead into form_submissions and notify sales/compliance.
+// Best-effort — never blocks the certificate email.
+async function tagWarmLeadAndNotify(opts: {
+  email: string;
+  holder_name: string;
+  course_title: string;
+  score: number;
+  certificate_url: string;
+  resend: any;
+}) {
+  const { email, holder_name, course_title, score, certificate_url, resend } = opts;
+  try {
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (SUPABASE_URL && SERVICE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+      const [first, ...rest] = (holder_name || "").trim().split(/\s+/);
+      await supabase.from("form_submissions").insert({
+        form_type: "academy_certified",
+        first_name: first || "Academy",
+        last_name: rest.join(" ") || "Learner",
+        email,
+        lead_status: "academy_certified",
+        message: `Earned certificate: ${course_title} (${score}%)`,
+        metadata: {
+          source: "academy_certificate",
+          course_title,
+          score,
+          certificate_url,
+          issued_at: new Date().toISOString(),
+        },
+      });
+      console.log(`✅ Warm lead tagged: ${email} (${course_title})`);
+    }
+  } catch (e) {
+    console.error("⚠️ Warm lead insert failed (non-fatal):", (e as Error).message);
+  }
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [SALES_NOTIFY_TO],
+      subject: `🎓 Academy lead: ${holder_name} certified in ${course_title}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;font-size:14px;color:#1e3a5f;line-height:1.6;">
+          <p>A new warm lead from WorldAML Academy:</p>
+          <table cellpadding="6" style="border-collapse:collapse;font-size:14px;">
+            <tr><td><strong>Name</strong></td><td>${holder_name || "—"}</td></tr>
+            <tr><td><strong>Email</strong></td><td><a href="mailto:${email}">${email}</a></td></tr>
+            <tr><td><strong>Course</strong></td><td>${course_title}</td></tr>
+            <tr><td><strong>Score</strong></td><td>${score}%</td></tr>
+            <tr><td><strong>Certificate</strong></td><td><a href="${certificate_url}">View</a></td></tr>
+          </table>
+          <p style="margin-top:16px;color:#6b7280;font-size:13px;">Tagged in form_submissions as <code>academy_certified</code>. Recommended action: outreach within 48h.</p>
+        </div>
+      `,
+    });
+  } catch (e) {
+    console.error("⚠️ Sales notification email failed (non-fatal):", (e as Error).message);
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -142,6 +206,11 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Fire-and-forget warm-lead tagging + sales notification
+    await tagWarmLeadAndNotify({
+      email, holder_name, course_title, score, certificate_url, resend,
+    });
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
