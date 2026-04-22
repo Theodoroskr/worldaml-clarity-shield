@@ -473,13 +473,34 @@ const Academy = () => {
                 const progressPct = moduleCount > 0 ? Math.round((completedMods / moduleCount) * 100) : 0;
                 const featured = opts?.featured;
 
+                const locked = isCourseLocked(course.id);
+                const prereqTitle = getPrereqTitle(course.id);
+                const cardClassName = `group rounded-xl border border-border bg-card overflow-hidden transition-all duration-300 flex flex-col ${
+                  featured ? "md:col-span-3 md:flex-row" : ""
+                } ${
+                  locked
+                    ? "opacity-70 cursor-not-allowed"
+                    : "hover:shadow-xl hover:border-primary/30 hover:-translate-y-0.5"
+                }`;
+
+                if (locked) {
+                  return (
+                    <div
+                      key={course.id}
+                      className={cardClassName}
+                      aria-disabled="true"
+                      title={`Pass ${prereqTitle ?? "the previous course"} (70%+) to unlock this course`}
+                    >
+                      {renderCardBody({ course, status, cert, catConfig, CatIcon, cpd, moduleCount, progressPct, completedMods, featured: !!featured, locked: true, prereqTitle })}
+                    </div>
+                  );
+                }
+
                 return (
                   <Link
                     key={course.id}
                     to={status === "completed" && cert ? `/academy/certificate/${cert.share_token}` : `/academy/${course.slug}`}
-                    className={`group rounded-xl border border-border bg-card overflow-hidden hover:shadow-xl hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-300 flex flex-col ${
-                      featured ? "md:col-span-3 md:flex-row" : ""
-                    }`}
+                    className={cardClassName}
                   >
                     {/* Thumbnail */}
                     <div
