@@ -1,56 +1,43 @@
 
+## Enhance Course Content Write-up
 
-## Currency/region indicator for Academy pricing
+Seven paid courses are still thin (under ~2,000 characters with only 2 modules) and don't meet the 15+ minute reading standard. I'll bring them up to the same depth as the previously expanded regional AML courses (~5 lessons + 1 case study, ~12k chars, 18-22 min).
 
-Make it obvious to users which currency they're seeing on Academy prices, why, and how to change it.
+### Courses to expand
 
-### What the user sees
+| Slug | Current | Target |
+|---|---|---|
+| sanctions-screening-essentials (free) | 2 mods / 1,366 chars / 5 min | 5 mods / ~12k / 18 min |
+| adverse-media-intelligence | 2 mods / 1,446 chars / 20 min | 5 mods / ~12k / 20 min |
+| pep-screening-edd | 2 mods / 1,560 chars / 20 min | 5 mods / ~12k / 20 min |
+| beneficial-ownership | 2 mods / 1,685 chars / 20 min | 5 mods / ~12k / 20 min |
+| crypto-aml | 2 mods / 1,838 chars / 20 min | 5 mods / ~12k / 22 min |
+| risk-based-approach | 2 mods / 1,873 chars / 5 min | 5 mods / ~12k / 18 min |
+| transaction-monitoring-sar | 8 mods / 4,902 chars / 60 min | 6 mods / ~14k / 25 min |
+| international-sanctions-compliance | 4 mods / 6,984 chars / 20 min | 6 mods / ~13k / 22 min |
 
-**1. Inline currency hint next to prices**
+`crypto-aml-essentials` (36k chars) and `kyc-customer-due-diligence` (14k chars) are already at standard — leaving untouched.
 
-On the Academy catalog cards, course detail header, and cart drawer summary, append a small muted suffix to the first price shown per view:
+### Lesson structure per course (5–6 modules)
 
-```text
-€29  EUR · EU & Middle East
-```
+1. **Foundations** — definitions, regulatory context (FATF, EU AMLD, FinCEN, MAS, etc.)
+2. **Regulators & Frameworks** — supervisory bodies and key obligations
+3. **Operational Practice** — workflows, controls, tooling, thresholds
+4. **Red Flags & Typologies** — indicators, common evasion patterns
+5. **Case Study** — realistic scenario with decision points and resolution
+6. *(longer courses)* **Reporting & Escalation** — SAR/STR triggers, internal governance
 
-On cards (space-tight) just show the ISO code in a small muted chip: `EUR`. On the course detail header and cart drawer (more room), show full `EUR · EU & Middle East`.
+Each lesson ~2,000–2,500 chars of substantive markdown with headings, bullet lists, examples, and citations to real regulations.
 
-**2. Currency control in the cart drawer**
+### Technical execution
 
-Above the price breakdown, add a compact row:
+1. **SQL migration #1** — `DELETE FROM academy_modules WHERE course_id IN (...) AND LENGTH(content) < 1500` to clear stub modules for the 8 target courses.
+2. **SQL migration #2** — `INSERT INTO academy_modules` with new lesson rows (sequential `sort_order`, slug-based course lookup via subquery).
+3. **SQL migration #3** — `UPDATE academy_courses SET duration_minutes = X` to align with the new content length.
+4. Quizzes already exist on these courses (validated previously) — no changes needed; re-sequencing keeps the quiz module at the end.
+5. No frontend changes required; `ModuleContent` and `ModuleTOC` already render markdown.
 
-```text
-Prices shown in  [ EUR — EU & Middle East ▾ ]   ⓘ
-```
-
-- The dropdown reuses the existing `RegionSelector` logic (writes to `RegionContext`, persists in the `worldaml_region` cookie). Changing it instantly re-renders all prices.
-- The ⓘ tooltip (Radix `Tooltip`) explains:
-  > "Prices are converted from EUR using fixed reference rates (USD ×1.08, GBP ×0.86). Final charge happens in your selected currency at Stripe Checkout, where VAT/sales tax is added based on your billing address."
-
-**3. Course detail page**
-
-Next to the price badge in `AcademyCourse.tsx`, render the same small `EUR · EU & Middle East` muted caption with the ⓘ tooltip (no dropdown here — keep the header clean; users change region from the cart drawer or global region selector).
-
-**4. Auto-detection indicator (first visit only)**
-
-When `RegionContext` has just auto-detected the region via IP (no saved cookie yet), show a one-time dismissible toast on `/academy`:
-
-> "Showing prices in EUR for EU & Middle East. Change region anytime from the cart." [Dismiss]
-
-Stored under `localStorage` key `academy_region_toast_dismissed` so it never re-appears.
-
-### Technical details
-
-- **New component**: `src/components/academy/CurrencyIndicator.tsx`
-  - Props: `variant: "compact" | "full"`, optional `showTooltip?: boolean`.
-  - Reads `region` + `regionConfig` from `useRegion()` and maps to currency via the existing `REGION_TO_CURRENCY` record (lift it into `src/lib/academyFx.ts` so all callers share one source).
-  - `compact` → `<span class="text-caption text-muted-foreground">EUR</span>`.
-  - `full` → `EUR · EU & Middle East` + optional `<Tooltip>` with the FX/tax explanation.
-- **Lift `REGION_TO_CURRENCY`** from `AcademyCourse.tsx` into `src/lib/academyFx.ts` and export it. Reuse in catalog cards, course detail, and cart drawer.
-- **`AcademyCartDrawer.tsx`**: add a header row above the line items (or directly above the breakdown) with `Prices shown in` label + an inline `<Select>` mirroring `RegionSelector`'s options + `<Tooltip>` trigger. Reuses `useRegion().setRegion`.
-- **`Academy.tsx`** (catalog cards): append `<CurrencyIndicator variant="compact" />` next to each price badge.
-- **`AcademyCourse.tsx`**: replace local `REGION_TO_CURRENCY` import; render `<CurrencyIndicator variant="full" showTooltip />` next to the price badge.
-- **First-visit toast**: in `Academy.tsx`, on mount check `!isLoading && !localStorage.getItem("academy_region_toast_dismissed") && !cookieExisted`. Use the existing `sonner` toast. To detect "auto-detected vs saved", expose a `wasAutoDetected: boolean` flag from `RegionContext` (set to `true` when no cookie was found at mount).
-- **No backend, schema, Stripe, or pricing-math changes** — purely a presentation + transparency layer over existing region/FX state.
-
+### Out of scope
+- Stripe pricing IDs (separate admin task)
+- Free-vs-paid gating logic (already shipped)
+- `crypto-aml-essentials` and `kyc-customer-due-diligence` (already at standard)
