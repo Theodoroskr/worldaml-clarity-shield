@@ -360,6 +360,63 @@ const Academy = () => {
           </div>
         </section>
 
+        {/* Access & pricing callout */}
+        <section className="bg-background border-b border-border">
+          <div className="container-enterprise py-6">
+            <div
+              className="rounded-xl border border-border bg-card p-5 sm:p-6 flex flex-col lg:flex-row gap-5 lg:items-center lg:justify-between"
+              role="region"
+              aria-label="Course access and pricing"
+            >
+              <div className="flex gap-4 min-w-0">
+                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Lock className="h-5 w-5 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-subtitle font-semibold text-foreground mb-1">
+                    How access works
+                  </h2>
+                  <ul className="text-body-sm text-muted-foreground space-y-1.5">
+                    <li className="flex gap-2">
+                      <CheckCircle className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
+                      <span>
+                        <strong className="text-foreground">2 free courses</strong> — AML Fundamentals & Sanctions Screening Essentials. Sign in and start instantly.
+                      </span>
+                    </li>
+                    <li className="flex gap-2">
+                      <Lock className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                      <span>
+                        <strong className="text-foreground">All other courses</strong> are paid (from €29). Add to basket, check out, then access modules, quiz & certificate.
+                      </span>
+                    </li>
+                    <li className="flex gap-2">
+                      <Sparkles className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
+                      <span>
+                        <strong className="text-foreground">Bundle discount</strong> — 5% off 2 courses, 10% off 3+. Applied automatically at checkout.
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              {!user && (
+                <div className="flex flex-col sm:flex-row gap-2 lg:flex-shrink-0 lg:ml-4">
+                  <Button asChild size="sm">
+                    <Link to={`/signup?redirect=${encodeURIComponent("/academy")}`}>
+                      Create free account
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" variant="outline">
+                    <Link to={`/login?redirect=${encodeURIComponent("/academy")}`}>
+                      Sign in
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
         {/* New Courses Announcement Banner */}
         {!bannerDismissed && (
           <section className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border-b border-primary/20">
