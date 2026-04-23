@@ -231,6 +231,15 @@ function AcademyCartDrawerContent() {
           <p className="text-caption text-muted-foreground">
             Each course includes 1 month of access from purchase date. Certificates earned remain yours forever.
           </p>
+          <div
+            className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted/40 px-3 py-2"
+            aria-live="polite"
+          >
+            <span className="text-caption text-muted-foreground">You will be charged in</span>
+            <span className="text-caption font-semibold text-foreground">
+              {currencyCode(currency)} · {regionConfig.name}
+            </span>
+          </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
