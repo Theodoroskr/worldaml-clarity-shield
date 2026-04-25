@@ -322,17 +322,17 @@ const Academy = () => {
             <div className="max-w-3xl mx-auto text-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-teal-light text-body-sm font-medium mb-6">
                 <GraduationCap className="h-4 w-4" />
-                Free Compliance Training
+                CPD-Accredited Compliance Training
               </div>
               <div className="flex justify-center mb-5 px-2">
                 <AcademyLogo size="lg" variant="light" className="max-w-full" />
               </div>
               <h1 className="text-display text-primary-foreground mb-4">
-                WorldAML Academy
+                Become a certified AML & KYC professional
               </h1>
               <p className="text-body-lg text-slate-light mb-8 max-w-2xl mx-auto">
-                Build your compliance expertise with interactive courses trusted by professionals worldwide. Pass the quiz, 
-                earn a shareable certificate, and showcase your credentials on LinkedIn — completely free.
+                Practical, regulator-aligned courses written by working compliance officers. Start free, master a region or
+                specialisation, and earn a verifiable certificate you can share on LinkedIn in under an hour.
               </p>
               <div className="flex flex-wrap justify-center gap-6 text-body-sm text-slate-light">
                 <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-teal-light" /> Interactive Courses</span>
