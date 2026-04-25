@@ -748,7 +748,7 @@ const Academy = () => {
         )}
 
         {/* Courses Grid */}
-        <section className="section-padding bg-background">
+        <section id="courses-grid" className="section-padding bg-background scroll-mt-20">
           <div className="container-enterprise">
             <div className="text-center mb-8">
               <h2 className="text-headline text-foreground mb-3">Available Courses</h2>
