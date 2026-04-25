@@ -322,17 +322,17 @@ const Academy = () => {
             <div className="max-w-3xl mx-auto text-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-teal-light text-body-sm font-medium mb-6">
                 <GraduationCap className="h-4 w-4" />
-                Free Compliance Training
+                CPD-Accredited Compliance Training
               </div>
               <div className="flex justify-center mb-5 px-2">
                 <AcademyLogo size="lg" variant="light" className="max-w-full" />
               </div>
               <h1 className="text-display text-primary-foreground mb-4">
-                WorldAML Academy
+                Become a certified AML & KYC professional
               </h1>
               <p className="text-body-lg text-slate-light mb-8 max-w-2xl mx-auto">
-                Build your compliance expertise with interactive courses trusted by professionals worldwide. Pass the quiz, 
-                earn a shareable certificate, and showcase your credentials on LinkedIn — completely free.
+                Practical, regulator-aligned courses written by working compliance officers. Start free, master a region or
+                specialisation, and earn a verifiable certificate you can share on LinkedIn in under an hour.
               </p>
               <div className="flex flex-wrap justify-center gap-6 text-body-sm text-slate-light">
                 <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-teal-light" /> Interactive Courses</span>
@@ -413,6 +413,228 @@ const Academy = () => {
                   </Button>
                 </div>
               )}
+            </div>
+          </div>
+        </section>
+
+        {/* Social proof — testimonials */}
+        <section className="bg-secondary/30 border-b border-border">
+          <div className="container-enterprise section-padding">
+            <div className="text-center mb-10">
+              <p className="text-caption uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+                Trusted by compliance teams worldwide
+              </p>
+              <h2 className="text-headline text-foreground">What learners say</h2>
+            </div>
+            <div className="grid md:grid-cols-3 gap-5">
+              {[
+                {
+                  quote: "Crisp, practical, and aligned with what regulators actually expect. Our analysts use the regional courses as onboarding day one.",
+                  name: "MLRO",
+                  role: "EU-licensed payments firm",
+                },
+                {
+                  quote: "The crypto and sanctions modules saved us weeks of policy drafting. The certificate is a nice extra to put on LinkedIn.",
+                  name: "Compliance Lead",
+                  role: "VASP, MENA region",
+                },
+                {
+                  quote: "Finally, AML training that doesn't read like a textbook. The case studies are realistic and decision-driven.",
+                  name: "Senior Analyst",
+                  role: "Tier-1 retail bank",
+                },
+              ].map((t, i) => (
+                <div key={i} className="rounded-xl border border-border bg-card p-6 flex flex-col">
+                  <div className="flex gap-0.5 mb-3">
+                    {[...Array(5)].map((_, s) => (
+                      <Star key={s} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <p className="text-body-sm text-foreground mb-4 leading-relaxed flex-1">"{t.quote}"</p>
+                  <div className="border-t border-border pt-3">
+                    <p className="text-body-sm font-semibold text-foreground">{t.name}</p>
+                    <p className="text-caption text-muted-foreground">{t.role}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* What you get — Free vs Paid comparison */}
+        <section className="bg-background border-b border-border">
+          <div className="container-enterprise section-padding">
+            <div className="text-center mb-10 max-w-2xl mx-auto">
+              <h2 className="text-headline text-foreground mb-3">What you get</h2>
+              <p className="text-body-lg text-muted-foreground">
+                Start with free fundamentals. Upgrade individual courses when you're ready to specialise.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">
+              {/* Free tier */}
+              <div className="rounded-xl border border-border bg-card p-6 flex flex-col">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-caption font-semibold uppercase tracking-wider text-muted-foreground">Free</p>
+                    <h3 className="text-subtitle font-bold text-foreground mt-0.5">Foundation tier</h3>
+                  </div>
+                  <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 border-emerald-200">€0</Badge>
+                </div>
+                <p className="text-body-sm text-muted-foreground mb-4">
+                  Get started with the essentials. Perfect for new joiners and anyone needing a refresher.
+                </p>
+                <ul className="space-y-2.5 mb-5 flex-1">
+                  {[
+                    "AML Fundamentals — full course access",
+                    "Sanctions Screening Essentials — full course access",
+                    "Interactive quizzes with instant feedback",
+                    "Shareable digital certificate on completion",
+                    "LinkedIn-ready credential",
+                  ].map((item, i) => (
+                    <li key={i} className="flex gap-2 text-body-sm text-foreground">
+                      <Check className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                {!user ? (
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to={`/signup?redirect=${encodeURIComponent("/academy")}`}>
+                      Create free account
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to="/academy/aml-fundamentals">
+                      Start free course
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Link>
+                  </Button>
+                )}
+              </div>
+
+              {/* Paid tier */}
+              <div className="rounded-xl border-2 border-primary bg-card p-6 flex flex-col relative shadow-lg">
+                <div className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-primary text-primary-foreground text-caption font-semibold">
+                  Most popular
+                </div>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-caption font-semibold uppercase tracking-wider text-primary">Paid</p>
+                    <h3 className="text-subtitle font-bold text-foreground mt-0.5">Specialisation tier</h3>
+                  </div>
+                  <Badge className="bg-primary text-primary-foreground">From €29</Badge>
+                </div>
+                <p className="text-body-sm text-muted-foreground mb-4">
+                  Pick the regions and topics that match your role. Buy individually or bundle for a discount.
+                </p>
+                <ul className="space-y-2.5 mb-5 flex-1">
+                  {[
+                    "16+ regional & specialist courses (AML by region, PEP/EDD, UBO, crypto, monitoring)",
+                    "5–6 in-depth modules per course with real case studies",
+                    "Comprehensive quizzes & CPD-accredited certificates",
+                    "Bundle discount: 5% off 2 courses, 10% off 3+",
+                    "MLRO Toolkit: editable policy & SAR templates included",
+                    "Lifetime access to purchased material",
+                  ].map((item, i) => (
+                    <li key={i} className="flex gap-2 text-body-sm text-foreground">
+                      <Check className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button asChild className="w-full">
+                  <a href="#courses-grid">
+                    Browse paid courses
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Certificate showcase */}
+        <section className="bg-navy text-primary-foreground border-b border-border">
+          <div className="container-enterprise section-padding">
+            <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-teal-light text-caption font-semibold mb-4">
+                  <Award className="h-3.5 w-3.5" />
+                  Verifiable Credentials
+                </div>
+                <h2 className="text-headline text-primary-foreground mb-4">
+                  Earn a credential that proves what you know
+                </h2>
+                <p className="text-body-lg text-slate-light mb-6">
+                  Pass the end-of-course quiz and instantly receive a branded, shareable certificate. Every certificate has a
+                  unique verification link so employers and regulators can confirm authenticity in one click.
+                </p>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    { icon: Award, text: "Branded landscape A4 PDF, ready to print or attach to a CV" },
+                    { icon: Linkedin, text: "One-click 'Add to LinkedIn' for your profile's Licenses & Certifications" },
+                    { icon: Shield, text: "Public verification page with course details, score, and date" },
+                    { icon: BarChart3, text: "CPD hours logged automatically — count toward annual requirements" },
+                  ].map((item, i) => {
+                    const Icon = item.icon;
+                    return (
+                      <li key={i} className="flex gap-3 text-body-sm text-slate-light">
+                        <Icon className="h-5 w-5 text-teal-light flex-shrink-0 mt-0.5" />
+                        <span>{item.text}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <Button asChild variant="accent" size="lg">
+                  <a href="#courses-grid">
+                    Choose a course
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </a>
+                </Button>
+              </div>
+
+              {/* Mock certificate preview */}
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-teal-light/20 via-transparent to-primary/20 blur-3xl" aria-hidden />
+                <div className="relative aspect-[1.414/1] rounded-2xl bg-gradient-to-br from-white to-slate-50 shadow-2xl border-8 border-white/90 p-6 sm:p-8 flex flex-col">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-500 font-semibold">Certificate of Completion</p>
+                      <p className="text-[9px] sm:text-[10px] text-slate-400 mt-0.5">WorldAML Academy · CPD-Accredited</p>
+                    </div>
+                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md">
+                      <Award className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-center text-center">
+                    <p className="text-[10px] sm:text-xs text-slate-500 mb-1">This is to certify that</p>
+                    <p className="text-base sm:text-xl font-bold text-slate-900 mb-2 truncate" style={{ fontFamily: "'Times New Roman', serif" }}>
+                      Jane Compliance
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-slate-500 mb-1">has successfully completed</p>
+                    <p className="text-sm sm:text-base font-semibold text-primary mb-3 leading-tight">
+                      AML Compliance in Europe
+                    </p>
+                    <div className="flex items-center justify-center gap-1 text-[10px] sm:text-xs text-amber-600">
+                      <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                      <span className="font-semibold">Score: 96%</span>
+                      <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                    </div>
+                  </div>
+                  <div className="flex items-end justify-between pt-3 border-t border-slate-200">
+                    <div>
+                      <p className="text-[8px] sm:text-[9px] text-slate-400">Issued</p>
+                      <p className="text-[10px] sm:text-xs font-medium text-slate-700">Apr 2026</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[8px] sm:text-[9px] text-slate-400">Verify at</p>
+                      <p className="text-[10px] sm:text-xs font-mono text-slate-700">worldaml.com/verify</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -526,7 +748,7 @@ const Academy = () => {
         )}
 
         {/* Courses Grid */}
-        <section className="section-padding bg-background">
+        <section id="courses-grid" className="section-padding bg-background scroll-mt-20">
           <div className="container-enterprise">
             <div className="text-center mb-8">
               <h2 className="text-headline text-foreground mb-3">Available Courses</h2>
