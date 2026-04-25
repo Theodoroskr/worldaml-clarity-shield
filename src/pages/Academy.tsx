@@ -499,7 +499,7 @@ const Academy = () => {
                 </ul>
                 {!user ? (
                   <Button asChild variant="outline" className="w-full">
-                    <Link to={`/signup?redirect=${encodeURIComponent("/academy")}`}>
+                    <Link to="/signup">
                       Create free account
                       <ArrowRight className="h-4 w-4 ml-1" />
                     </Link>
@@ -544,12 +544,21 @@ const Academy = () => {
                     </li>
                   ))}
                 </ul>
-                <Button asChild className="w-full">
-                  <a href="#courses-grid">
-                    Browse paid courses
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </a>
-                </Button>
+                {!user ? (
+                  <Button asChild className="w-full">
+                    <Link to="/login">
+                      Sign in to purchase
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button asChild className="w-full">
+                    <a href="#courses-grid">
+                      Browse paid courses
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </a>
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -588,10 +597,17 @@ const Academy = () => {
                   })}
                 </ul>
                 <Button asChild variant="accent" size="lg">
-                  <a href="#courses-grid">
-                    Choose a course
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </a>
+                  {!user ? (
+                    <Link to="/login">
+                      Sign in to purchase
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Link>
+                  ) : (
+                    <a href="#courses-grid">
+                      Choose a course
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </a>
+                  )}
                 </Button>
               </div>
 
