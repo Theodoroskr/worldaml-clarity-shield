@@ -1700,6 +1700,162 @@ export type Database = {
           },
         ]
       }
+      suite_sof_declarations: {
+        Row: {
+          ai_reconciliation: Json | null
+          ai_risk_flag: boolean
+          created_at: string
+          currency: string
+          customer_id: string
+          declared_annual_income: number | null
+          declared_total_wealth: number | null
+          expires_at: string | null
+          id: string
+          income_sources: Json
+          organisation_id: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          reviewer_notes: string | null
+          source_country: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+          wealth_sources: Json
+        }
+        Insert: {
+          ai_reconciliation?: Json | null
+          ai_risk_flag?: boolean
+          created_at?: string
+          currency?: string
+          customer_id: string
+          declared_annual_income?: number | null
+          declared_total_wealth?: number | null
+          expires_at?: string | null
+          id?: string
+          income_sources?: Json
+          organisation_id?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          source_country?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+          wealth_sources?: Json
+        }
+        Update: {
+          ai_reconciliation?: Json | null
+          ai_risk_flag?: boolean
+          created_at?: string
+          currency?: string
+          customer_id?: string
+          declared_annual_income?: number | null
+          declared_total_wealth?: number | null
+          expires_at?: string | null
+          id?: string
+          income_sources?: Json
+          organisation_id?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          source_country?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+          wealth_sources?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_sof_declarations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_sof_declarations_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_sof_documents: {
+        Row: {
+          created_at: string
+          declaration_id: string
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size_bytes: number | null
+          id: string
+          metadata: Json | null
+          mime_type: string | null
+          organisation_id: string | null
+          updated_at: string
+          user_id: string
+          verification_status: string
+          verified_at: string | null
+          verifier_id: string | null
+          verifier_notes: string | null
+        }
+        Insert: {
+          created_at?: string
+          declaration_id: string
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size_bytes?: number | null
+          id?: string
+          metadata?: Json | null
+          mime_type?: string | null
+          organisation_id?: string | null
+          updated_at?: string
+          user_id: string
+          verification_status?: string
+          verified_at?: string | null
+          verifier_id?: string | null
+          verifier_notes?: string | null
+        }
+        Update: {
+          created_at?: string
+          declaration_id?: string
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_size_bytes?: number | null
+          id?: string
+          metadata?: Json | null
+          mime_type?: string | null
+          organisation_id?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_status?: string
+          verified_at?: string | null
+          verifier_id?: string | null
+          verifier_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_sof_documents_declaration_id_fkey"
+            columns: ["declaration_id"]
+            isOneToOne: false
+            referencedRelation: "suite_sof_declarations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_sof_documents_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_transactions: {
         Row: {
           amount: number
