@@ -91,7 +91,7 @@ export default function SuiteSourceOfFunds() {
         .eq("organisation_id", orgId).order("updated_at", { ascending: false }),
     ]);
     setCustomers((c || []) as Customer[]);
-    setDeclarations((d || []) as Declaration[]);
+    setDeclarations((d || []) as unknown as Declaration[]);
 
     if (d?.length) {
       const { data: docs } = await supabase.from("suite_sof_documents")
