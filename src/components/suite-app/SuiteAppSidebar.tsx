@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, Shield, CreditCard, AlertTriangle,
   FileText, BarChart3, Settings, ChevronRight, Activity,
   UserCheck, Fingerprint, ClipboardList, Menu, Scale, ShieldCheck, HelpCircle, Radio,
-  LogOut, ArrowLeft,
+  LogOut, ArrowLeft, Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +46,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
       },
       { icon: Activity, label: "Monitoring", path: "/suite/monitoring" },
       { icon: BarChart3, label: "Risk Assessment", path: "/suite/risk" },
+      { icon: Wallet, label: "Source of Funds", path: "/suite/source-of-funds" },
     ],
   },
   {
