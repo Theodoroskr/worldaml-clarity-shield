@@ -529,6 +529,11 @@ export default function SuiteSourceOfFunds() {
                       rows={3} placeholder="Add notes for audit trail…" />
                   </div>
                 )}
+
+                {/* Audit trail */}
+                <div className="pt-2 border-t">
+                  <SofAuditTrail declarationId={openDecl.id} refreshKey={auditRefresh} />
+                </div>
               </div>
 
               <DialogFooter className="flex-wrap gap-2">
