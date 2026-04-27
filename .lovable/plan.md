@@ -1,71 +1,85 @@
-## Source of Funds — Audit Log
+## AI Flag Drill-Down Panel
 
-Add a complete, tamper-resistant audit trail per SoF declaration covering:
-- Declaration status changes (e.g. `draft → submitted → verified`)
-- Reviewer-note edits
-- Document verification decisions (verify / reject)
-- AI reconciliation runs (with risk flag + summary)
-
-Surface it as a timeline panel inside the existing declaration drawer at `/suite/source-of-funds`.
+When the AI reconciliation produces flags, give the analyst a dedicated panel that, for each flag, shows:
+- **The exact transactions** that triggered it (counterparty, country, amount, date, link to txn)
+- **The variance calculation** (formula, inputs, threshold, result)
+- **The generated analyst summary** (Lovable AI narrative, model attribution)
 
 ### What the user sees
 
-In the existing declaration drawer, a new **Audit Trail** section lists every event newest-first:
+In the existing declaration drawer, the "AI Reconciliation" card is replaced with a richer block:
 
 ```text
-[Apr 27, 14:02]  Status changed: under_review → verified        — Jane MLRO
-[Apr 27, 13:58]  Reviewer notes updated                          — Jane MLRO
-[Apr 27, 13:40]  Document verified: payslip_2025.pdf             — Jane MLRO
-[Apr 27, 13:22]  AI reconciliation: 2 flag(s), risk_flag=true    — system
-[Apr 26, 09:10]  Status changed: draft → submitted               — John Customer
+AI Reconciliation     analysed Apr 27 14:02 · gemini-2.5-flash · [Re-run]
+
+  Declared 60,000 EUR  ·  Actual 142,300 EUR  ·  Variance +137%
+  Transactions analysed: 47  ·  Foreign countries: 4
+
+  Analyst summary
+  > "Inflows materially exceed the declared annual income, driven by
+  >  high-value transfers from Cyprus and the UAE. Recommend EDD
+  >  refresh and request 2024 tax return."
+
+  ── Flags (3) ──────────────────────────────────────────────
+  [HIGH]  Inflows exceed declared income by 137%        [▾]
+          Calculation
+            ((142,300 − 60,000) / 60,000) × 100 = 137.2%
+            Threshold: actual > declared × 1.5
+            Excess: 82,300 EUR
+          Contributing transactions (top 10 by amount)
+            • 27 Mar  — Acme Ltd (CY)   18,500 EUR  → open
+            • 14 Mar  — J. Doe (UAE)    12,000 EUR  → open
+            …
+          [Open all in Transactions]   [Create case]
 ```
 
-Each row shows: timestamp, event type with a coloured badge, a short human description, and the actor. Clicking a row expands to show the full JSON payload (old/new values, AI summary, etc.) for forensic detail.
-
-A "Download CSV" button exports the timeline for that declaration.
+Each flag is collapsible. "Open" links jump to `/suite/transactions?id=...`. "Open all in Transactions" filters that page by the contributing IDs. "Create case" opens the existing case-creation modal pre-filled with the flag context.
 
 ### Data model
 
-New table `suite_sof_audit_events`:
+No schema changes. The existing `suite_sof_declarations.ai_reconciliation` JSONB column is extended with two new fields written by the edge function:
 
-- `declaration_id` (FK → `suite_sof_declarations`, ON DELETE CASCADE)
-- `organisation_id`, `actor_user_id` (nullable — `null` for system/AI events)
-- `event_type` enum-as-text: `status_change`, `notes_update`, `document_verification`, `ai_reconciliation`, `submission`, `expiry`
-- `summary` text (human-readable one-liner)
-- `details` jsonb (old/new values, document id + filename, AI flags, etc.)
-- timestamps
+- `flags_detailed`: array of `{ code, severity, message, calculation, contributing_transactions }`
+- `top_transactions`: array of the 10 largest credits in the analysis window
+- `model`: `"google/gemini-2.5-flash"` (for attribution)
 
-RLS mirrors `suite_sof_declarations`: org members of the declaration's org (or platform admins) can `SELECT`; inserts only via `SECURITY DEFINER` triggers / edge function (no direct client inserts, no updates, no deletes — append-only).
+The flat `flags: string[]` array is preserved for backward compatibility with the existing audit-log entries and any downstream consumers.
 
-### How events get recorded
+### Edge function changes
 
-1. **Declaration status / notes changes** — `AFTER UPDATE` trigger on `suite_sof_declarations` compares OLD vs NEW and writes one event per changed dimension (status, reviewer_notes). Actor = `auth.uid()`.
-2. **Document verification** — `AFTER INSERT OR UPDATE OF verification_status` trigger on `suite_sof_documents` writes a `document_verification` event referencing the parent declaration.
-3. **AI reconciliation** — the `sof-reconcile` edge function inserts an `ai_reconciliation` event after it writes results back, with `actor_user_id = auth.uid()` and details containing `flags`, `variance_pct`, `risk_flag`, model name.
-4. **Submission / expiry** — captured by the same status-change trigger (since both transition the `status` column).
+`supabase/functions/sof-reconcile/index.ts`:
 
-All triggers are `SECURITY DEFINER` with `SET search_path = public` and write directly to `suite_sof_audit_events`, bypassing RLS for the insert path only.
+1. Select `id`, `description`, and `risk_flag` on transactions (in addition to existing fields) so we can render and link them.
+2. Build `flagsDetailed` instead of plain strings. Each flag carries:
+   - `calculation`: `{ formula, inputs, threshold, result, excess/shortfall }`
+   - `contributing_transactions`: relevant txns (top 10 by amount; for the foreign-counterparty flag, only foreign txns)
+3. Compute `byCountry` breakdown for the foreign-counterparty flag.
+4. Persist `flags_detailed`, `top_transactions`, `model` into `ai_reconciliation`.
+5. The AI audit-log event already records `flags`; no change needed there.
 
 ### UI changes
 
-- `src/pages/suite/SuiteSourceOfFunds.tsx`
-  - Add `loadAuditEvents(declarationId)` and state `auditEvents`.
-  - In the declaration drawer (after the documents section), render a new `<AuditTrail />` block: timeline list, expandable JSON, CSV export button.
-  - Refresh the timeline after every status update / verify / AI run.
-- New small component `src/components/suite/SofAuditTrail.tsx` — pure presentational timeline + CSV download (uses existing teal accent + status-badge tokens).
+New component `src/components/suite/SofFlagDrillDown.tsx`:
+- Renders the headline metrics row (declared / actual / variance / txn count / foreign).
+- Renders the analyst summary with model attribution.
+- Renders an accordion of flags. Each item shows: severity badge (high=red, medium=amber, low=blue), message, expandable calculation block, and a sortable mini-table of contributing transactions with `→ open` deep-links.
+- Falls back gracefully when only the legacy flat `flags: string[]` is present (renders message-only rows with no drill-down) — important for declarations analysed before this upgrade.
+
+Edits to `src/pages/suite/SuiteSourceOfFunds.tsx`:
+- Replace the inline AI Reconciliation `<Card>` with `<SofFlagDrillDown reconciliation={openDecl.ai_reconciliation} onRerun={() => runReconciliation(openDecl.id)} busy={aiBusy === openDecl.id} />`.
+- Pass `customerId` so deep-links can scope the Transactions page filter.
 
 ### Technical notes
 
-- Trigger functions are idempotent and only insert when a tracked field actually changed (`OLD.x IS DISTINCT FROM NEW.x`).
-- Actor display name resolved client-side from `profiles.full_name` keyed by `actor_user_id`; system events render as "system".
-- No data migration needed — historical events are not back-filled (audit trail starts at deployment time; this is explicitly documented in the empty state).
-- CSV export is fully client-side, no new edge function.
+- All data comes from the already-stored JSONB — no new round-trip when opening the drawer.
+- Transaction deep-link uses an existing route convention (`/suite/transactions?customer=<id>&ids=<csv>`); if the Transactions page doesn't yet honour `ids`, we fall back to `?customer=<id>` and the user filters manually (no broken link).
+- Severity is derived in the edge function (`high` for missing-income / large excess; `medium` for shortfall / foreign concentration).
+- Currency formatting uses `Intl.NumberFormat` keyed off `decl.currency`.
 
 ### Files
 
-- New migration: `suite_sof_audit_events` table + RLS + 2 trigger functions + 2 triggers.
-- New: `src/components/suite/SofAuditTrail.tsx`.
-- Edited: `src/pages/suite/SuiteSourceOfFunds.tsx` (load + render timeline, refresh hooks).
-- Edited: `supabase/functions/sof-reconcile/index.ts` (append `ai_reconciliation` event after writing results).
+- Edited: `supabase/functions/sof-reconcile/index.ts` — emit `flags_detailed`, `top_transactions`, `model`.
+- New: `src/components/suite/SofFlagDrillDown.tsx`.
+- Edited: `src/pages/suite/SuiteSourceOfFunds.tsx` — swap in the new component.
 
 Approve to implement.

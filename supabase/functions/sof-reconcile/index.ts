@@ -59,33 +59,120 @@ Deno.serve(async (req) => {
     since.setMonth(since.getMonth() - 12);
     const { data: txns } = await supabase
       .from("suite_transactions")
-      .select("amount, currency, direction, counterparty, counterparty_country, created_at")
+      .select("id, amount, currency, direction, counterparty, counterparty_country, description, risk_flag, created_at")
       .eq("customer_id", decl.customer_id)
       .eq("direction", "credit")
       .gte("created_at", since.toISOString());
 
-    const actualInflow = (txns || []).reduce((s, t) => s + Number(t.amount || 0), 0);
+    const allTxns = (txns || []) as any[];
+    const actualInflow = allTxns.reduce((s, t) => s + Number(t.amount || 0), 0);
     const declaredIncome = Number(decl.declared_annual_income || 0);
     const variance = declaredIncome > 0 ? ((actualInflow - declaredIncome) / declaredIncome) * 100 : 0;
 
-    // Counterparty country diversity
-    const countries = new Set((txns || []).map((t) => t.counterparty_country).filter(Boolean));
     const sourceCountry = (decl.source_country || "").toUpperCase();
+    const foreignTxns = allTxns.filter(
+      (t) => t.counterparty_country && String(t.counterparty_country).toUpperCase() !== sourceCountry,
+    );
+    const countries = new Set(allTxns.map((t) => t.counterparty_country).filter(Boolean));
     const foreignCount = [...countries].filter((c) => String(c).toUpperCase() !== sourceCountry).length;
 
-    const flags: string[] = [];
+    const slim = (t: any) => ({
+      id: t.id,
+      amount: Number(t.amount || 0),
+      currency: t.currency,
+      counterparty: t.counterparty,
+      counterparty_country: t.counterparty_country,
+      description: t.description,
+      risk_flag: t.risk_flag,
+      created_at: t.created_at,
+    });
+    const topTxns = [...allTxns]
+      .sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0))
+      .slice(0, 10)
+      .map(slim);
+
+    type Flag = {
+      code: string;
+      severity: "high" | "medium" | "low";
+      message: string;
+      calculation: Record<string, any>;
+      contributing_transactions: any[];
+    };
+    const flagsDetailed: Flag[] = [];
+
     if (declaredIncome > 0 && actualInflow > declaredIncome * 1.5) {
-      flags.push(`Inflows exceed declared income by ${variance.toFixed(0)}% (declared ${declaredIncome.toLocaleString()} ${decl.currency}, actual ${actualInflow.toLocaleString()})`);
+      flagsDetailed.push({
+        code: "inflow_exceeds_declared",
+        severity: "high",
+        message: `Inflows exceed declared income by ${variance.toFixed(0)}% (declared ${declaredIncome.toLocaleString()} ${decl.currency}, actual ${actualInflow.toLocaleString()} ${decl.currency})`,
+        calculation: {
+          formula: "((actual_inflow_12m − declared_annual_income) / declared_annual_income) × 100",
+          declared_annual_income: declaredIncome,
+          actual_inflow_12m: Number(actualInflow.toFixed(2)),
+          variance_pct: Number(variance.toFixed(1)),
+          threshold: "actual > declared × 1.5",
+          excess_amount: Number((actualInflow - declaredIncome).toFixed(2)),
+        },
+        contributing_transactions: topTxns,
+      });
     }
-    if (declaredIncome > 0 && actualInflow < declaredIncome * 0.3 && (txns?.length || 0) > 0) {
-      flags.push(`Inflows are unusually low vs. declared income (${variance.toFixed(0)}% variance)`);
+    if (declaredIncome > 0 && actualInflow < declaredIncome * 0.3 && allTxns.length > 0) {
+      flagsDetailed.push({
+        code: "inflow_below_declared",
+        severity: "medium",
+        message: `Inflows are unusually low vs. declared income (${variance.toFixed(0)}% variance)`,
+        calculation: {
+          formula: "((actual_inflow_12m − declared_annual_income) / declared_annual_income) × 100",
+          declared_annual_income: declaredIncome,
+          actual_inflow_12m: Number(actualInflow.toFixed(2)),
+          variance_pct: Number(variance.toFixed(1)),
+          threshold: "actual < declared × 0.3",
+          shortfall_amount: Number((declaredIncome - actualInflow).toFixed(2)),
+        },
+        contributing_transactions: topTxns,
+      });
     }
     if (sourceCountry && foreignCount >= 3) {
-      flags.push(`${foreignCount} foreign counterparty countries detected vs. declared source country ${sourceCountry}`);
+      const byCountry: Record<string, { count: number; total: number }> = {};
+      for (const t of foreignTxns) {
+        const k = String(t.counterparty_country).toUpperCase();
+        byCountry[k] = byCountry[k] || { count: 0, total: 0 };
+        byCountry[k].count += 1;
+        byCountry[k].total += Number(t.amount || 0);
+      }
+      flagsDetailed.push({
+        code: "foreign_counterparties",
+        severity: "medium",
+        message: `${foreignCount} foreign counterparty countries detected vs. declared source country ${sourceCountry}`,
+        calculation: {
+          source_country: sourceCountry,
+          distinct_foreign_countries: foreignCount,
+          threshold: "distinct_foreign_countries ≥ 3",
+          breakdown_by_country: byCountry,
+          total_foreign_inflow: Number(foreignTxns.reduce((s, t) => s + Number(t.amount || 0), 0).toFixed(2)),
+        },
+        contributing_transactions: foreignTxns
+          .sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0))
+          .slice(0, 10)
+          .map(slim),
+      });
     }
-    if (!declaredIncome && (txns?.length || 0) > 0) {
-      flags.push(`Customer has ${txns!.length} inbound transactions but no declared income`);
+    if (!declaredIncome && allTxns.length > 0) {
+      flagsDetailed.push({
+        code: "missing_income_declaration",
+        severity: "high",
+        message: `Customer has ${allTxns.length} inbound transactions but no declared income`,
+        calculation: {
+          declared_annual_income: 0,
+          transaction_count: allTxns.length,
+          actual_inflow_12m: Number(actualInflow.toFixed(2)),
+          threshold: "declared_income == 0 AND transactions > 0",
+        },
+        contributing_transactions: topTxns,
+      });
     }
+
+    const flags = flagsDetailed.map((f) => f.message);
 
     // Optional AI narrative summary via Lovable AI
     let aiSummary = "";
@@ -124,12 +211,16 @@ Income sources declared: ${JSON.stringify(decl.income_sources)}`,
       declared_annual_income: declaredIncome,
       actual_inflow_12m: Number(actualInflow.toFixed(2)),
       variance_pct: Number(variance.toFixed(1)),
-      transaction_count: txns?.length || 0,
+      transaction_count: allTxns.length,
       foreign_counterparty_countries: foreignCount,
       flags,
+      flags_detailed: flagsDetailed,
+      top_transactions: topTxns,
       ai_summary: aiSummary,
+      model: "google/gemini-2.5-flash",
       analysed_at: new Date().toISOString(),
     };
+
 
     await supabase
       .from("suite_sof_declarations")
