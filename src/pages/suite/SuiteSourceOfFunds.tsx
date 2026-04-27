@@ -201,6 +201,7 @@ export default function SuiteSourceOfFunds() {
     if (insErr) { toast({ title: "Save failed", description: insErr.message, variant: "destructive" }); return; }
     toast({ title: "Document uploaded" });
     loadAll();
+    bumpAudit();
   };
 
   const verifyDoc = async (id: string, status: string) => {
