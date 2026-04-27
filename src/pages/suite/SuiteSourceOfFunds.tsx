@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import {
   AlertTriangle, FileText, Plus, Sparkles, Trash2, Upload, CheckCircle2, XCircle, Clock, Loader2,
 } from "lucide-react";
+import { SofAuditTrail } from "@/components/suite/SofAuditTrail";
 
 type Customer = {
   id: string; name: string; risk_level: string; type: string; country: string | null; pep_status: string | null;
@@ -69,6 +70,8 @@ export default function SuiteSourceOfFunds() {
   const [newOpen, setNewOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
+  const [auditRefresh, setAuditRefresh] = useState(0);
+  const bumpAudit = () => setAuditRefresh(k => k + 1);
 
   // New declaration form state
   const [form, setForm] = useState({
@@ -167,6 +170,7 @@ export default function SuiteSourceOfFunds() {
     if (error) { toast({ title: "Update failed", description: error.message, variant: "destructive" }); return; }
     toast({ title: `Status set to ${status}` });
     loadAll();
+    bumpAudit();
     if (openDecl?.id === id) setOpenDecl({ ...openDecl, status, reviewer_notes: reviewer_notes ?? openDecl.reviewer_notes });
   };
 
@@ -181,6 +185,7 @@ export default function SuiteSourceOfFunds() {
     if (error) { toast({ title: "Reconciliation failed", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Reconciliation complete", description: `${data?.reconciliation?.flags?.length || 0} flag(s)` });
     loadAll();
+    bumpAudit();
   };
 
   const uploadDoc = async (declId: string, file: File, type: string) => {
@@ -196,6 +201,7 @@ export default function SuiteSourceOfFunds() {
     if (insErr) { toast({ title: "Save failed", description: insErr.message, variant: "destructive" }); return; }
     toast({ title: "Document uploaded" });
     loadAll();
+    bumpAudit();
   };
 
   const verifyDoc = async (id: string, status: string) => {
@@ -205,6 +211,7 @@ export default function SuiteSourceOfFunds() {
     }).eq("id", id);
     if (error) { toast({ title: "Update failed", variant: "destructive" }); return; }
     loadAll();
+    bumpAudit();
   };
 
   if (orgLoading || loading) {
@@ -522,6 +529,11 @@ export default function SuiteSourceOfFunds() {
                       rows={3} placeholder="Add notes for audit trail…" />
                   </div>
                 )}
+
+                {/* Audit trail */}
+                <div className="pt-2 border-t">
+                  <SofAuditTrail declarationId={openDecl.id} refreshKey={auditRefresh} />
+                </div>
               </div>
 
               <DialogFooter className="flex-wrap gap-2">

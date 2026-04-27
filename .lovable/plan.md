@@ -1,43 +1,71 @@
+## Source of Funds — Audit Log
 
-## Enhance Course Content Write-up
+Add a complete, tamper-resistant audit trail per SoF declaration covering:
+- Declaration status changes (e.g. `draft → submitted → verified`)
+- Reviewer-note edits
+- Document verification decisions (verify / reject)
+- AI reconciliation runs (with risk flag + summary)
 
-Seven paid courses are still thin (under ~2,000 characters with only 2 modules) and don't meet the 15+ minute reading standard. I'll bring them up to the same depth as the previously expanded regional AML courses (~5 lessons + 1 case study, ~12k chars, 18-22 min).
+Surface it as a timeline panel inside the existing declaration drawer at `/suite/source-of-funds`.
 
-### Courses to expand
+### What the user sees
 
-| Slug | Current | Target |
-|---|---|---|
-| sanctions-screening-essentials (free) | 2 mods / 1,366 chars / 5 min | 5 mods / ~12k / 18 min |
-| adverse-media-intelligence | 2 mods / 1,446 chars / 20 min | 5 mods / ~12k / 20 min |
-| pep-screening-edd | 2 mods / 1,560 chars / 20 min | 5 mods / ~12k / 20 min |
-| beneficial-ownership | 2 mods / 1,685 chars / 20 min | 5 mods / ~12k / 20 min |
-| crypto-aml | 2 mods / 1,838 chars / 20 min | 5 mods / ~12k / 22 min |
-| risk-based-approach | 2 mods / 1,873 chars / 5 min | 5 mods / ~12k / 18 min |
-| transaction-monitoring-sar | 8 mods / 4,902 chars / 60 min | 6 mods / ~14k / 25 min |
-| international-sanctions-compliance | 4 mods / 6,984 chars / 20 min | 6 mods / ~13k / 22 min |
+In the existing declaration drawer, a new **Audit Trail** section lists every event newest-first:
 
-`crypto-aml-essentials` (36k chars) and `kyc-customer-due-diligence` (14k chars) are already at standard — leaving untouched.
+```text
+[Apr 27, 14:02]  Status changed: under_review → verified        — Jane MLRO
+[Apr 27, 13:58]  Reviewer notes updated                          — Jane MLRO
+[Apr 27, 13:40]  Document verified: payslip_2025.pdf             — Jane MLRO
+[Apr 27, 13:22]  AI reconciliation: 2 flag(s), risk_flag=true    — system
+[Apr 26, 09:10]  Status changed: draft → submitted               — John Customer
+```
 
-### Lesson structure per course (5–6 modules)
+Each row shows: timestamp, event type with a coloured badge, a short human description, and the actor. Clicking a row expands to show the full JSON payload (old/new values, AI summary, etc.) for forensic detail.
 
-1. **Foundations** — definitions, regulatory context (FATF, EU AMLD, FinCEN, MAS, etc.)
-2. **Regulators & Frameworks** — supervisory bodies and key obligations
-3. **Operational Practice** — workflows, controls, tooling, thresholds
-4. **Red Flags & Typologies** — indicators, common evasion patterns
-5. **Case Study** — realistic scenario with decision points and resolution
-6. *(longer courses)* **Reporting & Escalation** — SAR/STR triggers, internal governance
+A "Download CSV" button exports the timeline for that declaration.
 
-Each lesson ~2,000–2,500 chars of substantive markdown with headings, bullet lists, examples, and citations to real regulations.
+### Data model
 
-### Technical execution
+New table `suite_sof_audit_events`:
 
-1. **SQL migration #1** — `DELETE FROM academy_modules WHERE course_id IN (...) AND LENGTH(content) < 1500` to clear stub modules for the 8 target courses.
-2. **SQL migration #2** — `INSERT INTO academy_modules` with new lesson rows (sequential `sort_order`, slug-based course lookup via subquery).
-3. **SQL migration #3** — `UPDATE academy_courses SET duration_minutes = X` to align with the new content length.
-4. Quizzes already exist on these courses (validated previously) — no changes needed; re-sequencing keeps the quiz module at the end.
-5. No frontend changes required; `ModuleContent` and `ModuleTOC` already render markdown.
+- `declaration_id` (FK → `suite_sof_declarations`, ON DELETE CASCADE)
+- `organisation_id`, `actor_user_id` (nullable — `null` for system/AI events)
+- `event_type` enum-as-text: `status_change`, `notes_update`, `document_verification`, `ai_reconciliation`, `submission`, `expiry`
+- `summary` text (human-readable one-liner)
+- `details` jsonb (old/new values, document id + filename, AI flags, etc.)
+- timestamps
 
-### Out of scope
-- Stripe pricing IDs (separate admin task)
-- Free-vs-paid gating logic (already shipped)
-- `crypto-aml-essentials` and `kyc-customer-due-diligence` (already at standard)
+RLS mirrors `suite_sof_declarations`: org members of the declaration's org (or platform admins) can `SELECT`; inserts only via `SECURITY DEFINER` triggers / edge function (no direct client inserts, no updates, no deletes — append-only).
+
+### How events get recorded
+
+1. **Declaration status / notes changes** — `AFTER UPDATE` trigger on `suite_sof_declarations` compares OLD vs NEW and writes one event per changed dimension (status, reviewer_notes). Actor = `auth.uid()`.
+2. **Document verification** — `AFTER INSERT OR UPDATE OF verification_status` trigger on `suite_sof_documents` writes a `document_verification` event referencing the parent declaration.
+3. **AI reconciliation** — the `sof-reconcile` edge function inserts an `ai_reconciliation` event after it writes results back, with `actor_user_id = auth.uid()` and details containing `flags`, `variance_pct`, `risk_flag`, model name.
+4. **Submission / expiry** — captured by the same status-change trigger (since both transition the `status` column).
+
+All triggers are `SECURITY DEFINER` with `SET search_path = public` and write directly to `suite_sof_audit_events`, bypassing RLS for the insert path only.
+
+### UI changes
+
+- `src/pages/suite/SuiteSourceOfFunds.tsx`
+  - Add `loadAuditEvents(declarationId)` and state `auditEvents`.
+  - In the declaration drawer (after the documents section), render a new `<AuditTrail />` block: timeline list, expandable JSON, CSV export button.
+  - Refresh the timeline after every status update / verify / AI run.
+- New small component `src/components/suite/SofAuditTrail.tsx` — pure presentational timeline + CSV download (uses existing teal accent + status-badge tokens).
+
+### Technical notes
+
+- Trigger functions are idempotent and only insert when a tracked field actually changed (`OLD.x IS DISTINCT FROM NEW.x`).
+- Actor display name resolved client-side from `profiles.full_name` keyed by `actor_user_id`; system events render as "system".
+- No data migration needed — historical events are not back-filled (audit trail starts at deployment time; this is explicitly documented in the empty state).
+- CSV export is fully client-side, no new edge function.
+
+### Files
+
+- New migration: `suite_sof_audit_events` table + RLS + 2 trigger functions + 2 triggers.
+- New: `src/components/suite/SofAuditTrail.tsx`.
+- Edited: `src/pages/suite/SuiteSourceOfFunds.tsx` (load + render timeline, refresh hooks).
+- Edited: `supabase/functions/sof-reconcile/index.ts` (append `ai_reconciliation` event after writing results).
+
+Approve to implement.

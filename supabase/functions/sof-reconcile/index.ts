@@ -139,6 +139,25 @@ Income sources declared: ${JSON.stringify(decl.income_sources)}`,
       })
       .eq("id", declaration_id);
 
+    // Append AI run to the audit trail (uses service role to bypass RLS; insert-only)
+    await supabase.from("suite_sof_audit_events").insert({
+      declaration_id,
+      organisation_id: decl.organisation_id ?? null,
+      actor_user_id: userData.user.id,
+      event_type: "ai_reconciliation",
+      summary: `AI reconciliation: ${flags.length} flag(s)${flags.length > 0 ? ", risk_flag=true" : ""}`,
+      details: {
+        flags,
+        variance_pct: reconciliation.variance_pct,
+        declared_annual_income: reconciliation.declared_annual_income,
+        actual_inflow_12m: reconciliation.actual_inflow_12m,
+        transaction_count: reconciliation.transaction_count,
+        foreign_counterparty_countries: reconciliation.foreign_counterparty_countries,
+        ai_summary: reconciliation.ai_summary,
+        risk_flag: flags.length > 0,
+      },
+    });
+
     return new Response(JSON.stringify({ success: true, reconciliation }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -1700,6 +1700,47 @@ export type Database = {
           },
         ]
       }
+      suite_sof_audit_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          declaration_id: string
+          details: Json
+          event_type: string
+          id: string
+          organisation_id: string | null
+          summary: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          declaration_id: string
+          details?: Json
+          event_type: string
+          id?: string
+          organisation_id?: string | null
+          summary: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          declaration_id?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          organisation_id?: string | null
+          summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_sof_audit_events_declaration_id_fkey"
+            columns: ["declaration_id"]
+            isOneToOne: false
+            referencedRelation: "suite_sof_declarations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_sof_declarations: {
         Row: {
           ai_reconciliation: Json | null
