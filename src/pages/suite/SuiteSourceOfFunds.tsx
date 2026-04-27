@@ -170,6 +170,7 @@ export default function SuiteSourceOfFunds() {
     if (error) { toast({ title: "Update failed", description: error.message, variant: "destructive" }); return; }
     toast({ title: `Status set to ${status}` });
     loadAll();
+    bumpAudit();
     if (openDecl?.id === id) setOpenDecl({ ...openDecl, status, reviewer_notes: reviewer_notes ?? openDecl.reviewer_notes });
   };
 
