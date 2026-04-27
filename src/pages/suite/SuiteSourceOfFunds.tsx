@@ -211,6 +211,7 @@ export default function SuiteSourceOfFunds() {
     }).eq("id", id);
     if (error) { toast({ title: "Update failed", variant: "destructive" }); return; }
     loadAll();
+    bumpAudit();
   };
 
   if (orgLoading || loading) {
