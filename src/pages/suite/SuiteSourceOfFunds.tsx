@@ -185,6 +185,7 @@ export default function SuiteSourceOfFunds() {
     if (error) { toast({ title: "Reconciliation failed", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Reconciliation complete", description: `${data?.reconciliation?.flags?.length || 0} flag(s)` });
     loadAll();
+    bumpAudit();
   };
 
   const uploadDoc = async (declId: string, file: File, type: string) => {
