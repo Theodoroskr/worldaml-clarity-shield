@@ -185,7 +185,8 @@ export default function SuiteSourceOfFunds() {
 
   const uploadDoc = async (declId: string, file: File, type: string) => {
     if (!userId) return;
-    const path = `sof/${orgId}/${declId}/${Date.now()}-${file.name}`;
+    // Path must start with sof/<userId>/... to satisfy storage RLS policy.
+    const path = `sof/${userId}/${declId}/${Date.now()}-${file.name}`;
     const { error: upErr } = await supabase.storage.from("customer-documents").upload(path, file);
     if (upErr) { toast({ title: "Upload failed", description: upErr.message, variant: "destructive" }); return; }
     const { error: insErr } = await supabase.from("suite_sof_documents").insert({
