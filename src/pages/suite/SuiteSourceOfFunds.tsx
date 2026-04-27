@@ -439,39 +439,15 @@ export default function SuiteSourceOfFunds() {
                   </div>
                 )}
 
-                {/* AI Reconciliation */}
-                <Card className="p-4 border-primary/20 bg-primary/5">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2 font-semibold text-sm"><Sparkles className="w-4 h-4" /> AI Reconciliation</div>
-                    {canEdit && (
-                      <Button size="sm" variant="outline" onClick={() => runReconciliation(openDecl.id)} disabled={aiBusy === openDecl.id}>
-                        {aiBusy === openDecl.id ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                        Run check
-                      </Button>
-                    )}
-                  </div>
-                  {openDecl.ai_reconciliation && Object.keys(openDecl.ai_reconciliation).length > 0 ? (
-                    <div className="text-xs space-y-2">
-                      <div className="grid grid-cols-3 gap-2">
-                        <div><div className="text-muted-foreground">Declared</div><div className="font-mono">{openDecl.ai_reconciliation.declared_annual_income?.toLocaleString()}</div></div>
-                        <div><div className="text-muted-foreground">Actual 12m</div><div className="font-mono">{openDecl.ai_reconciliation.actual_inflow_12m?.toLocaleString()}</div></div>
-                        <div><div className="text-muted-foreground">Variance</div><div className={`font-mono ${Math.abs(openDecl.ai_reconciliation.variance_pct || 0) > 50 ? "text-red-600" : ""}`}>{openDecl.ai_reconciliation.variance_pct}%</div></div>
-                      </div>
-                      {openDecl.ai_reconciliation.flags?.length > 0 && (
-                        <div className="space-y-1 mt-2">
-                          {openDecl.ai_reconciliation.flags.map((f: string, i: number) => (
-                            <div key={i} className="flex items-start gap-2 text-red-600"><AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" /><span>{f}</span></div>
-                          ))}
-                        </div>
-                      )}
-                      {openDecl.ai_reconciliation.ai_summary && (
-                        <div className="mt-2 p-2 bg-background rounded text-foreground italic">{openDecl.ai_reconciliation.ai_summary}</div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">Not yet analysed.</p>
-                  )}
-                </Card>
+                {/* AI Reconciliation — drill-down */}
+                <SofFlagDrillDown
+                  reconciliation={openDecl.ai_reconciliation}
+                  customerId={openDecl.customer_id}
+                  currency={openDecl.currency}
+                  onRerun={() => runReconciliation(openDecl.id)}
+                  busy={aiBusy === openDecl.id}
+                  canRerun={canEdit}
+                />
 
                 {/* Documents */}
                 <div>
