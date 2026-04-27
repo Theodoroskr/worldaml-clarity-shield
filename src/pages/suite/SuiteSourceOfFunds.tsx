@@ -70,6 +70,8 @@ export default function SuiteSourceOfFunds() {
   const [newOpen, setNewOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
+  const [auditRefresh, setAuditRefresh] = useState(0);
+  const bumpAudit = () => setAuditRefresh(k => k + 1);
 
   // New declaration form state
   const [form, setForm] = useState({
