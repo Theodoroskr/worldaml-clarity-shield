@@ -14,6 +14,7 @@ import {
   AlertTriangle, FileText, Plus, Sparkles, Trash2, Upload, CheckCircle2, XCircle, Clock, Loader2,
 } from "lucide-react";
 import { SofAuditTrail } from "@/components/suite/SofAuditTrail";
+import { SofFlagDrillDown } from "@/components/suite/SofFlagDrillDown";
 
 type Customer = {
   id: string; name: string; risk_level: string; type: string; country: string | null; pep_status: string | null;
