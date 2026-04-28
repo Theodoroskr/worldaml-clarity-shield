@@ -18,6 +18,7 @@ import { SofAuditTrail } from "@/components/suite/SofAuditTrail";
 import { SofFlagDrillDown } from "@/components/suite/SofFlagDrillDown";
 import { SofThresholdsDialog } from "@/components/suite/SofThresholdsDialog";
 import { SofEvidenceChecklist } from "@/components/suite/SofEvidenceChecklist";
+import { SofRulesEvaluated } from "@/components/suite/SofRulesEvaluated";
 
 type Customer = {
   id: string; name: string; risk_level: string; type: string; country: string | null; pep_status: string | null;
@@ -537,6 +538,9 @@ export default function SuiteSourceOfFunds() {
                   canEditThresholds={canManage}
                   onEditThresholds={() => setThresholdsOpen(true)}
                 />
+
+                {/* Rules engine breakdown — every rule, triggered or not */}
+                <SofRulesEvaluated reconciliation={openDecl.ai_reconciliation} />
 
                 {/* Step-by-step evidence checklist */}
                 <SofEvidenceChecklist
