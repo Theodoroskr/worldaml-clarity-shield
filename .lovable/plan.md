@@ -1,85 +1,93 @@
-## AI Flag Drill-Down Panel
+## Goal
 
-When the AI reconciliation produces flags, give the analyst a dedicated panel that, for each flag, shows:
-- **The exact transactions** that triggered it (counterparty, country, amount, date, link to txn)
-- **The variance calculation** (formula, inputs, threshold, result)
-- **The generated analyst summary** (Lovable AI narrative, model attribution)
+Make the AI variance thresholds used by `sof-reconcile` configurable per organisation (instead of hard-coded 1.5×, 0.3×, ≥3 foreign countries), and surface an **AI Confidence Score** plus a plain-language **explanation** on the Source of Funds page.
 
-### What the user sees
+---
 
-In the existing declaration drawer, the "AI Reconciliation" card is replaced with a richer block:
+## 1. Database — thresholds + confidence storage
 
-```text
-AI Reconciliation     analysed Apr 27 14:02 · gemini-2.5-flash · [Re-run]
+New migration: `suite_sof_thresholds` table (one row per organisation, upsert pattern).
 
-  Declared 60,000 EUR  ·  Actual 142,300 EUR  ·  Variance +137%
-  Transactions analysed: 47  ·  Foreign countries: 4
+| Column | Type | Default | Notes |
+|---|---|---|---|
+| `organisation_id` | uuid PK | — | FK to `suite_organizations` |
+| `inflow_high_multiplier` | numeric | `1.5` | trigger when actual > declared × this |
+| `inflow_low_multiplier` | numeric | `0.3` | trigger when actual < declared × this |
+| `foreign_countries_min` | int | `3` | min distinct foreign counterparty countries |
+| `high_severity_variance_pct` | numeric | `100` | variance % above which a flag is "high" |
+| `min_confidence_for_auto_clear` | int | `80` | UI-only: badge tone helper |
+| `updated_at`, `updated_by` | — | — | audit |
 
-  Analyst summary
-  > "Inflows materially exceed the declared annual income, driven by
-  >  high-value transfers from Cyprus and the UAE. Recommend EDD
-  >  refresh and request 2024 tax return."
+RLS: select/insert/update restricted to members of the org (`organisation_id = get_user_org_id(auth.uid())`); admins of the org can update. No DELETE policy.
 
-  ── Flags (3) ──────────────────────────────────────────────
-  [HIGH]  Inflows exceed declared income by 137%        [▾]
-          Calculation
-            ((142,300 − 60,000) / 60,000) × 100 = 137.2%
-            Threshold: actual > declared × 1.5
-            Excess: 82,300 EUR
-          Contributing transactions (top 10 by amount)
-            • 27 Mar  — Acme Ltd (CY)   18,500 EUR  → open
-            • 14 Mar  — J. Doe (UAE)    12,000 EUR  → open
-            …
-          [Open all in Transactions]   [Create case]
-```
+`ai_reconciliation` JSONB on `suite_sof_declarations` gains two new fields (no schema change needed — JSON):
+- `confidence_score` (0–100 int)
+- `confidence_explanation` (string, plain language)
+- `thresholds_used` (snapshot of values used for the run, for audit)
 
-Each flag is collapsible. "Open" links jump to `/suite/transactions?id=...`. "Open all in Transactions" filters that page by the contributing IDs. "Create case" opens the existing case-creation modal pre-filled with the flag context.
+---
 
-### Data model
+## 2. Edge function — `supabase/functions/sof-reconcile/index.ts`
 
-No schema changes. The existing `suite_sof_declarations.ai_reconciliation` JSONB column is extended with two new fields written by the edge function:
+- Load `suite_sof_thresholds` for `decl.organisation_id`; fall back to defaults if no row.
+- Replace hard-coded `1.5`, `0.3`, `>= 3` literals with the loaded values; include them in each flag's `calculation` block and at the top level as `thresholds_used`.
+- Compute a **confidence score** (0–100) deterministically before calling the LLM:
+  - Base 100.
+  - Subtract weighted penalties per flag (high = 30, medium = 15, low = 5).
+  - Subtract penalty when supporting documents are missing (no rows in `suite_sof_documents` for the declaration: −20; some but none `verified`: −10).
+  - Subtract a small penalty for very low transaction sample size (`< 5` txns: −10).
+  - Clamp to `[0, 100]`.
+- Update the LLM prompt to also produce a one-paragraph **confidence explanation** that justifies the score in plain language. Use a strict JSON response (`response_format: json_object`) returning `{ "summary": string, "confidence_explanation": string }`. Keep the existing 2-sentence `summary` behaviour; if JSON parse fails, fall back to using the raw text as `summary` and a generated rule-based explanation.
+- Persist `confidence_score`, `confidence_explanation`, `thresholds_used` into `ai_reconciliation`.
+- Append both to the existing `suite_sof_audit_events` `ai_reconciliation` event details.
 
-- `flags_detailed`: array of `{ code, severity, message, calculation, contributing_transactions }`
-- `top_transactions`: array of the 10 largest credits in the analysis window
-- `model`: `"google/gemini-2.5-flash"` (for attribution)
+---
 
-The flat `flags: string[]` array is preserved for backward compatibility with the existing audit-log entries and any downstream consumers.
+## 3. Frontend
 
-### Edge function changes
+### 3a. New component `src/components/suite/SofConfidenceCard.tsx`
+- Shows a circular/linear progress bar with the score and a tone (green ≥80, amber 50–79, red <50, using the existing status badging palette).
+- Lists the contributing penalties (e.g. "−30 high-severity variance flag", "−20 no supporting documents") generated from `flags_detailed` + `thresholds_used`.
+- Renders the AI `confidence_explanation` paragraph below.
 
-`supabase/functions/sof-reconcile/index.ts`:
+### 3b. Update `src/components/suite/SofFlagDrillDown.tsx`
+- Render `<SofConfidenceCard />` at the top of the panel when `reconciliation.confidence_score` is present.
+- Display the active thresholds row (e.g. "Thresholds: high ×1.5 · low ×0.3 · foreign ≥3") with an "Edit" link that opens the new settings dialog (admins only).
 
-1. Select `id`, `description`, and `risk_flag` on transactions (in addition to existing fields) so we can render and link them.
-2. Build `flagsDetailed` instead of plain strings. Each flag carries:
-   - `calculation`: `{ formula, inputs, threshold, result, excess/shortfall }`
-   - `contributing_transactions`: relevant txns (top 10 by amount; for the foreign-counterparty flag, only foreign txns)
-3. Compute `byCountry` breakdown for the foreign-counterparty flag.
-4. Persist `flags_detailed`, `top_transactions`, `model` into `ai_reconciliation`.
-5. The AI audit-log event already records `flags`; no change needed there.
+### 3c. New dialog `src/components/suite/SofThresholdsDialog.tsx`
+- Form with the five threshold fields, Zod-validated, sensible min/max.
+- Loads via `select` from `suite_sof_thresholds`; saves with upsert on `organisation_id`.
+- Visible only to users with admin role for the org (reuse `useUserRole`/`has_role` pattern already in the codebase).
+- Toast on save; closes and re-opens drilldown so the next "Re-run AI" uses fresh values.
 
-### UI changes
+### 3d. `src/pages/suite/SuiteSourceOfFunds.tsx`
+- Pass org admin flag to `SofFlagDrillDown` so the Edit thresholds button can be conditionally shown.
+- No other layout changes.
 
-New component `src/components/suite/SofFlagDrillDown.tsx`:
-- Renders the headline metrics row (declared / actual / variance / txn count / foreign).
-- Renders the analyst summary with model attribution.
-- Renders an accordion of flags. Each item shows: severity badge (high=red, medium=amber, low=blue), message, expandable calculation block, and a sortable mini-table of contributing transactions with `→ open` deep-links.
-- Falls back gracefully when only the legacy flat `flags: string[]` is present (renders message-only rows with no drill-down) — important for declarations analysed before this upgrade.
+---
 
-Edits to `src/pages/suite/SuiteSourceOfFunds.tsx`:
-- Replace the inline AI Reconciliation `<Card>` with `<SofFlagDrillDown reconciliation={openDecl.ai_reconciliation} onRerun={() => runReconciliation(openDecl.id)} busy={aiBusy === openDecl.id} />`.
-- Pass `customerId` so deep-links can scope the Transactions page filter.
+## 4. Audit & types
 
-### Technical notes
+- Regenerated `src/integrations/supabase/types.ts` will include the new table (auto).
+- Audit event detail already stores arbitrary JSON, so no schema changes needed there.
 
-- All data comes from the already-stored JSONB — no new round-trip when opening the drawer.
-- Transaction deep-link uses an existing route convention (`/suite/transactions?customer=<id>&ids=<csv>`); if the Transactions page doesn't yet honour `ids`, we fall back to `?customer=<id>` and the user filters manually (no broken link).
-- Severity is derived in the edge function (`high` for missing-income / large excess; `medium` for shortfall / foreign concentration).
-- Currency formatting uses `Intl.NumberFormat` keyed off `decl.currency`.
+---
 
-### Files
+## Out of scope
 
-- Edited: `supabase/functions/sof-reconcile/index.ts` — emit `flags_detailed`, `top_transactions`, `model`.
-- New: `src/components/suite/SofFlagDrillDown.tsx`.
-- Edited: `src/pages/suite/SuiteSourceOfFunds.tsx` — swap in the new component.
+- Per-customer threshold overrides (org-level only for now).
+- Historical re-scoring of past declarations (only future runs use new values; existing `ai_reconciliation` rows continue to render without the confidence card).
 
-Approve to implement.
+---
+
+## Files
+
+**New**
+- `supabase/migrations/<timestamp>_sof_thresholds.sql`
+- `src/components/suite/SofConfidenceCard.tsx`
+- `src/components/suite/SofThresholdsDialog.tsx`
+
+**Edited**
+- `supabase/functions/sof-reconcile/index.ts`
+- `src/components/suite/SofFlagDrillDown.tsx`
+- `src/pages/suite/SuiteSourceOfFunds.tsx`
