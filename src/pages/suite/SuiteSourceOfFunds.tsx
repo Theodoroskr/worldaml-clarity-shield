@@ -74,7 +74,31 @@ export default function SuiteSourceOfFunds() {
   const [loading, setLoading] = useState(true);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
   const [auditRefresh, setAuditRefresh] = useState(0);
+  const [sweepBusy, setSweepBusy] = useState(false);
   const bumpAudit = () => setAuditRefresh(k => k + 1);
+
+  const runExpirySweep = async () => {
+    setSweepBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("sof-expire-declarations", {
+        body: { trigger: "manual" },
+      });
+      if (error) throw error;
+      const expired = data?.expired_count ?? 0;
+      const notified = data?.notified_orgs ?? 0;
+      toast({
+        title: expired > 0 ? "Expiry sweep complete" : "Nothing to expire",
+        description: expired > 0
+          ? `${expired} declaration(s) marked expired. ${notified} organisation(s) notified.`
+          : "No verified declarations are past their term.",
+      });
+      await loadAll();
+    } catch (e: any) {
+      toast({ title: "Sweep failed", description: e?.message ?? String(e), variant: "destructive" });
+    } finally {
+      setSweepBusy(false);
+    }
+  };
 
   // New declaration form state
   const [form, setForm] = useState({
