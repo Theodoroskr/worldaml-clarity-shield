@@ -5,8 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
   Sparkles, ChevronDown, ChevronRight, RefreshCw, Loader2,
-  ExternalLink, AlertTriangle, Calculator, ListChecks,
+  ExternalLink, AlertTriangle, Calculator, ListChecks, Settings2,
 } from "lucide-react";
+import { SofConfidenceCard, type ConfidencePenalty } from "./SofConfidenceCard";
 
 type Txn = {
   id: string;
