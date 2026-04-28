@@ -7,6 +7,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const DEFAULT_THRESHOLDS = {
+  inflow_high_multiplier: 1.5,
+  inflow_low_multiplier: 0.3,
+  foreign_countries_min: 3,
+  high_severity_variance_pct: 100,
+  min_confidence_for_auto_clear: 80,
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -54,6 +62,25 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Load org thresholds (fallback to defaults)
+    let thresholds = { ...DEFAULT_THRESHOLDS };
+    if (decl.organisation_id) {
+      const { data: thr } = await supabase
+        .from("suite_sof_thresholds")
+        .select("*")
+        .eq("organisation_id", decl.organisation_id)
+        .maybeSingle();
+      if (thr) {
+        thresholds = {
+          inflow_high_multiplier: Number(thr.inflow_high_multiplier),
+          inflow_low_multiplier: Number(thr.inflow_low_multiplier),
+          foreign_countries_min: Number(thr.foreign_countries_min),
+          high_severity_variance_pct: Number(thr.high_severity_variance_pct),
+          min_confidence_for_auto_clear: Number(thr.min_confidence_for_auto_clear),
+        };
+      }
+    }
+
     // Load last 12 months of credit (incoming) transactions
     const since = new Date();
     since.setMonth(since.getMonth() - 12);
@@ -68,6 +95,14 @@ Deno.serve(async (req) => {
     const actualInflow = allTxns.reduce((s, t) => s + Number(t.amount || 0), 0);
     const declaredIncome = Number(decl.declared_annual_income || 0);
     const variance = declaredIncome > 0 ? ((actualInflow - declaredIncome) / declaredIncome) * 100 : 0;
+
+    // Load supporting documents (for confidence scoring)
+    const { data: docs } = await supabase
+      .from("suite_sof_documents")
+      .select("id, verification_status")
+      .eq("declaration_id", declaration_id);
+    const docList = (docs || []) as any[];
+    const verifiedDocCount = docList.filter((d) => d.verification_status === "verified").length;
 
     const sourceCountry = (decl.source_country || "").toUpperCase();
     const foreignTxns = allTxns.filter(
@@ -100,23 +135,25 @@ Deno.serve(async (req) => {
     };
     const flagsDetailed: Flag[] = [];
 
-    if (declaredIncome > 0 && actualInflow > declaredIncome * 1.5) {
+    if (declaredIncome > 0 && actualInflow > declaredIncome * thresholds.inflow_high_multiplier) {
+      const sev: Flag["severity"] = Math.abs(variance) >= thresholds.high_severity_variance_pct ? "high" : "medium";
       flagsDetailed.push({
         code: "inflow_exceeds_declared",
-        severity: "high",
+        severity: sev,
         message: `Inflows exceed declared income by ${variance.toFixed(0)}% (declared ${declaredIncome.toLocaleString()} ${decl.currency}, actual ${actualInflow.toLocaleString()} ${decl.currency})`,
         calculation: {
           formula: "((actual_inflow_12m − declared_annual_income) / declared_annual_income) × 100",
           declared_annual_income: declaredIncome,
           actual_inflow_12m: Number(actualInflow.toFixed(2)),
           variance_pct: Number(variance.toFixed(1)),
-          threshold: "actual > declared × 1.5",
+          threshold: `actual > declared × ${thresholds.inflow_high_multiplier}`,
+          high_severity_variance_pct: thresholds.high_severity_variance_pct,
           excess_amount: Number((actualInflow - declaredIncome).toFixed(2)),
         },
         contributing_transactions: topTxns,
       });
     }
-    if (declaredIncome > 0 && actualInflow < declaredIncome * 0.3 && allTxns.length > 0) {
+    if (declaredIncome > 0 && actualInflow < declaredIncome * thresholds.inflow_low_multiplier && allTxns.length > 0) {
       flagsDetailed.push({
         code: "inflow_below_declared",
         severity: "medium",
@@ -126,13 +163,13 @@ Deno.serve(async (req) => {
           declared_annual_income: declaredIncome,
           actual_inflow_12m: Number(actualInflow.toFixed(2)),
           variance_pct: Number(variance.toFixed(1)),
-          threshold: "actual < declared × 0.3",
+          threshold: `actual < declared × ${thresholds.inflow_low_multiplier}`,
           shortfall_amount: Number((declaredIncome - actualInflow).toFixed(2)),
         },
         contributing_transactions: topTxns,
       });
     }
-    if (sourceCountry && foreignCount >= 3) {
+    if (sourceCountry && foreignCount >= thresholds.foreign_countries_min) {
       const byCountry: Record<string, { count: number; total: number }> = {};
       for (const t of foreignTxns) {
         const k = String(t.counterparty_country).toUpperCase();
@@ -147,7 +184,7 @@ Deno.serve(async (req) => {
         calculation: {
           source_country: sourceCountry,
           distinct_foreign_countries: foreignCount,
-          threshold: "distinct_foreign_countries ≥ 3",
+          threshold: `distinct_foreign_countries ≥ ${thresholds.foreign_countries_min}`,
           breakdown_by_country: byCountry,
           total_foreign_inflow: Number(foreignTxns.reduce((s, t) => s + Number(t.amount || 0), 0).toFixed(2)),
         },
@@ -174,8 +211,27 @@ Deno.serve(async (req) => {
 
     const flags = flagsDetailed.map((f) => f.message);
 
-    // Optional AI narrative summary via Lovable AI
+    // ===== Confidence score (deterministic, pre-LLM) =====
+    type Penalty = { code: string; label: string; points: number };
+    const penalties: Penalty[] = [];
+    for (const f of flagsDetailed) {
+      const pts = f.severity === "high" ? 30 : f.severity === "medium" ? 15 : 5;
+      penalties.push({ code: f.code, label: `${f.severity} severity flag: ${f.code.replace(/_/g, " ")}`, points: pts });
+    }
+    if (docList.length === 0) {
+      penalties.push({ code: "no_supporting_docs", label: "No supporting documents uploaded", points: 20 });
+    } else if (verifiedDocCount === 0) {
+      penalties.push({ code: "no_verified_docs", label: "Documents uploaded but none verified yet", points: 10 });
+    }
+    if (allTxns.length < 5) {
+      penalties.push({ code: "low_sample_size", label: `Low transaction sample size (${allTxns.length})`, points: 10 });
+    }
+    const totalPenalty = penalties.reduce((s, p) => s + p.points, 0);
+    const confidenceScore = Math.max(0, Math.min(100, 100 - totalPenalty));
+
+    // Optional AI narrative summary + confidence explanation via Lovable AI
     let aiSummary = "";
+    let confidenceExplanation = "";
     const aiKey = Deno.env.get("LOVABLE_API_KEY");
     if (aiKey) {
       try {
@@ -187,14 +243,22 @@ Deno.serve(async (req) => {
           },
           body: JSON.stringify({
             model: "google/gemini-2.5-flash",
+            response_format: { type: "json_object" },
             messages: [{
               role: "user",
-              content: `As an AML compliance analyst, write a 2-sentence assessment of this Source of Funds reconciliation.
+              content: `You are an AML compliance analyst. Reply in strict JSON: {"summary": string, "confidence_explanation": string}.
+- "summary": 2 sentences assessing this Source of Funds reconciliation.
+- "confidence_explanation": 1 short paragraph (2-3 sentences, plain language) justifying the confidence score of ${confidenceScore}/100, referring to the listed deductions.
+
 Declared annual income: ${declaredIncome} ${decl.currency}
 Actual 12-month inflows: ${actualInflow.toFixed(2)} ${decl.currency}
 Variance: ${variance.toFixed(1)}%
 Source country: ${sourceCountry || "not declared"}
 Foreign counterparty countries: ${foreignCount}
+Transactions: ${allTxns.length}
+Supporting documents: ${docList.length} uploaded, ${verifiedDocCount} verified
+Confidence score: ${confidenceScore}/100
+Confidence deductions: ${penalties.map((p) => `−${p.points} ${p.label}`).join("; ") || "none"}
 Flags: ${flags.join("; ") || "none"}
 Income sources declared: ${JSON.stringify(decl.income_sources)}`,
             }],
@@ -202,9 +266,26 @@ Income sources declared: ${JSON.stringify(decl.income_sources)}`,
         });
         if (aiRes.ok) {
           const j = await aiRes.json();
-          aiSummary = j.choices?.[0]?.message?.content || "";
+          const raw = j.choices?.[0]?.message?.content || "";
+          try {
+            const parsed = JSON.parse(raw);
+            aiSummary = String(parsed.summary || "");
+            confidenceExplanation = String(parsed.confidence_explanation || "");
+          } catch {
+            aiSummary = raw;
+          }
         }
       } catch (_) { /* non-fatal */ }
+    }
+
+    // Rule-based fallback explanation
+    if (!confidenceExplanation) {
+      if (penalties.length === 0) {
+        confidenceExplanation = `Confidence is ${confidenceScore}/100: declared figures reconcile with observed transactions and no risk indicators were triggered.`;
+      } else {
+        const top = penalties.slice(0, 3).map((p) => `−${p.points} for ${p.label.toLowerCase()}`).join(", ");
+        confidenceExplanation = `Confidence is ${confidenceScore}/100. Score reduced by: ${top}.`;
+      }
     }
 
     const reconciliation = {
@@ -217,6 +298,11 @@ Income sources declared: ${JSON.stringify(decl.income_sources)}`,
       flags_detailed: flagsDetailed,
       top_transactions: topTxns,
       ai_summary: aiSummary,
+      confidence_score: confidenceScore,
+      confidence_explanation: confidenceExplanation,
+      confidence_penalties: penalties,
+      thresholds_used: thresholds,
+      supporting_documents: { total: docList.length, verified: verifiedDocCount },
       model: "google/gemini-2.5-flash",
       analysed_at: new Date().toISOString(),
     };
@@ -236,7 +322,7 @@ Income sources declared: ${JSON.stringify(decl.income_sources)}`,
       organisation_id: decl.organisation_id ?? null,
       actor_user_id: userData.user.id,
       event_type: "ai_reconciliation",
-      summary: `AI reconciliation: ${flags.length} flag(s)${flags.length > 0 ? ", risk_flag=true" : ""}`,
+      summary: `AI reconciliation: ${flags.length} flag(s), confidence ${confidenceScore}/100${flags.length > 0 ? ", risk_flag=true" : ""}`,
       details: {
         flags,
         variance_pct: reconciliation.variance_pct,
@@ -245,6 +331,10 @@ Income sources declared: ${JSON.stringify(decl.income_sources)}`,
         transaction_count: reconciliation.transaction_count,
         foreign_counterparty_countries: reconciliation.foreign_counterparty_countries,
         ai_summary: reconciliation.ai_summary,
+        confidence_score: confidenceScore,
+        confidence_explanation: confidenceExplanation,
+        confidence_penalties: penalties,
+        thresholds_used: thresholds,
         risk_flag: flags.length > 0,
       },
     });
