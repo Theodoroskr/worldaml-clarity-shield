@@ -1,0 +1,50 @@
+{
+  "rcm": {
+    "title": "Regulatory Compliance Management",
+    "brand": "WorldAMLSuite",
+    "nav": {
+      "dashboard": "Dashboard",
+      "library": "Regulatory Library",
+      "obligations": "Obligations",
+      "controls": "Controls",
+      "assessments": "Assessments",
+      "tasks": "Tasks & Escalations",
+      "evidence": "Evidence Repository",
+      "reports": "Reports",
+      "translations": "Translation Review",
+      "settings": "Settings / Admin",
+      "audit": "Audit Trail"
+    },
+    "common": {
+      "language": "Language",
+      "english": "English",
+      "arabic": "العربية",
+      "create": "Create",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "loading": "Loading…",
+      "search": "Search",
+      "filter": "Filter",
+      "status": "Status",
+      "owner": "Owner",
+      "department": "Department",
+      "deadline": "Deadline",
+      "risk": "Risk",
+      "actions": "Actions",
+      "no_org": "No RCM organisation selected. Visit Settings to join one.",
+      "join_demo": "Join the Region Trade Bank demo as Admin"
+    },
+    "dashboard": {
+      "kpi_regulations": "Total regulations",
+      "kpi_obligations": "Active obligations",
+      "kpi_score": "Compliance score",
+      "kpi_open_gaps": "Open gaps",
+      "kpi_overdue": "Overdue tasks",
+      "kpi_high_risk": "High-risk obligations",
+      "recent_escalations": "Recent escalations",
+      "by_department": "Compliance by department"
+    }
+  }
+}

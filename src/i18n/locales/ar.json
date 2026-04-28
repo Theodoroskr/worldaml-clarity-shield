@@ -1,0 +1,50 @@
+{
+  "rcm": {
+    "title": "إدارة الامتثال التنظيمي",
+    "brand": "WorldAMLSuite",
+    "nav": {
+      "dashboard": "لوحة التحكم",
+      "library": "المكتبة التنظيمية",
+      "obligations": "الالتزامات",
+      "controls": "الضوابط",
+      "assessments": "التقييمات",
+      "tasks": "المهام والتصعيدات",
+      "evidence": "مستودع الأدلة",
+      "reports": "التقارير",
+      "translations": "مراجعة الترجمة",
+      "settings": "الإعدادات / الإدارة",
+      "audit": "سجل التدقيق"
+    },
+    "common": {
+      "language": "اللغة",
+      "english": "English",
+      "arabic": "العربية",
+      "create": "إنشاء",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "loading": "جارٍ التحميل…",
+      "search": "بحث",
+      "filter": "تصفية",
+      "status": "الحالة",
+      "owner": "المسؤول",
+      "department": "الإدارة",
+      "deadline": "الموعد النهائي",
+      "risk": "المخاطر",
+      "actions": "الإجراءات",
+      "no_org": "لم يتم اختيار مؤسسة. يُرجى الانتقال إلى الإعدادات للانضمام.",
+      "join_demo": "انضم إلى عرض Region Trade Bank كمسؤول"
+    },
+    "dashboard": {
+      "kpi_regulations": "إجمالي اللوائح",
+      "kpi_obligations": "الالتزامات النشطة",
+      "kpi_score": "درجة الامتثال",
+      "kpi_open_gaps": "الثغرات المفتوحة",
+      "kpi_overdue": "المهام المتأخرة",
+      "kpi_high_risk": "الالتزامات عالية المخاطر",
+      "recent_escalations": "التصعيدات الأخيرة",
+      "by_department": "الامتثال حسب الإدارة"
+    }
+  }
+}
