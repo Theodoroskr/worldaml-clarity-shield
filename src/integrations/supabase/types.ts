@@ -926,6 +926,1046 @@ export type Database = {
         }
         Relationships: []
       }
+      rcm_assessment_items: {
+        Row: {
+          answer_type: string
+          assessment_id: string
+          created_at: string
+          evidence_url: string | null
+          id: string
+          obligation_id: string | null
+          organization_id: string
+          question: string
+          response: string | null
+          risk_rating: string | null
+          sort_order: number
+        }
+        Insert: {
+          answer_type?: string
+          assessment_id: string
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          obligation_id?: string | null
+          organization_id: string
+          question: string
+          response?: string | null
+          risk_rating?: string | null
+          sort_order?: number
+        }
+        Update: {
+          answer_type?: string
+          assessment_id?: string
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          obligation_id?: string | null
+          organization_id?: string
+          question?: string
+          response?: string | null
+          risk_rating?: string | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_assessment_items_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_assessment_items_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_obligations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_assessment_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_assessments: {
+        Row: {
+          created_at: string
+          department_id: string | null
+          due_date: string | null
+          findings: string | null
+          framework: string | null
+          gaps: string | null
+          id: string
+          name: string
+          organization_id: string
+          overall_score: number | null
+          owner_id: string | null
+          period_end: string | null
+          period_start: string | null
+          regulation_id: string | null
+          required_actions: string | null
+          reviewer_comments: string | null
+          reviewer_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department_id?: string | null
+          due_date?: string | null
+          findings?: string | null
+          framework?: string | null
+          gaps?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          overall_score?: number | null
+          owner_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          regulation_id?: string | null
+          required_actions?: string | null
+          reviewer_comments?: string | null
+          reviewer_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string | null
+          due_date?: string | null
+          findings?: string | null
+          framework?: string | null
+          gaps?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          overall_score?: number | null
+          owner_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          regulation_id?: string | null
+          required_actions?: string | null
+          reviewer_comments?: string | null
+          reviewer_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_assessments_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_assessments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_assessments_regulation_id_fkey"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_regulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+          organization_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          organization_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          organization_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_audit_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_comments: {
+        Row: {
+          body: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          organization_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          organization_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          organization_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_comments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_controls: {
+        Row: {
+          control_type: string
+          created_at: string
+          department_id: string | null
+          description: string | null
+          effectiveness: string
+          evidence_required: string | null
+          frequency: string
+          id: string
+          last_tested_at: string | null
+          name: string
+          next_review_at: string | null
+          obligation_id: string | null
+          organization_id: string
+          owner_id: string | null
+          status: string
+          testing_result: string | null
+          updated_at: string
+        }
+        Insert: {
+          control_type?: string
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          effectiveness?: string
+          evidence_required?: string | null
+          frequency?: string
+          id?: string
+          last_tested_at?: string | null
+          name: string
+          next_review_at?: string | null
+          obligation_id?: string | null
+          organization_id: string
+          owner_id?: string | null
+          status?: string
+          testing_result?: string | null
+          updated_at?: string
+        }
+        Update: {
+          control_type?: string
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          effectiveness?: string
+          evidence_required?: string | null
+          frequency?: string
+          id?: string
+          last_tested_at?: string | null
+          name?: string
+          next_review_at?: string | null
+          obligation_id?: string | null
+          organization_id?: string
+          owner_id?: string | null
+          status?: string
+          testing_result?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_controls_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_controls_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_obligations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_controls_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_departments: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_departments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_evidence_files: {
+        Row: {
+          approval_status: string
+          assessment_id: string | null
+          control_id: string | null
+          created_at: string
+          file_name: string
+          file_path: string | null
+          file_size_bytes: number | null
+          file_type: string | null
+          id: string
+          notes: string | null
+          obligation_id: string | null
+          organization_id: string
+          task_id: string | null
+          uploaded_by: string | null
+          version: number
+        }
+        Insert: {
+          approval_status?: string
+          assessment_id?: string | null
+          control_id?: string | null
+          created_at?: string
+          file_name: string
+          file_path?: string | null
+          file_size_bytes?: number | null
+          file_type?: string | null
+          id?: string
+          notes?: string | null
+          obligation_id?: string | null
+          organization_id: string
+          task_id?: string | null
+          uploaded_by?: string | null
+          version?: number
+        }
+        Update: {
+          approval_status?: string
+          assessment_id?: string | null
+          control_id?: string | null
+          created_at?: string
+          file_name?: string
+          file_path?: string | null
+          file_size_bytes?: number | null
+          file_type?: string | null
+          id?: string
+          notes?: string | null
+          obligation_id?: string | null
+          organization_id?: string
+          task_id?: string | null
+          uploaded_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_evidence_files_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_evidence_files_control_id_fkey"
+            columns: ["control_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_controls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_evidence_files_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_obligations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_evidence_files_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_evidence_files_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_jurisdictions: {
+        Row: {
+          country_code: string
+          country_name: string
+          created_at: string
+          id: string
+          organization_id: string
+          regulator: string | null
+        }
+        Insert: {
+          country_code: string
+          country_name: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          regulator?: string | null
+        }
+        Update: {
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          regulator?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_jurisdictions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          organization_id: string
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          organization_id: string
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          organization_id?: string
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_obligation_translations: {
+        Row: {
+          created_at: string
+          id: string
+          language: string
+          obligation_id: string
+          organization_id: string
+          review_status: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          translated_description: string | null
+          translated_title: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language: string
+          obligation_id: string
+          organization_id: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          translated_description?: string | null
+          translated_title?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language?: string
+          obligation_id?: string
+          organization_id?: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          translated_description?: string | null
+          translated_title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_obligation_translations_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_obligations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_obligation_translations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_obligations: {
+        Row: {
+          comments: string | null
+          compliance_status: string
+          created_at: string
+          created_by: string | null
+          deadline: string | null
+          department_id: string | null
+          description: string | null
+          frequency: string
+          id: string
+          jurisdiction: string | null
+          obligation_type: string
+          organization_id: string
+          regulation_id: string | null
+          risk_level: string
+          section_id: string | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          comments?: string | null
+          compliance_status?: string
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          department_id?: string | null
+          description?: string | null
+          frequency?: string
+          id?: string
+          jurisdiction?: string | null
+          obligation_type?: string
+          organization_id: string
+          regulation_id?: string | null
+          risk_level?: string
+          section_id?: string | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          comments?: string | null
+          compliance_status?: string
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          department_id?: string | null
+          description?: string | null
+          frequency?: string
+          id?: string
+          jurisdiction?: string | null
+          obligation_type?: string
+          organization_id?: string
+          regulation_id?: string | null
+          risk_level?: string
+          section_id?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_obligations_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_obligations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_obligations_regulation_id_fkey"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_regulations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_obligations_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_regulation_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_org_members: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          role: Database["public"]["Enums"]["org_member_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          role?: Database["public"]["Enums"]["org_member_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          role?: Database["public"]["Enums"]["org_member_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_org_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_organizations: {
+        Row: {
+          created_at: string
+          id: string
+          jurisdiction: string | null
+          name: string
+          primary_language: string
+          regulator: string | null
+          slug: string
+          supported_languages: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jurisdiction?: string | null
+          name: string
+          primary_language?: string
+          regulator?: string | null
+          slug: string
+          supported_languages?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jurisdiction?: string | null
+          name?: string
+          primary_language?: string
+          regulator?: string | null
+          slug?: string
+          supported_languages?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rcm_regulation_sections: {
+        Row: {
+          ai_summary: string | null
+          created_at: string
+          human_summary: string | null
+          id: string
+          obligation_tags: string[] | null
+          organization_id: string
+          original_text: string | null
+          parent_section_id: string | null
+          reference: string | null
+          regulation_id: string
+          risk_category: string | null
+          section_type: string
+          sort_order: number
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          created_at?: string
+          human_summary?: string | null
+          id?: string
+          obligation_tags?: string[] | null
+          organization_id: string
+          original_text?: string | null
+          parent_section_id?: string | null
+          reference?: string | null
+          regulation_id: string
+          risk_category?: string | null
+          section_type?: string
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_summary?: string | null
+          created_at?: string
+          human_summary?: string | null
+          id?: string
+          obligation_tags?: string[] | null
+          organization_id?: string
+          original_text?: string | null
+          parent_section_id?: string | null
+          reference?: string | null
+          regulation_id?: string
+          risk_category?: string | null
+          section_type?: string
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_regulation_sections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_regulation_sections_parent_section_id_fkey"
+            columns: ["parent_section_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_regulation_sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_regulation_sections_regulation_id_fkey"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_regulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_regulation_translations: {
+        Row: {
+          created_at: string
+          id: string
+          language: string
+          organization_id: string
+          review_status: string
+          reviewed_at: string | null
+          reviewer_comments: string | null
+          reviewer_id: string | null
+          section_id: string
+          translated_summary: string | null
+          translated_text: string | null
+          translated_title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language: string
+          organization_id: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewer_comments?: string | null
+          reviewer_id?: string | null
+          section_id: string
+          translated_summary?: string | null
+          translated_text?: string | null
+          translated_title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language?: string
+          organization_id?: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewer_comments?: string | null
+          reviewer_id?: string | null
+          section_id?: string
+          translated_summary?: string | null
+          translated_text?: string | null
+          translated_title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_regulation_translations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_regulation_translations_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_regulation_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_regulations: {
+        Row: {
+          available_languages: string[]
+          created_at: string
+          created_by: string | null
+          document_name: string | null
+          document_url: string | null
+          effective_date: string | null
+          id: string
+          issuing_authority: string | null
+          jurisdiction: string | null
+          organization_id: string
+          original_language: string
+          regulation_type: string | null
+          sector: string | null
+          status: string
+          summary: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+          version: string | null
+        }
+        Insert: {
+          available_languages?: string[]
+          created_at?: string
+          created_by?: string | null
+          document_name?: string | null
+          document_url?: string | null
+          effective_date?: string | null
+          id?: string
+          issuing_authority?: string | null
+          jurisdiction?: string | null
+          organization_id: string
+          original_language?: string
+          regulation_type?: string | null
+          sector?: string | null
+          status?: string
+          summary?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: string | null
+        }
+        Update: {
+          available_languages?: string[]
+          created_at?: string
+          created_by?: string | null
+          document_name?: string | null
+          document_url?: string | null
+          effective_date?: string | null
+          id?: string
+          issuing_authority?: string | null
+          jurisdiction?: string | null
+          organization_id?: string
+          original_language?: string
+          regulation_type?: string | null
+          sector?: string | null
+          status?: string
+          summary?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_regulations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rcm_tasks: {
+        Row: {
+          assessment_id: string | null
+          assigned_to: string | null
+          comments: string | null
+          control_id: string | null
+          created_at: string
+          created_by: string | null
+          department_id: string | null
+          description: string | null
+          due_date: string | null
+          escalation_level: number
+          id: string
+          obligation_id: string | null
+          organization_id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assessment_id?: string | null
+          assigned_to?: string | null
+          comments?: string | null
+          control_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          escalation_level?: number
+          id?: string
+          obligation_id?: string | null
+          organization_id: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string | null
+          assigned_to?: string | null
+          comments?: string | null
+          control_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          escalation_level?: number
+          id?: string
+          obligation_id?: string | null
+          organization_id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rcm_tasks_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_tasks_control_id_fkey"
+            columns: ["control_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_controls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_tasks_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_tasks_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_obligations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rcm_tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "rcm_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referrals: {
         Row: {
           commission_earned: number | null
@@ -2336,6 +3376,13 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      rcm_can_edit: { Args: { _org: string }; Returns: boolean }
+      rcm_can_manage: { Args: { _org: string }; Returns: boolean }
+      rcm_is_org_member: { Args: { _org: string }; Returns: boolean }
+      rcm_member_role: {
+        Args: { _org: string }
+        Returns: Database["public"]["Enums"]["org_member_role"]
       }
       submit_quiz_and_issue_certificate: {
         Args: { _answers: Json; _course_id: string; _holder_name: string }
