@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { SofAuditTrail } from "@/components/suite/SofAuditTrail";
 import { SofFlagDrillDown } from "@/components/suite/SofFlagDrillDown";
+import { SofThresholdsDialog } from "@/components/suite/SofThresholdsDialog";
 
 type Customer = {
   id: string; name: string; risk_level: string; type: string; country: string | null; pep_status: string | null;
