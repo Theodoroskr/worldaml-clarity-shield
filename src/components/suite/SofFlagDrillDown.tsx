@@ -140,6 +140,8 @@ export function SofFlagDrillDown({
   onRerun,
   busy,
   canRerun = true,
+  canEditThresholds = false,
+  onEditThresholds,
 }: {
   reconciliation: SofReconciliation | null | undefined;
   customerId?: string;
@@ -147,6 +149,8 @@ export function SofFlagDrillDown({
   onRerun?: () => void;
   busy?: boolean;
   canRerun?: boolean;
+  canEditThresholds?: boolean;
+  onEditThresholds?: () => void;
 }) {
   const [openFlag, setOpenFlag] = useState<string | null>(null);
   const r = reconciliation || {};
@@ -154,6 +158,7 @@ export function SofFlagDrillDown({
   const detailed = r.flags_detailed || [];
   const legacyOnly = (!detailed.length) && (r.flags?.length || 0) > 0;
   const ccy = currency || "EUR";
+  const t = r.thresholds_used;
 
   return (
     <Card className="p-4 space-y-3 bg-muted/30 border-dashed">
