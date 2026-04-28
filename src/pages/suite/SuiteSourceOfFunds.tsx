@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import {
-  AlertTriangle, FileText, Plus, Sparkles, Trash2, Upload, CheckCircle2, XCircle, Clock, Loader2,
+  AlertTriangle, FileText, Plus, Sparkles, Trash2, Upload, CheckCircle2, XCircle, Clock, Loader2, CalendarClock,
 } from "lucide-react";
 import { SofAuditTrail } from "@/components/suite/SofAuditTrail";
 import { SofFlagDrillDown } from "@/components/suite/SofFlagDrillDown";
@@ -74,7 +74,31 @@ export default function SuiteSourceOfFunds() {
   const [loading, setLoading] = useState(true);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
   const [auditRefresh, setAuditRefresh] = useState(0);
+  const [sweepBusy, setSweepBusy] = useState(false);
   const bumpAudit = () => setAuditRefresh(k => k + 1);
+
+  const runExpirySweep = async () => {
+    setSweepBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("sof-expire-declarations", {
+        body: { trigger: "manual" },
+      });
+      if (error) throw error;
+      const expired = data?.expired_count ?? 0;
+      const notified = data?.notified_orgs ?? 0;
+      toast({
+        title: expired > 0 ? "Expiry sweep complete" : "Nothing to expire",
+        description: expired > 0
+          ? `${expired} declaration(s) marked expired. ${notified} organisation(s) notified.`
+          : "No verified declarations are past their term.",
+      });
+      await loadAll();
+    } catch (e: any) {
+      toast({ title: "Sweep failed", description: e?.message ?? String(e), variant: "destructive" });
+    } finally {
+      setSweepBusy(false);
+    }
+  };
 
   // New declaration form state
   const [form, setForm] = useState({
@@ -229,7 +253,15 @@ export default function SuiteSourceOfFunds() {
           <p className="text-sm text-muted-foreground mt-1">Enhanced Due Diligence declarations for high-risk customers</p>
         </div>
         {canEdit && (
-          <Button onClick={() => setNewOpen(true)}><Plus className="w-4 h-4 mr-2" /> New Declaration</Button>
+          <div className="flex items-center gap-2">
+            {canManage && (
+              <Button variant="outline" onClick={runExpirySweep} disabled={sweepBusy}>
+                {sweepBusy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CalendarClock className="w-4 h-4 mr-2" />}
+                Run expiry sweep
+              </Button>
+            )}
+            <Button onClick={() => setNewOpen(true)}><Plus className="w-4 h-4 mr-2" /> New Declaration</Button>
+          </div>
         )}
       </div>
 
