@@ -266,8 +266,58 @@ export default function SuiteSourceOfFunds() {
         )}
       </div>
 
+      {/* How this module works */}
+      <Card className="border-accent/30 bg-accent/5">
+        <Accordion type="single" collapsible defaultValue="how-it-works">
+          <AccordionItem value="how-it-works" className="border-0">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <Info className="w-4 h-4 text-accent" />
+                How Source of Funds &amp; Wealth (EDD) works
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <div className="grid md:grid-cols-2 gap-6 text-sm text-muted-foreground">
+                <div className="space-y-3">
+                  <div>
+                    <div className="font-semibold text-foreground mb-1">1. Trigger — High-risk customers only</div>
+                    <p>Only customers flagged as <span className="font-medium text-foreground">High</span> or <span className="font-medium text-foreground">Critical</span> risk (PEPs, sanctioned-jurisdiction nexus, large cash flows, adverse media) appear here. Standard-risk customers are handled by ordinary KYC.</p>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground mb-1">2. Customer declares income &amp; wealth</div>
+                    <p>Compliance officers create a declaration capturing <span className="font-medium text-foreground">annual income</span>, <span className="font-medium text-foreground">total wealth</span>, source country, and a breakdown by type (salary, business, investments, inheritance, sale of asset, gift, pension, etc.) with amounts and percentages.</p>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground mb-1">3. Supporting evidence</div>
+                    <p>Upload documents per source: payslips, tax returns, bank statements, sale deeds, inheritance certificates, dividend statements, business financials. Each document is verified individually (verified / partial / rejected).</p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <div className="font-semibold text-foreground mb-1">4. AI reconciliation</div>
+                    <p>The <span className="font-medium text-foreground">AI Reconciliation</span> action cross-checks declared figures against transactional activity, screening hits, and document evidence. It flags inconsistencies (e.g. declared €50k income but €500k throughput) and raises an <span className="font-medium text-foreground">AI risk flag</span> for reviewer attention.</p>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground mb-1">5. Reviewer decision</div>
+                    <p>A compliance reviewer marks the declaration <span className="font-medium text-foreground">Verified</span>, <span className="font-medium text-foreground">Partial</span>, or <span className="font-medium text-foreground">Rejected</span>, with notes. All actions are written to the audit trail with user, timestamp, and IP.</p>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground mb-1">6. Periodic re-verification</div>
+                    <p>Declarations carry an <span className="font-medium text-foreground">expiry date</span> (typically 12 months for high-risk, 6 months for critical). The <span className="font-medium text-foreground">Run expiry sweep</span> action auto-marks lapsed declarations as <span className="font-medium text-foreground">Expired</span> and raises an alert for refresh.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-border/40 text-xs text-muted-foreground">
+                <span className="font-semibold text-foreground">Regulatory basis:</span> EU 6AMLD Art. 18a (EDD for high-risk relationships), FATF Recommendation 10 &amp; 12 (PEPs), MGA/UKGC EDD obligations for iGaming. Full audit trail is retained for 5 years.
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </Card>
+
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+
         {[
           { label: "Total", value: declarations.length, color: "text-foreground" },
           { label: "Draft", value: declarations.filter(d => d.status === "draft").length, color: "text-muted-foreground" },
