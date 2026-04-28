@@ -539,7 +539,8 @@ export default function SuiteSourceOfFunds() {
                   onEditThresholds={() => setThresholdsOpen(true)}
                 />
 
-                {/* Step-by-step evidence checklist */}
+                {/* Rules engine breakdown — every rule, triggered or not */}
+                <SofRulesEvaluated reconciliation={openDecl.ai_reconciliation} />
                 <SofEvidenceChecklist
                   incomeSources={openDecl.income_sources || []}
                   wealthSources={openDecl.wealth_sources || []}
