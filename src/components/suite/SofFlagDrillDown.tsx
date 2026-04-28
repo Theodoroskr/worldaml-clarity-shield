@@ -38,6 +38,16 @@ export type SofReconciliation = {
   flags_detailed?: DetailedFlag[];
   top_transactions?: Txn[];
   ai_summary?: string;
+  confidence_score?: number;
+  confidence_explanation?: string;
+  confidence_penalties?: ConfidencePenalty[];
+  thresholds_used?: {
+    inflow_high_multiplier?: number;
+    inflow_low_multiplier?: number;
+    foreign_countries_min?: number;
+    high_severity_variance_pct?: number;
+    min_confidence_for_auto_clear?: number;
+  };
   model?: string;
   analysed_at?: string;
 };
