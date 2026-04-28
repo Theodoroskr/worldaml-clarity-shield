@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import {
-  AlertTriangle, FileText, Plus, Sparkles, Trash2, Upload, CheckCircle2, XCircle, Clock, Loader2,
+  AlertTriangle, FileText, Plus, Sparkles, Trash2, Upload, CheckCircle2, XCircle, Clock, Loader2, CalendarClock,
 } from "lucide-react";
 import { SofAuditTrail } from "@/components/suite/SofAuditTrail";
 import { SofFlagDrillDown } from "@/components/suite/SofFlagDrillDown";
