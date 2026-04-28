@@ -69,6 +69,7 @@ export default function SuiteSourceOfFunds() {
   const [docsByDecl, setDocsByDecl] = useState<Record<string, SofDoc[]>>({});
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
   const [openDecl, setOpenDecl] = useState<Declaration | null>(null);
+  const [thresholdsOpen, setThresholdsOpen] = useState(false);
   const [newOpen, setNewOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
