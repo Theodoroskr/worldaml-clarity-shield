@@ -450,6 +450,8 @@ export default function SuiteSourceOfFunds() {
                   onRerun={() => runReconciliation(openDecl.id)}
                   busy={aiBusy === openDecl.id}
                   canRerun={canEdit}
+                  canEditThresholds={canManage}
+                  onEditThresholds={() => setThresholdsOpen(true)}
                 />
 
                 {/* Documents */}
