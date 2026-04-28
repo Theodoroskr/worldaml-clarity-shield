@@ -114,6 +114,7 @@ const SuiteSettings = lazy(() => import("./pages/suite/SuiteSettings"));
 const SuiteHelp = lazy(() => import("./pages/suite/SuiteHelp"));
 const SuiteRegulatory = lazy(() => import("./pages/suite/SuiteRegulatory"));
 const SuiteSourceOfFunds = lazy(() => import("./pages/suite/SuiteSourceOfFunds"));
+const SuiteAmlAr = lazy(() => import("./pages/suite/SuiteAmlAr"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -262,6 +263,7 @@ const App = () => (
                   <Route path="alerts/rules" element={<SuiteAlertRules />} />
                   <Route path="risk" element={<SuiteRisk />} />
                   <Route path="source-of-funds" element={<SuiteSourceOfFunds />} />
+                  <Route path="aml-ar" element={<SuiteAmlAr />} />
                   <Route path="cases" element={<SuiteCases />} />
                   <Route path="audit" element={<SuiteAudit />} />
                   <Route path="settings" element={<SuiteSettings />} />

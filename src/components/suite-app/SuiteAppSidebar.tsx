@@ -47,6 +47,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
       { icon: Activity, label: "Monitoring", path: "/suite/monitoring" },
       { icon: BarChart3, label: "Risk Assessment", path: "/suite/risk" },
       { icon: Wallet, label: "Source of Funds", path: "/suite/source-of-funds" },
+      { icon: CreditCard, label: "AML Account Risk", path: "/suite/aml-ar" },
     ],
   },
   {
