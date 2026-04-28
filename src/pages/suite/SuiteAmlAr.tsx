@@ -106,7 +106,11 @@ export default function SuiteAmlAr() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <SEO title="AML Account Risk — Suite" noindex />
+      <SEO
+        title="AML Account Risk — Suite"
+        description="Mastercard AML Account Risk lookups inside the WorldAML Suite."
+        noindex
+      />
 
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
