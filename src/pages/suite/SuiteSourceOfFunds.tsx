@@ -253,7 +253,15 @@ export default function SuiteSourceOfFunds() {
           <p className="text-sm text-muted-foreground mt-1">Enhanced Due Diligence declarations for high-risk customers</p>
         </div>
         {canEdit && (
-          <Button onClick={() => setNewOpen(true)}><Plus className="w-4 h-4 mr-2" /> New Declaration</Button>
+          <div className="flex items-center gap-2">
+            {canManage && (
+              <Button variant="outline" onClick={runExpirySweep} disabled={sweepBusy}>
+                {sweepBusy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CalendarClock className="w-4 h-4 mr-2" />}
+                Run expiry sweep
+              </Button>
+            )}
+            <Button onClick={() => setNewOpen(true)}><Plus className="w-4 h-4 mr-2" /> New Declaration</Button>
+          </div>
         )}
       </div>
 
