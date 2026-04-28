@@ -541,6 +541,8 @@ export default function SuiteSourceOfFunds() {
 
                 {/* Rules engine breakdown — every rule, triggered or not */}
                 <SofRulesEvaluated reconciliation={openDecl.ai_reconciliation} />
+
+                {/* Step-by-step evidence checklist */}
                 <SofEvidenceChecklist
                   incomeSources={openDecl.income_sources || []}
                   wealthSources={openDecl.wealth_sources || []}
