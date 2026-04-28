@@ -12,3 +12,5 @@ export function RcmPlaceholder({ titleKey }: { titleKey: string }) {
     </div>
   );
 }
+
+export default RcmPlaceholder;
