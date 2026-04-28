@@ -1258,6 +1258,137 @@ export type Database = {
           },
         ]
       }
+      suite_aml_ar_batch_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          failed_count: number
+          high_risk_count: number
+          id: string
+          job_name: string
+          organisation_id: string
+          payload: Json | null
+          processed_count: number
+          source_file_name: string | null
+          started_at: string | null
+          status: string
+          success_count: number
+          total_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          failed_count?: number
+          high_risk_count?: number
+          id?: string
+          job_name: string
+          organisation_id: string
+          payload?: Json | null
+          processed_count?: number
+          source_file_name?: string | null
+          started_at?: string | null
+          status?: string
+          success_count?: number
+          total_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          failed_count?: number
+          high_risk_count?: number
+          id?: string
+          job_name?: string
+          organisation_id?: string
+          payload?: Json | null
+          processed_count?: number
+          source_file_name?: string | null
+          started_at?: string | null
+          status?: string
+          success_count?: number
+          total_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      suite_aml_ar_lookups: {
+        Row: {
+          ar_raw_response: Json | null
+          ar_request_id: string | null
+          ar_risk_indicators: Json | null
+          ar_risk_level: string | null
+          ar_risk_score: number | null
+          batch_job_id: string | null
+          created_at: string
+          customer_id: string | null
+          environment: string
+          error_message: string | null
+          id: string
+          latency_ms: number | null
+          organisation_id: string
+          pan_bin: string | null
+          pan_hash: string
+          pan_last4: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          ar_raw_response?: Json | null
+          ar_request_id?: string | null
+          ar_risk_indicators?: Json | null
+          ar_risk_level?: string | null
+          ar_risk_score?: number | null
+          batch_job_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          environment?: string
+          error_message?: string | null
+          id?: string
+          latency_ms?: number | null
+          organisation_id: string
+          pan_bin?: string | null
+          pan_hash: string
+          pan_last4?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          ar_raw_response?: Json | null
+          ar_request_id?: string | null
+          ar_risk_indicators?: Json | null
+          ar_risk_level?: string | null
+          ar_risk_score?: number | null
+          batch_job_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          environment?: string
+          error_message?: string | null
+          id?: string
+          latency_ms?: number | null
+          organisation_id?: string
+          pan_bin?: string | null
+          pan_hash?: string
+          pan_last4?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_aml_ar_lookups_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_audit_log: {
         Row: {
           action: string
@@ -1413,6 +1544,12 @@ export type Database = {
       }
       suite_customers: {
         Row: {
+          aml_ar_last_checked_at: string | null
+          aml_ar_last_risk_level: string | null
+          aml_ar_last_score: number | null
+          aml_ar_pan_bin: string | null
+          aml_ar_pan_last4: string | null
+          aml_ar_payment_account_ref: string | null
           company_name: string | null
           country: string | null
           created_at: string
@@ -1436,6 +1573,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          aml_ar_last_checked_at?: string | null
+          aml_ar_last_risk_level?: string | null
+          aml_ar_last_score?: number | null
+          aml_ar_pan_bin?: string | null
+          aml_ar_pan_last4?: string | null
+          aml_ar_payment_account_ref?: string | null
           company_name?: string | null
           country?: string | null
           created_at?: string
@@ -1459,6 +1602,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          aml_ar_last_checked_at?: string | null
+          aml_ar_last_risk_level?: string | null
+          aml_ar_last_score?: number | null
+          aml_ar_pan_bin?: string | null
+          aml_ar_pan_last4?: string | null
+          aml_ar_payment_account_ref?: string | null
           company_name?: string | null
           country?: string | null
           created_at?: string
