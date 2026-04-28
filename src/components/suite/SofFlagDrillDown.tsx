@@ -201,6 +201,35 @@ export function SofFlagDrillDown({
             <Metric label="Foreign countries" value={String(r.foreign_counterparty_countries ?? 0)} />
           </div>
 
+          {/* Confidence */}
+          {typeof r.confidence_score === "number" && (
+            <SofConfidenceCard
+              score={r.confidence_score}
+              explanation={r.confidence_explanation}
+              penalties={r.confidence_penalties}
+              minAutoClear={t?.min_confidence_for_auto_clear}
+            />
+          )}
+
+          {/* Active thresholds */}
+          {(t || canEditThresholds) && (
+            <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground bg-muted/40 rounded px-2 py-1.5">
+              <div className="truncate">
+                <span className="uppercase tracking-wider font-medium mr-2">Thresholds</span>
+                {t ? (
+                  <>high ×{t.inflow_high_multiplier} · low ×{t.inflow_low_multiplier} · foreign ≥{t.foreign_countries_min} · high-sev {t.high_severity_variance_pct}%</>
+                ) : (
+                  <>using defaults</>
+                )}
+              </div>
+              {canEditThresholds && onEditThresholds && (
+                <Button size="sm" variant="ghost" className="h-6 px-2 text-[11px]" onClick={onEditThresholds}>
+                  <Settings2 className="w-3 h-3 mr-1" /> Edit
+                </Button>
+              )}
+            </div>
+          )}
+
           {/* Analyst summary */}
           {r.ai_summary && (
             <div className="border-l-2 border-primary/60 pl-3 py-1">
