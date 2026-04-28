@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
 import StickyBottomCTA from "@/components/StickyBottomCTA";
@@ -8,12 +9,14 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children }: LayoutProps) => {
+  const { pathname } = useLocation();
+  const isAppShell = pathname.startsWith("/rcm") || pathname.startsWith("/suite");
   return (
     <>
-      <AnnouncementBar />
+      {!isAppShell && <AnnouncementBar />}
       {children}
-      <StickyBottomCTA />
-      <ChatbotWidget />
+      {!isAppShell && <StickyBottomCTA />}
+      {!isAppShell && <ChatbotWidget />}
     </>
   );
 };

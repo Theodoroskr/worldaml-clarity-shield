@@ -64,6 +64,9 @@ const BestPractices = lazy(() => import("./pages/BestPractices"));
 const SanctionsCheck = lazy(() => import("./pages/SanctionsCheck"));
 const SanctionsLists = lazy(() => import("./pages/SanctionsLists"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const RcmLayout = lazy(() => import("./pages/rcm/RcmLayout"));
+const RcmDashboard = lazy(() => import("./pages/rcm/RcmDashboard"));
+const RcmPlaceholder = lazy(() => import("./pages/rcm/RcmPlaceholder"));
 const SuiteLayout = lazy(() => import("./pages/SuiteLayout"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
@@ -269,6 +272,21 @@ const App = () => (
                   <Route path="settings" element={<SuiteSettings />} />
                   <Route path="help" element={<SuiteHelp />} />
                   <Route path="regulatory" element={<SuiteRegulatory />} />
+                </Route>
+
+                {/* RCM Module */}
+                <Route path="/rcm" element={<RcmLayout />}>
+                  <Route index element={<RcmDashboard />} />
+                  <Route path="library" element={<RcmPlaceholder titleKey="rcm.nav.library" />} />
+                  <Route path="obligations" element={<RcmPlaceholder titleKey="rcm.nav.obligations" />} />
+                  <Route path="controls" element={<RcmPlaceholder titleKey="rcm.nav.controls" />} />
+                  <Route path="assessments" element={<RcmPlaceholder titleKey="rcm.nav.assessments" />} />
+                  <Route path="tasks" element={<RcmPlaceholder titleKey="rcm.nav.tasks" />} />
+                  <Route path="evidence" element={<RcmPlaceholder titleKey="rcm.nav.evidence" />} />
+                  <Route path="reports" element={<RcmPlaceholder titleKey="rcm.nav.reports" />} />
+                  <Route path="translations" element={<RcmPlaceholder titleKey="rcm.nav.translations" />} />
+                  <Route path="audit" element={<RcmPlaceholder titleKey="rcm.nav.audit" />} />
+                  <Route path="settings" element={<RcmPlaceholder titleKey="rcm.nav.settings" />} />
                 </Route>
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
