@@ -17,6 +17,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { SofAuditTrail } from "@/components/suite/SofAuditTrail";
 import { SofFlagDrillDown } from "@/components/suite/SofFlagDrillDown";
 import { SofThresholdsDialog } from "@/components/suite/SofThresholdsDialog";
+import { SofEvidenceChecklist } from "@/components/suite/SofEvidenceChecklist";
 
 type Customer = {
   id: string; name: string; risk_level: string; type: string; country: string | null; pep_status: string | null;
@@ -535,6 +536,29 @@ export default function SuiteSourceOfFunds() {
                   canRerun={canEdit}
                   canEditThresholds={canManage}
                   onEditThresholds={() => setThresholdsOpen(true)}
+                />
+
+                {/* Step-by-step evidence checklist */}
+                <SofEvidenceChecklist
+                  incomeSources={openDecl.income_sources || []}
+                  wealthSources={openDecl.wealth_sources || []}
+                  documents={(docsByDecl[openDecl.id] || []).map(d => ({
+                    id: d.id,
+                    document_type: d.document_type,
+                    file_name: d.file_name,
+                    verification_status: d.verification_status,
+                  }))}
+                  currency={openDecl.currency}
+                  canEdit={canEdit}
+                  onUpload={(docType) => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.onchange = (e: any) => {
+                      const f = e.target.files?.[0];
+                      if (f) uploadDoc(openDecl.id, f, docType);
+                    };
+                    input.click();
+                  }}
                 />
 
                 {/* Documents */}
