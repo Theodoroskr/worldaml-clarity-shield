@@ -1897,6 +1897,42 @@ export type Database = {
           },
         ]
       }
+      suite_sof_thresholds: {
+        Row: {
+          created_at: string
+          foreign_countries_min: number
+          high_severity_variance_pct: number
+          inflow_high_multiplier: number
+          inflow_low_multiplier: number
+          min_confidence_for_auto_clear: number
+          organisation_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          foreign_countries_min?: number
+          high_severity_variance_pct?: number
+          inflow_high_multiplier?: number
+          inflow_low_multiplier?: number
+          min_confidence_for_auto_clear?: number
+          organisation_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          foreign_countries_min?: number
+          high_severity_variance_pct?: number
+          inflow_high_multiplier?: number
+          inflow_low_multiplier?: number
+          min_confidence_for_auto_clear?: number
+          organisation_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       suite_transactions: {
         Row: {
           amount: number
