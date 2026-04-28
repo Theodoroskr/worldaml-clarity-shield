@@ -533,6 +533,13 @@ export default function SuiteSourceOfFunds() {
           )}
         </DialogContent>
       </Dialog>
+
+      <SofThresholdsDialog
+        open={thresholdsOpen}
+        onOpenChange={setThresholdsOpen}
+        organisationId={orgId}
+        userId={userId}
+      />
     </div>
   );
 }
