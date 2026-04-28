@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { SofAuditTrail } from "@/components/suite/SofAuditTrail";
 import { SofFlagDrillDown } from "@/components/suite/SofFlagDrillDown";
+import { SofThresholdsDialog } from "@/components/suite/SofThresholdsDialog";
 
 type Customer = {
   id: string; name: string; risk_level: string; type: string; country: string | null; pep_status: string | null;
@@ -68,6 +69,7 @@ export default function SuiteSourceOfFunds() {
   const [docsByDecl, setDocsByDecl] = useState<Record<string, SofDoc[]>>({});
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
   const [openDecl, setOpenDecl] = useState<Declaration | null>(null);
+  const [thresholdsOpen, setThresholdsOpen] = useState(false);
   const [newOpen, setNewOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
@@ -448,6 +450,8 @@ export default function SuiteSourceOfFunds() {
                   onRerun={() => runReconciliation(openDecl.id)}
                   busy={aiBusy === openDecl.id}
                   canRerun={canEdit}
+                  canEditThresholds={canManage}
+                  onEditThresholds={() => setThresholdsOpen(true)}
                 />
 
                 {/* Documents */}
@@ -529,6 +533,13 @@ export default function SuiteSourceOfFunds() {
           )}
         </DialogContent>
       </Dialog>
+
+      <SofThresholdsDialog
+        open={thresholdsOpen}
+        onOpenChange={setThresholdsOpen}
+        organisationId={orgId}
+        userId={userId}
+      />
     </div>
   );
 }

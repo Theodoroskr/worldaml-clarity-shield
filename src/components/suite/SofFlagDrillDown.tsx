@@ -5,8 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
   Sparkles, ChevronDown, ChevronRight, RefreshCw, Loader2,
-  ExternalLink, AlertTriangle, Calculator, ListChecks,
+  ExternalLink, AlertTriangle, Calculator, ListChecks, Settings2,
 } from "lucide-react";
+import { SofConfidenceCard, type ConfidencePenalty } from "./SofConfidenceCard";
 
 type Txn = {
   id: string;
@@ -37,6 +38,16 @@ export type SofReconciliation = {
   flags_detailed?: DetailedFlag[];
   top_transactions?: Txn[];
   ai_summary?: string;
+  confidence_score?: number;
+  confidence_explanation?: string;
+  confidence_penalties?: ConfidencePenalty[];
+  thresholds_used?: {
+    inflow_high_multiplier?: number;
+    inflow_low_multiplier?: number;
+    foreign_countries_min?: number;
+    high_severity_variance_pct?: number;
+    min_confidence_for_auto_clear?: number;
+  };
   model?: string;
   analysed_at?: string;
 };
@@ -129,6 +140,8 @@ export function SofFlagDrillDown({
   onRerun,
   busy,
   canRerun = true,
+  canEditThresholds = false,
+  onEditThresholds,
 }: {
   reconciliation: SofReconciliation | null | undefined;
   customerId?: string;
@@ -136,6 +149,8 @@ export function SofFlagDrillDown({
   onRerun?: () => void;
   busy?: boolean;
   canRerun?: boolean;
+  canEditThresholds?: boolean;
+  onEditThresholds?: () => void;
 }) {
   const [openFlag, setOpenFlag] = useState<string | null>(null);
   const r = reconciliation || {};
@@ -143,6 +158,7 @@ export function SofFlagDrillDown({
   const detailed = r.flags_detailed || [];
   const legacyOnly = (!detailed.length) && (r.flags?.length || 0) > 0;
   const ccy = currency || "EUR";
+  const t = r.thresholds_used;
 
   return (
     <Card className="p-4 space-y-3 bg-muted/30 border-dashed">
@@ -184,6 +200,35 @@ export function SofFlagDrillDown({
             <Metric label="Transactions" value={String(r.transaction_count ?? 0)} />
             <Metric label="Foreign countries" value={String(r.foreign_counterparty_countries ?? 0)} />
           </div>
+
+          {/* Confidence */}
+          {typeof r.confidence_score === "number" && (
+            <SofConfidenceCard
+              score={r.confidence_score}
+              explanation={r.confidence_explanation}
+              penalties={r.confidence_penalties}
+              minAutoClear={t?.min_confidence_for_auto_clear}
+            />
+          )}
+
+          {/* Active thresholds */}
+          {(t || canEditThresholds) && (
+            <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground bg-muted/40 rounded px-2 py-1.5">
+              <div className="truncate">
+                <span className="uppercase tracking-wider font-medium mr-2">Thresholds</span>
+                {t ? (
+                  <>high ×{t.inflow_high_multiplier} · low ×{t.inflow_low_multiplier} · foreign ≥{t.foreign_countries_min} · high-sev {t.high_severity_variance_pct}%</>
+                ) : (
+                  <>using defaults</>
+                )}
+              </div>
+              {canEditThresholds && onEditThresholds && (
+                <Button size="sm" variant="ghost" className="h-6 px-2 text-[11px]" onClick={onEditThresholds}>
+                  <Settings2 className="w-3 h-3 mr-1" /> Edit
+                </Button>
+              )}
+            </div>
+          )}
 
           {/* Analyst summary */}
           {r.ai_summary && (
