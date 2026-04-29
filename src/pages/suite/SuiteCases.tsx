@@ -1388,6 +1388,89 @@ export default function SuiteCases() {
                 </div>
               </div>
 
+              {/* Section 2a: Per-Transaction Action Overrides (FWR multi-action) */}
+              {(() => {
+                const selectedTxs = caseTransactions.filter(t => selectedTxIds.has(t.id));
+                if (selectedTxs.length === 0) return null;
+                const txActions = mf.transactionActions ?? {};
+                const setTxAction = (txId: string, kind: "starting" | "completing", patch: Record<string, string>) => {
+                  const current = txActions[txId] ?? { starting: {}, completing: {} };
+                  const updated = { ...txActions, [txId]: { ...current, [kind]: { ...current[kind], ...patch } } };
+                  setMF({ transactionActions: updated });
+                };
+                return (
+                  <div className="bg-white border border-red-200 rounded-xl p-4">
+                    <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5" /> Per-Transaction Action Overrides ({selectedTxs.length})
+                    </h3>
+                    <p className="text-[10px] text-red-600 mb-3">
+                      Optional. FWR multi-action support — provide a separate Starting + Completing Action per transaction.
+                      Empty fields fall back to the aggregate values entered above.
+                    </p>
+                    <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                      {selectedTxs.map((tx, idx) => {
+                        const actions = txActions[tx.id] ?? { starting: {}, completing: {} };
+                        const s = actions.starting; const c = actions.completing;
+                        const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
+                        const amt = Number(tx.amount).toLocaleString("en-CA", { minimumFractionDigits: 2 });
+                        return (
+                          <details key={tx.id} className="border border-red-100 rounded-lg bg-red-50/30 group">
+                            <summary className="cursor-pointer px-3 py-2 flex items-center justify-between text-[11px] font-semibold text-red-900">
+                              <span>Tx {idx + 1} · {tx.id.slice(0, 8)} · {txDate} · {amt} {tx.currency} · {tx.direction}</span>
+                              <ChevronRight className="w-3.5 h-3.5 group-open:rotate-90 transition-transform" />
+                            </summary>
+                            <div className="px-3 pb-3 space-y-2">
+                              <div>
+                                <p className="text-[10px] font-bold text-red-800 mt-1 mb-1">Starting Action</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <input value={s.methodOfTransaction || ""} onChange={e => setTxAction(tx.id, "starting", { methodOfTransaction: e.target.value })}
+                                    placeholder="Method (override)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                  <input value={s.sourceOfFunds || ""} onChange={e => setTxAction(tx.id, "starting", { sourceOfFunds: e.target.value })}
+                                    placeholder="Source of funds (override)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                  <input value={s.conductorName || ""} onChange={e => setTxAction(tx.id, "starting", { conductorName: e.target.value })}
+                                    placeholder="Conductor (override)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                  <select value={s.thirdPartyIndicator || ""} onChange={e => setTxAction(tx.id, "starting", { thirdPartyIndicator: e.target.value })}
+                                    className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground">
+                                    <option value="">3rd-party (use default)</option>
+                                    <option value="own_behalf">On own behalf</option>
+                                    <option value="third_party">On behalf of 3rd party</option>
+                                  </select>
+                                  {s.thirdPartyIndicator === "third_party" && (
+                                    <input value={s.thirdPartyName || ""} onChange={e => setTxAction(tx.id, "starting", { thirdPartyName: e.target.value })}
+                                      placeholder="Third party name" className="col-span-2 border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                  )}
+                                  <input value={s.accountFrom || ""} onChange={e => setTxAction(tx.id, "starting", { accountFrom: e.target.value })}
+                                    placeholder="Account from" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                  <input value={s.institutionFrom || ""} onChange={e => setTxAction(tx.id, "starting", { institutionFrom: e.target.value })}
+                                    placeholder="Institution from" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-[10px] font-bold text-red-800 mt-2 mb-1">Completing Action</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <input value={c.dispositionOfFunds || ""} onChange={e => setTxAction(tx.id, "completing", { dispositionOfFunds: e.target.value })}
+                                    placeholder="Disposition (override)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                  <input value={c.beneficiaryName || ""} onChange={e => setTxAction(tx.id, "completing", { beneficiaryName: e.target.value })}
+                                    placeholder="Beneficiary name (override)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                  <input value={c.beneficiaryAccount || ""} onChange={e => setTxAction(tx.id, "completing", { beneficiaryAccount: e.target.value })}
+                                    placeholder="Beneficiary account" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                  <input value={c.beneficiaryCountry || ""} onChange={e => setTxAction(tx.id, "completing", { beneficiaryCountry: e.target.value })}
+                                    placeholder="Beneficiary country" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                  <input value={c.accountTo || ""} onChange={e => setTxAction(tx.id, "completing", { accountTo: e.target.value })}
+                                    placeholder="Account to" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                  <input value={c.institutionTo || ""} onChange={e => setTxAction(tx.id, "completing", { institutionTo: e.target.value })}
+                                    placeholder="Institution to" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                </div>
+                              </div>
+                            </div>
+                          </details>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Section 2b: Conductors (multi-entry) */}
               <div className="bg-white border border-red-200 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-1">
