@@ -506,7 +506,55 @@ export default function SuiteCases() {
     }
   };
 
-  // ── MOKAS (Cyprus) Validation & Export ──
+  // ── FINTRAC FWR JSON (electronic submission payload) ──
+  const handleDownloadFwrJson = async () => {
+    if (!selectedCase) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error("Please log in to export"); return; }
+
+      let customer = null;
+      if (selectedCase.customer_id) {
+        const { data } = await supabase.from("suite_customers").select("*").eq("id", selectedCase.customer_id).single();
+        customer = data;
+      }
+      const transactions = caseTransactions.filter(t => selectedTxIds.has(t.id));
+
+      const payload = buildFwrPayload({
+        caseItem: selectedCase,
+        notes,
+        customer,
+        transactions,
+        submittedBy: user.email ?? "CAMLO",
+        reportingEntity: "WorldAML Client",
+        reportingEntityRef: `FINTRAC-${fintracStrType.toUpperCase()}-${selectedCase.id.slice(0, 8).toUpperCase()}`,
+        strType: fintracStrType,
+        manualFields,
+      });
+
+      const { blobUrl, fileName } = downloadFwrPayload(payload);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: `FINTRAC ${fintracStrType.toUpperCase()} FWR JSON downloaded: ${selectedCase.title}`,
+        entity_type: "case",
+        entity_id: selectedCase.id,
+        details: { report_type: fintracStrType, fwr_schema_version: payload.schemaVersion, transactions_count: transactions.length },
+      });
+      toast.success("FWR JSON payload downloaded");
+    } catch (err: any) {
+      console.error("FWR JSON export error:", err);
+      toast.error(`FWR JSON export failed: ${err?.message || "Unknown error"}`);
+    }
+  };
+
   const validateMokasFields = (): string[] => {
     const errors: string[] = [];
     if (!mokasFields.complianceOfficerName) errors.push("complianceOfficerName");
