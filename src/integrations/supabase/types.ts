@@ -2184,6 +2184,7 @@ export type Database = {
           customer_id: string | null
           filed_at: string | null
           filing_status: string
+          fwr_payload: Json | null
           grounds_for_suspicion: string | null
           id: string
           organisation_id: string | null
@@ -2205,6 +2206,7 @@ export type Database = {
           customer_id?: string | null
           filed_at?: string | null
           filing_status?: string
+          fwr_payload?: Json | null
           grounds_for_suspicion?: string | null
           id?: string
           organisation_id?: string | null
@@ -2226,6 +2228,7 @@ export type Database = {
           customer_id?: string | null
           filed_at?: string | null
           filing_status?: string
+          fwr_payload?: Json | null
           grounds_for_suspicion?: string | null
           id?: string
           organisation_id?: string | null
