@@ -24,6 +24,10 @@ type Obligation = {
 
 const STATUS_OPTIONS = ["compliant", "partial", "non_compliant", "not_assessed", "not_applicable"] as const;
 const RISK_OPTIONS = ["low", "medium", "high", "critical"] as const;
+const STATUS_RANK: Record<string, number> = { compliant: 0, partial: 1, non_compliant: 2, not_assessed: 3, not_applicable: 4 };
+const RISK_RANK: Record<string, number> = { low: 0, medium: 1, high: 2, critical: 3 };
+type SortKey = "title" | "deadline" | "compliance_status" | "risk_level";
+const SORT_KEYS: SortKey[] = ["title", "deadline", "compliance_status", "risk_level"];
 
 const STATUS_BADGE: Record<string, string> = {
   compliant: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
