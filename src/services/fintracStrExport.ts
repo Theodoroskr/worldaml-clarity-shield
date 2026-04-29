@@ -154,6 +154,13 @@ export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
   tprDispositionAction: "",
   tprDateDiscovered: "",
   tprRelationshipToEntity: "",
+  conductors: [],
+  beneficialOwners: [],
+  thirdParties: [],
+  isVirtualCurrency: false,
+  virtualCurrency: { vcType: "", senderAddress: "", receiverAddress: "", transactionHash: "", exchangeRateToCad: "", walletProvider: "" },
+  isEmt: false,
+  emt: { emtReference: "", emtMessage: "", senderInstitution: "", receiverInstitution: "", senderAccount: "", receiverAccount: "", emtType: "" },
 };
 
 export interface FINTRACSTRExportOptions {
