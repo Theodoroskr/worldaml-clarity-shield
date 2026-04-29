@@ -39,8 +39,55 @@ export interface FINTRACNote {
   created_at: string;
 }
 
+// FINTRAC FWR-aligned party records (multi-entry)
+export interface FINTRACPartyConductor {
+  fullName: string;
+  dateOfBirth?: string;
+  address?: string;
+  occupation?: string;
+  idType?: string;
+  idNumber?: string;
+  idJurisdiction?: string;
+}
+
+export interface FINTRACPartyBeneficialOwner {
+  fullName: string;
+  dateOfBirth?: string;
+  address?: string;
+  ownershipPercent?: string;
+  controlNature?: string; // e.g. director, signatory, ultimate beneficial owner
+}
+
+export interface FINTRACPartyThirdParty {
+  fullName: string;
+  dateOfBirth?: string;
+  address?: string;
+  relationshipToConductor?: string; // e.g. employer, spouse, agent
+  onBehalfOfIndicator?: string; // who they are acting for
+}
+
+// Virtual currency / EMT (Electronic Funds Transfer / Electronic Money Transfer) details
+export interface FINTRACVirtualCurrencyDetails {
+  vcType: string; // BTC, ETH, USDT, etc.
+  senderAddress?: string;
+  receiverAddress?: string;
+  transactionHash?: string;
+  exchangeRateToCad?: string;
+  walletProvider?: string;
+}
+
+export interface FINTRACEmtDetails {
+  emtReference?: string;        // EMT reference / confirmation number
+  emtMessage?: string;          // free-text EMT memo / message field
+  senderInstitution?: string;
+  receiverInstitution?: string;
+  senderAccount?: string;
+  receiverAccount?: string;
+  emtType?: string;             // e-Transfer, SWIFT MT103, ACH, Interac, etc.
+}
+
 export interface FINTRACManualFields {
-  // Starting Action
+  // Starting Action (legacy single-conductor — kept for backward compat)
   methodOfTransaction: string;
   sourceOfFunds: string;
   conductorName: string;
@@ -70,6 +117,15 @@ export interface FINTRACManualFields {
   tprDispositionAction: string;
   tprDateDiscovered: string;
   tprRelationshipToEntity: string;
+  // ── FWR-aligned multi-party records ──
+  conductors: FINTRACPartyConductor[];
+  beneficialOwners: FINTRACPartyBeneficialOwner[];
+  thirdParties: FINTRACPartyThirdParty[];
+  // ── Virtual currency / EMT ──
+  isVirtualCurrency: boolean;
+  virtualCurrency: FINTRACVirtualCurrencyDetails;
+  isEmt: boolean;
+  emt: FINTRACEmtDetails;
 }
 
 export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
@@ -98,6 +154,13 @@ export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
   tprDispositionAction: "",
   tprDateDiscovered: "",
   tprRelationshipToEntity: "",
+  conductors: [],
+  beneficialOwners: [],
+  thirdParties: [],
+  isVirtualCurrency: false,
+  virtualCurrency: { vcType: "", senderAddress: "", receiverAddress: "", transactionHash: "", exchangeRateToCad: "", walletProvider: "" },
+  isEmt: false,
+  emt: { emtReference: "", emtMessage: "", senderInstitution: "", receiverInstitution: "", senderAccount: "", receiverAccount: "", emtType: "" },
 };
 
 export interface FINTRACSTRExportOptions {
@@ -351,6 +414,92 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     }
   }
   y += 2;
+
+  // PART C-1: Conductors (multi-entry) — FWR Conductor section
+  if (mf.conductors && mf.conductors.length > 0) {
+    y = checkPage(doc, y, 30);
+    y = header(doc, `Part C-1 — Conductors (${mf.conductors.length})`, y);
+    mf.conductors.forEach((c, idx) => {
+      y = checkPage(doc, y, 30);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(120, 20, 20);
+      doc.text(`Conductor ${idx + 1}`, MARGIN, y);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "normal");
+      y += 4;
+      y = fieldPair(doc, "Full Legal Name", c.fullName || "—", "Date of Birth", c.dateOfBirth || "—", y);
+      y = field(doc, "Address", c.address || "—", y);
+      y = fieldPair(doc, "Occupation", c.occupation || "—", "ID Type", c.idType || "—", y);
+      y = fieldPair(doc, "ID Number", c.idNumber || "—", "ID Issuing Jurisdiction", c.idJurisdiction || "—", y);
+    });
+    y += 2;
+  }
+
+  // PART C-2: Third Parties (multi-entry)
+  if (mf.thirdParties && mf.thirdParties.length > 0) {
+    y = checkPage(doc, y, 30);
+    y = header(doc, `Part C-2 — Third Parties (${mf.thirdParties.length})`, y);
+    mf.thirdParties.forEach((t, idx) => {
+      y = checkPage(doc, y, 30);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(120, 20, 20);
+      doc.text(`Third Party ${idx + 1}`, MARGIN, y);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "normal");
+      y += 4;
+      y = fieldPair(doc, "Full Legal Name", t.fullName || "—", "Date of Birth", t.dateOfBirth || "—", y);
+      y = field(doc, "Address", t.address || "—", y);
+      y = fieldPair(doc, "Relationship to Conductor", t.relationshipToConductor || "—", "On Behalf Of", t.onBehalfOfIndicator || "—", y);
+    });
+    y += 2;
+  }
+
+  // PART C-3: Beneficial Owners (multi-entry)
+  if (mf.beneficialOwners && mf.beneficialOwners.length > 0) {
+    y = checkPage(doc, y, 30);
+    y = header(doc, `Part C-3 — Beneficial Owners (${mf.beneficialOwners.length})`, y);
+    mf.beneficialOwners.forEach((b, idx) => {
+      y = checkPage(doc, y, 30);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(120, 20, 20);
+      doc.text(`Beneficial Owner ${idx + 1}`, MARGIN, y);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "normal");
+      y += 4;
+      y = fieldPair(doc, "Full Legal Name", b.fullName || "—", "Date of Birth", b.dateOfBirth || "—", y);
+      y = field(doc, "Address", b.address || "—", y);
+      y = fieldPair(doc, "Ownership %", b.ownershipPercent || "—", "Nature of Control", b.controlNature || "—", y);
+    });
+    y += 2;
+  }
+
+  // PART C-VC: Virtual Currency Details
+  if (mf.isVirtualCurrency) {
+    const vc = mf.virtualCurrency;
+    y = checkPage(doc, y, 50);
+    y = header(doc, "Part C-VC — Virtual Currency Details (PCMLTFR s.7.1)", y);
+    y = fieldPair(doc, "Virtual Currency Type", vc.vcType || "—", "Wallet / Exchange Provider", vc.walletProvider || "—", y);
+    y = field(doc, "Sender VC Address", vc.senderAddress || "—", y);
+    y = field(doc, "Receiver VC Address", vc.receiverAddress || "—", y);
+    y = field(doc, "Transaction Hash / TXID", vc.transactionHash || "—", y);
+    y = field(doc, "Exchange Rate to CAD at Time of Transaction", vc.exchangeRateToCad || "—", y);
+    y += 2;
+  }
+
+  // PART C-EMT: Electronic Funds / Money Transfer Details
+  if (mf.isEmt) {
+    const emt = mf.emt;
+    y = checkPage(doc, y, 60);
+    y = header(doc, "Part C-EMT — Electronic Funds Transfer Details", y);
+    y = fieldPair(doc, "EMT / EFT Type", emt.emtType || "—", "EMT Reference Number", emt.emtReference || "—", y);
+    y = fieldPair(doc, "Sender Institution", emt.senderInstitution || "—", "Receiver Institution", emt.receiverInstitution || "—", y);
+    y = fieldPair(doc, "Sender Account", emt.senderAccount || "—", "Receiver Account", emt.receiverAccount || "—", y);
+    y = field(doc, "EMT Message / Memo", emt.emtMessage || "—", y);
+    y += 2;
+  }
 
   // TPR-SPECIFIC SECTIONS — Terrorist Property Report
   if (strType === "tpr") {

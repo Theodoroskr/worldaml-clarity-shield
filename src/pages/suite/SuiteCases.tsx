@@ -1388,6 +1388,187 @@ export default function SuiteCases() {
                 </div>
               </div>
 
+              {/* Section 2b: Conductors (multi-entry) */}
+              <div className="bg-white border border-red-200 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-xs font-bold text-red-900 flex items-center gap-1.5">
+                    <ClipboardCheck className="w-3.5 h-3.5" /> Conductors ({mf.conductors.length})
+                  </h3>
+                  <button type="button" onClick={() => setMF({ conductors: [...mf.conductors, { fullName: "", dateOfBirth: "", address: "", occupation: "", idType: "", idNumber: "", idJurisdiction: "" }] })}
+                    className="text-[10px] font-semibold text-white bg-red-700 hover:bg-red-800 rounded-md px-2 py-1 flex items-center gap-1">
+                    <Plus className="w-3 h-3" /> Add conductor
+                  </button>
+                </div>
+                <p className="text-[10px] text-red-600 mb-3">FWR Conductor section — add one entry per individual who initiated the transaction.</p>
+                {mf.conductors.length === 0 && <p className="text-[10px] text-gray-500 italic">No conductors added. Use the legacy single Conductor field above, or add a structured entry.</p>}
+                <div className="space-y-3">
+                  {mf.conductors.map((c, idx) => (
+                    <div key={idx} className="border border-red-100 rounded-lg p-3 bg-red-50/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold text-red-900">Conductor #{idx + 1}</span>
+                        <button type="button" onClick={() => setMF({ conductors: mf.conductors.filter((_, i) => i !== idx) })}
+                          className="text-[10px] text-red-600 hover:text-red-800 flex items-center gap-1">
+                          <X className="w-3 h-3" /> Remove
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input value={c.fullName} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, fullName: e.target.value }; setMF({ conductors: arr }); }}
+                          placeholder="Full legal name *" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input type="date" value={c.dateOfBirth || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, dateOfBirth: e.target.value }; setMF({ conductors: arr }); }}
+                          placeholder="Date of birth" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={c.address || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, address: e.target.value }; setMF({ conductors: arr }); }}
+                          placeholder="Address" className="col-span-2 border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={c.occupation || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, occupation: e.target.value }; setMF({ conductors: arr }); }}
+                          placeholder="Occupation" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={c.idType || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, idType: e.target.value }; setMF({ conductors: arr }); }}
+                          placeholder="ID type (passport, driver's licence…)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={c.idNumber || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, idNumber: e.target.value }; setMF({ conductors: arr }); }}
+                          placeholder="ID number" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={c.idJurisdiction || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, idJurisdiction: e.target.value }; setMF({ conductors: arr }); }}
+                          placeholder="ID issuing jurisdiction" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 2c: Third Parties (multi-entry) */}
+              <div className="bg-white border border-red-200 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-xs font-bold text-red-900 flex items-center gap-1.5">
+                    <Info className="w-3.5 h-3.5" /> Third Parties ({mf.thirdParties.length})
+                  </h3>
+                  <button type="button" onClick={() => setMF({ thirdParties: [...mf.thirdParties, { fullName: "", dateOfBirth: "", address: "", relationshipToConductor: "", onBehalfOfIndicator: "" }] })}
+                    className="text-[10px] font-semibold text-white bg-red-700 hover:bg-red-800 rounded-md px-2 py-1 flex items-center gap-1">
+                    <Plus className="w-3 h-3" /> Add third party
+                  </button>
+                </div>
+                <p className="text-[10px] text-red-600 mb-3">PCMLTFR s.8 — Persons on whose behalf the transaction was conducted.</p>
+                {mf.thirdParties.length === 0 && <p className="text-[10px] text-gray-500 italic">No third parties added.</p>}
+                <div className="space-y-3">
+                  {mf.thirdParties.map((t, idx) => (
+                    <div key={idx} className="border border-red-100 rounded-lg p-3 bg-red-50/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold text-red-900">Third Party #{idx + 1}</span>
+                        <button type="button" onClick={() => setMF({ thirdParties: mf.thirdParties.filter((_, i) => i !== idx) })}
+                          className="text-[10px] text-red-600 hover:text-red-800 flex items-center gap-1">
+                          <X className="w-3 h-3" /> Remove
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input value={t.fullName} onChange={e => { const arr = [...mf.thirdParties]; arr[idx] = { ...t, fullName: e.target.value }; setMF({ thirdParties: arr }); }}
+                          placeholder="Full legal name *" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input type="date" value={t.dateOfBirth || ""} onChange={e => { const arr = [...mf.thirdParties]; arr[idx] = { ...t, dateOfBirth: e.target.value }; setMF({ thirdParties: arr }); }}
+                          className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={t.address || ""} onChange={e => { const arr = [...mf.thirdParties]; arr[idx] = { ...t, address: e.target.value }; setMF({ thirdParties: arr }); }}
+                          placeholder="Address" className="col-span-2 border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={t.relationshipToConductor || ""} onChange={e => { const arr = [...mf.thirdParties]; arr[idx] = { ...t, relationshipToConductor: e.target.value }; setMF({ thirdParties: arr }); }}
+                          placeholder="Relationship to conductor" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={t.onBehalfOfIndicator || ""} onChange={e => { const arr = [...mf.thirdParties]; arr[idx] = { ...t, onBehalfOfIndicator: e.target.value }; setMF({ thirdParties: arr }); }}
+                          placeholder="Acting on behalf of" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 2d: Beneficial Owners (multi-entry) */}
+              <div className="bg-white border border-red-200 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-xs font-bold text-red-900 flex items-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5" /> Beneficial Owners ({mf.beneficialOwners.length})
+                  </h3>
+                  <button type="button" onClick={() => setMF({ beneficialOwners: [...mf.beneficialOwners, { fullName: "", dateOfBirth: "", address: "", ownershipPercent: "", controlNature: "" }] })}
+                    className="text-[10px] font-semibold text-white bg-red-700 hover:bg-red-800 rounded-md px-2 py-1 flex items-center gap-1">
+                    <Plus className="w-3 h-3" /> Add beneficial owner
+                  </button>
+                </div>
+                <p className="text-[10px] text-red-600 mb-3">PCMLTFR s.138 — Individuals who own ≥25% or otherwise exercise control over an entity.</p>
+                {mf.beneficialOwners.length === 0 && <p className="text-[10px] text-gray-500 italic">No beneficial owners added.</p>}
+                <div className="space-y-3">
+                  {mf.beneficialOwners.map((b, idx) => (
+                    <div key={idx} className="border border-red-100 rounded-lg p-3 bg-red-50/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold text-red-900">Beneficial Owner #{idx + 1}</span>
+                        <button type="button" onClick={() => setMF({ beneficialOwners: mf.beneficialOwners.filter((_, i) => i !== idx) })}
+                          className="text-[10px] text-red-600 hover:text-red-800 flex items-center gap-1">
+                          <X className="w-3 h-3" /> Remove
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input value={b.fullName} onChange={e => { const arr = [...mf.beneficialOwners]; arr[idx] = { ...b, fullName: e.target.value }; setMF({ beneficialOwners: arr }); }}
+                          placeholder="Full legal name *" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input type="date" value={b.dateOfBirth || ""} onChange={e => { const arr = [...mf.beneficialOwners]; arr[idx] = { ...b, dateOfBirth: e.target.value }; setMF({ beneficialOwners: arr }); }}
+                          className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={b.address || ""} onChange={e => { const arr = [...mf.beneficialOwners]; arr[idx] = { ...b, address: e.target.value }; setMF({ beneficialOwners: arr }); }}
+                          placeholder="Address" className="col-span-2 border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={b.ownershipPercent || ""} onChange={e => { const arr = [...mf.beneficialOwners]; arr[idx] = { ...b, ownershipPercent: e.target.value }; setMF({ beneficialOwners: arr }); }}
+                          placeholder="Ownership % (e.g. 30)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={b.controlNature || ""} onChange={e => { const arr = [...mf.beneficialOwners]; arr[idx] = { ...b, controlNature: e.target.value }; setMF({ beneficialOwners: arr }); }}
+                          placeholder="Nature of control (director, signatory…)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 2e: Virtual Currency */}
+              <div className="bg-white border border-red-200 rounded-xl p-4">
+                <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                  <input type="checkbox" checked={mf.isVirtualCurrency} onChange={e => setMF({ isVirtualCurrency: e.target.checked })} className="accent-red-700" />
+                  <h3 className="text-xs font-bold text-red-900">Transaction involves Virtual Currency</h3>
+                </label>
+                {mf.isVirtualCurrency && (
+                  <>
+                    <p className="text-[10px] text-red-600 mb-3">PCMLTFR s.7.1 — Required for VC transfers ≥ CAD 10,000 and any suspicious VC activity.</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input value={mf.virtualCurrency.vcType} onChange={e => setMF({ virtualCurrency: { ...mf.virtualCurrency, vcType: e.target.value } })}
+                        placeholder="VC type (BTC, ETH, USDT…) *" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.virtualCurrency.walletProvider || ""} onChange={e => setMF({ virtualCurrency: { ...mf.virtualCurrency, walletProvider: e.target.value } })}
+                        placeholder="Wallet / exchange provider" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.virtualCurrency.senderAddress || ""} onChange={e => setMF({ virtualCurrency: { ...mf.virtualCurrency, senderAddress: e.target.value } })}
+                        placeholder="Sender VC address" className="col-span-2 border border-red-200 rounded px-2 py-1 text-xs font-mono bg-white text-foreground" />
+                      <input value={mf.virtualCurrency.receiverAddress || ""} onChange={e => setMF({ virtualCurrency: { ...mf.virtualCurrency, receiverAddress: e.target.value } })}
+                        placeholder="Receiver VC address" className="col-span-2 border border-red-200 rounded px-2 py-1 text-xs font-mono bg-white text-foreground" />
+                      <input value={mf.virtualCurrency.transactionHash || ""} onChange={e => setMF({ virtualCurrency: { ...mf.virtualCurrency, transactionHash: e.target.value } })}
+                        placeholder="Transaction hash / TXID" className="col-span-2 border border-red-200 rounded px-2 py-1 text-xs font-mono bg-white text-foreground" />
+                      <input value={mf.virtualCurrency.exchangeRateToCad || ""} onChange={e => setMF({ virtualCurrency: { ...mf.virtualCurrency, exchangeRateToCad: e.target.value } })}
+                        placeholder="Exchange rate to CAD at time of TX" className="col-span-2 border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Section 2f: Electronic Funds Transfer / EMT */}
+              <div className="bg-white border border-red-200 rounded-xl p-4">
+                <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                  <input type="checkbox" checked={mf.isEmt} onChange={e => setMF({ isEmt: e.target.checked })} className="accent-red-700" />
+                  <h3 className="text-xs font-bold text-red-900">Transaction is an Electronic Funds / Money Transfer (EMT)</h3>
+                </label>
+                {mf.isEmt && (
+                  <>
+                    <p className="text-[10px] text-red-600 mb-3">For Interac e-Transfers, SWIFT/MT103, ACH, and other EMTs — capture reference numbers and message text.</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input value={mf.emt.emtType || ""} onChange={e => setMF({ emt: { ...mf.emt, emtType: e.target.value } })}
+                        placeholder="EMT type (Interac, SWIFT MT103, ACH…)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.emt.emtReference || ""} onChange={e => setMF({ emt: { ...mf.emt, emtReference: e.target.value } })}
+                        placeholder="EMT reference / confirmation #" className="border border-red-200 rounded px-2 py-1 text-xs font-mono bg-white text-foreground" />
+                      <input value={mf.emt.senderInstitution || ""} onChange={e => setMF({ emt: { ...mf.emt, senderInstitution: e.target.value } })}
+                        placeholder="Sender institution" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.emt.receiverInstitution || ""} onChange={e => setMF({ emt: { ...mf.emt, receiverInstitution: e.target.value } })}
+                        placeholder="Receiver institution" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.emt.senderAccount || ""} onChange={e => setMF({ emt: { ...mf.emt, senderAccount: e.target.value } })}
+                        placeholder="Sender account" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.emt.receiverAccount || ""} onChange={e => setMF({ emt: { ...mf.emt, receiverAccount: e.target.value } })}
+                        placeholder="Receiver account" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <textarea value={mf.emt.emtMessage || ""} onChange={e => setMF({ emt: { ...mf.emt, emtMessage: e.target.value } })}
+                        placeholder="EMT message / memo (full text as sent)" rows={2}
+                        className="col-span-2 border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                    </div>
+                  </>
+                )}
+              </div>
+
               {/* Section 3: Grounds for Suspicion */}
               <div className="bg-white border border-red-200 rounded-xl p-4">
                 <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
