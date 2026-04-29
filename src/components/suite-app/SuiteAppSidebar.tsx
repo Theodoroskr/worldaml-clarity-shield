@@ -87,7 +87,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
 
 export default function SuiteAppSidebar() {
   const { isAdmin } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Customers", "Transactions"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Customers", "Transactions", "Reg. Compliance"]);
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
