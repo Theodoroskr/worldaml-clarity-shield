@@ -69,7 +69,16 @@
       "all_statuses": "كل الحالات",
       "all_risks": "كل مستويات المخاطر",
       "clear_filters": "مسح عوامل التصفية",
-      "no_matches": "لا توجد التزامات تطابق عوامل التصفية الحالية."
+      "no_matches": "لا توجد التزامات تطابق عوامل التصفية الحالية.",
+      "select_all": "تحديد الكل",
+      "selected_count": "{{count}} محدد",
+      "clear_selection": "إلغاء التحديد",
+      "bulk_set_status": "تعيين الحالة",
+      "bulk_set_risk": "تعيين المخاطر",
+      "apply": "تطبيق",
+      "applying": "جارٍ التطبيق…",
+      "bulk_success": "تم تحديث {{count}} التزامات",
+      "bulk_error": "تعذر تحديث الالتزامات"
     }
   }
 }
