@@ -6,6 +6,7 @@ import { useOrganisation } from "@/hooks/useOrganisation";
 import { toast } from "sonner";
 import { exportSAR } from "@/services/sarExport";
 import { exportFINTRACStr, DEFAULT_MANUAL_FIELDS, type FINTRACManualFields } from "@/services/fintracStrExport";
+import { buildFwrPayload, downloadFwrPayload } from "@/services/fintracFwrPayload";
 import { exportMOKASStr, DEFAULT_MOKAS_FIELDS, type MOKASManualFields } from "@/services/mokasStrExport";
 import { exportCTR, DEFAULT_CTR_FIELDS, type CTRManualFields } from "@/services/ctrExport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
