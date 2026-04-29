@@ -2063,8 +2063,151 @@ export default function SuiteCases() {
               <span className="text-[10px] text-red-500">PCMLTFA s.7 · PCMLTFR Part 1</span>
             </div>
 
+            {/* STR Version History Timeline */}
+            {caseStrReports.length > 0 && (() => {
+              // Build chronological (oldest → newest) timeline with parent/child links
+              const sorted = [...caseStrReports].sort(
+                (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+              );
+              const childrenByParent = new Map<string, StrAmendmentRow[]>();
+              sorted.forEach(r => {
+                if (r.parent_report_id) {
+                  const arr = childrenByParent.get(r.parent_report_id) || [];
+                  arr.push(r);
+                  childrenByParent.set(r.parent_report_id, arr);
+                }
+              });
+              const statusMeta = (s: string) => {
+                switch (s) {
+                  case "draft": return { label: "Draft", dot: "bg-slate-400", ring: "ring-slate-200" };
+                  case "submitted": return { label: "Submitted", dot: "bg-blue-500", ring: "ring-blue-200" };
+                  case "change_requested": return { label: "Change Requested", dot: "bg-amber-500", ring: "ring-amber-200" };
+                  case "amended": return { label: "Amended", dot: "bg-emerald-500", ring: "ring-emerald-200" };
+                  case "superseded": return { label: "Superseded", dot: "bg-muted-foreground", ring: "ring-border" };
+                  default: return { label: s, dot: "bg-slate-400", ring: "ring-slate-200" };
+                }
+              };
+              return (
+                <div className="mt-5 border border-border rounded-lg overflow-hidden bg-card">
+                  <div className="px-4 py-2.5 border-b border-border bg-muted/30 flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-primary" /> STR Version History — Timeline
+                    </h4>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {sorted.length} version{sorted.length === 1 ? "" : "s"} · case {selectedCase.id.slice(0, 8).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="px-5 py-4">
+                    <ol className="relative border-l-2 border-border ml-2 space-y-5">
+                      {sorted.map((r, idx) => {
+                        const meta = statusMeta(r.filing_status);
+                        const days = daysUntilDue(r.amendment_due_at);
+                        const overdue = days !== null && days < 0;
+                        const urgent = days !== null && days >= 0 && days <= 5;
+                        const children = childrenByParent.get(r.id) || [];
+                        const parent = r.parent_report_id
+                          ? sorted.find(x => x.id === r.parent_report_id)
+                          : null;
+                        return (
+                          <li key={r.id} className="ml-5">
+                            <span
+                              className={cn(
+                                "absolute -left-[9px] w-4 h-4 rounded-full ring-4 ring-card",
+                                meta.dot,
+                                r.filing_status === "superseded" && "opacity-60"
+                              )}
+                              aria-hidden
+                            />
+                            <div className={cn(
+                              "rounded-md border border-border p-3 bg-background",
+                              r.filing_status === "superseded" && "opacity-70"
+                            )}>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs font-bold text-foreground">
+                                  v{r.version}
+                                </span>
+                                <span className="text-[10px] font-mono text-muted-foreground">
+                                  {r.id.slice(0, 8).toUpperCase()}
+                                </span>
+                                <span className={cn(
+                                  "text-[10px] px-2 py-0.5 rounded-full font-semibold border",
+                                  r.filing_status === "draft" && "bg-slate-100 text-slate-700 border-slate-200",
+                                  r.filing_status === "submitted" && "bg-blue-50 text-blue-800 border-blue-200",
+                                  r.filing_status === "change_requested" && "bg-amber-100 text-amber-800 border-amber-300",
+                                  r.filing_status === "amended" && "bg-emerald-100 text-emerald-700 border-emerald-300",
+                                  r.filing_status === "superseded" && "bg-muted text-muted-foreground border-border line-through",
+                                )}>
+                                  {meta.label}
+                                </span>
+                                {idx === 0 && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-semibold">
+                                    Original
+                                  </span>
+                                )}
+                                {idx === sorted.length - 1 && sorted.length > 1 && r.filing_status !== "superseded" && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                                    Current
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="mt-1.5 flex items-center gap-3 flex-wrap text-[10px] text-muted-foreground">
+                                <span><strong>Created:</strong> {new Date(r.created_at).toLocaleString()}</span>
+                                {r.change_requested_at && (
+                                  <span><strong>Change requested:</strong> {new Date(r.change_requested_at).toLocaleDateString()}</span>
+                                )}
+                                {r.amendment_due_at && r.filing_status === "change_requested" && (
+                                  <span className={cn(
+                                    "px-2 py-0.5 rounded-full font-bold border inline-flex items-center gap-1",
+                                    overdue ? "bg-red-600 text-white border-red-700 animate-pulse" :
+                                    urgent ? "bg-orange-100 text-orange-800 border-orange-300" :
+                                    "bg-blue-50 text-blue-800 border-blue-200"
+                                  )}>
+                                    <AlertTriangle className="w-3 h-3" />
+                                    {overdue
+                                      ? `Overdue ${Math.abs(days!)}d (due ${new Date(r.amendment_due_at).toLocaleDateString()})`
+                                      : `Due in ${days}d (${new Date(r.amendment_due_at).toLocaleDateString()})`}
+                                  </span>
+                                )}
+                              </div>
+
+                              {(parent || children.length > 0) && (
+                                <div className="mt-2 flex items-center gap-3 flex-wrap text-[10px]">
+                                  {parent && (
+                                    <span className="text-muted-foreground">
+                                      ↑ Amends <span className="font-mono text-foreground">v{parent.version} · {parent.id.slice(0, 8).toUpperCase()}</span>
+                                    </span>
+                                  )}
+                                  {children.map(c => (
+                                    <span key={c.id} className="text-muted-foreground">
+                                      ↓ Replaced by <span className="font-mono text-foreground">v{c.version} · {c.id.slice(0, 8).toUpperCase()}</span>
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+
+                              {r.amendment_explanation && (
+                                <p className="mt-2 text-[11px] text-foreground/80 leading-snug border-l-2 border-amber-300 pl-2 bg-amber-50/40 py-1 rounded-r">
+                                  <strong className="text-amber-900">Explanation:</strong> {r.amendment_explanation}
+                                </p>
+                              )}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </div>
+                  <div className="px-4 py-2 border-t border-border bg-muted/20 text-[10px] text-muted-foreground flex items-center justify-between">
+                    <span>Timeline shows lineage of all STR versions filed for this case (FINTRAC PCMLTFR audit trail).</span>
+                    <span className="font-mono">Retention: 5 years</span>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* STR Amendment Workflow (FINTRAC 20-day deadline for corrected reports) */}
             {caseStrReports.length > 0 && (
+
               <div className="mt-5 border border-red-200 rounded-lg overflow-hidden bg-red-50/30">
                 <div className="px-4 py-2.5 border-b border-red-200 bg-red-100/50 flex items-center justify-between">
                   <h4 className="text-xs font-bold text-red-900 flex items-center gap-1.5">
