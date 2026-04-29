@@ -78,7 +78,12 @@
       "apply": "Apply",
       "applying": "Applying…",
       "bulk_success": "Updated {{count}} obligations",
-      "bulk_error": "Could not update obligations"
+      "bulk_error": "Could not update obligations",
+      "sort_by": "Sort by",
+      "sort_title": "Title",
+      "sort_deadline": "Deadline",
+      "sort_compliance_status": "Compliance status",
+      "sort_risk_level": "Risk level"
     }
   }
 }

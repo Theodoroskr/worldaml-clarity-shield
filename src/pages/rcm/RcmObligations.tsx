@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 
 type Obligation = {
@@ -24,6 +24,10 @@ type Obligation = {
 
 const STATUS_OPTIONS = ["compliant", "partial", "non_compliant", "not_assessed", "not_applicable"] as const;
 const RISK_OPTIONS = ["low", "medium", "high", "critical"] as const;
+const STATUS_RANK: Record<string, number> = { compliant: 0, partial: 1, non_compliant: 2, not_assessed: 3, not_applicable: 4 };
+const RISK_RANK: Record<string, number> = { low: 0, medium: 1, high: 2, critical: 3 };
+type SortKey = "title" | "deadline" | "compliance_status" | "risk_level";
+const SORT_KEYS: SortKey[] = ["title", "deadline", "compliance_status", "risk_level"];
 
 const STATUS_BADGE: Record<string, string> = {
   compliant: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
@@ -49,6 +53,11 @@ export default function RcmObligations() {
   const risk = searchParams.get("risk") || "all";
   const q = searchParams.get("q") || "";
 
+  const sortKey = (SORT_KEYS as string[]).includes(searchParams.get("sort") || "")
+    ? (searchParams.get("sort") as SortKey)
+    : "deadline";
+  const sortDir: "asc" | "desc" = searchParams.get("dir") === "desc" ? "desc" : "asc";
+
   const updateParam = (key: string, value: string, defaultValue: string) => {
     const next = new URLSearchParams(searchParams);
     if (!value || value === defaultValue) next.delete(key);
@@ -58,6 +67,19 @@ export default function RcmObligations() {
   const setStatus = (v: string) => updateParam("status", v, "all");
   const setRisk = (v: string) => updateParam("risk", v, "all");
   const setQ = (v: string) => updateParam("q", v, "");
+  const toggleSort = (key: SortKey) => {
+    const next = new URLSearchParams(searchParams);
+    if (sortKey === key) {
+      const newDir = sortDir === "asc" ? "desc" : "asc";
+      next.set("sort", key);
+      if (newDir === "asc") next.delete("dir"); else next.set("dir", newDir);
+    } else {
+      if (key === "deadline") next.delete("sort"); else next.set("sort", key);
+      next.delete("dir");
+    }
+    setSearchParams(next, { replace: true });
+  };
+
 
   useEffect(() => {
     if (!membership) { setLoading(false); return; }
@@ -75,13 +97,29 @@ export default function RcmObligations() {
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return items.filter(o => {
+    const list = items.filter(o => {
       if (status !== "all" && (o.compliance_status || "not_assessed") !== status) return false;
       if (risk !== "all" && (o.risk_level || "medium") !== risk) return false;
       if (needle && !`${o.title} ${o.description ?? ""} ${o.jurisdiction ?? ""}`.toLowerCase().includes(needle)) return false;
       return true;
     });
-  }, [items, status, risk, q]);
+    const dir = sortDir === "asc" ? 1 : -1;
+    const cmpVal = (o: Obligation): string | number => {
+      switch (sortKey) {
+        case "title": return (o.title || "").toLowerCase();
+        case "compliance_status": return STATUS_RANK[o.compliance_status || "not_assessed"] ?? 99;
+        case "risk_level": return RISK_RANK[o.risk_level || "medium"] ?? 99;
+        case "deadline":
+        default: return o.deadline ? new Date(o.deadline).getTime() : Number.POSITIVE_INFINITY;
+      }
+    };
+    return [...list].sort((a, b) => {
+      const av = cmpVal(a); const bv = cmpVal(b);
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return 0;
+    });
+  }, [items, status, risk, q, sortKey, sortDir]);
 
   const filtersActive = status !== "all" || risk !== "all" || q.length > 0;
   const clearFilters = () => {
@@ -237,6 +275,26 @@ export default function RcmObligations() {
             ) : (
               <span className="text-muted-foreground">{t("rcm.obligations.select_all")}</span>
             )}
+          </div>
+          <div className="flex items-center gap-1 px-4 py-2 border-b bg-muted/10 text-xs text-muted-foreground flex-wrap">
+            <span className="me-2">{t("rcm.obligations.sort_by")}:</span>
+            {SORT_KEYS.map(key => {
+              const active = sortKey === key;
+              const Icon = active ? (sortDir === "asc" ? ArrowUp : ArrowDown) : ArrowUpDown;
+              return (
+                <Button
+                  key={key}
+                  variant={active ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-7 px-2 gap-1 text-xs"
+                  onClick={() => toggleSort(key)}
+                  aria-pressed={active}
+                >
+                  {t(`rcm.obligations.sort_${key}`)}
+                  <Icon className="h-3 w-3" />
+                </Button>
+              );
+            })}
           </div>
           <ul className="divide-y">
             {filtered.map(o => (

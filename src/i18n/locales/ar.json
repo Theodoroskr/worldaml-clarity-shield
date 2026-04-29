@@ -78,7 +78,12 @@
       "apply": "تطبيق",
       "applying": "جارٍ التطبيق…",
       "bulk_success": "تم تحديث {{count}} التزامات",
-      "bulk_error": "تعذر تحديث الالتزامات"
+      "bulk_error": "تعذر تحديث الالتزامات",
+      "sort_by": "ترتيب حسب",
+      "sort_title": "العنوان",
+      "sort_deadline": "الموعد النهائي",
+      "sort_compliance_status": "حالة الامتثال",
+      "sort_risk_level": "مستوى المخاطر"
     }
   }
 }
