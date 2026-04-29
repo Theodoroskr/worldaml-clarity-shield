@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import {
   Loader2, User, Building2, LogOut, CreditCard, ShieldAlert,
   GraduationCap, Award, Share2, ExternalLink, Copy, Globe,
-  Search, BookOpen, Shield, ChevronRight, Sparkles, PlayCircle
+  Search, BookOpen, Shield, ChevronRight, Sparkles, PlayCircle, CheckCircle2
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
@@ -217,6 +217,34 @@ const Dashboard = () => {
                     a regulator and confirm your seats. Existing customers can also ask their
                     organisation admin to invite them.
                   </p>
+
+                  <div className="mt-3 rounded-md border border-navy/10 bg-white/60 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-navy/70">
+                      Have these ready before you contact us
+                    </p>
+                    <ul className="mt-2 space-y-1.5 text-xs text-text-secondary">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-teal mt-0.5 flex-shrink-0" />
+                        <span><strong className="text-navy">Company name</strong> & legal entity / jurisdiction of incorporation</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-teal mt-0.5 flex-shrink-0" />
+                        <span><strong className="text-navy">Regulators & frameworks</strong> that apply to you (e.g. MGA, FCA, FINTRAC, MOKAS)</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-teal mt-0.5 flex-shrink-0" />
+                        <span><strong className="text-navy">Expected volume</strong> — number of obligations, business lines and monthly transactions</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-teal mt-0.5 flex-shrink-0" />
+                        <span><strong className="text-navy">Team size & seats</strong> — how many users need access and their roles</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-teal mt-0.5 flex-shrink-0" />
+                        <span><strong className="text-navy">Primary contact</strong> — MLRO or Compliance Officer name & email</span>
+                      </li>
+                    </ul>
+                  </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Button variant="accent" size="sm" onClick={() => navigate("/contact-sales")}>
                       Request RCM access
