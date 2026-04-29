@@ -276,6 +276,26 @@ export default function RcmObligations() {
               <span className="text-muted-foreground">{t("rcm.obligations.select_all")}</span>
             )}
           </div>
+          <div className="flex items-center gap-1 px-4 py-2 border-b bg-muted/10 text-xs text-muted-foreground flex-wrap">
+            <span className="me-2">{t("rcm.obligations.sort_by")}:</span>
+            {SORT_KEYS.map(key => {
+              const active = sortKey === key;
+              const Icon = active ? (sortDir === "asc" ? ArrowUp : ArrowDown) : ArrowUpDown;
+              return (
+                <Button
+                  key={key}
+                  variant={active ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-7 px-2 gap-1 text-xs"
+                  onClick={() => toggleSort(key)}
+                  aria-pressed={active}
+                >
+                  {t(`rcm.obligations.sort_${key}`)}
+                  <Icon className="h-3 w-3" />
+                </Button>
+              );
+            })}
+          </div>
           <ul className="divide-y">
             {filtered.map(o => (
               <li key={o.id} className="p-4 hover:bg-muted/40 transition-colors">
