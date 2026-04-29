@@ -2573,6 +2573,118 @@ export default function SuiteCases() {
         </div>
       </div>
 
+      {/* STR Amendment Dialog (FINTRAC 20-day correction window) */}
+      <Dialog open={showAmendDialog} onOpenChange={(open) => { if (!open && !amendSubmitting) setShowAmendDialog(false); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm font-semibold">
+              <AlertTriangle className={cn("w-4 h-4", amendMode === "request" ? "text-amber-600" : "text-emerald-600")} />
+              {amendMode === "request" ? "Request STR Amendment" : "File Amended STR"}
+            </DialogTitle>
+          </DialogHeader>
+
+          {amendTargetReport && (
+            <div className="space-y-4">
+              <div className="p-3 rounded-lg bg-muted/50 border border-border space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-foreground">
+                    Report v{amendTargetReport.version} · {amendTargetReport.id.slice(0, 8).toUpperCase()}
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-background border border-border font-mono">
+                    {amendTargetReport.filing_status.replace("_", " ")}
+                  </span>
+                </div>
+                {amendMode === "request" && (
+                  <p className="text-[11px] text-muted-foreground leading-snug">
+                    Per FINTRAC PCMLTFR, corrections to a filed STR must be submitted as soon as practicable
+                    and within <strong>20 calendar days</strong> of identifying the change. Requesting an amendment
+                    starts the 20-day clock and creates a versioned draft.
+                  </p>
+                )}
+                {amendMode === "file" && amendTargetReport.amendment_due_at && (() => {
+                  const days = daysUntilDue(amendTargetReport.amendment_due_at);
+                  const overdue = days !== null && days < 0;
+                  return (
+                    <div className={cn(
+                      "text-[11px] px-2 py-1 rounded font-semibold inline-flex items-center gap-1",
+                      overdue ? "bg-red-100 text-red-800 border border-red-300" : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    )}>
+                      <AlertTriangle className="w-3 h-3" />
+                      {overdue
+                        ? `Overdue by ${Math.abs(days!)} day${Math.abs(days!) === 1 ? "" : "s"} — file immediately`
+                        : `${days} day${days === 1 ? "" : "s"} remaining until 20-day deadline`}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {amendMode === "request" ? (
+                <div>
+                  <label className="text-xs font-semibold text-foreground block mb-1.5">
+                    Reason for Amendment <span className="text-red-600">*</span>
+                  </label>
+                  <textarea
+                    value={amendReason}
+                    onChange={e => setAmendReason(e.target.value.slice(0, 1000))}
+                    placeholder="e.g. Additional transactions identified linking subject to suspicious counterparty…"
+                    rows={4}
+                    className="w-full text-xs px-3 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-muted-foreground">Min. 10 characters · audit-logged</span>
+                    <span className="text-[10px] text-muted-foreground">{amendReason.length}/1000</span>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="text-xs font-semibold text-foreground block mb-1.5">
+                    Explanation of Changes <span className="text-red-600">*</span>
+                  </label>
+                  <textarea
+                    value={amendExplanation}
+                    onChange={e => setAmendExplanation(e.target.value.slice(0, 2000))}
+                    placeholder="Describe what was changed in this amended STR (fields, parties, amounts, narrative additions…)"
+                    rows={5}
+                    className="w-full text-xs px-3 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-muted-foreground">Min. 10 characters · attached to FWR submission</span>
+                    <span className="text-[10px] text-muted-foreground">{amendExplanation.length}/2000</span>
+                  </div>
+                  <div className="mt-3 p-2.5 rounded bg-amber-50 border border-amber-200 text-[10px] text-amber-900 leading-snug">
+                    <strong>Tipping-off prohibition (PCMLTFA s.8):</strong> Do not disclose the existence of
+                    this STR or its amendment to the subject. Filing this amendment will mark the prior
+                    version as <em>superseded</em>.
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <button
+              onClick={() => setShowAmendDialog(false)}
+              disabled={amendSubmitting}
+              className="text-xs px-4 py-2 rounded-md border border-border bg-background hover:bg-muted disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={submitAmendment}
+              disabled={amendSubmitting}
+              className={cn(
+                "text-xs px-4 py-2 rounded-md font-semibold text-white disabled:opacity-50",
+                amendMode === "request" ? "bg-amber-600 hover:bg-amber-700" : "bg-emerald-600 hover:bg-emerald-700"
+              )}
+            >
+              {amendSubmitting
+                ? "Submitting…"
+                : amendMode === "request" ? "Request Amendment" : "File Amended STR"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* PDF Preview Modal */}
       <Dialog open={!!pdfPreview} onOpenChange={(open) => { if (!open) closePdfPreview(); }}>
         <DialogContent className="max-w-4xl w-[90vw] h-[85vh] flex flex-col p-0 gap-0">
