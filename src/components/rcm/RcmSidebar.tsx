@@ -2,11 +2,11 @@ import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard, BookOpen, ListChecks, ShieldCheck, ClipboardCheck,
-  Bell, FolderArchive, FileBarChart, Languages, Settings, History,
+  Bell, FolderArchive, FileBarChart, Languages, Settings, History, ArrowLeft,
 } from "lucide-react";
 import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+  Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
+  SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
 export function RcmSidebar({ side = "left" }: { side?: "left" | "right" }) {
@@ -26,6 +26,18 @@ export function RcmSidebar({ side = "left" }: { side?: "left" | "right" }) {
   ];
   return (
     <Sidebar collapsible="icon" side={side}>
+      <SidebarHeader className="border-b">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Back to WorldAML Suite">
+              <NavLink to="/suite" className="flex items-center gap-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+                <ArrowLeft className="h-4 w-4 shrink-0" />
+                <span className="text-start font-medium">Back to Suite</span>
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>{t("rcm.brand")} · RCM</SidebarGroupLabel>
@@ -33,9 +45,11 @@ export function RcmSidebar({ side = "left" }: { side?: "left" | "right" }) {
             <SidebarMenu>
               {items.map(it => (
                 <SidebarMenuItem key={it.to}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip={it.label}>
                     <NavLink to={it.to} end={it.end} className={({ isActive }) =>
-                      `flex items-center gap-2 ${isActive ? "bg-muted text-foreground font-medium" : ""}`}>
+                      `flex items-center gap-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
+                        isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : ""
+                      }`}>
                       <it.icon className="h-4 w-4 shrink-0" />
                       <span className="text-start">{it.label}</span>
                     </NavLink>
@@ -46,6 +60,9 @@ export function RcmSidebar({ side = "left" }: { side?: "left" | "right" }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="border-t">
+        <div className="px-2 py-1 text-xs text-sidebar-foreground/60">RCM v1.0</div>
+      </SidebarFooter>
     </Sidebar>
   );
 }
