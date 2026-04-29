@@ -139,7 +139,7 @@ export default function RcmObligations() {
     setBulkStatus(""); setBulkRisk(""); clearSelection();
   };
 
-
+  if (orgLoading) {
     return <div className="p-8 flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin"/> {t("rcm.common.loading")}</div>;
   }
   if (!membership) {
