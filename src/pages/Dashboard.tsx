@@ -24,6 +24,8 @@ import { formatDistanceToNow } from "date-fns";
 const Dashboard = () => {
   const { user, profile, isLoading, isApproved, isAdmin, signOut } = useAuth();
   const { hasSuiteAccess } = useAccess();
+  const { membership: rcmMembership } = useRcmOrg();
+  const isOrgAdmin = rcmMembership?.role === "admin";
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
