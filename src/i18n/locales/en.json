@@ -46,7 +46,21 @@
       "recent_escalations": "Recent escalations",
       "by_department": "Compliance by department",
       "scaffold_note": "Schema, RLS, and Region Trade Bank demo data are live. Library, Obligations, Controls, Assessments, Tasks, Evidence, Reports, Translation Review, Audit and Settings UIs are scaffolded — basic CRUD lands in the next iteration.",
-      "sign_in_first": "Sign in first via <1>/login</1>."
+      "sign_in_first": "Sign in first via <1>/login</1>.",
+      "obligations_summary": "Obligations summary",
+      "by_status": "By compliance status",
+      "by_risk": "By risk level",
+      "view_all": "View all",
+      "no_obligations": "No obligations recorded yet.",
+      "status_compliant": "Compliant",
+      "status_partial": "Partial",
+      "status_non_compliant": "Non-compliant",
+      "status_not_assessed": "Not assessed",
+      "status_not_applicable": "Not applicable",
+      "risk_low": "Low",
+      "risk_medium": "Medium",
+      "risk_high": "High",
+      "risk_critical": "Critical"
     },
     "placeholder": {
       "body": "Module scaffolded. CRUD UI ships in the next iteration — schema, RLS and demo data are already live."
