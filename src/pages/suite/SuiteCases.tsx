@@ -6,6 +6,7 @@ import { useOrganisation } from "@/hooks/useOrganisation";
 import { toast } from "sonner";
 import { exportSAR } from "@/services/sarExport";
 import { exportFINTRACStr, DEFAULT_MANUAL_FIELDS, type FINTRACManualFields } from "@/services/fintracStrExport";
+import { buildFwrPayload, downloadFwrPayload } from "@/services/fintracFwrPayload";
 import { exportMOKASStr, DEFAULT_MOKAS_FIELDS, type MOKASManualFields } from "@/services/mokasStrExport";
 import { exportCTR, DEFAULT_CTR_FIELDS, type CTRManualFields } from "@/services/ctrExport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -455,7 +456,71 @@ export default function SuiteCases() {
       // Use only selected transactions
       const transactions = caseTransactions.filter(t => selectedTxIds.has(t.id));
 
-      const result = await exportFINTRACStr({
+      const exportOpts = {
+        caseItem: selectedCase,
+        notes,
+        customer,
+        transactions,
+        submittedBy: user.email ?? "CAMLO",
+        reportingEntity: "WorldAML Client",
+        reportingEntityRef: `FINTRAC-${fintracStrType.toUpperCase()}-${selectedCase.id.slice(0, 8).toUpperCase()}`,
+        strType: fintracStrType,
+        manualFields,
+      };
+
+      const result = await exportFINTRACStr(exportOpts);
+      setPdfPreview(result);
+
+      // Build FWR-ready structured payload alongside the PDF
+      const fwrPayload = buildFwrPayload(exportOpts);
+
+      // Persist STR report to database (with FWR snapshot)
+      const { data: strReport } = await supabase.from("str_reports").insert({
+        user_id: user.id,
+        case_id: selectedCase.id,
+        customer_id: selectedCase.customer_id,
+        filing_status: "draft",
+        camlo_name: mf.camloName,
+        action_taken: mf.actionTaken,
+        grounds_for_suspicion: mf.suspicionType,
+        fwr_payload: fwrPayload as any,
+      } as any).select("id").single();
+
+      // Link selected transactions to the STR report
+      if (strReport && transactions.length > 0) {
+        await supabase.from("str_report_transactions").insert(
+          transactions.map(tx => ({ report_id: strReport.id, transaction_id: tx.id }))
+        );
+      }
+
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: `FINTRAC ${fintracStrType.toUpperCase()} exported (PDF + FWR JSON): ${selectedCase.title}`,
+        entity_type: "case",
+        entity_id: selectedCase.id,
+        details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada", str_report_id: strReport?.id, transactions_count: transactions.length, fwr_schema_version: fwrPayload.schemaVersion },
+      });
+    } catch (err: any) {
+      console.error("FINTRAC export error:", err);
+      toast.error(`PDF export failed: ${err?.message || "Unknown error"}`);
+    }
+  };
+
+  // ── FINTRAC FWR JSON (electronic submission payload) ──
+  const handleDownloadFwrJson = async () => {
+    if (!selectedCase) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error("Please log in to export"); return; }
+
+      let customer = null;
+      if (selectedCase.customer_id) {
+        const { data } = await supabase.from("suite_customers").select("*").eq("id", selectedCase.customer_id).single();
+        customer = data;
+      }
+      const transactions = caseTransactions.filter(t => selectedTxIds.has(t.id));
+
+      const payload = buildFwrPayload({
         caseItem: selectedCase,
         notes,
         customer,
@@ -467,36 +532,26 @@ export default function SuiteCases() {
         manualFields,
       });
 
-      setPdfPreview(result);
-
-      // Persist STR report to database
-      const { data: strReport } = await supabase.from("str_reports").insert({
-        user_id: user.id,
-        case_id: selectedCase.id,
-        customer_id: selectedCase.customer_id,
-        filing_status: "draft",
-        camlo_name: mf.camloName,
-        action_taken: mf.actionTaken,
-        grounds_for_suspicion: mf.suspicionType,
-      }).select("id").single();
-
-      // Link selected transactions to the STR report
-      if (strReport && transactions.length > 0) {
-        await supabase.from("str_report_transactions").insert(
-          transactions.map(tx => ({ report_id: strReport.id, transaction_id: tx.id }))
-        );
-      }
+      const { blobUrl, fileName } = downloadFwrPayload(payload);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
 
       await supabase.from("suite_audit_log").insert({
         user_id: user.id,
-        action: `FINTRAC ${fintracStrType.toUpperCase()} exported: ${selectedCase.title}`,
+        action: `FINTRAC ${fintracStrType.toUpperCase()} FWR JSON downloaded: ${selectedCase.title}`,
         entity_type: "case",
         entity_id: selectedCase.id,
-        details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada", str_report_id: strReport?.id, transactions_count: transactions.length },
+        details: { report_type: fintracStrType, fwr_schema_version: payload.schemaVersion, transactions_count: transactions.length },
       });
+      toast.success("FWR JSON payload downloaded");
     } catch (err: any) {
-      console.error("FINTRAC export error:", err);
-      toast.error(`PDF export failed: ${err?.message || "Unknown error"}`);
+      console.error("FWR JSON export error:", err);
+      toast.error(`FWR JSON export failed: ${err?.message || "Unknown error"}`);
     }
   };
 
@@ -1893,6 +1948,11 @@ export default function SuiteCases() {
               <button onClick={handleExportFINTRAC}
                 className="flex items-center gap-1.5 text-xs px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
                 <Download className="w-3.5 h-3.5" /> Export {fintracStrType.toUpperCase()} PDF
+              </button>
+              <button onClick={handleDownloadFwrJson}
+                title="Download FWR-ready structured JSON for electronic submission via FINTRAC API"
+                className="flex items-center gap-1.5 text-xs px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 font-semibold">
+                <Download className="w-3.5 h-3.5" /> FWR JSON (API-ready)
               </button>
               <button onClick={() => setShowFieldMapping(!showFieldMapping)}
                 className="flex items-center gap-1.5 text-xs px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-100 font-medium">
