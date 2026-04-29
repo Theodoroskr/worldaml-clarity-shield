@@ -42,9 +42,20 @@ export default function RcmObligations() {
   const { membership, loading: orgLoading } = useRcmOrg();
   const [items, setItems] = useState<Obligation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState<string>("all");
-  const [risk, setRisk] = useState<string>("all");
-  const [q, setQ] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const status = searchParams.get("status") || "all";
+  const risk = searchParams.get("risk") || "all";
+  const q = searchParams.get("q") || "";
+
+  const updateParam = (key: string, value: string, defaultValue: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (!value || value === defaultValue) next.delete(key);
+    else next.set(key, value);
+    setSearchParams(next, { replace: true });
+  };
+  const setStatus = (v: string) => updateParam("status", v, "all");
+  const setRisk = (v: string) => updateParam("risk", v, "all");
+  const setQ = (v: string) => updateParam("q", v, "");
 
   useEffect(() => {
     if (!membership) { setLoading(false); return; }
