@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, Shield, CreditCard, AlertTriangle,
   FileText, BarChart3, Settings, ChevronRight, Activity,
   UserCheck, Fingerprint, ClipboardList, Menu, Scale, ShieldCheck, HelpCircle, Radio,
-  LogOut, ArrowLeft, Wallet,
+  LogOut, ArrowLeft, Wallet, BookOpen, ListChecks,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -58,6 +58,24 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
     ],
   },
   {
+    title: "RCM",
+    items: [
+      {
+        icon: BookOpen, label: "Reg. Compliance",
+        children: [
+          { label: "Dashboard", path: "/rcm" },
+          { label: "Library", path: "/rcm/library" },
+          { label: "Obligations", path: "/rcm/obligations" },
+          { label: "Controls", path: "/rcm/controls" },
+          { label: "Assessments", path: "/rcm/assessments" },
+          { label: "Tasks", path: "/rcm/tasks" },
+          { label: "Evidence", path: "/rcm/evidence" },
+          { label: "Reports", path: "/rcm/reports" },
+        ],
+      },
+    ],
+  },
+  {
     title: "System",
     items: [
       { icon: Scale, label: "Regulatory Hub", path: "/suite/regulatory" },
@@ -69,7 +87,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
 
 export default function SuiteAppSidebar() {
   const { isAdmin } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Customers", "Transactions"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Customers", "Transactions", "Reg. Compliance"]);
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
