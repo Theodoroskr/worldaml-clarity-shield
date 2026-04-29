@@ -456,7 +456,7 @@ export default function SuiteCases() {
       // Use only selected transactions
       const transactions = caseTransactions.filter(t => selectedTxIds.has(t.id));
 
-      const result = await exportFINTRACStr({
+      const exportOpts = {
         caseItem: selectedCase,
         notes,
         customer,
@@ -466,11 +466,15 @@ export default function SuiteCases() {
         reportingEntityRef: `FINTRAC-${fintracStrType.toUpperCase()}-${selectedCase.id.slice(0, 8).toUpperCase()}`,
         strType: fintracStrType,
         manualFields,
-      });
+      };
 
+      const result = await exportFINTRACStr(exportOpts);
       setPdfPreview(result);
 
-      // Persist STR report to database
+      // Build FWR-ready structured payload alongside the PDF
+      const fwrPayload = buildFwrPayload(exportOpts);
+
+      // Persist STR report to database (with FWR snapshot)
       const { data: strReport } = await supabase.from("str_reports").insert({
         user_id: user.id,
         case_id: selectedCase.id,
@@ -479,7 +483,8 @@ export default function SuiteCases() {
         camlo_name: mf.camloName,
         action_taken: mf.actionTaken,
         grounds_for_suspicion: mf.suspicionType,
-      }).select("id").single();
+        fwr_payload: fwrPayload as any,
+      } as any).select("id").single();
 
       // Link selected transactions to the STR report
       if (strReport && transactions.length > 0) {
@@ -490,10 +495,10 @@ export default function SuiteCases() {
 
       await supabase.from("suite_audit_log").insert({
         user_id: user.id,
-        action: `FINTRAC ${fintracStrType.toUpperCase()} exported: ${selectedCase.title}`,
+        action: `FINTRAC ${fintracStrType.toUpperCase()} exported (PDF + FWR JSON): ${selectedCase.title}`,
         entity_type: "case",
         entity_id: selectedCase.id,
-        details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada", str_report_id: strReport?.id, transactions_count: transactions.length },
+        details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada", str_report_id: strReport?.id, transactions_count: transactions.length, fwr_schema_version: fwrPayload.schemaVersion },
       });
     } catch (err: any) {
       console.error("FINTRAC export error:", err);
