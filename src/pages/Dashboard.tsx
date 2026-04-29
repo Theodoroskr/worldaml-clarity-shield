@@ -196,6 +196,40 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/* RCM access empty state – shown when user has no Suite access */}
+          {!hasSuiteAccess && !isAdmin && (
+            <div className="mb-6 p-5 rounded-lg border border-dashed border-navy/20 bg-navy/[0.02]">
+              <div className="flex items-start gap-4">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-navy/5 text-navy/70 flex-shrink-0">
+                  <ShieldAlert className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-navy text-sm">
+                    Regulatory Compliance Management (RCM) — access required
+                  </p>
+                  <p className="text-text-secondary text-xs mt-1 leading-relaxed">
+                    RCM is part of WorldAML Suite and includes the regulation library, obligations,
+                    controls, assessments, tasks, evidence vault and audit-ready reports. Your account
+                    doesn't have Suite access yet.
+                  </p>
+                  <p className="text-text-secondary text-xs mt-2 leading-relaxed">
+                    To request access, contact our team — we'll provision your organisation, assign
+                    a regulator and confirm your seats. Existing customers can also ask their
+                    organisation admin to invite them.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button variant="accent" size="sm" onClick={() => navigate("/contact-sales")}>
+                      Request RCM access
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => navigate("/pricing")}>
+                      View Suite plans
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ══════════ WELCOME / ONBOARDING (free users) ══════════ */}
           {!hasSuiteAccess && !isAdmin && (
             <div className="mb-8">
