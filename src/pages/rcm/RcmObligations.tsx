@@ -7,8 +7,10 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, X } from "lucide-react";
+import { toast } from "sonner";
 
 type Obligation = {
   id: string;
@@ -88,6 +90,55 @@ export default function RcmObligations() {
     setSearchParams(next, { replace: true });
   };
 
+  // Bulk selection
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkStatus, setBulkStatus] = useState<string>("");
+  const [bulkRisk, setBulkRisk] = useState<string>("");
+  const [applying, setApplying] = useState(false);
+
+  const filteredIds = useMemo(() => filtered.map(o => o.id), [filtered]);
+  const allSelected = filteredIds.length > 0 && filteredIds.every(id => selected.has(id));
+  const someSelected = filteredIds.some(id => selected.has(id));
+
+  const toggleOne = (id: string, on: boolean) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      on ? next.add(id) : next.delete(id);
+      return next;
+    });
+  };
+  const toggleAll = (on: boolean) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      filteredIds.forEach(id => on ? next.add(id) : next.delete(id));
+      return next;
+    });
+  };
+  const clearSelection = () => setSelected(new Set());
+
+  const applyBulk = async () => {
+    if (!membership || selected.size === 0) return;
+    const patch: Record<string, string> = {};
+    if (bulkStatus) patch.compliance_status = bulkStatus;
+    if (bulkRisk) patch.risk_level = bulkRisk;
+    if (Object.keys(patch).length === 0) return;
+    setApplying(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase
+      .from("rcm_obligations")
+      .update(patch)
+      .in("id", ids)
+      .eq("organization_id", membership.orgId);
+    setApplying(false);
+    if (error) {
+      toast.error(t("rcm.obligations.bulk_error"));
+      return;
+    }
+    setItems(prev => prev.map(o => ids.includes(o.id) ? { ...o, ...patch } : o));
+    toast.success(t("rcm.obligations.bulk_success", { count: ids.length }));
+    setBulkStatus(""); setBulkRisk(""); clearSelection();
+  };
+
   if (orgLoading) {
     return <div className="p-8 flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin"/> {t("rcm.common.loading")}</div>;
   }
@@ -150,18 +201,63 @@ export default function RcmObligations() {
         </Card>
       ) : (
         <Card className="overflow-hidden">
+          <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-muted/30 text-sm flex-wrap">
+            <Checkbox
+              checked={allSelected ? true : someSelected ? "indeterminate" : false}
+              onCheckedChange={(v) => toggleAll(v === true)}
+              aria-label={t("rcm.obligations.select_all")}
+            />
+            {selected.size > 0 ? (
+              <>
+                <span className="font-medium">{t("rcm.obligations.selected_count", { count: selected.size })}</span>
+                <Select value={bulkStatus} onValueChange={setBulkStatus}>
+                  <SelectTrigger className="h-8 w-[170px]"><SelectValue placeholder={t("rcm.obligations.bulk_set_status")} /></SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map(s => (
+                      <SelectItem key={s} value={s}>{t(`rcm.dashboard.status_${s}`)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={bulkRisk} onValueChange={setBulkRisk}>
+                  <SelectTrigger className="h-8 w-[150px]"><SelectValue placeholder={t("rcm.obligations.bulk_set_risk")} /></SelectTrigger>
+                  <SelectContent>
+                    {RISK_OPTIONS.map(r => (
+                      <SelectItem key={r} value={r}>{t(`rcm.dashboard.risk_${r}`)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button size="sm" onClick={applyBulk} disabled={applying || (!bulkStatus && !bulkRisk)} className="h-8">
+                  {applying && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
+                  {applying ? t("rcm.obligations.applying") : t("rcm.obligations.apply")}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={clearSelection} className="h-8 gap-1">
+                  <X className="h-3.5 w-3.5" /> {t("rcm.obligations.clear_selection")}
+                </Button>
+              </>
+            ) : (
+              <span className="text-muted-foreground">{t("rcm.obligations.select_all")}</span>
+            )}
+          </div>
           <ul className="divide-y">
             {filtered.map(o => (
               <li key={o.id} className="p-4 hover:bg-muted/40 transition-colors">
                 <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium truncate">{o.title}</div>
-                    {o.description && (
-                      <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{o.description}</p>
-                    )}
-                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
-                      {o.jurisdiction && <span>{o.jurisdiction}</span>}
-                      {o.deadline && <span>· {t("rcm.common.deadline")}: {o.deadline}</span>}
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <Checkbox
+                      className="mt-1"
+                      checked={selected.has(o.id)}
+                      onCheckedChange={(v) => toggleOne(o.id, v === true)}
+                      aria-label={o.title}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium truncate">{o.title}</div>
+                      {o.description && (
+                        <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{o.description}</p>
+                      )}
+                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
+                        {o.jurisdiction && <span>{o.jurisdiction}</span>}
+                        {o.deadline && <span>· {t("rcm.common.deadline")}: {o.deadline}</span>}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
