@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard, BookOpen, ListChecks, ShieldCheck, ClipboardCheck,
-  Bell, FolderArchive, FileBarChart, Languages, Settings, History, ArrowLeft,
+  Bell, FolderArchive, FileBarChart, Languages, Settings, History, ArrowLeft, LifeBuoy,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -23,6 +23,7 @@ export function RcmSidebar({ side = "left" }: { side?: "left" | "right" }) {
     { to: "/rcm/translations", icon: Languages, label: t("rcm.nav.translations") },
     { to: "/rcm/audit", icon: History, label: t("rcm.nav.audit") },
     { to: "/rcm/settings", icon: Settings, label: t("rcm.nav.settings") },
+    { to: "/rcm/help", icon: LifeBuoy, label: "Help & Process" },
   ];
   return (
     <Sidebar collapsible="icon" side={side}>
