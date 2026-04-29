@@ -126,6 +126,32 @@ export interface FINTRACManualFields {
   virtualCurrency: FINTRACVirtualCurrencyDetails;
   isEmt: boolean;
   emt: FINTRACEmtDetails;
+  // ── FWR multi-action: per-transaction starting + completing actions ──
+  // Keyed by transaction.id. When present, overrides the legacy aggregate fields above.
+  transactionActions?: Record<string, FINTRACTransactionAction>;
+}
+
+// One starting+completing action pair per transaction (FWR multi-action support)
+export interface FINTRACTransactionAction {
+  // Starting Action — how the funds entered the transaction
+  starting: {
+    methodOfTransaction?: string;     // in-person, online, ATM, wire…
+    sourceOfFunds?: string;           // salary, business revenue, savings…
+    conductorName?: string;
+    thirdPartyIndicator?: "own_behalf" | "third_party";
+    thirdPartyName?: string;
+    accountFrom?: string;
+    institutionFrom?: string;
+  };
+  // Completing Action — how the funds left / were disposed
+  completing: {
+    dispositionOfFunds?: string;
+    beneficiaryName?: string;
+    beneficiaryAccount?: string;
+    beneficiaryCountry?: string;
+    accountTo?: string;
+    institutionTo?: string;
+  };
 }
 
 export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
