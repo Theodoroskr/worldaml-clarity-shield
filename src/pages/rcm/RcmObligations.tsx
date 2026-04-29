@@ -90,7 +90,56 @@ export default function RcmObligations() {
     setSearchParams(next, { replace: true });
   };
 
-  if (orgLoading) {
+  // Bulk selection
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkStatus, setBulkStatus] = useState<string>("");
+  const [bulkRisk, setBulkRisk] = useState<string>("");
+  const [applying, setApplying] = useState(false);
+
+  const filteredIds = useMemo(() => filtered.map(o => o.id), [filtered]);
+  const allSelected = filteredIds.length > 0 && filteredIds.every(id => selected.has(id));
+  const someSelected = filteredIds.some(id => selected.has(id));
+
+  const toggleOne = (id: string, on: boolean) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      on ? next.add(id) : next.delete(id);
+      return next;
+    });
+  };
+  const toggleAll = (on: boolean) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      filteredIds.forEach(id => on ? next.add(id) : next.delete(id));
+      return next;
+    });
+  };
+  const clearSelection = () => setSelected(new Set());
+
+  const applyBulk = async () => {
+    if (!membership || selected.size === 0) return;
+    const patch: Record<string, string> = {};
+    if (bulkStatus) patch.compliance_status = bulkStatus;
+    if (bulkRisk) patch.risk_level = bulkRisk;
+    if (Object.keys(patch).length === 0) return;
+    setApplying(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase
+      .from("rcm_obligations")
+      .update(patch)
+      .in("id", ids)
+      .eq("organization_id", membership.orgId);
+    setApplying(false);
+    if (error) {
+      toast.error(t("rcm.obligations.bulk_error"));
+      return;
+    }
+    setItems(prev => prev.map(o => ids.includes(o.id) ? { ...o, ...patch } : o));
+    toast.success(t("rcm.obligations.bulk_success", { count: ids.length }));
+    setBulkStatus(""); setBulkRisk(""); clearSelection();
+  };
+
+
     return <div className="p-8 flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin"/> {t("rcm.common.loading")}</div>;
   }
   if (!membership) {
