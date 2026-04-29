@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useRcmOrg } from "@/hooks/useRcmOrg";
 import { Card } from "@/components/ui/card";
@@ -42,9 +42,20 @@ export default function RcmObligations() {
   const { membership, loading: orgLoading } = useRcmOrg();
   const [items, setItems] = useState<Obligation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState<string>("all");
-  const [risk, setRisk] = useState<string>("all");
-  const [q, setQ] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const status = searchParams.get("status") || "all";
+  const risk = searchParams.get("risk") || "all";
+  const q = searchParams.get("q") || "";
+
+  const updateParam = (key: string, value: string, defaultValue: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (!value || value === defaultValue) next.delete(key);
+    else next.set(key, value);
+    setSearchParams(next, { replace: true });
+  };
+  const setStatus = (v: string) => updateParam("status", v, "all");
+  const setRisk = (v: string) => updateParam("risk", v, "all");
+  const setQ = (v: string) => updateParam("q", v, "");
 
   useEffect(() => {
     if (!membership) { setLoading(false); return; }
@@ -71,7 +82,11 @@ export default function RcmObligations() {
   }, [items, status, risk, q]);
 
   const filtersActive = status !== "all" || risk !== "all" || q.length > 0;
-  const clearFilters = () => { setStatus("all"); setRisk("all"); setQ(""); };
+  const clearFilters = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("status"); next.delete("risk"); next.delete("q");
+    setSearchParams(next, { replace: true });
+  };
 
   if (orgLoading) {
     return <div className="p-8 flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin"/> {t("rcm.common.loading")}</div>;
