@@ -55,7 +55,7 @@ const faqData = {
       name: "What is FINTRAC reporting?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "FINTRAC (Financial Transactions and Reports Analysis Centre of Canada) is Canada's financial intelligence unit. Regulated entities in Canada must submit Suspicious Transaction Reports (STRs), Large Cash Transaction Reports (LCTRs), and Electronic Funds Transfer Reports (EFTRs) to FINTRAC. Non-compliance carries significant administrative penalties.",
+        text: "FINTRAC (Financial Transactions and Reports Analysis Centre of Canada) is Canada's financial intelligence unit. Regulated entities must submit Suspicious Transaction Reports (STRs) whenever there are reasonable grounds to suspect a transaction (completed or attempted) is related to money laundering or terrorist activity financing — there is no monetary threshold for an STR, it must be filed as soon as practicable, and the client must not be tipped off. Threshold-based reports also apply: Large Cash Transaction Reports (LCTRs), Electronic Funds Transfer Reports (EFTRs), Large Virtual Currency Transaction Reports (LVCTRs), and Casino Disbursement Reports (CDRs). Reports are submitted electronically via the FINTRAC Web Reporting System (FWR) or the FINTRAC API; paper filing is only permitted when electronic submission is not technically possible. Non-compliance carries significant administrative penalties.",
       },
     },
     {

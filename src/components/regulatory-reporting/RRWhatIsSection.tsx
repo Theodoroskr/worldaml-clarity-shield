@@ -20,7 +20,7 @@ const frameworks = [
     fullName: "Financial Transactions & Reports Analysis Centre",
     authority: "Canada",
     who: "Reporting entities: banks, MSBs, securities dealers, life insurers, casinos, and more",
-    what: "Mandates filing of Large Cash Transaction Reports (LCTR), Suspicious Transaction Reports (STR), Electronic Funds Transfer Reports (EFTR), and Casino Disbursement Reports under PCMLTFA.",
+    what: "Mandates filing of Suspicious Transaction Reports (STR) — no monetary threshold, triggered by reasonable grounds to suspect and submitted as soon as practicable via the FINTRAC Web Reporting System (FWR) or FINTRAC API. Tipping off the client is prohibited. Threshold-based reports (LCTR, EFTR, LVCTR, CDR) are also filed under the PCMLTFA.",
     color: "bg-amber-500/10 text-amber-700 border-amber-500/20",
   },
 ];

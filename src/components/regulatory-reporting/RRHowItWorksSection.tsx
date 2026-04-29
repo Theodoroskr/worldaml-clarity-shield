@@ -11,7 +11,7 @@ const steps = [
     number: "02",
     title: "Classify",
     description:
-      "Automatically classify accounts by reportability status — applying CRS entity type logic, FATCA status categories, and FINTRAC reporting thresholds.",
+      "Automatically classify accounts by reportability status — applying CRS entity type logic and FATCA status categories. For FINTRAC STRs, the trigger is reasonable grounds to suspect, not a monetary threshold.",
   },
   {
     number: "03",
@@ -23,7 +23,7 @@ const steps = [
     number: "04",
     title: "File",
     description:
-      "Generate jurisdiction-ready XML or structured report files. Submit directly via IDES (FATCA), local CRS portal, or FINTRAC F2R system with full status tracking.",
+      "Generate jurisdiction-ready XML or structured report files. Submit directly via IDES (FATCA), local CRS portal, or the FINTRAC Web Reporting System (FWR) / FINTRAC API with full status tracking.",
   },
   {
     number: "05",
