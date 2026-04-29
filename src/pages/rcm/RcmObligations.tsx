@@ -53,6 +53,11 @@ export default function RcmObligations() {
   const risk = searchParams.get("risk") || "all";
   const q = searchParams.get("q") || "";
 
+  const sortKey = (SORT_KEYS as string[]).includes(searchParams.get("sort") || "")
+    ? (searchParams.get("sort") as SortKey)
+    : "deadline";
+  const sortDir: "asc" | "desc" = searchParams.get("dir") === "desc" ? "desc" : "asc";
+
   const updateParam = (key: string, value: string, defaultValue: string) => {
     const next = new URLSearchParams(searchParams);
     if (!value || value === defaultValue) next.delete(key);
@@ -62,6 +67,19 @@ export default function RcmObligations() {
   const setStatus = (v: string) => updateParam("status", v, "all");
   const setRisk = (v: string) => updateParam("risk", v, "all");
   const setQ = (v: string) => updateParam("q", v, "");
+  const toggleSort = (key: SortKey) => {
+    const next = new URLSearchParams(searchParams);
+    if (sortKey === key) {
+      const newDir = sortDir === "asc" ? "desc" : "asc";
+      next.set("sort", key);
+      if (newDir === "asc") next.delete("dir"); else next.set("dir", newDir);
+    } else {
+      if (key === "deadline") next.delete("sort"); else next.set("sort", key);
+      next.delete("dir");
+    }
+    setSearchParams(next, { replace: true });
+  };
+
 
   useEffect(() => {
     if (!membership) { setLoading(false); return; }
