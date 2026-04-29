@@ -68,6 +68,7 @@ const RcmLayout = lazy(() => import("./pages/rcm/RcmLayout"));
 const RcmDashboard = lazy(() => import("./pages/rcm/RcmDashboard"));
 const RcmPlaceholder = lazy(() => import("./pages/rcm/RcmPlaceholder"));
 const RcmObligations = lazy(() => import("./pages/rcm/RcmObligations"));
+const RcmHelp = lazy(() => import("./pages/rcm/RcmHelp"));
 const SuiteLayout = lazy(() => import("./pages/SuiteLayout"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
@@ -288,6 +289,7 @@ const App = () => (
                   <Route path="translations" element={<RcmPlaceholder titleKey="rcm.nav.translations" />} />
                   <Route path="audit" element={<RcmPlaceholder titleKey="rcm.nav.audit" />} />
                   <Route path="settings" element={<RcmPlaceholder titleKey="rcm.nav.settings" />} />
+                  <Route path="help" element={<RcmHelp />} />
                 </Route>
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
