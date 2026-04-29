@@ -1,0 +1,1 @@
+ALTER VIEW public.str_reports_overdue_amendments SET (security_invoker = true);
