@@ -240,6 +240,25 @@ export default function SuiteCases() {
   const [userRegulator, setUserRegulator] = useState<string | null>(null);
   const [showChecklist, setShowChecklist] = useState(false);
   const [filedReports, setFiledReports] = useState<Set<string>>(new Set());
+
+  // ── STR Amendment workflow ──
+  type StrAmendmentRow = {
+    id: string;
+    version: number;
+    parent_report_id: string | null;
+    filing_status: string;
+    change_requested_at: string | null;
+    amendment_due_at: string | null;
+    amendment_explanation: string | null;
+    created_at: string;
+  };
+  const [caseStrReports, setCaseStrReports] = useState<StrAmendmentRow[]>([]);
+  const [showAmendDialog, setShowAmendDialog] = useState(false);
+  const [amendTargetReport, setAmendTargetReport] = useState<StrAmendmentRow | null>(null);
+  const [amendMode, setAmendMode] = useState<"request" | "file">("request");
+  const [amendReason, setAmendReason] = useState("");
+  const [amendExplanation, setAmendExplanation] = useState("");
+  const [amendSubmitting, setAmendSubmitting] = useState(false);
   const availableExports = getAvailableExports(userRegulator);
   const regulatorReports = userRegulator ? (REGULATOR_REPORTS[userRegulator] || []) : [];
 
@@ -333,6 +352,82 @@ export default function SuiteCases() {
         setManualFields(prev => ({ ...prev, isPEP: custRes.data.pep_status }));
       }
     }
+    await loadCaseStrReports(c.id);
+  };
+
+  const loadCaseStrReports = async (caseId: string) => {
+    const { data, error } = await supabase
+      .from("str_reports")
+      .select("id, version, parent_report_id, filing_status, change_requested_at, amendment_due_at, amendment_explanation, created_at")
+      .eq("case_id", caseId)
+      .order("created_at", { ascending: false });
+    if (!error) setCaseStrReports((data as StrAmendmentRow[]) || []);
+  };
+
+  const openAmendDialog = (report: StrAmendmentRow, mode: "request" | "file") => {
+    setAmendTargetReport(report);
+    setAmendMode(mode);
+    setAmendReason("");
+    setAmendExplanation("");
+    setShowAmendDialog(true);
+  };
+
+  const submitAmendment = async () => {
+    if (!amendTargetReport || !selectedCase) return;
+    if (amendMode === "request" && amendReason.trim().length < 10) {
+      toast.error("Please provide a reason (min. 10 characters)");
+      return;
+    }
+    if (amendMode === "file" && amendExplanation.trim().length < 10) {
+      toast.error("Please provide an explanation (min. 10 characters)");
+      return;
+    }
+    setAmendSubmitting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error("Please log in"); return; }
+
+      if (amendMode === "request") {
+        const { error } = await supabase.rpc("request_str_amendment", {
+          _report_id: amendTargetReport.id,
+          _reason: amendReason.trim(),
+        } as any);
+        if (error) throw error;
+        toast.success("Amendment requested — 20-day clock started");
+      } else {
+        const { error } = await supabase.rpc("file_str_amendment", {
+          _report_id: amendTargetReport.id,
+          _explanation: amendExplanation.trim(),
+        } as any);
+        if (error) throw error;
+        toast.success("Amended STR filed");
+      }
+
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: amendMode === "request"
+          ? `STR amendment requested (v${amendTargetReport.version}) — 20-day deadline started`
+          : `STR amendment filed (replaces v${amendTargetReport.version})`,
+        entity_type: "str_report",
+        entity_id: amendTargetReport.id,
+        details: { mode: amendMode, reason: amendMode === "request" ? amendReason : undefined, explanation: amendMode === "file" ? amendExplanation : undefined },
+      });
+
+      setShowAmendDialog(false);
+      await loadCaseStrReports(selectedCase.id);
+    } catch (err: any) {
+      console.error("Amendment error:", err);
+      toast.error(`Amendment failed: ${err?.message || "Unknown error"}`);
+    } finally {
+      setAmendSubmitting(false);
+    }
+  };
+
+  // Days remaining until FINTRAC 20-day amendment deadline (negative = overdue)
+  const daysUntilDue = (dueAt: string | null): number | null => {
+    if (!dueAt) return null;
+    const ms = new Date(dueAt).getTime() - Date.now();
+    return Math.ceil(ms / (1000 * 60 * 60 * 24));
   };
 
   const addNote = async () => {
@@ -500,6 +595,8 @@ export default function SuiteCases() {
         entity_id: selectedCase.id,
         details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada", str_report_id: strReport?.id, transactions_count: transactions.length, fwr_schema_version: fwrPayload.schemaVersion },
       });
+
+      await loadCaseStrReports(selectedCase.id);
     } catch (err: any) {
       console.error("FINTRAC export error:", err);
       toast.error(`PDF export failed: ${err?.message || "Unknown error"}`);
@@ -1966,6 +2063,98 @@ export default function SuiteCases() {
               <span className="text-[10px] text-red-500">PCMLTFA s.7 · PCMLTFR Part 1</span>
             </div>
 
+            {/* STR Amendment Workflow (FINTRAC 20-day deadline for corrected reports) */}
+            {caseStrReports.length > 0 && (
+              <div className="mt-5 border border-red-200 rounded-lg overflow-hidden bg-red-50/30">
+                <div className="px-4 py-2.5 border-b border-red-200 bg-red-100/50 flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-red-900 flex items-center gap-1.5">
+                    <ClipboardCheck className="w-3.5 h-3.5" /> Filed STR Reports — Amendment Workflow
+                  </h4>
+                  <span className="text-[10px] text-red-700 font-mono">PCMLTFR · 20-day correction window</span>
+                </div>
+                <div className="divide-y divide-red-100">
+                  {caseStrReports.map(report => {
+                    const days = daysUntilDue(report.amendment_due_at);
+                    const isChangeRequested = report.filing_status === "change_requested";
+                    const isSuperseded = report.filing_status === "superseded";
+                    const isAmended = report.filing_status === "amended";
+                    const isDraft = report.filing_status === "draft";
+                    const overdue = days !== null && days < 0;
+                    const urgent = days !== null && days >= 0 && days <= 5;
+                    return (
+                      <div key={report.id} className="px-4 py-3 flex items-center gap-3 flex-wrap">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-foreground">
+                              v{report.version} · {report.id.slice(0, 8).toUpperCase()}
+                            </span>
+                            <span className={cn(
+                              "text-[10px] px-2 py-0.5 rounded-full font-semibold border",
+                              isDraft && "bg-slate-100 text-slate-700 border-slate-200",
+                              isChangeRequested && "bg-amber-100 text-amber-800 border-amber-300",
+                              isAmended && "bg-emerald-100 text-emerald-700 border-emerald-300",
+                              isSuperseded && "bg-muted text-muted-foreground border-border line-through",
+                            )}>
+                              {report.filing_status.replace("_", " ")}
+                            </span>
+                            {report.parent_report_id && (
+                              <span className="text-[10px] text-muted-foreground">
+                                amends {report.parent_report_id.slice(0, 8).toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          {isChangeRequested && days !== null && (
+                            <div className="mt-1 flex items-center gap-2">
+                              <span className={cn(
+                                "text-[10px] px-2 py-0.5 rounded-full font-bold border inline-flex items-center gap-1",
+                                overdue ? "bg-red-600 text-white border-red-700 animate-pulse" :
+                                urgent ? "bg-orange-100 text-orange-800 border-orange-300" :
+                                "bg-blue-50 text-blue-800 border-blue-200"
+                              )}>
+                                <AlertTriangle className="w-3 h-3" />
+                                {overdue
+                                  ? `Overdue by ${Math.abs(days)} day${Math.abs(days) === 1 ? "" : "s"}`
+                                  : `${days} day${days === 1 ? "" : "s"} remaining`}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground">
+                                Due {new Date(report.amendment_due_at!).toLocaleDateString()}
+                              </span>
+                            </div>
+                          )}
+                          {report.amendment_explanation && (
+                            <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">
+                              <strong>Explanation:</strong> {report.amendment_explanation}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {(isDraft || isAmended) && !isSuperseded && (
+                            <button
+                              onClick={() => openAmendDialog(report, "request")}
+                              className="text-[10px] px-2.5 py-1 rounded-md border border-amber-300 text-amber-800 bg-amber-50 hover:bg-amber-100 font-semibold"
+                            >
+                              Request Amendment
+                            </button>
+                          )}
+                          {isChangeRequested && (
+                            <button
+                              onClick={() => openAmendDialog(report, "file")}
+                              className={cn(
+                                "text-[10px] px-2.5 py-1 rounded-md font-semibold text-white",
+                                overdue ? "bg-red-600 hover:bg-red-700" : "bg-emerald-600 hover:bg-emerald-700"
+                              )}
+                            >
+                              File Amended STR
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Field Mapping Panel */}
             {showFieldMapping && (() => {
               const parts = Object.keys(PART_LABELS);
@@ -2385,6 +2574,118 @@ export default function SuiteCases() {
           </div>
         </div>
       </div>
+
+      {/* STR Amendment Dialog (FINTRAC 20-day correction window) */}
+      <Dialog open={showAmendDialog} onOpenChange={(open) => { if (!open && !amendSubmitting) setShowAmendDialog(false); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm font-semibold">
+              <AlertTriangle className={cn("w-4 h-4", amendMode === "request" ? "text-amber-600" : "text-emerald-600")} />
+              {amendMode === "request" ? "Request STR Amendment" : "File Amended STR"}
+            </DialogTitle>
+          </DialogHeader>
+
+          {amendTargetReport && (
+            <div className="space-y-4">
+              <div className="p-3 rounded-lg bg-muted/50 border border-border space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-foreground">
+                    Report v{amendTargetReport.version} · {amendTargetReport.id.slice(0, 8).toUpperCase()}
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-background border border-border font-mono">
+                    {amendTargetReport.filing_status.replace("_", " ")}
+                  </span>
+                </div>
+                {amendMode === "request" && (
+                  <p className="text-[11px] text-muted-foreground leading-snug">
+                    Per FINTRAC PCMLTFR, corrections to a filed STR must be submitted as soon as practicable
+                    and within <strong>20 calendar days</strong> of identifying the change. Requesting an amendment
+                    starts the 20-day clock and creates a versioned draft.
+                  </p>
+                )}
+                {amendMode === "file" && amendTargetReport.amendment_due_at && (() => {
+                  const days = daysUntilDue(amendTargetReport.amendment_due_at);
+                  const overdue = days !== null && days < 0;
+                  return (
+                    <div className={cn(
+                      "text-[11px] px-2 py-1 rounded font-semibold inline-flex items-center gap-1",
+                      overdue ? "bg-red-100 text-red-800 border border-red-300" : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    )}>
+                      <AlertTriangle className="w-3 h-3" />
+                      {overdue
+                        ? `Overdue by ${Math.abs(days!)} day${Math.abs(days!) === 1 ? "" : "s"} — file immediately`
+                        : `${days} day${days === 1 ? "" : "s"} remaining until 20-day deadline`}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {amendMode === "request" ? (
+                <div>
+                  <label className="text-xs font-semibold text-foreground block mb-1.5">
+                    Reason for Amendment <span className="text-red-600">*</span>
+                  </label>
+                  <textarea
+                    value={amendReason}
+                    onChange={e => setAmendReason(e.target.value.slice(0, 1000))}
+                    placeholder="e.g. Additional transactions identified linking subject to suspicious counterparty…"
+                    rows={4}
+                    className="w-full text-xs px-3 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-muted-foreground">Min. 10 characters · audit-logged</span>
+                    <span className="text-[10px] text-muted-foreground">{amendReason.length}/1000</span>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="text-xs font-semibold text-foreground block mb-1.5">
+                    Explanation of Changes <span className="text-red-600">*</span>
+                  </label>
+                  <textarea
+                    value={amendExplanation}
+                    onChange={e => setAmendExplanation(e.target.value.slice(0, 2000))}
+                    placeholder="Describe what was changed in this amended STR (fields, parties, amounts, narrative additions…)"
+                    rows={5}
+                    className="w-full text-xs px-3 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-muted-foreground">Min. 10 characters · attached to FWR submission</span>
+                    <span className="text-[10px] text-muted-foreground">{amendExplanation.length}/2000</span>
+                  </div>
+                  <div className="mt-3 p-2.5 rounded bg-amber-50 border border-amber-200 text-[10px] text-amber-900 leading-snug">
+                    <strong>Tipping-off prohibition (PCMLTFA s.8):</strong> Do not disclose the existence of
+                    this STR or its amendment to the subject. Filing this amendment will mark the prior
+                    version as <em>superseded</em>.
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <button
+              onClick={() => setShowAmendDialog(false)}
+              disabled={amendSubmitting}
+              className="text-xs px-4 py-2 rounded-md border border-border bg-background hover:bg-muted disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={submitAmendment}
+              disabled={amendSubmitting}
+              className={cn(
+                "text-xs px-4 py-2 rounded-md font-semibold text-white disabled:opacity-50",
+                amendMode === "request" ? "bg-amber-600 hover:bg-amber-700" : "bg-emerald-600 hover:bg-emerald-700"
+              )}
+            >
+              {amendSubmitting
+                ? "Submitting…"
+                : amendMode === "request" ? "Request Amendment" : "File Amended STR"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* PDF Preview Modal */}
       <Dialog open={!!pdfPreview} onOpenChange={(open) => { if (!open) closePdfPreview(); }}>
