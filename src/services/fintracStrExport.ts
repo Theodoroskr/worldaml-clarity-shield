@@ -39,8 +39,55 @@ export interface FINTRACNote {
   created_at: string;
 }
 
+// FINTRAC FWR-aligned party records (multi-entry)
+export interface FINTRACPartyConductor {
+  fullName: string;
+  dateOfBirth?: string;
+  address?: string;
+  occupation?: string;
+  idType?: string;
+  idNumber?: string;
+  idJurisdiction?: string;
+}
+
+export interface FINTRACPartyBeneficialOwner {
+  fullName: string;
+  dateOfBirth?: string;
+  address?: string;
+  ownershipPercent?: string;
+  controlNature?: string; // e.g. director, signatory, ultimate beneficial owner
+}
+
+export interface FINTRACPartyThirdParty {
+  fullName: string;
+  dateOfBirth?: string;
+  address?: string;
+  relationshipToConductor?: string; // e.g. employer, spouse, agent
+  onBehalfOfIndicator?: string; // who they are acting for
+}
+
+// Virtual currency / EMT (Electronic Funds Transfer / Electronic Money Transfer) details
+export interface FINTRACVirtualCurrencyDetails {
+  vcType: string; // BTC, ETH, USDT, etc.
+  senderAddress?: string;
+  receiverAddress?: string;
+  transactionHash?: string;
+  exchangeRateToCad?: string;
+  walletProvider?: string;
+}
+
+export interface FINTRACEmtDetails {
+  emtReference?: string;        // EMT reference / confirmation number
+  emtMessage?: string;          // free-text EMT memo / message field
+  senderInstitution?: string;
+  receiverInstitution?: string;
+  senderAccount?: string;
+  receiverAccount?: string;
+  emtType?: string;             // e-Transfer, SWIFT MT103, ACH, Interac, etc.
+}
+
 export interface FINTRACManualFields {
-  // Starting Action
+  // Starting Action (legacy single-conductor — kept for backward compat)
   methodOfTransaction: string;
   sourceOfFunds: string;
   conductorName: string;
@@ -70,6 +117,15 @@ export interface FINTRACManualFields {
   tprDispositionAction: string;
   tprDateDiscovered: string;
   tprRelationshipToEntity: string;
+  // ── FWR-aligned multi-party records ──
+  conductors: FINTRACPartyConductor[];
+  beneficialOwners: FINTRACPartyBeneficialOwner[];
+  thirdParties: FINTRACPartyThirdParty[];
+  // ── Virtual currency / EMT ──
+  isVirtualCurrency: boolean;
+  virtualCurrency: FINTRACVirtualCurrencyDetails;
+  isEmt: boolean;
+  emt: FINTRACEmtDetails;
 }
 
 export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
