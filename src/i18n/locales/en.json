@@ -64,6 +64,12 @@
     },
     "placeholder": {
       "body": "Module scaffolded. CRUD UI ships in the next iteration — schema, RLS and demo data are already live."
+    },
+    "obligations": {
+      "all_statuses": "All statuses",
+      "all_risks": "All risk levels",
+      "clear_filters": "Clear filters",
+      "no_matches": "No obligations match the current filters."
     }
   }
 }
