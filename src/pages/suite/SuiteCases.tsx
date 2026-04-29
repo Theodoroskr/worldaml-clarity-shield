@@ -1949,6 +1949,11 @@ export default function SuiteCases() {
                 className="flex items-center gap-1.5 text-xs px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
                 <Download className="w-3.5 h-3.5" /> Export {fintracStrType.toUpperCase()} PDF
               </button>
+              <button onClick={handleDownloadFwrJson}
+                title="Download FWR-ready structured JSON for electronic submission via FINTRAC API"
+                className="flex items-center gap-1.5 text-xs px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 font-semibold">
+                <Download className="w-3.5 h-3.5" /> FWR JSON (API-ready)
+              </button>
               <button onClick={() => setShowFieldMapping(!showFieldMapping)}
                 className="flex items-center gap-1.5 text-xs px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-100 font-medium">
                 <Info className="w-3.5 h-3.5" /> {showFieldMapping ? "Hide" : "Show"} Field Mapping
