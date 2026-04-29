@@ -595,6 +595,8 @@ export default function SuiteCases() {
         entity_id: selectedCase.id,
         details: { report_type: fintracStrType, jurisdiction: "FINTRAC-Canada", str_report_id: strReport?.id, transactions_count: transactions.length, fwr_schema_version: fwrPayload.schemaVersion },
       });
+
+      await loadCaseStrReports(selectedCase.id);
     } catch (err: any) {
       console.error("FINTRAC export error:", err);
       toast.error(`PDF export failed: ${err?.message || "Unknown error"}`);
