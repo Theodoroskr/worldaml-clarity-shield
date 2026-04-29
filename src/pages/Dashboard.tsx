@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccess } from "@/hooks/useAccess";
+import { useRcmOrg } from "@/hooks/useRcmOrg";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import { useSearchParams } from "react-router-dom";
@@ -24,6 +25,8 @@ import { formatDistanceToNow } from "date-fns";
 const Dashboard = () => {
   const { user, profile, isLoading, isApproved, isAdmin, signOut } = useAuth();
   const { hasSuiteAccess } = useAccess();
+  const { membership: rcmMembership } = useRcmOrg();
+  const isOrgAdmin = rcmMembership?.role === "admin";
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
@@ -205,22 +208,43 @@ const Dashboard = () => {
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-navy text-sm">
-                    Regulatory Compliance Management (RCM) — access required
+                    {isOrgAdmin
+                      ? "Activate Regulatory Compliance Management (RCM) for your organisation"
+                      : "Regulatory Compliance Management (RCM) — access required"}
                   </p>
-                  <p className="text-text-secondary text-xs mt-1 leading-relaxed">
-                    RCM is part of WorldAML Suite and includes the regulation library, obligations,
-                    controls, assessments, tasks, evidence vault and audit-ready reports. Your account
-                    doesn't have Suite access yet.
-                  </p>
-                  <p className="text-text-secondary text-xs mt-2 leading-relaxed">
-                    To request access, contact our team — we'll provision your organisation, assign
-                    a regulator and confirm your seats. Existing customers can also ask their
-                    organisation admin to invite them.
-                  </p>
+
+                  {isOrgAdmin ? (
+                    <>
+                      <p className="text-text-secondary text-xs mt-1 leading-relaxed">
+                        You're an <strong className="text-navy">organisation admin</strong>, but your
+                        org doesn't have a Suite subscription with RCM enabled yet. Once activated,
+                        you'll be able to invite teammates, assign roles and manage seats yourself —
+                        no further requests needed.
+                      </p>
+                      <p className="text-text-secondary text-xs mt-2 leading-relaxed">
+                        Talk to our team to upgrade your plan, or pick a Suite tier directly.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-text-secondary text-xs mt-1 leading-relaxed">
+                        RCM is part of WorldAML Suite and includes the regulation library, obligations,
+                        controls, assessments, tasks, evidence vault and audit-ready reports. Your account
+                        doesn't have Suite access yet.
+                      </p>
+                      <p className="text-text-secondary text-xs mt-2 leading-relaxed">
+                        The fastest path is usually to ask your <strong className="text-navy">organisation admin</strong> to
+                        invite you to an existing workspace. If your company isn't on WorldAML yet,
+                        contact our team and we'll provision a new organisation.
+                      </p>
+                    </>
+                  )}
 
                   <div className="mt-3 rounded-md border border-navy/10 bg-white/60 p-3">
                     <p className="text-[11px] font-semibold uppercase tracking-wider text-navy/70">
-                      Have these ready before you contact us
+                      {isOrgAdmin
+                        ? "Have these ready when you talk to sales"
+                        : "Have these ready before you contact us"}
                     </p>
                     <ul className="mt-2 space-y-1.5 text-xs text-text-secondary">
                       <li className="flex items-start gap-2">
@@ -247,7 +271,7 @@ const Dashboard = () => {
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Button variant="accent" size="sm" onClick={() => navigate("/contact-sales")}>
-                      Request RCM access
+                      {isOrgAdmin ? "Talk to sales" : "Request RCM access"}
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => navigate("/pricing")}>
                       View Suite plans
