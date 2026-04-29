@@ -67,6 +67,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const RcmLayout = lazy(() => import("./pages/rcm/RcmLayout"));
 const RcmDashboard = lazy(() => import("./pages/rcm/RcmDashboard"));
 const RcmPlaceholder = lazy(() => import("./pages/rcm/RcmPlaceholder"));
+const RcmObligations = lazy(() => import("./pages/rcm/RcmObligations"));
 const SuiteLayout = lazy(() => import("./pages/SuiteLayout"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
@@ -278,7 +279,7 @@ const App = () => (
                 <Route path="/rcm" element={<RcmLayout />}>
                   <Route index element={<RcmDashboard />} />
                   <Route path="library" element={<RcmPlaceholder titleKey="rcm.nav.library" />} />
-                  <Route path="obligations" element={<RcmPlaceholder titleKey="rcm.nav.obligations" />} />
+                  <Route path="obligations" element={<RcmObligations />} />
                   <Route path="controls" element={<RcmPlaceholder titleKey="rcm.nav.controls" />} />
                   <Route path="assessments" element={<RcmPlaceholder titleKey="rcm.nav.assessments" />} />
                   <Route path="tasks" element={<RcmPlaceholder titleKey="rcm.nav.tasks" />} />
