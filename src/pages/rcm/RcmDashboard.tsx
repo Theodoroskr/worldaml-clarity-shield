@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Trans } from "react-i18next";
 
 export default function RcmDashboard() {
   const { t } = useTranslation();
@@ -57,7 +58,11 @@ export default function RcmDashboard() {
             {joining ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : null}
             {t("rcm.common.join_demo")}
           </Button>
-          {!userId && <p className="text-xs text-muted-foreground mt-3">Sign in first via <Link to="/login" className="underline">/login</Link>.</p>}
+          {!userId && (
+            <p className="text-xs text-muted-foreground mt-3">
+              <Trans i18nKey="rcm.dashboard.sign_in_first" components={{ 1: <Link to="/login" className="underline" /> }} />
+            </p>
+          )}
         </Card>
       </div>
     );
@@ -86,11 +91,7 @@ export default function RcmDashboard() {
         ))}
       </div>
       <Card className="p-6">
-        <p className="text-sm text-muted-foreground">
-          Schema, RLS, and Region Trade Bank demo data are live. Library, Obligations, Controls,
-          Assessments, Tasks, Evidence, Reports, Translation Review, Audit and Settings UIs are
-          scaffolded — basic CRUD lands in the next iteration.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("rcm.dashboard.scaffold_note")}</p>
       </Card>
     </div>
   );
