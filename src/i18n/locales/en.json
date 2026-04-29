@@ -69,7 +69,16 @@
       "all_statuses": "All statuses",
       "all_risks": "All risk levels",
       "clear_filters": "Clear filters",
-      "no_matches": "No obligations match the current filters."
+      "no_matches": "No obligations match the current filters.",
+      "select_all": "Select all",
+      "selected_count": "{{count}} selected",
+      "clear_selection": "Clear selection",
+      "bulk_set_status": "Set status",
+      "bulk_set_risk": "Set risk",
+      "apply": "Apply",
+      "applying": "Applying…",
+      "bulk_success": "Updated {{count}} obligations",
+      "bulk_error": "Could not update obligations"
     }
   }
 }
