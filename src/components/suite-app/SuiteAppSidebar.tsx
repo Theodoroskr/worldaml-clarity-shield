@@ -58,6 +58,24 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
     ],
   },
   {
+    title: "RCM",
+    items: [
+      {
+        icon: BookOpen, label: "Reg. Compliance",
+        children: [
+          { label: "Dashboard", path: "/rcm" },
+          { label: "Library", path: "/rcm/library" },
+          { label: "Obligations", path: "/rcm/obligations" },
+          { label: "Controls", path: "/rcm/controls" },
+          { label: "Assessments", path: "/rcm/assessments" },
+          { label: "Tasks", path: "/rcm/tasks" },
+          { label: "Evidence", path: "/rcm/evidence" },
+          { label: "Reports", path: "/rcm/reports" },
+        ],
+      },
+    ],
+  },
+  {
     title: "System",
     items: [
       { icon: Scale, label: "Regulatory Hub", path: "/suite/regulatory" },
