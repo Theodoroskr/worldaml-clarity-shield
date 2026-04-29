@@ -9,7 +9,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-export function RcmSidebar() {
+export function RcmSidebar({ side = "left" }: { side?: "left" | "right" }) {
   const { t } = useTranslation();
   const items = [
     { to: "/rcm", end: true, icon: LayoutDashboard, label: t("rcm.nav.dashboard") },
@@ -25,7 +25,7 @@ export function RcmSidebar() {
     { to: "/rcm/settings", icon: Settings, label: t("rcm.nav.settings") },
   ];
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" side={side}>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>{t("rcm.brand")} · RCM</SidebarGroupLabel>
@@ -36,8 +36,8 @@ export function RcmSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={it.to} end={it.end} className={({ isActive }) =>
                       `flex items-center gap-2 ${isActive ? "bg-muted text-foreground font-medium" : ""}`}>
-                      <it.icon className="h-4 w-4" />
-                      <span>{it.label}</span>
+                      <it.icon className="h-4 w-4 shrink-0" />
+                      <span className="text-start">{it.label}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

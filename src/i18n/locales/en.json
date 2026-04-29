@@ -44,7 +44,12 @@
       "kpi_overdue": "Overdue tasks",
       "kpi_high_risk": "High-risk obligations",
       "recent_escalations": "Recent escalations",
-      "by_department": "Compliance by department"
+      "by_department": "Compliance by department",
+      "scaffold_note": "Schema, RLS, and Region Trade Bank demo data are live. Library, Obligations, Controls, Assessments, Tasks, Evidence, Reports, Translation Review, Audit and Settings UIs are scaffolded — basic CRUD lands in the next iteration.",
+      "sign_in_first": "Sign in first via <1>/login</1>."
+    },
+    "placeholder": {
+      "body": "Module scaffolded. CRUD UI ships in the next iteration — schema, RLS and demo data are already live."
     }
   }
 }
