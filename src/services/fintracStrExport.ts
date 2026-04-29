@@ -310,18 +310,41 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
   doc.setTextColor(0, 0, 0);
   let y = 52;
 
-  // PART A: Report Identification
-  y = header(doc, "Part A — Report Identification", y);
-  y = fieldPair(doc, "Reference Number", refNum, "Report Type", STR_TYPE_LABELS[strType] ?? "STR", y);
+  // ════════════════════════════════════════════════════════════════════
+  // FWR STR — 6 OFFICIAL SECTIONS
+  //   1 General Information · 2 Transaction Information · 3 Starting Action
+  //   4 Completing Action · 5 Details of Suspicion · 6 Action Taken
+  // ════════════════════════════════════════════════════════════════════
+
+  const txActions = mf.transactionActions ?? {};
+  const getStarting = (txId: string) => txActions[txId]?.starting ?? {};
+  const getCompleting = (txId: string) => txActions[txId]?.completing ?? {};
+  const fallback = (perTx: string | undefined, legacy: string) => (perTx && perTx.trim() ? perTx : legacy);
+
+  const subHeader = (label: string) => {
+    doc.setFillColor(255, 240, 240);
+    doc.rect(MARGIN, y, CONTENT_W, 7, "F");
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(120, 20, 20);
+    doc.text(label, MARGIN + 3, y + 5);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "normal");
+    y += 10;
+  };
+
+  // ── SECTION 1 — General Information ──
+  y = header(doc, "Section 1 — General Information", y);
+  y = fieldPair(doc, "Reporting Entity Report Reference", refNum, "Report Type", STR_TYPE_LABELS[strType] ?? "STR", y);
   y = fieldPair(doc, "Reporting Entity", reportingEntity, "Reporting Officer (CAMLO)", submittedBy, y);
-  y = fieldPair(doc, "Report Date", dateStr, "Filing Deadline", strType === "str" ? "Within 3 business days of determination" : "Within 15 calendar days", y);
-  y = field(doc, "Case Reference", `${caseItem.id} — ${caseItem.title}`, y);
+  y = fieldPair(doc, "Report Date", dateStr, "Filing Deadline",
+    strType === "str" ? "As soon as practicable after RGS established" : "Within 15 calendar days", y);
+  y = field(doc, "Internal Case Reference", `${caseItem.id} — ${caseItem.title}`, y);
   y = fieldPair(doc, "Case Status", caseItem.status.replace(/_/g, " ").toUpperCase(), "Priority", caseItem.priority.toUpperCase(), y);
   y += 2;
 
-  // PART B: Subject Information
   y = checkPage(doc, y, 60);
-  y = header(doc, "Part B — Subject Information (Individual / Entity)", y);
+  subHeader("1.1 — SUBJECT OF THE REPORT (INDIVIDUAL / ENTITY)");
   if (customer) {
     y = fieldPair(doc, "Full Legal Name", customer.name, "Entity Type", customer.type === "business" ? "Legal Entity / Corporation" : "Individual", y);
     if (customer.date_of_birth) {
@@ -338,25 +361,69 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
   }
   y += 2;
 
-  // PART C: Transaction Details — Starting & Completing Actions
+  if (mf.conductors && mf.conductors.length > 0) {
+    y = checkPage(doc, y, 30);
+    subHeader(`1.2 — CONDUCTORS (${mf.conductors.length})`);
+    mf.conductors.forEach((c, idx) => {
+      y = checkPage(doc, y, 30);
+      doc.setFontSize(8); doc.setFont("helvetica", "bold");
+      doc.text(`Conductor ${idx + 1}`, MARGIN, y);
+      doc.setFont("helvetica", "normal"); y += 4;
+      y = fieldPair(doc, "Full Legal Name", c.fullName || "—", "Date of Birth", c.dateOfBirth || "—", y);
+      y = field(doc, "Address", c.address || "—", y);
+      y = fieldPair(doc, "Occupation", c.occupation || "—", "ID Type", c.idType || "—", y);
+      y = fieldPair(doc, "ID Number", c.idNumber || "—", "ID Issuing Jurisdiction", c.idJurisdiction || "—", y);
+    });
+    y += 2;
+  }
+
+  if (mf.thirdParties && mf.thirdParties.length > 0) {
+    y = checkPage(doc, y, 30);
+    subHeader(`1.3 — THIRD PARTIES (${mf.thirdParties.length})`);
+    mf.thirdParties.forEach((t, idx) => {
+      y = checkPage(doc, y, 30);
+      doc.setFontSize(8); doc.setFont("helvetica", "bold");
+      doc.text(`Third Party ${idx + 1}`, MARGIN, y);
+      doc.setFont("helvetica", "normal"); y += 4;
+      y = fieldPair(doc, "Full Legal Name", t.fullName || "—", "Date of Birth", t.dateOfBirth || "—", y);
+      y = field(doc, "Address", t.address || "—", y);
+      y = fieldPair(doc, "Relationship to Conductor", t.relationshipToConductor || "—", "On Behalf Of", t.onBehalfOfIndicator || "—", y);
+    });
+    y += 2;
+  }
+
+  if (mf.beneficialOwners && mf.beneficialOwners.length > 0) {
+    y = checkPage(doc, y, 30);
+    subHeader(`1.4 — BENEFICIAL OWNERS (${mf.beneficialOwners.length})`);
+    mf.beneficialOwners.forEach((b, idx) => {
+      y = checkPage(doc, y, 30);
+      doc.setFontSize(8); doc.setFont("helvetica", "bold");
+      doc.text(`Beneficial Owner ${idx + 1}`, MARGIN, y);
+      doc.setFont("helvetica", "normal"); y += 4;
+      y = fieldPair(doc, "Full Legal Name", b.fullName || "—", "Date of Birth", b.dateOfBirth || "—", y);
+      y = field(doc, "Address", b.address || "—", y);
+      y = fieldPair(doc, "Ownership %", b.ownershipPercent || "—", "Nature of Control", b.controlNature || "—", y);
+    });
+    y += 2;
+  }
+
+  // ── SECTION 2 — Transaction Information (multi-transaction) ──
   y = checkPage(doc, y, 40);
-  y = header(doc, "Part C — Transaction Details (Starting & Completing Actions)", y);
+  y = header(doc, `Section 2 — Transaction Information (${transactions.length} transaction${transactions.length === 1 ? "" : "s"})`, y);
+
   if (transactions.length === 0) {
-    y = field(doc, "Transactions", "No linked transactions. See investigation notes for narrative.", y);
+    y = field(doc, "Transactions", "No linked transactions. See Section 5 (Details of Suspicion) for narrative.", y);
   } else {
-    // Transaction table
-    doc.setFontSize(7.5);
-    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.5); doc.setFont("helvetica", "bold");
     doc.setFillColor(245, 245, 245);
     doc.rect(MARGIN, y, CONTENT_W, 7, "F");
     const cols = [MARGIN + 2, MARGIN + 22, MARGIN + 47, MARGIN + 67, MARGIN + 87, MARGIN + 112, MARGIN + 140];
-    const headers = ["Date", "Amount", "Currency", "Direction", "Counterparty", "Country", "Status"];
-    headers.forEach((h, i) => doc.text(h, cols[i], y + 5));
+    const cellHeaders = ["Date", "Amount", "Currency", "Direction", "Counterparty", "Country", "Status"];
+    cellHeaders.forEach((h, i) => doc.text(h, cols[i], y + 5));
     y += 9;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8);
 
-    for (const tx of transactions.slice(0, 20)) {
+    for (const tx of transactions.slice(0, 30)) {
       y = checkPage(doc, y, 8);
       const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
       const amt = tx.amount.toLocaleString("en-CA", { minimumFractionDigits: 2 });
@@ -371,142 +438,25 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
       doc.line(MARGIN, y + 6, MARGIN + CONTENT_W, y + 6);
       y += 8;
     }
-    if (transactions.length > 20) {
-      doc.setFontSize(7);
-      doc.setFont("helvetica", "italic");
-      doc.text(`+ ${transactions.length - 20} additional transactions omitted`, MARGIN, y + 4);
+    if (transactions.length > 30) {
+      doc.setFontSize(7); doc.setFont("helvetica", "italic");
+      doc.text(`+ ${transactions.length - 30} additional transactions omitted from summary table`, MARGIN, y + 4);
       y += 8;
     }
 
-    // Summary
     y = checkPage(doc, y, 15);
     const totalAmount = transactions.reduce((s, t) => s + t.amount, 0);
     const flaggedCount = transactions.filter(t => t.risk_flag).length;
-    y = fieldPair(doc,
-      "Total Transactions", String(transactions.length),
-      "Aggregate Value", `${totalAmount.toLocaleString("en-CA", { minimumFractionDigits: 2 })} ${transactions[0]?.currency ?? "CAD"}`,
-      y
-    );
-    y = fieldPair(doc,
-      "Risk-Flagged Transactions", `${flaggedCount} of ${transactions.length}`,
-      "Flagged Percentage", `${transactions.length > 0 ? Math.round((flaggedCount / transactions.length) * 100) : 0}%`,
-      y
-    );
-
-    // Starting Action section
-    y = checkPage(doc, y, 40);
-    y += 2;
-    doc.setFillColor(255, 240, 240);
-    doc.rect(MARGIN, y, CONTENT_W, 7, "F");
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(120, 20, 20);
-    doc.text("STARTING ACTION — CONDUCTOR & SOURCE (PCMLTFR s.132)", MARGIN + 3, y + 5);
-    doc.setTextColor(0, 0, 0);
-    y += 10;
-
-    const startingFields = [
-      { label: "Method of Transaction", value: mf.methodOfTransaction || "Not specified" },
-      { label: "Source of Funds", value: mf.sourceOfFunds || "Not specified" },
-      { label: "Conductor Name", value: mf.conductorName || (customer ? customer.name : "Not specified") },
-      { label: "Third Party Determination", value: mf.thirdPartyIndicator === "third_party" ? `On behalf of third party: ${mf.thirdPartyName || "—"}` : "Transaction conducted on own behalf" },
-    ];
-    for (const sf of startingFields) {
-      y = checkPage(doc, y, 12);
-      y = field(doc, sf.label, sf.value, y);
-    }
-
-    // Completing Action section
-    y = checkPage(doc, y, 40);
-    y += 2;
-    doc.setFillColor(255, 240, 240);
-    doc.rect(MARGIN, y, CONTENT_W, 7, "F");
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(120, 20, 20);
-    doc.text("COMPLETING ACTION — DISPOSITION & BENEFICIARY (PCMLTFR s.133)", MARGIN + 3, y + 5);
-    doc.setTextColor(0, 0, 0);
-    y += 10;
-
-    const completingFields = [
-      { label: "Disposition of Funds", value: mf.dispositionOfFunds || "Not specified" },
-      { label: "Beneficiary Name", value: mf.beneficiaryName || "Not specified" },
-      { label: "Beneficiary Account", value: mf.beneficiaryAccount || "—" },
-      { label: "Beneficiary Country", value: mf.beneficiaryCountry || "—" },
-    ];
-    for (const cf of completingFields) {
-      y = checkPage(doc, y, 12);
-      y = field(doc, cf.label, cf.value, y);
-    }
-  }
-  y += 2;
-
-  // PART C-1: Conductors (multi-entry) — FWR Conductor section
-  if (mf.conductors && mf.conductors.length > 0) {
-    y = checkPage(doc, y, 30);
-    y = header(doc, `Part C-1 — Conductors (${mf.conductors.length})`, y);
-    mf.conductors.forEach((c, idx) => {
-      y = checkPage(doc, y, 30);
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(120, 20, 20);
-      doc.text(`Conductor ${idx + 1}`, MARGIN, y);
-      doc.setTextColor(0, 0, 0);
-      doc.setFont("helvetica", "normal");
-      y += 4;
-      y = fieldPair(doc, "Full Legal Name", c.fullName || "—", "Date of Birth", c.dateOfBirth || "—", y);
-      y = field(doc, "Address", c.address || "—", y);
-      y = fieldPair(doc, "Occupation", c.occupation || "—", "ID Type", c.idType || "—", y);
-      y = fieldPair(doc, "ID Number", c.idNumber || "—", "ID Issuing Jurisdiction", c.idJurisdiction || "—", y);
-    });
-    y += 2;
+    y = fieldPair(doc, "Total Transactions", String(transactions.length),
+      "Aggregate Value", `${totalAmount.toLocaleString("en-CA", { minimumFractionDigits: 2 })} ${transactions[0]?.currency ?? "CAD"}`, y);
+    y = fieldPair(doc, "Risk-Flagged Transactions", `${flaggedCount} of ${transactions.length}`,
+      "Flagged Percentage", `${transactions.length > 0 ? Math.round((flaggedCount / transactions.length) * 100) : 0}%`, y);
   }
 
-  // PART C-2: Third Parties (multi-entry)
-  if (mf.thirdParties && mf.thirdParties.length > 0) {
-    y = checkPage(doc, y, 30);
-    y = header(doc, `Part C-2 — Third Parties (${mf.thirdParties.length})`, y);
-    mf.thirdParties.forEach((t, idx) => {
-      y = checkPage(doc, y, 30);
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(120, 20, 20);
-      doc.text(`Third Party ${idx + 1}`, MARGIN, y);
-      doc.setTextColor(0, 0, 0);
-      doc.setFont("helvetica", "normal");
-      y += 4;
-      y = fieldPair(doc, "Full Legal Name", t.fullName || "—", "Date of Birth", t.dateOfBirth || "—", y);
-      y = field(doc, "Address", t.address || "—", y);
-      y = fieldPair(doc, "Relationship to Conductor", t.relationshipToConductor || "—", "On Behalf Of", t.onBehalfOfIndicator || "—", y);
-    });
-    y += 2;
-  }
-
-  // PART C-3: Beneficial Owners (multi-entry)
-  if (mf.beneficialOwners && mf.beneficialOwners.length > 0) {
-    y = checkPage(doc, y, 30);
-    y = header(doc, `Part C-3 — Beneficial Owners (${mf.beneficialOwners.length})`, y);
-    mf.beneficialOwners.forEach((b, idx) => {
-      y = checkPage(doc, y, 30);
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(120, 20, 20);
-      doc.text(`Beneficial Owner ${idx + 1}`, MARGIN, y);
-      doc.setTextColor(0, 0, 0);
-      doc.setFont("helvetica", "normal");
-      y += 4;
-      y = fieldPair(doc, "Full Legal Name", b.fullName || "—", "Date of Birth", b.dateOfBirth || "—", y);
-      y = field(doc, "Address", b.address || "—", y);
-      y = fieldPair(doc, "Ownership %", b.ownershipPercent || "—", "Nature of Control", b.controlNature || "—", y);
-    });
-    y += 2;
-  }
-
-  // PART C-VC: Virtual Currency Details
   if (mf.isVirtualCurrency) {
     const vc = mf.virtualCurrency;
     y = checkPage(doc, y, 50);
-    y = header(doc, "Part C-VC — Virtual Currency Details (PCMLTFR s.7.1)", y);
+    subHeader("2.1 — VIRTUAL CURRENCY DETAILS (PCMLTFR s.7.1)");
     y = fieldPair(doc, "Virtual Currency Type", vc.vcType || "—", "Wallet / Exchange Provider", vc.walletProvider || "—", y);
     y = field(doc, "Sender VC Address", vc.senderAddress || "—", y);
     y = field(doc, "Receiver VC Address", vc.receiverAddress || "—", y);
@@ -515,11 +465,10 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y += 2;
   }
 
-  // PART C-EMT: Electronic Funds / Money Transfer Details
   if (mf.isEmt) {
     const emt = mf.emt;
     y = checkPage(doc, y, 60);
-    y = header(doc, "Part C-EMT — Electronic Funds Transfer Details", y);
+    subHeader("2.2 — ELECTRONIC FUNDS / MONEY TRANSFER DETAILS");
     y = fieldPair(doc, "EMT / EFT Type", emt.emtType || "—", "EMT Reference Number", emt.emtReference || "—", y);
     y = fieldPair(doc, "Sender Institution", emt.senderInstitution || "—", "Receiver Institution", emt.receiverInstitution || "—", y);
     y = fieldPair(doc, "Sender Account", emt.senderAccount || "—", "Receiver Account", emt.receiverAccount || "—", y);
@@ -527,70 +476,137 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y += 2;
   }
 
-  // TPR-SPECIFIC SECTIONS — Terrorist Property Report
+  // ── SECTION 3 — Starting Action (per-transaction multi-action) ──
+  y = checkPage(doc, y, 30);
+  y = header(doc, "Section 3 — Starting Action (PCMLTFR s.132)", y);
+  doc.setFontSize(7.5); doc.setFont("helvetica", "italic"); doc.setTextColor(100, 100, 100);
+  doc.text("How each transaction was initiated — conductor, source of funds, method, third-party determination.", MARGIN, y);
+  doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal");
+  y += 6;
+
+  if (transactions.length === 0) {
+    y = field(doc, "Method of Transaction", mf.methodOfTransaction || "Not specified", y);
+    y = field(doc, "Source of Funds", mf.sourceOfFunds || "Not specified", y);
+    y = field(doc, "Conductor Name", mf.conductorName || (customer ? customer.name : "Not specified"), y);
+    y = field(doc, "Third Party Determination",
+      mf.thirdPartyIndicator === "third_party" ? `On behalf of third party: ${mf.thirdPartyName || "—"}` : "Transaction conducted on own behalf", y);
+  } else {
+    transactions.forEach((tx, idx) => {
+      const s = getStarting(tx.id);
+      y = checkPage(doc, y, 38);
+      doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(120, 20, 20);
+      const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
+      const amt = tx.amount.toLocaleString("en-CA", { minimumFractionDigits: 2 });
+      doc.text(`Starting Action ${idx + 1} — Tx ${tx.id.slice(0, 8)} · ${txDate} · ${amt} ${tx.currency}`, MARGIN, y);
+      doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal"); y += 4;
+      y = fieldPair(doc,
+        "Method of Transaction", fallback(s.methodOfTransaction, mf.methodOfTransaction || "Not specified"),
+        "Source of Funds", fallback(s.sourceOfFunds, mf.sourceOfFunds || "Not specified"), y);
+      y = fieldPair(doc,
+        "Conductor Name", fallback(s.conductorName, mf.conductorName || (customer?.name ?? "Not specified")),
+        "Third Party Determination",
+        (s.thirdPartyIndicator ?? mf.thirdPartyIndicator) === "third_party"
+          ? `On behalf of: ${fallback(s.thirdPartyName, mf.thirdPartyName || "—")}`
+          : "Conducted on own behalf",
+        y);
+      if (s.accountFrom || s.institutionFrom) {
+        y = fieldPair(doc, "Account From", s.accountFrom || "—", "Institution From", s.institutionFrom || "—", y);
+      }
+    });
+  }
+  y += 2;
+
+  // ── SECTION 4 — Completing Action (per-transaction multi-action) ──
+  y = checkPage(doc, y, 30);
+  y = header(doc, "Section 4 — Completing Action (PCMLTFR s.133)", y);
+  doc.setFontSize(7.5); doc.setFont("helvetica", "italic"); doc.setTextColor(100, 100, 100);
+  doc.text("How each transaction was completed — disposition of funds, beneficiary, receiving account/institution.", MARGIN, y);
+  doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal");
+  y += 6;
+
+  if (transactions.length === 0) {
+    y = field(doc, "Disposition of Funds", mf.dispositionOfFunds || "Not specified", y);
+    y = field(doc, "Beneficiary Name", mf.beneficiaryName || "Not specified", y);
+    y = field(doc, "Beneficiary Account", mf.beneficiaryAccount || "—", y);
+    y = field(doc, "Beneficiary Country", mf.beneficiaryCountry || "—", y);
+  } else {
+    transactions.forEach((tx, idx) => {
+      const c = getCompleting(tx.id);
+      y = checkPage(doc, y, 38);
+      doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(120, 20, 20);
+      const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
+      const amt = tx.amount.toLocaleString("en-CA", { minimumFractionDigits: 2 });
+      doc.text(`Completing Action ${idx + 1} — Tx ${tx.id.slice(0, 8)} · ${txDate} · ${amt} ${tx.currency}`, MARGIN, y);
+      doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal"); y += 4;
+      y = fieldPair(doc,
+        "Disposition of Funds", fallback(c.dispositionOfFunds, mf.dispositionOfFunds || "Not specified"),
+        "Beneficiary Name", fallback(c.beneficiaryName, mf.beneficiaryName || "Not specified"), y);
+      y = fieldPair(doc,
+        "Beneficiary Account", fallback(c.beneficiaryAccount, mf.beneficiaryAccount || "—"),
+        "Beneficiary Country", fallback(c.beneficiaryCountry, mf.beneficiaryCountry || "—"), y);
+      if (c.accountTo || c.institutionTo) {
+        y = fieldPair(doc, "Account To", c.accountTo || "—", "Institution To", c.institutionTo || "—", y);
+      }
+    });
+  }
+  y += 2;
+
+  // TPR addendum (after the 4 transactional sections, before suspicion)
   if (strType === "tpr") {
-    // Part C-TPR: Terrorist Entity Information
     y = checkPage(doc, y, 60);
-    y = header(doc, "Part C-TPR — Terrorist Entity / Listed Person", y);
+    y = header(doc, "TPR Addendum — Terrorist Entity / Listed Person", y);
     y = fieldPair(doc, "Listed Entity / Person Name", mf.tprTerroristEntityName || "Not specified",
       "Entity Type", mf.tprTerroristEntityType === "entity" ? "Entity / Organisation" : "Individual", y);
     y = field(doc, "Listed Under (Regulation)", mf.tprListedUnder || "Not specified — e.g., Criminal Code s.83.05, UN Regulations (UNAQTR)", y);
-    y = field(doc, "Relationship of Subject to Listed Entity", mf.tprRelationshipToEntity || "Not specified — e.g., account holder, signatory, beneficial owner, associate", y);
+    y = field(doc, "Relationship of Subject to Listed Entity", mf.tprRelationshipToEntity || "Not specified", y);
     y = field(doc, "Date Property Identified / Discovered", mf.tprDateDiscovered || "Not specified", y);
-    y += 2;
 
-    // Part D-TPR: Property Details
     y = checkPage(doc, y, 60);
-    y = header(doc, "Part D-TPR — Property Details (PCMLTFA s.7.1)", y);
+    y = header(doc, "TPR Addendum — Property Details (PCMLTFA s.7.1)", y);
     const propTypes: Record<string, string> = {
-      bank_account: "Bank Account / Deposit",
-      investment: "Investment / Securities",
-      real_estate: "Real Estate / Property",
-      vehicle: "Vehicle / Vessel / Aircraft",
-      cash: "Cash / Currency",
-      crypto: "Virtual Currency / Crypto-asset",
-      insurance: "Insurance Policy / Annuity",
-      precious: "Precious Metals / Stones",
-      other: "Other Property",
+      bank_account: "Bank Account / Deposit", investment: "Investment / Securities",
+      real_estate: "Real Estate / Property", vehicle: "Vehicle / Vessel / Aircraft",
+      cash: "Cash / Currency", crypto: "Virtual Currency / Crypto-asset",
+      insurance: "Insurance Policy / Annuity", precious: "Precious Metals / Stones", other: "Other Property",
     };
     y = fieldPair(doc, "Property Type", (propTypes[mf.tprPropertyType] ?? mf.tprPropertyType) || "Not specified",
       "Estimated Value", `${mf.tprPropertyCurrency || "CAD"} ${mf.tprPropertyValue || "—"}`, y);
-    y = field(doc, "Property Description", mf.tprPropertyDescription || "Not specified — describe the property or asset in detail", y);
-    y = field(doc, "Location of Property", mf.tprPropertyLocation || "Not specified — branch, address, account number, or jurisdiction", y);
-    y += 2;
+    y = field(doc, "Property Description", mf.tprPropertyDescription || "Not specified", y);
+    y = field(doc, "Location of Property", mf.tprPropertyLocation || "Not specified", y);
 
-    // Part E-TPR: Action / Disposition
     y = checkPage(doc, y, 30);
-    y = header(doc, "Part E-TPR — Disposition & Action Taken (Criminal Code s.83.08)", y);
+    y = header(doc, "TPR Addendum — Disposition (Criminal Code s.83.08)", y);
     const dispActions: Record<string, string> = {
-      frozen: "Property Frozen / Account Blocked",
-      seized: "Property Seized by Law Enforcement",
-      reported_rcmp: "Reported to RCMP / CSIS",
-      retained: "Property Retained — Awaiting Direction",
-      released: "Property Released (with FINTRAC/court order)",
-      other: "Other — See Notes",
+      frozen: "Property Frozen / Account Blocked", seized: "Property Seized by Law Enforcement",
+      reported_rcmp: "Reported to RCMP / CSIS", retained: "Property Retained — Awaiting Direction",
+      released: "Property Released (with FINTRAC/court order)", other: "Other — See Notes",
     };
     y = field(doc, "Disposition Action", (dispActions[mf.tprDispositionAction] ?? mf.tprDispositionAction) || "Not specified", y);
-    doc.setFontSize(7.5);
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor(120, 20, 20);
-    doc.text("Under Criminal Code s.83.08, no person shall deal with property owned/controlled by a listed entity.", MARGIN, y);
-    y += 6;
-    doc.text("Failure to disclose terrorist property is an offence under PCMLTFA s.7.1 and Criminal Code s.83.1.", MARGIN, y);
-    doc.setTextColor(0, 0, 0);
-    doc.setFont("helvetica", "normal");
-    y += 8;
   }
 
-  // PART D: Indicators & Grounds for Suspicion
+  // ── SECTION 5 — Details of Suspicion ──
   y = checkPage(doc, y, 30);
-  y = header(doc, "Part D — Grounds for Suspicion / Indicators", y);
+  y = header(doc, "Section 5 — Details of Suspicion", y);
+  doc.setFontSize(7.5); doc.setFont("helvetica", "italic"); doc.setTextColor(100, 100, 100);
+  doc.text("Reasonable grounds to suspect (RGS) — facts, context, ML/TF indicators, and full investigation narrative.", MARGIN, y);
+  doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal");
+  y += 6;
 
-  // Suspicion type & PEP
   const suspicionLabels: Record<string, string> = { ml: "Money Laundering (ML)", tf: "Terrorist Activity Financing (TF)", sanctions: "Sanctions Evasion", ml_tf: "ML and TF" };
-  y = fieldPair(doc, "Suspicion Type", suspicionLabels[mf.suspicionType] ?? mf.suspicionType ?? "Not specified", "PEP Status", mf.isPEP === "yes" ? "YES — Subject is a Politically Exposed Person" : mf.isPEP === "foreign_pep" ? "YES — Foreign PEP" : mf.isPEP === "domestic_pep" ? "YES — Domestic PEP" : "No", y);
+  y = fieldPair(doc, "Suspicion Type", suspicionLabels[mf.suspicionType] ?? mf.suspicionType ?? "Not specified",
+    "PEP Status",
+    mf.isPEP === "yes" ? "YES — Politically Exposed Person"
+      : mf.isPEP === "foreign_pep" ? "YES — Foreign PEP"
+      : mf.isPEP === "domestic_pep" ? "YES — Domestic PEP"
+      : "No",
+    y);
 
-  // FINTRAC indicator checklist
+  y = checkPage(doc, y, 20);
+  doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(120, 20, 20);
+  doc.text("5.1 — ML / TF INDICATORS (FINTRAC Guidance)", MARGIN, y);
+  doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal");
+  y += 5;
+
   const indicators = [
     "Transaction inconsistent with client's known business or occupation",
     "Structured to avoid reporting thresholds (PCMLTFR s.12)",
@@ -611,16 +627,16 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
   }
   y += 4;
 
-  // PART E: Investigation Narrative
-  y = checkPage(doc, y, 30);
-  y = header(doc, "Part E — Investigation Narrative", y);
+  y = checkPage(doc, y, 20);
+  doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(120, 20, 20);
+  doc.text("5.2 — INVESTIGATION NARRATIVE (RGS)", MARGIN, y);
+  doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal");
+  y += 6;
+
   if (notes.length === 0) {
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor(120, 120, 120);
+    doc.setFontSize(9); doc.setFont("helvetica", "italic"); doc.setTextColor(120, 120, 120);
     doc.text("No investigation notes recorded. Add case notes before filing.", MARGIN, y);
-    doc.setTextColor(0, 0, 0);
-    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal");
     y += 8;
   } else {
     for (let i = 0; i < notes.length; i++) {
@@ -629,14 +645,10 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
       const noteDate = new Date(note.created_at).toLocaleString("en-CA", {
         year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
       });
-      doc.setFontSize(7.5);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(80, 80, 80);
+      doc.setFontSize(7.5); doc.setFont("helvetica", "bold"); doc.setTextColor(80, 80, 80);
       doc.text(`Note ${i + 1} — ${noteDate}`, MARGIN, y);
       y += 4;
-      doc.setFontSize(9);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(0, 0, 0);
       const lines = doc.splitTextToSize(note.content, CONTENT_W);
       y = checkPage(doc, y, lines.length * LINE_H + 6);
       doc.text(lines, MARGIN, y);
@@ -647,10 +659,11 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
   }
   y += 4;
 
-  // Action Taken
+  // ── SECTION 6 — Action Taken ──
   y = checkPage(doc, y, 20);
-  y = header(doc, "Part F — Action Taken", y);
-  y = field(doc, "Action Taken by Reporting Entity", mf.actionTaken || "Not specified — describe what action was or will be taken (e.g., enhanced monitoring, account restriction, relationship terminated)", y);
+  y = header(doc, "Section 6 — Action Taken", y);
+  y = field(doc, "Action Taken by Reporting Entity",
+    mf.actionTaken || "Not specified — describe what action was or will be taken (e.g., enhanced monitoring, account restriction, relationship terminated, file referred to law enforcement)", y);
   y += 2;
 
   // PART G: Compliance Officer Declaration
