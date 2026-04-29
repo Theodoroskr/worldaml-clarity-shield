@@ -2073,6 +2073,61 @@ export type Database = {
         }
         Relationships: []
       }
+      str_report_amendments: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          notes: string | null
+          organisation_id: string
+          report_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          notes?: string | null
+          organisation_id: string
+          report_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          notes?: string | null
+          organisation_id?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "str_report_amendments_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "str_report_amendments_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "str_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "str_report_amendments_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "str_reports_overdue_amendments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       str_report_transactions: {
         Row: {
           created_at: string
@@ -2101,6 +2156,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "str_report_transactions_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "str_reports_overdue_amendments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "str_report_transactions_transaction_id_fkey"
             columns: ["transaction_id"]
             isOneToOne: false
@@ -2112,8 +2174,12 @@ export type Database = {
       str_reports: {
         Row: {
           action_taken: string | null
+          amendment_due_at: string | null
+          amendment_explanation: string | null
           camlo_name: string | null
           case_id: string | null
+          change_request_reason: string | null
+          change_requested_at: string | null
           created_at: string
           customer_id: string | null
           filed_at: string | null
@@ -2121,14 +2187,20 @@ export type Database = {
           grounds_for_suspicion: string | null
           id: string
           organisation_id: string | null
+          parent_report_id: string | null
           report_number: string
           updated_at: string
           user_id: string
+          version: number
         }
         Insert: {
           action_taken?: string | null
+          amendment_due_at?: string | null
+          amendment_explanation?: string | null
           camlo_name?: string | null
           case_id?: string | null
+          change_request_reason?: string | null
+          change_requested_at?: string | null
           created_at?: string
           customer_id?: string | null
           filed_at?: string | null
@@ -2136,14 +2208,20 @@ export type Database = {
           grounds_for_suspicion?: string | null
           id?: string
           organisation_id?: string | null
+          parent_report_id?: string | null
           report_number?: string
           updated_at?: string
           user_id: string
+          version?: number
         }
         Update: {
           action_taken?: string | null
+          amendment_due_at?: string | null
+          amendment_explanation?: string | null
           camlo_name?: string | null
           case_id?: string | null
+          change_request_reason?: string | null
+          change_requested_at?: string | null
           created_at?: string
           customer_id?: string | null
           filed_at?: string | null
@@ -2151,9 +2229,11 @@ export type Database = {
           grounds_for_suspicion?: string | null
           id?: string
           organisation_id?: string | null
+          parent_report_id?: string | null
           report_number?: string
           updated_at?: string
           user_id?: string
+          version?: number
         }
         Relationships: [
           {
@@ -2175,6 +2255,20 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "str_reports_parent_report_id_fkey"
+            columns: ["parent_report_id"]
+            isOneToOne: false
+            referencedRelation: "str_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "str_reports_parent_report_id_fkey"
+            columns: ["parent_report_id"]
+            isOneToOne: false
+            referencedRelation: "str_reports_overdue_amendments"
             referencedColumns: ["id"]
           },
         ]
@@ -3312,6 +3406,64 @@ export type Database = {
           },
         ]
       }
+      str_reports_overdue_amendments: {
+        Row: {
+          amendment_due_at: string | null
+          change_requested_at: string | null
+          days_overdue: number | null
+          filing_status: string | null
+          id: string | null
+          organisation_id: string | null
+          parent_report_id: string | null
+          report_number: string | null
+          version: number | null
+        }
+        Insert: {
+          amendment_due_at?: string | null
+          change_requested_at?: string | null
+          days_overdue?: never
+          filing_status?: string | null
+          id?: string | null
+          organisation_id?: string | null
+          parent_report_id?: string | null
+          report_number?: string | null
+          version?: number | null
+        }
+        Update: {
+          amendment_due_at?: string | null
+          change_requested_at?: string | null
+          days_overdue?: never
+          filing_status?: string | null
+          id?: string | null
+          organisation_id?: string | null
+          parent_report_id?: string | null
+          report_number?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "str_reports_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "str_reports_parent_report_id_fkey"
+            columns: ["parent_report_id"]
+            isOneToOne: false
+            referencedRelation: "str_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "str_reports_parent_report_id_fkey"
+            columns: ["parent_report_id"]
+            isOneToOne: false
+            referencedRelation: "str_reports_overdue_amendments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_access: {
         Row: {
           email: string | null
@@ -3368,6 +3520,10 @@ export type Database = {
       }
       current_user_has_suite_access: { Args: never; Returns: boolean }
       current_user_org_id: { Args: never; Returns: string }
+      file_str_amendment: {
+        Args: { _explanation: string; _report_id: string }
+        Returns: undefined
+      }
       get_certificate_by_token: { Args: { _token: string }; Returns: Json }
       get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
@@ -3383,6 +3539,10 @@ export type Database = {
       rcm_member_role: {
         Args: { _org: string }
         Returns: Database["public"]["Enums"]["org_member_role"]
+      }
+      request_str_amendment: {
+        Args: { _reason: string; _report_id: string }
+        Returns: string
       }
       submit_quiz_and_issue_certificate: {
         Args: { _answers: Json; _course_id: string; _holder_name: string }
