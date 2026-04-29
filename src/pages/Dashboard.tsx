@@ -122,6 +122,17 @@ const Dashboard = () => {
     <div className="min-h-screen flex flex-col">
       <SEO title="Dashboard" description="Manage your WorldAML account and subscriptions." noindex />
       <Header />
+      {hasSuiteAccess && (
+        <button
+          type="button"
+          onClick={() => navigate("/rcm")}
+          className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 rounded-full bg-teal px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-teal/30 hover:bg-teal/90 transition-colors"
+          aria-label="Back to Suite — open RCM"
+        >
+          <ChevronRight className="h-4 w-4 rotate-180" />
+          Back to Suite · RCM
+        </button>
+      )}
       <main className="flex-1 py-12">
         <div className="container-enterprise">
           {/* Header */}
