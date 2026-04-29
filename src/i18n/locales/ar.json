@@ -46,7 +46,21 @@
       "recent_escalations": "التصعيدات الأخيرة",
       "by_department": "الامتثال حسب الإدارة",
       "scaffold_note": "المخطط وسياسات RLS وبيانات Region Trade Bank التجريبية فعّالة. تم تجهيز واجهات المكتبة والالتزامات والضوابط والتقييمات والمهام والأدلة والتقارير ومراجعة الترجمة والتدقيق والإعدادات — تصل عمليات CRUD الأساسية في التكرار التالي.",
-      "sign_in_first": "يرجى تسجيل الدخول أولاً عبر <1>/login</1>."
+      "sign_in_first": "يرجى تسجيل الدخول أولاً عبر <1>/login</1>.",
+      "obligations_summary": "ملخص الالتزامات",
+      "by_status": "حسب حالة الامتثال",
+      "by_risk": "حسب مستوى المخاطر",
+      "view_all": "عرض الكل",
+      "no_obligations": "لا توجد التزامات مسجلة بعد.",
+      "status_compliant": "ممتثل",
+      "status_partial": "جزئي",
+      "status_non_compliant": "غير ممتثل",
+      "status_not_assessed": "لم يُقيَّم",
+      "status_not_applicable": "غير منطبق",
+      "risk_low": "منخفض",
+      "risk_medium": "متوسط",
+      "risk_high": "مرتفع",
+      "risk_critical": "حرج"
     },
     "placeholder": {
       "body": "الوحدة جاهزة هيكلياً. ستظهر واجهة CRUD في التكرار التالي — المخطط وسياسات RLS والبيانات التجريبية فعّالة بالفعل."
