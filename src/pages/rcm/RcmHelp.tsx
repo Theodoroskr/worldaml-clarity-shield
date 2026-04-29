@@ -190,6 +190,26 @@ const SECTIONS: Section[] = [
     ],
   },
   {
+    id: "fintrac-str",
+    icon: FileBarChart,
+    title: "FINTRAC STR (Canada)",
+    summary:
+      "How to handle Suspicious Transaction Reports under Canada's PCMLTFA. STRs are not threshold-based — they are triggered by reasonable grounds to suspect that a transaction (completed or attempted) is related to money laundering or terrorist activity financing.",
+    steps: [
+      "Trigger: there are reasonable grounds to suspect (RGS) — a step above a hunch but below the 'reasonable grounds to believe' standard. Document the facts, context and ML/TF indicators that led you there.",
+      "No monetary threshold applies to an STR. Attempted transactions must be reported in the same way as completed ones.",
+      "File as soon as practicable after you complete the measures that established RGS — treat the report as a priority, not a backlog item.",
+      "Submit electronically via the FINTRAC Web Reporting System (FWR) or the FINTRAC API. Paper submission (fax or mail) is only allowed if you have no technical capability to file electronically.",
+      "Do not tip off the client. You must not tell anyone — including the client — that an STR has been or will be filed if doing so could prejudice an investigation.",
+      "If you need to correct or update a submitted STR, file the revised report within 20 days of the request for change.",
+    ],
+    tips: [
+      "Threshold reports (LCTR, EFTR, LVCTR, CDR) are separate obligations with their own monetary triggers — never use them as a proxy for STR.",
+      "A service provider can submit STRs on your behalf, but legal responsibility under the PCMLTFA cannot be delegated.",
+      "Capture indicators, beneficial owners, third parties, IP addresses, EMTs and virtual currency addresses where known — they materially improve FINTRAC's analysis.",
+    ],
+  },
+  {
     id: "faq",
     icon: HelpCircle,
     title: "FAQ",
@@ -199,6 +219,7 @@ const SECTIONS: Section[] = [
       "Q: Can I import regulations in bulk? A: Yes, use the CSV importer in Library (admins only).",
       "Q: How do I get back to the WorldAML Suite? A: Use the ‘Back to Suite’ link at the top of the RCM sidebar.",
       "Q: Who can see the Audit log? A: All organisation members can view; nobody can edit it.",
+      "Q: Does an STR require a minimum amount? A: No — FINTRAC STRs have no monetary threshold; the trigger is reasonable grounds to suspect.",
     ],
   },
 ];
