@@ -240,6 +240,25 @@ export default function SuiteCases() {
   const [userRegulator, setUserRegulator] = useState<string | null>(null);
   const [showChecklist, setShowChecklist] = useState(false);
   const [filedReports, setFiledReports] = useState<Set<string>>(new Set());
+
+  // ── STR Amendment workflow ──
+  type StrAmendmentRow = {
+    id: string;
+    version: number;
+    parent_report_id: string | null;
+    filing_status: string;
+    change_requested_at: string | null;
+    amendment_due_at: string | null;
+    amendment_explanation: string | null;
+    created_at: string;
+  };
+  const [caseStrReports, setCaseStrReports] = useState<StrAmendmentRow[]>([]);
+  const [showAmendDialog, setShowAmendDialog] = useState(false);
+  const [amendTargetReport, setAmendTargetReport] = useState<StrAmendmentRow | null>(null);
+  const [amendMode, setAmendMode] = useState<"request" | "file">("request");
+  const [amendReason, setAmendReason] = useState("");
+  const [amendExplanation, setAmendExplanation] = useState("");
+  const [amendSubmitting, setAmendSubmitting] = useState(false);
   const availableExports = getAvailableExports(userRegulator);
   const regulatorReports = userRegulator ? (REGULATOR_REPORTS[userRegulator] || []) : [];
 
