@@ -82,7 +82,11 @@ export default function RcmObligations() {
   }, [items, status, risk, q]);
 
   const filtersActive = status !== "all" || risk !== "all" || q.length > 0;
-  const clearFilters = () => { setStatus("all"); setRisk("all"); setQ(""); };
+  const clearFilters = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("status"); next.delete("risk"); next.delete("q");
+    setSearchParams(next, { replace: true });
+  };
 
   if (orgLoading) {
     return <div className="p-8 flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin"/> {t("rcm.common.loading")}</div>;
