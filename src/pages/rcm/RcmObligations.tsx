@@ -97,13 +97,29 @@ export default function RcmObligations() {
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return items.filter(o => {
+    const list = items.filter(o => {
       if (status !== "all" && (o.compliance_status || "not_assessed") !== status) return false;
       if (risk !== "all" && (o.risk_level || "medium") !== risk) return false;
       if (needle && !`${o.title} ${o.description ?? ""} ${o.jurisdiction ?? ""}`.toLowerCase().includes(needle)) return false;
       return true;
     });
-  }, [items, status, risk, q]);
+    const dir = sortDir === "asc" ? 1 : -1;
+    const cmpVal = (o: Obligation): string | number => {
+      switch (sortKey) {
+        case "title": return (o.title || "").toLowerCase();
+        case "compliance_status": return STATUS_RANK[o.compliance_status || "not_assessed"] ?? 99;
+        case "risk_level": return RISK_RANK[o.risk_level || "medium"] ?? 99;
+        case "deadline":
+        default: return o.deadline ? new Date(o.deadline).getTime() : Number.POSITIVE_INFINITY;
+      }
+    };
+    return [...list].sort((a, b) => {
+      const av = cmpVal(a); const bv = cmpVal(b);
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return 0;
+    });
+  }, [items, status, risk, q, sortKey, sortDir]);
 
   const filtersActive = status !== "all" || risk !== "all" || q.length > 0;
   const clearFilters = () => {
