@@ -167,6 +167,24 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/* RCM banner – same gating as Suite */}
+          {hasSuiteAccess && (
+            <div className="mb-6 p-5 rounded-lg border border-teal/20 bg-gradient-to-r from-navy/5 to-teal/5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-teal/10 text-teal">
+                  <Globe className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-semibold text-navy text-sm">Regulatory Compliance Management (RCM)</p>
+                  <p className="text-text-secondary text-xs">Library, obligations, controls, assessments, tasks & evidence</p>
+                </div>
+              </div>
+              <Button variant="accent" size="sm" onClick={() => navigate("/rcm")}>
+                Open RCM <ExternalLink className="ml-1 h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+
           {/* ══════════ WELCOME / ONBOARDING (free users) ══════════ */}
           {!hasSuiteAccess && !isAdmin && (
             <div className="mb-8">
