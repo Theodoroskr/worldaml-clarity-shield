@@ -224,6 +224,9 @@ const Dashboard = () => {
                     <Button variant="outline" size="sm" onClick={() => navigate("/pricing")}>
                       View Suite plans
                     </Button>
+                    <Button variant="ghost" size="sm" onClick={() => navigate("/rcm/help")}>
+                      Learn how RCM works
+                    </Button>
                   </div>
                 </div>
               </div>
