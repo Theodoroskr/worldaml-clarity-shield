@@ -352,6 +352,82 @@ export default function SuiteCases() {
         setManualFields(prev => ({ ...prev, isPEP: custRes.data.pep_status }));
       }
     }
+    await loadCaseStrReports(c.id);
+  };
+
+  const loadCaseStrReports = async (caseId: string) => {
+    const { data, error } = await supabase
+      .from("str_reports")
+      .select("id, version, parent_report_id, filing_status, change_requested_at, amendment_due_at, amendment_explanation, created_at")
+      .eq("case_id", caseId)
+      .order("created_at", { ascending: false });
+    if (!error) setCaseStrReports((data as StrAmendmentRow[]) || []);
+  };
+
+  const openAmendDialog = (report: StrAmendmentRow, mode: "request" | "file") => {
+    setAmendTargetReport(report);
+    setAmendMode(mode);
+    setAmendReason("");
+    setAmendExplanation("");
+    setShowAmendDialog(true);
+  };
+
+  const submitAmendment = async () => {
+    if (!amendTargetReport || !selectedCase) return;
+    if (amendMode === "request" && amendReason.trim().length < 10) {
+      toast.error("Please provide a reason (min. 10 characters)");
+      return;
+    }
+    if (amendMode === "file" && amendExplanation.trim().length < 10) {
+      toast.error("Please provide an explanation (min. 10 characters)");
+      return;
+    }
+    setAmendSubmitting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error("Please log in"); return; }
+
+      if (amendMode === "request") {
+        const { error } = await supabase.rpc("request_str_amendment", {
+          _report_id: amendTargetReport.id,
+          _reason: amendReason.trim(),
+        } as any);
+        if (error) throw error;
+        toast.success("Amendment requested — 20-day clock started");
+      } else {
+        const { error } = await supabase.rpc("file_str_amendment", {
+          _report_id: amendTargetReport.id,
+          _explanation: amendExplanation.trim(),
+        } as any);
+        if (error) throw error;
+        toast.success("Amended STR filed");
+      }
+
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: amendMode === "request"
+          ? `STR amendment requested (v${amendTargetReport.version}) — 20-day deadline started`
+          : `STR amendment filed (replaces v${amendTargetReport.version})`,
+        entity_type: "str_report",
+        entity_id: amendTargetReport.id,
+        details: { mode: amendMode, reason: amendMode === "request" ? amendReason : undefined, explanation: amendMode === "file" ? amendExplanation : undefined },
+      });
+
+      setShowAmendDialog(false);
+      await loadCaseStrReports(selectedCase.id);
+    } catch (err: any) {
+      console.error("Amendment error:", err);
+      toast.error(`Amendment failed: ${err?.message || "Unknown error"}`);
+    } finally {
+      setAmendSubmitting(false);
+    }
+  };
+
+  // Days remaining until FINTRAC 20-day amendment deadline (negative = overdue)
+  const daysUntilDue = (dueAt: string | null): number | null => {
+    if (!dueAt) return null;
+    const ms = new Date(dueAt).getTime() - Date.now();
+    return Math.ceil(ms / (1000 * 60 * 60 * 24));
   };
 
   const addNote = async () => {
