@@ -201,18 +201,63 @@ export default function RcmObligations() {
         </Card>
       ) : (
         <Card className="overflow-hidden">
+          <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-muted/30 text-sm flex-wrap">
+            <Checkbox
+              checked={allSelected ? true : someSelected ? "indeterminate" : false}
+              onCheckedChange={(v) => toggleAll(v === true)}
+              aria-label={t("rcm.obligations.select_all")}
+            />
+            {selected.size > 0 ? (
+              <>
+                <span className="font-medium">{t("rcm.obligations.selected_count", { count: selected.size })}</span>
+                <Select value={bulkStatus} onValueChange={setBulkStatus}>
+                  <SelectTrigger className="h-8 w-[170px]"><SelectValue placeholder={t("rcm.obligations.bulk_set_status")} /></SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map(s => (
+                      <SelectItem key={s} value={s}>{t(`rcm.dashboard.status_${s}`)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={bulkRisk} onValueChange={setBulkRisk}>
+                  <SelectTrigger className="h-8 w-[150px]"><SelectValue placeholder={t("rcm.obligations.bulk_set_risk")} /></SelectTrigger>
+                  <SelectContent>
+                    {RISK_OPTIONS.map(r => (
+                      <SelectItem key={r} value={r}>{t(`rcm.dashboard.risk_${r}`)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button size="sm" onClick={applyBulk} disabled={applying || (!bulkStatus && !bulkRisk)} className="h-8">
+                  {applying && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
+                  {applying ? t("rcm.obligations.applying") : t("rcm.obligations.apply")}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={clearSelection} className="h-8 gap-1">
+                  <X className="h-3.5 w-3.5" /> {t("rcm.obligations.clear_selection")}
+                </Button>
+              </>
+            ) : (
+              <span className="text-muted-foreground">{t("rcm.obligations.select_all")}</span>
+            )}
+          </div>
           <ul className="divide-y">
             {filtered.map(o => (
               <li key={o.id} className="p-4 hover:bg-muted/40 transition-colors">
                 <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium truncate">{o.title}</div>
-                    {o.description && (
-                      <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{o.description}</p>
-                    )}
-                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
-                      {o.jurisdiction && <span>{o.jurisdiction}</span>}
-                      {o.deadline && <span>· {t("rcm.common.deadline")}: {o.deadline}</span>}
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <Checkbox
+                      className="mt-1"
+                      checked={selected.has(o.id)}
+                      onCheckedChange={(v) => toggleOne(o.id, v === true)}
+                      aria-label={o.title}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium truncate">{o.title}</div>
+                      {o.description && (
+                        <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{o.description}</p>
+                      )}
+                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
+                        {o.jurisdiction && <span>{o.jurisdiction}</span>}
+                        {o.deadline && <span>· {t("rcm.common.deadline")}: {o.deadline}</span>}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
