@@ -40,8 +40,8 @@ type TemplateId = "suite-upsell" | "screening-upsell" | "password-reset-academy"
 
 interface TemplateConfig {
   subject: string;
-  buildHtml: (firstName: string) => string;
-  buildText: (firstName: string) => string;
+  buildHtml: (firstName: string, resetLink?: string) => string;
+  buildText: (firstName: string, resetLink?: string) => string;
 }
 
 const TEMPLATES: Record<TemplateId, TemplateConfig> = {
@@ -145,8 +145,7 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
 
   "password-reset-academy": {
     subject: "Reset Your Password — Access Your Free WorldAML Academy",
-    buildHtml: (firstName: string) => {
-      const resetLink = "https://suite.worldaml.com/auth";
+    buildHtml: (firstName: string, resetLink = "https://www.worldaml.com/forgot-password") => {
       return `
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"/></head>
@@ -193,8 +192,8 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
   </table>
 </body></html>`;
     },
-    buildText: (firstName: string) =>
-      `Hi ${firstName || "there"},\n\nWe noticed you recently registered for WorldAML. To access your free Academy courses, please reset your password.\n\nReset your password here: https://suite.worldaml.com/auth\n\nAs a registered user, you have free access to AML compliance training courses including AML Fundamentals, KYC & Customer Due Diligence, Sanctions Screening, and CPD-Accredited Certificates.\n\nOnce logged in, visit https://worldaml.com/academy to start learning.\n\nBest regards,\nThe WorldAML Team`,
+    buildText: (firstName: string, resetLink = "https://www.worldaml.com/forgot-password") =>
+      `Hi ${firstName || "there"},\n\nWe noticed you recently registered for WorldAML. To access your free Academy courses, please reset your password.\n\nReset your password here: ${resetLink}\n\nAs a registered user, you have free access to AML compliance training courses including AML Fundamentals, KYC & Customer Due Diligence, Sanctions Screening, and CPD-Accredited Certificates.\n\nOnce logged in, visit https://worldaml.com/academy to start learning.\n\nBest regards,\nThe WorldAML Team`,
   },
 };
 
