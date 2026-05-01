@@ -198,6 +198,21 @@ export default function SuiteScreening() {
         </p>
       </div>
 
+      {/* Upgrade banner — shows at ≥80% of limit */}
+      <UpgradeBanner
+        context={screeningLimit}
+        currentTier={subscriptionTier}
+        onUpgradeClick={() => setUpgradeOpen(true)}
+      />
+
+      {/* Upgrade modal */}
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        context={screeningLimit}
+        currentTier={subscriptionTier}
+      />
+
       <div className="bg-card rounded-xl border border-border p-5">
         <h2 className="font-semibold text-foreground mb-4">Search</h2>
         <div className="flex gap-3 items-end flex-wrap">
