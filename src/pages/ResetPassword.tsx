@@ -188,6 +188,16 @@ const ResetPassword = () => {
               </p>
             </div>
 
+            {invalidReason && (
+              <details className="rounded-lg border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
+                <summary className="cursor-pointer font-medium">Diagnostic details</summary>
+                <dl className="mt-2 space-y-1">
+                  <div className="flex gap-2"><dt className="font-medium min-w-[60px]">Reason:</dt><dd>{invalidReason}</dd></div>
+                  <div className="flex gap-2"><dt className="font-medium min-w-[60px]">Detail:</dt><dd className="break-all">{invalidDetail}</dd></div>
+                </dl>
+              </details>
+            )}
+
             <div className="rounded-lg border border-border bg-muted/40 p-4 space-y-2 text-sm text-muted-foreground">
               <p className="font-medium text-foreground">What happens next?</p>
               <ol className="list-decimal list-inside space-y-1">
