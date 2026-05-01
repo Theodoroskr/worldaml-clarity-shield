@@ -55,6 +55,16 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // --- Auth: require service role key (internal invocation only) ---
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const token = authHeader.replace("Bearer ", "");
+    if (!serviceKey || token !== serviceKey) {
+      return new Response(JSON.stringify({ error: "Unauthorized — internal use only" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { full_name, company_name, email, signed_up_at, auto_approved } = await req.json();
 
     if (!email) {
