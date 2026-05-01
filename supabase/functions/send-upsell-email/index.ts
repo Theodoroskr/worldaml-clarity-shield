@@ -281,6 +281,11 @@ Deno.serve(async (req) => {
     console.log("Sending upsell email", { recipientEmail, templateId });
 
     if (templateId === "password-reset-academy") {
+      console.log("[password-reset] Generating recovery link via admin.generateLink", {
+        email: recipientEmail,
+        redirectTo: "https://www.worldaml.com/reset-password",
+      });
+
       const { data: resetData, error: resetError } = await supabase.auth.admin.generateLink({
         type: "recovery",
         email: recipientEmail,
@@ -290,10 +295,21 @@ Deno.serve(async (req) => {
       });
 
       if (resetError) {
-        console.warn("Password reset link generation failed:", resetError.message);
+        console.error("[password-reset] generateLink FAILED:", {
+          message: resetError.message,
+          status: (resetError as any).status,
+        });
       } else {
         passwordResetLink = resetData?.properties?.action_link;
-        console.log("Password recovery link generated for", recipientEmail);
+        const linkUrl = passwordResetLink ? new URL(passwordResetLink) : null;
+        console.log("[password-reset] generateLink SUCCESS", {
+          email: recipientEmail,
+          linkHost: linkUrl?.host,
+          linkPath: linkUrl?.pathname,
+          hasToken: !!linkUrl?.searchParams.get("token"),
+          hasType: !!linkUrl?.searchParams.get("type"),
+          redirectTo: linkUrl?.searchParams.get("redirect_to"),
+        });
       }
     }
 
