@@ -236,11 +236,45 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { recipientEmail: rawEmail, recipientName, templateId } = body as {
+    const { recipientEmail: rawEmail, recipientName, templateId, setPassword } = body as {
       recipientEmail: string;
       recipientName?: string;
       templateId: TemplateId;
+      setPassword?: string;
     };
+
+    // If setPassword is provided, update the user's password directly
+    if (setPassword && rawEmail) {
+      const email = normalizeEmail(rawEmail);
+      if (!email) {
+        return new Response(JSON.stringify({ error: "Invalid email" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: { users } } = await supabase.auth.admin.listUsers();
+      const user = users?.find((u: any) => u.email === email);
+      if (!user) {
+        return new Response(JSON.stringify({ error: `User not found: ${email}` }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { error: pwErr } = await supabase.auth.admin.updateUserById(user.id, {
+        password: setPassword,
+      });
+      if (pwErr) {
+        console.error("[setPassword] Failed:", pwErr.message);
+        return new Response(JSON.stringify({ error: pwErr.message }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      console.log("[setPassword] Password updated for", email);
+      // If no templateId, just return success without sending email
+      if (!templateId) {
+        return new Response(JSON.stringify({ success: true, action: "password_set", email }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
 
     const recipientEmail = normalizeEmail(rawEmail);
 
