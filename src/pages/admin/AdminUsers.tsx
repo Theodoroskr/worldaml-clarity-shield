@@ -35,6 +35,31 @@ export default function AdminUsers() {
   // Grant Suite dialog state
   const [grantDialog, setGrantDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
   const [selectedRegulator, setSelectedRegulator] = useState("");
+  const [upsellDialog, setUpsellDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
+  const [upsellTemplate, setUpsellTemplate] = useState<"suite-upsell" | "screening-upsell">("suite-upsell");
+  const [upsellSending, setUpsellSending] = useState(false);
+
+  const sendUpsellEmail = async () => {
+    if (!upsellDialog.profile?.email) return;
+    setUpsellSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-upsell-email", {
+        body: {
+          recipientEmail: upsellDialog.profile.email,
+          recipientName: upsellDialog.profile.full_name || "",
+          templateId: upsellTemplate,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Upsell email sent to ${upsellDialog.profile.email}`);
+      setUpsellDialog({ open: false, profile: null });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send email");
+    } finally {
+      setUpsellSending(false);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
