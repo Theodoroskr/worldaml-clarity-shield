@@ -39,6 +39,19 @@ Allow: /
 User-agent: anthropic-ai
 Allow: /
 
+# Block known Chinese crawler bots
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: Sogou
+Disallow: /
+
+User-agent: YisouSpider
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
 User-agent: *
 Allow: /
 Disallow: /login
