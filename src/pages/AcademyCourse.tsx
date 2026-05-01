@@ -191,6 +191,7 @@ const AcademyCourse = () => {
     if (!questions || !user || !course) return;
 
     setGenerating(true);
+    setQuizError(null);
     try {
       const { data: profile } = await supabase
         .from("profiles")
@@ -207,7 +208,16 @@ const AcademyCourse = () => {
         _holder_name: holderName,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("[QuizSubmit] RPC error:", JSON.stringify(error, null, 2));
+        setQuizError({
+          message: error.message || "Unknown RPC error",
+          code: error.code || undefined,
+          details: error.details || undefined,
+          hint: error.hint || undefined,
+        });
+        throw error;
+      }
 
       const result = data as { passed: boolean; score: number; certificate_id?: string; share_token?: string; correct_answers?: Record<string, number> };
       setQuizScore(result.score);
@@ -247,12 +257,18 @@ const AcademyCourse = () => {
           variant: "destructive",
         });
       }
-    } catch {
+    } catch (err: unknown) {
+      const alreadySet = !!quizError;
+      if (!alreadySet) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setQuizError({ message: msg });
+      }
       toast({
         title: "Error",
-        description: "Failed to submit quiz. Please try again.",
+        description: "Failed to submit quiz. See error details below.",
         variant: "destructive",
       });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setGenerating(false);
     }
