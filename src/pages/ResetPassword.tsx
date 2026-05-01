@@ -13,6 +13,13 @@ import { Loader2, CheckCircle, AlertTriangle, Mail, ArrowLeft } from "lucide-rea
 
 type PageState = "checking" | "ready" | "invalid" | "success" | "resent";
 
+type InvalidReason =
+  | "code_exchange_failed"
+  | "token_session_failed"
+  | "no_params"
+  | "no_session"
+  | "uncaught_error";
+
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
