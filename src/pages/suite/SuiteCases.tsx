@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, MapPin, AlertTriangle, Shield, CheckCircle2, XCircle, Info, X, ClipboardCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,8 @@ import { buildFwrPayload, downloadFwrPayload } from "@/services/fintracFwrPayloa
 import { exportMOKASStr, DEFAULT_MOKAS_FIELDS, type MOKASManualFields } from "@/services/mokasStrExport";
 import { exportCTR, DEFAULT_CTR_FIELDS, type CTRManualFields } from "@/services/ctrExport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useFeatureLimits } from "@/hooks/useFeatureLimits";
+import UpgradeModal, { UpgradeBanner } from "@/components/suite/UpgradeModal";
 
 /* ── Regulator → Required Reports Mapping ── */
 interface ReportObligation {
@@ -261,6 +263,11 @@ export default function SuiteCases() {
   const [amendSubmitting, setAmendSubmitting] = useState(false);
   const availableExports = getAvailableExports(userRegulator);
   const regulatorReports = userRegulator ? (REGULATOR_REPORTS[userRegulator] || []) : [];
+
+  // Feature limits
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const { checkLimit, subscriptionTier } = useFeatureLimits();
+  const casesLimit = useMemo(() => checkLimit("casesTotal", cases.length), [cases.length, checkLimit]);
 
   const fetchCases = async () => {
     if (!orgId) return;
@@ -2884,6 +2891,10 @@ export default function SuiteCases() {
         </div>
         <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium"><Plus className="w-3.5 h-3.5" /> New Case</button>
       </div>
+
+      {/* Upgrade banner & modal */}
+      <UpgradeBanner context={casesLimit} currentTier={subscriptionTier} onUpgradeClick={() => setUpgradeOpen(true)} />
+      <UpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} context={casesLimit} currentTier={subscriptionTier} />
 
       {showForm && (
         <div className="bg-card border border-border rounded-xl p-5 animate-fade-in">

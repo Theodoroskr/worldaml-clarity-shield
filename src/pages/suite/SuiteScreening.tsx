@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Search, X, Loader2, Flag, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { runScreening, type ScreeningResult, type ScreeningResponse } from "@/services/screeningProvider";
 import { useNavigate } from "react-router-dom";
 import { useOrganisation } from "@/hooks/useOrganisation";
+import { useFeatureLimits } from "@/hooks/useFeatureLimits";
+import UpgradeModal, { UpgradeBanner } from "@/components/suite/UpgradeModal";
 
 interface StoredScreening {
   id: string;
@@ -53,6 +55,21 @@ export default function SuiteScreening() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [dismissedResults, setDismissedResults] = useState<Set<string>>(new Set());
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+
+  const { checkLimit, subscriptionTier } = useFeatureLimits();
+
+  // Count this month's screenings for limit check
+  const monthlyScreenings = useMemo(() => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    return history.filter(h => h.screened_at >= startOfMonth).length;
+  }, [history]);
+
+  const screeningLimit = useMemo(
+    () => checkLimit("screeningsPerMonth", monthlyScreenings),
+    [monthlyScreenings, checkLimit],
+  );
 
   const loadHistory = useCallback(async () => {
     if (!orgId) return;
@@ -81,6 +98,12 @@ export default function SuiteScreening() {
   const runSearch = async () => {
     if (!searchName.trim()) { toast.error("Enter a name to search"); return; }
     if (!selectedCustomerId) { toast.error("Select a customer to link this screening to"); return; }
+
+    // Feature-limit gate
+    if (screeningLimit.isAtLimit) {
+      setUpgradeOpen(true);
+      return;
+    }
 
     setSearching(true);
     setResponse(null);
@@ -174,6 +197,21 @@ export default function SuiteScreening() {
           Sanctions · PEP · Adverse Media · {response ? response.listsSearched.length : 7} lists
         </p>
       </div>
+
+      {/* Upgrade banner — shows at ≥80% of limit */}
+      <UpgradeBanner
+        context={screeningLimit}
+        currentTier={subscriptionTier}
+        onUpgradeClick={() => setUpgradeOpen(true)}
+      />
+
+      {/* Upgrade modal */}
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        context={screeningLimit}
+        currentTier={subscriptionTier}
+      />
 
       <div className="bg-card rounded-xl border border-border p-5">
         <h2 className="font-semibold text-foreground mb-4">Search</h2>

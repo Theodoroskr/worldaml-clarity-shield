@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 import { Activity, AlertTriangle, Scale, TrendingUp, TrendingDown, BarChart3, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganisation } from "@/hooks/useOrganisation";
+import { useFeatureLimits } from "@/hooks/useFeatureLimits";
+import UpgradeModal, { UpgradeBanner } from "@/components/suite/UpgradeModal";
 import SuiteAlerts from "./SuiteAlerts";
 import SuiteAlertRules from "./SuiteAlertRules";
 
@@ -15,6 +17,10 @@ export default function SuiteMonitoring() {
   const [ruleStats, setRuleStats] = useState({ total: 0, active: 0 });
   const [recentAlerts, setRecentAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+
+  const { checkLimit, subscriptionTier } = useFeatureLimits();
+  const rulesLimit = useMemo(() => checkLimit("monitoringRules", ruleStats.total), [ruleStats.total, checkLimit]);
 
   useEffect(() => {
     if (orgLoading || !orgId) return;
@@ -78,6 +84,10 @@ export default function SuiteMonitoring() {
           <h1 className="text-xl font-bold text-foreground">Monitoring Hub</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Real-time alert management and rule configuration</p>
         </div>
+
+        {/* Upgrade banner & modal */}
+        <UpgradeBanner context={rulesLimit} currentTier={subscriptionTier} onUpgradeClick={() => setUpgradeOpen(true)} />
+        <UpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} context={rulesLimit} currentTier={subscriptionTier} />
 
         {loading ? (
           <p className="text-sm text-muted-foreground text-center py-12">Loading monitoring data…</p>
