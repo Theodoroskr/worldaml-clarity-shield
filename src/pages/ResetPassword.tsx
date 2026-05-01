@@ -131,14 +131,27 @@ const ResetPassword = () => {
               <div className="mx-auto w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
                 <AlertTriangle className="h-6 w-6 text-destructive" />
               </div>
+              <h3 className="text-base font-semibold text-foreground">
+                This link has expired or is no longer valid
+              </h3>
               <p className="text-sm text-muted-foreground">
-                This reset link is invalid or has expired. Enter your email below
-                and we'll send you a fresh one.
+                Password reset links can only be used once and expire after a short time.
+                Enter your email below to receive a brand-new link.
               </p>
             </div>
+
+            <div className="rounded-lg border border-border bg-muted/40 p-4 space-y-2 text-sm text-muted-foreground">
+              <p className="font-medium text-foreground">What happens next?</p>
+              <ol className="list-decimal list-inside space-y-1">
+                <li>Enter the email address linked to your account</li>
+                <li>Check your inbox (and spam folder) for the new link</li>
+                <li>Click the link to set a new password</li>
+              </ol>
+            </div>
+
             <form onSubmit={handleResend} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="resend-email">Email</Label>
+                <Label htmlFor="resend-email">Email address</Label>
                 <Input
                   id="resend-email"
                   type="email"
@@ -146,6 +159,7 @@ const ResetPassword = () => {
                   value={resendEmail}
                   onChange={(e) => setResendEmail(e.target.value)}
                   required
+                  autoFocus
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isResending}>
