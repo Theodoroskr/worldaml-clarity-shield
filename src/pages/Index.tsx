@@ -14,23 +14,40 @@ import IndustriesSection from "@/components/home/IndustriesSection";
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO
-        title="AML Sanctions, PEP & Adverse Media Screening Platform"
-        description="Enterprise-grade financial crime screening infrastructure. KYC, KYB, AML sanctions screening, PEP checks, adverse media monitoring for regulated organisations."
+       <SEO
+        title="AML Screening Software for US, UK, EU & UAE Compliance"
+        description="Enterprise AML sanctions screening, KYC/KYB, PEP checks & adverse media monitoring. Trusted by compliance teams in the US, UK, Europe and UAE. 1,900+ global lists."
         canonical="/"
-        structuredData={{
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          "name": "WorldAML - AML Screening Platform",
-          "description": "Enterprise-grade financial crime screening infrastructure for regulated organisations.",
-          "url": "https://www.worldaml.com/",
-          "mainEntity": {
-            "@type": "SoftwareApplication",
+        structuredData={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "WorldAML - AML Screening Platform",
+            "description": "Enterprise-grade financial crime screening infrastructure for regulated organisations in the US, UK, EU and UAE.",
+            "url": "https://www.worldaml.com/",
+            "mainEntity": {
+              "@type": "SoftwareApplication",
+              "name": "WorldAML",
+              "applicationCategory": "BusinessApplication",
+              "operatingSystem": "Web"
+            }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
             "name": "WorldAML",
-            "applicationCategory": "BusinessApplication",
-            "operatingSystem": "Web"
+            "url": "https://www.worldaml.com",
+            "logo": "https://www.worldaml.com/og-image.png",
+            "areaServed": [
+              { "@type": "Country", "name": "United States" },
+              { "@type": "Country", "name": "United Kingdom" },
+              { "@type": "Country", "name": "United Arab Emirates" },
+              { "@type": "AdministrativeArea", "name": "European Union" }
+            ],
+            "knowsLanguage": "en",
+            "description": "AML compliance platform providing sanctions screening, KYC/KYB verification, PEP checks and transaction monitoring for regulated firms in the US, UK, EU and Middle East."
           }
-        }}
+        ]}
       />
       <Header />
       <main className="flex-1">
