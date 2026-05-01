@@ -78,6 +78,28 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // --- Auth: require authenticated user ---
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace("Bearer ", "");
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data, error: claimsErr } = await supabaseAuth.auth.getUser();
+    if (claimsErr || !data?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const callerUserId = data.user.id;
+
     const { holder_name, email, course_title, score, certificate_url, certificate_id } = await req.json();
 
     if (!email || !course_title || !certificate_url) {
@@ -85,6 +107,13 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Verify the caller can only send certificate emails for their own certificates
+    if (email !== data.user.email) {
+      return new Response(JSON.stringify({ error: "You can only send certificate emails to your own address" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
