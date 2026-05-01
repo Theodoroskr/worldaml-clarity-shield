@@ -142,6 +142,60 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
     buildText: (firstName: string) =>
       `Hi ${firstName || "there"},\n\nStay ahead of sanctions and PEP risks with WorldAML AML Screening.\n\nScreen against 1,900+ global watchlists including OFAC, EU, UN, HMT, Interpol, PEP databases, and adverse media sources.\n\nTry it: https://worldaml.com/contact-sales?product=screening\n\nBest regards,\nThe WorldAML Team`,
   },
+
+  "password-reset-academy": {
+    subject: "Reset Your Password — Access Your Free WorldAML Academy",
+    buildHtml: (firstName: string) => {
+      const resetLink = "https://suite.worldaml.com/auth";
+      return `
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"/></head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#0f1b3d;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);">
+        <tr><td style="background:linear-gradient(135deg,#1e3a5f 0%,#0d2137 100%);padding:28px 32px;text-align:center;">
+          <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;letter-spacing:0.3px;">WorldAML Academy</h1>
+          <p style="margin:6px 0 0;color:#5eead4;font-size:13px;">Your Free Account Awaits</p>
+        </td></tr>
+        <tr><td style="padding:32px;">
+          <p style="margin:0 0 14px;font-size:15px;color:#374151;">Hi ${firstName || "there"},</p>
+          <h2 style="margin:0 0 16px;font-size:20px;color:#1e3a5f;line-height:1.35;">Reset your password to get started</h2>
+          <p style="margin:0 0 18px;font-size:15px;line-height:1.65;color:#374151;">
+            We noticed you recently registered for WorldAML. To access your <strong>free Academy courses</strong>, please reset your password using the link below.
+          </p>
+          <p style="margin:0 0 18px;font-size:15px;line-height:1.65;color:#374151;">
+            As a registered user, you have <strong>free access</strong> to our AML compliance training courses covering:
+          </p>
+          <ul style="margin:0 0 24px;padding-left:20px;font-size:14px;line-height:1.8;color:#374151;">
+            <li><strong>AML Fundamentals</strong> — Core anti-money laundering concepts</li>
+            <li><strong>KYC & Customer Due Diligence</strong> — Best practices for onboarding</li>
+            <li><strong>Sanctions Screening</strong> — Understanding global watchlists</li>
+            <li><strong>CPD-Accredited Certificates</strong> — Shareable credentials upon completion</li>
+          </ul>
+          <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 4px;">
+            <a href="${resetLink}"
+               style="display:inline-block;background:linear-gradient(135deg,#0d9488,#0f766e);color:#fff;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;letter-spacing:0.3px;">
+              Reset Password & Log In →
+            </a>
+          </td></tr></table>
+          <p style="margin:24px 0 0;font-size:13px;color:#6b7280;text-align:center;">
+            Once logged in, visit the <a href="https://worldaml.com/academy" style="color:#0d9488;text-decoration:underline;">Academy</a> to start learning.
+          </p>
+        </td></tr>
+        <tr><td style="padding:20px 32px;background:#f9fafb;border-top:1px solid #e5e7eb;">
+          <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center;">
+            WorldAML by Infocredit Group · <a href="https://worldaml.com" style="color:#9ca3af;">worldaml.com</a>
+          </p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+    },
+    buildText: (firstName: string) =>
+      `Hi ${firstName || "there"},\n\nWe noticed you recently registered for WorldAML. To access your free Academy courses, please reset your password.\n\nReset your password here: https://suite.worldaml.com/auth\n\nAs a registered user, you have free access to AML compliance training courses including AML Fundamentals, KYC & Customer Due Diligence, Sanctions Screening, and CPD-Accredited Certificates.\n\nOnce logged in, visit https://worldaml.com/academy to start learning.\n\nBest regards,\nThe WorldAML Team`,
+  },
 };
 
 /* ── Handler ── */
