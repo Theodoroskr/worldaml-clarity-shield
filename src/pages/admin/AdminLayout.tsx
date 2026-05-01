@@ -14,6 +14,7 @@ const NAV = [
   { label: "Pricing", path: "/admin/pricing", icon: CreditCard },
   { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText },
   { label: "Regulatory Hub", path: "/admin/regulatory", icon: Landmark },
+  { label: "Security Audit", path: "/admin/security", icon: ShieldCheck },
 ];
 
 export default function AdminLayout() {
