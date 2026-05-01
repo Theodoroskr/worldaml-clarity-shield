@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
@@ -21,6 +21,7 @@ const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,7 +69,8 @@ const Signup = () => {
         title: "Account created",
         description: "Your account has been approved. Please verify your email and sign in.",
       });
-      navigate("/login");
+      const redirectParam = searchParams.get("redirect");
+      navigate(redirectParam ? `/login?redirect=${encodeURIComponent(redirectParam)}` : "/login");
     }
 
     setIsLoading(false);
@@ -142,7 +144,7 @@ const Signup = () => {
             </form>
             <div className="mt-6 text-center text-sm text-text-secondary">
               Already have an account?{" "}
-              <Link to="/login" className="text-teal hover:underline font-medium">
+              <Link to={searchParams.get("redirect") ? `/login?redirect=${encodeURIComponent(searchParams.get("redirect")!)}` : "/login"} className="text-teal hover:underline font-medium">
                 Sign in
               </Link>
             </div>

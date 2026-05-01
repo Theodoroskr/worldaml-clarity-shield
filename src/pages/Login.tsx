@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
@@ -17,6 +17,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,7 +37,8 @@ const Login = () => {
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-      navigate("/dashboard");
+      const redirectTo = searchParams.get("redirect") || "/dashboard";
+      navigate(redirectTo);
     }
 
     setIsLoading(false);
@@ -90,7 +92,7 @@ const Login = () => {
             </div>
             <div className="mt-4 text-center text-sm text-text-secondary">
               Don't have an account?{" "}
-              <Link to="/signup" className="text-teal hover:underline font-medium">
+              <Link to={searchParams.get("redirect") ? `/signup?redirect=${encodeURIComponent(searchParams.get("redirect")!)}` : "/signup"} className="text-teal hover:underline font-medium">
                 Sign up
               </Link>
             </div>
