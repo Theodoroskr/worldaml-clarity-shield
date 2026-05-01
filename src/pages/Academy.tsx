@@ -292,9 +292,9 @@ const Academy = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO
-        title="Compliance Academy — Free AML & KYC Training | WorldAML"
-        description="Earn free compliance certificates with WorldAML Academy. Learn AML, KYC, and sanctions screening through interactive courses and quizzes."
+       <SEO
+        title="Free AML & KYC Training Courses — CPD Certificates | WorldAML"
+        description="CPD-accredited AML, KYC and sanctions training for compliance professionals in the US, UK, EU and UAE. Free courses available. Earn verifiable certificates."
         canonical="/academy"
         breadcrumbs={[
           { name: "Home", url: "/" },
@@ -304,8 +304,14 @@ const Academy = () => {
           "@context": "https://schema.org",
           "@type": "EducationalOrganization",
           name: "WorldAML Compliance Academy",
-          description: "Free compliance training courses with certificates covering AML, KYC, and sanctions screening.",
+          description: "CPD-accredited compliance training courses with verifiable certificates. AML, KYC and sanctions screening for regulated firms in the US, UK, Europe and Middle East.",
           url: "https://www.worldaml.com/academy",
+          areaServed: [
+            { "@type": "Country", name: "United States" },
+            { "@type": "Country", name: "United Kingdom" },
+            { "@type": "Country", name: "United Arab Emirates" },
+            { "@type": "AdministrativeArea", name: "European Union" },
+          ],
         }}
       />
       <Header />
