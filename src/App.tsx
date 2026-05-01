@@ -102,6 +102,7 @@ const AdminOrganizations = lazy(() => import("./pages/admin/AdminOrganizations")
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
 const AdminRegulatoryHub = lazy(() => import("./pages/admin/AdminRegulatoryHub"));
+const AdminSecurityAudit = lazy(() => import("./pages/admin/AdminSecurityAudit"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
