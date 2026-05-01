@@ -14,22 +14,22 @@ const RATES: Record<string, number> = { eur: 1, usd: 1.08, gbp: 0.86 };
 // Pricing — keep in sync with src/data/academyPricing.ts
 // stripeProductId is required for a course to be purchasable.
 const PRICING: Record<string, { eurCents: number; stripeProductId: string }> = {
-  "crypto-aml-essentials": { eurCents: 4900, stripeProductId: "" },
-  "aml-compliance-eu": { eurCents: 2900, stripeProductId: "" },
-  "aml-compliance-uk": { eurCents: 2900, stripeProductId: "" },
-  "aml-compliance-cyprus": { eurCents: 2900, stripeProductId: "" },
-  "aml-compliance-canada": { eurCents: 2900, stripeProductId: "" },
-  "aml-compliance-caribbean": { eurCents: 2900, stripeProductId: "" },
-  "aml-compliance-united-states": { eurCents: 2900, stripeProductId: "" },
-  "sanctions-compliance": { eurCents: 2900, stripeProductId: "" },
-  "pep-screening-adverse-media": { eurCents: 2900, stripeProductId: "" },
-  "transaction-monitoring-fundamentals": { eurCents: 2900, stripeProductId: "" },
-  "suspicious-activity-reporting": { eurCents: 2900, stripeProductId: "" },
-  "risk-based-approach": { eurCents: 2900, stripeProductId: "" },
-  "beneficial-ownership-ubo": { eurCents: 2900, stripeProductId: "" },
-  "compliance-officer-essentials": { eurCents: 2900, stripeProductId: "" },
-  "regulatory-reporting-essentials": { eurCents: 2900, stripeProductId: "" },
-  "travel-rule-wire-transfers": { eurCents: 2900, stripeProductId: "" },
+  "kyc-customer-due-diligence": { eurCents: 2900, stripeProductId: "prod_UNtNyYF6HC7Osp" },
+  "aml-europe": { eurCents: 2900, stripeProductId: "prod_UNtOIK9w7fRxZy" },
+  "aml-gcc-mena": { eurCents: 2900, stripeProductId: "prod_UNtPKlfpEfKIP6" },
+  "aml-asia-pacific": { eurCents: 2900, stripeProductId: "prod_UNtWobcmrPAJU3" },
+  "aml-americas": { eurCents: 2900, stripeProductId: "prod_URCbOPZTOUEZGi" },
+  "aml-africa": { eurCents: 2900, stripeProductId: "prod_URCbXpPRQb1nNV" },
+  "aml-cis": { eurCents: 2900, stripeProductId: "prod_URCc2U8EkGSsSO" },
+  "pep-screening-edd": { eurCents: 2900, stripeProductId: "prod_URCcOUYeCwnyjF" },
+  "adverse-media-intelligence": { eurCents: 2900, stripeProductId: "prod_URCcuWwRKR6w2T" },
+  "beneficial-ownership": { eurCents: 2900, stripeProductId: "prod_URCcNXPR9xIxu5" },
+  "beneficial-ownership-ubo-transparency": { eurCents: 2900, stripeProductId: "prod_URCcLmKpBK20zV" },
+  "transaction-monitoring-sar": { eurCents: 2900, stripeProductId: "prod_URCdenMZN0nNw8" },
+  "risk-based-approach": { eurCents: 2900, stripeProductId: "prod_URCdnPTBqo5gbh" },
+  "international-sanctions-compliance": { eurCents: 2900, stripeProductId: "prod_URCdkCCDtRRWyC" },
+  "crypto-aml": { eurCents: 4900, stripeProductId: "prod_URCdSqTbYEbrFg" },
+  "crypto-aml-essentials": { eurCents: 4900, stripeProductId: "prod_URCdNRdfGf9gXK" },
 };
 
 const FREE_COURSES = new Set(["aml-fundamentals", "sanctions-screening-essentials"]);
