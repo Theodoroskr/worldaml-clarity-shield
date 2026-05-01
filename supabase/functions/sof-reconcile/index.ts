@@ -62,6 +62,21 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Ownership check: verify caller belongs to the declaration's organisation
+    if (decl.organisation_id) {
+      const { data: membership } = await supabase
+        .from("suite_org_members")
+        .select("id")
+        .eq("user_id", userData.user.id)
+        .eq("organization_id", decl.organisation_id)
+        .maybeSingle();
+      if (!membership) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Load org thresholds (fallback to defaults)
     let thresholds = { ...DEFAULT_THRESHOLDS };
     if (decl.organisation_id) {
@@ -343,7 +358,8 @@ Income sources declared: ${JSON.stringify(decl.income_sources)}`,
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e) }), {
+    console.error("sof-reconcile error:", e);
+    return new Response(JSON.stringify({ error: "Internal error" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
