@@ -140,8 +140,15 @@ Deno.serve(async (req) => {
     let body: any = {};
     try { const raw = await req.text(); body = raw ? JSON.parse(raw) : {}; } catch { body = {}; }
 
-    // ---- Test mode ----
+    // ---- Test mode (requires service role key) ----
     if (body?.test === true) {
+      const authHeader = req.headers.get("Authorization") ?? "";
+      const token = authHeader.replace("Bearer ", "");
+      if (!SERVICE_KEY || token !== SERVICE_KEY) {
+        return new Response(JSON.stringify({ ok: false, error: "Unauthorized — test mode requires service role key" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const to = String(body.to ?? "").trim();
       if (!EMAIL_RE.test(to)) {
         return new Response(JSON.stringify({ ok: false, error: "Provide a valid 'to' email" }), {
