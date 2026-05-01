@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Search, X, Loader2, Flag, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { runScreening, type ScreeningResult, type ScreeningResponse } from "@/services/screeningProvider";
 import { useNavigate } from "react-router-dom";
 import { useOrganisation } from "@/hooks/useOrganisation";
+import { useFeatureLimits } from "@/hooks/useFeatureLimits";
+import UpgradeModal, { UpgradeBanner } from "@/components/suite/UpgradeModal";
 
 interface StoredScreening {
   id: string;
