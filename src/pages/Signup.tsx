@@ -144,7 +144,7 @@ const Signup = () => {
             </form>
             <div className="mt-6 text-center text-sm text-text-secondary">
               Already have an account?{" "}
-              <Link to="/login" className="text-teal hover:underline font-medium">
+              <Link to={searchParams.get("redirect") ? `/login?redirect=${encodeURIComponent(searchParams.get("redirect")!)}` : "/login"} className="text-teal hover:underline font-medium">
                 Sign in
               </Link>
             </div>
