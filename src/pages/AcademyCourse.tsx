@@ -46,6 +46,7 @@ const AcademyCourse = () => {
   const [correctAnswers, setCorrectAnswers] = useState<Record<string, number>>({});
   const [certificateToken, setCertificateToken] = useState<string | null>(null);
   const [reviewMode, setReviewMode] = useState(false);
+  const [quizError, setQuizError] = useState<{ message: string; code?: string; details?: string; hint?: string } | null>(null);
 
   const { data: course } = useQuery({
     queryKey: ["academy-course", slug],
