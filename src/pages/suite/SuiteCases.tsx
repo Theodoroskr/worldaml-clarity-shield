@@ -264,6 +264,11 @@ export default function SuiteCases() {
   const availableExports = getAvailableExports(userRegulator);
   const regulatorReports = userRegulator ? (REGULATOR_REPORTS[userRegulator] || []) : [];
 
+  // Feature limits
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const { checkLimit, subscriptionTier } = useFeatureLimits();
+  const casesLimit = useMemo(() => checkLimit("casesTotal", cases.length), [cases.length, checkLimit]);
+
   const fetchCases = async () => {
     if (!orgId) return;
     const [cRes, aRes] = await Promise.all([
