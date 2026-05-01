@@ -21,14 +21,17 @@ const ForgotPassword = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+    const { data, error } = await supabase.functions.invoke("send-upsell-email", {
+      body: {
+        recipientEmail: email,
+        templateId: "password-reset-academy",
+      },
     });
 
     if (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: "Failed to send reset email. Please try again in a moment.",
         variant: "destructive",
       });
     } else {

@@ -149,13 +149,20 @@ const ResetPassword = () => {
     e.preventDefault();
     setIsResending(true);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(resendEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
+    console.info("[ResetPassword] Requesting new reset email via edge function", { email: resendEmail });
+
+    const { data, error } = await supabase.functions.invoke("send-upsell-email", {
+      body: {
+        recipientEmail: resendEmail,
+        templateId: "password-reset-academy",
+      },
     });
 
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      console.error("[ResetPassword] Edge function error:", error);
+      toast({ title: "Error", description: "Failed to send reset email. Please try again in a moment.", variant: "destructive" });
     } else {
+      console.info("[ResetPassword] Reset email sent successfully", data);
       setPageState("resent");
       toast({ title: "Email sent", description: "Check your inbox for a new reset link." });
     }
