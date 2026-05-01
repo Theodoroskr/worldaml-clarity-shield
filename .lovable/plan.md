@@ -1,84 +1,67 @@
-## Goal
 
-Make `/rcm/*` fully translatable and Arabic-correct. Today the nav, header, and placeholder titles already read from `react-i18next`, but the placeholder body, dashboard footer text, and dashboard "no org" hint are hardcoded English, and the layout shell doesn't react to `dir="rtl"` (logical spacing, scroll direction, sidebar side).
+# Fix Academy Paid Course Checkout
 
-## Scope
+## Problem
 
-1. **Replace remaining hardcoded English strings** under `/rcm/*` with `t()` keys.
-2. **Add the missing translation keys** to both `en.json` and `ar.json`.
-3. **Make the layout RTL-aware** so Arabic renders correctly (sidebar on the right, logical paddings, header alignment).
-4. **Guarantee i18n is initialised before any RCM page mounts** (currently relies on a side-effect import that is only inside `RcmLayout`).
+No one can buy paid courses because of three cascading failures:
 
-## Implementation
+1. **Database**: All 18 courses have `stripe_price_id = NULL`, `stripe_product_id = NULL`, and `price_eur_cents = 0`.
+2. **Stripe**: Only 4 of 15 paid courses have Stripe products created (KYC & CDD, AML Europe, AML GCC & MENA, AML Asia-Pacific). The other 11 have no products at all.
+3. **Edge function**: The `create-academy-checkout` function has a hardcoded `PRICING` map with **stale slugs** that don't match the database (e.g. `aml-compliance-eu` in the edge function vs `aml-europe` in the DB). Even if the DB were correct, the slug mismatch would cause "Unknown course" errors.
+4. **Frontend config**: `academyPricing.ts` has the correct slugs but all `stripeProductId` fields are empty strings.
 
-### 1. New i18n keys
+The result: the purchase wall shows "This course is not yet available for purchase" for every paid course.
 
-Add to `src/i18n/locales/en.json` under `rcm`:
+## Plan
 
-```
-"placeholder": {
-  "body": "Module scaffolded. CRUD UI ships in the next iteration — schema, RLS and demo data are already live."
-},
-"dashboard": {
-  ...existing,
-  "scaffold_note": "Schema, RLS, and Region Trade Bank demo data are live. Library, Obligations, Controls, Assessments, Tasks, Evidence, Reports, Translation Review, Audit and Settings UIs are scaffolded — basic CRUD lands in the next iteration.",
-  "sign_in_first": "Sign in first via {{loginPath}}."
-}
-```
+### Step 1 --- Create 11 missing Stripe products (all at EUR 29.00 except the two crypto courses at EUR 49.00)
 
-Add Arabic equivalents to `src/i18n/locales/ar.json`:
+Create one Stripe product + one-time price for each of these courses:
 
-```
-"placeholder": {
-  "body": "الوحدة جاهزة هيكلياً. ستظهر واجهة CRUD في التكرار التالي — المخطط وسياسات RLS والبيانات التجريبية فعّالة بالفعل."
-},
-"dashboard": {
-  ...existing,
-  "scaffold_note": "المخطط وسياسات RLS وبيانات Region Trade Bank التجريبية فعّالة. تم تجهيز واجهات المكتبة والالتزامات والضوابط والتقييمات والمهام والأدلة والتقارير ومراجعة الترجمة والتدقيق والإعدادات — تصل عمليات CRUD الأساسية لاحقاً.",
-  "sign_in_first": "يرجى تسجيل الدخول أولاً عبر {{loginPath}}."
-}
-```
+| Slug | Price | 
+|---|---|
+| aml-americas | EUR 29 |
+| aml-africa | EUR 29 |
+| aml-cis | EUR 29 |
+| pep-screening-edd | EUR 29 |
+| adverse-media-intelligence | EUR 29 |
+| beneficial-ownership | EUR 29 |
+| beneficial-ownership-ubo-transparency | EUR 29 |
+| transaction-monitoring-sar | EUR 29 |
+| risk-based-approach | EUR 29 |
+| international-sanctions-compliance | EUR 29 |
+| crypto-aml | EUR 49 |
+| crypto-aml-essentials | EUR 49 |
 
-### 2. Wire keys into components
+(12 products total -- crypto-aml was also missing)
 
-- `src/pages/rcm/RcmPlaceholder.tsx` — replace the hardcoded sentence with `t("rcm.placeholder.body")`.
-- `src/pages/rcm/RcmDashboard.tsx` — replace the scaffold paragraph with `t("rcm.dashboard.scaffold_note")` and the "Sign in first" line with the `sign_in_first` key (`<Trans>` with the `/login` link, or split the translated string around the `/login` href).
+### Step 2 --- Update the database
 
-### 3. RTL-aware layout
+Use the insert tool to run UPDATE statements on `academy_courses`, setting `stripe_product_id`, `stripe_price_id`, and `price_eur_cents` for all 15 paid courses using the Stripe IDs from Step 1 plus the 4 existing ones:
 
-Update `src/pages/rcm/RcmLayout.tsx`:
+- KYC & CDD: `prod_UNtNyYF6HC7Osp` / `price_1TP7b1Lz1lUQpGdDbUFcR1mr` / 2900
+- AML Europe: `prod_UNtOIK9w7fRxZy` / `price_1TP7btLz1lUQpGdDDZ5AdfNG` / 2900
+- AML GCC & MENA: `prod_UNtPKlfpEfKIP6` / `price_1TP7cJLz1lUQpGdDoS8nj8Oh` / 2900
+- AML Asia-Pacific: `prod_UNtWobcmrPAJU3` / `price_1TP7jkLz1lUQpGdDs7NLWGjx` / 2900
 
-- Read `i18n.dir()` (or `i18n.language`) and pass `side="right"` to `<RcmSidebar />` when RTL so the sidebar mounts on the trailing edge.
-- Replace directional Tailwind utilities with logical equivalents in the header/main: `pl-`/`pr-` → `ps-`/`pe-`, `ml-`/`mr-` → `ms-`/`me-`, `text-left/right` → `text-start/end`. Specifically the header `px-3` is already symmetric, but the inner clusters use `gap-3` which is fine. Audit `RcmSidebar.tsx` for any `ml/mr/pl/pr` and swap to `ms/me/ps/pe` (none currently, but verify after the `side="right"` change).
-- Pass an `dir` attribute on the outer wrapper as a belt-and-braces signal: `<div dir={i18n.dir()} ...>`.
+### Step 3 --- Update `src/data/academyPricing.ts`
 
-Update `src/components/rcm/RcmSidebar.tsx`:
+Fill in every `stripeProductId` field with the real product IDs from Stripe.
 
-- Accept an optional `side?: "left" | "right"` prop and forward to the shadcn `<Sidebar>` component.
+### Step 4 --- Fix the edge function `create-academy-checkout/index.ts`
 
-### 4. Bootstrap i18n early
+- Replace the stale hardcoded `PRICING` map with the correct slugs and product IDs (matching the database).
+- Since the function already falls through to DB-managed pricing when `stripe_product_id` and `price_eur_cents` are present, the hardcoded map mainly serves as a safety fallback. Aligning it eliminates the "Unknown course" error path.
 
-Move the `import "@/i18n"` side-effect import from `RcmLayout.tsx` into `src/main.tsx` so the i18n instance, language detection and `dir`/`lang` attributes on `<html>` are applied before the very first render (avoids a flash of English on a deep-link to `/rcm/obligations`). Keep the import in `RcmLayout.tsx` as a no-op safety net.
+### Step 5 --- Smoke-test the checkout flow
 
-### 5. QA checklist (in default mode after edits)
+- Call the `create-academy-checkout` edge function with a test course slug to confirm it returns a valid Stripe Checkout URL.
+- Verify the Stripe session contains the correct price, product, and metadata.
+- Check that the `academy_course_purchases` table receives a `pending` row.
 
-- Visit `/rcm`, switch to Arabic via the LanguageSwitcher → header label, sidebar items, KPI tiles, scaffold note all translate.
-- Reload on `/rcm/obligations` directly with `localStorage` set to `ar` → page title and placeholder body both render Arabic, `<html dir="rtl" lang="ar">`.
-- Sidebar is anchored to the right edge in RTL; chevrons/icons remain visually correct.
-- Switch back to English → layout flips back to LTR, sidebar returns to the left.
+## Technical details
 
-## Files touched
-
-- edit `src/i18n/locales/en.json` — add `placeholder` and dashboard keys.
-- edit `src/i18n/locales/ar.json` — add Arabic translations.
-- edit `src/pages/rcm/RcmPlaceholder.tsx` — translate body.
-- edit `src/pages/rcm/RcmDashboard.tsx` — translate scaffold note + sign-in hint.
-- edit `src/pages/rcm/RcmLayout.tsx` — RTL `dir`, sidebar side, drop redundant import.
-- edit `src/components/rcm/RcmSidebar.tsx` — accept `side` prop.
-- edit `src/main.tsx` — import `@/i18n` once at app boot.
-
-## Out of scope
-
-- Translating each future CRUD page (will be done as those pages get built).
-- Server-side localisation of database-stored regulation/obligation text (already covered separately by `rcm_obligation_translations`).
-- Adding more than EN/AR (e.g. FR, ES) — current `supportedLngs` stays `["en","ar"]`.
+- The webhook (`stripe-academy-webhook`) is already correctly implemented: it listens for `checkout.session.completed` and marks pending rows as `paid` with a 1-month `expires_at`.
+- The frontend purchase wall (`AcademyCourse.tsx` line 370-372) checks `isPaidCourse(slug)` OR `stripe_price_id` being truthy. Once `price_eur_cents > 0` in the DB and `isPaidCourse` returns true from the updated pricing map, the "Add to basket" button will be enabled.
+- The cart drawer reads prices from `ACADEMY_PRICING` in the frontend, so those must be populated for correct price display.
+- No database schema changes are needed -- only data updates.
