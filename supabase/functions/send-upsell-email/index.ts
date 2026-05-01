@@ -40,8 +40,8 @@ type TemplateId = "suite-upsell" | "screening-upsell" | "password-reset-academy"
 
 interface TemplateConfig {
   subject: string;
-  buildHtml: (firstName: string) => string;
-  buildText: (firstName: string) => string;
+  buildHtml: (firstName: string, resetLink?: string) => string;
+  buildText: (firstName: string, resetLink?: string) => string;
 }
 
 const TEMPLATES: Record<TemplateId, TemplateConfig> = {
@@ -145,8 +145,7 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
 
   "password-reset-academy": {
     subject: "Reset Your Password — Access Your Free WorldAML Academy",
-    buildHtml: (firstName: string) => {
-      const resetLink = "https://suite.worldaml.com/auth";
+    buildHtml: (firstName: string, resetLink = "https://www.worldaml.com/forgot-password") => {
       return `
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"/></head>
@@ -193,8 +192,8 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
   </table>
 </body></html>`;
     },
-    buildText: (firstName: string) =>
-      `Hi ${firstName || "there"},\n\nWe noticed you recently registered for WorldAML. To access your free Academy courses, please reset your password.\n\nReset your password here: https://suite.worldaml.com/auth\n\nAs a registered user, you have free access to AML compliance training courses including AML Fundamentals, KYC & Customer Due Diligence, Sanctions Screening, and CPD-Accredited Certificates.\n\nOnce logged in, visit https://worldaml.com/academy to start learning.\n\nBest regards,\nThe WorldAML Team`,
+    buildText: (firstName: string, resetLink = "https://www.worldaml.com/forgot-password") =>
+      `Hi ${firstName || "there"},\n\nWe noticed you recently registered for WorldAML. To access your free Academy courses, please reset your password.\n\nReset your password here: ${resetLink}\n\nAs a registered user, you have free access to AML compliance training courses including AML Fundamentals, KYC & Customer Due Diligence, Sanctions Screening, and CPD-Accredited Certificates.\n\nOnce logged in, visit https://worldaml.com/academy to start learning.\n\nBest regards,\nThe WorldAML Team`,
   },
 };
 
@@ -277,16 +276,34 @@ Deno.serve(async (req) => {
     const resend = new Resend(resendApiKey);
     const template = TEMPLATES[templateId];
     const safeName = escapeHtml(recipientName || "");
+    let passwordResetLink: string | undefined;
 
     console.log("Sending upsell email", { recipientEmail, templateId });
+
+    if (templateId === "password-reset-academy") {
+      const { data: resetData, error: resetError } = await supabase.auth.admin.generateLink({
+        type: "recovery",
+        email: recipientEmail,
+        options: {
+          redirectTo: "https://www.worldaml.com/reset-password",
+        },
+      });
+
+      if (resetError) {
+        console.warn("Password reset link generation failed:", resetError.message);
+      } else {
+        passwordResetLink = resetData?.properties?.action_link;
+        console.log("Password recovery link generated for", recipientEmail);
+      }
+    }
 
     const { error: sendError } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [recipientEmail],
       cc: CC,
       subject: template.subject,
-      html: template.buildHtml(safeName),
-      text: template.buildText(safeName),
+      html: template.buildHtml(safeName, passwordResetLink),
+      text: template.buildText(safeName, passwordResetLink),
     });
 
     if (sendError) {
@@ -295,19 +312,6 @@ Deno.serve(async (req) => {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }
-
-    // If password-reset template, also trigger Supabase password reset
-    if (templateId === "password-reset-academy") {
-      const { error: resetError } = await supabase.auth.admin.generateLink({
-        type: "recovery",
-        email: recipientEmail,
-      });
-      if (resetError) {
-        console.warn("Password reset link generation failed (non-blocking):", resetError.message);
-      } else {
-        console.log("Password recovery email triggered for", recipientEmail);
-      }
     }
 
     // Audit log
