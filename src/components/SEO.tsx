@@ -19,6 +19,18 @@ const SITE_NAME = "WorldAML";
 const BASE_URL = "https://www.worldaml.com";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 
+/**
+ * hreflang targets: same content, one URL, but signal Google which
+ * English-speaking markets the page is relevant for.
+ */
+const HREFLANG_TARGETS = [
+  { hreflang: "en-US", region: "United States" },
+  { hreflang: "en-GB", region: "United Kingdom" },
+  { hreflang: "en-AE", region: "United Arab Emirates" },
+  { hreflang: "en", region: "International (English)" },
+  { hreflang: "x-default", region: "Default" },
+];
+
 const SEO = ({ title, description, canonical, noindex = false, ogType = "website", breadcrumbs, structuredData }: SEOProps) => {
   const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
   const canonicalUrl = canonical ? `${BASE_URL}${canonical}` : undefined;
@@ -42,6 +54,11 @@ const SEO = ({ title, description, canonical, noindex = false, ogType = "website
       <meta name="description" content={description} data-rh="true" />
       {noindex && <meta name="robots" content="noindex, nofollow" data-rh="true" />}
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} data-rh="true" />}
+
+      {/* hreflang — signal target English-speaking markets */}
+      {canonicalUrl && HREFLANG_TARGETS.map(({ hreflang }) => (
+        <link key={hreflang} rel="alternate" hrefLang={hreflang} href={canonicalUrl} data-rh="true" />
+      ))}
 
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} data-rh="true" />
