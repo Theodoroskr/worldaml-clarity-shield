@@ -57,24 +57,25 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
       { icon: FileText, label: "Audit Trail", path: "/suite/audit" },
     ],
   },
-  {
-    title: "RCM",
-    items: [
-      {
-        icon: BookOpen, label: "Reg. Compliance",
-        children: [
-          { label: "Dashboard", path: "/rcm" },
-          { label: "Library", path: "/rcm/library" },
-          { label: "Obligations", path: "/rcm/obligations" },
-          { label: "Controls", path: "/rcm/controls" },
-          { label: "Assessments", path: "/rcm/assessments" },
-          { label: "Tasks", path: "/rcm/tasks" },
-          { label: "Evidence", path: "/rcm/evidence" },
-          { label: "Reports", path: "/rcm/reports" },
-        ],
-      },
-    ],
-  },
+  // RCM section hidden — product not yet finished
+  // {
+  //   title: "RCM",
+  //   items: [
+  //     {
+  //       icon: BookOpen, label: "Reg. Compliance",
+  //       children: [
+  //         { label: "Dashboard", path: "/rcm" },
+  //         { label: "Library", path: "/rcm/library" },
+  //         { label: "Obligations", path: "/rcm/obligations" },
+  //         { label: "Controls", path: "/rcm/controls" },
+  //         { label: "Assessments", path: "/rcm/assessments" },
+  //         { label: "Tasks", path: "/rcm/tasks" },
+  //         { label: "Evidence", path: "/rcm/evidence" },
+  //         { label: "Reports", path: "/rcm/reports" },
+  //       ],
+  //     },
+  //   ],
+  // },
   {
     title: "System",
     items: [
