@@ -2892,6 +2892,10 @@ export default function SuiteCases() {
         <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium"><Plus className="w-3.5 h-3.5" /> New Case</button>
       </div>
 
+      {/* Upgrade banner & modal */}
+      <UpgradeBanner context={casesLimit} currentTier={subscriptionTier} onUpgradeClick={() => setUpgradeOpen(true)} />
+      <UpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} context={casesLimit} currentTier={subscriptionTier} />
+
       {showForm && (
         <div className="bg-card border border-border rounded-xl p-5 animate-fade-in">
           <h2 className="font-semibold text-foreground mb-3">Create Case</h2>
