@@ -55,6 +55,21 @@ export default function SuiteScreening() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [dismissedResults, setDismissedResults] = useState<Set<string>>(new Set());
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+
+  const { checkLimit, subscriptionTier } = useFeatureLimits();
+
+  // Count this month's screenings for limit check
+  const monthlyScreenings = useMemo(() => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    return history.filter(h => h.screened_at >= startOfMonth).length;
+  }, [history]);
+
+  const screeningLimit = useMemo(
+    () => checkLimit("screeningsPerMonth", monthlyScreenings),
+    [monthlyScreenings, checkLimit],
+  );
 
   const loadHistory = useCallback(async () => {
     if (!orgId) return;
