@@ -297,10 +297,23 @@ Deno.serve(async (req) => {
       });
     }
 
+    // If password-reset template, also trigger Supabase password reset
+    if (templateId === "password-reset-academy") {
+      const { error: resetError } = await supabase.auth.admin.generateLink({
+        type: "recovery",
+        email: recipientEmail,
+      });
+      if (resetError) {
+        console.warn("Password reset link generation failed (non-blocking):", resetError.message);
+      } else {
+        console.log("Password recovery email triggered for", recipientEmail);
+      }
+    }
+
     // Audit log
     await supabase.from("suite_audit_log").insert({
       user_id: user.id,
-      action: `Sent upsell email (${templateId}) to ${recipientEmail}`,
+      action: `Sent ${templateId} email to ${recipientEmail}`,
     }).then(() => {});
 
     return new Response(JSON.stringify({ success: true, to: recipientEmail, template: templateId }), {
