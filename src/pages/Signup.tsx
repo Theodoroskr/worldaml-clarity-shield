@@ -51,21 +51,14 @@ const Signup = () => {
     } else {
       // Send admin notification (non-blocking) — all users are auto-approved
       try {
-        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-        await fetch(`https://${projectId}.supabase.co/functions/v1/notify-new-signup`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({
+        await supabase.functions.invoke("notify-new-signup", {
+          body: {
             full_name: fullName,
             company_name: companyName,
             email,
             signed_up_at: new Date().toISOString(),
             auto_approved: true,
-          }),
+          },
         });
       } catch (notifyErr) {
         console.warn("Admin notification failed (non-blocking):", notifyErr);
