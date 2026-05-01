@@ -3528,6 +3528,23 @@ export type Database = {
         Returns: undefined
       }
       get_certificate_by_token: { Args: { _token: string }; Returns: Json }
+      get_rls_audit: {
+        Args: never
+        Returns: {
+          command: string
+          permissive: string
+          policy_name: string
+          rls_enabled: boolean
+          table: string
+        }[]
+      }
+      get_storage_buckets_audit: {
+        Args: never
+        Returns: {
+          name: string
+          public: boolean
+        }[]
+      }
       get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
         Args: {
