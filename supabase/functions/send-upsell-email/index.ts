@@ -168,14 +168,24 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { recipientEmail, recipientName, templateId } = body as {
+    const { recipientEmail: rawEmail, recipientName, templateId } = body as {
       recipientEmail: string;
       recipientName?: string;
       templateId: TemplateId;
     };
 
-    if (!recipientEmail || !templateId) {
-      return new Response(JSON.stringify({ error: "recipientEmail and templateId are required" }), {
+    const recipientEmail = typeof rawEmail === "string" ? rawEmail.trim() : "";
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!recipientEmail || !EMAIL_RE.test(recipientEmail)) {
+      return new Response(JSON.stringify({ error: "A valid recipientEmail is required", received: recipientEmail }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!templateId) {
+      return new Response(JSON.stringify({ error: "templateId is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -200,9 +210,11 @@ Deno.serve(async (req) => {
     const template = TEMPLATES[templateId];
     const safeName = escapeHtml(recipientName || "");
 
+    console.log("Sending upsell email to:", recipientEmail, "template:", templateId);
+
     const { error: sendError } = await resend.emails.send({
       from: FROM_EMAIL,
-      to: [recipientEmail],
+      to: recipientEmail,
       cc: CC,
       subject: template.subject,
       html: template.buildHtml(safeName),
