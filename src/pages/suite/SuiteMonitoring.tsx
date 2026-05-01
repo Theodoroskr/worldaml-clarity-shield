@@ -17,6 +17,10 @@ export default function SuiteMonitoring() {
   const [ruleStats, setRuleStats] = useState({ total: 0, active: 0 });
   const [recentAlerts, setRecentAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+
+  const { checkLimit, subscriptionTier } = useFeatureLimits();
+  const rulesLimit = useMemo(() => checkLimit("monitoringRules", ruleStats.total), [ruleStats.total, checkLimit]);
 
   useEffect(() => {
     if (orgLoading || !orgId) return;
