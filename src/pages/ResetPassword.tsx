@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
@@ -9,14 +9,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, AlertTriangle, Mail, ArrowLeft } from "lucide-react";
+
+type PageState = "checking" | "ready" | "invalid" | "success" | "resent";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isCheckingLink, setIsCheckingLink] = useState(true);
+  const [pageState, setPageState] = useState<PageState>("checking");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [resendEmail, setResendEmail] = useState("");
+  const [isResending, setIsResending] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -31,12 +34,7 @@ const ResetPassword = () => {
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
-          toast({
-            title: "Invalid or expired link",
-            description: "Please request a new password reset link.",
-            variant: "destructive",
-          });
-          navigate("/forgot-password", { replace: true });
+          setPageState("invalid");
           return;
         }
         window.history.replaceState({}, document.title, "/reset-password");
@@ -46,12 +44,7 @@ const ResetPassword = () => {
           refresh_token: refreshToken,
         });
         if (error) {
-          toast({
-            title: "Invalid or expired link",
-            description: "Please request a new password reset link.",
-            variant: "destructive",
-          });
-          navigate("/forgot-password", { replace: true });
+          setPageState("invalid");
           return;
         }
         window.history.replaceState({}, document.title, "/reset-password");
@@ -59,83 +52,158 @@ const ResetPassword = () => {
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
-        toast({
-          title: "Invalid or expired link",
-          description: "Please request a new password reset link.",
-          variant: "destructive",
-        });
-        navigate("/forgot-password", { replace: true });
+        setPageState("invalid");
         return;
       }
 
-      setIsCheckingLink(false);
+      setPageState("ready");
     };
 
     validateRecoveryLink().catch(() => {
-      toast({
-        title: "Invalid or expired link",
-        description: "Please request a new password reset link.",
-        variant: "destructive",
-      });
-      navigate("/forgot-password", { replace: true });
+      setPageState("invalid");
     });
-  }, [navigate, toast]);
+  }, []);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
-        setIsCheckingLink(false);
+        setPageState("ready");
       }
     });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure both passwords are the same.",
-        variant: "destructive",
-      });
+      toast({ title: "Passwords don't match", description: "Please make sure both passwords are the same.", variant: "destructive" });
       return;
     }
-
     if (password.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
-      });
+      toast({ title: "Password too short", description: "Password must be at least 6 characters long.", variant: "destructive" });
       return;
     }
 
     setIsLoading(true);
-
     const { error } = await supabase.auth.updateUser({ password });
-
     if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      setIsSuccess(true);
-      toast({
-        title: "Password updated",
-        description: "Your password has been successfully reset.",
-      });
-      // Redirect to dashboard after 2 seconds
+      setPageState("success");
+      toast({ title: "Password updated", description: "Your password has been successfully reset." });
       setTimeout(() => navigate("/dashboard"), 2000);
     }
-
     setIsLoading(false);
   };
+
+  const handleResend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsResending(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(resendEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      setPageState("resent");
+      toast({ title: "Email sent", description: "Check your inbox for a new reset link." });
+    }
+    setIsResending(false);
+  };
+
+  const renderContent = () => {
+    switch (pageState) {
+      case "checking":
+        return (
+          <div className="flex items-center justify-center py-8 text-muted-foreground">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Verifying reset link…
+          </div>
+        );
+
+      case "invalid":
+        return (
+          <div className="space-y-6">
+            <div className="text-center space-y-3">
+              <div className="mx-auto w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
+                <AlertTriangle className="h-6 w-6 text-destructive" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                This reset link is invalid or has expired. Enter your email below
+                and we'll send you a fresh one.
+              </p>
+            </div>
+            <form onSubmit={handleResend} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="resend-email">Email</Label>
+                <Input
+                  id="resend-email"
+                  type="email"
+                  placeholder="you@company.com"
+                  value={resendEmail}
+                  onChange={(e) => setResendEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isResending}>
+                {isResending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Send New Reset Link
+              </Button>
+            </form>
+          </div>
+        );
+
+      case "resent":
+        return (
+          <div className="text-center space-y-4">
+            <div className="mx-auto w-12 h-12 bg-teal/10 rounded-full flex items-center justify-center">
+              <Mail className="h-6 w-6 text-teal" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              We've sent a new password reset link to <strong>{resendEmail}</strong>.
+              Please check your inbox and spam folder.
+            </p>
+            <Button variant="outline" className="w-full" onClick={() => { setResendEmail(""); setPageState("invalid"); }}>
+              Try a different email
+            </Button>
+          </div>
+        );
+
+      case "success":
+        return (
+          <div className="text-center space-y-4">
+            <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="h-6 w-6 text-green-600" />
+            </div>
+            <p className="text-sm text-text-secondary">Redirecting you to the dashboard…</p>
+          </div>
+        );
+
+      case "ready":
+        return (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">New Password</Label>
+              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input id="confirmPassword" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={6} />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Update Password
+            </Button>
+          </form>
+        );
+    }
+  };
+
+  const cardTitle = pageState === "invalid" ? "Link Expired" : pageState === "resent" ? "Check Your Email" : pageState === "success" ? "Password Updated" : "Set New Password";
+  const cardDesc = pageState === "invalid" ? "Request a new password reset link" : pageState === "resent" ? "A new link is on its way" : pageState === "success" ? "Your password has been updated" : "Enter your new password below";
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -144,57 +212,18 @@ const ResetPassword = () => {
       <main className="flex-1 flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl text-navy">Set New Password</CardTitle>
-            <CardDescription>
-              {isSuccess ? "Your password has been updated" : "Enter your new password below"}
-            </CardDescription>
+            <CardTitle className="text-2xl text-navy">{cardTitle}</CardTitle>
+            <CardDescription>{cardDesc}</CardDescription>
           </CardHeader>
           <CardContent>
-            {isCheckingLink ? (
-              <div className="flex items-center justify-center py-8 text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Verifying reset link...
+            {renderContent()}
+            {(pageState === "invalid" || pageState === "resent") && (
+              <div className="mt-6 text-center">
+                <Link to="/login" className="text-sm text-teal hover:underline font-medium inline-flex items-center gap-1">
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Sign In
+                </Link>
               </div>
-            ) : isSuccess ? (
-              <div className="text-center space-y-4">
-                <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
-                </div>
-                <p className="text-sm text-text-secondary">
-                  Redirecting you to the dashboard...
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password">New Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Update Password
-                </Button>
-              </form>
             )}
           </CardContent>
         </Card>
