@@ -276,6 +276,30 @@ const AcademyCourse = () => {
     }
   };
 
+  const reportErrorToSupport = async () => {
+    if (!quizError || !course) return;
+    setReportingError(true);
+    try {
+      await supabase.functions.invoke("report-quiz-error", {
+        body: {
+          error_message: quizError.message,
+          error_code: quizError.code,
+          error_details: quizError.details,
+          error_hint: quizError.hint,
+          course_id: course.id,
+          course_slug: slug,
+          user_agent: navigator.userAgent,
+        },
+      });
+      setErrorReported(true);
+      toast({ title: "Reported", description: "Error details sent to our support team." });
+    } catch {
+      toast({ title: "Could not send report", description: "Please contact support manually.", variant: "destructive" });
+    } finally {
+      setReportingError(false);
+    }
+  };
+
   const allModulesComplete = modules ? completedModules.length >= modules.length : false;
   const progressPercent = modules?.length ? (completedModules.length / modules.length) * 100 : 0;
 
