@@ -272,6 +272,11 @@ export default function AdminUsers() {
                         <KeyRound className="w-3.5 h-3.5 mr-1" />Grant Suite
                       </Button>
                     )}
+                    {p.email && (
+                      <Button size="sm" variant="ghost" className="h-7 text-xs text-teal-600" onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellDialog({ open: true, profile: p }); }}>
+                        <Send className="w-3.5 h-3.5 mr-1" />Upsell
+                      </Button>
+                    )}
                   </div>
                 </td>
               </tr>
