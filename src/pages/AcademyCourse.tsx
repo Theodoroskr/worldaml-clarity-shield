@@ -72,6 +72,7 @@ const AcademyCourse = () => {
     }
   }, [user, slug, gate.loading, gate.requiresPurchase, searchParams]);
 
+  const { data: course } = useQuery({
     queryKey: ["academy-course", slug],
     queryFn: async () => {
       const { data, error } = await supabase
