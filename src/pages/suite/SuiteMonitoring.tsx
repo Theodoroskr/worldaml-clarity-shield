@@ -85,6 +85,10 @@ export default function SuiteMonitoring() {
           <p className="text-xs text-muted-foreground mt-0.5">Real-time alert management and rule configuration</p>
         </div>
 
+        {/* Upgrade banner & modal */}
+        <UpgradeBanner context={rulesLimit} currentTier={subscriptionTier} onUpgradeClick={() => setUpgradeOpen(true)} />
+        <UpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} context={rulesLimit} currentTier={subscriptionTier} />
+
         {loading ? (
           <p className="text-sm text-muted-foreground text-center py-12">Loading monitoring data…</p>
         ) : (
