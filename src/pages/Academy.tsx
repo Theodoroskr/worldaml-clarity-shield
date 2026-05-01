@@ -461,22 +461,22 @@ const Academy = () => {
           </div>
         </section>
 
-        {/* What you get — Free vs Paid comparison */}
+        {/* What you get — Three-tier pricing */}
         <section className="bg-background border-b border-border">
           <div className="container-enterprise section-padding">
             <div className="text-center mb-10 max-w-2xl mx-auto">
-              <h2 className="text-headline text-foreground mb-3">What you get</h2>
+              <h2 className="text-headline text-foreground mb-3">Choose your plan</h2>
               <p className="text-body-lg text-muted-foreground">
-                Start with free fundamentals. Upgrade individual courses when you're ready to specialise.
+                Start free, buy individual courses, or unlock everything with an annual subscription.
               </p>
             </div>
-            <div className="grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
               {/* Free tier */}
               <div className="rounded-xl border border-border bg-card p-6 flex flex-col">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <p className="text-caption font-semibold uppercase tracking-wider text-muted-foreground">Free</p>
-                    <h3 className="text-subtitle font-bold text-foreground mt-0.5">Foundation tier</h3>
+                    <h3 className="text-subtitle font-bold text-foreground mt-0.5">Foundation</h3>
                   </div>
                   <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 border-emerald-200">€0</Badge>
                 </div>
@@ -514,15 +514,12 @@ const Academy = () => {
                 )}
               </div>
 
-              {/* Paid tier */}
-              <div className="rounded-xl border-2 border-primary bg-card p-6 flex flex-col relative shadow-lg">
-                <div className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-primary text-primary-foreground text-caption font-semibold">
-                  Most popular
-                </div>
+              {/* Per-Course tier */}
+              <div className="rounded-xl border border-border bg-card p-6 flex flex-col">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-caption font-semibold uppercase tracking-wider text-primary">Paid</p>
-                    <h3 className="text-subtitle font-bold text-foreground mt-0.5">Specialisation tier</h3>
+                    <p className="text-caption font-semibold uppercase tracking-wider text-muted-foreground">Per Course</p>
+                    <h3 className="text-subtitle font-bold text-foreground mt-0.5">Specialisation</h3>
                   </div>
                   <Badge className="bg-primary text-primary-foreground">From €29</Badge>
                 </div>
@@ -531,11 +528,11 @@ const Academy = () => {
                 </p>
                 <ul className="space-y-2.5 mb-5 flex-1">
                   {[
-                    "16+ regional & specialist courses (AML by region, PEP/EDD, UBO, crypto, monitoring)",
-                    "5–6 in-depth modules per course with real case studies",
-                    "Comprehensive quizzes & CPD-accredited certificates",
+                    "16+ regional & specialist courses",
+                    "5–6 in-depth modules per course with case studies",
+                    "CPD-accredited certificates",
                     "Bundle discount: 5% off 2 courses, 10% off 3+",
-                    "MLRO Toolkit: editable policy & SAR templates included",
+                    "MLRO Toolkit: editable policy & SAR templates",
                     "Lifetime access to purchased material",
                   ].map((item, i) => (
                     <li key={i} className="flex gap-2 text-body-sm text-foreground">
@@ -545,20 +542,73 @@ const Academy = () => {
                   ))}
                 </ul>
                 {!user ? (
-                  <Button asChild className="w-full">
+                  <Button asChild className="w-full" variant="outline">
                     <Link to="/login">
                       Sign in to purchase
                       <ArrowRight className="h-4 w-4 ml-1" />
                     </Link>
                   </Button>
                 ) : (
-                  <Button asChild className="w-full">
+                  <Button asChild className="w-full" variant="outline">
                     <a href="#courses-grid">
                       Browse paid courses
                       <ArrowRight className="h-4 w-4 ml-1" />
                     </a>
                   </Button>
                 )}
+              </div>
+
+              {/* Annual All-Access tier */}
+              <div className="rounded-xl border-2 border-accent bg-card p-6 flex flex-col relative shadow-lg">
+                <div className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-accent text-accent-foreground text-caption font-semibold flex items-center gap-1">
+                  <Crown className="h-3 w-3" /> Best value
+                </div>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-caption font-semibold uppercase tracking-wider text-accent">Annual</p>
+                    <h3 className="text-subtitle font-bold text-foreground mt-0.5">All-Access</h3>
+                  </div>
+                  <div className="text-right">
+                    <Badge className="bg-accent text-accent-foreground">€199/year</Badge>
+                  </div>
+                </div>
+                <p className="text-body-sm text-muted-foreground mb-4">
+                  One annual payment, unlimited access to every course. Certificates never expire.
+                </p>
+                <ul className="space-y-2.5 mb-5 flex-1">
+                  {[
+                    { icon: BookOpen, text: "Unlimited access to all 16+ courses" },
+                    { icon: Calendar, text: "Annual prepaid billing — one payment, full year" },
+                    { icon: RefreshCw, text: "Unused course completions roll over — certificates never expire" },
+                    { icon: Sparkles, text: "Priority access to new courses added during your subscription" },
+                    { icon: Award, text: "All CPD certificates and MLRO Toolkit included" },
+                    { icon: Shield, text: "Cancel anytime, keep every certificate you've earned" },
+                  ].map((item, i) => {
+                    const Icon = item.icon;
+                    return (
+                      <li key={i} className="flex gap-2 text-body-sm text-foreground">
+                        <Icon className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
+                        <span>{item.text}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <Button asChild variant="accent" className="w-full">
+                  <Link to="/contact-sales">
+                    Subscribe annually
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            {/* Rollover usage callout */}
+            <div className="max-w-3xl mx-auto mt-8">
+              <div className="rounded-lg border border-accent/30 bg-accent/5 px-5 py-4 flex gap-3 items-start">
+                <RefreshCw className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+                <p className="text-body-sm text-muted-foreground">
+                  <strong className="text-foreground">Annual subscribers:</strong> your access renews each year. Certificates and CPD credits you've earned are yours forever — they never expire, even if you cancel.
+                </p>
               </div>
             </div>
           </div>
