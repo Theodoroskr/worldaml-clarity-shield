@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, FileText } from "lucide-react";
+import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, FileText, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,6 +35,31 @@ export default function AdminUsers() {
   // Grant Suite dialog state
   const [grantDialog, setGrantDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
   const [selectedRegulator, setSelectedRegulator] = useState("");
+  const [upsellDialog, setUpsellDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
+  const [upsellTemplate, setUpsellTemplate] = useState<"suite-upsell" | "screening-upsell">("suite-upsell");
+  const [upsellSending, setUpsellSending] = useState(false);
+
+  const sendUpsellEmail = async () => {
+    if (!upsellDialog.profile?.email) return;
+    setUpsellSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-upsell-email", {
+        body: {
+          recipientEmail: upsellDialog.profile.email,
+          recipientName: upsellDialog.profile.full_name || "",
+          templateId: upsellTemplate,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Upsell email sent to ${upsellDialog.profile.email}`);
+      setUpsellDialog({ open: false, profile: null });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send email");
+    } finally {
+      setUpsellSending(false);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -247,6 +272,11 @@ export default function AdminUsers() {
                         <KeyRound className="w-3.5 h-3.5 mr-1" />Grant Suite
                       </Button>
                     )}
+                    {p.email && (
+                      <Button size="sm" variant="ghost" className="h-7 text-xs text-teal-600" onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellDialog({ open: true, profile: p }); }}>
+                        <Send className="w-3.5 h-3.5 mr-1" />Upsell
+                      </Button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -374,6 +404,61 @@ export default function AdminUsers() {
                 <KeyRound className="w-3.5 h-3.5 mr-1" />
               )}
               Grant Suite Access
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Upsell Email Dialog */}
+      <Dialog open={upsellDialog.open} onOpenChange={(open) => !open && setUpsellDialog({ open: false, profile: null })}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="w-4 h-4 text-teal-600" />
+              Send Upsell Email
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 bg-muted/30 rounded-lg border border-border">
+              <p className="text-sm font-medium">{upsellDialog.profile?.full_name || "—"}</p>
+              <p className="text-xs text-muted-foreground">{upsellDialog.profile?.email}</p>
+              {upsellDialog.profile?.company_name && (
+                <p className="text-xs text-muted-foreground">{upsellDialog.profile.company_name}</p>
+              )}
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Email Template</label>
+              <Select value={upsellTemplate} onValueChange={(v: any) => setUpsellTemplate(v)}>
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="suite-upsell">
+                    <span className="font-medium">WorldAML Suite</span>
+                    <span className="text-muted-foreground ml-1.5">— Full platform upsell</span>
+                  </SelectItem>
+                  <SelectItem value="screening-upsell">
+                    <span className="font-medium">AML Screening</span>
+                    <span className="text-muted-foreground ml-1.5">— 1,900+ watchlists</span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-3 rounded-lg border border-amber-200 bg-amber-50/50 text-xs text-amber-800">
+              <strong>Note:</strong> This sends a single personalised email via Resend to this user. A copy is CC'd to compliance@infocreditgroup.com and logged in the audit trail.
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" size="sm" onClick={() => setUpsellDialog({ open: false, profile: null })}>
+              Cancel
+            </Button>
+            <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white" onClick={sendUpsellEmail} disabled={upsellSending}>
+              {upsellSending ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+              ) : (
+                <Send className="w-3.5 h-3.5 mr-1" />
+              )}
+              Send Email
             </Button>
           </DialogFooter>
         </DialogContent>
