@@ -9,6 +9,21 @@ const corsHeaders = {
 
 const FROM_EMAIL = "WorldAML <info@worldaml.com>";
 const CC = ["compliance@infocreditgroup.com"];
+const EMAIL_RE = /^[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i;
+
+function normalizeEmail(value: unknown): string {
+  if (typeof value !== "string") return "";
+
+  const trimmed = value
+    .trim()
+    .replace(/^mailto:/i, "")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "");
+  const displayMatch = trimmed.match(/<([^<>]+)>$/);
+  const email = (displayMatch?.[1] ?? trimmed).trim().toLowerCase();
+
+  if (!email || /[\s,;<>]/.test(email) || !EMAIL_RE.test(email)) return "";
+  return email;
+}
 
 function escapeHtml(str: string): string {
   return str
@@ -174,11 +189,10 @@ Deno.serve(async (req) => {
       templateId: TemplateId;
     };
 
-    const recipientEmail = typeof rawEmail === "string" ? rawEmail.trim() : "";
-    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const recipientEmail = normalizeEmail(rawEmail);
 
-    if (!recipientEmail || !EMAIL_RE.test(recipientEmail)) {
-      return new Response(JSON.stringify({ error: "A valid recipientEmail is required", received: recipientEmail }), {
+    if (!recipientEmail) {
+      return new Response(JSON.stringify({ error: "A valid recipient email is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -210,11 +224,11 @@ Deno.serve(async (req) => {
     const template = TEMPLATES[templateId];
     const safeName = escapeHtml(recipientName || "");
 
-    console.log("Sending upsell email to:", recipientEmail, "template:", templateId);
+    console.log("Sending upsell email", { recipientEmail, templateId });
 
     const { error: sendError } = await resend.emails.send({
       from: FROM_EMAIL,
-      to: recipientEmail,
+      to: [recipientEmail],
       cc: CC,
       subject: template.subject,
       html: template.buildHtml(safeName),
