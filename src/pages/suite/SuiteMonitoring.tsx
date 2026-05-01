@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 import { Activity, AlertTriangle, Scale, TrendingUp, TrendingDown, BarChart3, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganisation } from "@/hooks/useOrganisation";
+import { useFeatureLimits } from "@/hooks/useFeatureLimits";
+import UpgradeModal, { UpgradeBanner } from "@/components/suite/UpgradeModal";
 import SuiteAlerts from "./SuiteAlerts";
 import SuiteAlertRules from "./SuiteAlertRules";
 
