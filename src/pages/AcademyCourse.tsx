@@ -50,7 +50,28 @@ const AcademyCourse = () => {
   const [errorReported, setErrorReported] = useState(false);
   const [reportingError, setReportingError] = useState(false);
 
-  const { data: course } = useQuery({
+  // Auto-add to cart and open drawer when returning from login with purchase intent
+  useEffect(() => {
+    if (
+      searchParams.get("intent") === "purchase" &&
+      user &&
+      slug &&
+      !gate.loading &&
+      gate.requiresPurchase &&
+      isPaidCourse(slug)
+    ) {
+      if (!cart.has(slug)) {
+        cart.add(slug);
+      }
+      cart.open();
+      // Clean up the URL param
+      const next = new URLSearchParams(searchParams);
+      next.delete("intent");
+      const qs = next.toString();
+      navigate(`/academy/${slug}${qs ? `?${qs}` : ""}`, { replace: true });
+    }
+  }, [user, slug, gate.loading, gate.requiresPurchase, searchParams]);
+
     queryKey: ["academy-course", slug],
     queryFn: async () => {
       const { data, error } = await supabase
