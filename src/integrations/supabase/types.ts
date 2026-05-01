@@ -926,6 +926,48 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_error_reports: {
+        Row: {
+          course_id: string | null
+          course_slug: string | null
+          created_at: string
+          error_code: string | null
+          error_details: string | null
+          error_hint: string | null
+          error_message: string
+          id: string
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          course_slug?: string | null
+          created_at?: string
+          error_code?: string | null
+          error_details?: string | null
+          error_hint?: string | null
+          error_message: string
+          id?: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          course_slug?: string | null
+          created_at?: string
+          error_code?: string | null
+          error_details?: string | null
+          error_hint?: string | null
+          error_message?: string
+          id?: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       rcm_assessment_items: {
         Row: {
           answer_type: string

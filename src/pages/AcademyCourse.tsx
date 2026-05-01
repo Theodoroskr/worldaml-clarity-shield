@@ -47,6 +47,8 @@ const AcademyCourse = () => {
   const [certificateToken, setCertificateToken] = useState<string | null>(null);
   const [reviewMode, setReviewMode] = useState(false);
   const [quizError, setQuizError] = useState<{ message: string; code?: string; details?: string; hint?: string } | null>(null);
+  const [errorReported, setErrorReported] = useState(false);
+  const [reportingError, setReportingError] = useState(false);
 
   const { data: course } = useQuery({
     queryKey: ["academy-course", slug],
@@ -271,6 +273,30 @@ const AcademyCourse = () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const reportErrorToSupport = async () => {
+    if (!quizError || !course) return;
+    setReportingError(true);
+    try {
+      await supabase.functions.invoke("report-quiz-error", {
+        body: {
+          error_message: quizError.message,
+          error_code: quizError.code,
+          error_details: quizError.details,
+          error_hint: quizError.hint,
+          course_id: course.id,
+          course_slug: slug,
+          user_agent: navigator.userAgent,
+        },
+      });
+      setErrorReported(true);
+      toast({ title: "Reported", description: "Error details sent to our support team." });
+    } catch {
+      toast({ title: "Could not send report", description: "Please contact support manually.", variant: "destructive" });
+    } finally {
+      setReportingError(false);
     }
   };
 
@@ -800,14 +826,30 @@ const AcademyCourse = () => {
                             <li>If the issue persists, contact support with the error details above.</li>
                           </ul>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-3 border-rose-300 text-rose-700 hover:bg-rose-100"
-                          onClick={() => setQuizError(null)}
-                        >
-                          Dismiss
-                        </Button>
+                        <div className="flex gap-2 mt-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-rose-300 text-rose-700 hover:bg-rose-100"
+                            onClick={() => { setQuizError(null); setErrorReported(false); }}
+                          >
+                            Dismiss
+                          </Button>
+                          {user && !errorReported && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-rose-300 text-rose-700 hover:bg-rose-100"
+                              disabled={reportingError}
+                              onClick={reportErrorToSupport}
+                            >
+                              {reportingError ? "Sending…" : "Report to Support"}
+                            </Button>
+                          )}
+                          {errorReported && (
+                            <span className="text-sm text-emerald-700 self-center">✓ Reported</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
