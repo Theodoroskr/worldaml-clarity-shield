@@ -21,6 +21,7 @@ const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,7 +69,8 @@ const Signup = () => {
         title: "Account created",
         description: "Your account has been approved. Please verify your email and sign in.",
       });
-      navigate("/login");
+      const redirectParam = searchParams.get("redirect");
+      navigate(redirectParam ? `/login?redirect=${encodeURIComponent(redirectParam)}` : "/login");
     }
 
     setIsLoading(false);
