@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
