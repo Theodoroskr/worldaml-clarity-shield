@@ -24,11 +24,20 @@ const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pageState, setPageState] = useState<PageState>("checking");
+  const [invalidReason, setInvalidReason] = useState<InvalidReason | null>(null);
+  const [invalidDetail, setInvalidDetail] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [resendEmail, setResendEmail] = useState("");
   const [isResending, setIsResending] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const markInvalid = (reason: InvalidReason, detail: string) => {
+    console.error(`[ResetPassword] INVALID — reason: ${reason}`, detail);
+    setInvalidReason(reason);
+    setInvalidDetail(detail);
+    setPageState("invalid");
+  };
 
   useEffect(() => {
     const validateRecoveryLink = async () => {
@@ -37,37 +46,69 @@ const ResetPassword = () => {
       const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
       const accessToken = hashParams.get("access_token");
       const refreshToken = hashParams.get("refresh_token");
+      const errorParam = url.searchParams.get("error") || hashParams.get("error");
+      const errorDesc = url.searchParams.get("error_description") || hashParams.get("error_description");
+
+      console.info("[ResetPassword] Validating recovery link", {
+        hasCode: !!code,
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        errorParam,
+        errorDesc,
+        href: url.href.replace(/code=[^&]+/, "code=REDACTED").replace(/access_token=[^&]+/, "access_token=REDACTED").replace(/refresh_token=[^&]+/, "refresh_token=REDACTED"),
+      });
+
+      // If Supabase already redirected with an error in the URL
+      if (errorParam) {
+        markInvalid("code_exchange_failed", `Auth redirect error: ${errorParam} — ${errorDesc || "no description"}`);
+        return;
+      }
 
       if (code) {
+        console.info("[ResetPassword] Exchanging PKCE code for session…");
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
-          setPageState("invalid");
+          markInvalid("code_exchange_failed", `exchangeCodeForSession failed: ${error.message} (status: ${(error as any).status ?? "n/a"})`);
           return;
         }
+        console.info("[ResetPassword] PKCE code exchange succeeded");
         window.history.replaceState({}, document.title, "/reset-password");
       } else if (accessToken && refreshToken) {
+        console.info("[ResetPassword] Setting session from hash tokens…");
         const { error } = await supabase.auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken,
         });
         if (error) {
-          setPageState("invalid");
+          markInvalid("token_session_failed", `setSession failed: ${error.message} (status: ${(error as any).status ?? "n/a"})`);
           return;
         }
+        console.info("[ResetPassword] Hash token session set succeeded");
         window.history.replaceState({}, document.title, "/reset-password");
+      } else {
+        console.info("[ResetPassword] No code or tokens in URL — checking existing session");
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.info("[ResetPassword] getSession result", {
+        hasSession: !!session,
+        userId: session?.user?.id ?? null,
+        email: session?.user?.email ?? null,
+        sessionError: sessionError?.message ?? null,
+      });
+
       if (!session?.user) {
-        setPageState("invalid");
+        const reason: InvalidReason = (!code && !accessToken) ? "no_params" : "no_session";
+        markInvalid(reason, `No active session after validation. code=${!!code}, accessToken=${!!accessToken}`);
         return;
       }
 
+      console.info("[ResetPassword] Recovery link valid — showing password form");
       setPageState("ready");
     };
 
-    validateRecoveryLink().catch(() => {
-      setPageState("invalid");
+    validateRecoveryLink().catch((err) => {
+      markInvalid("uncaught_error", `Uncaught: ${err?.message ?? String(err)}`);
     });
   }, []);
 
