@@ -23,6 +23,17 @@ interface Profile {
   created_at: string;
 }
 
+const EMAIL_RE = /^[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i;
+
+const normalizeEmail = (value: string | null | undefined) => {
+  const cleaned = (value || "")
+    .trim()
+    .replace(/^mailto:/i, "")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "");
+  const displayMatch = cleaned.match(/<([^<>]+)>$/);
+  return (displayMatch?.[1] ?? cleaned).trim().toLowerCase();
+};
+
 export default function AdminUsers() {
   const { user } = useAuth();
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -40,19 +51,23 @@ export default function AdminUsers() {
   const [upsellSending, setUpsellSending] = useState(false);
 
   const sendUpsellEmail = async () => {
-    if (!upsellDialog.profile?.email) return;
+    const recipientEmail = normalizeEmail(upsellDialog.profile?.email);
+    if (!recipientEmail || /[\s,;<>]/.test(recipientEmail) || !EMAIL_RE.test(recipientEmail)) {
+      toast.error("This user does not have a valid email address.");
+      return;
+    }
     setUpsellSending(true);
     try {
       const { data, error } = await supabase.functions.invoke("send-upsell-email", {
         body: {
-          recipientEmail: upsellDialog.profile.email,
+          recipientEmail,
           recipientName: upsellDialog.profile.full_name || "",
           templateId: upsellTemplate,
         },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success(`Upsell email sent to ${upsellDialog.profile.email}`);
+      toast.success(`Upsell email sent to ${recipientEmail}`);
       setUpsellDialog({ open: false, profile: null });
     } catch (err: any) {
       toast.error(err.message || "Failed to send email");
