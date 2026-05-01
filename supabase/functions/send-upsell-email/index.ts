@@ -36,7 +36,7 @@ function escapeHtml(str: string): string {
 
 /* ── Email templates ── */
 
-type TemplateId = "suite-upsell" | "screening-upsell";
+type TemplateId = "suite-upsell" | "screening-upsell" | "password-reset-academy";
 
 interface TemplateConfig {
   subject: string;
