@@ -751,6 +751,67 @@ const AcademyCourse = () => {
               </div>
             ) : (
               <div className="max-w-2xl mx-auto">
+                {quizError && (
+                  <div className="mb-8 rounded-xl border border-rose-500/40 bg-rose-50 p-6">
+                    <div className="flex items-start gap-3">
+                      <XCircle className="h-6 w-6 text-rose-600 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold text-rose-800 mb-2">Quiz Submission Failed</h3>
+                        <div className="space-y-2 text-sm">
+                          <div>
+                            <span className="font-semibold text-rose-700">Error: </span>
+                            <span className="text-rose-900 font-mono">{quizError.message}</span>
+                          </div>
+                          {quizError.code && (
+                            <div>
+                              <span className="font-semibold text-rose-700">Code: </span>
+                              <span className="text-rose-900 font-mono">{quizError.code}</span>
+                            </div>
+                          )}
+                          {quizError.details && (
+                            <div>
+                              <span className="font-semibold text-rose-700">Details: </span>
+                              <span className="text-rose-900 font-mono">{quizError.details}</span>
+                            </div>
+                          )}
+                          {quizError.hint && (
+                            <div>
+                              <span className="font-semibold text-rose-700">Hint: </span>
+                              <span className="text-rose-900 font-mono">{quizError.hint}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-4 p-3 bg-white/60 rounded-lg border border-rose-200">
+                          <p className="font-semibold text-rose-800 mb-1">Suggested next steps:</p>
+                          <ul className="list-disc list-inside text-rose-700 text-sm space-y-1">
+                            {quizError.code === "42501" && (
+                              <li>Permission denied — the database function or table RLS policy is blocking access. Contact support.</li>
+                            )}
+                            {quizError.code === "PGRST202" && (
+                              <li>The RPC function was not found. A database migration may be pending.</li>
+                            )}
+                            {quizError.message?.includes("rate") && (
+                              <li>You may be rate-limited. Wait a minute and try again.</li>
+                            )}
+                            {quizError.message?.includes("JWT") && (
+                              <li>Your session may have expired. Try logging out and back in.</li>
+                            )}
+                            <li>Try refreshing the page and submitting again.</li>
+                            <li>If the issue persists, contact support with the error details above.</li>
+                          </ul>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-3 border-rose-300 text-rose-700 hover:bg-rose-100"
+                          onClick={() => setQuizError(null)}
+                        >
+                          Dismiss
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {quizSubmitted && quizScore !== null && (
                   <div className={`mb-8 rounded-xl border p-6 ${
                     quizScore >= PASS_THRESHOLD
