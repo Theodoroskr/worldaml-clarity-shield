@@ -826,14 +826,30 @@ const AcademyCourse = () => {
                             <li>If the issue persists, contact support with the error details above.</li>
                           </ul>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-3 border-rose-300 text-rose-700 hover:bg-rose-100"
-                          onClick={() => setQuizError(null)}
-                        >
-                          Dismiss
-                        </Button>
+                        <div className="flex gap-2 mt-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-rose-300 text-rose-700 hover:bg-rose-100"
+                            onClick={() => { setQuizError(null); setErrorReported(false); }}
+                          >
+                            Dismiss
+                          </Button>
+                          {user && !errorReported && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-rose-300 text-rose-700 hover:bg-rose-100"
+                              disabled={reportingError}
+                              onClick={reportErrorToSupport}
+                            >
+                              {reportingError ? "Sending…" : "Report to Support"}
+                            </Button>
+                          )}
+                          {errorReported && (
+                            <span className="text-sm text-emerald-700 self-center">✓ Reported</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
