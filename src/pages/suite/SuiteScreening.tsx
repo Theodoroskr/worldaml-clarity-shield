@@ -99,6 +99,12 @@ export default function SuiteScreening() {
     if (!searchName.trim()) { toast.error("Enter a name to search"); return; }
     if (!selectedCustomerId) { toast.error("Select a customer to link this screening to"); return; }
 
+    // Feature-limit gate
+    if (screeningLimit.isAtLimit) {
+      setUpgradeOpen(true);
+      return;
+    }
+
     setSearching(true);
     setResponse(null);
     setDismissedResults(new Set());
