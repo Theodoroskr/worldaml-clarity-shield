@@ -55,14 +55,31 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // --- Auth: require service role key (internal invocation only) ---
+    // --- Auth: require authenticated user or service role key ---
     const authHeader = req.headers.get("Authorization") ?? "";
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const token = authHeader.replace("Bearer ", "");
-    if (!serviceKey || token !== serviceKey) {
-      return new Response(JSON.stringify({ error: "Unauthorized — internal use only" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+
+    // Allow service role key for internal/cron invocations
+    const isServiceRole = serviceKey && token === serviceKey;
+
+    if (!isServiceRole) {
+      // Otherwise require a valid user JWT
+      if (!token) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const supabaseAuth = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+        global: { headers: { Authorization: authHeader } },
       });
+      const { data, error: authError } = await supabaseAuth.auth.getUser();
+      if (authError || !data?.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const { full_name, company_name, email, signed_up_at, auto_approved } = await req.json();
