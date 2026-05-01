@@ -50,6 +50,28 @@ const AcademyCourse = () => {
   const [errorReported, setErrorReported] = useState(false);
   const [reportingError, setReportingError] = useState(false);
 
+  // Auto-add to cart and open drawer when returning from login with purchase intent
+  useEffect(() => {
+    if (
+      searchParams.get("intent") === "purchase" &&
+      user &&
+      slug &&
+      !gate.loading &&
+      gate.requiresPurchase &&
+      isPaidCourse(slug)
+    ) {
+      if (!cart.has(slug)) {
+        cart.add(slug);
+      }
+      cart.open();
+      // Clean up the URL param
+      const next = new URLSearchParams(searchParams);
+      next.delete("intent");
+      const qs = next.toString();
+      navigate(`/academy/${slug}${qs ? `?${qs}` : ""}`, { replace: true });
+    }
+  }, [user, slug, gate.loading, gate.requiresPurchase, searchParams]);
+
   const { data: course } = useQuery({
     queryKey: ["academy-course", slug],
     queryFn: async () => {
@@ -317,7 +339,8 @@ const AcademyCourse = () => {
 
   // Login wall — every course (free or paid) requires sign-in.
   if (gate.requiresLogin) {
-    const redirectTo = encodeURIComponent(`/academy/${slug}`);
+    const isPaidSlug = isPaidCourse(course.slug) || !FREE_ACADEMY_COURSES.has(course.slug);
+    const redirectTo = encodeURIComponent(`/academy/${slug}${isPaidSlug ? '?intent=purchase' : ''}`);
     return (
       <div className="min-h-screen flex flex-col">
         <SEO
