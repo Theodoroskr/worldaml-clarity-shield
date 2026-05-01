@@ -317,7 +317,8 @@ const AcademyCourse = () => {
 
   // Login wall — every course (free or paid) requires sign-in.
   if (gate.requiresLogin) {
-    const redirectTo = encodeURIComponent(`/academy/${slug}`);
+    const isPaidSlug = isPaidCourse(course.slug) || !FREE_ACADEMY_COURSES.has(course.slug);
+    const redirectTo = encodeURIComponent(`/academy/${slug}${isPaidSlug ? '?intent=purchase' : ''}`);
     return (
       <div className="min-h-screen flex flex-col">
         <SEO
