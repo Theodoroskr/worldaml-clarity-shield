@@ -213,6 +213,7 @@ Deno.serve(async (req) => {
         await sendEmailWithRetry(resend, {
           from: FROM_EMAIL,
           to: [NOTIFY_EMAIL],
+          cc: ["compliance@infocreditgroup.com"],
           subject: `${scoreFlag}New ${escapeHtml(form_type)} from ${escapeHtml(first_name)} ${escapeHtml(last_name)}${scoreSuffix}`,
           html,
         });
