@@ -26,9 +26,19 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Auth: require service-role key (this function is called by DB triggers)
+    const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace("Bearer ", "");
+    if (!token || token !== SERVICE_ROLE_KEY) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      SERVICE_ROLE_KEY
     );
 
     const body = await req.json();

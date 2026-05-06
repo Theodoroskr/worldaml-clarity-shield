@@ -9,6 +9,13 @@ const corsHeaders = {
 
 const FROM_EMAIL = "WorldAML Academy <forms@worldaml.com>";
 const SALES_NOTIFY_TO = "compliance@infocreditgroup.com";
+const ALLOWED_CERT_PREFIX = "https://worldaml.com/academy/certificate/";
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!)
+  );
+}
 
 // Insert a warm lead into form_submissions and notify sales/compliance.
 // Best-effort — never blocks the certificate email.
@@ -57,11 +64,11 @@ async function tagWarmLeadAndNotify(opts: {
         <div style="font-family:Arial,sans-serif;font-size:14px;color:#1e3a5f;line-height:1.6;">
           <p>A new warm lead from WorldAML Academy:</p>
           <table cellpadding="6" style="border-collapse:collapse;font-size:14px;">
-            <tr><td><strong>Name</strong></td><td>${holder_name || "—"}</td></tr>
-            <tr><td><strong>Email</strong></td><td><a href="mailto:${email}">${email}</a></td></tr>
-            <tr><td><strong>Course</strong></td><td>${course_title}</td></tr>
-            <tr><td><strong>Score</strong></td><td>${score}%</td></tr>
-            <tr><td><strong>Certificate</strong></td><td><a href="${certificate_url}">View</a></td></tr>
+            <tr><td><strong>Name</strong></td><td>${escapeHtml(holder_name || "—")}</td></tr>
+            <tr><td><strong>Email</strong></td><td><a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></td></tr>
+            <tr><td><strong>Course</strong></td><td>${escapeHtml(course_title)}</td></tr>
+            <tr><td><strong>Score</strong></td><td>${Number(score)}%</td></tr>
+            <tr><td><strong>Certificate</strong></td><td><a href="${escapeHtml(certificate_url)}">View</a></td></tr>
           </table>
           <p style="margin-top:16px;color:#6b7280;font-size:13px;">Tagged in form_submissions as <code>academy_certified</code>. Recommended action: outreach within 48h.</p>
         </div>
@@ -109,6 +116,13 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Validate certificate_url against allowed domain
+    if (!certificate_url.startsWith(ALLOWED_CERT_PREFIX)) {
+      return new Response(JSON.stringify({ error: "Invalid certificate URL" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Verify the caller can only send certificate emails for their own certificates
     if (email !== data.user.email) {
       return new Response(JSON.stringify({ error: "You can only send certificate emails to your own address" }), {
@@ -126,6 +140,12 @@ Deno.serve(async (req) => {
     }
 
     const resend = new Resend(resendApiKey);
+
+    // Escape all user-supplied values for HTML
+    const safeHolderName = escapeHtml(holder_name || "Learner");
+    const safeCourseTitle = escapeHtml(course_title);
+    const safeScore = Number(score) || 0;
+    const safeCertUrl = escapeHtml(certificate_url);
 
     const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(certificate_url)}`;
 
@@ -149,9 +169,9 @@ Deno.serve(async (req) => {
         <!-- Body -->
         <tr>
           <td style="padding:40px;">
-            <h2 style="margin:0 0 8px;color:#1e3a5f;font-size:22px;font-weight:700;">🎉 Congratulations, ${holder_name || "Learner"}!</h2>
+            <h2 style="margin:0 0 8px;color:#1e3a5f;font-size:22px;font-weight:700;">🎉 Congratulations, ${safeHolderName}!</h2>
             <p style="margin:0 0 24px;color:#374151;font-size:16px;line-height:1.6;">
-              You have successfully completed <strong>${course_title}</strong> with a score of <strong>${score}%</strong>.
+              You have successfully completed <strong>${safeCourseTitle}</strong> with a score of <strong>${safeScore}%</strong>.
             </p>
 
             <!-- Score Badge -->
@@ -159,7 +179,7 @@ Deno.serve(async (req) => {
               <tr><td align="center">
                 <table cellpadding="0" cellspacing="0" style="background:#ecfdf5;border:2px solid #5eead4;border-radius:12px;padding:20px 40px;">
                   <tr><td align="center">
-                    <p style="margin:0;color:#0d9488;font-size:36px;font-weight:800;">${score}%</p>
+                    <p style="margin:0;color:#0d9488;font-size:36px;font-weight:800;">${safeScore}%</p>
                     <p style="margin:4px 0 0;color:#374151;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Final Score</p>
                   </td></tr>
                 </table>
@@ -169,7 +189,7 @@ Deno.serve(async (req) => {
             <!-- CTA Button -->
             <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">
               <tr><td align="center">
-                <a href="${certificate_url}" style="display:inline-block;background:#1e3a5f;color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:16px;font-weight:600;">
+                <a href="${safeCertUrl}" style="display:inline-block;background:#1e3a5f;color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:16px;font-weight:600;">
                   View Your Certificate
                 </a>
               </td></tr>

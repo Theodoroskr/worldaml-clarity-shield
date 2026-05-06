@@ -109,19 +109,53 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const body = await req.json();
-    const { user_id, transaction_ids, force } = body;
-
-    if (!user_id) {
-      return new Response(JSON.stringify({ error: "user_id required" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Auth: require either a valid user JWT or the service-role key (for DB triggers/cron)
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace("Bearer ", "");
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    let user_id: string;
+
+    if (token === SERVICE_ROLE_KEY) {
+      // Internal caller (DB trigger) — trust the body's user_id
+      const body = await req.json();
+      user_id = body.user_id;
+      if (!user_id) {
+        return new Response(JSON.stringify({ error: "user_id required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      var transaction_ids = body.transaction_ids;
+      var force = body.force;
+    } else {
+      // External caller — validate JWT and derive user_id
+      const supabaseAuth = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const { data: userData, error: authErr } = await supabaseAuth.auth.getUser();
+      if (authErr || !userData?.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      user_id = userData.user.id;
+      const body = await req.json().catch(() => ({}));
+      var transaction_ids = body.transaction_ids;
+      var force = body.force;
+    }
+
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      SERVICE_ROLE_KEY
+    );
 
     const { data: rules, error: ruleErr } = await supabaseAdmin
       .from("suite_alert_rules").select("*").eq("user_id", user_id).eq("is_active", true);
