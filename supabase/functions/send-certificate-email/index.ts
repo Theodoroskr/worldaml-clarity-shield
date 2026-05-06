@@ -9,6 +9,13 @@ const corsHeaders = {
 
 const FROM_EMAIL = "WorldAML Academy <forms@worldaml.com>";
 const SALES_NOTIFY_TO = "compliance@infocreditgroup.com";
+const ALLOWED_CERT_PREFIX = "https://worldaml.com/academy/certificate/";
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!)
+  );
+}
 
 // Insert a warm lead into form_submissions and notify sales/compliance.
 // Best-effort — never blocks the certificate email.
