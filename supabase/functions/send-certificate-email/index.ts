@@ -116,6 +116,13 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Validate certificate_url against allowed domain
+    if (!certificate_url.startsWith(ALLOWED_CERT_PREFIX)) {
+      return new Response(JSON.stringify({ error: "Invalid certificate URL" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Verify the caller can only send certificate emails for their own certificates
     if (email !== data.user.email) {
       return new Response(JSON.stringify({ error: "You can only send certificate emails to your own address" }), {
@@ -133,6 +140,12 @@ Deno.serve(async (req) => {
     }
 
     const resend = new Resend(resendApiKey);
+
+    // Escape all user-supplied values for HTML
+    const safeHolderName = escapeHtml(holder_name || "Learner");
+    const safeCourseTitle = escapeHtml(course_title);
+    const safeScore = Number(score) || 0;
+    const safeCertUrl = escapeHtml(certificate_url);
 
     const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(certificate_url)}`;
 
