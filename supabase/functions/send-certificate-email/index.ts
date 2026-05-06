@@ -64,11 +64,11 @@ async function tagWarmLeadAndNotify(opts: {
         <div style="font-family:Arial,sans-serif;font-size:14px;color:#1e3a5f;line-height:1.6;">
           <p>A new warm lead from WorldAML Academy:</p>
           <table cellpadding="6" style="border-collapse:collapse;font-size:14px;">
-            <tr><td><strong>Name</strong></td><td>${holder_name || "—"}</td></tr>
-            <tr><td><strong>Email</strong></td><td><a href="mailto:${email}">${email}</a></td></tr>
-            <tr><td><strong>Course</strong></td><td>${course_title}</td></tr>
-            <tr><td><strong>Score</strong></td><td>${score}%</td></tr>
-            <tr><td><strong>Certificate</strong></td><td><a href="${certificate_url}">View</a></td></tr>
+            <tr><td><strong>Name</strong></td><td>${escapeHtml(holder_name || "—")}</td></tr>
+            <tr><td><strong>Email</strong></td><td><a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></td></tr>
+            <tr><td><strong>Course</strong></td><td>${escapeHtml(course_title)}</td></tr>
+            <tr><td><strong>Score</strong></td><td>${Number(score)}%</td></tr>
+            <tr><td><strong>Certificate</strong></td><td><a href="${escapeHtml(certificate_url)}">View</a></td></tr>
           </table>
           <p style="margin-top:16px;color:#6b7280;font-size:13px;">Tagged in form_submissions as <code>academy_certified</code>. Recommended action: outreach within 48h.</p>
         </div>
