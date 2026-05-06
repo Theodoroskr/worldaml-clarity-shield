@@ -169,9 +169,9 @@ Deno.serve(async (req) => {
         <!-- Body -->
         <tr>
           <td style="padding:40px;">
-            <h2 style="margin:0 0 8px;color:#1e3a5f;font-size:22px;font-weight:700;">🎉 Congratulations, ${holder_name || "Learner"}!</h2>
+            <h2 style="margin:0 0 8px;color:#1e3a5f;font-size:22px;font-weight:700;">🎉 Congratulations, ${safeHolderName}!</h2>
             <p style="margin:0 0 24px;color:#374151;font-size:16px;line-height:1.6;">
-              You have successfully completed <strong>${course_title}</strong> with a score of <strong>${score}%</strong>.
+              You have successfully completed <strong>${safeCourseTitle}</strong> with a score of <strong>${safeScore}%</strong>.
             </p>
 
             <!-- Score Badge -->
@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
               <tr><td align="center">
                 <table cellpadding="0" cellspacing="0" style="background:#ecfdf5;border:2px solid #5eead4;border-radius:12px;padding:20px 40px;">
                   <tr><td align="center">
-                    <p style="margin:0;color:#0d9488;font-size:36px;font-weight:800;">${score}%</p>
+                    <p style="margin:0;color:#0d9488;font-size:36px;font-weight:800;">${safeScore}%</p>
                     <p style="margin:4px 0 0;color:#374151;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Final Score</p>
                   </td></tr>
                 </table>
@@ -189,7 +189,7 @@ Deno.serve(async (req) => {
             <!-- CTA Button -->
             <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">
               <tr><td align="center">
-                <a href="${certificate_url}" style="display:inline-block;background:#1e3a5f;color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:16px;font-weight:600;">
+                <a href="${safeCertUrl}" style="display:inline-block;background:#1e3a5f;color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:16px;font-weight:600;">
                   View Your Certificate
                 </a>
               </td></tr>
