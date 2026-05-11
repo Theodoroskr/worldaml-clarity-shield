@@ -188,7 +188,9 @@ export default function SanctionsCheck() {
                 <User className="w-3.5 h-3.5 text-accent" />
               </div>
               <span className="font-medium">
-                {profile?.full_name || profile?.email || user?.email}
+                {profile?.user_id === user?.id
+                  ? (profile?.full_name || profile?.email || user?.email)
+                  : user?.email}
               </span>
               <span className="w-px h-4 bg-white/20" />
               {(() => {
