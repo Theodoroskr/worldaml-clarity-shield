@@ -25,7 +25,15 @@ export function useAccess(): AccessFlags {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        if (mounted) setFlags(f => ({ ...f, isLoading: false }));
+        if (mounted) {
+          setFlags({
+            isLoading: false,
+            isAuthenticated: false,
+            isAdmin: false,
+            hasSuiteAccess: false,
+            subscriptionTier: "free",
+          });
+        }
         return;
       }
 

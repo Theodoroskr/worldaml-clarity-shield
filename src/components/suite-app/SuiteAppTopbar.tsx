@@ -9,11 +9,12 @@ interface SuiteAppTopbarProps {
 }
 
 export default function SuiteAppTopbar({ title }: SuiteAppTopbarProps) {
-  const { profile, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const initials = profile?.full_name
-    ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+  const currentProfile = profile?.user_id === user?.id ? profile : null;
+  const initials = currentProfile?.full_name
+    ? currentProfile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
     : "U";
 
   return (
@@ -55,10 +56,10 @@ export default function SuiteAppTopbar({ title }: SuiteAppTopbarProps) {
             <>
               <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
               <div className="absolute right-0 top-full mt-1 z-50 w-48 bg-popover border border-border rounded-lg shadow-lg py-1">
-                {profile?.full_name && (
+                {currentProfile?.full_name && (
                   <div className="px-3 py-2 border-b border-border">
-                    <p className="text-sm font-medium text-foreground truncate">{profile.full_name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{profile.email}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{currentProfile.full_name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{currentProfile.email}</p>
                   </div>
                 )}
                 <button

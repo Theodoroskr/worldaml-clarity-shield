@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const authRequestId = useRef(0);
 
   const fetchProfile = async (userId: string) => {
     const { data, error } = await supabase
@@ -72,12 +73,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const refreshProfile = async () => {
-    if (user) {
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (currentUser) {
       const [profileData, adminStatus] = await Promise.all([
-        fetchProfile(user.id),
-        fetchIsAdmin(user.id),
+        fetchProfile(currentUser.id),
+        fetchIsAdmin(currentUser.id),
       ]);
-      setProfile(profileData);
+      setProfile(profileData?.user_id === currentUser.id ? profileData : null);
       setIsAdmin(adminStatus);
     }
   };
@@ -85,16 +87,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
+        const requestId = ++authRequestId.current;
+        const currentUser = currentSession?.user ?? null;
         setSession(currentSession);
-        setUser(currentSession?.user ?? null);
+        setUser(currentUser);
 
-        if (currentSession?.user) {
+        if (currentUser) {
+          setProfile((currentProfile) => currentProfile?.user_id === currentUser.id ? currentProfile : null);
+          setIsAdmin(false);
           setTimeout(async () => {
             const [profileData, adminStatus] = await Promise.all([
-              fetchProfile(currentSession.user.id),
-              fetchIsAdmin(currentSession.user.id),
+              fetchProfile(currentUser.id),
+              fetchIsAdmin(currentUser.id),
             ]);
-            setProfile(profileData);
+            if (authRequestId.current !== requestId) return;
+            setProfile(profileData?.user_id === currentUser.id ? profileData : null);
             setIsAdmin(adminStatus);
           }, 0);
         } else {
@@ -107,20 +114,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      const requestId = ++authRequestId.current;
+      const currentUser = initialSession?.user ?? null;
       setSession(initialSession);
-      setUser(initialSession?.user ?? null);
+      setUser(currentUser);
 
-      if (initialSession?.user) {
+      if (currentUser) {
+        setProfile((currentProfile) => currentProfile?.user_id === currentUser.id ? currentProfile : null);
         Promise.all([
-          fetchProfile(initialSession.user.id),
-          fetchIsAdmin(initialSession.user.id),
+          fetchProfile(currentUser.id),
+          fetchIsAdmin(currentUser.id),
         ]).then(([profileData, adminStatus]) => {
-          setProfile(profileData);
+          if (authRequestId.current !== requestId) return;
+          setProfile(profileData?.user_id === currentUser.id ? profileData : null);
           setIsAdmin(adminStatus);
+          setIsLoading(false);
         });
+      } else {
+        setProfile(null);
+        setIsAdmin(false);
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     });
 
     return () => {
