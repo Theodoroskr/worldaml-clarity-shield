@@ -135,7 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       fetchIsAdminSafe(userId),
     ]);
     const profileData: Profile | null = profileResult.ok ? profileResult.data : null;
-    const err: Error | null = profileResult.ok ? null : profileResult.error;
+    const err: Error | null = profileResult.ok ? null : (profileResult as { ok: false; error: Error }).error;
 
     // Drop stale results.
     if (authRequestId.current !== requestId) return;
