@@ -126,14 +126,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setProfileMissing(false);
     inFlightUserId.current = userId;
 
-    let profileData: Profile | null = null;
-    let err: Error | null = null;
-    try {
-      profileData = await fetchProfileWithRetry(userId);
-    } catch (e) {
-      err = e instanceof Error ? e : new Error(String(e));
-    }
-    const adminStatus = await fetchIsAdminSafe(userId);
+    // Run both in parallel so a slow profile fetch doesn't block role lookup.
+    const [profileResult, adminStatus] = await Promise.all([
+      fetchProfileWithRetry(userId).then(
+        (data) => ({ ok: true as const, data }),
+        (e) => ({ ok: false as const, error: e instanceof Error ? e : new Error(String(e)) }),
+      ),
+      fetchIsAdminSafe(userId),
+    ]);
+    const profileData = profileResult.ok ? profileResult.data : null;
+    const err = profileResult.ok ? null : profileResult.error;
 
     // Drop stale results.
     if (authRequestId.current !== requestId) return;
