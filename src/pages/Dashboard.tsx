@@ -120,6 +120,7 @@ const Dashboard = () => {
     );
   }
   if (!user) return null;
+  const displayName = profile?.user_id === user.id && profile.full_name ? profile.full_name : user.email;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -142,7 +143,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-3xl font-bold text-navy">Dashboard</h1>
-              <p className="text-text-secondary">Welcome back, {profile?.full_name || user.email}</p>
+              <p className="text-text-secondary">Welcome back, {displayName}</p>
             </div>
             <Button variant="outline" onClick={handleSignOut}>
               <LogOut className="mr-2 h-4 w-4" /> Sign Out
@@ -418,8 +419,8 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent className="space-y-2">
                 <p className="text-sm"><strong>Email:</strong> {user.email}</p>
-                {profile?.full_name && <p className="text-sm"><strong>Name:</strong> {profile.full_name}</p>}
-                {profile?.company_name && <p className="text-sm"><strong>Company:</strong> {profile.company_name}</p>}
+                {profile?.user_id === user.id && profile.full_name && <p className="text-sm"><strong>Name:</strong> {profile.full_name}</p>}
+                {profile?.user_id === user.id && profile.company_name && <p className="text-sm"><strong>Company:</strong> {profile.company_name}</p>}
               </CardContent>
             </Card>
 
