@@ -41,7 +41,7 @@ const PendingApproval = () => {
           {/* Heading */}
           <h1 className="text-3xl font-bold text-navy mb-3">Account Under Review</h1>
           <p className="text-text-secondary text-lg mb-8">
-            Thank you for registering, {profile?.full_name?.split(" ")[0] || "there"}.
+            Thank you for registering, {profile?.user_id === user.id && profile?.full_name ? profile.full_name.split(" ")[0] : "there"}.
             Your account is currently being reviewed by our compliance team.
           </p>
 
