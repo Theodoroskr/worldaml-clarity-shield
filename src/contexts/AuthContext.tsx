@@ -83,20 +83,20 @@ async function fetchProfileWithRetry(userId: string): Promise<Profile | null> {
   throw lastErr instanceof Error ? lastErr : new Error("fetchProfile failed");
 }
 
+async function fetchIsAdminOnce(userId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (error) return false;
+  return !!data;
+}
+
 async function fetchIsAdminSafe(userId: string): Promise<boolean> {
   try {
-    const { data, error } = await withTimeout(
-      supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle(),
-      PROFILE_FETCH_TIMEOUT_MS,
-      "fetchIsAdmin",
-    );
-    if (error) return false;
-    return !!data;
+    return await withTimeout(fetchIsAdminOnce(userId), PROFILE_FETCH_TIMEOUT_MS, "fetchIsAdmin");
   } catch {
     return false;
   }
