@@ -14,7 +14,7 @@ export default function SuiteAppTopbar({ title }: SuiteAppTopbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const currentProfile = profile?.user_id === user?.id ? profile : null;
   const initials = currentProfile?.full_name
-    ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    ? currentProfile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
     : "U";
 
   return (
