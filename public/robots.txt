@@ -61,4 +61,4 @@ Disallow: /forgot-password
 Disallow: /reset-password
 
 # Sitemap location
-Sitemap: https://www.worldaml.com/sitemap.xml
+Sitemap: https://worldaml.com/sitemap.xml
