@@ -173,7 +173,9 @@ export const FreeTrialForm = ({ region = "eu-me" }: FreeTrialFormProps) => {
           <img 
             src={lexisnexisLogo} 
             alt="LexisNexis Risk Solutions" 
-            className="h-8 md:h-10 object-contain"
+            width={409}
+            height={123}
+            className="h-8 md:h-10 w-auto object-contain"
           />
         </div>
         <p className="text-body-sm text-text-secondary">
