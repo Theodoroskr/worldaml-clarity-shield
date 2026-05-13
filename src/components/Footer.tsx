@@ -232,6 +232,8 @@ export const Footer = () => {
                 <img 
                   src={cert.badge} 
                   alt={cert.alt}
+                  width={232}
+                  height={120}
                   className="h-12 md:h-14 w-auto"
                 />
                 <div className="hidden sm:block">
