@@ -109,6 +109,8 @@ export const Footer = () => {
                 <img 
                   src={infocreditLogo} 
                   alt="InfoCredit Group" 
+                  width={1334}
+                  height={315}
                   className="h-6 w-auto"
                 />
               </a>
