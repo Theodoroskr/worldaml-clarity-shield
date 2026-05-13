@@ -209,7 +209,7 @@ const EUSanctionsMap = () => {
 
           {filtered.length === 0 && (
             <div className="text-center py-16">
-              <Globe className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
+              <Globe className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">No sanctions regimes match your search.</p>
             </div>
           )}

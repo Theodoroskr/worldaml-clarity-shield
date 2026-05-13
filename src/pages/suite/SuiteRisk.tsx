@@ -351,7 +351,7 @@ export default function SuiteRisk() {
               ) : (
                 /* Empty state */
                 <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                  <Grid3X3 className="w-8 h-8 text-muted-foreground/40 mb-3" />
+                  <Grid3X3 className="w-8 h-8 text-muted-foreground mb-3" />
                   <h3 className="font-semibold text-foreground text-sm">Select a Cell</h3>
                   <p className="text-xs text-muted-foreground mt-1">Click on any cell in the matrix to view the customers plotted there and drill down into their risk factors.</p>
                 </div>

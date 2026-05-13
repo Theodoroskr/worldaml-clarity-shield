@@ -70,7 +70,7 @@ const WorldIDBundleSection = () => {
                       {bundle.includes.includes(feature) ? (
                         <Check className="w-5 h-5 text-teal mx-auto" />
                       ) : (
-                        <X className="w-5 h-5 text-muted-foreground/40 mx-auto" />
+                        <X className="w-5 h-5 text-muted-foreground mx-auto" />
                       )}
                     </TableCell>
                   ))}
@@ -90,7 +90,7 @@ const WorldIDBundleSection = () => {
                     {bundle.api ? (
                       <Check className="w-5 h-5 text-teal mx-auto" />
                     ) : (
-                      <X className="w-5 h-5 text-muted-foreground/40 mx-auto" />
+                      <X className="w-5 h-5 text-muted-foreground mx-auto" />
                     )}
                   </TableCell>
                 ))}
@@ -102,7 +102,7 @@ const WorldIDBundleSection = () => {
                     {bundle.platform ? (
                       <Check className="w-5 h-5 text-teal mx-auto" />
                     ) : (
-                      <X className="w-5 h-5 text-muted-foreground/40 mx-auto" />
+                      <X className="w-5 h-5 text-muted-foreground mx-auto" />
                     )}
                   </TableCell>
                 ))}
