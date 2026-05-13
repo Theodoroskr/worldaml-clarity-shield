@@ -137,6 +137,8 @@ const About = () => {
                     <img 
                       src={infocreditLogo} 
                       alt="InfoCredit Group — parent company of WorldAML" 
+                      width={1334}
+                      height={315}
                       className="h-12 md:h-16 w-auto"
                     />
                   </a>
