@@ -1,0 +1,66 @@
+# WorldAML
+
+> Enterprise-grade financial crime compliance infrastructure: AML sanctions, PEP and adverse media screening, KYC/KYB, transaction monitoring, risk assessment, and regulatory reporting for regulated organisations worldwide.
+
+WorldAML, part of Infocredit Group, provides a unified compliance platform plus REST APIs and curated data (LexisNexis WorldCompliance, BridgerXG) covering 1,900+ global sanctions, PEP, and watchlist sources.
+
+## Platform
+
+- [Platform Overview](/platform): Unified compliance platform overview.
+- [AML Screening](/platform/aml-screening): Sanctions, PEP, adverse media screening.
+- [KYC / KYB](/platform/kyc-kyb): Identity and business verification workflows.
+- [Transaction Monitoring](/platform/transaction-monitoring): Rule-based and risk-scored monitoring.
+- [Regulatory Reporting](/platform/regulatory-reporting): FinCEN, FINTRAC, MOKAS exports.
+- [Risk Assessment](/platform/risk-assessment): Composite customer and transaction risk scoring.
+- [Suite](/platform/suite): Multi-tenant compliance workspace.
+- [Security](/platform/security): Platform security posture.
+- [WorldID](/worldid): KYC identity verification (Identomat white-label).
+
+## APIs
+
+- [AML Screening API](/aml-api): Programmatic AML screening.
+- [Sanctions Screening API](/sanctions-screening-api): Real-time sanctions list screening.
+- [KYC / KYB API](/kyc-kyb-api): Identity and company verification API.
+
+## Data
+
+- [Data Sources](/data-sources): Coverage of underlying data providers.
+- [Data Coverage](/resources/data-coverage): Country and list coverage index.
+- [Sanctions Lists](/sanctions-lists): Global sanctions list reference.
+- [WorldCompliance](/worldcompliance): LexisNexis WorldCompliance data.
+- [BridgerXG](/bridgerxg): LexisNexis BridgerXG screening engine.
+
+## Industries
+
+- [Banking](/industries/banking)
+- [Fintech](/industries/fintech)
+- [Crypto](/industries/crypto)
+- [iGaming](/industries/gaming)
+- [Legal](/industries/legal)
+- [Payments](/industries/payments)
+
+## Resources
+
+- [Blog](/blog): Compliance news and analysis.
+- [News](/news): Curated regulatory news.
+- [Best Practices](/best-practices): AML/KYC operational guidance.
+- [AML Regulations](/aml-regulations): Jurisdictional regulation reference.
+- [Glossary](/glossary): Compliance terminology.
+- [FAQ](/faq): Common questions.
+- [Academy](/academy): WorldAML compliance training and CPD certificates.
+- [Free AML Check](/free-aml-check): One-off sanctions screening.
+
+## Company
+
+- [About](/about): Company background.
+- [Why WorldAML](/why-worldaml): Differentiators.
+- [Partners](/partners): Referral and reseller program.
+- [Contact Sales](/contact-sales): Sales enquiries and demo requests.
+- [Support](/support): Customer support.
+
+## Optional
+
+- [Pricing](/pricing)
+- [Privacy](/privacy)
+- [Terms](/terms)
+- [Cookies](/cookies)
