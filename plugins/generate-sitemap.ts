@@ -10,7 +10,7 @@ import { Plugin } from "vite";
 import fs from "fs";
 import path from "path";
 
-const BASE_URL = "https://www.worldaml.com";
+const BASE_URL = "https://worldaml.com";
 
 /* ------------------------------------------------------------------ */
 /*  Route registry — single source of truth for the sitemap           */
