@@ -50,7 +50,7 @@ const WorldComplianceDemo = () => {
                 
                 {/* Attribution Block */}
                 <div className="bg-white border border-divider rounded-lg p-4 mb-8">
-                  <img src={lexisNexisLogo} alt="LexisNexis Risk Solutions" className="h-8 object-contain mb-3" />
+                  <img src={lexisNexisLogo} alt="LexisNexis Risk Solutions" width={409} height={123} className="h-8 w-auto object-contain mb-3" />
                   <p className="text-body-sm text-text-tertiary">
                     <strong>Delivered and supported by</strong> Infocredit Group
                   </p>

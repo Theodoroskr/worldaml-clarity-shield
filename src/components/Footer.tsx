@@ -109,6 +109,8 @@ export const Footer = () => {
                 <img 
                   src={infocreditLogo} 
                   alt="InfoCredit Group" 
+                  width={1334}
+                  height={315}
                   className="h-6 w-auto"
                 />
               </a>
@@ -120,7 +122,7 @@ export const Footer = () => {
               className="inline-block mt-3 hover:opacity-80 transition-opacity"
             >
               <p className="text-xs text-muted-foreground mb-1">Scan to Chat on WhatsApp</p>
-              <img src={whatsappQR} alt="Scan to Chat on WhatsApp" className="w-28 h-28 rounded" />
+              <img src={whatsappQR} alt="Scan to Chat on WhatsApp" width={842} height={794} className="w-28 h-auto rounded" />
             </a>
           </div>
 
@@ -230,6 +232,8 @@ export const Footer = () => {
                 <img 
                   src={cert.badge} 
                   alt={cert.alt}
+                  width={232}
+                  height={120}
                   className="h-12 md:h-14 w-auto"
                 />
                 <div className="hidden sm:block">

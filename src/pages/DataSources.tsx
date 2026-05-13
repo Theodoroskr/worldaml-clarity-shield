@@ -46,7 +46,7 @@ const DataSources = () => {
               <LaneBadge lane="data-source" className="mb-6" />
               <div className="flex items-center gap-4 mb-6">
                 <h1 className="text-navy">Data Sources</h1>
-                <img src={lexisNexisLogo} alt="LexisNexis Risk Solutions" className="h-10 object-contain" />
+                <img src={lexisNexisLogo} alt="LexisNexis Risk Solutions" width={409} height={123} className="h-10 w-auto object-contain" />
               </div>
               <p className="text-body-lg text-text-secondary mb-8">
                 WorldAML connects regulated institutions to trusted financial crime screening solutions. 
