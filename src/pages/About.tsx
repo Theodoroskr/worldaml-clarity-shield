@@ -282,6 +282,8 @@ const About = () => {
                   <img 
                     src={cert.badge} 
                     alt={cert.alt}
+                    width={232}
+                    height={120}
                     className="h-16 md:h-20 w-auto mx-auto mb-4"
                   />
                   <h3 className="text-body font-semibold text-navy mb-1">{cert.standard}</h3>
