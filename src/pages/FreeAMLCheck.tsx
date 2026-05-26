@@ -312,6 +312,45 @@ const FreeAMLCheck = () => {
           </div>
         </section>
 
+        {/* FAQ */}
+        <section className="section-padding bg-surface-subtle">
+          <div className="container-enterprise max-w-3xl">
+            <h2 className="text-heading text-navy mb-2 text-center">Free AML Check — FAQ</h2>
+            <p className="text-body text-text-secondary text-center mb-10">
+              Everything regulated firms ask before running an AML check online.
+            </p>
+            <div className="space-y-6">
+              {[
+                {
+                  q: "What is a free AML check?",
+                  a: "A free AML check screens an individual or company against global sanctions lists, Politically Exposed Persons (PEP) databases, and adverse media sources to identify financial crime risk. WorldAML's free check returns a sample screening report against 1,900+ watchlists within one business day, with no commitment.",
+                },
+                {
+                  q: "How do I run an AML check online for free?",
+                  a: "Submit your name, work email and company in the form above and our compliance team sends back a sample screening report. For instant ad-hoc sanctions screening, use our free Sanctions Check tool which queries the EU, UK OFSI, US OFAC and UN consolidated lists in real time.",
+                },
+                {
+                  q: "Which sanctions and watchlists are covered?",
+                  a: "1,900+ global lists including OFAC SDN, EU consolidated financial sanctions, UK OFSI consolidated list, UN Security Council list, HM Treasury, EU CFSP regimes, Interpol notices, and major regulator enforcement databases — powered by LexisNexis WorldCompliance and BridgerXG data.",
+                },
+                {
+                  q: "Is the free AML check really free?",
+                  a: "Yes. The sample screening report and consultation are free with no obligation. Paid plans start when you need ongoing screening, transaction monitoring, case management or API access.",
+                },
+                {
+                  q: "Who is the free AML check for?",
+                  a: "MLROs, compliance officers and risk managers at banks, fintechs, EMIs, payment institutions, crypto-asset firms, gaming operators, law firms and accountants — anyone subject to AML/CFT obligations evaluating a screening tool before committing.",
+                },
+              ].map((item) => (
+                <div key={item.q} className="border-b border-divider pb-6">
+                  <h3 className="text-body font-semibold text-navy mb-2">{item.q}</h3>
+                  <p className="text-body-sm text-text-secondary">{item.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* How It Works */}
         <section className="section-padding bg-background">
           <div className="container-enterprise">
