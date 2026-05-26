@@ -3569,6 +3569,13 @@ export type Database = {
         Args: { _explanation: string; _report_id: string }
         Returns: undefined
       }
+      get_academy_module_counts: {
+        Args: never
+        Returns: {
+          course_id: string
+          module_count: number
+        }[]
+      }
       get_certificate_by_token: { Args: { _token: string }; Returns: Json }
       get_rls_audit: {
         Args: never
@@ -3588,6 +3595,10 @@ export type Database = {
         }[]
       }
       get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
+      has_academy_course_access: {
+        Args: { _course_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
