@@ -67,6 +67,15 @@ Deno.serve(async (req) => {
       user_agent: user_agent ? String(user_agent).slice(0, 500) : null,
     });
 
+    // Escape user-supplied values before HTML interpolation
+    const esc = (v: unknown) =>
+      String(v ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
     // Also send admin notification email via Resend
     const resendKey = Deno.env.get("RESEND_API_KEY");
     if (resendKey) {
@@ -79,15 +88,15 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           from: "WorldAML Platform <notifications@worldaml.com>",
           to: ["support@worldaml.com"],
-          subject: `[Quiz Error] ${userEmail || userId} — ${error_code || "unknown"}`,
+          subject: `[Quiz Error] ${userEmail || userId} — ${error_code || "unknown"}`.slice(0, 200),
           html: `<h2>Quiz Submission Error Report</h2>
-<p><strong>User:</strong> ${userEmail || "N/A"} (${userId})</p>
-<p><strong>Course:</strong> ${course_slug || course_id || "N/A"}</p>
-<p><strong>Error:</strong> ${error_message}</p>
-<p><strong>Code:</strong> ${error_code || "N/A"}</p>
-<p><strong>Details:</strong> ${error_details || "N/A"}</p>
-<p><strong>Hint:</strong> ${error_hint || "N/A"}</p>
-<p><strong>User Agent:</strong> ${user_agent || "N/A"}</p>
+<p><strong>User:</strong> ${esc(userEmail || "N/A")} (${esc(userId)})</p>
+<p><strong>Course:</strong> ${esc(course_slug || course_id || "N/A")}</p>
+<p><strong>Error:</strong> ${esc(error_message)}</p>
+<p><strong>Code:</strong> ${esc(error_code || "N/A")}</p>
+<p><strong>Details:</strong> ${esc(error_details || "N/A")}</p>
+<p><strong>Hint:</strong> ${esc(error_hint || "N/A")}</p>
+<p><strong>User Agent:</strong> ${esc(user_agent || "N/A")}</p>
 <p><strong>Reported at:</strong> ${new Date().toISOString()}</p>`,
         }),
       }).catch((e) => console.error("Resend email failed:", e));
