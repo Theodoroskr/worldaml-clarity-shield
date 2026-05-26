@@ -198,13 +198,11 @@ const Academy = () => {
   const { data: moduleCounts } = useQuery({
     queryKey: ["academy-module-counts"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("academy_modules")
-        .select("course_id");
+      const { data, error } = await supabase.rpc("get_academy_module_counts");
       if (error) throw error;
       const counts: Record<string, number> = {};
-      (data || []).forEach((m: { course_id: string }) => {
-        counts[m.course_id] = (counts[m.course_id] || 0) + 1;
+      (data || []).forEach((m: { course_id: string; module_count: number }) => {
+        counts[m.course_id] = Number(m.module_count) || 0;
       });
       return counts;
     },

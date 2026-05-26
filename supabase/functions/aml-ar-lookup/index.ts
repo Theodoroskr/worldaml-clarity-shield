@@ -178,6 +178,24 @@ Deno.serve(async (req) => {
 
     // Update customer + auto-create alert if high/critical
     if (body.customer_id) {
+      // Verify the customer belongs to the caller's organisation BEFORE any service-role write
+      const { data: customerRow } = await supabaseAdmin
+        .from("suite_customers")
+        .select("id")
+        .eq("id", body.customer_id)
+        .eq("organisation_id", organisationId)
+        .maybeSingle();
+
+      if (!customerRow) {
+        return new Response(
+          JSON.stringify({ error: "Customer not found in your organisation" }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
       await supabaseAdmin
         .from("suite_customers")
         .update({
@@ -188,7 +206,8 @@ Deno.serve(async (req) => {
           aml_ar_pan_bin: panBin,
           aml_ar_pan_last4: panLast4,
         })
-        .eq("id", body.customer_id);
+        .eq("id", body.customer_id)
+        .eq("organisation_id", organisationId);
 
       if (ar.riskLevel === "high" || ar.riskLevel === "critical") {
         await supabaseAdmin.from("suite_alerts").insert({

@@ -70,14 +70,13 @@ const Dashboard = () => {
       }
 
       const courseIds = progress.map((p: any) => p.course_id);
-      const { data: modules } = await supabase
-        .from("academy_modules")
-        .select("course_id")
-        .in("course_id", courseIds);
+      const { data: modules } = await supabase.rpc("get_academy_module_counts");
 
       const totals: Record<string, number> = {};
-      (modules ?? []).forEach((m: any) => {
-        totals[m.course_id] = (totals[m.course_id] || 0) + 1;
+      (modules ?? []).forEach((m: { course_id: string; module_count: number }) => {
+        if (courseIds.includes(m.course_id)) {
+          totals[m.course_id] = Number(m.module_count) || 0;
+        }
       });
 
       const enriched = progress
