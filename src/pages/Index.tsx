@@ -14,9 +14,9 @@ import IndustriesSection from "@/components/home/IndustriesSection";
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
-       <SEO
-        title="AML Screening Software for US, UK, EU & UAE Compliance"
-        description="Enterprise AML sanctions screening, KYC/KYB, PEP checks & adverse media monitoring. Trusted by compliance teams in the US, UK, Europe and UAE. 1,900+ global lists."
+      <SEO
+       title="AML, KYC & Sanctions Screening Platform"
+       description="Enterprise AML sanctions, PEP, adverse media & KYC/KYB screening across 1,900+ global lists. Trusted by US, UK, EU and UAE compliance teams."
         canonical="/"
         structuredData={[
           {
