@@ -117,13 +117,59 @@ const FreeAMLCheck = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Free AML Check | WorldAML"
-        description="Run a free AML check and see how a modern compliance workflow can improve onboarding, screening, and audit readiness for your regulated business."
+        title="Free AML Check Online — Sanctions, PEP & Adverse Media"
+        description="Run a free AML check online against 1,900+ sanctions, PEP and adverse media lists. Sample screening report delivered within 1 business day. Powered by LexisNexis data."
         canonical="/free-aml-check"
         breadcrumbs={[
           { name: "Home", url: "/" },
           { name: "Free AML Check", url: "/free-aml-check" },
         ]}
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "What is a free AML check?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "A free AML check screens an individual or company against global sanctions lists, Politically Exposed Persons (PEP) databases, and adverse media sources to identify financial crime risk. WorldAML's free check returns a sample screening report against 1,900+ watchlists within one business day, with no commitment.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "How do I run an AML check online for free?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Submit your name, work email and company on this page, and our compliance team sends back a sample screening report. For instant ad-hoc sanctions screening, use our free Sanctions Check tool which queries the EU, UK OFSI, US OFAC and UN consolidated lists in real time.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Which sanctions and watchlists are covered?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "WorldAML screens against 1,900+ global lists including the OFAC SDN list, EU consolidated financial sanctions, UK OFSI consolidated list, UN Security Council list, HM Treasury, EU CFSP regimes, Interpol notices, and major regulator enforcement databases — powered by LexisNexis WorldCompliance and BridgerXG data.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Is the free AML check really free?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Yes. The sample screening report and consultation are free with no obligation. Paid plans start when you need ongoing screening, transaction monitoring, case management or API access.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Who is the free AML check for?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "MLROs, compliance officers and risk managers at banks, fintechs, EMIs, payment institutions, crypto-asset firms, gaming operators, law firms and accountants — anyone subject to AML/CFT obligations who wants to evaluate a screening tool before committing.",
+              },
+            },
+          ],
+        }}
       />
       <Header />
       <main className="flex-1">
@@ -262,6 +308,45 @@ const FreeAMLCheck = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="section-padding bg-surface-subtle">
+          <div className="container-enterprise max-w-3xl">
+            <h2 className="text-heading text-navy mb-2 text-center">Free AML Check — FAQ</h2>
+            <p className="text-body text-text-secondary text-center mb-10">
+              Everything regulated firms ask before running an AML check online.
+            </p>
+            <div className="space-y-6">
+              {[
+                {
+                  q: "What is a free AML check?",
+                  a: "A free AML check screens an individual or company against global sanctions lists, Politically Exposed Persons (PEP) databases, and adverse media sources to identify financial crime risk. WorldAML's free check returns a sample screening report against 1,900+ watchlists within one business day, with no commitment.",
+                },
+                {
+                  q: "How do I run an AML check online for free?",
+                  a: "Submit your name, work email and company in the form above and our compliance team sends back a sample screening report. For instant ad-hoc sanctions screening, use our free Sanctions Check tool which queries the EU, UK OFSI, US OFAC and UN consolidated lists in real time.",
+                },
+                {
+                  q: "Which sanctions and watchlists are covered?",
+                  a: "1,900+ global lists including OFAC SDN, EU consolidated financial sanctions, UK OFSI consolidated list, UN Security Council list, HM Treasury, EU CFSP regimes, Interpol notices, and major regulator enforcement databases — powered by LexisNexis WorldCompliance and BridgerXG data.",
+                },
+                {
+                  q: "Is the free AML check really free?",
+                  a: "Yes. The sample screening report and consultation are free with no obligation. Paid plans start when you need ongoing screening, transaction monitoring, case management or API access.",
+                },
+                {
+                  q: "Who is the free AML check for?",
+                  a: "MLROs, compliance officers and risk managers at banks, fintechs, EMIs, payment institutions, crypto-asset firms, gaming operators, law firms and accountants — anyone subject to AML/CFT obligations evaluating a screening tool before committing.",
+                },
+              ].map((item) => (
+                <div key={item.q} className="border-b border-divider pb-6">
+                  <h3 className="text-body font-semibold text-navy mb-2">{item.q}</h3>
+                  <p className="text-body-sm text-text-secondary">{item.a}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
