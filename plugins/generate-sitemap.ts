@@ -45,6 +45,10 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/platform/aml-screening", changefreq: "monthly", priority: 0.8 },
   { path: "/platform/risk-assessment", changefreq: "monthly", priority: 0.8 },
 
+  // Regional AML landing pages
+  { path: "/aml-screening/eu", changefreq: "monthly", priority: 0.9 },
+  { path: "/aml-screening/uk", changefreq: "monthly", priority: 0.9 },
+
   // Data Sources (Lane 2)
   { path: "/data-sources", changefreq: "monthly", priority: 0.9 },
   { path: "/data-sources/resources", changefreq: "monthly", priority: 0.7 },

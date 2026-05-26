@@ -85,6 +85,18 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://worldaml.com/aml-screening/eu</loc>
+    <lastmod>2026-05-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/aml-screening/uk</loc>
+    <lastmod>2026-05-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://worldaml.com/data-sources</loc>
     <lastmod>2026-05-26</lastmod>
     <changefreq>monthly</changefreq>
