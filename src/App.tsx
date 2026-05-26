@@ -91,6 +91,8 @@ const KYCKYBApi = lazy(() => import("./pages/KYCKYBApi"));
 const WhyWorldAML = lazy(() => import("./pages/WhyWorldAML"));
 const EUSanctionsMap = lazy(() => import("./pages/EUSanctionsMap"));
 const EUSanctionsCountry = lazy(() => import("./pages/EUSanctionsCountry"));
+const AMLScreeningEU = lazy(() => import("./pages/AMLScreeningEU"));
+const AMLScreeningUK = lazy(() => import("./pages/AMLScreeningUK"));
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
@@ -255,6 +257,10 @@ const App = () => (
                 {/* EU Sanctions */}
                 <Route path="/eu-sanctions-map" element={<EUSanctionsMap />} />
                 <Route path="/eu-sanctions/:slug" element={<EUSanctionsCountry />} />
+
+                {/* Regional AML landing pages */}
+                <Route path="/aml-screening/eu" element={<AMLScreeningEU />} />
+                <Route path="/aml-screening/uk" element={<AMLScreeningUK />} />
 
                 <Route path="/suite-layout-preview" element={<SuiteLayout />} />
 
