@@ -192,7 +192,7 @@ export const NewHeroSection = () => {
               <span className="text-body-sm font-medium text-primary-foreground">
                 Free Sanctions Quick Check
               </span>
-              <span className="ml-auto text-xs text-slate-light/70">
+              <span className="ml-auto text-xs text-primary-foreground">
                 OFAC · EU · UN · HMT
               </span>
             </div>
