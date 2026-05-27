@@ -42,7 +42,7 @@ export const APIIntelligenceSection = () => {
             
             {/* Code block */}
             <div className="bg-[#0a0f1a] rounded-lg p-6 text-left overflow-x-auto">
-              <div className="flex items-center gap-2 mb-4 text-caption text-slate-light/60">
+              <div className="flex items-center gap-2 mb-4 text-caption text-slate-light">
                 <span>Response</span>
                 <span className="px-2 py-0.5 bg-accent/20 text-accent rounded text-xs">JSON</span>
               </div>
