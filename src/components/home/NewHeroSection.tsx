@@ -223,7 +223,9 @@ export const NewHeroSection = () => {
         </div>
 
         {/* Three-Column Product Split */}
+        <h2 className="sr-only">Our Products</h2>
         <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+
           {/* Lane 1 - WorldAML Platform */}
           <Card className="border-navy/10 hover:border-navy/20 transition-colors">
             <CardHeader>
