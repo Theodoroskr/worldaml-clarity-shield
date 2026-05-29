@@ -21,7 +21,7 @@ const BookDemo = () => {
   return (
     <div className="min-h-screen flex flex-col bg-secondary">
       <SEO
-        title="Book a WorldAML Suite Demo | AML, KYC & Transaction Monitoring"
+        title="Book a Suite Demo — AML, KYC & Monitoring"
         description="See WorldAML Suite live in 30 minutes. AML screening, KYC/KYB, transaction monitoring & regulatory reporting tailored to your regulator."
         canonical="https://worldaml.com/book-demo"
       />

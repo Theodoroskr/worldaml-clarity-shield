@@ -113,7 +113,7 @@ const WorldID = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="WorldID | Digital Identity Verification & Liveness Detection | WorldAML"
+        title="WorldID — Identity Verification & Liveness"
         description="Digital identity verification with document authentication, biometric liveness, and face matching. eIDAS-aligned, FATF-compliant. Verify in seconds."
         canonical="/products/worldid"
         breadcrumbs={[

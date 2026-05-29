@@ -32,7 +32,7 @@ const BestPractices = () => {
   return (
     <>
       <SEO
-        title="Global AML & Compliance Best Practices | WorldAML"
+        title="Global AML & Compliance Best Practices"
         description="Curated AML and compliance best practices from FATF, Basel Committee, Wolfsberg Group, FCA, FinCEN, and leading global banks. Linked to WorldAML features."
         canonical="/resources/best-practices"
         breadcrumbs={[

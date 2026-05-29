@@ -71,7 +71,7 @@ const obligations = [
 const IndustryBanking = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
-      title="AML Compliance for Banks & EMIs | KYC Onboarding | WorldAML"
+      title="AML Compliance for Banks & EMIs — KYC Onboarding"
       description="AML compliance for banks and EMIs. KYC/KYB onboarding, sanctions and PEP screening, transaction monitoring, and regulatory reporting."
       canonical="/industries/banking"
       breadcrumbs={[

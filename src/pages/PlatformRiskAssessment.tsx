@@ -88,7 +88,7 @@ const structuredData = [softwareData, faqData];
 const PlatformRiskAssessment = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
-      title="Customer Risk Assessment Software | AML Risk Categorisation | WorldAML"
+      title="Customer Risk Assessment — AML Risk Scoring"
       description="Automate customer risk scoring with WorldAML. Configurable risk matrix, EDD triggers, and full audit trail. FATF RBA and EU AMLD aligned."
       canonical="/platform/risk-assessment"
       breadcrumbs={[

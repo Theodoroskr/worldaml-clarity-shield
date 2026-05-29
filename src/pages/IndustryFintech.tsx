@@ -62,7 +62,7 @@ const features = [
 const IndustryFintech = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
-      title="AML Compliance for Fintechs | API-First KYC & Screening | WorldAML"
+      title="AML Compliance for Fintechs — API-First KYC"
       description="API-first AML compliance for fintechs. Embed KYC/KYB onboarding, sanctions screening, and risk decisioning into your product. Usage-based pricing."
       canonical="/industries/fintech"
       breadcrumbs={[
