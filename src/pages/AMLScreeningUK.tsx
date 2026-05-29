@@ -61,7 +61,7 @@ const AMLScreeningUK = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="UK AML Screening & OFSI Sanctions Compliance Software"
+        title="UK AML Screening & OFSI Sanctions Software"
         description="AML, sanctions and PEP screening built for the UK — MLR 2017, FCA supervision, JMLSG guidance, OFSI consolidated list and NCA SAR Online reporting for banks, fintechs and crypto-asset firms."
         canonical="/aml-screening/uk"
         breadcrumbs={[

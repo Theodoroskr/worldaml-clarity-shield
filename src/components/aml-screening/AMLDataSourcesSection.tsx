@@ -47,10 +47,11 @@ const AMLDataSourcesSection = () => {
                 ))}
               </ul>
               <Button variant="outline-light" size="sm" asChild>
-                <Link to={src.href}>
-                  Learn more <ArrowRight className="ml-1 h-3 w-3" />
+                <Link to={src.href} aria-label={`Learn more about ${src.name}`}>
+                  Learn more about {src.name} <ArrowRight className="ml-1 h-3 w-3" />
                 </Link>
               </Button>
+
             </div>
           ))}
         </div>

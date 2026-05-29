@@ -74,8 +74,9 @@ export const ProductModulesSection = () => {
 
               {/* Hover indicator */}
               <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-caption font-medium text-teal">Learn more →</span>
+                <span className="text-caption font-medium text-teal">Explore {module.title} →</span>
               </div>
+
             </div>
           ))}
         </div>

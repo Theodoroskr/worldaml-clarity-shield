@@ -117,7 +117,7 @@ const FreeAMLCheck = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Free AML Check Online — Sanctions, PEP & Adverse Media"
+        title="Free AML Check — Sanctions, PEP & Adverse Media"
         description="Run a free AML check online against 1,900+ sanctions, PEP and adverse media lists. Sample screening report delivered within 1 business day. Powered by LexisNexis data."
         canonical="/free-aml-check"
         breadcrumbs={[

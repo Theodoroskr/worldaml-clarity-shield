@@ -262,7 +262,7 @@ const AMLRegulations = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="AML Regulations by Jurisdiction — 12 Countries Compared"
+        title="AML Regulations — 12 Jurisdictions Compared"
         description="Compare AML regulations across 12 jurisdictions — FATF, EU, UK, US, Japan, Switzerland and more. Obligations, penalties, and UBO thresholds."
         canonical="/resources/aml-regulations"
         breadcrumbs={[
