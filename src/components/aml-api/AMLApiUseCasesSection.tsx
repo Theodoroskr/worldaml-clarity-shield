@@ -61,6 +61,7 @@ export const AMLApiUseCasesSection = () => {
             <Link
               key={uc.title}
               to={uc.link}
+              aria-label={`Learn more about ${uc.title}`}
               className="group p-6 rounded-lg border border-divider bg-card hover:border-teal/30 transition-colors"
             >
               <div className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-navy/5 text-navy mb-4">
@@ -71,9 +72,10 @@ export const AMLApiUseCasesSection = () => {
               </h3>
               <p className="text-body-sm text-text-secondary mb-3">{uc.description}</p>
               <span className="inline-flex items-center gap-1 text-caption font-medium text-teal">
-                Learn more <ArrowRight className="w-3 h-3" />
+                Learn more about {uc.title} <ArrowRight className="w-3 h-3" />
               </span>
             </Link>
+
           ))}
         </div>
       </div>
