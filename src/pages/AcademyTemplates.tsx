@@ -117,7 +117,7 @@ const AcademyTemplates = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Free MLRO Templates — Board Report, Risk Assessment & SAR Log | WorldAML"
+        title="Free MLRO Templates — Board Report & SAR Log"
         description="Download regulator-ready MLRO templates: board reports, enterprise risk assessment, suspicious activity log. Unlock the Pro Toolkit by completing any Academy course."
         canonical="/academy/templates"
         breadcrumbs={[

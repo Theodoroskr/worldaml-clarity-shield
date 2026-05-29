@@ -62,7 +62,7 @@ const features = [
 const IndustryPayments = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
-      title="AML Compliance for Payment Providers & PSPs | Merchant KYB | WorldAML"
+      title="AML Compliance for PSPs — Merchant KYB"
       description="AML compliance for PSPs and acquirers. Merchant KYB onboarding, sanctions screening, transaction monitoring, and Travel Rule. PSD2, AMLD, and FATF R.16 aligned."
       canonical="/industries/payments"
       breadcrumbs={[

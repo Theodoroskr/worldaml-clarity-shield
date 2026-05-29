@@ -26,7 +26,7 @@ const PartnerApply = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Apply to Partner Program — WorldAML"
+        title="Apply to Partner Program"
         description="Submit your partner application to join the WorldAML partner program. Choose from referral, affiliate, or reseller tiers."
         canonical="/partners/apply"
         breadcrumbs={[

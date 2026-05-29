@@ -62,7 +62,7 @@ const features = [
 const IndustryLegal = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
-      title="AML Compliance for Law Firms & Fiduciary Services | KYC & EDD | WorldAML"
+      title="AML Compliance for Law Firms — KYC & EDD"
       description="AML compliance platform for law firms, trust companies, and CSPs. Client KYC/KYB, UBO mapping, EDD workflows, and audit trail. FATF DNFBP and EU AMLD aligned."
       canonical="/industries/legal"
       breadcrumbs={[

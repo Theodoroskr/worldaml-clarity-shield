@@ -62,7 +62,7 @@ const features = [
 const IndustryGaming = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
-      title="AML Compliance for Gaming & iGaming Operators | Player KYC | WorldAML"
+      title="AML Compliance for iGaming Operators — Player KYC"
       description="AML and KYC compliance for gaming and gambling operators. Player KYC, source of funds checks, PEP screening, and transaction monitoring."
       canonical="/industries/gaming"
       breadcrumbs={[

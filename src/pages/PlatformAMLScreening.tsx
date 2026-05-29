@@ -97,7 +97,7 @@ const structuredData = [softwareData, faqData];
 const PlatformAMLScreening = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
-      title="AML Screening & Monitoring Software | Sanctions & PEP Screening | WorldAML"
+      title="AML Screening & Monitoring — Sanctions & PEP"
       description="AML screening software covering sanctions, PEPs, adverse media, and RCAs. Real-time and batch screening powered by WorldCompliance® data."
       canonical="/platform/aml-screening"
       breadcrumbs={[

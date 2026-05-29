@@ -130,6 +130,7 @@ const BlogPost = () => {
         title={post.title}
         description={post.description}
         canonical={`/blog/${post.slug}`}
+        ogType="article"
         breadcrumbs={[
           { name: "Home", url: "/" },
           { name: "Blog", url: "/blog" },

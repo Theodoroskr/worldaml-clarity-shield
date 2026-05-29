@@ -143,7 +143,7 @@ export default function SanctionsCheck() {
   return (
     <div className="min-h-screen flex flex-col">
        <SEO
-        title="Free Sanctions Screening Tool — OFAC, EU, UN, HMT | WorldAML"
+        title="Free Sanctions Screening — OFAC, EU, UN, HMT"
         description="Free sanctions screening against OFAC SDN, EU, UN and UK HMT lists. Instant PEP and sanctions checks for US, UK, EU and UAE compliance teams."
         canonical="/sanctions-check"
         breadcrumbs={[

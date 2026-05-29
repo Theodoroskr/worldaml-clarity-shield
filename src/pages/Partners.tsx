@@ -7,7 +7,7 @@ import PartnerBenefitsSection from "@/components/partners/PartnerBenefitsSection
 const Partners = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
-      title="Partner Program — Earn with WorldAML"
+      title="Partner Program — Earn Recurring Commission"
       description="Join the WorldAML partner program. Refer clients, earn commissions, and grow your compliance business as a referral, affiliate, or reseller partner."
       canonical="/partners"
       breadcrumbs={[

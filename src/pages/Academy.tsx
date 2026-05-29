@@ -291,7 +291,7 @@ const Academy = () => {
   return (
     <div className="min-h-screen flex flex-col">
        <SEO
-        title="Free AML & KYC Training Courses — CPD Certificates | WorldAML"
+        title="Free AML & KYC Training — CPD Certificates"
         description="CPD-accredited AML, KYC and sanctions training for compliance professionals in the US, UK, EU and UAE. Free courses available. Earn verifiable certificates."
         canonical="/academy"
         breadcrumbs={[

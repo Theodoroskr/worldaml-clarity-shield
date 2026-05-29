@@ -110,7 +110,7 @@ const PlatformSuite = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Compliance Suite | KYC KYB AML Risk Reporting | WorldAML"
+        title="Compliance Suite — KYC, AML, Risk & Reporting"
         description="WorldAML Suite: KYC/KYB onboarding, AML screening, risk decisioning, transaction monitoring, and regulatory reporting in one platform."
         canonical="/platform/suite"
         breadcrumbs={[

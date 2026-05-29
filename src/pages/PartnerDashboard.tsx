@@ -81,7 +81,7 @@ const PartnerDashboard = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Partner Dashboard — WorldAML"
+        title="Partner Dashboard"
         description="Track your referrals, conversions, and commissions."
         noindex
         breadcrumbs={[
