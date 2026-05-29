@@ -285,7 +285,9 @@ const Pricing = () => {
               {!user ? (
                 /* ==================== PUBLIC VIEW: Starting From ==================== */
                 <>
+                  <h2 className="sr-only">Our Plans</h2>
                   <div className="grid md:grid-cols-3 gap-6 mb-12">
+
                     {/* WorldAML Card */}
                     <div id="worldaml" className="scroll-mt-24">
                       <Card className="h-full border-divider hover:border-slate-muted transition-all">
