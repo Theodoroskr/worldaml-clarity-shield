@@ -2,12 +2,73 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { Resend } from "npm:resend";
 
 // Public webhook — no CORS needed for Stripe callbacks, but include for browser debugging
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "stripe-signature, content-type",
 };
+
+const ADMIN_ALERT_EMAIL = "theodoros@infocreditgroup.com";
+const FROM_EMAIL = "WorldAML <info@worldaml.com>";
+
+async function notifyAdminPaymentIssue(params: {
+  eventType: string;
+  sessionId?: string | null;
+  paymentIntentId?: string | null;
+  customerEmail?: string | null;
+  amount?: number | null;
+  currency?: string | null;
+  reason?: string | null;
+  courseSlug?: string | null;
+}) {
+  const apiKey = Deno.env.get("RESEND_API_KEY");
+  if (!apiKey) {
+    console.warn("RESEND_API_KEY not set — skipping admin alert");
+    return;
+  }
+  try {
+    const resend = new Resend(apiKey);
+    const amountFmt =
+      params.amount != null
+        ? `${(params.amount / 100).toFixed(2)} ${(params.currency ?? "eur").toUpperCase()}`
+        : "—";
+    const rows = [
+      ["Event", params.eventType],
+      ["Course", params.courseSlug ?? "—"],
+      ["Customer", params.customerEmail ?? "—"],
+      ["Amount", amountFmt],
+      ["Reason", params.reason ?? "—"],
+      ["Checkout Session", params.sessionId ?? "—"],
+      ["Payment Intent", params.paymentIntentId ?? "—"],
+      ["Time (UTC)", new Date().toISOString()],
+    ];
+    const html = `
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a;">
+        <h2 style="margin:0 0 16px;color:#b91c1c;">Academy payment ${params.eventType}</h2>
+        <p style="margin:0 0 16px;">A Stripe payment did not complete successfully. Details below:</p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          ${rows
+            .map(
+              ([k, v]) =>
+                `<tr><td style="padding:6px 8px;border:1px solid #e2e8f0;background:#f8fafc;font-weight:600;width:160px;">${k}</td><td style="padding:6px 8px;border:1px solid #e2e8f0;word-break:break-all;">${v}</td></tr>`,
+            )
+            .join("")}
+        </table>
+        <p style="margin:16px 0 0;font-size:12px;color:#64748b;">Review in Admin → Purchase Status, or in the Stripe Dashboard.</p>
+      </div>`;
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [ADMIN_ALERT_EMAIL],
+      subject: `[WorldAML] Payment ${params.eventType}${params.customerEmail ? ` — ${params.customerEmail}` : ""}`,
+      html,
+    });
+  } catch (err) {
+    console.error("Failed to send admin alert email:", err);
+  }
+}
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -94,6 +155,83 @@ serve(async (req) => {
       }
     }
 
+    if (
+      event.type === "checkout.session.expired" ||
+      event.type === "checkout.session.async_payment_failed"
+    ) {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const sessionId = session.id;
+
+      // Fetch existing purchase row for context
+      const { data: purchase } = await supabase
+        .from("academy_course_purchases")
+        .select("course_slug,user_id,amount_cents,currency,status")
+        .eq("stripe_session_id", sessionId)
+        .maybeSingle();
+
+      // Only flag rows that aren't already paid
+      if (!purchase || purchase.status !== "paid") {
+        const { error } = await supabase
+          .from("academy_course_purchases")
+          .update({ status: "failed" })
+          .eq("stripe_session_id", sessionId)
+          .neq("status", "paid");
+        if (error) console.error("Failed to mark purchase failed:", error);
+      }
+
+      await notifyAdminPaymentIssue({
+        eventType: event.type,
+        sessionId,
+        paymentIntentId:
+          typeof session.payment_intent === "string"
+            ? session.payment_intent
+            : session.payment_intent?.id ?? null,
+        customerEmail:
+          session.customer_details?.email ?? session.customer_email ?? null,
+        amount: session.amount_total ?? purchase?.amount_cents ?? null,
+        currency: session.currency ?? purchase?.currency ?? null,
+        courseSlug: purchase?.course_slug ?? null,
+        reason:
+          event.type === "checkout.session.expired"
+            ? "Checkout session expired before payment completed"
+            : "Asynchronous payment failed",
+      });
+    }
+
+    if (event.type === "payment_intent.payment_failed") {
+      const pi = event.data.object as Stripe.PaymentIntent;
+      const paymentIntentId = pi.id;
+
+      const { data: purchase } = await supabase
+        .from("academy_course_purchases")
+        .select("course_slug,stripe_session_id,amount_cents,currency,status")
+        .eq("stripe_payment_intent_id", paymentIntentId)
+        .maybeSingle();
+
+      if (purchase && purchase.status !== "paid") {
+        const { error } = await supabase
+          .from("academy_course_purchases")
+          .update({ status: "failed" })
+          .eq("stripe_payment_intent_id", paymentIntentId)
+          .neq("status", "paid");
+        if (error) console.error("Failed to mark PI failed:", error);
+      }
+
+      await notifyAdminPaymentIssue({
+        eventType: event.type,
+        sessionId: purchase?.stripe_session_id ?? null,
+        paymentIntentId,
+        customerEmail: pi.receipt_email ?? null,
+        amount: pi.amount ?? purchase?.amount_cents ?? null,
+        currency: pi.currency ?? purchase?.currency ?? null,
+        courseSlug: purchase?.course_slug ?? null,
+        reason:
+          pi.last_payment_error?.message ??
+          pi.last_payment_error?.code ??
+          "Payment intent failed",
+      });
+    }
+
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -105,3 +243,4 @@ serve(async (req) => {
     });
   }
 });
+
