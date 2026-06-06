@@ -377,11 +377,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Audit log
-    await supabase.from("suite_audit_log").insert({
-      user_id: user.id,
-      action: `Sent ${templateId} email to ${recipientEmail}`,
-    }).then(() => {});
+    // Audit log (only when there is an authenticated actor)
+    if (user) {
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: `Sent ${templateId} email to ${recipientEmail}`,
+      }).then(() => {});
+    }
+
 
     return new Response(JSON.stringify({ success: true, to: recipientEmail, template: templateId }), {
       status: 200,
