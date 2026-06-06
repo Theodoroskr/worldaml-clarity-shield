@@ -205,36 +205,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Auth: admin-only
     const authHeader = req.headers.get("Authorization") ?? "";
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Check admin role
-    const { data: roleData } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-
-    if (!roleData) {
-      return new Response(JSON.stringify({ error: "Admin access required" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
+    // Parse body first so we can decide which paths need admin auth
     const body = await req.json();
     const { recipientEmail: rawEmail, recipientName, templateId, setPassword } = body as {
       recipientEmail: string;
@@ -242,6 +218,43 @@ Deno.serve(async (req) => {
       templateId: TemplateId;
       setPassword?: string;
     };
+
+    // Public path: anyone can request a password reset email for their own account.
+    // Supabase admin.generateLink only emits a valid recovery link for an actual user,
+    // and the link is delivered to that user's verified email — safe to expose.
+    const isPublicPasswordReset =
+      templateId === "password-reset-academy" && !setPassword;
+
+    // Audit user for non-public paths (admin-only)
+    let user: { id: string } | null = null;
+
+    if (!isPublicPasswordReset) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user: authedUser }, error: authError } =
+        await supabase.auth.getUser(token);
+      if (authError || !authedUser) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      user = authedUser;
+
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", authedUser.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (!roleData) {
+        return new Response(JSON.stringify({ error: "Admin access required" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
 
     // If setPassword is provided, update the user's password directly
     if (setPassword && rawEmail) {
@@ -364,11 +377,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Audit log
-    await supabase.from("suite_audit_log").insert({
-      user_id: user.id,
-      action: `Sent ${templateId} email to ${recipientEmail}`,
-    }).then(() => {});
+    // Audit log (only when there is an authenticated actor)
+    if (user) {
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: `Sent ${templateId} email to ${recipientEmail}`,
+      }).then(() => {});
+    }
+
 
     return new Response(JSON.stringify({ success: true, to: recipientEmail, template: templateId }), {
       status: 200,
