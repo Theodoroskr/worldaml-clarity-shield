@@ -80,6 +80,22 @@ export default function AdminPurchaseStatus() {
           r.user_id.toLowerCase().includes(q)
       );
     }
+    if (createdFrom) {
+      const from = new Date(createdFrom).getTime();
+      data = data.filter((r) => new Date(r.created_at).getTime() >= from);
+    }
+    if (createdTo) {
+      const to = new Date(createdTo).getTime() + 86_399_999; // end of day
+      data = data.filter((r) => new Date(r.created_at).getTime() <= to);
+    }
+    if (paidFrom) {
+      const from = new Date(paidFrom).getTime();
+      data = data.filter((r) => r.paid_at && new Date(r.paid_at).getTime() >= from);
+    }
+    if (paidTo) {
+      const to = new Date(paidTo).getTime() + 86_399_999;
+      data = data.filter((r) => r.paid_at && new Date(r.paid_at).getTime() <= to);
+    }
     data.sort((a, b) => {
       let cmp = 0;
       const aVal = a[sortKey];
@@ -92,7 +108,7 @@ export default function AdminPurchaseStatus() {
       return sortDir === "asc" ? cmp : -cmp;
     });
     return data;
-  }, [rows, statusFilter, search, sortKey, sortDir]);
+  }, [rows, statusFilter, search, sortKey, sortDir, createdFrom, createdTo, paidFrom, paidTo]);
 
   const totals = useMemo(() => {
     const pending = rows.filter((r) => r.status === "pending").length;
