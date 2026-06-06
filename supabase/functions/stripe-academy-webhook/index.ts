@@ -341,18 +341,49 @@ serve(async (req) => {
         if (error) console.error("Failed to mark PI failed:", error);
       }
 
+      // Resolve a customer email: prefer receipt_email, else look up profile by user_id
+      let customerEmail: string | null = pi.receipt_email ?? null;
+      if (!customerEmail) {
+        const { data: row } = await supabase
+          .from("academy_course_purchases")
+          .select("user_id")
+          .eq("stripe_payment_intent_id", paymentIntentId)
+          .maybeSingle();
+        if (row?.user_id) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("email")
+            .eq("user_id", row.user_id)
+            .maybeSingle();
+          customerEmail = profile?.email ?? null;
+        }
+      }
+
+      const failureReason =
+        pi.last_payment_error?.message ??
+        pi.last_payment_error?.code ??
+        "Payment intent failed";
+
       await notifyAdminPaymentIssue({
         eventType: event.type,
         sessionId: purchase?.stripe_session_id ?? null,
         paymentIntentId,
-        customerEmail: pi.receipt_email ?? null,
+        customerEmail,
         amount: pi.amount ?? purchase?.amount_cents ?? null,
         currency: pi.currency ?? purchase?.currency ?? null,
         courseSlug: purchase?.course_slug ?? null,
-        reason:
-          pi.last_payment_error?.message ??
-          pi.last_payment_error?.code ??
-          "Payment intent failed",
+        reason: failureReason,
+      });
+
+      await sendCustomerRecoveryEmail({
+        supabase,
+        sessionId: purchase?.stripe_session_id ?? null,
+        paymentIntentId,
+        toEmail: customerEmail,
+        courseSlug: purchase?.course_slug ?? null,
+        amountCents: pi.amount ?? purchase?.amount_cents ?? null,
+        currency: pi.currency ?? purchase?.currency ?? null,
+        failureReason,
       });
     }
 
