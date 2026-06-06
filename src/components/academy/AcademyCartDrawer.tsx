@@ -83,6 +83,20 @@ export function AcademyCartButton() {
   );
 }
 
+/**
+ * Headless mount for the basket drawer. Use on pages that don't render the
+ * visible basket button (e.g. course purchase wall) but still need the drawer
+ * to open when something calls cart.open().
+ */
+export function AcademyCartDrawerMount() {
+  const { isOpen, open, close } = useCart();
+  return (
+    <Sheet open={isOpen} onOpenChange={(v) => (v ? open() : close())}>
+      <AcademyCartDrawerContent />
+    </Sheet>
+  );
+}
+
 function AcademyCartDrawerContent() {
   const { items, remove, clear, close, computeTotals } = useCart();
   const { region, setRegion, regionConfig } = useRegion();
