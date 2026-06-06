@@ -171,6 +171,7 @@ const App = () => (
                   <Route path="regulatory" element={<AdminRegulatoryHub />} />
                   <Route path="security" element={<AdminSecurityAudit />} />
                   <Route path="reconcile-purchases" element={<AdminReconcilePurchases />} />
+                  <Route path="purchase-status" element={<AdminPurchaseStatus />} />
                 </Route>
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
