@@ -71,7 +71,7 @@ export const KYCKYBApiUseCasesSection = () => {
               </h3>
               <p className="text-body-sm text-text-secondary mb-3">{uc.description}</p>
               <span className="inline-flex items-center gap-1 text-caption font-medium text-teal">
-                Learn more <ArrowRight className="w-3 h-3" />
+                Explore {uc.title} use case <ArrowRight className="w-3 h-3" />
               </span>
             </Link>
           ))}

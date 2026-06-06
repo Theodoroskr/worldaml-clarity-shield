@@ -514,7 +514,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO title="Admin — Lead & User Management" description="WorldAML admin panel." noindex />
+      <SEO title="Admin — Lead & User Management" description="WorldAML internal admin console for managing leads, user accounts, subscriptions, and platform configuration. Authorized administrators only." noindex />
       <Header />
       <main className="flex-1 py-12">
         <div className="container-enterprise">

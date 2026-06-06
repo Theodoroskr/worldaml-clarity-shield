@@ -34,6 +34,11 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/contact-sales", changefreq: "monthly", priority: 0.8 },
   { path: "/get-started", changefreq: "monthly", priority: 0.8 },
 
+  // Auth entry points (public; /admin, /dashboard, /pending-approval are intentionally
+  // excluded — they are noindex / user-gated and should not appear in the sitemap)
+  { path: "/login", changefreq: "yearly", priority: 0.3 },
+  { path: "/signup", changefreq: "yearly", priority: 0.3 },
+
   // Platform (Lane 1)
   { path: "/platform", changefreq: "monthly", priority: 0.9 },
   { path: "/platform/suite", changefreq: "monthly", priority: 0.8 },
