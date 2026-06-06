@@ -162,31 +162,95 @@ export default function AdminPurchaseStatus() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-        <div className="flex gap-2 flex-wrap">
-          {(["all", "pending", "paid", "failed", "refunded"] as const).map((s) => (
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <div className="flex gap-2 flex-wrap">
+            {(["all", "pending", "paid", "failed", "refunded"] as const).map((s) => (
+              <Button
+                key={s}
+                variant={statusFilter === s ? "default" : "outline"}
+                size="sm"
+                onClick={() => setStatusFilter(s)}
+              >
+                {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
+              </Button>
+            ))}
+          </div>
+          <div className="relative flex-1 w-full sm:w-auto">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by course, session ID, payment intent, or user ID…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 w-full sm:w-96"
+            />
+          </div>
+          <Button variant="ghost" size="sm" onClick={load} disabled={loading}>
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Refresh"}
+          </Button>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-3 items-start md:items-end flex-wrap">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground flex items-center gap-1">
+              <CalendarRange className="w-3 h-3" /> Created
+            </label>
+            <div className="flex gap-2 items-center">
+              <input
+                type="date"
+                value={createdFrom}
+                onChange={(e) => setCreatedFrom(e.target.value)}
+                className="h-9 px-2 rounded-md border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+              <span className="text-muted-foreground text-sm">to</span>
+              <input
+                type="date"
+                value={createdTo}
+                onChange={(e) => setCreatedTo(e.target.value)}
+                className="h-9 px-2 rounded-md border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground flex items-center gap-1">
+              <CalendarRange className="w-3 h-3" /> Paid At
+            </label>
+            <div className="flex gap-2 items-center">
+              <input
+                type="date"
+                value={paidFrom}
+                onChange={(e) => setPaidFrom(e.target.value)}
+                className="h-9 px-2 rounded-md border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+              <span className="text-muted-foreground text-sm">to</span>
+              <input
+                type="date"
+                value={paidTo}
+                onChange={(e) => setPaidTo(e.target.value)}
+                className="h-9 px-2 rounded-md border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          {(createdFrom || createdTo || paidFrom || paidTo || search || statusFilter !== "all") && (
             <Button
-              key={s}
-              variant={statusFilter === s ? "default" : "outline"}
+              variant="outline"
               size="sm"
-              onClick={() => setStatusFilter(s)}
+              className="mb-0.5"
+              onClick={() => {
+                setCreatedFrom("");
+                setCreatedTo("");
+                setPaidFrom("");
+                setPaidTo("");
+                setSearch("");
+                setStatusFilter("all");
+              }}
             >
-              {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
+              Clear filters
             </Button>
-          ))}
+          )}
         </div>
-        <div className="relative flex-1 w-full sm:w-auto">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by course, session ID, payment intent, or user ID…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 w-full sm:w-96"
-          />
-        </div>
-        <Button variant="ghost" size="sm" onClick={load} disabled={loading}>
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Refresh"}
-        </Button>
       </div>
 
       {/* Table */}
