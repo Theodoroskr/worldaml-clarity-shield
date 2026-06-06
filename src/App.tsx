@@ -107,6 +107,7 @@ const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
 const AdminRegulatoryHub = lazy(() => import("./pages/admin/AdminRegulatoryHub"));
 const AdminSecurityAudit = lazy(() => import("./pages/admin/AdminSecurityAudit"));
 const AdminReconcilePurchases = lazy(() => import("./pages/admin/AdminReconcilePurchases"));
+const AdminPurchaseStatus = lazy(() => import("./pages/admin/AdminPurchaseStatus"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
