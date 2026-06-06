@@ -1,0 +1,270 @@
+import { useEffect, useState, useMemo } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Search, ArrowUpDown } from "lucide-react";
+import { toast } from "sonner";
+
+type PurchaseRow = {
+  id: string;
+  user_id: string;
+  course_slug: string;
+  amount_cents: number;
+  currency: string;
+  status: "pending" | "paid" | "failed" | "refunded";
+  stripe_session_id: string | null;
+  stripe_payment_intent_id: string | null;
+  paid_at: string | null;
+  created_at: string;
+  updated_at: string;
+  expires_at: string | null;
+};
+
+type SortKey = "created_at" | "paid_at" | "amount_cents" | "status" | "course_slug";
+type SortDir = "asc" | "desc";
+
+export default function AdminPurchaseStatus() {
+  const [rows, setRows] = useState<PurchaseRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "paid" | "failed" | "refunded">("all");
+  const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("created_at");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  const load = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("academy_course_purchases")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setRows((data as PurchaseRow[]) ?? []);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  };
+
+  const filtered = useMemo(() => {
+    let data = [...rows];
+    if (statusFilter !== "all") {
+      data = data.filter((r) => r.status === statusFilter);
+    }
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      data = data.filter(
+        (r) =>
+          r.course_slug.toLowerCase().includes(q) ||
+          (r.stripe_session_id ?? "").toLowerCase().includes(q) ||
+          (r.stripe_payment_intent_id ?? "").toLowerCase().includes(q) ||
+          r.user_id.toLowerCase().includes(q)
+      );
+    }
+    data.sort((a, b) => {
+      let cmp = 0;
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+      if (aVal === null && bVal === null) cmp = 0;
+      else if (aVal === null) cmp = 1;
+      else if (bVal === null) cmp = -1;
+      else if (typeof aVal === "number" && typeof bVal === "number") cmp = aVal - bVal;
+      else cmp = String(aVal).localeCompare(String(bVal));
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+    return data;
+  }, [rows, statusFilter, search, sortKey, sortDir]);
+
+  const totals = useMemo(() => {
+    const pending = rows.filter((r) => r.status === "pending").length;
+    const paid = rows.filter((r) => r.status === "paid").length;
+    const failed = rows.filter((r) => r.status === "failed").length;
+    const refunded = rows.filter((r) => r.status === "refunded").length;
+    return { pending, paid, failed, refunded, total: rows.length };
+  }, [rows]);
+
+  const statusBadge = (status: string) => {
+    switch (status) {
+      case "paid":
+        return <Badge className="bg-emerald-600 hover:bg-emerald-600">paid</Badge>;
+      case "pending":
+        return <Badge variant="outline" className="text-amber-400 border-amber-400">pending</Badge>;
+      case "failed":
+        return <Badge variant="destructive">failed</Badge>;
+      case "refunded":
+        return <Badge variant="secondary">refunded</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const SortHeader = ({ label, k }: { label: string; k: SortKey }) => (
+    <button
+      onClick={() => toggleSort(k)}
+      className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+    >
+      {label}
+      <ArrowUpDown className="w-3 h-3" />
+    </button>
+  );
+
+  return (
+    <div className="p-6 max-w-6xl space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Academy Purchase Status</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          All academy course purchase rows with checkout session ID and payment timestamps.
+        </p>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <StatCard label="Total" value={totals.total} />
+        <StatCard label="Pending" value={totals.pending} accent="amber" />
+        <StatCard label="Paid" value={totals.paid} accent="emerald" />
+        <StatCard label="Failed" value={totals.failed} accent="rose" />
+        <StatCard label="Refunded" value={totals.refunded} accent="slate" />
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div className="flex gap-2 flex-wrap">
+          {(["all", "pending", "paid", "failed", "refunded"] as const).map((s) => (
+            <Button
+              key={s}
+              variant={statusFilter === s ? "default" : "outline"}
+              size="sm"
+              onClick={() => setStatusFilter(s)}
+            >
+              {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
+            </Button>
+          ))}
+        </div>
+        <div className="relative flex-1 w-full sm:w-auto">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by course, session ID, payment intent, or user ID…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 w-full sm:w-96"
+          />
+        </div>
+        <Button variant="ghost" size="sm" onClick={load} disabled={loading}>
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Refresh"}
+        </Button>
+      </div>
+
+      {/* Table */}
+      <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-muted-foreground border-b border-border">
+              <tr>
+                <th className="text-left py-3 px-4"><SortHeader label="Status" k="status" /></th>
+                <th className="text-left py-3 px-4"><SortHeader label="Course" k="course_slug" /></th>
+                <th className="text-right py-3 px-4"><SortHeader label="Amount" k="amount_cents" /></th>
+                <th className="text-left py-3 px-4">Checkout Session</th>
+                <th className="text-left py-3 px-4">Payment Intent</th>
+                <th className="text-left py-3 px-4"><SortHeader label="Created" k="created_at" /></th>
+                <th className="text-left py-3 px-4"><SortHeader label="Paid At" k="paid_at" /></th>
+                <th className="text-left py-3 px-4">Expires</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-12 text-center text-muted-foreground">
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "No rows match the current filter."}
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((row) => (
+                  <tr key={row.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                    <td className="py-3 px-4">{statusBadge(row.status)}</td>
+                    <td className="py-3 px-4 font-medium">{row.course_slug}</td>
+                    <td className="py-3 px-4 text-right tabular-nums">
+                      {(row.amount_cents / 100).toFixed(2)} {row.currency.toUpperCase()}
+                    </td>
+                    <td className="py-3 px-4 font-mono text-xs text-muted-foreground">
+                      {row.stripe_session_id ? (
+                        <span title={row.stripe_session_id}>{row.stripe_session_id.slice(0, 18)}…</span>
+                      ) : (
+                        <span className="italic">—</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 font-mono text-xs text-muted-foreground">
+                      {row.stripe_payment_intent_id ? (
+                        <span title={row.stripe_payment_intent_id}>{row.stripe_payment_intent_id.slice(0, 18)}…</span>
+                      ) : (
+                        <span className="italic">—</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-muted-foreground">{fmtDate(row.created_at)}</td>
+                    <td className="py-3 px-4 text-muted-foreground">{fmtDate(row.paid_at)}</td>
+                    <td className="py-3 px-4 text-muted-foreground">{fmtDate(row.expires_at)}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="px-4 py-2 border-t border-border text-xs text-muted-foreground">
+          Showing {filtered.length} of {rows.length} rows
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: number;
+  accent?: "amber" | "emerald" | "rose" | "slate";
+}) {
+  const color =
+    accent === "amber"
+      ? "text-amber-400"
+      : accent === "emerald"
+      ? "text-emerald-400"
+      : accent === "rose"
+      ? "text-rose-400"
+      : accent === "slate"
+      ? "text-slate-400"
+      : "text-foreground";
+  return (
+    <Card className="p-3">
+      <div className="text-muted-foreground text-xs">{label}</div>
+      <div className={`text-lg font-semibold ${color}`}>{value}</div>
+    </Card>
+  );
+}
+
+function fmtDate(ts: string | null) {
+  if (!ts) return "—";
+  const d = new Date(ts);
+  return d.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
