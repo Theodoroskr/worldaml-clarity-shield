@@ -47,7 +47,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO title="Forgot Password" description="Reset your WorldAML account password." noindex />
+      <SEO title="Forgot Password" description="Reset your WorldAML account password securely. Enter your email and we'll send you a recovery link to regain access to your compliance workspace." noindex />
       <Header />
       <main className="flex-1 flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md">

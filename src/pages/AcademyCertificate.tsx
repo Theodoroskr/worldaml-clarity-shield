@@ -237,7 +237,7 @@ const AcademyCertificate = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title={`${cert.holder_name} — ${course?.title} Certificate | WorldAML Academy`}
+       title={`${cert.holder_name} — ${course?.title} Certificate`}
         description={`${cert.holder_name} earned the ${course?.title} certificate from WorldAML Academy with a score of ${cert.score}%.`}
         canonical={`/academy/certificate/${token}`}
       />

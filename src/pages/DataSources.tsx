@@ -79,8 +79,8 @@ const DataSources = () => {
                   </CardHeader>
                   <CardContent>
                     <Button variant="outline" asChild className="w-full">
-                      <Link to={source.href}>
-                        Learn More
+                      <Link to={source.href} aria-label={`Learn more about ${source.name} data source`}>
+                        Learn more about {source.name}
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>

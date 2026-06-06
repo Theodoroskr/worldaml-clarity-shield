@@ -123,7 +123,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO title="Dashboard" description="Manage your WorldAML account and subscriptions." noindex />
+      <SEO title="Dashboard" description="Manage your WorldAML account, review active subscriptions, access purchased Academy courses, and configure your compliance workspace." noindex />
       <Header />
       {hasSuiteAccess && (
         <button

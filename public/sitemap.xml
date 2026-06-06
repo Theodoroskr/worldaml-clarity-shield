@@ -31,6 +31,18 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://worldaml.com/login</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/signup</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://worldaml.com/platform</loc>
     <lastmod>2026-06-06</lastmod>
     <changefreq>monthly</changefreq>
