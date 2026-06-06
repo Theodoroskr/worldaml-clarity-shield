@@ -69,6 +69,111 @@ async function notifyAdminPaymentIssue(params: {
   }
 }
 
+async function sendCustomerRecoveryEmail(params: {
+  supabase: ReturnType<typeof createClient>;
+  sessionId: string | null;
+  paymentIntentId?: string | null;
+  toEmail: string | null;
+  courseSlug: string | null;
+  amountCents: number | null;
+  currency: string | null;
+  failureReason: string | null;
+}) {
+  const apiKey = Deno.env.get("RESEND_API_KEY");
+  if (!apiKey) {
+    console.warn("RESEND_API_KEY not set — skipping customer recovery email");
+    return;
+  }
+  if (!params.toEmail) {
+    console.warn("No customer email available — skipping recovery email");
+    return;
+  }
+  if (!params.sessionId && !params.paymentIntentId) {
+    console.warn("No session/PI id — cannot dedupe recovery email, skipping");
+    return;
+  }
+
+  // Dedupe + load course title in one go
+  const query = params.sessionId
+    ? params.supabase.from("academy_course_purchases").select("id,course_slug,recovery_email_sent_at").eq("stripe_session_id", params.sessionId).maybeSingle()
+    : params.supabase.from("academy_course_purchases").select("id,course_slug,recovery_email_sent_at").eq("stripe_payment_intent_id", params.paymentIntentId!).maybeSingle();
+  const { data: row } = await query;
+  if (!row) {
+    console.warn("No purchase row found for recovery email");
+    return;
+  }
+  if (row.recovery_email_sent_at) {
+    console.log("Recovery email already sent for purchase", row.id);
+    return;
+  }
+
+  const slug = params.courseSlug ?? row.course_slug ?? null;
+
+  // Fetch course title (best-effort)
+  let courseTitle = slug ?? "your WorldAML Academy course";
+  if (slug) {
+    const { data: course } = await params.supabase
+      .from("academy_courses")
+      .select("title")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (course?.title) courseTitle = course.title;
+  }
+
+  const retryUrl = slug
+    ? `https://worldaml.com/academy/${slug}`
+    : "https://worldaml.com/academy";
+  const amountFmt =
+    params.amountCents != null
+      ? `${(params.amountCents / 100).toFixed(2)} ${(params.currency ?? "eur").toUpperCase()}`
+      : null;
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a;background:#ffffff;">
+      <h2 style="margin:0 0 12px;color:#0f172a;">Your payment didn't go through</h2>
+      <p style="margin:0 0 16px;line-height:1.55;">
+        Hi there,
+      </p>
+      <p style="margin:0 0 16px;line-height:1.55;">
+        We weren't able to complete your purchase of
+        <strong>${courseTitle}</strong>${amountFmt ? ` (${amountFmt})` : ""}.
+        ${params.failureReason ? `Stripe reported: <em>${params.failureReason}</em>.` : "This sometimes happens when a card is declined, a 3-D Secure prompt times out, or the checkout window is closed."}
+      </p>
+      <p style="margin:0 0 24px;line-height:1.55;">
+        Your spot is still available — you can try again with the same card or a different payment method:
+      </p>
+      <p style="margin:0 0 24px;">
+        <a href="${retryUrl}"
+           style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:6px;">
+          Retry your purchase
+        </a>
+      </p>
+      <p style="margin:0 0 8px;font-size:13px;color:#475569;line-height:1.55;">
+        If you keep seeing an error, just reply to this email and our team will help you get sorted.
+      </p>
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+      <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
+        You're receiving this because a checkout was started on worldaml.com with this email address. This is a one-time transactional message — no further emails will be sent about this attempt.
+      </p>
+    </div>`;
+
+  try {
+    const resend = new Resend(apiKey);
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [params.toEmail],
+      subject: `Your WorldAML Academy payment didn't go through — try again`,
+      html,
+    });
+    await params.supabase
+      .from("academy_course_purchases")
+      .update({ recovery_email_sent_at: new Date().toISOString() })
+      .eq("id", row.id);
+  } catch (err) {
+    console.error("Failed to send customer recovery email:", err);
+  }
+}
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
