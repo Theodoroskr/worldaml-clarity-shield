@@ -155,6 +155,83 @@ serve(async (req) => {
       }
     }
 
+    if (
+      event.type === "checkout.session.expired" ||
+      event.type === "checkout.session.async_payment_failed"
+    ) {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const sessionId = session.id;
+
+      // Fetch existing purchase row for context
+      const { data: purchase } = await supabase
+        .from("academy_course_purchases")
+        .select("course_slug,user_id,amount_cents,currency,status")
+        .eq("stripe_session_id", sessionId)
+        .maybeSingle();
+
+      // Only flag rows that aren't already paid
+      if (!purchase || purchase.status !== "paid") {
+        const { error } = await supabase
+          .from("academy_course_purchases")
+          .update({ status: "failed" })
+          .eq("stripe_session_id", sessionId)
+          .neq("status", "paid");
+        if (error) console.error("Failed to mark purchase failed:", error);
+      }
+
+      await notifyAdminPaymentIssue({
+        eventType: event.type,
+        sessionId,
+        paymentIntentId:
+          typeof session.payment_intent === "string"
+            ? session.payment_intent
+            : session.payment_intent?.id ?? null,
+        customerEmail:
+          session.customer_details?.email ?? session.customer_email ?? null,
+        amount: session.amount_total ?? purchase?.amount_cents ?? null,
+        currency: session.currency ?? purchase?.currency ?? null,
+        courseSlug: purchase?.course_slug ?? null,
+        reason:
+          event.type === "checkout.session.expired"
+            ? "Checkout session expired before payment completed"
+            : "Asynchronous payment failed",
+      });
+    }
+
+    if (event.type === "payment_intent.payment_failed") {
+      const pi = event.data.object as Stripe.PaymentIntent;
+      const paymentIntentId = pi.id;
+
+      const { data: purchase } = await supabase
+        .from("academy_course_purchases")
+        .select("course_slug,stripe_session_id,amount_cents,currency,status")
+        .eq("stripe_payment_intent_id", paymentIntentId)
+        .maybeSingle();
+
+      if (purchase && purchase.status !== "paid") {
+        const { error } = await supabase
+          .from("academy_course_purchases")
+          .update({ status: "failed" })
+          .eq("stripe_payment_intent_id", paymentIntentId)
+          .neq("status", "paid");
+        if (error) console.error("Failed to mark PI failed:", error);
+      }
+
+      await notifyAdminPaymentIssue({
+        eventType: event.type,
+        sessionId: purchase?.stripe_session_id ?? null,
+        paymentIntentId,
+        customerEmail: pi.receipt_email ?? null,
+        amount: pi.amount ?? purchase?.amount_cents ?? null,
+        currency: pi.currency ?? purchase?.currency ?? null,
+        courseSlug: purchase?.course_slug ?? null,
+        reason:
+          pi.last_payment_error?.message ??
+          pi.last_payment_error?.code ??
+          "Payment intent failed",
+      });
+    }
+
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -166,3 +243,4 @@ serve(async (req) => {
     });
   }
 });
+
