@@ -21,6 +21,7 @@ import { useRegion } from "@/contexts/RegionContext";
 import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY } from "@/lib/academyFx";
 import CurrencyIndicator from "@/components/academy/CurrencyIndicator";
 import { useCart } from "@/contexts/CartContext";
+import { AcademyCartDrawerMount } from "@/components/academy/AcademyCartDrawer";
 
 const PASS_THRESHOLD = 70;
 
