@@ -473,6 +473,7 @@ const AcademyCourse = () => {
           </div>
         </main>
         <Footer />
+        <AcademyCartDrawerMount />
       </div>
     );
   }
