@@ -107,7 +107,7 @@ export default function ChatbotWidget() {
                         }}
                         className="mt-2 flex items-center gap-1 text-xs font-medium text-primary underline underline-offset-2"
                       >
-                        Learn more <ArrowRight className="h-3 w-3" />
+                        Read more on this topic <ArrowRight className="h-3 w-3" />
                       </button>
                     )}
                   </div>

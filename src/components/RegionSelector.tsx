@@ -23,7 +23,7 @@ export const RegionSelector = () => {
 
   return (
     <Select value={region} onValueChange={(value) => setRegion(value as Region)}>
-      <SelectTrigger className="w-[160px] h-9 text-sm border-slate-200">
+      <SelectTrigger aria-label="Select region" className="w-[160px] h-9 text-sm border-slate-200">
         <Globe className="h-4 w-4 mr-2 text-text-secondary" />
         <SelectValue />
       </SelectTrigger>

@@ -21,7 +21,7 @@ const supportOptions = [
     title: "Dedicated Success Manager",
     description: "Assigned account manager for Compliance and Enterprise plans. Direct line to our team.",
     link: "/enterprise",
-    linkText: "Learn More",
+    linkText: "About success management",
   },
   {
     icon: Clock,

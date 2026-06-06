@@ -30,7 +30,7 @@ export default function SuiteAccessRestricted() {
             <Button size="lg" variant="outline" asChild>
               <Link to="/platform/suite">
                 <Phone className="mr-2 h-4 w-4" />
-                Learn More
+                Learn more about WorldAML Suite
               </Link>
             </Button>
           </div>
