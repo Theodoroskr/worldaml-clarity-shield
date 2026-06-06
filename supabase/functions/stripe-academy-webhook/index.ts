@@ -284,6 +284,9 @@ serve(async (req) => {
         if (error) console.error("Failed to mark purchase failed:", error);
       }
 
+      const customerEmail =
+        session.customer_details?.email ?? session.customer_email ?? null;
+
       await notifyAdminPaymentIssue({
         eventType: event.type,
         sessionId,
@@ -291,8 +294,7 @@ serve(async (req) => {
           typeof session.payment_intent === "string"
             ? session.payment_intent
             : session.payment_intent?.id ?? null,
-        customerEmail:
-          session.customer_details?.email ?? session.customer_email ?? null,
+        customerEmail,
         amount: session.amount_total ?? purchase?.amount_cents ?? null,
         currency: session.currency ?? purchase?.currency ?? null,
         courseSlug: purchase?.course_slug ?? null,
@@ -300,6 +302,23 @@ serve(async (req) => {
           event.type === "checkout.session.expired"
             ? "Checkout session expired before payment completed"
             : "Asynchronous payment failed",
+      });
+
+      await sendCustomerRecoveryEmail({
+        supabase,
+        sessionId,
+        paymentIntentId:
+          typeof session.payment_intent === "string"
+            ? session.payment_intent
+            : session.payment_intent?.id ?? null,
+        toEmail: customerEmail,
+        courseSlug: purchase?.course_slug ?? null,
+        amountCents: session.amount_total ?? purchase?.amount_cents ?? null,
+        currency: session.currency ?? purchase?.currency ?? null,
+        failureReason:
+          event.type === "checkout.session.expired"
+            ? "the checkout session expired before payment completed"
+            : "the asynchronous payment failed",
       });
     }
 
