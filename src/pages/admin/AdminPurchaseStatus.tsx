@@ -33,6 +33,11 @@ export default function AdminPurchaseStatus() {
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
+  const [createdFrom, setCreatedFrom] = useState("");
+  const [createdTo, setCreatedTo] = useState("");
+  const [paidFrom, setPaidFrom] = useState("");
+  const [paidTo, setPaidTo] = useState("");
+
   const load = async () => {
     setLoading(true);
     const { data, error } = await supabase
