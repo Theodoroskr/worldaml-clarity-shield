@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -12,10 +12,12 @@ const NAV = [
   { label: "Forms", path: "/admin/forms", icon: FileText },
   { label: "Workflows", path: "/admin/workflows", icon: GitBranch },
   { label: "Pricing", path: "/admin/pricing", icon: CreditCard },
+  { label: "Reconcile Purchases", path: "/admin/reconcile-purchases", icon: RefreshCw },
   { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText },
   { label: "Regulatory Hub", path: "/admin/regulatory", icon: Landmark },
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck },
 ];
+
 
 export default function AdminLayout() {
   const { user, isLoading, isAdmin } = useAuth();
