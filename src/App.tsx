@@ -29,6 +29,7 @@ const WorldComplianceEUME = lazy(() => import("./pages/WorldComplianceEUME"));
 const WorldComplianceUKIE = lazy(() => import("./pages/WorldComplianceUKIE"));
 const WorldComplianceNA = lazy(() => import("./pages/WorldComplianceNA"));
 const ResourcesDataCoverage = lazy(() => import("./pages/ResourcesDataCoverage"));
+const WhatIsSanctionsScreening = lazy(() => import("./pages/WhatIsSanctionsScreening"));
 const BridgerXG = lazy(() => import("./pages/BridgerXG"));
 const BridgerXGEUME = lazy(() => import("./pages/BridgerXGEUME"));
 const BridgerXGUKIE = lazy(() => import("./pages/BridgerXGUKIE"));
