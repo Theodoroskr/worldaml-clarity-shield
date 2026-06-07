@@ -288,22 +288,22 @@ const Glossary = () => {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
                 AML & Compliance<br className="hidden sm:block" /> Glossary
               </h1>
-              <p className="text-white/60 text-lg mb-8 max-w-xl">
+              <p className="text-white/85 text-lg mb-8 max-w-xl">
                 Plain-English definitions of the key terms used in anti-money laundering, KYC/KYB, sanctions screening, and financial crime compliance.
               </p>
 
               {/* Search */}
               <div className="relative w-full max-w-lg">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 pointer-events-none" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/80 pointer-events-none" />
                 <input
                   type="search"
                   placeholder="Search terms or definitions…"
                   value={query}
                   onChange={(e) => { setQuery(e.target.value); setActiveLetter(null); }}
-                  className="w-full h-12 pl-10 pr-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-teal/60 focus:border-teal/40 backdrop-blur-sm transition-all text-sm"
+                  className="w-full h-12 pl-10 pr-4 rounded-xl bg-white/10 border border-white/30 text-white placeholder:text-white/75 focus:outline-none focus:ring-2 focus:ring-teal/60 focus:border-teal/40 backdrop-blur-sm transition-all text-sm"
                 />
                 {query && (
-                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-white/50 tabular-nums pointer-events-none">
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-white/85 tabular-nums pointer-events-none">
                     {filtered.length} of {sortedGlossaryTerms.length}
                   </span>
                 )}
@@ -311,14 +311,14 @@ const Glossary = () => {
             </div>
 
             {/* Stats strip */}
-            <div className="flex items-center gap-8 mt-10 pt-8 border-t border-white/10">
+            <div className="flex items-center gap-8 mt-10 pt-8 border-t border-white/20">
               <StatChip target={sortedGlossaryTerms.length} label="Terms Defined" />
-              <div className="w-px h-8 bg-white/10" />
+              <div className="w-px h-8 bg-white/20" />
               <StatChip target={10} label="Jurisdictions" />
-              <div className="w-px h-8 bg-white/10" />
+              <div className="w-px h-8 bg-white/20" />
               <StatChip target={100} label="Free Access" suffix="%" />
-              <div className="hidden sm:block w-px h-8 bg-white/10" />
-              <span className="hidden sm:block text-xs text-white/40">Updated {new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</span>
+              <div className="hidden sm:block w-px h-8 bg-white/20" />
+              <span className="hidden sm:block text-xs text-white/80">Updated {new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</span>
             </div>
           </div>
         </section>
