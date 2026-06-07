@@ -234,6 +234,7 @@ const App = () => (
                 <Route path="/resources/sanctions-lists" element={<SanctionsLists />} />
                 <Route path="/resources/glossary" element={<Glossary />} />
                 <Route path="/resources/aml-regulations" element={<AMLRegulations />} />
+                <Route path="/resources/what-is-sanctions-screening" element={<WhatIsSanctionsScreening />} />
                 <Route path="/sanctions-check" element={<SanctionsCheck />} />
                 <Route path="/free-aml-check" element={<FreeAMLCheck />} />
                 <Route path="/data-coverage" element={<DataCoverageIndex />} />
