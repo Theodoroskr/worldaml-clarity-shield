@@ -34,6 +34,10 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#39;");
 }
 
+function escapeAttribute(str: string): string {
+  return escapeHtml(str).replace(/`/g, "&#96;");
+}
+
 /* ── Email templates ── */
 
 type TemplateId = "suite-upsell" | "screening-upsell" | "password-reset-academy";
@@ -146,6 +150,7 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
   "password-reset-academy": {
     subject: "Reset Your Password — Access Your Free WorldAML Academy",
     buildHtml: (firstName: string, resetLink = "https://www.worldaml.com/forgot-password") => {
+      const safeResetLink = escapeAttribute(resetLink);
       return `
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"/></head>
@@ -173,11 +178,15 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
             <li><strong>CPD-Accredited Certificates</strong> — Shareable credentials upon completion</li>
           </ul>
           <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 4px;">
-            <a href="${resetLink}"
+            <a href="${safeResetLink}"
                style="display:inline-block;background:linear-gradient(135deg,#0d9488,#0f766e);color:#fff;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;letter-spacing:0.3px;">
               Reset Password & Log In →
             </a>
           </td></tr></table>
+          <p style="margin:18px 0 0;font-size:13px;line-height:1.6;color:#6b7280;text-align:center;">
+            If the button is not clickable, copy and paste this secure reset link into your browser:<br/>
+            <a href="${safeResetLink}" style="color:#0d9488;text-decoration:underline;word-break:break-all;">${safeResetLink}</a>
+          </p>
           <p style="margin:24px 0 0;font-size:13px;color:#6b7280;text-align:center;">
             Once logged in, visit the <a href="https://worldaml.com/academy" style="color:#0d9488;text-decoration:underline;">Academy</a> to start learning.
           </p>
@@ -346,8 +355,19 @@ Deno.serve(async (req) => {
           message: resetError.message,
           status: (resetError as any).status,
         });
+        return new Response(JSON.stringify({ error: "Failed to generate password reset link" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       } else {
         passwordResetLink = resetData?.properties?.action_link;
+        if (!passwordResetLink) {
+          console.error("[password-reset] generateLink returned no action_link", { email: recipientEmail });
+          return new Response(JSON.stringify({ error: "Password reset link was not generated" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
         const linkUrl = passwordResetLink ? new URL(passwordResetLink) : null;
         console.log("[password-reset] generateLink SUCCESS", {
           email: recipientEmail,
