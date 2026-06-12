@@ -16,7 +16,7 @@ interface SEOProps {
 }
 
 const SITE_NAME = "WorldAML";
-const BASE_URL = "https://www.worldaml.com";
+const BASE_URL = "https://worldaml.com";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 
 /**
