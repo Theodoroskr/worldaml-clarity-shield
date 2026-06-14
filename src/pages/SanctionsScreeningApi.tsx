@@ -57,7 +57,7 @@ const SanctionsScreeningApiPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Sanctions Screening API — Real-Time Global List Coverage"
+        title="Sanctions Screening API — Real-time Matching"
         description="Screen individuals and entities against 200+ global sanctions lists via API. Fuzzy matching, batch processing, and ongoing monitoring in a single integration."
         canonical="/sanctions-screening-api"
         breadcrumbs={[
