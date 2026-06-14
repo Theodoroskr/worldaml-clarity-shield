@@ -44,8 +44,10 @@ export default function RcmLayout() {
               {membership ? (
                 <Badge variant="outline">{membership.orgName} · {membership.role}</Badge>
               ) : null}
+              <Badge variant="outline" className="border-amber-400/40 text-amber-600 bg-amber-50">Beta · Admins only</Badge>
               <LanguageSwitcher />
             </div>
+
           </header>
           <main className="flex-1 overflow-y-auto"><Outlet /></main>
         </div>
