@@ -181,15 +181,18 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* RCM banner – same gating as Suite */}
-          {hasSuiteAccess && (
+          {/* RCM banner – beta, admins only */}
+          {isAdmin && (
             <div className="mb-6 p-5 rounded-lg border border-teal/20 bg-gradient-to-r from-navy/5 to-teal/5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-teal/10 text-teal">
                   <Globe className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="font-semibold text-navy text-sm">Regulatory Compliance Management (RCM)</p>
+                  <p className="font-semibold text-navy text-sm flex items-center gap-2">
+                    Regulatory Compliance Management (RCM)
+                    <span className="inline-flex items-center rounded-full border border-amber-400/40 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">Beta · Admins only</span>
+                  </p>
                   <p className="text-text-secondary text-xs">Library, obligations, controls, assessments, tasks & evidence</p>
                 </div>
               </div>
@@ -199,8 +202,8 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* RCM access empty state – shown when user has no Suite access */}
-          {!hasSuiteAccess && !isAdmin && (
+          {/* RCM empty state hidden — RCM is currently in admin-only beta. */}
+          {false && !hasSuiteAccess && !isAdmin && (
             <div className="mb-6 p-5 rounded-lg border border-dashed border-navy/20 bg-navy/[0.02]">
               <div className="flex items-start gap-4">
                 <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-navy/5 text-navy/70 flex-shrink-0">

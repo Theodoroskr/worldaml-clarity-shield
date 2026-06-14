@@ -1,17 +1,32 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { RcmSidebar } from "@/components/rcm/RcmSidebar";
 import { LanguageSwitcher } from "@/components/rcm/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
 import { useRcmOrg } from "@/hooks/useRcmOrg";
+import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
 import "@/i18n";
 
 export default function RcmLayout() {
   const { t, i18n } = useTranslation();
   const { membership } = useRcmOrg();
+  const { user, isAdmin, isLoading } = useAuth();
   const dir = i18n.dir();
   const isRtl = dir === "rtl";
+
+  // RCM is in beta — restrict to platform admins only.
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-teal" />
+      </div>
+    );
+  }
+  if (!user) return <Navigate to="/login" replace />;
+  if (!isAdmin) return <Navigate to="/dashboard" replace />;
+
   return (
     <SidebarProvider>
       <div dir={dir} className="min-h-screen flex w-full bg-background">
@@ -29,8 +44,10 @@ export default function RcmLayout() {
               {membership ? (
                 <Badge variant="outline">{membership.orgName} · {membership.role}</Badge>
               ) : null}
+              <Badge variant="outline" className="border-amber-400/40 text-amber-600 bg-amber-50">Beta · Admins only</Badge>
               <LanguageSwitcher />
             </div>
+
           </header>
           <main className="flex-1 overflow-y-auto"><Outlet /></main>
         </div>
