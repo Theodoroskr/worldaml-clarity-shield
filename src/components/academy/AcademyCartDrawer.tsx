@@ -235,6 +235,13 @@ function AcademyCartDrawerContent() {
               <span>−{formatPrice(totals.discountAmount, currency)}</span>
             </div>
           )}
+          {items.length < 3 && (
+            <div className="rounded-md border border-accent/30 bg-accent/5 px-3 py-2 text-caption text-accent">
+              {items.length === 1
+                ? "Add 1 more course to save 5% · add 2 more to save 10%."
+                : "Add 1 more course to unlock the 10% bundle discount."}
+            </div>
+          )}
           <div className="flex items-center justify-between border-t border-border pt-3">
             <span className="text-subtitle font-semibold text-foreground">Total</span>
             <span className="text-subtitle font-bold text-foreground">{formatPrice(totals.total, currency)}</span>
