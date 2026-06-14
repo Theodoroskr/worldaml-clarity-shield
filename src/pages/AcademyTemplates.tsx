@@ -63,7 +63,7 @@ const AcademyTemplates = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("academy_templates")
-        .select("*")
+        .select("id, slug, title, description, category, file_format, file_size_kb, jurisdictions, sort_order")
         .eq("is_published", true)
         .order("sort_order");
       if (error) throw error;
