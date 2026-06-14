@@ -46,7 +46,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO title="Sign In" description="Sign in to your WorldAML account." noindex />
+      <SEO title="Sign In" description="Sign in to your WorldAML account to manage your compliance screening, KYC reviews, and risk assessments." noindex />
       <Header />
       <main className="flex-1 flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md">
