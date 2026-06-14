@@ -100,9 +100,15 @@ const AcademyTemplates = () => {
     }
     setDownloading(template.id);
     try {
+      const { data: path, error: pathError } = await supabase.rpc(
+        "get_academy_template_file_url",
+        { _template_id: template.id },
+      );
+      if (pathError) throw pathError;
+      if (!path) throw new Error("Template not available");
       const { data, error } = await supabase.storage
         .from("academy-templates")
-        .createSignedUrl(template.file_url, 60);
+        .createSignedUrl(path as string, 60);
       if (error) throw error;
       window.open(data.signedUrl, "_blank", "noopener,noreferrer");
     } catch (err: any) {
