@@ -92,7 +92,7 @@ const Industries = () => {
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-navy/5 text-navy mb-6 group-hover:bg-navy group-hover:text-primary-foreground transition-colors">
                     <industry.icon className="w-6 h-6" />
                   </div>
-                  <h3 className="text-title text-navy mb-3">{industry.title}</h3>
+                  <h2 className="text-title text-navy mb-3">{industry.title}</h2>
                   <p className="text-body text-text-secondary mb-6">{industry.description}</p>
                   
                   <div className="flex flex-wrap gap-2 mb-6">
@@ -109,8 +109,9 @@ const Industries = () => {
                   <Link
                     to={industry.link}
                     className="inline-flex items-center text-body-sm font-medium text-teal hover:text-teal-light transition-colors"
+                    aria-label={`Learn more about ${industry.title} compliance`}
                   >
-                    Learn More
+                    Learn more about {industry.title}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </div>
