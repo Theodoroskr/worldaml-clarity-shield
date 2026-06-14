@@ -243,6 +243,56 @@ serve(async (req) => {
           status: 500, headers: corsHeaders,
         });
       }
+
+      // Guest checkout: send a magic link so the buyer can claim their account
+      // and access the courses they just paid for.
+      const isGuest = session.metadata?.is_guest === "1";
+      const guestEmail =
+        session.customer_details?.email ?? session.customer_email ?? null;
+      if (isGuest && guestEmail) {
+        try {
+          const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
+            type: "magiclink",
+            email: guestEmail,
+            options: { redirectTo: "https://worldaml.com/academy" },
+          });
+          const actionLink = linkData?.properties?.action_link;
+          const apiKey = Deno.env.get("RESEND_API_KEY");
+          if (!linkErr && actionLink && apiKey) {
+            const resend = new Resend(apiKey);
+            const html = `
+              <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a;background:#ffffff;">
+                <h2 style="margin:0 0 12px;">Thanks for your purchase</h2>
+                <p style="margin:0 0 16px;line-height:1.55;">
+                  Your WorldAML Academy access is ready. Click the secure link below to sign in and start learning — no password needed.
+                </p>
+                <p style="margin:0 0 24px;">
+                  <a href="${actionLink}"
+                     style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:6px;">
+                    Access my courses
+                  </a>
+                </p>
+                <p style="margin:0 0 8px;font-size:13px;color:#475569;line-height:1.55;">
+                  This link is single-use and expires shortly. Once signed in you can set a password from your account settings.
+                </p>
+                <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+                <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
+                  Sent because a purchase was completed on worldaml.com with this email address.
+                </p>
+              </div>`;
+            await resend.emails.send({
+              from: FROM_EMAIL,
+              to: [guestEmail],
+              subject: "Your WorldAML Academy access — sign in to start",
+              html,
+            });
+          } else if (linkErr) {
+            console.error("generateLink failed for guest:", linkErr);
+          }
+        } catch (err) {
+          console.error("Guest claim-account email failed:", err);
+        }
+      }
     }
 
     if (event.type === "charge.refunded") {
