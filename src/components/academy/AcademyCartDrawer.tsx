@@ -267,6 +267,27 @@ function AcademyCartDrawerContent() {
               {currencyCode(currency)} · {regionConfig.name}
             </span>
           </div>
+          {!user && (
+            <div className="space-y-1.5">
+              <label htmlFor="guest-email" className="text-caption font-medium text-foreground">
+                Email for receipt &amp; course access
+              </label>
+              <input
+                id="guest-email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="you@company.com"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                disabled={loading}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 text-body-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+              <p className="text-caption text-muted-foreground">
+                We'll email you a secure sign-in link after payment — no password needed.
+              </p>
+            </div>
+          )}
           <div className="flex gap-2">
             <Button
               variant="outline"
