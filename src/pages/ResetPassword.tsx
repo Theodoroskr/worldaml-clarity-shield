@@ -286,7 +286,7 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO title="Reset Password" description="Set a new password for your WorldAML account." noindex />
+      <SEO title="Reset Password" description="Set a new password for your WorldAML account to securely restore access to your compliance workspace." noindex />
       <Header />
       <main className="flex-1 flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md">

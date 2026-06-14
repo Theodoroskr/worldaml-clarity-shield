@@ -58,7 +58,7 @@ const KYCKYBApiPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="KYC & KYB API — Programmatic Identity Verification"
+        title="KYC & KYB Verification API — Business Diligence"
         description="Automate KYC and KYB checks via API. Verify identities, map UBOs, check documents, and trigger EDD workflows programmatically through a single integration."
         canonical="/kyc-kyb-api"
         breadcrumbs={[

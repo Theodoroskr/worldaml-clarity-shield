@@ -58,7 +58,7 @@ const AMLApiPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="AML Screening API — Automate Compliance at Scale"
+        title="AML Screening API — Automate Compliance"
         description="Integrate real-time AML screening into your workflows. Screen against sanctions lists, PEP databases, adverse media, and RCAs through a single RESTful API."
         canonical="/aml-api"
         breadcrumbs={[
