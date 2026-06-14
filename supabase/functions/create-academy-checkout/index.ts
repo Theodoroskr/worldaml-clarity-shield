@@ -228,6 +228,7 @@ serve(async (req) => {
         user_id: userId,
         course_slugs: slugsToBuy.join(","),
         discount_pct: String(discountPct),
+        is_guest: isGuest ? "1" : "0",
       },
     });
 
