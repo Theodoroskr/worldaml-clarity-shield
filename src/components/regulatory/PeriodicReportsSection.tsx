@@ -652,7 +652,7 @@ export default function PeriodicReportsSection({ regulator, regulatorFullName, p
                 <div key={s.label} className="space-y-0.5">
                   <div className="text-lg font-bold text-foreground">{s.value}</div>
                   <div className="text-[10px] text-muted-foreground">{s.label}</div>
-                  <div className="text-[10px] text-muted-foreground/70">{s.sub}</div>
+                  <div className="text-[10px] text-muted-foreground">{s.sub}</div>
                 </div>
               ))}
             </div>

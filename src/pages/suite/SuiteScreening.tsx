@@ -300,7 +300,7 @@ export default function SuiteScreening() {
                         {result.aliases.length > 0 && <span>Also known as: {result.aliases.join(", ")}</span>}
                       </div>
                       <p className="text-xs text-muted-foreground">{result.position}</p>
-                      <p className="text-[10px] text-muted-foreground/70 mt-1">
+                      <p className="text-[10px] text-muted-foreground mt-1">
                         Source: {result.dataSource} · Updated: {result.lastUpdated}
                       </p>
                     </div>
