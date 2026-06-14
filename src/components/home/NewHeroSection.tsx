@@ -203,6 +203,7 @@ export const NewHeroSection = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search a name, company, or organisation…"
+                aria-label="Search a name, company, or organisation against global sanctions and watchlists"
                 className="flex-1 text-base"
                 maxLength={200}
               />
