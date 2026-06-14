@@ -29,7 +29,7 @@ type Template = {
   description: string;
   category: string;
   file_format: string;
-  file_url: string;
+  file_url?: string;
   file_size_kb: number | null;
   jurisdictions: string[];
   sort_order: number;
