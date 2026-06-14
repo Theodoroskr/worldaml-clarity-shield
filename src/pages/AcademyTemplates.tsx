@@ -29,7 +29,7 @@ type Template = {
   description: string;
   category: string;
   file_format: string;
-  file_url: string;
+  file_url?: string;
   file_size_kb: number | null;
   jurisdictions: string[];
   sort_order: number;
@@ -63,7 +63,7 @@ const AcademyTemplates = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("academy_templates")
-        .select("*")
+        .select("id, slug, title, description, category, file_format, file_size_kb, jurisdictions, sort_order")
         .eq("is_published", true)
         .order("sort_order");
       if (error) throw error;
@@ -100,9 +100,15 @@ const AcademyTemplates = () => {
     }
     setDownloading(template.id);
     try {
+      const { data: path, error: pathError } = await supabase.rpc(
+        "get_academy_template_file_url",
+        { _template_id: template.id },
+      );
+      if (pathError) throw pathError;
+      if (!path) throw new Error("Template not available");
       const { data, error } = await supabase.storage
         .from("academy-templates")
-        .createSignedUrl(template.file_url, 60);
+        .createSignedUrl(path as string, 60);
       if (error) throw error;
       window.open(data.signedUrl, "_blank", "noopener,noreferrer");
     } catch (err: any) {

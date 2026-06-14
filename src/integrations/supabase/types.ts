@@ -3579,6 +3579,10 @@ export type Database = {
           module_count: number
         }[]
       }
+      get_academy_template_file_url: {
+        Args: { _template_id: string }
+        Returns: string
+      }
       get_certificate_by_token: { Args: { _token: string }; Returns: Json }
       get_rls_audit: {
         Args: never
