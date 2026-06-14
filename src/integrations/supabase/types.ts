@@ -3084,7 +3084,7 @@ export type Database = {
           expires_at: string | null
           id: string
           income_sources: Json
-          organisation_id: string | null
+          organisation_id: string
           reviewed_at: string | null
           reviewer_id: string | null
           reviewer_notes: string | null
@@ -3106,7 +3106,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           income_sources?: Json
-          organisation_id?: string | null
+          organisation_id: string
           reviewed_at?: string | null
           reviewer_id?: string | null
           reviewer_notes?: string | null
@@ -3128,7 +3128,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           income_sources?: Json
-          organisation_id?: string | null
+          organisation_id?: string
           reviewed_at?: string | null
           reviewer_id?: string | null
           reviewer_notes?: string | null
