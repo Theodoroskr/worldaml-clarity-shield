@@ -103,6 +103,7 @@ function AcademyCartDrawerContent() {
   const { user } = useAuth();
   const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [loading, setLoading] = useState(false);
+  const [guestEmail, setGuestEmail] = useState("");
 
   const { data: courseTitles } = useQuery({
     queryKey: ["academy-cart-titles", items.join(",")],
@@ -123,16 +124,20 @@ function AcademyCartDrawerContent() {
   const discount = computeDiscount(items.length);
 
   const handleCheckout = async () => {
-    if (!user) {
-      toast.error("Please sign in to complete your purchase.");
-      close();
+    if (items.length === 0) return;
+    const emailTrimmed = guestEmail.trim().toLowerCase();
+    if (!user && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+      toast.error("Please enter a valid email to continue.");
       return;
     }
-    if (items.length === 0) return;
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-academy-checkout", {
-        body: { courseSlugs: items, currency },
+        body: {
+          courseSlugs: items,
+          currency,
+          ...(user ? {} : { guestEmail: emailTrimmed }),
+        },
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL returned");
@@ -143,6 +148,7 @@ function AcademyCartDrawerContent() {
       setLoading(false);
     }
   };
+
 
   return (
     <SheetContent side="right" className="w-full sm:max-w-md flex flex-col">
