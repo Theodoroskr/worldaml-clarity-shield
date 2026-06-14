@@ -42,33 +42,26 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // ----- Auth -----
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return json({ error: "Unauthorized" }, 401);
-    }
-
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
     );
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userErr } = await supabase.auth.getUser(token);
-    if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
-
-    const userId = userData.user.id;
-    const userEmail = userData.user.email ?? undefined;
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
 
     // ----- Input -----
     const body = await req.json().catch(() => ({}));
     const courseSlugs: string[] = Array.isArray(body?.courseSlugs) ? body.courseSlugs : [];
     const currency: string = (body?.currency ?? "eur").toLowerCase();
+    const guestEmailRaw: string | undefined =
+      typeof body?.guestEmail === "string" ? body.guestEmail.trim().toLowerCase() : undefined;
 
     if (courseSlugs.length === 0) return json({ error: "No courses provided" }, 400);
     if (!RATES[currency]) return json({ error: "Unsupported currency" }, 400);
 
-    // Dedupe
+    // Dedupe early
     const unique = Array.from(new Set(courseSlugs));
     for (const slug of unique) {
       if (FREE_COURSES.has(slug)) {
@@ -76,10 +69,61 @@ serve(async (req) => {
       }
     }
 
-    const serviceClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    // ----- Resolve user: authenticated or guest -----
+    let userId: string | undefined;
+    let userEmail: string | undefined;
+    let isGuest = false;
+
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: userData } = await supabase.auth.getUser(token);
+      if (userData?.user) {
+        userId = userData.user.id;
+        userEmail = userData.user.email ?? undefined;
+      }
+    }
+
+    if (!userId) {
+      if (!guestEmailRaw || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmailRaw)) {
+        return json({ error: "A valid email is required to check out." }, 400);
+      }
+      isGuest = true;
+      userEmail = guestEmailRaw;
+
+      // Find existing auth user by email; create if missing.
+      const findByEmail = async (email: string) => {
+        // Page through up to 5000 users (50 pages × 100). Adjust if userbase grows.
+        for (let page = 1; page <= 50; page++) {
+          const { data, error } = await serviceClient.auth.admin.listUsers({ page, perPage: 100 });
+          if (error || !data?.users?.length) return null;
+          const hit = data.users.find((u) => u.email?.toLowerCase() === email);
+          if (hit) return hit;
+          if (data.users.length < 100) return null;
+        }
+        return null;
+      };
+
+      let user = await findByEmail(guestEmailRaw);
+      if (!user) {
+        const created = await serviceClient.auth.admin.createUser({
+          email: guestEmailRaw,
+          email_confirm: false,
+          user_metadata: { source: "academy_guest_checkout" },
+        });
+        if (created.error) {
+          // Race: another request may have created it; re-check
+          user = await findByEmail(guestEmailRaw);
+          if (!user) {
+            console.error("createUser failed:", created.error);
+            return json({ error: "Could not start checkout. Please try signing in instead." }, 500);
+          }
+        } else {
+          user = created.data.user!;
+        }
+      }
+      userId = user.id;
+    }
 
     // Load DB-managed course pricing (overrides hardcoded PRICING when present)
     const { data: dbCourses } = await serviceClient
@@ -184,6 +228,7 @@ serve(async (req) => {
         user_id: userId,
         course_slugs: slugsToBuy.join(","),
         discount_pct: String(discountPct),
+        is_guest: isGuest ? "1" : "0",
       },
     });
 

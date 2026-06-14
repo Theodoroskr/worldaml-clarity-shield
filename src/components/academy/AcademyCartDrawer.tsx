@@ -103,6 +103,7 @@ function AcademyCartDrawerContent() {
   const { user } = useAuth();
   const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [loading, setLoading] = useState(false);
+  const [guestEmail, setGuestEmail] = useState("");
 
   const { data: courseTitles } = useQuery({
     queryKey: ["academy-cart-titles", items.join(",")],
@@ -123,16 +124,20 @@ function AcademyCartDrawerContent() {
   const discount = computeDiscount(items.length);
 
   const handleCheckout = async () => {
-    if (!user) {
-      toast.error("Please sign in to complete your purchase.");
-      close();
+    if (items.length === 0) return;
+    const emailTrimmed = guestEmail.trim().toLowerCase();
+    if (!user && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+      toast.error("Please enter a valid email to continue.");
       return;
     }
-    if (items.length === 0) return;
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-academy-checkout", {
-        body: { courseSlugs: items, currency },
+        body: {
+          courseSlugs: items,
+          currency,
+          ...(user ? {} : { guestEmail: emailTrimmed }),
+        },
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL returned");
@@ -143,6 +148,7 @@ function AcademyCartDrawerContent() {
       setLoading(false);
     }
   };
+
 
   return (
     <SheetContent side="right" className="w-full sm:max-w-md flex flex-col">
@@ -261,6 +267,27 @@ function AcademyCartDrawerContent() {
               {currencyCode(currency)} · {regionConfig.name}
             </span>
           </div>
+          {!user && (
+            <div className="space-y-1.5">
+              <label htmlFor="guest-email" className="text-caption font-medium text-foreground">
+                Email for receipt &amp; course access
+              </label>
+              <input
+                id="guest-email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="you@company.com"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                disabled={loading}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 text-body-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+              <p className="text-caption text-muted-foreground">
+                We'll email you a secure sign-in link after payment — no password needed.
+              </p>
+            </div>
+          )}
           <div className="flex gap-2">
             <Button
               variant="outline"
