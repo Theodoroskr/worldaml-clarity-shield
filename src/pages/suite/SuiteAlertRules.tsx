@@ -601,7 +601,7 @@ export default function SuiteAlertRules() {
               <div className="flex flex-col items-center justify-center py-16 gap-3">
                 <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
                 <p className="text-xs text-muted-foreground">Analysing rule effectiveness…</p>
-                <p className="text-[10px] text-muted-foreground/60">Evaluating against your transaction portfolio</p>
+                <p className="text-[10px] text-muted-foreground">Evaluating against your transaction portfolio</p>
               </div>
             )}
             {ruleAnalysis && (

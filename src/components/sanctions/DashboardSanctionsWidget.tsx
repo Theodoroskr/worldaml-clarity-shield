@@ -166,7 +166,7 @@ export const DashboardSanctionsWidget = ({ onSearchComplete }: Props) => {
                 <div key={label} className="col-span-2 flex items-center justify-between py-2 border-b border-border/60 last:border-0">
                   <span className="text-muted-foreground">{label}</span>
                   <div className="flex items-center gap-3">
-                    <span className="text-muted-foreground/60 line-through">{free}</span>
+                    <span className="text-muted-foreground line-through">{free}</span>
                     <span className="font-semibold text-teal flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" />{paid}
                     </span>
