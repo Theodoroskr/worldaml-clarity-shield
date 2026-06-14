@@ -78,7 +78,7 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO title="Create Account" description="Create your WorldAML account." noindex />
+      <SEO title="Create Account" description="Create your WorldAML account to start automating your AML, KYC, and KYB screening and compliance workflows." noindex />
       <Header />
       <main className="flex-1 flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md">
