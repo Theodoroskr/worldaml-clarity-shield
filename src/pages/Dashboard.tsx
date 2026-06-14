@@ -202,8 +202,8 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* RCM access empty state – shown when user has no Suite access */}
-          {!hasSuiteAccess && !isAdmin && (
+          {/* RCM empty state hidden — RCM is currently in admin-only beta. */}
+          {false && !hasSuiteAccess && !isAdmin && (
             <div className="mb-6 p-5 rounded-lg border border-dashed border-navy/20 bg-navy/[0.02]">
               <div className="flex items-start gap-4">
                 <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-navy/5 text-navy/70 flex-shrink-0">
