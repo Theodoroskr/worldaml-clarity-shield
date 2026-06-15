@@ -161,7 +161,7 @@ const Academy = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("academy_courses")
-        .select("*")
+        .select("id, slug, title, description, category, difficulty, duration_minutes, cpd_hours, image_url, is_published, sort_order, created_at, price_eur_cents, estimated_words, learning_outcomes, role_track")
         .eq("is_published", true)
         .order("sort_order");
       if (error) throw error;
