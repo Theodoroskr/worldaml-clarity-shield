@@ -101,17 +101,35 @@ const AcademyCourse = () => {
     },
   });
 
-  const { data: questions } = useQuery({
+  const {
+    data: questions,
+    isLoading: questionsLoading,
+    isError: questionsError,
+    error: questionsErrorObj,
+    refetch: refetchQuestions,
+    isFetching: questionsFetching,
+  } = useQuery({
     queryKey: ["academy-questions", course?.id],
     enabled: !!course?.id && !!user,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 4000),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("academy_questions_safe")
-        .select("*")
-        .eq("course_id", course!.id)
-        .order("sort_order");
-      if (error) throw error;
-      return data;
+      // Hard 15s timeout so a stalled network never wedges the quiz UI
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      try {
+        const { data, error } = await supabase
+          .from("academy_questions_safe")
+          .select("*")
+          .eq("course_id", course!.id)
+          .order("sort_order")
+          .abortSignal(controller.signal);
+        if (error) throw error;
+        if (!data || data.length === 0) throw new Error("No questions returned for this course.");
+        return data;
+      } finally {
+        clearTimeout(timeout);
+      }
     },
   });
 
@@ -226,12 +244,21 @@ const AcademyCourse = () => {
 
       const holderName = profile?.full_name || user.email || "Learner";
 
-      // Submit answers to server-side validation function
-      const { data, error } = await supabase.rpc("submit_quiz_and_issue_certificate", {
+      // Submit answers to server-side validation function, with a 25s
+      // client-side timeout so the user is never stuck on "Generating…".
+      const SUBMIT_TIMEOUT_MS = 25000;
+      const rpcPromise = supabase.rpc("submit_quiz_and_issue_certificate", {
         _course_id: course.id,
         _answers: quizAnswers,
         _holder_name: holderName,
       });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Submission timed out after 25 seconds. Please retry.")),
+          SUBMIT_TIMEOUT_MS,
+        ),
+      );
+      const { data, error } = (await Promise.race([rpcPromise, timeoutPromise])) as Awaited<typeof rpcPromise>;
 
       if (error) {
         console.error("[QuizSubmit] RPC error:", JSON.stringify(error, null, 2));
@@ -851,7 +878,14 @@ const AcademyCourse = () => {
                             <li>If the issue persists, contact support with the error details above.</li>
                           </ul>
                         </div>
-                        <div className="flex gap-2 mt-3">
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          <Button
+                            size="sm"
+                            onClick={() => { setQuizError(null); submitQuiz(); }}
+                            disabled={generating}
+                          >
+                            {generating ? "Retrying…" : "Retry Quiz"}
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"
@@ -956,6 +990,41 @@ const AcademyCourse = () => {
                         ? "Correct answers are highlighted in green. Read the explanation under each question to reinforce the concept."
                         : `Answer all questions. You need ${PASS_THRESHOLD}% to pass and earn your certificate.`}
                     </p>
+
+
+                    {questionsLoading && (
+                      <div className="rounded-xl border border-border p-6 text-center text-muted-foreground">
+                        Loading quiz questions…
+                      </div>
+                    )}
+
+                    {questionsError && (
+                      <div className="rounded-xl border border-rose-500/40 bg-rose-50 p-6 mb-6">
+                        <div className="flex items-start gap-3">
+                          <XCircle className="h-6 w-6 text-rose-600 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-rose-800 mb-1">Couldn't load the quiz</h3>
+                            <p className="text-sm text-rose-700 mb-3">
+                              {(questionsErrorObj as Error)?.message || "Network timed out while fetching questions."} You can retry without losing your progress.
+                            </p>
+                            <Button
+                              size="sm"
+                              onClick={() => refetchQuestions()}
+                              disabled={questionsFetching}
+                            >
+                              {questionsFetching ? "Retrying…" : "Retry loading quiz"}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {!questionsLoading && !questionsError && (!questions || questions.length === 0) && (
+                      <div className="rounded-xl border border-border p-6 text-center">
+                        <p className="text-muted-foreground mb-3">No quiz questions are available for this course yet.</p>
+                        <Button size="sm" variant="outline" onClick={() => refetchQuestions()}>Try again</Button>
+                      </div>
+                    )}
 
                     <ContentProtection watermarkLabel={user?.email || "WorldAML Academy"}>
                       <div className="space-y-8">
