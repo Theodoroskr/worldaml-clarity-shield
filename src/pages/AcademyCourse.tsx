@@ -101,17 +101,35 @@ const AcademyCourse = () => {
     },
   });
 
-  const { data: questions } = useQuery({
+  const {
+    data: questions,
+    isLoading: questionsLoading,
+    isError: questionsError,
+    error: questionsErrorObj,
+    refetch: refetchQuestions,
+    isFetching: questionsFetching,
+  } = useQuery({
     queryKey: ["academy-questions", course?.id],
     enabled: !!course?.id && !!user,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 4000),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("academy_questions_safe")
-        .select("*")
-        .eq("course_id", course!.id)
-        .order("sort_order");
-      if (error) throw error;
-      return data;
+      // Hard 15s timeout so a stalled network never wedges the quiz UI
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      try {
+        const { data, error } = await supabase
+          .from("academy_questions_safe")
+          .select("*")
+          .eq("course_id", course!.id)
+          .order("sort_order")
+          .abortSignal(controller.signal);
+        if (error) throw error;
+        if (!data || data.length === 0) throw new Error("No questions returned for this course.");
+        return data;
+      } finally {
+        clearTimeout(timeout);
+      }
     },
   });
 
