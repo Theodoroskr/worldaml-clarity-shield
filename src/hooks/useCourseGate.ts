@@ -10,8 +10,6 @@ interface CourseRow {
   sort_order: number;
   category: string | null;
   price_eur_cents: number | null;
-  stripe_price_id: string | null;
-  stripe_product_id: string | null;
 }
 
 interface PurchaseRow {
