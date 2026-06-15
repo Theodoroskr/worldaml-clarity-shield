@@ -420,7 +420,7 @@ const AcademyCourse = () => {
     const eurCents = priceEntry?.eurCents ?? dbCents;
     const purchasable =
       isPaidCourse(course.slug) ||
-      !!(course as { stripe_price_id?: string | null }).stripe_price_id;
+      dbCents > 0;
     const displayCents = eurCents > 0 ? convertEurCents(eurCents, currency) : 0;
     const inCart = cart.has(course.slug);
 
