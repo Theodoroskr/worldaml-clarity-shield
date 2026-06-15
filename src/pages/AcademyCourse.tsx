@@ -878,7 +878,14 @@ const AcademyCourse = () => {
                             <li>If the issue persists, contact support with the error details above.</li>
                           </ul>
                         </div>
-                        <div className="flex gap-2 mt-3">
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          <Button
+                            size="sm"
+                            onClick={() => { setQuizError(null); submitQuiz(); }}
+                            disabled={generating}
+                          >
+                            {generating ? "Retrying…" : "Retry Quiz"}
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"
