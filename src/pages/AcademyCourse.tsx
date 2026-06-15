@@ -244,12 +244,21 @@ const AcademyCourse = () => {
 
       const holderName = profile?.full_name || user.email || "Learner";
 
-      // Submit answers to server-side validation function
-      const { data, error } = await supabase.rpc("submit_quiz_and_issue_certificate", {
+      // Submit answers to server-side validation function, with a 25s
+      // client-side timeout so the user is never stuck on "Generating…".
+      const SUBMIT_TIMEOUT_MS = 25000;
+      const rpcPromise = supabase.rpc("submit_quiz_and_issue_certificate", {
         _course_id: course.id,
         _answers: quizAnswers,
         _holder_name: holderName,
       });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Submission timed out after 25 seconds. Please retry.")),
+          SUBMIT_TIMEOUT_MS,
+        ),
+      );
+      const { data, error } = (await Promise.race([rpcPromise, timeoutPromise])) as Awaited<typeof rpcPromise>;
 
       if (error) {
         console.error("[QuizSubmit] RPC error:", JSON.stringify(error, null, 2));
