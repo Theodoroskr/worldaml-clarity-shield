@@ -78,7 +78,7 @@ const AcademyCourse = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("academy_courses")
-        .select("*")
+        .select("id, slug, title, description, category, difficulty, duration_minutes, cpd_hours, image_url, is_published, sort_order, created_at, price_eur_cents, estimated_words, learning_outcomes, role_track")
         .eq("slug", slug)
         .eq("is_published", true)
         .single();
@@ -420,7 +420,7 @@ const AcademyCourse = () => {
     const eurCents = priceEntry?.eurCents ?? dbCents;
     const purchasable =
       isPaidCourse(course.slug) ||
-      !!(course as { stripe_price_id?: string | null }).stripe_price_id;
+      dbCents > 0;
     const displayCents = eurCents > 0 ? convertEurCents(eurCents, currency) : 0;
     const inCart = cart.has(course.slug);
 

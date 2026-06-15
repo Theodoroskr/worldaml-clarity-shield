@@ -10,8 +10,6 @@ interface CourseRow {
   sort_order: number;
   category: string | null;
   price_eur_cents: number | null;
-  stripe_price_id: string | null;
-  stripe_product_id: string | null;
 }
 
 interface PurchaseRow {
@@ -53,7 +51,7 @@ export const useCourseGate = (slug: string | undefined): GateResult => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("academy_courses")
-        .select("id, slug, title, sort_order, category, price_eur_cents, stripe_price_id, stripe_product_id")
+        .select("id, slug, title, sort_order, category, price_eur_cents")
         .eq("slug", slug!)
         .eq("is_published", true)
         .maybeSingle();
