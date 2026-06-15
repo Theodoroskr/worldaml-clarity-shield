@@ -222,7 +222,7 @@ const AcademyCourse = () => {
         .from("profiles")
         .select("full_name")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       const holderName = profile?.full_name || user.email || "Learner";
 
