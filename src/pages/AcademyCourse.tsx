@@ -991,6 +991,41 @@ const AcademyCourse = () => {
                         : `Answer all questions. You need ${PASS_THRESHOLD}% to pass and earn your certificate.`}
                     </p>
 
+
+                    {questionsLoading && (
+                      <div className="rounded-xl border border-border p-6 text-center text-muted-foreground">
+                        Loading quiz questions…
+                      </div>
+                    )}
+
+                    {questionsError && (
+                      <div className="rounded-xl border border-rose-500/40 bg-rose-50 p-6 mb-6">
+                        <div className="flex items-start gap-3">
+                          <XCircle className="h-6 w-6 text-rose-600 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-rose-800 mb-1">Couldn't load the quiz</h3>
+                            <p className="text-sm text-rose-700 mb-3">
+                              {(questionsErrorObj as Error)?.message || "Network timed out while fetching questions."} You can retry without losing your progress.
+                            </p>
+                            <Button
+                              size="sm"
+                              onClick={() => refetchQuestions()}
+                              disabled={questionsFetching}
+                            >
+                              {questionsFetching ? "Retrying…" : "Retry loading quiz"}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {!questionsLoading && !questionsError && (!questions || questions.length === 0) && (
+                      <div className="rounded-xl border border-border p-6 text-center">
+                        <p className="text-muted-foreground mb-3">No quiz questions are available for this course yet.</p>
+                        <Button size="sm" variant="outline" onClick={() => refetchQuestions()}>Try again</Button>
+                      </div>
+                    )}
+
                     <ContentProtection watermarkLabel={user?.email || "WorldAML Academy"}>
                       <div className="space-y-8">
                         {questions?.map((q, qi) => {
