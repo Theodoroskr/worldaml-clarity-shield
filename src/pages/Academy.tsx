@@ -1156,6 +1156,7 @@ const Academy = () => {
                           const isFree = FREE_ACADEMY_COURSES.has(course.slug);
                           const purchased = purchasedSlugs.has(course.slug);
                           const requiresPurchase = !isFree && !purchased;
+                          const inCart = cart.has(course.slug);
 
                           if (status === "completed") {
                             return (
@@ -1164,17 +1165,29 @@ const Academy = () => {
                               </span>
                             );
                           }
+                          if (requiresPurchase) {
+                            // Guest-friendly Buy now — adds to cart and opens drawer (no login required).
+                            return (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (!inCart) cart.add(course.slug);
+                                  cart.open();
+                                }}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-body-sm font-semibold hover:bg-primary/90 transition-colors"
+                              >
+                                <ShoppingBag className="h-4 w-4" />
+                                {inCart ? "View basket" : "Buy now"}
+                              </button>
+                            );
+                          }
                           if (!user) {
+                            // Free course, not signed in — still needs an account to track progress.
                             return (
                               <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
                                 <LogIn className="h-4 w-4" /> Sign up to start
-                              </span>
-                            );
-                          }
-                          if (requiresPurchase) {
-                            return (
-                              <span className="text-body-sm font-semibold text-primary flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-                                <ShoppingBag className="h-4 w-4" /> Unlock course
                               </span>
                             );
                           }
@@ -1205,6 +1218,7 @@ const Academy = () => {
                           <Linkedin className="h-4 w-4" />
                         </button>
                       </div>
+
                     </div>
                   </Link>
                 );
