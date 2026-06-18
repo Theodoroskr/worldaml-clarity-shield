@@ -645,18 +645,12 @@ const Academy = () => {
                   })}
                 </ul>
                 <Button asChild variant="accent" size="lg">
-                  {!user ? (
-                    <Link to="/login">
-                      Sign in to purchase
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  ) : (
-                    <a href="#courses-grid">
-                      Choose a course
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </a>
-                  )}
+                  <a href="#courses-grid">
+                    Choose a course
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </a>
                 </Button>
+
               </div>
 
               {/* Mock certificate preview */}
