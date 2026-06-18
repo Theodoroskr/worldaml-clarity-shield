@@ -493,29 +493,71 @@ const AcademyCourse = () => {
               )}
 
               {purchasable ? (
-                <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                  {inCart ? (
-                    <Button onClick={() => cart.open()}>
-                      <ShoppingBag className="h-4 w-4 mr-2" />
-                      View basket
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={() => {
-                        cart.add(course.slug);
-                        cart.open();
-                      }}
-                    >
-                      <ShoppingBag className="h-4 w-4 mr-2" />
-                      Add to basket
-                    </Button>
-                  )}
-                  <Button variant="outline" asChild>
-                    <Link to="/academy">
-                      <ArrowLeft className="h-4 w-4 mr-2" />
-                      Browse other courses
-                    </Link>
-                  </Button>
+                <div className="space-y-3">
+                  {(() => {
+                    const rememberedEmail =
+                      !user && typeof window !== "undefined"
+                        ? window.localStorage.getItem("academy_last_email")
+                        : null;
+                    const canExpress = Boolean(user || rememberedEmail);
+                    return (
+                      <>
+                        <Button
+                          onClick={handleExpressCheckout}
+                          disabled={expressLoading}
+                          size="lg"
+                          className="w-full"
+                        >
+                          {expressLoading ? (
+                            <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Redirecting…</>
+                          ) : (
+                            <>
+                              <Zap className="h-4 w-4 mr-2" />
+                              Express checkout
+                              {displayCents > 0 && <span className="ml-2 opacity-90">· {formatPrice(displayCents, currency)}</span>}
+                            </>
+                          )}
+                        </Button>
+                        <p className="text-caption text-muted-foreground">
+                          {canExpress
+                            ? user
+                              ? `One click — billed to ${user.email}. Apple Pay, Google Pay & Link supported at checkout.`
+                              : `One click as ${rememberedEmail}. Apple Pay, Google Pay & Link supported at checkout.`
+                            : "Goes straight to secure Stripe Checkout — Apple Pay, Google Pay & Link supported."}
+                        </p>
+                        <div className="flex items-center gap-3">
+                          <div className="h-px flex-1 bg-border" />
+                          <span className="text-caption text-muted-foreground">or</span>
+                          <div className="h-px flex-1 bg-border" />
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                          {inCart ? (
+                            <Button variant="outline" onClick={() => cart.open()}>
+                              <ShoppingBag className="h-4 w-4 mr-2" />
+                              View basket
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                cart.add(course.slug);
+                                cart.open();
+                              }}
+                            >
+                              <ShoppingBag className="h-4 w-4 mr-2" />
+                              Add to basket
+                            </Button>
+                          )}
+                          <Button variant="ghost" asChild>
+                            <Link to="/academy">
+                              <ArrowLeft className="h-4 w-4 mr-2" />
+                              Browse other courses
+                            </Link>
+                          </Button>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="space-y-3">
