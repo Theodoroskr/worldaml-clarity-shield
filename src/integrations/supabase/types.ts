@@ -3558,6 +3558,24 @@ export type Database = {
             Args: { target_email: string; target_regulator?: string }
             Returns: undefined
           }
+      admin_list_courses_with_stripe: {
+        Args: never
+        Returns: {
+          category: string
+          cpd_hours: number
+          description: string
+          difficulty: string
+          duration_minutes: number
+          id: string
+          is_published: boolean
+          price_eur_cents: number
+          slug: string
+          sort_order: number
+          stripe_price_id: string
+          stripe_product_id: string
+          title: string
+        }[]
+      }
       admin_revoke_suite_access: {
         Args: { target_email: string }
         Returns: undefined
