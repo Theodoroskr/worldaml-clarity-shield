@@ -545,14 +545,7 @@ const Academy = () => {
                     </li>
                   ))}
                 </ul>
-                {!user ? (
-                  <Button asChild className="w-full" variant="outline">
-                    <Link to="/login">
-                      Sign in to purchase
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Button>
-                ) : (
+                {(
                   <Button asChild className="w-full" variant="outline">
                     <a href="#courses-grid">
                       Browse paid courses
@@ -560,6 +553,7 @@ const Academy = () => {
                     </a>
                   </Button>
                 )}
+
               </div>
 
               {/* Annual All-Access tier */}
