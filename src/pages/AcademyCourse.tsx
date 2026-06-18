@@ -50,6 +50,41 @@ const AcademyCourse = () => {
   const [quizError, setQuizError] = useState<{ message: string; code?: string; details?: string; hint?: string } | null>(null);
   const [errorReported, setErrorReported] = useState(false);
   const [reportingError, setReportingError] = useState(false);
+  const [expressLoading, setExpressLoading] = useState(false);
+
+  const handleExpressCheckout = async () => {
+    if (!slug) return;
+    const rememberedEmail = !user
+      ? (typeof window !== "undefined" ? window.localStorage.getItem("academy_last_email") : null)
+      : null;
+    if (!user && !rememberedEmail) {
+      // No identity available — fall back to the basket drawer to collect email
+      cart.add(slug);
+      cart.open();
+      return;
+    }
+    setExpressLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-academy-checkout", {
+        body: {
+          courseSlugs: [slug],
+          currency,
+          ...(user ? {} : { guestEmail: rememberedEmail }),
+        },
+      });
+      if (error) throw error;
+      if (!data?.url) throw new Error("No checkout URL returned");
+      window.location.href = data.url;
+    } catch (err) {
+      console.error("Express checkout failed:", err);
+      toast({
+        title: "Could not start checkout",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+      setExpressLoading(false);
+    }
+  };
 
   // Auto-add to cart and open drawer when returning from login with purchase intent
   useEffect(() => {
