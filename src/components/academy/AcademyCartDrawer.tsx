@@ -141,6 +141,10 @@ function AcademyCartDrawerContent() {
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL returned");
+      // Remember the email so returning guests get one-click express checkout next time.
+      if (!user && typeof window !== "undefined") {
+        try { window.localStorage.setItem("academy_last_email", emailTrimmed); } catch { /* noop */ }
+      }
       window.location.href = data.url;
     } catch (err) {
       console.error("Checkout failed:", err);
