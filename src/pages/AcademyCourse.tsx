@@ -365,10 +365,10 @@ const AcademyCourse = () => {
     );
   }
 
-  // Login wall — every course (free or paid) requires sign-in.
-  if (gate.requiresLogin) {
-    const isPaidSlug = isPaidCourse(course.slug) || !FREE_ACADEMY_COURSES.has(course.slug);
-    const redirectTo = encodeURIComponent(`/academy/${slug}${isPaidSlug ? '?intent=purchase' : ''}`);
+  // Login wall — only for FREE courses. Paid courses fall through to the
+  // purchase wall below, which supports guest checkout (no account required to pay).
+  if (gate.requiresLogin && !gate.isPaid) {
+    const redirectTo = encodeURIComponent(`/academy/${slug}`);
     return (
       <div className="min-h-screen flex flex-col">
         <SEO
@@ -413,8 +413,11 @@ const AcademyCourse = () => {
     );
   }
 
-  // Purchase wall — paid course, signed in, no active purchase yet.
-  if (gate.requiresPurchase) {
+  // Purchase wall — paid course, no active purchase. Works for guests
+  // (cart drawer collects email and auto-creates an account post-payment)
+  // and signed-in learners alike.
+  if (gate.requiresPurchase || (gate.requiresLogin && gate.isPaid)) {
+
     const priceEntry = ACADEMY_PRICING[course.slug];
     const dbCents = (course as { price_eur_cents?: number }).price_eur_cents ?? 0;
     const eurCents = priceEntry?.eurCents ?? dbCents;
