@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, ArrowLeft, CheckCircle, XCircle, Award, Clock, BookOpen, Lock, ImageIcon, ShoppingBag, LogIn } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, XCircle, Award, Clock, BookOpen, Lock, ImageIcon, ShoppingBag, LogIn, Zap, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ModuleContent, { computeReadingMinutes } from "@/components/academy/ModuleContent";
 import ModuleTOC from "@/components/academy/ModuleTOC";
@@ -50,6 +50,41 @@ const AcademyCourse = () => {
   const [quizError, setQuizError] = useState<{ message: string; code?: string; details?: string; hint?: string } | null>(null);
   const [errorReported, setErrorReported] = useState(false);
   const [reportingError, setReportingError] = useState(false);
+  const [expressLoading, setExpressLoading] = useState(false);
+
+  const handleExpressCheckout = async () => {
+    if (!slug) return;
+    const rememberedEmail = !user
+      ? (typeof window !== "undefined" ? window.localStorage.getItem("academy_last_email") : null)
+      : null;
+    if (!user && !rememberedEmail) {
+      // No identity available — fall back to the basket drawer to collect email
+      cart.add(slug);
+      cart.open();
+      return;
+    }
+    setExpressLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-academy-checkout", {
+        body: {
+          courseSlugs: [slug],
+          currency,
+          ...(user ? {} : { guestEmail: rememberedEmail }),
+        },
+      });
+      if (error) throw error;
+      if (!data?.url) throw new Error("No checkout URL returned");
+      window.location.href = data.url;
+    } catch (err) {
+      console.error("Express checkout failed:", err);
+      toast({
+        title: "Could not start checkout",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+      setExpressLoading(false);
+    }
+  };
 
   // Auto-add to cart and open drawer when returning from login with purchase intent
   useEffect(() => {
@@ -458,29 +493,71 @@ const AcademyCourse = () => {
               )}
 
               {purchasable ? (
-                <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                  {inCart ? (
-                    <Button onClick={() => cart.open()}>
-                      <ShoppingBag className="h-4 w-4 mr-2" />
-                      View basket
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={() => {
-                        cart.add(course.slug);
-                        cart.open();
-                      }}
-                    >
-                      <ShoppingBag className="h-4 w-4 mr-2" />
-                      Add to basket
-                    </Button>
-                  )}
-                  <Button variant="outline" asChild>
-                    <Link to="/academy">
-                      <ArrowLeft className="h-4 w-4 mr-2" />
-                      Browse other courses
-                    </Link>
-                  </Button>
+                <div className="space-y-3">
+                  {(() => {
+                    const rememberedEmail =
+                      !user && typeof window !== "undefined"
+                        ? window.localStorage.getItem("academy_last_email")
+                        : null;
+                    const canExpress = Boolean(user || rememberedEmail);
+                    return (
+                      <>
+                        <Button
+                          onClick={handleExpressCheckout}
+                          disabled={expressLoading}
+                          size="lg"
+                          className="w-full"
+                        >
+                          {expressLoading ? (
+                            <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Redirecting…</>
+                          ) : (
+                            <>
+                              <Zap className="h-4 w-4 mr-2" />
+                              Express checkout
+                              {displayCents > 0 && <span className="ml-2 opacity-90">· {formatPrice(displayCents, currency)}</span>}
+                            </>
+                          )}
+                        </Button>
+                        <p className="text-caption text-muted-foreground">
+                          {canExpress
+                            ? user
+                              ? `One click — billed to ${user.email}. Apple Pay, Google Pay & Link supported at checkout.`
+                              : `One click as ${rememberedEmail}. Apple Pay, Google Pay & Link supported at checkout.`
+                            : "Goes straight to secure Stripe Checkout — Apple Pay, Google Pay & Link supported."}
+                        </p>
+                        <div className="flex items-center gap-3">
+                          <div className="h-px flex-1 bg-border" />
+                          <span className="text-caption text-muted-foreground">or</span>
+                          <div className="h-px flex-1 bg-border" />
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                          {inCart ? (
+                            <Button variant="outline" onClick={() => cart.open()}>
+                              <ShoppingBag className="h-4 w-4 mr-2" />
+                              View basket
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                cart.add(course.slug);
+                                cart.open();
+                              }}
+                            >
+                              <ShoppingBag className="h-4 w-4 mr-2" />
+                              Add to basket
+                            </Button>
+                          )}
+                          <Button variant="ghost" asChild>
+                            <Link to="/academy">
+                              <ArrowLeft className="h-4 w-4 mr-2" />
+                              Browse other courses
+                            </Link>
+                          </Button>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="space-y-3">
