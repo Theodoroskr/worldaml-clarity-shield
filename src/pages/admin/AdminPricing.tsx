@@ -75,7 +75,7 @@ export default function AdminPricing() {
       supabase.from("admin_subscription_tiers").select("*").order("sort_order"),
       supabase.from("admin_user_subscriptions").select("*"),
       supabase.from("profiles").select("user_id, email, full_name"),
-      supabase.from("academy_courses").select("*").order("sort_order"),
+      supabase.rpc("admin_list_courses_with_stripe" as any),
     ]);
     setTiers((t || []).map((d: any) => ({ ...d, features: (d.features || []) as string[] })));
     setSubs((s || []) as UserSub[]);
