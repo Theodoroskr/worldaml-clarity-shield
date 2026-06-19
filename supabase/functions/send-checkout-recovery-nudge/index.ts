@@ -36,6 +36,34 @@ interface PendingRow {
   created_at: string;
 }
 
+function buildHtml(p: { greetingName: string; courseList: string; amountFmt: string; retryUrl: string }) {
+  return `
+<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a;background:#ffffff;">
+  <h2 style="margin:0 0 12px;color:#0f172a;">You left your WorldAML Academy course in the basket</h2>
+  <p style="margin:0 0 16px;line-height:1.55;">Hi ${p.greetingName},</p>
+  <p style="margin:0 0 16px;line-height:1.55;">
+    We saved your spot for <strong>${p.courseList}</strong>${p.amountFmt ? ` (${p.amountFmt})` : ""}.
+    Looks like the checkout window closed before payment went through — no card was charged.
+  </p>
+  <p style="margin:0 0 24px;line-height:1.55;">Pick up where you left off and start the course in minutes:</p>
+  <p style="margin:0 0 24px;">
+    <a href="${p.retryUrl}" style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:6px;">
+      Complete your purchase
+    </a>
+  </p>
+  <p style="margin:0 0 8px;font-size:13px;color:#475569;line-height:1.55;">
+    Every Academy course includes CPD-accredited certificates and 1 month of full access.
+    If you had any trouble at checkout — card declined, 3-D Secure prompt, anything else —
+    just reply to this email and our team will help you finish.
+  </p>
+  <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+  <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
+    You're receiving this because a checkout was started on worldaml.com with this email.
+    This is a one-time transactional message — no further reminders will be sent for this attempt.
+  </p>
+</div>`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -49,6 +77,34 @@ serve(async (req) => {
     return json({ error: "RESEND_API_KEY not configured" }, 500);
   }
   const resend = new Resend(resendKey);
+
+  // Manual one-off send for admin recovery: POST { email, courseList?, amount?, currency?, retryUrl?, name? }
+  if (req.method === "POST") {
+    let body: any = {};
+    try { body = await req.json(); } catch { /* fall through to cron */ }
+    if (body && typeof body.email === "string" && body.email.includes("@")) {
+      const html = buildHtml({
+        greetingName: body.name ?? "there",
+        courseList: body.courseList ?? "your WorldAML Academy courses",
+        amountFmt: body.amount && body.currency
+          ? `${Number(body.amount).toFixed(2)} ${String(body.currency).toUpperCase()}`
+          : "",
+        retryUrl: body.retryUrl ?? `${RETRY_BASE}?resume=basket`,
+      });
+      try {
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: [body.email],
+          subject: `Finish your WorldAML Academy purchase — your spot is saved`,
+          html,
+        });
+        return json({ sent: 1, to: body.email });
+      } catch (err: any) {
+        console.error("manual recovery email failed", body.email, err);
+        return json({ error: err?.message ?? String(err) }, 500);
+      }
+    }
+  }
 
   const now = Date.now();
   const minAgeISO = new Date(now - MIN_AGE_MIN * 60_000).toISOString();
