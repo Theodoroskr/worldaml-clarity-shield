@@ -111,6 +111,7 @@ const AdminSecurityAudit = lazy(() => import("./pages/admin/AdminSecurityAudit")
 const AdminReconcilePurchases = lazy(() => import("./pages/admin/AdminReconcilePurchases"));
 const AdminPurchaseStatus = lazy(() => import("./pages/admin/AdminPurchaseStatus"));
 const AdminPartners = lazy(() => import("./pages/admin/AdminPartners"));
+const AdminDomains = lazy(() => import("./pages/admin/AdminDomains"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
@@ -176,6 +177,7 @@ const App = () => (
                   <Route path="reconcile-purchases" element={<AdminReconcilePurchases />} />
                   <Route path="purchase-status" element={<AdminPurchaseStatus />} />
                   <Route path="partners" element={<AdminPartners />} />
+                  <Route path="domains" element={<AdminDomains />} />
                 </Route>
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
