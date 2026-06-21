@@ -670,7 +670,7 @@ const Academy = () => {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <p className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-500 font-semibold">Certificate of Completion</p>
-                      <p className="text-[9px] sm:text-[10px] text-slate-400 mt-0.5">WorldAML Academy · CPD-Accredited</p>
+                      <p className="text-[9px] sm:text-[10px] text-slate-600 mt-0.5">WorldAML Academy · CPD-Accredited</p>
                     </div>
                     <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md">
                       <Award className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
@@ -693,11 +693,11 @@ const Academy = () => {
                   </div>
                   <div className="flex items-end justify-between pt-3 border-t border-slate-200">
                     <div>
-                      <p className="text-[8px] sm:text-[9px] text-slate-400">Issued</p>
+                      <p className="text-[8px] sm:text-[9px] text-slate-600">Issued</p>
                       <p className="text-[10px] sm:text-xs font-medium text-slate-700">Apr 2026</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[8px] sm:text-[9px] text-slate-400">Verify at</p>
+                      <p className="text-[8px] sm:text-[9px] text-slate-600">Verify at</p>
                       <p className="text-[10px] sm:text-xs font-mono text-slate-700">worldaml.com/verify</p>
                     </div>
                   </div>
