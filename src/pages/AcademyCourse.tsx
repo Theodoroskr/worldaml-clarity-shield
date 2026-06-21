@@ -306,7 +306,18 @@ const AcademyCourse = () => {
         throw error;
       }
 
-      const result = data as { passed: boolean; score: number; certificate_id?: string; share_token?: string; correct_answers?: Record<string, number> };
+      const result = data as {
+        passed: boolean;
+        score: number;
+        certificate_id?: string;
+        share_token?: string;
+        correct_answers?: Record<string, number>;
+        certificate_withheld?: boolean;
+        reason?: string;
+        message?: string;
+        domain?: string;
+        cap?: number;
+      };
       setQuizScore(result.score);
       setQuizSubmitted(true);
       setReviewMode(true);
@@ -319,7 +330,15 @@ const AcademyCourse = () => {
       // Scroll to top of quiz to show summary
       window.scrollTo({ top: 0, behavior: "smooth" });
 
-      if (result.passed && result.share_token) {
+      if (result.passed && result.certificate_withheld) {
+        toast({
+          title: "✅ You passed — certificate on hold",
+          description:
+            result.message ||
+            `Your team at ${result.domain} has hit the daily certificate limit (${result.cap}). Your pass is recorded; the certificate unlocks once the 24-hour window resets.`,
+          duration: 12000,
+        });
+      } else if (result.passed && result.share_token) {
         toast({
           title: "🎉 You passed!",
           description: `Score: ${result.score}%. Review your answers below — your certificate is ready.`,
