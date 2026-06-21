@@ -188,7 +188,7 @@ const WorldCompliancePricing = () => {
               <h1 className="text-3xl md:text-4xl font-bold mb-4">
                 Pricing — WorldCompliance® Online Screening
               </h1>
-              <p className="text-lg text-slate-300">
+              <p className="text-lg text-slate-200">
                 Pricing varies by jurisdiction, currency, and service scope.
               </p>
             </div>
