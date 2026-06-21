@@ -1,0 +1,1 @@
+UPDATE public.academy_course_purchases SET recovery_email_sent_at = now() WHERE status = 'pending' AND recovery_email_sent_at IS NULL AND created_at < now() - interval '2 hours';
