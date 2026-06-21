@@ -1812,4 +1812,142 @@ export const blogPosts: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: "worldcompliance-vs-world-check",
+    title: "LexisNexis WorldCompliance vs LSEG World-Check: A 2026 Comparison",
+    description:
+      "Side-by-side comparison of LexisNexis WorldCompliance and LSEG World-Check across coverage, refresh frequency, PEP depth, adverse media, integration and pricing — and how WorldAML packages WorldCompliance for live, API-first screening.",
+    category: "Sanctions",
+    date: "2026-06-21",
+    readTime: 11,
+    author: "WorldAML Research Team",
+    authorTitle: "Sanctions & Screening Data",
+    tags: [
+      "WorldCompliance",
+      "World-Check",
+      "sanctions screening",
+      "PEP",
+      "adverse media",
+      "LexisNexis",
+      "LSEG",
+      "Refinitiv",
+    ],
+    relatedSlugs: [
+      "sanctions-screening-best-practices",
+      "aml-compliance-checklist-2025",
+    ],
+    content: [
+      {
+        type: "intro",
+        text: "If you are evaluating screening data for sanctions, PEPs and adverse media, the conversation almost always narrows to two names: LexisNexis WorldCompliance and LSEG World-Check (formerly Refinitiv / Thomson Reuters). Both are market-leading databases used by tier-one banks, payment institutions and crypto exchanges — but they differ meaningfully in coverage depth, refresh cadence, licensing model and how easily they integrate into modern AML platforms. This guide compares them on the criteria that actually drive procurement decisions, and explains where WorldAML's WorldCompliance-powered offering fits in.",
+      },
+      { type: "h2", text: "TL;DR — which one should you pick?" },
+      {
+        type: "ul",
+        items: [
+          "Choose **WorldCompliance** if you need the broadest list coverage (1,900+ global watchlists), API-first integration, transparent licensing, and want to avoid the legacy enterprise sales cycle.",
+          "Choose **World-Check** if you are already on the LSEG stack, need its specific risk-intelligence narrative format, and are comfortable with enterprise contracting and per-seat licensing.",
+          "Choose **WorldAML (powered by WorldCompliance)** if you want the WorldCompliance dataset already integrated into a live screening, monitoring, and case-management platform — without managing the data pipeline yourself.",
+        ],
+      },
+      { type: "h2", text: "1. Coverage breadth" },
+      {
+        type: "p",
+        text: "Both providers cover the canonical sanctions regimes (OFAC, EU, UN, HMT/OFSI, DFAT, SECO) and the major PEP categories. The difference is in the long tail.",
+      },
+      {
+        type: "table",
+        headers: ["Coverage area", "LexisNexis WorldCompliance", "LSEG World-Check"],
+        rows: [
+          ["Global watchlists", "1,900+ structured lists", "~1,100 curated lists"],
+          ["Sanctions regimes", "All major + regional (incl. Asia-Pacific, LatAm)", "All major + regional"],
+          ["PEP coverage", "~2.6M profiles incl. RCAs and family", "~3M profiles incl. RCAs"],
+          ["Adverse media", "Structured + unstructured news ingestion", "Curated risk-intelligence narratives"],
+          ["State-Owned Enterprises (SOE)", "Yes, with ownership chains", "Yes"],
+          ["Crypto / VASP enrichment", "Yes (LexisNexis Digital Identity overlay)", "Limited, via World-Check One add-ons"],
+        ],
+      },
+      { type: "h2", text: "2. Refresh frequency and data freshness" },
+      {
+        type: "p",
+        text: "For sanctions screening, freshness is non-negotiable — a 24-hour delay against an OFAC update is a regulatory finding waiting to happen.",
+      },
+      {
+        type: "ul",
+        items: [
+          "**WorldCompliance:** Near real-time ingestion for sanctions lists (typically <15 minutes after publication). PEPs and adverse media refreshed continuously.",
+          "**World-Check:** Updated multiple times daily; SLA on sanctions varies by feed type and contract tier.",
+          "**WorldAML platform:** Streams WorldCompliance updates directly into your customer monitoring — no nightly batch, no manual list refresh.",
+        ],
+      },
+      { type: "h2", text: "3. Match quality and tuning" },
+      {
+        type: "p",
+        text: "False positives are the silent cost of any screening programme. Both vendors offer fuzzy matching, transliteration handling, and secondary identifier disambiguation (date of birth, nationality, identifier numbers).",
+      },
+      {
+        type: "ul",
+        items: [
+          "WorldCompliance exposes raw match attributes (name parts, scripts, identifiers) so you can tune scoring thresholds per business line.",
+          "World-Check pairs matches with curated intelligence narratives, which speeds adjudication but locks you into LSEG's scoring opinion.",
+          "WorldAML applies Jaro-Winkler + token-based secondary scoring on top of WorldCompliance, with an MLRO-tunable threshold (default 0.70).",
+        ],
+      },
+      { type: "h2", text: "4. Integration model" },
+      {
+        type: "table",
+        headers: ["Capability", "WorldCompliance (direct)", "World-Check One", "WorldAML"],
+        rows: [
+          ["REST API", "Yes", "Yes (separate license)", "Yes — included"],
+          ["Bulk file feed", "Yes", "Yes", "Optional"],
+          ["Web UI for ad-hoc screening", "Limited", "Yes (per-seat)", "Included for all users"],
+          ["Webhooks / streaming updates", "Available", "Limited", "Native"],
+          ["Case management & STR drafting", "No", "Add-on", "Built-in"],
+          ["Transaction monitoring engine", "No", "No", "Built-in (46 baseline rules)"],
+        ],
+      },
+      { type: "h2", text: "5. Licensing and commercial model" },
+      {
+        type: "ul",
+        items: [
+          "**WorldCompliance:** Annual data license, typically scoped by record volume and use case. No per-seat fees.",
+          "**World-Check:** Per-seat licensing for World-Check One, plus data feed fees for API access. Enterprise sales cycle is typically 4–8 weeks.",
+          "**WorldAML:** Transparent SaaS pricing — WorldCompliance data, screening engine, and case management bundled into a single subscription, with self-serve onboarding.",
+        ],
+      },
+      { type: "h2", text: "6. Auditability and regulator acceptance" },
+      {
+        type: "p",
+        text: "Both datasets are accepted by FATF-aligned regulators worldwide. Mutual evaluations have cited deployments of both as evidence of adequate screening controls. The audit trail you can produce matters more than the brand on the data license — regulators want to see who screened whom, against which list version, on which date, and how matches were adjudicated.",
+      },
+      {
+        type: "callout",
+        text: "WorldAML retains a per-screening snapshot of the WorldCompliance list version used, every match returned, every analyst decision, and the rationale — exportable as a regulator-ready PDF audit pack. See our /world-check-alternative page for a deeper feature-by-feature breakdown.",
+      },
+      { type: "h2", text: "When to migrate from World-Check" },
+      {
+        type: "ul",
+        items: [
+          "Per-seat licensing is becoming a barrier as your compliance team grows.",
+          "You need API-first integration into onboarding, payments, or KYB flows that World-Check One cannot deliver natively.",
+          "Your false-positive rate is being driven by curated narratives you can't tune.",
+          "You want sanctions, PEP, adverse media, AND case management on a single contract.",
+        ],
+      },
+      { type: "h2", text: "Getting started with WorldCompliance via WorldAML" },
+      {
+        type: "ol",
+        items: [
+          "Book a 30-minute scoping call to confirm your jurisdictions, expected screening volume, and risk appetite.",
+          "Receive a sandbox API key the same day, pre-loaded with the WorldCompliance dataset.",
+          "Run a parallel-run pilot — screen 30 days of historical customers and compare match quality against your incumbent.",
+          "Migrate live traffic with zero downtime — WorldAML exposes both REST and webhook integrations.",
+        ],
+      },
+      {
+        type: "callout",
+        text: "Ready to compare WorldCompliance against your current World-Check setup? Book a demo at /contact-sales or read the detailed feature breakdown at /world-check-alternative.",
+      },
+    ],
+  },
 ];
