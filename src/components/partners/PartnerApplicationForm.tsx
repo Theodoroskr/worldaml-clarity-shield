@@ -27,13 +27,13 @@ const PartnerApplicationForm = () => {
     if (!form.company_name.trim()) { toast.error("Company name is required"); return; }
 
     setLoading(true);
-    const { error } = await supabase.from("partner_applications").insert({
+    const { data: inserted, error } = await supabase.from("partner_applications").insert({
       user_id: user.id,
       company_name: form.company_name.trim(),
       website: form.website.trim() || null,
       partner_type: form.partner_type,
       description: form.description.trim() || null,
-    } as any);
+    } as any).select("id").maybeSingle();
 
     if (error) {
       toast.error("Failed to submit application. Please try again.");
@@ -41,6 +41,12 @@ const PartnerApplicationForm = () => {
     } else {
       setSubmitted(true);
       toast.success("Application submitted!");
+      // Fire-and-forget notifications (admin alert + applicant thank-you)
+      if (inserted?.id) {
+        supabase.functions
+          .invoke("notify-partner-application", { body: { application_id: inserted.id } })
+          .catch((e) => console.error("notify-partner-application failed:", e));
+      }
     }
     setLoading(false);
   };
