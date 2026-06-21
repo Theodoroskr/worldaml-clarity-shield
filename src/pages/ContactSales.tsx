@@ -42,6 +42,12 @@ const products = [
     description: "Screening and decisioning engine from LexisNexis",
     category: "Data Source",
   },
+  {
+    id: "academy-team",
+    name: "Academy — Team Plan",
+    description: "Bulk seats (5+) with 20% discount, invoice / PO billing and admin dashboard",
+    category: "Training",
+  },
 ];
 
 const ContactSales = () => {
@@ -69,7 +75,7 @@ const ContactSales = () => {
 
     if (topicParam === "academy-team-quote") {
       // Procurement-friendly Academy team quote flow
-      setSelectedProducts((prev) => (prev.length === 0 ? [] : prev));
+      setSelectedProducts((prev) => (prev.includes("academy-team") ? prev : [...prev, "academy-team"]));
       const seats = Number(seatsParam) || 5;
       const domainLine = domainParam ? ` from ${domainParam}` : "";
       setFormData((prev) => ({
