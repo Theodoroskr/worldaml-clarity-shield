@@ -42,6 +42,7 @@ const Dashboard = () => {
   const [certificates, setCertificates] = useState<any[]>([]);
   const [certsLoading, setCertsLoading] = useState(true);
   const [inProgressCourses, setInProgressCourses] = useState<any[]>([]);
+  const [showFirstLessonNudge, setShowFirstLessonNudge] = useState(false);
 
   /* ─── fetch certificates + in-progress courses ─── */
   useEffect(() => {
@@ -89,6 +90,23 @@ const Dashboard = () => {
         .filter((p: any) => p.completed > 0 && !p.quiz_passed && p.academy_courses);
 
       setInProgressCourses(enriched);
+    })();
+
+    // Free→Academy nudge: signed up >7 days ago, no academy purchases yet,
+    // and hasn't dismissed the nudge this browser.
+    (async () => {
+      try {
+        if (localStorage.getItem("dashboard_first_lesson_nudge_dismissed") === "1") return;
+      } catch { /* ignore */ }
+      const createdAt = user.created_at ? new Date(user.created_at).getTime() : Date.now();
+      const ageDays = (Date.now() - createdAt) / 86_400_000;
+      if (ageDays < 7) return;
+      const { count } = await supabase
+        .from("academy_course_purchases")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "paid");
+      if ((count ?? 0) === 0) setShowFirstLessonNudge(true);
     })();
   }, [user]);
 
