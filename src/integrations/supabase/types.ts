@@ -3642,6 +3642,13 @@ export type Database = {
         Args: { _reason: string; _report_id: string }
         Returns: string
       }
+      same_domain_signup_count: {
+        Args: never
+        Returns: {
+          domain: string
+          signup_count: number
+        }[]
+      }
       submit_quiz_and_issue_certificate: {
         Args: { _answers: Json; _course_id: string; _holder_name: string }
         Returns: Json

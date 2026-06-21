@@ -28,6 +28,8 @@ const countryToRegion: Record<string, Region> = {
   GB: 'uk-ie', IE: 'uk-ie',
   // North America
   US: 'na', CA: 'na', MX: 'na',
+  // India & South Asia (PPP pricing)
+  IN: 'in', PK: 'in', BD: 'in', LK: 'in', NP: 'in', BT: 'in',
 };
 
 function getCookie(name: string): string | null {

@@ -9,7 +9,13 @@ const corsHeaders = {
 };
 
 // FX rates — keep in sync with src/lib/academyFx.ts
-const RATES: Record<string, number> = { eur: 1, usd: 1.08, gbp: 0.86 };
+const RATES: Record<string, number> = { eur: 1, usd: 1.08, gbp: 0.86, inr: 90 };
+
+// PPP overrides for INR (Stripe minor units = paise). Keep in sync with src/lib/academyFx.ts
+const INR_PPP_OVERRIDES: Record<number, number> = {
+  2900: 99900,  // €29 → ₹999
+  4900: 169900, // €49 → ₹1,699
+};
 
 // Pricing — keep in sync with src/data/academyPricing.ts
 // stripeProductId is required for a course to be purchasable.
@@ -35,8 +41,12 @@ const PRICING: Record<string, { eurCents: number; stripeProductId: string }> = {
 const FREE_COURSES = new Set(["aml-fundamentals", "sanctions-screening-essentials"]);
 
 const computeDiscountPct = (count: number) => (count >= 3 ? 10 : count === 2 ? 5 : 0);
-const convert = (eurCents: number, currency: string) =>
-  Math.round(eurCents * (RATES[currency] ?? 1));
+const convert = (eurCents: number, currency: string) => {
+  if (currency === "inr") {
+    return INR_PPP_OVERRIDES[eurCents] ?? Math.round(eurCents * RATES.inr);
+  }
+  return Math.round(eurCents * (RATES[currency] ?? 1));
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });

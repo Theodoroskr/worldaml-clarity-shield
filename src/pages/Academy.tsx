@@ -18,6 +18,7 @@ import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/acad
 import { useRegion } from "@/contexts/RegionContext";
 import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY, currencyCode } from "@/lib/academyFx";
 import CurrencyIndicator from "@/components/academy/CurrencyIndicator";
+import TeamQuoteBanner from "@/components/academy/TeamQuoteBanner";
 import { toast } from "sonner";
 
 
@@ -363,6 +364,15 @@ const Academy = () => {
             </div>
           </div>
         </section>
+
+        {/* Team quote banner (≥3 colleagues from same domain) */}
+        {user && (
+          <section className="bg-background border-b border-border">
+            <div className="container-enterprise py-4">
+              <TeamQuoteBanner />
+            </div>
+          </section>
+        )}
 
         {/* Access & pricing callout */}
         <section className="bg-background border-b border-border">

@@ -27,6 +27,7 @@ import {
 } from "@/lib/academyFx";
 import { computeDiscount } from "@/lib/academyDiscount";
 import { Region, REGIONS } from "@/types/regions";
+import { TeamQuoteBanner } from "@/components/academy/TeamQuoteBanner";
 import { toast } from "sonner";
 
 const FX_TOOLTIP =
@@ -233,6 +234,7 @@ function AcademyCartDrawerContent() {
       {/* Totals + checkout */}
       {items.length > 0 && (
         <div className="border-t border-border pt-4 space-y-3">
+          <TeamQuoteBanner compact />
           <div className="flex items-center justify-between text-body-sm">
             <span className="text-muted-foreground">
               Subtotal ({items.length} {items.length === 1 ? "course" : "courses"})

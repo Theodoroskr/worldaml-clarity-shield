@@ -1,4 +1,4 @@
-export type Region = 'eu-me' | 'uk-ie' | 'na';
+export type Region = 'eu-me' | 'uk-ie' | 'na' | 'in';
 
 export type Lane = 'platform' | 'data-source';
 
@@ -27,6 +27,12 @@ export const REGIONS: Record<Region, RegionConfig> = {
     name: 'North America',
     currency: 'USD',
     currencySymbol: '$',
+  },
+  'in': {
+    id: 'in',
+    name: 'India & South Asia',
+    currency: 'INR',
+    currencySymbol: '₹',
   },
 };
 

@@ -42,6 +42,12 @@ const products = [
     description: "Screening and decisioning engine from LexisNexis",
     category: "Data Source",
   },
+  {
+    id: "academy-team",
+    name: "Academy — Team Plan",
+    description: "Bulk seats (5+) with 20% discount, invoice / PO billing and admin dashboard",
+    category: "Training",
+  },
 ];
 
 const ContactSales = () => {
@@ -63,10 +69,36 @@ const ContactSales = () => {
     const productParam = searchParams.get("product");
     const planParam = searchParams.get("plan");
     const bundleParam = searchParams.get("bundle");
-    
+    const topicParam = searchParams.get("topic");
+    const seatsParam = searchParams.get("seats");
+    const domainParam = searchParams.get("domain");
+
+    if (topicParam === "academy-team-quote") {
+      // Procurement-friendly Academy team quote flow
+      setSelectedProducts((prev) => (prev.includes("academy-team") ? prev : [...prev, "academy-team"]));
+      const seats = Number(seatsParam) || 5;
+      const domainLine = domainParam ? ` from ${domainParam}` : "";
+      setFormData((prev) => ({
+        ...prev,
+        message: prev.message
+          ? prev.message
+          : `Requesting a WorldAML Academy team quote for ${Math.max(seats, 5)}+ seats${domainLine}.
+
+Please send:
+- Invoice / PO billing terms (NET-30)
+- 20% bulk discount confirmation for 5+ seats
+- Admin / L&D dashboard for seat assignment
+- Consolidated VAT-compliant invoice
+- Course catalogue & CPD certificate sample
+
+Preferred start date and number of seats below.`,
+      }));
+      return;
+    }
+
     if (productParam === "worldid") {
       setSelectedProducts(["worldid"]);
-      
+
       // Add context to message if plan or bundle specified
       if (planParam) {
         setFormData(prev => ({
