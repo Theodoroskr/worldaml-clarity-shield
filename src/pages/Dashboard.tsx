@@ -323,6 +323,45 @@ const Dashboard = () => {
                 </div>
               </div>
 
+              {/* ── Your first lesson is free (≥7-day-old users, 0 purchases) ── */}
+              {showFirstLessonNudge && (
+                <div className="mb-6 rounded-xl border border-teal/30 bg-gradient-to-br from-teal/10 via-teal/5 to-transparent p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-teal/15 text-teal flex-shrink-0">
+                      <BookOpen className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h3 className="text-sm font-bold text-navy">Your first lesson is free</h3>
+                        <span className="inline-flex items-center rounded-full bg-teal/15 px-2 py-0.5 text-[10px] font-semibold text-teal uppercase tracking-wider">
+                          No card required
+                        </span>
+                      </div>
+                      <p className="text-xs text-text-secondary leading-relaxed mb-3">
+                        Start with <strong className="text-navy">AML Fundamentals</strong> — a 20-minute interactive
+                        lesson with a CPD-accredited certificate at the end. Most learners finish on their first
+                        coffee break.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Button size="sm" variant="accent" onClick={() => navigate("/academy/aml-fundamentals")}>
+                          <PlayCircle className="h-4 w-4 mr-1.5" /> Start free lesson
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setShowFirstLessonNudge(false);
+                            try { localStorage.setItem("dashboard_first_lesson_nudge_dismissed", "1"); } catch { /* ignore */ }
+                          }}
+                        >
+                          Maybe later
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <h3 className="text-sm font-semibold text-navy mb-3 flex items-center gap-2">
                 <ChevronRight className="h-4 w-4 text-teal" /> Getting Started
               </h3>
