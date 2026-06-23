@@ -47,21 +47,28 @@ export default function AdminLayout() {
           <Shield className="w-5 h-5 text-primary" />
           <span className="font-bold text-foreground text-sm">Admin Panel</span>
         </div>
-        <nav className="flex-1 p-2 space-y-0.5">
-          {NAV.map(n => (
-            <button
-              key={n.path}
-              onClick={() => navigate(n.path)}
-              className={cn(
-                "w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors",
-                location.pathname.startsWith(n.path)
-                  ? "bg-primary/10 text-primary font-medium"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              <n.icon className="w-4 h-4" />
-              {n.label}
-            </button>
+        <nav className="flex-1 p-2 space-y-3 overflow-y-auto">
+          {Array.from(new Set(NAV.map(n => n.section || "Main"))).map(section => (
+            <div key={section} className="space-y-0.5">
+              <div className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                {section}
+              </div>
+              {NAV.filter(n => (n.section || "Main") === section).map(n => (
+                <button
+                  key={n.path}
+                  onClick={() => navigate(n.path)}
+                  className={cn(
+                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors",
+                    location.pathname.startsWith(n.path)
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  <n.icon className="w-4 h-4" />
+                  {n.label}
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="p-2 border-t border-border">
