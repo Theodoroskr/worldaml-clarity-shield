@@ -73,6 +73,9 @@ const Signup = () => {
         console.warn("Admin notification failed (non-blocking):", notifyErr);
       }
 
+      clearAttribution();
+
+
       toast({
         title: "Account created",
         description: "Your account has been approved. Please verify your email and sign in.",
