@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, TrendingUp, Download, RefreshCw, Filter } from "lucide-react";
+import { Loader2, TrendingUp, Download, RefreshCw, Filter, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const FREE_EMAIL = new Set([
   "gmail.com", "googlemail.com", "yahoo.com", "yahoo.co.uk", "yahoo.co.in",
@@ -66,6 +67,13 @@ export default function AdminAcademyFunnel() {
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<Range>("30d");
   const [domainSegment, setDomainSegment] = useState<"all" | "corporate" | "personal">("all");
+  const [drill, setDrill] = useState<{
+    kind: "course" | "domain";
+    key: string;
+    signupIds: string[];
+    startedIds: string[];
+    paidIds: string[];
+  } | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -151,6 +159,8 @@ export default function AdminAcademyFunnel() {
       conversion: pct(v.paid.size, v.started.size),
       revenue: v.revenue,
       currency: v.currency,
+      startedIds: Array.from(v.started),
+      paidIds: Array.from(v.paid),
     })).sort((a, b) => b.paid - a.paid);
 
     // Per-domain
@@ -194,9 +204,22 @@ export default function AdminAcademyFunnel() {
         signupToPaid: pct(v.paid.size, v.signups.size),
         startedToPaid: pct(v.paid.size, v.started.size),
         revenue: v.revenue,
+        signupIds: Array.from(v.signups),
+        startedIds: Array.from(v.started),
+        paidIds: Array.from(v.paid),
       }))
       .filter(r => r.signups + r.started + r.paid > 0)
       .sort((a, b) => b.paid - a.paid || b.signups - a.signups);
+
+    // Lookup helpers for drill-down
+    const profileById = new Map(profiles.map(p => [p.user_id, p]));
+    const purchasesByUser = new Map<string, Purchase[]>();
+    inRangePurchases.forEach(pu => {
+      const arr = purchasesByUser.get(pu.user_id) || [];
+      arr.push(pu);
+      purchasesByUser.set(pu.user_id, arr);
+    });
+    const signupsInRangeSet = new Set(signups.map(s => s.user_id));
 
     return {
       totalSignups,
@@ -208,6 +231,9 @@ export default function AdminAcademyFunnel() {
       signupToPaid: pct(totalPaid, totalSignups),
       courseRows,
       domainRows,
+      profileById,
+      purchasesByUser,
+      signupsInRangeSet,
     };
   }, [profiles, purchases, range, domainSegment]);
 
@@ -350,8 +376,23 @@ export default function AdminAcademyFunnel() {
                   </thead>
                   <tbody className="divide-y divide-border">
                     {data.courseRows.map(r => (
-                      <tr key={r.slug} className="hover:bg-muted/20">
-                        <td className="px-3 py-2 font-medium">{r.slug}</td>
+                      <tr
+                        key={r.slug}
+                        className="hover:bg-muted/30 cursor-pointer transition-colors"
+                        onClick={() => setDrill({
+                          kind: "course",
+                          key: r.slug,
+                          signupIds: [],
+                          startedIds: r.startedIds,
+                          paidIds: r.paidIds,
+                        })}
+                      >
+                        <td className="px-3 py-2 font-medium">
+                          <span className="inline-flex items-center gap-1 text-foreground hover:text-primary">
+                            {r.slug}
+                            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                          </span>
+                        </td>
                         <td className="px-3 py-2 text-right tabular-nums">{r.started}</td>
                         <td className="px-3 py-2 text-right tabular-nums text-emerald-600 font-medium">{r.paid}</td>
                         <td className="px-3 py-2 text-right tabular-nums">
@@ -392,9 +433,22 @@ export default function AdminAcademyFunnel() {
                     </thead>
                     <tbody className="divide-y divide-border">
                       {data.domainRows.map(r => (
-                        <tr key={r.domain} className="hover:bg-muted/20">
+                        <tr
+                          key={r.domain}
+                          className="hover:bg-muted/30 cursor-pointer transition-colors"
+                          onClick={() => setDrill({
+                            kind: "domain",
+                            key: r.domain,
+                            signupIds: r.signupIds,
+                            startedIds: r.startedIds,
+                            paidIds: r.paidIds,
+                          })}
+                        >
                           <td className="px-3 py-2">
-                            <span className="font-medium">{r.domain}</span>
+                            <span className="font-medium inline-flex items-center gap-1 hover:text-primary">
+                              {r.domain}
+                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                            </span>
                             <Badge
                               variant="outline"
                               className={`ml-2 text-[10px] ${r.isCorporate ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-muted text-muted-foreground"}`}
@@ -425,7 +479,187 @@ export default function AdminAcademyFunnel() {
           </p>
         </>
       )}
+
+      <DrillDownDialog
+        drill={drill}
+        onClose={() => setDrill(null)}
+        profileById={data.profileById}
+        purchasesByUser={data.purchasesByUser}
+        signupsInRangeSet={data.signupsInRangeSet}
+      />
     </div>
+  );
+}
+
+interface DrillProps {
+  drill: {
+    kind: "course" | "domain";
+    key: string;
+    signupIds: string[];
+    startedIds: string[];
+    paidIds: string[];
+  } | null;
+  onClose: () => void;
+  profileById: Map<string, Profile>;
+  purchasesByUser: Map<string, Purchase[]>;
+  signupsInRangeSet: Set<string>;
+}
+
+function DrillDownDialog({ drill, onClose, profileById, purchasesByUser, signupsInRangeSet }: DrillProps) {
+  if (!drill) return null;
+
+  const allIds = Array.from(new Set([
+    ...drill.signupIds,
+    ...drill.startedIds,
+    ...drill.paidIds,
+  ]));
+
+  const startedSet = new Set(drill.startedIds);
+  const paidSet = new Set(drill.paidIds);
+  const courseFilter = drill.kind === "course" ? drill.key : null;
+
+  const rows = allIds
+    .map((uid) => {
+      const profile = profileById.get(uid);
+      const userPurchases = purchasesByUser.get(uid) || [];
+      const scoped = courseFilter
+        ? userPurchases.filter(p => p.course_slug === courseFilter)
+        : userPurchases;
+      const paidRows = scoped.filter(p => p.status === "paid");
+      const revenue = paidRows.reduce((s, p) => s + (p.amount_cents || 0), 0);
+      const status: "paid" | "started" | "signup" = paidSet.has(uid)
+        ? "paid"
+        : startedSet.has(uid)
+        ? "started"
+        : "signup";
+      const lastActivity =
+        scoped.map(p => p.paid_at || p.created_at).filter(Boolean).sort().reverse()[0]
+        || profile?.created_at
+        || "";
+      return {
+        uid,
+        profile,
+        scoped,
+        revenue,
+        status,
+        lastActivity,
+        isSignupInRange: signupsInRangeSet.has(uid),
+      };
+    })
+    .sort((a, b) => {
+      const order = { paid: 0, started: 1, signup: 2 } as const;
+      if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
+      return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime();
+    });
+
+  const exportRows = () => {
+    const csv = [
+      ["email", "full_name", "company", "status", "signup_in_range", "courses_in_scope", "paid_courses", "revenue_eur", "last_activity"],
+      ...rows.map(r => [
+        r.profile?.email || "",
+        r.profile?.full_name || "",
+        r.profile?.company_name || "",
+        r.status,
+        r.isSignupInRange ? "yes" : "no",
+        r.scoped.map(p => p.course_slug).join("|"),
+        r.scoped.filter(p => p.status === "paid").map(p => p.course_slug).join("|"),
+        (r.revenue / 100).toFixed(2),
+        r.lastActivity,
+      ]),
+    ]
+      .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `funnel-${drill.kind}-${drill.key}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <Dialog open={!!drill} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center justify-between gap-3">
+            <span className="flex items-center gap-2">
+              {drill.kind === "course" ? "Course" : "Domain"}:{" "}
+              <code className="text-sm bg-muted px-2 py-0.5 rounded">{drill.key}</code>
+              <Badge variant="outline" className="text-[10px]">{rows.length} user{rows.length === 1 ? "" : "s"}</Badge>
+            </span>
+            <Button variant="outline" size="sm" onClick={exportRows} disabled={!rows.length}>
+              <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
+            </Button>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="overflow-y-auto -mx-6 px-6">
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 bg-card">
+              <tr className="border-b border-border bg-muted/30 text-xs uppercase text-muted-foreground">
+                <th className="px-2 py-2 text-left">Learner</th>
+                <th className="px-2 py-2 text-left">Company</th>
+                <th className="px-2 py-2 text-left">Status</th>
+                <th className="px-2 py-2 text-left">{drill.kind === "course" ? "Purchase rows" : "Courses"}</th>
+                <th className="px-2 py-2 text-right">Revenue</th>
+                <th className="px-2 py-2 text-left">Last activity</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {rows.map(r => (
+                <tr key={r.uid} className="hover:bg-muted/20">
+                  <td className="px-2 py-2">
+                    <div className="font-medium text-foreground">{r.profile?.full_name || "—"}</div>
+                    <div className="text-xs text-muted-foreground">{r.profile?.email}</div>
+                  </td>
+                  <td className="px-2 py-2 text-xs text-muted-foreground">{r.profile?.company_name || "—"}</td>
+                  <td className="px-2 py-2">
+                    {r.status === "paid" && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Paid</Badge>}
+                    {r.status === "started" && <Badge className="bg-blue-50 text-blue-700 border-blue-200">Started checkout</Badge>}
+                    {r.status === "signup" && <Badge variant="outline" className="bg-muted text-muted-foreground">Signup only</Badge>}
+                    {r.isSignupInRange && (
+                      <Badge variant="outline" className="ml-1 text-[10px] bg-amber-50 text-amber-700 border-amber-200">
+                        New signup
+                      </Badge>
+                    )}
+                  </td>
+                  <td className="px-2 py-2">
+                    <div className="flex flex-wrap gap-1">
+                      {r.scoped.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
+                      {r.scoped.map((p, i) => (
+                        <Badge
+                          key={`${p.course_slug}-${i}`}
+                          variant="outline"
+                          className={`text-[10px] ${
+                            p.status === "paid"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : p.status === "pending"
+                              ? "bg-amber-50 text-amber-700 border-amber-200"
+                              : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {drill.kind === "course" ? p.status : `${p.course_slug}:${p.status}`}
+                        </Badge>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-2 py-2 text-right tabular-nums text-xs">
+                    {r.revenue > 0 ? `€${(r.revenue / 100).toFixed(2)}` : "—"}
+                  </td>
+                  <td className="px-2 py-2 text-xs text-muted-foreground">
+                    {r.lastActivity ? new Date(r.lastActivity).toLocaleDateString() : "—"}
+                  </td>
+                </tr>
+              ))}
+              {rows.length === 0 && (
+                <tr><td colSpan={6} className="text-center py-8 text-sm text-muted-foreground">No matching records.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
