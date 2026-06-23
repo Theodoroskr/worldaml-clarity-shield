@@ -61,6 +61,7 @@ export type Database = {
           expires_at: string | null
           id: string
           paid_at: string | null
+          recovery_email_24h_sent_at: string | null
           recovery_email_sent_at: string | null
           status: string
           stripe_payment_intent_id: string | null
@@ -76,6 +77,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           paid_at?: string | null
+          recovery_email_24h_sent_at?: string | null
           recovery_email_sent_at?: string | null
           status?: string
           stripe_payment_intent_id?: string | null
@@ -91,6 +93,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           paid_at?: string | null
+          recovery_email_24h_sent_at?: string | null
           recovery_email_sent_at?: string | null
           status?: string
           stripe_payment_intent_id?: string | null
