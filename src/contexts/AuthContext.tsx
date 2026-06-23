@@ -29,8 +29,9 @@ interface AuthContextType {
   signUp: (
     email: string,
     password: string,
-    metadata?: { full_name?: string; company_name?: string }
+    metadata?: Record<string, unknown>
   ) => Promise<{ error: Error | null }>;
+
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }

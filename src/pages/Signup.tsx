@@ -40,10 +40,16 @@ const Signup = () => {
 
     setIsLoading(true);
 
+    const attribution = getAttribution();
     const { error } = await signUp(email, password, {
       full_name: fullName,
       company_name: companyName,
+      signup_source: attribution.signup_source,
+      signup_landing_path: attribution.signup_landing_path,
+      signup_referrer: attribution.signup_referrer,
+      signup_utm: attribution.signup_utm || {},
     });
+
 
     if (error) {
       toast({
