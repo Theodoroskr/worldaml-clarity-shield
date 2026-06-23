@@ -152,6 +152,8 @@ export default function AdminAcademyFunnel() {
       conversion: pct(v.paid.size, v.started.size),
       revenue: v.revenue,
       currency: v.currency,
+      startedIds: Array.from(v.started),
+      paidIds: Array.from(v.paid),
     })).sort((a, b) => b.paid - a.paid);
 
     // Per-domain
@@ -195,9 +197,22 @@ export default function AdminAcademyFunnel() {
         signupToPaid: pct(v.paid.size, v.signups.size),
         startedToPaid: pct(v.paid.size, v.started.size),
         revenue: v.revenue,
+        signupIds: Array.from(v.signups),
+        startedIds: Array.from(v.started),
+        paidIds: Array.from(v.paid),
       }))
       .filter(r => r.signups + r.started + r.paid > 0)
       .sort((a, b) => b.paid - a.paid || b.signups - a.signups);
+
+    // Lookup helpers for drill-down
+    const profileById = new Map(profiles.map(p => [p.user_id, p]));
+    const purchasesByUser = new Map<string, Purchase[]>();
+    inRangePurchases.forEach(pu => {
+      const arr = purchasesByUser.get(pu.user_id) || [];
+      arr.push(pu);
+      purchasesByUser.set(pu.user_id, arr);
+    });
+    const signupsInRangeSet = new Set(signups.map(s => s.user_id));
 
     return {
       totalSignups,
@@ -209,6 +224,9 @@ export default function AdminAcademyFunnel() {
       signupToPaid: pct(totalPaid, totalSignups),
       courseRows,
       domainRows,
+      profileById,
+      purchasesByUser,
+      signupsInRangeSet,
     };
   }, [profiles, purchases, range, domainSegment]);
 
