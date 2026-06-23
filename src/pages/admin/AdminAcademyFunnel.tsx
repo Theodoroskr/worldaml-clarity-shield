@@ -67,6 +67,13 @@ export default function AdminAcademyFunnel() {
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<Range>("30d");
   const [domainSegment, setDomainSegment] = useState<"all" | "corporate" | "personal">("all");
+  const [drill, setDrill] = useState<{
+    kind: "course" | "domain";
+    key: string;
+    signupIds: string[];
+    startedIds: string[];
+    paidIds: string[];
+  } | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -369,8 +376,23 @@ export default function AdminAcademyFunnel() {
                   </thead>
                   <tbody className="divide-y divide-border">
                     {data.courseRows.map(r => (
-                      <tr key={r.slug} className="hover:bg-muted/20">
-                        <td className="px-3 py-2 font-medium">{r.slug}</td>
+                      <tr
+                        key={r.slug}
+                        className="hover:bg-muted/30 cursor-pointer transition-colors"
+                        onClick={() => setDrill({
+                          kind: "course",
+                          key: r.slug,
+                          signupIds: [],
+                          startedIds: r.startedIds,
+                          paidIds: r.paidIds,
+                        })}
+                      >
+                        <td className="px-3 py-2 font-medium">
+                          <span className="inline-flex items-center gap-1 text-foreground hover:text-primary">
+                            {r.slug}
+                            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                          </span>
+                        </td>
                         <td className="px-3 py-2 text-right tabular-nums">{r.started}</td>
                         <td className="px-3 py-2 text-right tabular-nums text-emerald-600 font-medium">{r.paid}</td>
                         <td className="px-3 py-2 text-right tabular-nums">
