@@ -893,6 +893,10 @@ export type Database = {
           id: string
           phone: string | null
           regulator: string | null
+          signup_landing_path: string | null
+          signup_referrer: string | null
+          signup_source: string | null
+          signup_utm: Json | null
           status: string
           subscription_tier: string
           suite_access_granted_at: string | null
@@ -908,6 +912,10 @@ export type Database = {
           id?: string
           phone?: string | null
           regulator?: string | null
+          signup_landing_path?: string | null
+          signup_referrer?: string | null
+          signup_source?: string | null
+          signup_utm?: Json | null
           status?: string
           subscription_tier?: string
           suite_access_granted_at?: string | null
@@ -923,6 +931,10 @@ export type Database = {
           id?: string
           phone?: string | null
           regulator?: string | null
+          signup_landing_path?: string | null
+          signup_referrer?: string | null
+          signup_source?: string | null
+          signup_utm?: Json | null
           status?: string
           subscription_tier?: string
           suite_access_granted_at?: string | null
