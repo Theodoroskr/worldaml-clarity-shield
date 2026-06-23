@@ -12,6 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { isFreeEmail, WORK_EMAIL_ERROR } from "@/lib/workEmail";
+import { getAttribution, clearAttribution } from "@/lib/signupAttribution";
+
 
 const Signup = () => {
   const [email, setEmail] = useState("");
