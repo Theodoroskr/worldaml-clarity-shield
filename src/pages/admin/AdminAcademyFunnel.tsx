@@ -433,9 +433,22 @@ export default function AdminAcademyFunnel() {
                     </thead>
                     <tbody className="divide-y divide-border">
                       {data.domainRows.map(r => (
-                        <tr key={r.domain} className="hover:bg-muted/20">
+                        <tr
+                          key={r.domain}
+                          className="hover:bg-muted/30 cursor-pointer transition-colors"
+                          onClick={() => setDrill({
+                            kind: "domain",
+                            key: r.domain,
+                            signupIds: r.signupIds,
+                            startedIds: r.startedIds,
+                            paidIds: r.paidIds,
+                          })}
+                        >
                           <td className="px-3 py-2">
-                            <span className="font-medium">{r.domain}</span>
+                            <span className="font-medium inline-flex items-center gap-1 hover:text-primary">
+                              {r.domain}
+                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                            </span>
                             <Badge
                               variant="outline"
                               className={`ml-2 text-[10px] ${r.isCorporate ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-muted text-muted-foreground"}`}
