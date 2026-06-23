@@ -174,8 +174,11 @@ export default function AdminUsers() {
   };
 
   const isSuiteUser = (p: Profile) => p.subscription_tier === "suite" || p.subscription_tier === "enterprise";
-  const suiteUsers = profiles.filter(isSuiteUser);
-  const regularUsers = profiles.filter(p => !isSuiteUser(p));
+  const isAcademyUser = (p: Profile) => p.subscription_tier === "academy";
+  const nonAcademyProfiles = profiles.filter(p => !isAcademyUser(p));
+  const suiteUsers = nonAcademyProfiles.filter(isSuiteUser);
+  const regularUsers = nonAcademyProfiles.filter(p => !isSuiteUser(p));
+  const academyUsers = profiles.filter(isAcademyUser);
 
   const applyFilters = (list: Profile[]) =>
     list.filter(p => {
@@ -307,9 +310,13 @@ export default function AdminUsers() {
 
   return (
     <div className="p-6 space-y-5">
-      <div>
-        <h1 className="text-xl font-bold text-foreground">User Management</h1>
-        <p className="text-xs text-muted-foreground">{profiles.length} registered users · {suiteUsers.length} suite users</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-foreground">User Management</h1>
+          <p className="text-xs text-muted-foreground">
+            {nonAcademyProfiles.length} platform users · {suiteUsers.length} suite users · {academyUsers.length} academy learners (managed in <a href="/admin/academy-users" className="text-primary hover:underline">Academy Signups</a>)
+          </p>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">
@@ -333,11 +340,11 @@ export default function AdminUsers() {
       ) : (
         <Tabs defaultValue="all" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="all">All Users ({profiles.length})</TabsTrigger>
+            <TabsTrigger value="all">All Platform Users ({nonAcademyProfiles.length})</TabsTrigger>
             <TabsTrigger value="suite">Suite Users ({suiteUsers.length})</TabsTrigger>
             <TabsTrigger value="regular">Regular Users ({regularUsers.length})</TabsTrigger>
           </TabsList>
-          <TabsContent value="all">{renderTable(profiles, false)}</TabsContent>
+          <TabsContent value="all">{renderTable(nonAcademyProfiles, false)}</TabsContent>
           <TabsContent value="suite">{renderTable(suiteUsers, true)}</TabsContent>
           <TabsContent value="regular">{renderTable(regularUsers, false)}</TabsContent>
         </Tabs>
