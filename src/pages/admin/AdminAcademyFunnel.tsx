@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, TrendingUp, Download, RefreshCw, Filter, ChevronRight } from "lucide-react";
+import { Loader2, TrendingUp, Download, RefreshCw, Filter, ChevronRight, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -506,6 +507,12 @@ interface DrillProps {
 }
 
 function DrillDownDialog({ drill, onClose, profileById, purchasesByUser, signupsInRangeSet }: DrillProps) {
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    setQuery("");
+  }, [drill?.kind, drill?.key]);
+
   if (!drill) return null;
 
   const allIds = Array.from(new Set([
@@ -517,6 +524,7 @@ function DrillDownDialog({ drill, onClose, profileById, purchasesByUser, signups
   const startedSet = new Set(drill.startedIds);
   const paidSet = new Set(drill.paidIds);
   const courseFilter = drill.kind === "course" ? drill.key : null;
+  const q = query.trim().toLowerCase();
 
   const rows = allIds
     .map((uid) => {
@@ -545,6 +553,12 @@ function DrillDownDialog({ drill, onClose, profileById, purchasesByUser, signups
         lastActivity,
         isSignupInRange: signupsInRangeSet.has(uid),
       };
+    })
+    .filter((r) => {
+      if (!q) return true;
+      const name = (r.profile?.full_name || "").toLowerCase();
+      const email = (r.profile?.email || "").toLowerCase();
+      return name.includes(q) || email.includes(q);
     })
     .sort((a, b) => {
       const order = { paid: 0, started: 1, signup: 2 } as const;
@@ -582,15 +596,28 @@ function DrillDownDialog({ drill, onClose, profileById, purchasesByUser, signups
     <Dialog open={!!drill} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between gap-3">
-            <span className="flex items-center gap-2">
+          <DialogTitle className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span className="flex items-center gap-2 flex-wrap">
               {drill.kind === "course" ? "Course" : "Domain"}:{" "}
               <code className="text-sm bg-muted px-2 py-0.5 rounded">{drill.key}</code>
-              <Badge variant="outline" className="text-[10px]">{rows.length} user{rows.length === 1 ? "" : "s"}</Badge>
+              <Badge variant="outline" className="text-[10px]">
+                {rows.length} user{rows.length === 1 ? "" : "s"}
+              </Badge>
             </span>
-            <Button variant="outline" size="sm" onClick={exportRows} disabled={!rows.length}>
-              <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
-            </Button>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Filter by name or email"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="pl-7 h-8 text-sm w-48 sm:w-64"
+                />
+              </div>
+              <Button variant="outline" size="sm" onClick={exportRows} disabled={!rows.length}>
+                <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
+              </Button>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
