@@ -21,6 +21,7 @@ const NAV: NavItem[] = [
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Platform" },
 
   { label: "Academy Signups", path: "/admin/academy-users", icon: GraduationCap, section: "Academy" },
+  { label: "Funnel Metrics", path: "/admin/academy-funnel", icon: TrendingUp, section: "Academy" },
   { label: "Purchase Status", path: "/admin/purchase-status", icon: Receipt, section: "Academy" },
   { label: "Reconcile Purchases", path: "/admin/reconcile-purchases", icon: RefreshCw, section: "Academy" },
 ];
