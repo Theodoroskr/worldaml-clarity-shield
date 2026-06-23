@@ -113,6 +113,7 @@ const AdminPurchaseStatus = lazy(() => import("./pages/admin/AdminPurchaseStatus
 const AdminPartners = lazy(() => import("./pages/admin/AdminPartners"));
 const AdminDomains = lazy(() => import("./pages/admin/AdminDomains"));
 const AdminAcademyUsers = lazy(() => import("./pages/admin/AdminAcademyUsers"));
+const AdminAcademyFunnel = lazy(() => import("./pages/admin/AdminAcademyFunnel"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
@@ -180,6 +181,7 @@ const App = () => (
                   <Route path="partners" element={<AdminPartners />} />
                   <Route path="domains" element={<AdminDomains />} />
                   <Route path="academy-users" element={<AdminAcademyUsers />} />
+                  <Route path="academy-funnel" element={<AdminAcademyFunnel />} />
                 </Route>
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
