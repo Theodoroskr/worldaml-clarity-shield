@@ -15,6 +15,7 @@ import AcademyCartButton from "@/components/academy/AcademyCartDrawer";
 import { useCart } from "@/contexts/CartContext";
 import { useAcademyPurchases } from "@/hooks/useAcademyPurchases";
 import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/academyPricing";
+import { computeDiscount, applyDiscount } from "@/lib/academyDiscount";
 import { useRegion } from "@/contexts/RegionContext";
 import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY, currencyCode } from "@/lib/academyFx";
 import CurrencyIndicator from "@/components/academy/CurrencyIndicator";
@@ -824,6 +825,117 @@ const Academy = () => {
                 Choose a course, work through the material, then take the quiz to earn your certificate.
               </p>
             </div>
+
+            {/* Bundle savings banner */}
+            {(() => {
+              const standardEur = 2900; // €29 standard course price used for examples
+              const tiers = [1, 2, 3, 5].map((n) => {
+                const subtotalEur = standardEur * n;
+                const subtotal = convertEurCents(subtotalEur, currency);
+                const { pct } = computeDiscount(n);
+                const total = applyDiscount(subtotal, pct);
+                const saved = subtotal - total;
+                return { n, pct, subtotal, total, saved };
+              });
+              const inBasket = cart.count;
+              const basketTier = computeDiscount(inBasket);
+              const nextTierAt = inBasket < 2 ? 2 : inBasket < 3 ? 3 : null;
+              const nextTierPct = nextTierAt === 2 ? 5 : nextTierAt === 3 ? 10 : 0;
+              const remaining = nextTierAt ? nextTierAt - inBasket : 0;
+
+              return (
+                <div className="mb-8 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5 p-5 sm:p-6">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-5">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Sparkles className="h-4 w-4 text-accent" />
+                        <h3 className="text-body font-semibold text-foreground uppercase tracking-wide">
+                          Bundle & Save
+                        </h3>
+                      </div>
+                      <p className="text-body-sm text-muted-foreground">
+                        Add multiple courses to one basket — the discount is applied automatically at checkout.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {inBasket === 0 ? (
+                        <span className="text-body-sm text-muted-foreground">
+                          Your basket is empty — start adding courses below.
+                        </span>
+                      ) : nextTierAt ? (
+                        <span className="text-body-sm text-foreground">
+                          <span className="font-semibold text-primary">{inBasket}</span> in basket — add{" "}
+                          <span className="font-semibold text-primary">{remaining}</span> more to unlock{" "}
+                          <span className="font-semibold text-accent">{nextTierPct}% off</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-body-sm font-semibold text-accent">
+                          <Check className="h-4 w-4" /> {basketTier.pct}% bundle discount applied
+                        </span>
+                      )}
+                      {inBasket > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => cart.open()}
+                          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-body-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+                        >
+                          <ShoppingBag className="h-4 w-4" /> View basket
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    {tiers.map((t) => {
+                      const isActive = inBasket === t.n || (t.n === 5 && inBasket >= 5);
+                      const tierLabel =
+                        t.n === 1 ? "1 course" : t.n === 5 ? "5-course bundle" : `${t.n}-course bundle`;
+                      return (
+                        <div
+                          key={t.n}
+                          className={`rounded-xl border p-3 sm:p-4 transition-colors ${
+                            isActive
+                              ? "border-primary bg-primary/10"
+                              : t.pct > 0
+                              ? "border-accent/30 bg-card"
+                              : "border-border bg-card"
+                          }`}
+                        >
+                          <div className="flex items-baseline justify-between gap-2 mb-1">
+                            <span className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
+                              {tierLabel}
+                            </span>
+                            {t.pct > 0 && (
+                              <span className="text-[10px] font-semibold uppercase tracking-wide text-accent">
+                                Save {t.pct}%
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">
+                              {formatPrice(t.total, currency)}
+                            </span>
+                            {t.pct > 0 && (
+                              <span className="text-body-sm text-muted-foreground line-through tabular-nums">
+                                {formatPrice(t.subtotal, currency)}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-caption text-muted-foreground mt-1">
+                            {t.pct > 0
+                              ? `${formatPrice(t.saved, currency)} off · ${formatPrice(Math.round(t.total / t.n), currency)} per course`
+                              : `${formatPrice(t.total, currency)} per course`}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-caption text-muted-foreground mt-3">
+                    Examples based on €29 standard courses. Advanced courses (€49) and regional prices are calculated the same way.
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* Filters */}
             <div className="space-y-4 mb-8">
