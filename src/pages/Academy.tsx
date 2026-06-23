@@ -12,6 +12,7 @@ import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, C
 import { getCourseCover } from "@/assets/academy";
 import AcademyLogo from "@/components/AcademyLogo";
 import AcademyCartButton from "@/components/academy/AcademyCartDrawer";
+import LearnerLogos from "@/components/academy/LearnerLogos";
 import { useCart } from "@/contexts/CartContext";
 import { useAcademyPurchases } from "@/hooks/useAcademyPurchases";
 import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/academyPricing";
@@ -815,6 +816,9 @@ const Academy = () => {
             </div>
           </section>
         )}
+
+        {/* Learner logos — social proof from real corporate learners */}
+        <LearnerLogos />
 
         {/* Courses Grid */}
         <section id="courses-grid" className="section-padding bg-background scroll-mt-20">
