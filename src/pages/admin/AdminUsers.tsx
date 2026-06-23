@@ -258,7 +258,7 @@ export default function AdminUsers() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              {["User", "Company", "Status", "Tier", "Regulator", "Roles", "Registered", "Actions"].map(h => (
+              {["User", "Company", "Status", "Tier", "Source", "Regulator", "Roles", "Registered", "Actions"].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>
               ))}
             </tr>
@@ -273,6 +273,8 @@ export default function AdminUsers() {
                 <td className="px-4 py-3 text-xs text-muted-foreground">{p.company_name || "—"}</td>
                 <td className="px-4 py-3">{statusBadge(p.status)}</td>
                 <td className="px-4 py-3">{tierBadge(p.subscription_tier)}</td>
+                <td className="px-4 py-3">{sourceBadge(p)}</td>
+
                 <td className="px-4 py-3">
                   {isSuiteUser(p) ? (
                     <Select
