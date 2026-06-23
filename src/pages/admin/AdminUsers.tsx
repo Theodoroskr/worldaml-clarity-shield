@@ -21,7 +21,12 @@ interface Profile {
   suite_access_granted_at: string | null;
   regulator: string | null;
   created_at: string;
+  signup_source: string | null;
+  signup_landing_path: string | null;
+  signup_referrer: string | null;
+  signup_utm: Record<string, string> | null;
 }
+
 
 const EMAIL_RE = /^[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i;
 
