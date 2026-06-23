@@ -21,7 +21,12 @@ interface Profile {
   suite_access_granted_at: string | null;
   regulator: string | null;
   created_at: string;
+  signup_source: string | null;
+  signup_landing_path: string | null;
+  signup_referrer: string | null;
+  signup_utm: Record<string, string> | null;
 }
+
 
 const EMAIL_RE = /^[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i;
 
@@ -40,8 +45,10 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sourceFilter, setSourceFilter] = useState("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
+
 
   // Grant Suite dialog state
   const [grantDialog, setGrantDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
@@ -180,12 +187,24 @@ export default function AdminUsers() {
   const regularUsers = nonAcademyProfiles.filter(p => !isSuiteUser(p));
   const academyUsers = profiles.filter(isAcademyUser);
 
+  const allSources = Array.from(
+    new Set(profiles.map(p => p.signup_source).filter(Boolean) as string[])
+  ).sort();
+
   const applyFilters = (list: Profile[]) =>
     list.filter(p => {
       const matchStatus = statusFilter === "all" || p.status === statusFilter;
+      const matchSource =
+        sourceFilter === "all" ||
+        (sourceFilter === "unknown" ? !p.signup_source : p.signup_source === sourceFilter);
       const q = search.toLowerCase();
-      const matchSearch = !q || (p.full_name || "").toLowerCase().includes(q) || (p.email || "").toLowerCase().includes(q) || (p.company_name || "").toLowerCase().includes(q);
-      return matchStatus && matchSearch;
+      const matchSearch =
+        !q ||
+        (p.full_name || "").toLowerCase().includes(q) ||
+        (p.email || "").toLowerCase().includes(q) ||
+        (p.company_name || "").toLowerCase().includes(q) ||
+        (p.signup_source || "").toLowerCase().includes(q);
+      return matchStatus && matchSource && matchSearch;
     });
 
   const statusBadge = (s: string) => {
@@ -201,6 +220,25 @@ export default function AdminUsers() {
     return <Badge variant="outline" className="text-xs text-muted-foreground">Free</Badge>;
   };
 
+  const sourceBadge = (p: Profile) => {
+    if (!p.signup_source) return <span className="text-xs text-muted-foreground">—</span>;
+    const utm = p.signup_utm || {};
+    const campaign = utm.utm_campaign || utm.utm_medium;
+    const title = [
+      p.signup_landing_path && `Landing: ${p.signup_landing_path}`,
+      p.signup_referrer && `Referrer: ${p.signup_referrer}`,
+      Object.keys(utm).length && `UTM: ${JSON.stringify(utm)}`,
+    ].filter(Boolean).join("\n");
+    return (
+      <div className="flex flex-col gap-0.5" title={title}>
+        <Badge variant="outline" className="text-xs font-medium bg-teal-50 text-teal-700 border-teal-200 w-fit">
+          {p.signup_source}
+        </Badge>
+        {campaign && <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">{campaign}</span>}
+      </div>
+    );
+  };
+
   const regulatorBadge = (reg: string | null) => {
     if (!reg) return <span className="text-xs text-muted-foreground">—</span>;
     const profile = REGULATORY_PROFILES[reg];
@@ -212,6 +250,7 @@ export default function AdminUsers() {
     );
   };
 
+
   const renderTable = (list: Profile[], showSuiteActions: boolean) => {
     const filtered = applyFilters(list);
     return (
@@ -219,7 +258,7 @@ export default function AdminUsers() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              {["User", "Company", "Status", "Tier", "Regulator", "Roles", "Registered", "Actions"].map(h => (
+              {["User", "Company", "Status", "Tier", "Source", "Regulator", "Roles", "Registered", "Actions"].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>
               ))}
             </tr>
@@ -234,6 +273,8 @@ export default function AdminUsers() {
                 <td className="px-4 py-3 text-xs text-muted-foreground">{p.company_name || "—"}</td>
                 <td className="px-4 py-3">{statusBadge(p.status)}</td>
                 <td className="px-4 py-3">{tierBadge(p.subscription_tier)}</td>
+                <td className="px-4 py-3">{sourceBadge(p)}</td>
+
                 <td className="px-4 py-3">
                   {isSuiteUser(p) ? (
                     <Select
@@ -333,7 +374,18 @@ export default function AdminUsers() {
             <SelectItem value="rejected">Rejected</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={sourceFilter} onValueChange={setSourceFilter}>
+          <SelectTrigger className="w-40 text-sm"><SelectValue placeholder="Source" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All sources</SelectItem>
+            <SelectItem value="unknown">Unknown</SelectItem>
+            {allSources.map(s => (
+              <SelectItem key={s} value={s}>{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
+
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>

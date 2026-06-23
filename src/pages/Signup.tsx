@@ -12,6 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { isFreeEmail, WORK_EMAIL_ERROR } from "@/lib/workEmail";
+import { getAttribution, clearAttribution } from "@/lib/signupAttribution";
+
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -38,10 +40,16 @@ const Signup = () => {
 
     setIsLoading(true);
 
+    const attribution = getAttribution();
     const { error } = await signUp(email, password, {
       full_name: fullName,
       company_name: companyName,
+      signup_source: attribution.signup_source,
+      signup_landing_path: attribution.signup_landing_path,
+      signup_referrer: attribution.signup_referrer,
+      signup_utm: attribution.signup_utm || {},
     });
+
 
     if (error) {
       toast({
@@ -64,6 +72,9 @@ const Signup = () => {
       } catch (notifyErr) {
         console.warn("Admin notification failed (non-blocking):", notifyErr);
       }
+
+      clearAttribution();
+
 
       toast({
         title: "Account created",
