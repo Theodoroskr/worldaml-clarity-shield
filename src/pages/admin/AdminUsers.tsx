@@ -187,12 +187,24 @@ export default function AdminUsers() {
   const regularUsers = nonAcademyProfiles.filter(p => !isSuiteUser(p));
   const academyUsers = profiles.filter(isAcademyUser);
 
+  const allSources = Array.from(
+    new Set(profiles.map(p => p.signup_source).filter(Boolean) as string[])
+  ).sort();
+
   const applyFilters = (list: Profile[]) =>
     list.filter(p => {
       const matchStatus = statusFilter === "all" || p.status === statusFilter;
+      const matchSource =
+        sourceFilter === "all" ||
+        (sourceFilter === "unknown" ? !p.signup_source : p.signup_source === sourceFilter);
       const q = search.toLowerCase();
-      const matchSearch = !q || (p.full_name || "").toLowerCase().includes(q) || (p.email || "").toLowerCase().includes(q) || (p.company_name || "").toLowerCase().includes(q);
-      return matchStatus && matchSearch;
+      const matchSearch =
+        !q ||
+        (p.full_name || "").toLowerCase().includes(q) ||
+        (p.email || "").toLowerCase().includes(q) ||
+        (p.company_name || "").toLowerCase().includes(q) ||
+        (p.signup_source || "").toLowerCase().includes(q);
+      return matchStatus && matchSource && matchSearch;
     });
 
   const statusBadge = (s: string) => {
@@ -208,6 +220,25 @@ export default function AdminUsers() {
     return <Badge variant="outline" className="text-xs text-muted-foreground">Free</Badge>;
   };
 
+  const sourceBadge = (p: Profile) => {
+    if (!p.signup_source) return <span className="text-xs text-muted-foreground">—</span>;
+    const utm = p.signup_utm || {};
+    const campaign = utm.utm_campaign || utm.utm_medium;
+    const title = [
+      p.signup_landing_path && `Landing: ${p.signup_landing_path}`,
+      p.signup_referrer && `Referrer: ${p.signup_referrer}`,
+      Object.keys(utm).length && `UTM: ${JSON.stringify(utm)}`,
+    ].filter(Boolean).join("\n");
+    return (
+      <div className="flex flex-col gap-0.5" title={title}>
+        <Badge variant="outline" className="text-xs font-medium bg-teal-50 text-teal-700 border-teal-200 w-fit">
+          {p.signup_source}
+        </Badge>
+        {campaign && <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">{campaign}</span>}
+      </div>
+    );
+  };
+
   const regulatorBadge = (reg: string | null) => {
     if (!reg) return <span className="text-xs text-muted-foreground">—</span>;
     const profile = REGULATORY_PROFILES[reg];
@@ -218,6 +249,7 @@ export default function AdminUsers() {
       </Badge>
     );
   };
+
 
   const renderTable = (list: Profile[], showSuiteActions: boolean) => {
     const filtered = applyFilters(list);
