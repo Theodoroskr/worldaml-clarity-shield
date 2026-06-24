@@ -232,16 +232,33 @@ export default function AdminPurchaseStatus() {
           <div className="relative flex-1 w-full sm:w-auto">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search by course, session ID, payment intent, or user ID…"
+              placeholder="Search by email, name, course, session ID, payment intent, or user ID…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 w-full sm:w-96"
             />
           </div>
-          <Button variant="ghost" size="sm" onClick={load} disabled={loading}>
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Refresh"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => load(false)} disabled={loading}>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              <span className="ml-1">Refresh</span>
+            </Button>
+            <Button
+              variant={autoRefresh ? "default" : "outline"}
+              size="sm"
+              onClick={() => setAutoRefresh((v) => !v)}
+              title="Poll every 15 seconds"
+            >
+              Auto: {autoRefresh ? "On" : "Off"}
+            </Button>
+            {lastRefresh && (
+              <span className="text-xs text-muted-foreground hidden md:inline">
+                Updated {lastRefresh.toLocaleTimeString()}
+              </span>
+            )}
+          </div>
         </div>
+
 
         <div className="flex flex-col md:flex-row gap-3 items-start md:items-end flex-wrap">
           <div className="flex flex-col gap-1">
