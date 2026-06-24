@@ -14,6 +14,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import { isAcademyHost } from "@/lib/academyHost";
+import AcademyHeader from "@/components/academy/AcademyHeader";
+
 
 type NavChild = { href: string; label: string };
 type NavGroup = { groupLabel: string; items: NavChild[] };
@@ -114,6 +117,9 @@ export const Header = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const headerRef = useRef<HTMLElement>(null);
+  const academyHost = isAcademyHost();
+
+
 
   const handleSignOut = async () => {
     await signOut();
@@ -136,7 +142,11 @@ export const Header = () => {
     };
   }, [mobileMenuOpen]);
 
+  // Academy subdomain: render the slim learner-focused header.
+  if (academyHost) return <AcademyHeader />;
+
   return (
+
     <header ref={headerRef} className="sticky top-0 z-50 w-full border-b border-divider bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="container-enterprise">
         <div className="flex h-16 items-center justify-between gap-4">

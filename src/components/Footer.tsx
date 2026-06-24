@@ -1,5 +1,8 @@
 import { Link } from "react-router-dom";
 import { Logo } from "./Logo";
+import { isAcademyHost } from "@/lib/academyHost";
+import AcademyFooter from "@/components/academy/AcademyFooter";
+
 import iso9001Badge from "@/assets/iso-9001-badge.png";
 import iso27001Badge from "@/assets/iso-27001-badge.png";
 import iso22301Badge from "@/assets/iso-22301-badge.png";
@@ -86,6 +89,9 @@ const certifications = [
 ];
 
 export const Footer = () => {
+  // Academy subdomain: render the slim, learner-focused footer instead.
+  if (isAcademyHost()) return <AcademyFooter />;
+
   return (
     <footer className="border-t border-divider bg-surface-subtle">
       <div className="container-enterprise py-12 md:py-16">
