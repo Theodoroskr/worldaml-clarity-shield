@@ -1,10 +1,10 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, ArrowUpDown, CalendarRange } from "lucide-react";
+import { Loader2, Search, ArrowUpDown, CalendarRange, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 type PurchaseRow = {
@@ -27,34 +27,83 @@ type SortDir = "asc" | "desc";
 
 export default function AdminPurchaseStatus() {
   const [rows, setRows] = useState<PurchaseRow[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, { email: string | null; full_name: string | null }>>({});
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "paid" | "failed" | "refunded">("all");
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const prevStatusRef = useRef<Record<string, string>>({});
 
   const [createdFrom, setCreatedFrom] = useState("");
   const [createdTo, setCreatedTo] = useState("");
   const [paidFrom, setPaidFrom] = useState("");
   const [paidTo, setPaidTo] = useState("");
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     const { data, error } = await supabase
       .from("academy_course_purchases")
       .select("*")
       .order("created_at", { ascending: false });
     if (error) {
-      toast.error(error.message);
+      if (!silent) toast.error(error.message);
     } else {
-      setRows((data as PurchaseRow[]) ?? []);
+      const next = (data as PurchaseRow[]) ?? [];
+      // Detect transitions → toast on pending→paid so admins see live unlocks
+      const prev = prevStatusRef.current;
+      if (Object.keys(prev).length > 0) {
+        for (const row of next) {
+          const before = prev[row.id];
+          if (before && before !== row.status) {
+            if (row.status === "paid") {
+              const who = profiles[row.user_id]?.email ?? row.user_id.slice(0, 8);
+              toast.success(`${who} → ${row.course_slug} unlocked (paid)`);
+            } else if (row.status === "failed") {
+              const who = profiles[row.user_id]?.email ?? row.user_id.slice(0, 8);
+              toast.error(`${who} → ${row.course_slug} marked failed`);
+            }
+          }
+        }
+      }
+      prevStatusRef.current = Object.fromEntries(next.map((r) => [r.id, r.status]));
+      setRows(next);
+      setLastRefresh(new Date());
+
+      // Fetch profile emails for any new user_ids
+      const missing = Array.from(new Set(next.map((r) => r.user_id))).filter((uid) => !profiles[uid]);
+      if (missing.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, email, full_name")
+          .in("user_id", missing);
+        if (profs) {
+          setProfiles((p) => {
+            const merged = { ...p };
+            for (const pr of profs as { user_id: string; email: string | null; full_name: string | null }[]) {
+              merged[pr.user_id] = { email: pr.email, full_name: pr.full_name };
+            }
+            return merged;
+          });
+        }
+      }
     }
-    setLoading(false);
+    if (!silent) setLoading(false);
   };
 
   useEffect(() => {
     load();
   }, []);
+
+  // Auto-refresh every 15s when enabled
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const id = setInterval(() => load(true), 15_000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRefresh, profiles]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -72,13 +121,17 @@ export default function AdminPurchaseStatus() {
     }
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      data = data.filter(
-        (r) =>
+      data = data.filter((r) => {
+        const prof = profiles[r.user_id];
+        return (
           r.course_slug.toLowerCase().includes(q) ||
           (r.stripe_session_id ?? "").toLowerCase().includes(q) ||
           (r.stripe_payment_intent_id ?? "").toLowerCase().includes(q) ||
-          r.user_id.toLowerCase().includes(q)
-      );
+          r.user_id.toLowerCase().includes(q) ||
+          (prof?.email ?? "").toLowerCase().includes(q) ||
+          (prof?.full_name ?? "").toLowerCase().includes(q)
+        );
+      });
     }
     if (createdFrom) {
       const from = new Date(createdFrom).getTime();
@@ -179,16 +232,33 @@ export default function AdminPurchaseStatus() {
           <div className="relative flex-1 w-full sm:w-auto">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search by course, session ID, payment intent, or user ID…"
+              placeholder="Search by email, name, course, session ID, payment intent, or user ID…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 w-full sm:w-96"
             />
           </div>
-          <Button variant="ghost" size="sm" onClick={load} disabled={loading}>
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Refresh"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => load(false)} disabled={loading}>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              <span className="ml-1">Refresh</span>
+            </Button>
+            <Button
+              variant={autoRefresh ? "default" : "outline"}
+              size="sm"
+              onClick={() => setAutoRefresh((v) => !v)}
+              title="Poll every 15 seconds"
+            >
+              Auto: {autoRefresh ? "On" : "Off"}
+            </Button>
+            {lastRefresh && (
+              <span className="text-xs text-muted-foreground hidden md:inline">
+                Updated {lastRefresh.toLocaleTimeString()}
+              </span>
+            )}
+          </div>
         </div>
+
 
         <div className="flex flex-col md:flex-row gap-3 items-start md:items-end flex-wrap">
           <div className="flex flex-col gap-1">
@@ -260,6 +330,7 @@ export default function AdminPurchaseStatus() {
             <thead className="bg-muted/50 text-muted-foreground border-b border-border">
               <tr>
                 <th className="text-left py-3 px-4"><SortHeader label="Status" k="status" /></th>
+                <th className="text-left py-3 px-4">Buyer</th>
                 <th className="text-left py-3 px-4"><SortHeader label="Course" k="course_slug" /></th>
                 <th className="text-right py-3 px-4"><SortHeader label="Amount" k="amount_cents" /></th>
                 <th className="text-left py-3 px-4">Checkout Session</th>
@@ -272,14 +343,24 @@ export default function AdminPurchaseStatus() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-muted-foreground">
+                  <td colSpan={9} className="py-12 text-center text-muted-foreground">
                     {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "No rows match the current filter."}
                   </td>
                 </tr>
               ) : (
-                filtered.map((row) => (
+                filtered.map((row) => {
+                  const prof = profiles[row.user_id];
+                  return (
                   <tr key={row.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-4">{statusBadge(row.status)}</td>
+                    <td className="py-3 px-4">
+                      <div className="text-foreground text-xs font-medium truncate max-w-[220px]" title={prof?.email ?? ""}>
+                        {prof?.email ?? <span className="italic text-muted-foreground">unknown</span>}
+                      </div>
+                      {prof?.full_name && (
+                        <div className="text-muted-foreground text-xs truncate max-w-[220px]">{prof.full_name}</div>
+                      )}
+                    </td>
                     <td className="py-3 px-4 font-medium">{row.course_slug}</td>
                     <td className="py-3 px-4 text-right tabular-nums">
                       {(row.amount_cents / 100).toFixed(2)} {row.currency.toUpperCase()}
@@ -302,7 +383,9 @@ export default function AdminPurchaseStatus() {
                     <td className="py-3 px-4 text-muted-foreground">{fmtDate(row.paid_at)}</td>
                     <td className="py-3 px-4 text-muted-foreground">{fmtDate(row.expires_at)}</td>
                   </tr>
-                ))
+                  );
+                })
+
               )}
             </tbody>
           </table>
