@@ -11,6 +11,7 @@ import fs from "fs";
 import path from "path";
 
 const BASE_URL = "https://worldaml.com";
+const ACADEMY_BASE_URL = "https://academy.worldaml.com";
 
 /* ------------------------------------------------------------------ */
 /*  Route registry — single source of truth for the sitemap           */
