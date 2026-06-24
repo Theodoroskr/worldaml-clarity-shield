@@ -217,7 +217,7 @@ const AcademyAnnualSuccess = () => {
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {(courses ?? []).map((c) => {
                   const isFree = FREE_ACADEMY_COURSES.has(c.slug);
-                  const mods = moduleCountBySlug.get(c.slug);
+                  const mods = moduleCountByCourseId.get(c.id);
                   return (
                     <Link
                       key={c.slug}
@@ -244,8 +244,8 @@ const AcademyAnnualSuccess = () => {
                             <BookOpen className="h-3 w-3" /> {mods} modules
                           </span>
                         ) : null}
-                        {c.estimated_minutes ? (
-                          <span>{Math.round(c.estimated_minutes / 60 * 10) / 10}h</span>
+                        {c.duration_minutes ? (
+                          <span>{Math.round((c.duration_minutes / 60) * 10) / 10}h</span>
                         ) : null}
                         {c.category ? <span className="capitalize">{c.category}</span> : null}
                       </p>
