@@ -64,12 +64,13 @@ export const useCourseGate = (slug: string | undefined): GateResult => {
     queryKey: ["academy-purchases-gate", user?.id, slug],
     enabled: !!user?.id && !!slug,
     queryFn: async () => {
+      // Pull the slug-specific purchase AND any annual all-access pass row.
       const { data, error } = await supabase
         .from("academy_course_purchases")
         .select("course_slug, status, expires_at")
         .eq("user_id", user!.id)
-        .eq("course_slug", slug!)
-        .eq("status", "paid");
+        .eq("status", "paid")
+        .in("course_slug", [slug!, "__annual_pass__"]);
       if (error) throw error;
       return (data || []) as PurchaseRow[];
     },

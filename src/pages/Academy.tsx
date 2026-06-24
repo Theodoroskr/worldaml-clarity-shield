@@ -8,7 +8,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock, ShoppingBag, Check, LogIn, Calendar, RefreshCw, Crown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock, ShoppingBag, Check, LogIn, Calendar, RefreshCw, Crown, Loader2 } from "lucide-react";
 import { getCourseCover } from "@/assets/academy";
 import AcademyLogo from "@/components/AcademyLogo";
 import AcademyCartButton from "@/components/academy/AcademyCartDrawer";
@@ -90,6 +92,38 @@ const Academy = () => {
 
   // Slugs that were just purchased — drives the on-screen success banner.
   const [justPurchasedSlugs, setJustPurchasedSlugs] = useState<string[]>([]);
+
+  // --- Annual all-access pass quick checkout ---
+  const [annualLoading, setAnnualLoading] = useState(false);
+  const [annualGuestEmail, setAnnualGuestEmail] = useState("");
+  const [annualPromptOpen, setAnnualPromptOpen] = useState(false);
+
+  const startAnnualCheckout = async (emailOverride?: string) => {
+    const invokeBody: Record<string, unknown> = { currency };
+    if (!user) {
+      const email = (emailOverride ?? annualGuestEmail).trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setAnnualPromptOpen(true);
+        return;
+      }
+      invokeBody.guestEmail = email;
+      try { window.localStorage.setItem("academy_last_email", email); } catch { /* noop */ }
+    }
+    setAnnualLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "create-academy-annual-checkout",
+        { body: invokeBody },
+      );
+      if (error) throw error;
+      if (!data?.url) throw new Error("No checkout URL returned");
+      window.location.href = data.url;
+    } catch (err) {
+      console.error("Annual checkout failed:", err);
+      toast.error(err instanceof Error ? err.message : "Could not start checkout. Please try again.");
+      setAnnualLoading(false);
+    }
+  };
 
   // Post-checkout success toast (Stripe redirects back with ?purchase=success)
   useEffect(() => {
@@ -603,12 +637,27 @@ const Academy = () => {
                     );
                   })}
                 </ul>
-                <Button asChild variant="accent" className="w-full">
-                  <Link to="/contact-sales">
-                    Subscribe annually
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Link>
+                <Button
+                  variant="accent"
+                  className="w-full"
+                  onClick={() => startAnnualCheckout()}
+                  disabled={annualLoading}
+                >
+                  {annualLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      Starting checkout…
+                    </>
+                  ) : (
+                    <>
+                      Buy annual access
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </>
+                  )}
                 </Button>
+                <p className="mt-2 text-caption text-muted-foreground text-center">
+                  Instant checkout — no onboarding required.
+                </p>
               </div>
             </div>
 
@@ -1462,6 +1511,54 @@ const Academy = () => {
         </section>
       </main>
       <Footer />
+
+      {/* Guest email prompt for annual all-access pass */}
+      <Dialog open={annualPromptOpen} onOpenChange={setAnnualPromptOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Buy annual access</DialogTitle>
+            <DialogDescription>
+              Enter your email to start checkout. We'll send your access link as soon as payment completes — no account setup required.
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const email = annualGuestEmail.trim().toLowerCase();
+              if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                toast.error("Please enter a valid email.");
+                return;
+              }
+              setAnnualPromptOpen(false);
+              startAnnualCheckout(email);
+            }}
+            className="space-y-3"
+          >
+            <Input
+              type="email"
+              placeholder="you@example.com"
+              value={annualGuestEmail}
+              onChange={(e) => setAnnualGuestEmail(e.target.value)}
+              autoFocus
+              required
+            />
+            <Button type="submit" variant="accent" className="w-full" disabled={annualLoading}>
+              {annualLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  Starting checkout…
+                </>
+              ) : (
+                <>Continue to payment</>
+              )}
+            </Button>
+            <p className="text-caption text-muted-foreground text-center">
+              Already have an account?{" "}
+              <Link to="/login" className="underline">Sign in</Link> first for an even faster checkout.
+            </p>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
