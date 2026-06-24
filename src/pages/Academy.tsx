@@ -1509,6 +1509,54 @@ const Academy = () => {
         </section>
       </main>
       <Footer />
+
+      {/* Guest email prompt for annual all-access pass */}
+      <Dialog open={annualPromptOpen} onOpenChange={setAnnualPromptOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Buy annual access</DialogTitle>
+            <DialogDescription>
+              Enter your email to start checkout. We'll send your access link as soon as payment completes — no account setup required.
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const email = annualGuestEmail.trim().toLowerCase();
+              if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                toast.error("Please enter a valid email.");
+                return;
+              }
+              setAnnualPromptOpen(false);
+              startAnnualCheckout(email);
+            }}
+            className="space-y-3"
+          >
+            <Input
+              type="email"
+              placeholder="you@example.com"
+              value={annualGuestEmail}
+              onChange={(e) => setAnnualGuestEmail(e.target.value)}
+              autoFocus
+              required
+            />
+            <Button type="submit" variant="accent" className="w-full" disabled={annualLoading}>
+              {annualLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  Starting checkout…
+                </>
+              ) : (
+                <>Continue to payment</>
+              )}
+            </Button>
+            <p className="text-caption text-muted-foreground text-center">
+              Already have an account?{" "}
+              <Link to="/login" className="underline">Sign in</Link> first for an even faster checkout.
+            </p>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
