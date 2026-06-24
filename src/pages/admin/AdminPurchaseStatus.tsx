@@ -1,10 +1,10 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, ArrowUpDown, CalendarRange } from "lucide-react";
+import { Loader2, Search, ArrowUpDown, CalendarRange, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 type PurchaseRow = {
