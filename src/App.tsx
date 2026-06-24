@@ -9,6 +9,13 @@ import { CartProvider } from "@/contexts/CartContext";
 import Layout from "@/components/Layout";
 import ScrollToTop from "@/components/ScrollToTop";
 import { lazy, Suspense } from "react";
+import { isAcademyHost } from "@/lib/academyHost";
+import {
+  AcademyRootRedirect,
+  AcademyCourseRedirect,
+  AcademyCertificateRedirect,
+} from "@/components/academy/AcademyPathRedirect";
+
 
 const Index = lazy(() => import("./pages/Index"));
 const Pricing = lazy(() => import("./pages/Pricing"));
