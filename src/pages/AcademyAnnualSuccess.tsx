@@ -41,10 +41,48 @@ type CourseRow = {
 
 type ModuleCountRow = { course_id: string; module_count: number };
 
+type ReceiptInfo = {
+  session_id: string;
+  payment_status: string | null;
+  amount_total: number | null;
+  currency: string | null;
+  payment_intent_id: string | null;
+  charge_id: string | null;
+  receipt_url: string | null;
+  receipt_number: string | null;
+  invoice_number: string | null;
+  invoice_hosted_url: string | null;
+  invoice_pdf: string | null;
+};
+
 const AcademyAnnualSuccess = () => {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get("session_id");
   const { hasAnnualPass, isLoading: purchasesLoading, refetch } = useAcademyPurchases();
+
+  const { data: receipt, isLoading: receiptLoading } = useQuery({
+    queryKey: ["annual-pass-receipt", sessionId],
+    enabled: !!sessionId,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("get-academy-annual-receipt", {
+        body: { session_id: sessionId },
+      });
+      if (error) throw error;
+      return data as ReceiptInfo;
+    },
+  });
+
+  const copyToClipboard = async (value: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} copied`);
+    } catch {
+      toast.error("Could not copy to clipboard");
+    }
+  };
 
   // Webhook is async — poll for the pass row for ~30s after redirect.
   useEffect(() => {
