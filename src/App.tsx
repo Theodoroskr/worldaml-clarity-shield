@@ -261,6 +261,7 @@ const App = () => (
                 {/* Academy */}
                 <Route path="/academy" element={<Academy />} />
                 <Route path="/academy/templates" element={<AcademyTemplates />} />
+                <Route path="/academy/annual-pass-active" element={<AcademyAnnualSuccess />} />
                 <Route path="/academy/certificate/:token" element={<AcademyCertificate />} />
                 <Route path="/academy/:slug" element={<AcademyCourse />} />
 
