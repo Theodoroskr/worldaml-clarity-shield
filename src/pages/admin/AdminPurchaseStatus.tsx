@@ -330,6 +330,7 @@ export default function AdminPurchaseStatus() {
             <thead className="bg-muted/50 text-muted-foreground border-b border-border">
               <tr>
                 <th className="text-left py-3 px-4"><SortHeader label="Status" k="status" /></th>
+                <th className="text-left py-3 px-4">Buyer</th>
                 <th className="text-left py-3 px-4"><SortHeader label="Course" k="course_slug" /></th>
                 <th className="text-right py-3 px-4"><SortHeader label="Amount" k="amount_cents" /></th>
                 <th className="text-left py-3 px-4">Checkout Session</th>
@@ -342,14 +343,24 @@ export default function AdminPurchaseStatus() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-muted-foreground">
+                  <td colSpan={9} className="py-12 text-center text-muted-foreground">
                     {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "No rows match the current filter."}
                   </td>
                 </tr>
               ) : (
-                filtered.map((row) => (
+                filtered.map((row) => {
+                  const prof = profiles[row.user_id];
+                  return (
                   <tr key={row.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-4">{statusBadge(row.status)}</td>
+                    <td className="py-3 px-4">
+                      <div className="text-foreground text-xs font-medium truncate max-w-[220px]" title={prof?.email ?? ""}>
+                        {prof?.email ?? <span className="italic text-muted-foreground">unknown</span>}
+                      </div>
+                      {prof?.full_name && (
+                        <div className="text-muted-foreground text-xs truncate max-w-[220px]">{prof.full_name}</div>
+                      )}
+                    </td>
                     <td className="py-3 px-4 font-medium">{row.course_slug}</td>
                     <td className="py-3 px-4 text-right tabular-nums">
                       {(row.amount_cents / 100).toFixed(2)} {row.currency.toUpperCase()}
