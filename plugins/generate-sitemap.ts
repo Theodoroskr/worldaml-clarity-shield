@@ -11,6 +11,7 @@ import fs from "fs";
 import path from "path";
 
 const BASE_URL = "https://worldaml.com";
+const ACADEMY_BASE_URL = "https://academy.worldaml.com";
 
 /* ------------------------------------------------------------------ */
 /*  Route registry — single source of truth for the sitemap           */
@@ -166,13 +167,13 @@ function extractRecordKeys(filePath: string): string[] {
 /*  XML builder                                                       */
 /* ------------------------------------------------------------------ */
 
-function buildSitemapXml(entries: SitemapEntry[]): string {
+function buildSitemapXml(entries: SitemapEntry[], baseUrl: string = BASE_URL): string {
   const today = new Date().toISOString().split("T")[0];
 
   const urls = entries
     .map(
       (e) => `  <url>
-    <loc>${BASE_URL}${e.path}</loc>
+    <loc>${baseUrl}${e.path}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${e.changefreq}</changefreq>
     <priority>${e.priority.toFixed(1)}</priority>
@@ -185,6 +186,39 @@ function buildSitemapXml(entries: SitemapEntry[]): string {
 ${urls}
 </urlset>
 `;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Academy subdomain generator                                       */
+/*  academy.worldaml.com serves a learner-only experience. Course     */
+/*  URLs live at the subdomain root (no /academy prefix).             */
+/* ------------------------------------------------------------------ */
+
+const ACADEMY_STATIC_ROUTES: SitemapEntry[] = [
+  { path: "/", changefreq: "weekly", priority: 1.0 },
+  { path: "/templates", changefreq: "monthly", priority: 0.7 },
+  { path: "/login", changefreq: "yearly", priority: 0.3 },
+  { path: "/signup", changefreq: "yearly", priority: 0.3 },
+];
+
+function generateAcademySitemap(): string {
+  const entries: SitemapEntry[] = [...ACADEMY_STATIC_ROUTES];
+  const knownAcademyCourses = [
+    "aml-fundamentals",
+    "kyc-essentials",
+    "international-sanctions-compliance",
+    "transaction-monitoring-fundamentals",
+    "risk-based-approach",
+    "ubo-identification",
+    "pep-screening-essentials",
+    "adverse-media-monitoring",
+    "regulatory-reporting-essentials",
+    "edd-procedures",
+  ];
+  for (const slug of knownAcademyCourses) {
+    entries.push({ path: `/${slug}`, changefreq: "monthly", priority: 0.7 });
+  }
+  return buildSitemapXml(entries, ACADEMY_BASE_URL);
 }
 
 /* ------------------------------------------------------------------ */
@@ -254,7 +288,12 @@ export function sitemapGenerator(): Plugin {
       const xml = generateSitemap(projectRoot);
       const outPath = path.join(projectRoot, "public/sitemap.xml");
       fs.writeFileSync(outPath, xml, "utf-8");
-      console.log(`[sitemap] Generated ${outPath} with sitemap entries`);
+      console.log(`[sitemap] Generated ${outPath}`);
+
+      const academyXml = generateAcademySitemap();
+      const academyOutPath = path.join(projectRoot, "public/sitemap-academy.xml");
+      fs.writeFileSync(academyOutPath, academyXml, "utf-8");
+      console.log(`[sitemap] Generated ${academyOutPath}`);
     },
     handleHotUpdate({ file }) {
       if (
@@ -266,6 +305,10 @@ export function sitemapGenerator(): Plugin {
         const xml = generateSitemap(projectRoot);
         const outPath = path.join(projectRoot, "public/sitemap.xml");
         fs.writeFileSync(outPath, xml, "utf-8");
+
+        const academyXml = generateAcademySitemap();
+        const academyOutPath = path.join(projectRoot, "public/sitemap-academy.xml");
+        fs.writeFileSync(academyOutPath, academyXml, "utf-8");
         console.log(`[sitemap] Regenerated after data file change`);
       }
     },
