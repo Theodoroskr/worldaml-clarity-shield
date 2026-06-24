@@ -94,6 +94,7 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/news", changefreq: "daily", priority: 0.7 },
   { path: "/blog", changefreq: "weekly", priority: 0.8 },
   { path: "/academy", changefreq: "weekly", priority: 0.8 },
+  { path: "/academy/templates", changefreq: "monthly", priority: 0.7 },
   { path: "/partners", changefreq: "monthly", priority: 0.6 },
   { path: "/partners/apply", changefreq: "monthly", priority: 0.5 },
 
