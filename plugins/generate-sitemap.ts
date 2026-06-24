@@ -167,13 +167,13 @@ function extractRecordKeys(filePath: string): string[] {
 /*  XML builder                                                       */
 /* ------------------------------------------------------------------ */
 
-function buildSitemapXml(entries: SitemapEntry[]): string {
+function buildSitemapXml(entries: SitemapEntry[], baseUrl: string = BASE_URL): string {
   const today = new Date().toISOString().split("T")[0];
 
   const urls = entries
     .map(
       (e) => `  <url>
-    <loc>${BASE_URL}${e.path}</loc>
+    <loc>${baseUrl}${e.path}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${e.changefreq}</changefreq>
     <priority>${e.priority.toFixed(1)}</priority>
@@ -186,6 +186,39 @@ function buildSitemapXml(entries: SitemapEntry[]): string {
 ${urls}
 </urlset>
 `;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Academy subdomain generator                                       */
+/*  academy.worldaml.com serves a learner-only experience. Course     */
+/*  URLs live at the subdomain root (no /academy prefix).             */
+/* ------------------------------------------------------------------ */
+
+const ACADEMY_STATIC_ROUTES: SitemapEntry[] = [
+  { path: "/", changefreq: "weekly", priority: 1.0 },
+  { path: "/templates", changefreq: "monthly", priority: 0.7 },
+  { path: "/login", changefreq: "yearly", priority: 0.3 },
+  { path: "/signup", changefreq: "yearly", priority: 0.3 },
+];
+
+function generateAcademySitemap(): string {
+  const entries: SitemapEntry[] = [...ACADEMY_STATIC_ROUTES];
+  const knownAcademyCourses = [
+    "aml-fundamentals",
+    "kyc-essentials",
+    "international-sanctions-compliance",
+    "transaction-monitoring-fundamentals",
+    "risk-based-approach",
+    "ubo-identification",
+    "pep-screening-essentials",
+    "adverse-media-monitoring",
+    "regulatory-reporting-essentials",
+    "edd-procedures",
+  ];
+  for (const slug of knownAcademyCourses) {
+    entries.push({ path: `/${slug}`, changefreq: "monthly", priority: 0.7 });
+  }
+  return buildSitemapXml(entries, ACADEMY_BASE_URL);
 }
 
 /* ------------------------------------------------------------------ */
