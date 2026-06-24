@@ -288,7 +288,12 @@ export function sitemapGenerator(): Plugin {
       const xml = generateSitemap(projectRoot);
       const outPath = path.join(projectRoot, "public/sitemap.xml");
       fs.writeFileSync(outPath, xml, "utf-8");
-      console.log(`[sitemap] Generated ${outPath} with sitemap entries`);
+      console.log(`[sitemap] Generated ${outPath}`);
+
+      const academyXml = generateAcademySitemap();
+      const academyOutPath = path.join(projectRoot, "public/sitemap-academy.xml");
+      fs.writeFileSync(academyOutPath, academyXml, "utf-8");
+      console.log(`[sitemap] Generated ${academyOutPath}`);
     },
     handleHotUpdate({ file }) {
       if (
@@ -300,6 +305,10 @@ export function sitemapGenerator(): Plugin {
         const xml = generateSitemap(projectRoot);
         const outPath = path.join(projectRoot, "public/sitemap.xml");
         fs.writeFileSync(outPath, xml, "utf-8");
+
+        const academyXml = generateAcademySitemap();
+        const academyOutPath = path.join(projectRoot, "public/sitemap-academy.xml");
+        fs.writeFileSync(academyOutPath, academyXml, "utf-8");
         console.log(`[sitemap] Regenerated after data file change`);
       }
     },
