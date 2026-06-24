@@ -113,10 +113,14 @@ const navLinks: NavLink[] = [
 ];
 
 export const Header = () => {
+  // On the academy.* subdomain, render the slim learner-focused header instead.
+  if (isAcademyHost()) return <AcademyHeader />;
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
   const headerRef = useRef<HTMLElement>(null);
+
 
   const handleSignOut = async () => {
     await signOut();
