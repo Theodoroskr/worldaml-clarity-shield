@@ -91,6 +91,38 @@ const Academy = () => {
   // Slugs that were just purchased — drives the on-screen success banner.
   const [justPurchasedSlugs, setJustPurchasedSlugs] = useState<string[]>([]);
 
+  // --- Annual all-access pass quick checkout ---
+  const [annualLoading, setAnnualLoading] = useState(false);
+  const [annualGuestEmail, setAnnualGuestEmail] = useState("");
+  const [annualPromptOpen, setAnnualPromptOpen] = useState(false);
+
+  const startAnnualCheckout = async (emailOverride?: string) => {
+    const invokeBody: Record<string, unknown> = { currency };
+    if (!user) {
+      const email = (emailOverride ?? annualGuestEmail).trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setAnnualPromptOpen(true);
+        return;
+      }
+      invokeBody.guestEmail = email;
+      try { window.localStorage.setItem("academy_last_email", email); } catch { /* noop */ }
+    }
+    setAnnualLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "create-academy-annual-checkout",
+        { body: invokeBody },
+      );
+      if (error) throw error;
+      if (!data?.url) throw new Error("No checkout URL returned");
+      window.location.href = data.url;
+    } catch (err) {
+      console.error("Annual checkout failed:", err);
+      toast.error(err instanceof Error ? err.message : "Could not start checkout. Please try again.");
+      setAnnualLoading(false);
+    }
+  };
+
   // Post-checkout success toast (Stripe redirects back with ?purchase=success)
   useEffect(() => {
     const purchase = searchParams.get("purchase");
