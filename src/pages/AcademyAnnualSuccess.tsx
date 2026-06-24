@@ -76,11 +76,11 @@ const AcademyAnnualSuccess = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("academy_courses")
-        .select("slug, title, category, estimated_minutes, is_published")
+        .select("id, slug, title, category, duration_minutes, is_published")
         .eq("is_published", true)
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return (data || []) as CourseRow[];
+      return (data || []) as unknown as CourseRow[];
     },
   });
 
@@ -93,9 +93,9 @@ const AcademyAnnualSuccess = () => {
     },
   });
 
-  const moduleCountBySlug = useMemo(() => {
+  const moduleCountByCourseId = useMemo(() => {
     const map = new Map<string, number>();
-    (moduleCounts ?? []).forEach((r) => map.set(r.course_slug, r.module_count));
+    (moduleCounts ?? []).forEach((r) => map.set(r.course_id, Number(r.module_count) || 0));
     return map;
   }, [moduleCounts]);
 
