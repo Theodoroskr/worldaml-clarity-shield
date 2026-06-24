@@ -224,8 +224,14 @@ serve(async (req) => {
           : session.payment_intent?.id;
 
       const now = new Date();
+      // Annual all-access pass → +12 months; single course → +1 month.
+      const isAnnualPass = session.metadata?.kind === "annual_pass";
       const expiresAt = new Date(now);
-      expiresAt.setMonth(expiresAt.getMonth() + 1);
+      if (isAnnualPass) {
+        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+      } else {
+        expiresAt.setMonth(expiresAt.getMonth() + 1);
+      }
 
       const { error } = await supabase
         .from("academy_course_purchases")
