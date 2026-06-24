@@ -27,34 +27,83 @@ type SortDir = "asc" | "desc";
 
 export default function AdminPurchaseStatus() {
   const [rows, setRows] = useState<PurchaseRow[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, { email: string | null; full_name: string | null }>>({});
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "paid" | "failed" | "refunded">("all");
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const prevStatusRef = useRef<Record<string, string>>({});
 
   const [createdFrom, setCreatedFrom] = useState("");
   const [createdTo, setCreatedTo] = useState("");
   const [paidFrom, setPaidFrom] = useState("");
   const [paidTo, setPaidTo] = useState("");
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     const { data, error } = await supabase
       .from("academy_course_purchases")
       .select("*")
       .order("created_at", { ascending: false });
     if (error) {
-      toast.error(error.message);
+      if (!silent) toast.error(error.message);
     } else {
-      setRows((data as PurchaseRow[]) ?? []);
+      const next = (data as PurchaseRow[]) ?? [];
+      // Detect transitions → toast on pending→paid so admins see live unlocks
+      const prev = prevStatusRef.current;
+      if (Object.keys(prev).length > 0) {
+        for (const row of next) {
+          const before = prev[row.id];
+          if (before && before !== row.status) {
+            if (row.status === "paid") {
+              const who = profiles[row.user_id]?.email ?? row.user_id.slice(0, 8);
+              toast.success(`${who} → ${row.course_slug} unlocked (paid)`);
+            } else if (row.status === "failed") {
+              const who = profiles[row.user_id]?.email ?? row.user_id.slice(0, 8);
+              toast.error(`${who} → ${row.course_slug} marked failed`);
+            }
+          }
+        }
+      }
+      prevStatusRef.current = Object.fromEntries(next.map((r) => [r.id, r.status]));
+      setRows(next);
+      setLastRefresh(new Date());
+
+      // Fetch profile emails for any new user_ids
+      const missing = Array.from(new Set(next.map((r) => r.user_id))).filter((uid) => !profiles[uid]);
+      if (missing.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, email, full_name")
+          .in("user_id", missing);
+        if (profs) {
+          setProfiles((p) => {
+            const merged = { ...p };
+            for (const pr of profs as { user_id: string; email: string | null; full_name: string | null }[]) {
+              merged[pr.user_id] = { email: pr.email, full_name: pr.full_name };
+            }
+            return merged;
+          });
+        }
+      }
     }
-    setLoading(false);
+    if (!silent) setLoading(false);
   };
 
   useEffect(() => {
     load();
   }, []);
+
+  // Auto-refresh every 15s when enabled
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const id = setInterval(() => load(true), 15_000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRefresh, profiles]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
