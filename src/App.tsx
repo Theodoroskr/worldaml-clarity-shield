@@ -87,6 +87,7 @@ const Academy = lazy(() => import("./pages/Academy"));
 const AcademyCourse = lazy(() => import("./pages/AcademyCourse"));
 const AcademyCertificate = lazy(() => import("./pages/AcademyCertificate"));
 const AcademyTemplates = lazy(() => import("./pages/AcademyTemplates"));
+const AcademyAnnualSuccess = lazy(() => import("./pages/AcademyAnnualSuccess"));
 const AMLApi = lazy(() => import("./pages/AMLApi"));
 const SanctionsScreeningApi = lazy(() => import("./pages/SanctionsScreeningApi"));
 const KYCKYBApi = lazy(() => import("./pages/KYCKYBApi"));
@@ -260,6 +261,7 @@ const App = () => (
                 {/* Academy */}
                 <Route path="/academy" element={<Academy />} />
                 <Route path="/academy/templates" element={<AcademyTemplates />} />
+                <Route path="/academy/annual-pass-active" element={<AcademyAnnualSuccess />} />
                 <Route path="/academy/certificate/:token" element={<AcademyCertificate />} />
                 <Route path="/academy/:slug" element={<AcademyCourse />} />
 
