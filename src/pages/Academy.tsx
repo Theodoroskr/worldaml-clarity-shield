@@ -335,19 +335,34 @@ const Academy = () => {
           { name: "Home", url: "/" },
           { name: "Academy", url: "/academy" },
         ]}
-        structuredData={{
-          "@context": "https://schema.org",
-          "@type": "EducationalOrganization",
-          name: "WorldAML Compliance Academy",
-          description: "CPD-accredited compliance training courses with verifiable certificates. AML, KYC and sanctions screening for regulated firms in the US, UK, Europe and Middle East.",
-          url: "https://www.worldaml.com/academy",
-          areaServed: [
-            { "@type": "Country", name: "United States" },
-            { "@type": "Country", name: "United Kingdom" },
-            { "@type": "Country", name: "United Arab Emirates" },
-            { "@type": "AdministrativeArea", name: "European Union" },
-          ],
-        }}
+        structuredData={[
+          {
+            "@context": "https://schema.org",
+            "@type": "EducationalOrganization",
+            name: "WorldAML Academy",
+            description: "CPD-accredited compliance training courses with verifiable certificates. AML, KYC and sanctions screening for regulated firms in the US, UK, Europe and Middle East.",
+            url: "https://academy.worldaml.com",
+            sameAs: ["https://www.worldaml.com/academy"],
+            areaServed: [
+              { "@type": "Country", name: "United States" },
+              { "@type": "Country", name: "United Kingdom" },
+              { "@type": "Country", name: "United Arab Emirates" },
+              { "@type": "AdministrativeArea", name: "European Union" },
+            ],
+          },
+          ...(courses && courses.length
+            ? [{
+                "@context": "https://schema.org",
+                "@type": "ItemList",
+                itemListElement: courses.map((c, idx) => ({
+                  "@type": "ListItem",
+                  position: idx + 1,
+                  url: `https://academy.worldaml.com/${c.slug}`,
+                  name: c.title,
+                })),
+              }]
+            : []),
+        ]}
       />
       <Header />
       <main className="flex-1">
