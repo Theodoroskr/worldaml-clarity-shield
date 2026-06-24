@@ -121,13 +121,17 @@ export default function AdminPurchaseStatus() {
     }
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      data = data.filter(
-        (r) =>
+      data = data.filter((r) => {
+        const prof = profiles[r.user_id];
+        return (
           r.course_slug.toLowerCase().includes(q) ||
           (r.stripe_session_id ?? "").toLowerCase().includes(q) ||
           (r.stripe_payment_intent_id ?? "").toLowerCase().includes(q) ||
-          r.user_id.toLowerCase().includes(q)
-      );
+          r.user_id.toLowerCase().includes(q) ||
+          (prof?.email ?? "").toLowerCase().includes(q) ||
+          (prof?.full_name ?? "").toLowerCase().includes(q)
+        );
+      });
     }
     if (createdFrom) {
       const from = new Date(createdFrom).getTime();
