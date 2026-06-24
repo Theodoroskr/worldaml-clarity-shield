@@ -145,7 +145,7 @@ serve(async (req) => {
           },
         },
       ],
-      success_url: `${origin}/academy?purchase=success&pass=annual`,
+      success_url: `${origin}/academy/annual-pass-active?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/academy?purchase=cancelled`,
       metadata: {
         user_id: userId,
