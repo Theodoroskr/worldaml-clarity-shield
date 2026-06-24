@@ -14,6 +14,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import { isAcademyHost } from "@/lib/academyHost";
+import AcademyHeader from "@/components/academy/AcademyHeader";
+
 
 type NavChild = { href: string; label: string };
 type NavGroup = { groupLabel: string; items: NavChild[] };
