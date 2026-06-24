@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.stripe-academy-webhook]
 verify_jwt = false
+
+[functions.get-academy-annual-receipt]
+verify_jwt = false
