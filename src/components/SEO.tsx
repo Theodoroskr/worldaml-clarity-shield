@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { isAcademyHost } from "@/lib/academyHost";
 
 interface BreadcrumbItem {
   name: string;
@@ -15,9 +16,10 @@ interface SEOProps {
   structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const SITE_NAME = "WorldAML";
-const BASE_URL = "https://worldaml.com";
-const OG_IMAGE = `${BASE_URL}/og-image.png`;
+const MAIN_SITE_NAME = "WorldAML";
+const MAIN_BASE_URL = "https://worldaml.com";
+const ACADEMY_SITE_NAME = "WorldAML Academy";
+const ACADEMY_BASE_URL = "https://academy.worldaml.com";
 
 /**
  * hreflang targets: same content, one URL, but signal Google which
@@ -31,9 +33,24 @@ const HREFLANG_TARGETS = [
   { hreflang: "x-default", region: "Default" },
 ];
 
+/**
+ * On the Academy subdomain, strip a leading `/academy` from canonical/breadcrumb
+ * paths so URLs resolve at the subdomain root (academy.worldaml.com/<slug>).
+ */
+const stripAcademyPrefix = (path: string): string => {
+  const cleaned = path.replace(/^\/academy(?=\/|$)/, "");
+  return cleaned === "" ? "/" : cleaned;
+};
+
 const SEO = ({ title, description, canonical, noindex = false, ogType = "website", breadcrumbs, structuredData }: SEOProps) => {
+  const onAcademy = isAcademyHost();
+  const SITE_NAME = onAcademy ? ACADEMY_SITE_NAME : MAIN_SITE_NAME;
+  const BASE_URL = onAcademy ? ACADEMY_BASE_URL : MAIN_BASE_URL;
+  const OG_IMAGE = `${BASE_URL}/og-image.png`;
+
   const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
-  const canonicalUrl = canonical ? `${BASE_URL}${canonical}` : undefined;
+  const canonicalPath = canonical ? (onAcademy ? stripAcademyPrefix(canonical) : canonical) : undefined;
+  const canonicalUrl = canonicalPath ? `${BASE_URL}${canonicalPath}` : undefined;
 
   const breadcrumbLD = breadcrumbs?.length
     ? {
