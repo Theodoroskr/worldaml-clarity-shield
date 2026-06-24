@@ -120,7 +120,7 @@ const AcademyAnnualSuccess = () => {
       <SEO
         title="Annual Pass Active — WorldAML Academy"
         description="Your WorldAML Academy annual all-access pass is now active. View your expiry date and all the courses included."
-        noIndex
+        noindex
       />
       <Header />
       <main>
