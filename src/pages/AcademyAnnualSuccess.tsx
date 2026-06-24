@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
@@ -8,11 +8,17 @@ import {
   BookOpen,
   Calendar,
   CheckCircle2,
+  Copy,
   Crown,
+  Download,
+  ExternalLink,
+  FileText,
   Loader2,
+  Receipt,
   RefreshCw,
   Sparkles,
 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAcademyPurchases, ANNUAL_PASS_SLUG } from "@/hooks/useAcademyPurchases";
