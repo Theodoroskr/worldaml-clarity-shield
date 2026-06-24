@@ -233,7 +233,7 @@ serve(async (req) => {
         expiresAt.setMonth(expiresAt.getMonth() + 1);
       }
 
-      const { error } = await supabase
+      const { data: updatedRows, error } = await supabase
         .from("academy_course_purchases")
         .update({
           status: "paid",
@@ -241,13 +241,54 @@ serve(async (req) => {
           paid_at: now.toISOString(),
           expires_at: expiresAt.toISOString(),
         })
-        .eq("stripe_session_id", sessionId);
+        .eq("stripe_session_id", sessionId)
+        .select("id");
 
       if (error) {
         console.error("Failed to mark purchases paid:", error);
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500, headers: corsHeaders,
         });
+      }
+
+      // Fallback: no pending rows existed for this session (e.g. Payment Link or
+      // reissued checkout). Use session metadata to insert paid rows so the
+      // buyer still gets access without manual reconciliation.
+      if (!isAnnualPass && (!updatedRows || updatedRows.length === 0)) {
+        const metaUserId = session.metadata?.user_id ?? null;
+        const metaSlugs = (session.metadata?.course_slugs ?? "")
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+        if (metaUserId && metaSlugs.length > 0) {
+          const total = session.amount_total ?? 0;
+          const perRow = Math.round(total / metaSlugs.length);
+          let allocated = 0;
+          const rows = metaSlugs.map((slug, idx) => {
+            const amount =
+              idx === metaSlugs.length - 1 ? total - allocated : perRow;
+            allocated += perRow;
+            return {
+              user_id: metaUserId,
+              course_slug: slug,
+              amount_cents: amount,
+              currency: session.currency ?? "eur",
+              status: "paid",
+              stripe_session_id: sessionId,
+              stripe_payment_intent_id: paymentIntentId ?? null,
+              paid_at: now.toISOString(),
+              expires_at: expiresAt.toISOString(),
+            };
+          });
+          const { error: insertErr } = await supabase
+            .from("academy_course_purchases")
+            .insert(rows);
+          if (insertErr) {
+            console.error("Fallback insert for payment-link purchase failed:", insertErr);
+          } else {
+            console.log("Inserted paid rows from session metadata", { sessionId, slugs: metaSlugs });
+          }
+        }
       }
 
       // Guest checkout: send a magic link so the buyer can claim their account
