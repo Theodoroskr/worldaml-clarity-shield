@@ -25,14 +25,15 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
 type CourseRow = {
+  id: string;
   slug: string;
   title: string;
   category: string | null;
-  estimated_minutes: number | null;
+  duration_minutes: number | null;
   is_published: boolean;
 };
 
-type ModuleCountRow = { course_slug: string; module_count: number };
+type ModuleCountRow = { course_id: string; module_count: number };
 
 const AcademyAnnualSuccess = () => {
   const { user, isLoading: authLoading } = useAuth();
