@@ -162,9 +162,38 @@ const App = () => (
             <ScrollToTop />
             <Layout>
               <Suspense fallback={<div className="min-h-screen" />}>
+              {isAcademyHost() ? (
+                /* Academy subdomain (academy.worldaml.com) — Academy-only routes */
+                <Routes>
+                  <Route path="/" element={<Academy />} />
+                  <Route path="/templates" element={<AcademyTemplates />} />
+                  <Route path="/annual-pass-active" element={<AcademyAnnualSuccess />} />
+                  <Route path="/certificate/:token" element={<AcademyCertificate />} />
+
+                  {/* Auth (reused) */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/pending-approval" element={<PendingApproval />} />
+
+                  {/* Legacy /academy/* links → clean subdomain URLs */}
+                  <Route path="/academy" element={<AcademyRootRedirect />} />
+                  <Route path="/academy/templates" element={<AcademyRootRedirect />} />
+                  <Route path="/academy/annual-pass-active" element={<AcademyRootRedirect />} />
+                  <Route path="/academy/certificate/:token" element={<AcademyCertificateRedirect />} />
+                  <Route path="/academy/:slug" element={<AcademyCourseRedirect />} />
+
+                  {/* Course detail by slug (must be last among dynamic) */}
+                  <Route path="/:slug" element={<AcademyCourse />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              ) : (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/pricing" element={<Pricing />} />
+
                 
 {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
