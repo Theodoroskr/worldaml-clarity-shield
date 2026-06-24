@@ -611,14 +611,44 @@ const AcademyCourse = () => {
         description={course.description.slice(0, 160)}
         canonical={`/academy/${course.slug}`}
         ogType="article"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Academy", url: "/academy" },
+          { name: course.title, url: `/academy/${course.slug}` },
+        ]}
         structuredData={{
           "@context": "https://schema.org",
           "@type": "Course",
           name: course.title,
           description: course.description,
-          provider: { "@type": "Organization", name: "WorldAML" },
+          provider: {
+            "@type": "Organization",
+            name: "WorldAML Academy",
+            sameAs: "https://academy.worldaml.com",
+          },
+          url: `https://academy.worldaml.com/${course.slug}`,
+          ...(course.image_url ? { image: course.image_url } : {}),
+          inLanguage: "en",
           timeRequired: `PT${course.duration_minutes}M`,
           educationalLevel: course.difficulty,
+          ...(course.learning_outcomes && Array.isArray(course.learning_outcomes) && course.learning_outcomes.length
+            ? { teaches: course.learning_outcomes }
+            : {}),
+          hasCourseInstance: {
+            "@type": "CourseInstance",
+            courseMode: "online",
+            courseWorkload: `PT${course.duration_minutes}M`,
+          },
+          offers: {
+            "@type": "Offer",
+            category: isPaidCourse(course.slug) ? "Paid" : "Free",
+            price: isPaidCourse(course.slug)
+              ? (ACADEMY_PRICING[course.slug].eurCents / 100).toFixed(2)
+              : "0",
+            priceCurrency: "EUR",
+            availability: "https://schema.org/InStock",
+            url: `https://academy.worldaml.com/${course.slug}`,
+          },
         }}
       />
       <Header />
