@@ -242,6 +242,119 @@ const AcademyAnnualSuccess = () => {
           </div>
         </section>
 
+        {/* Receipt / invoice */}
+        {sessionId ? (
+          <section className="bg-muted/30 border-b border-border">
+            <div className="container-enterprise section-padding">
+              <div className="max-w-3xl mx-auto">
+                <div className="flex items-center gap-2 mb-4">
+                  <Receipt className="h-5 w-5 text-accent" />
+                  <h2 className="text-headline font-semibold text-foreground">
+                    Receipt & transaction reference
+                  </h2>
+                </div>
+                <p className="text-body-sm text-muted-foreground mb-5">
+                  Keep these for your records. The Stripe receipt and (if available) VAT invoice
+                  can be downloaded as a PDF.
+                </p>
+
+                <Card>
+                  <CardContent className="p-5 space-y-4">
+                    {receiptLoading ? (
+                      <div className="flex items-center gap-2 text-body-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Loading transaction details…
+                      </div>
+                    ) : !receipt ? (
+                      <p className="text-body-sm text-muted-foreground">
+                        Transaction details aren't available right now. Please refresh in a moment.
+                      </p>
+                    ) : (
+                      <>
+                        <div className="grid sm:grid-cols-2 gap-3">
+                          {[
+                            { label: "Checkout session", value: receipt.session_id },
+                            { label: "Payment intent", value: receipt.payment_intent_id },
+                            { label: "Charge ID", value: receipt.charge_id },
+                            { label: "Receipt number", value: receipt.receipt_number },
+                            { label: "Invoice number", value: receipt.invoice_number },
+                          ]
+                            .filter((r) => !!r.value)
+                            .map((r) => (
+                              <div
+                                key={r.label}
+                                className="rounded-md border border-border bg-background p-3"
+                              >
+                                <p className="text-caption text-muted-foreground mb-1">{r.label}</p>
+                                <div className="flex items-center gap-2">
+                                  <code className="text-caption font-mono text-foreground truncate">
+                                    {r.value}
+                                  </code>
+                                  <button
+                                    type="button"
+                                    onClick={() => copyToClipboard(r.value!, r.label)}
+                                    className="ml-auto text-muted-foreground hover:text-foreground shrink-0"
+                                    aria-label={`Copy ${r.label}`}
+                                  >
+                                    <Copy className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {receipt.receipt_url ? (
+                            <Button asChild variant="outline" size="sm">
+                              <a
+                                href={receipt.receipt_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Receipt className="h-4 w-4 mr-1.5" />
+                                View Stripe receipt
+                                <ExternalLink className="h-3.5 w-3.5 ml-1" />
+                              </a>
+                            </Button>
+                          ) : null}
+                          {receipt.invoice_hosted_url ? (
+                            <Button asChild variant="outline" size="sm">
+                              <a
+                                href={receipt.invoice_hosted_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <FileText className="h-4 w-4 mr-1.5" />
+                                View invoice
+                                <ExternalLink className="h-3.5 w-3.5 ml-1" />
+                              </a>
+                            </Button>
+                          ) : null}
+                          {receipt.invoice_pdf ? (
+                            <Button asChild variant="accent" size="sm">
+                              <a href={receipt.invoice_pdf} target="_blank" rel="noopener noreferrer">
+                                <Download className="h-4 w-4 mr-1.5" />
+                                Download invoice PDF
+                              </a>
+                            </Button>
+                          ) : null}
+                          {!receipt.receipt_url && !receipt.invoice_hosted_url ? (
+                            <p className="text-caption text-muted-foreground">
+                              A receipt link will be emailed to you by Stripe shortly.
+                            </p>
+                          ) : null}
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+
+
         {/* What's included */}
         <section className="bg-background border-b border-border">
           <div className="container-enterprise section-padding">
