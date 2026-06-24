@@ -383,7 +383,9 @@ export default function AdminPurchaseStatus() {
                     <td className="py-3 px-4 text-muted-foreground">{fmtDate(row.paid_at)}</td>
                     <td className="py-3 px-4 text-muted-foreground">{fmtDate(row.expires_at)}</td>
                   </tr>
-                ))
+                  );
+                })
+
               )}
             </tbody>
           </table>
