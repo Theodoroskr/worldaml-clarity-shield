@@ -142,7 +142,11 @@ export const Header = () => {
     };
   }, [mobileMenuOpen]);
 
+  // Academy subdomain: render the slim learner-focused header.
+  if (academyHost) return <AcademyHeader />;
+
   return (
+
     <header ref={headerRef} className="sticky top-0 z-50 w-full border-b border-divider bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="container-enterprise">
         <div className="flex h-16 items-center justify-between gap-4">
