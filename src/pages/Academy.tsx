@@ -8,6 +8,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock, ShoppingBag, Check, LogIn, Calendar, RefreshCw, Crown, Loader2 } from "lucide-react";
 import { getCourseCover } from "@/assets/academy";
 import AcademyLogo from "@/components/AcademyLogo";
