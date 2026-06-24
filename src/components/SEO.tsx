@@ -52,11 +52,20 @@ const SEO = ({ title, description, canonical, noindex = false, ogType = "website
   const canonicalPath = canonical ? (onAcademy ? stripAcademyPrefix(canonical) : canonical) : undefined;
   const canonicalUrl = canonicalPath ? `${BASE_URL}${canonicalPath}` : undefined;
 
-  const breadcrumbLD = breadcrumbs?.length
+  // On the academy subdomain, the main marketing home is not the
+  // hierarchical parent. Drop the "Home → /" crumb and rewrite
+  // any "/academy*" links to live at the subdomain root.
+  const effectiveBreadcrumbs = breadcrumbs && onAcademy
+    ? breadcrumbs
+        .filter((b) => b.url !== "/")
+        .map((b) => ({ name: b.name, url: stripAcademyPrefix(b.url) }))
+    : breadcrumbs;
+
+  const breadcrumbLD = effectiveBreadcrumbs?.length
     ? {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
-        itemListElement: breadcrumbs.map((item, index) => ({
+        itemListElement: effectiveBreadcrumbs.map((item, index) => ({
           "@type": "ListItem",
           position: index + 1,
           name: item.name,
