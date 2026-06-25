@@ -9,7 +9,7 @@ import { Award, Linkedin, Share2, ArrowLeft, CheckCircle, BookOpen, ExternalLink
 import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import worldAmlLogo from "@/assets/worldaml-logo.png";
+import worldAmlLogo from "@/assets/worldaml-logo.png.asset.json";
 
 const PUBLISHED_ORIGIN = "https://worldaml.com";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
