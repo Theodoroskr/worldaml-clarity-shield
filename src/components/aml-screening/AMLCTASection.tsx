@@ -23,7 +23,7 @@ const AMLCTASection = () => (
             </Link>
           </Button>
         </div>
-        <p className="mt-6 text-white/50 text-body-sm">
+        <p className="mt-6 text-white/75 text-body-sm">
           Available as part of{" "}
           <Link to="/platform/suite" className="text-white/80 hover:text-white underline underline-offset-2 transition-colors">WorldAML Suite</Link>{" "}
           and via the{" "}

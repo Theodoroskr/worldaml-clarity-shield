@@ -96,7 +96,7 @@ const PartnerBenefitsSection = () => (
                 <p className="text-xs font-semibold uppercase tracking-widest text-teal mb-4">{t.tagline}</p>
                 <div className="flex items-baseline gap-1 mb-1">
                   <span className="text-5xl font-bold text-white">{t.rate}</span>
-                  <span className="text-white/50 text-sm">commission</span>
+                  <span className="text-white/75 text-sm">commission</span>
                 </div>
                 <h3 className="text-xl font-semibold text-white mt-3 mb-3">{t.name}</h3>
                 <p className="text-white/60 text-sm leading-relaxed mb-6">{t.description}</p>
