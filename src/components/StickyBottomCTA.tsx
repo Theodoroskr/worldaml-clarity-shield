@@ -38,7 +38,7 @@ const StickyBottomCTA = () => {
           </Button>
           <button
             onClick={() => setDismissed(true)}
-            className="p-1.5 text-white/50 hover:text-white hover:bg-white/10 rounded transition-colors"
+            className="p-1.5 text-white/75 hover:text-white hover:bg-white/10 rounded transition-colors"
             aria-label="Dismiss"
           >
             <X className="h-4 w-4" />

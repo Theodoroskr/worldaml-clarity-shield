@@ -90,7 +90,7 @@ export const DataSourceCTA = ({
         </div>
         
         {/* Trust line */}
-        <p className="text-center text-sm text-white/50 mt-10">
+        <p className="text-center text-sm text-white/75 mt-10">
           Powered by LexisNexis Risk Solutions • Delivered by Infocredit Group
         </p>
       </div>
