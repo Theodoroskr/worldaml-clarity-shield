@@ -330,7 +330,7 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
       updates.registration_number = edit.registration_number.trim() || null;
     }
 
-    const { error } = await supabase.from("suite_customers").update(updates).eq("id", customer.id);
+    const { error } = await supabase.from("suite_customers").update(updates as any).eq("id", customer.id);
     if (error) { toast.error(error.message); setSaving(false); return; }
 
     // Build change summary for audit
