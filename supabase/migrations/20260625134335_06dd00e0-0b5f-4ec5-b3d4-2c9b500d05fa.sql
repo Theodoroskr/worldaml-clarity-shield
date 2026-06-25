@@ -1,0 +1,1 @@
+UPDATE public.academy_courses SET image_url = '/__l5e/assets-v1/0cff452c-bfd5-4256-9bab-57b946155859/course-aml-5min-refresher.jpg' WHERE slug = 'aml-5min-refresher';
