@@ -11,6 +11,32 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock, ShoppingBag, Check, LogIn, Calendar, RefreshCw, Crown, Loader2 } from "lucide-react";
+import { useRef } from "react";
+import { z } from "zod";
+
+// Block common disposable / throwaway inbox providers from the guest annual-pass
+// flow — these accounts can't receive receipts or course-access links reliably.
+const DISPOSABLE_EMAIL_DOMAINS = new Set([
+  "mailinator.com", "tempmail.com", "temp-mail.org", "10minutemail.com",
+  "guerrillamail.com", "yopmail.com", "trashmail.com", "throwawaymail.com",
+  "fakeinbox.com", "getnada.com", "maildrop.cc", "sharklasers.com",
+  "dispostable.com", "mintemail.com", "mailnesia.com",
+]);
+
+const guestEmailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(1, "Email is required")
+  .max(255, "Email is too long")
+  .email("Please enter a valid email address")
+  .refine(
+    (email) => {
+      const domain = email.split("@")[1];
+      return domain ? !DISPOSABLE_EMAIL_DOMAINS.has(domain) : false;
+    },
+    { message: "Please use a work or permanent email address" },
+  );
 import { getCourseCover } from "@/assets/academy";
 import AcademyLogo from "@/components/AcademyLogo";
 import worldAmlLogoDark from "@/assets/worldaml-logo-dark.png.asset.json";
