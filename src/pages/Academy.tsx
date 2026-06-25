@@ -1752,35 +1752,55 @@ const Academy = () => {
       <Footer />
 
       {/* Guest email prompt for annual all-access pass */}
-      <Dialog open={annualPromptOpen} onOpenChange={setAnnualPromptOpen}>
+      <Dialog
+        open={annualPromptOpen}
+        onOpenChange={(open) => {
+          setAnnualPromptOpen(open);
+          if (!open) setAnnualEmailError(null);
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Buy annual access</DialogTitle>
             <DialogDescription>
-              Enter your email to start checkout. We'll send your access link as soon as payment completes — no account setup required.
+              Enter your email to start checkout. We'll send your receipt and access link there as soon as payment completes — no account setup required.
             </DialogDescription>
           </DialogHeader>
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              const email = annualGuestEmail.trim().toLowerCase();
-              if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                toast.error("Please enter a valid email.");
+              const parsed = guestEmailSchema.safeParse(annualGuestEmail);
+              if (!parsed.success) {
+                setAnnualEmailError(parsed.error.issues[0]?.message ?? "Invalid email");
                 return;
               }
+              setAnnualEmailError(null);
               setAnnualPromptOpen(false);
-              startAnnualCheckout(email);
+              startAnnualCheckout(parsed.data);
             }}
             className="space-y-3"
+            noValidate
           >
             <Input
               type="email"
               placeholder="you@example.com"
               value={annualGuestEmail}
-              onChange={(e) => setAnnualGuestEmail(e.target.value)}
+              onChange={(e) => {
+                setAnnualGuestEmail(e.target.value);
+                if (annualEmailError) setAnnualEmailError(null);
+              }}
               autoFocus
+              maxLength={255}
+              aria-invalid={annualEmailError ? true : undefined}
+              aria-describedby={annualEmailError ? "annual-email-error" : undefined}
+              className={annualEmailError ? "border-destructive focus-visible:ring-destructive" : undefined}
               required
             />
+            {annualEmailError && (
+              <p id="annual-email-error" role="alert" className="text-caption text-destructive">
+                {annualEmailError}
+              </p>
+            )}
             <Button type="submit" variant="accent" className="w-full" disabled={annualLoading}>
               {annualLoading ? (
                 <>
