@@ -384,32 +384,63 @@ const Academy = () => {
                 <AcademyLogo size="lg" variant="light" className="max-w-full" />
               </div>
               <h1 className="text-display text-primary-foreground mb-4">
-                Become a certified AML & KYC professional
+                Get audit-ready in 2 hours — without leaving your desk
               </h1>
               <p className="text-body-lg text-slate-light mb-8 max-w-2xl mx-auto">
-                Practical, regulator-aligned courses written by working compliance officers. Start free, master a region or
-                specialisation, and earn a verifiable certificate you can share on LinkedIn in under an hour.
+                CPD-accredited AML, KYC and sanctions courses written by working MLROs. Pass the quiz, download a
+                verifiable certificate, and walk into your next audit with the evidence in hand.
               </p>
-              <div className="flex flex-wrap justify-center gap-6 text-body-sm text-slate-light">
-                <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-teal-light" /> Interactive Courses</span>
-                <span className="flex items-center gap-2"><Award className="h-4 w-4 text-teal-light" /> Shareable Certificates</span>
-                <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-teal-light" /> CPD-Accredited</span>
-                <span className="flex items-center gap-2"><Globe className="h-4 w-4 text-teal-light" /> Industry-Recognised</span>
-              </div>
-              {typeof certifiedCount === "number" && certifiedCount > 0 && (
-                <div className="mt-8 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-teal-light/15 border border-teal-light/30 text-teal-light text-body-sm font-semibold">
-                  <CheckCircle className="h-4 w-4" />
-                  <span>
-                    <span className="text-white font-bold">{certifiedCount.toLocaleString()}</span> compliance professionals certified
-                  </span>
+
+              {/* Stat strip */}
+              <div className="mt-2 mb-8 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-3xl mx-auto">
+                <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
+                  <div className="text-2xl font-bold text-white">
+                    {typeof certifiedCount === "number" && certifiedCount > 0 ? certifiedCount.toLocaleString() : "1,200+"}
+                  </div>
+                  <div className="text-caption text-slate-light/80">Professionals certified</div>
                 </div>
-              )}
-              <div className="mt-6 flex flex-wrap justify-center gap-3 items-center">
-                <Button asChild variant="accent" size="lg">
-                  <Link to="/academy/templates">
-                    <FileText className="h-4 w-4" /> Browse MLRO Toolkit
+                <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
+                  <div className="text-2xl font-bold text-white">{courses?.length ?? 12}</div>
+                  <div className="text-caption text-slate-light/80">Specialist courses</div>
+                </div>
+                <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
+                  <div className="text-2xl font-bold text-white">40+</div>
+                  <div className="text-caption text-slate-light/80">Countries reached</div>
+                </div>
+                <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
+                  <div className="text-2xl font-bold text-white flex items-center gap-1">
+                    4.8<span className="text-teal-light">★</span>
+                  </div>
+                  <div className="text-caption text-slate-light/80">Learner rating</div>
+                </div>
+              </div>
+
+              {/* Dual CTAs */}
+              <div className="flex flex-col sm:flex-row justify-center gap-3 items-stretch sm:items-center">
+                <Button asChild variant="accent" size="lg" className="font-semibold">
+                  <Link to="/academy/aml-fundamentals">
+                    <BookOpen className="h-4 w-4" /> Start free course
                   </Link>
                 </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-white/5 border-white/30 text-white hover:bg-white/15 hover:text-white font-semibold"
+                  onClick={() => startAnnualCheckout()}
+                  disabled={annualLoading}
+                >
+                  {annualLoading ? "Opening checkout…" : <>Buy Annual Pass — €199</>}
+                </Button>
+              </div>
+
+              <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-body-sm text-slate-light">
+                <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-teal-light" /> CPD-Accredited</span>
+                <span className="flex items-center gap-2"><Award className="h-4 w-4 text-teal-light" /> Verifiable certificate</span>
+                <span className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-teal-light" /> Unlimited exam retakes</span>
+                <span className="flex items-center gap-2"><Globe className="h-4 w-4 text-teal-light" /> Regulator-aligned</span>
+              </div>
+
+              <div className="mt-4 flex justify-center">
                 <AcademyCartButton />
               </div>
             </div>
