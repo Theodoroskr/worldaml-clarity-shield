@@ -214,8 +214,11 @@ const Academy = () => {
   // First-visit toast: announce auto-detected region once per browser.
   useEffect(() => {
     if (regionLoading || !wasAutoDetected) return;
+    // Key the dismiss flag by region so a different detected region (travel,
+    // VPN switch, relocation) re-announces the new currency once.
+    const dismissKey = `academy_region_toast_dismissed:${region}`;
     try {
-      if (localStorage.getItem("academy_region_toast_dismissed") === "1") return;
+      if (localStorage.getItem(dismissKey) === "1") return;
       const id = toast(
         `Showing prices in ${currencyCode(currency)} for ${regionConfig.name}. Change region anytime from the cart.`,
         {
@@ -223,17 +226,18 @@ const Academy = () => {
           action: {
             label: "Got it",
             onClick: () => {
-              try { localStorage.setItem("academy_region_toast_dismissed", "1"); } catch { /* ignore */ }
+              try { localStorage.setItem(dismissKey, "1"); } catch { /* ignore */ }
               toast.dismiss(id);
             },
           },
         }
       );
-      // Mark as shown immediately so it never reappears even without explicit dismiss.
-      try { localStorage.setItem("academy_region_toast_dismissed", "1"); } catch { /* ignore */ }
+      // Mark as shown immediately so it never reappears for this region even
+      // without explicit dismiss.
+      try { localStorage.setItem(dismissKey, "1"); } catch { /* ignore */ }
     } catch { /* ignore */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [regionLoading, wasAutoDetected]);
+  }, [regionLoading, wasAutoDetected, region]);
 
   const [filter, setFilter] = useState<FilterTab>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
