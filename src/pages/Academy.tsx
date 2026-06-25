@@ -191,7 +191,7 @@ const Academy = () => {
       const reconcile = async () => {
         await refetchPurchases();
         setJustPurchasedSlugs((prev) =>
-          prev.filter((slug) => (purchasedSlugs as unknown as { has?: (s: string) => boolean })?.has?.(slug) ?? (Array.isArray(purchasedSlugs) ? (purchasedSlugs as string[]).includes(slug) : true)),
+          prev.filter((slug) => purchasedSlugs.has(slug)),
         );
       };
       void reconcile();
