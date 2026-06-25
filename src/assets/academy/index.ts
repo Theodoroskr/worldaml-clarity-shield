@@ -56,6 +56,10 @@ export const COURSE_COVERS: Record<string, string> = {
   "crypto-aml": cryptoAml,
   "risk-based-approach": riskBased,
   "international-sanctions-compliance": intlSanctions,
+  "aml-law-firms": "/__l5e/assets-v1/cf51afea-01dc-4cbf-a365-8a643df47c43/course-aml-law-firms.jpg",
+  "aml-accountancy": "/__l5e/assets-v1/59b8e586-6c7e-453f-8f8c-aa9f16de56bd/course-aml-accountancy.jpg",
+  "aml-real-estate": "/__l5e/assets-v1/f5159f07-f984-4fc6-8644-f8bb8a6fcffa/course-aml-real-estate.jpg",
+  "aml-gaming-gambling": "/__l5e/assets-v1/dc7a8601-463a-43fa-980f-52c6460a4612/course-aml-gaming.jpg",
 };
 
 export const COURSE_DIAGRAMS: Record<string, string> = {
