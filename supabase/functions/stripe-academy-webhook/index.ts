@@ -384,22 +384,39 @@ serve(async (req) => {
       const customerEmail =
         session.customer_details?.email ?? session.customer_email ?? null;
 
-      await notifyAdminPaymentIssue({
-        eventType: event.type,
-        sessionId,
-        paymentIntentId:
-          typeof session.payment_intent === "string"
-            ? session.payment_intent
-            : session.payment_intent?.id ?? null,
-        customerEmail,
-        amount: session.amount_total ?? purchase?.amount_cents ?? null,
-        currency: session.currency ?? purchase?.currency ?? null,
-        courseSlug: purchase?.course_slug ?? null,
-        reason:
-          event.type === "checkout.session.expired"
-            ? "Checkout session expired before payment completed"
-            : "Asynchronous payment failed",
-      });
+      const sessionPaymentIntentId =
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id ?? null;
+
+      // Only alert admins when a real payment attempt happened.
+      // Pure abandonment (expired with no payment_intent and no prior pending row)
+      // is noise — skip the email but still log.
+      const paymentWasAttempted =
+        event.type === "checkout.session.async_payment_failed" ||
+        !!sessionPaymentIntentId ||
+        (purchase && purchase.status === "pending" && (purchase.amount_cents ?? 0) > 0 && !!purchase.course_slug);
+
+      if (paymentWasAttempted) {
+        await notifyAdminPaymentIssue({
+          eventType: event.type,
+          sessionId,
+          paymentIntentId: sessionPaymentIntentId,
+          customerEmail,
+          amount: session.amount_total ?? purchase?.amount_cents ?? null,
+          currency: session.currency ?? purchase?.currency ?? null,
+          courseSlug: purchase?.course_slug ?? null,
+          reason:
+            event.type === "checkout.session.expired"
+              ? "Checkout session expired before payment completed"
+              : "Asynchronous payment failed",
+        });
+      } else {
+        console.log(
+          `Skipping admin alert for abandoned checkout ${sessionId} (no payment attempt, customer=${customerEmail ?? "unknown"})`
+        );
+      }
+
 
       await sendCustomerRecoveryEmail({
         supabase,

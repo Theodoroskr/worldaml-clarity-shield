@@ -164,7 +164,7 @@ export default function RcmObligations() {
     const ids = Array.from(selected);
     const { error } = await supabase
       .from("rcm_obligations")
-      .update(patch)
+      .update(patch as any)
       .in("id", ids)
       .eq("organization_id", membership.orgId);
     setApplying(false);
