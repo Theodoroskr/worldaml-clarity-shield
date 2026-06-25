@@ -1,0 +1,1 @@
+UPDATE public.academy_courses SET image_url = CASE slug WHEN 'aml-uk' THEN '/__l5e/assets-v1/9b0ab7be-18ec-400d-a392-96892048ff90/course-aml-uk.jpg' WHEN 'mlro-masterclass' THEN '/__l5e/assets-v1/a82357dc-0604-49a9-bfec-74ee45e6497b/course-mlro-masterclass.jpg' END WHERE slug IN ('aml-uk', 'mlro-masterclass');
