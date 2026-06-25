@@ -13,7 +13,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock, ShoppingBag, Check, LogIn, Calendar, RefreshCw, Crown, Loader2 } from "lucide-react";
 import { getCourseCover } from "@/assets/academy";
 import AcademyLogo from "@/components/AcademyLogo";
-import AcademyLogo from "@/components/AcademyLogo";
 import heroShield from "@/assets/academy-hero-professional.jpg";
 import AcademyCartButton from "@/components/academy/AcademyCartDrawer";
 import LearnerLogos from "@/components/academy/LearnerLogos";
@@ -906,7 +905,7 @@ const Academy = () => {
                 <div className="relative aspect-[1.414/1] rounded-2xl bg-gradient-to-br from-white to-slate-50 shadow-2xl border-8 border-white/90 p-6 sm:p-8 flex flex-col">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <img src={worldAmlLogoDark.url} alt="World AML" className="h-7 sm:h-9 w-auto mb-2" />
+                      <AcademyLogo size="md" className="mb-2" />
                       <p className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-500 font-semibold">Certificate of Completion</p>
                       <p className="text-[9px] sm:text-[10px] text-slate-600 mt-0.5">WorldAML Academy · CPD-Accredited</p>
                     </div>
