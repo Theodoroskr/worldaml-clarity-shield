@@ -446,8 +446,8 @@ const Academy = () => {
                     }}
                   >
                     <img
-                      src={heroAurora}
-                      alt=""
+                      src={heroShield}
+                      alt="AML compliance shield and verifiable certificate visualization"
                       width={1024}
                       height={1280}
                       className="h-full w-full object-cover"
