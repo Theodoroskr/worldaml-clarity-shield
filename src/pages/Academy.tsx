@@ -126,18 +126,27 @@ const Academy = () => {
   const [annualLoading, setAnnualLoading] = useState(false);
   const [annualGuestEmail, setAnnualGuestEmail] = useState("");
   const [annualPromptOpen, setAnnualPromptOpen] = useState(false);
+  const [annualEmailError, setAnnualEmailError] = useState<string | null>(null);
+  // Ref guard runs synchronously on click — prevents the double-Stripe-session
+  // race where rapid clicks fire before React commits `setAnnualLoading(true)`.
+  const annualInFlightRef = useRef(false);
 
   const startAnnualCheckout = async (emailOverride?: string) => {
+    if (annualInFlightRef.current) return;
     const invokeBody: Record<string, unknown> = { currency };
     if (!user) {
-      const email = (emailOverride ?? annualGuestEmail).trim().toLowerCase();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      const raw = emailOverride ?? annualGuestEmail;
+      const parsed = guestEmailSchema.safeParse(raw);
+      if (!parsed.success) {
+        setAnnualEmailError(parsed.error.issues[0]?.message ?? "Invalid email");
         setAnnualPromptOpen(true);
         return;
       }
+      const email = parsed.data;
       invokeBody.guestEmail = email;
       try { window.localStorage.setItem("academy_last_email", email); } catch { /* noop */ }
     }
+    annualInFlightRef.current = true;
     setAnnualLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke(
@@ -145,22 +154,31 @@ const Academy = () => {
         { body: invokeBody },
       );
       if (error) throw error;
-      if (!data?.url) throw new Error("No checkout URL returned");
+      if (!data?.url || typeof data.url !== "string" || !data.url.startsWith("https://checkout.stripe.com/")) {
+        throw new Error("Invalid checkout URL returned");
+      }
       window.location.href = data.url;
     } catch (err) {
       console.error("Annual checkout failed:", err);
       toast.error(err instanceof Error ? err.message : "Could not start checkout. Please try again.");
+      annualInFlightRef.current = false;
       setAnnualLoading(false);
     }
   };
 
-  // Post-checkout success toast (Stripe redirects back with ?purchase=success)
+  // Post-checkout success toast (Stripe redirects back with ?purchase=success).
+  // Intentionally runs once on mount only — the URL param is stripped via
+  // setSearchParams below, so re-running on every searchParams change would
+  // either no-op or duplicate the toast. Browser back/forward landing on the
+  // same param again is an accepted edge case (user can refresh to retrigger).
   useEffect(() => {
     const purchase = searchParams.get("purchase");
     if (purchase === "success") {
-      // Snapshot cart contents BEFORE clearing so we can show what was unlocked.
-      const unlocked = Array.from(cart.items);
-      if (unlocked.length > 0) setJustPurchasedSlugs(unlocked);
+      // Snapshot cart BEFORE clearing so we can show what was unlocked, but
+      // intersect with the server-confirmed `purchasedSlugs` after refetch so
+      // a stale cart (e.g. cleared in another tab) doesn't show fake unlocks.
+      const snapshot = Array.from(cart.items);
+      if (snapshot.length > 0) setJustPurchasedSlugs(snapshot);
 
       toast.success("Payment received — your courses are unlocked.", {
         description: "Scroll down to start learning.",
@@ -169,10 +187,16 @@ const Academy = () => {
       // Clear cart locally; the webhook has recorded the purchase server-side.
       cart.clear();
       // Refetch purchases so card CTAs flip from "Unlock course" to "Start course".
-      // Webhook may take a moment; retry a few times.
-      void refetchPurchases();
-      const t1 = setTimeout(() => { void refetchPurchases(); }, 1500);
-      const t2 = setTimeout(() => { void refetchPurchases(); }, 4000);
+      // Webhook may take a moment; retry a few times, then reconcile the banner.
+      const reconcile = async () => {
+        await refetchPurchases();
+        setJustPurchasedSlugs((prev) =>
+          prev.filter((slug) => purchasedSlugs?.includes?.(slug) ?? true),
+        );
+      };
+      void reconcile();
+      const t1 = setTimeout(() => { void reconcile(); }, 1500);
+      const t2 = setTimeout(() => { void reconcile(); }, 4000);
       const next = new URLSearchParams(searchParams);
       next.delete("purchase");
       setSearchParams(next, { replace: true });
@@ -183,6 +207,7 @@ const Academy = () => {
       next.delete("purchase");
       setSearchParams(next, { replace: true });
     }
+    // Mount-only; see comment above for rationale.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
