@@ -688,6 +688,93 @@ const Academy = () => {
           </div>
         </section>
 
+        {/* What you get — checklist grid */}
+        <section className="bg-secondary/30 border-b border-border">
+          <div className="container-enterprise section-padding">
+            <div className="text-center mb-10 max-w-2xl mx-auto">
+              <h2 className="text-headline text-foreground mb-3">What you get</h2>
+              <p className="text-body-lg text-muted-foreground">
+                Every plan includes practical, regulator-aligned resources designed to make you audit-ready.
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {[
+                {
+                  icon: Award,
+                  title: "Certificates",
+                  color: "text-primary",
+                  bg: "bg-primary/10",
+                  items: [
+                    "Branded, CPD-accredited digital certificate",
+                    "One-click LinkedIn profile integration",
+                    "Public verification page with unique URL",
+                    "A4 PDF ready to print or attach to a CV",
+                  ],
+                },
+                {
+                  icon: Calendar,
+                  title: "Access duration",
+                  color: "text-accent",
+                  bg: "bg-accent/10",
+                  items: [
+                    "Free courses: lifetime access after sign-up",
+                    "Purchased courses: lifetime access to material",
+                    "Annual pass: unlimited access for 12 months",
+                    "Certificates remain valid forever after completion",
+                  ],
+                },
+                {
+                  icon: FileText,
+                  title: "Templates",
+                  color: "text-teal-600",
+                  bg: "bg-teal-600/10",
+                  items: [
+                    "MLRO Toolkit: editable policy templates",
+                    "SAR / STR narrative templates by regulator",
+                    "Risk assessment & customer due-diligence forms",
+                    "Downloadable Word, PDF and spreadsheet formats",
+                  ],
+                },
+                {
+                  icon: RefreshCw,
+                  title: "Exam retakes",
+                  color: "text-emerald-600",
+                  bg: "bg-emerald-600/10",
+                  items: [
+                    "80% pass mark on every course quiz",
+                    "Unlimited free retakes until you pass",
+                    "Instant feedback on every answer",
+                    "Retake after 24 hours to reinforce learning",
+                  ],
+                },
+              ].map((card, i) => {
+                const Icon = card.icon;
+                return (
+                  <div
+                    key={i}
+                    className="rounded-xl border border-border bg-card p-6 flex flex-col"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`h-10 w-10 rounded-full ${card.bg} flex items-center justify-center flex-shrink-0`}>
+                        <Icon className={`h-5 w-5 ${card.color}`} />
+                      </div>
+                      <h3 className="text-subtitle font-semibold text-foreground">{card.title}</h3>
+                    </div>
+                    <ul className="space-y-2.5 flex-1">
+                      {card.items.map((item, j) => (
+                        <li key={j} className="flex gap-2 text-body-sm text-foreground">
+                          <Check className={`h-4 w-4 ${card.color} flex-shrink-0 mt-0.5`} />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         {/* Certificate showcase */}
         <section className="bg-navy text-primary-foreground border-b border-border">
           <div className="container-enterprise section-padding">
