@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,32 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock, ShoppingBag, Check, LogIn, Calendar, RefreshCw, Crown, Loader2 } from "lucide-react";
+
+import { z } from "zod";
+
+// Block common disposable / throwaway inbox providers from the guest annual-pass
+// flow — these accounts can't receive receipts or course-access links reliably.
+const DISPOSABLE_EMAIL_DOMAINS = new Set([
+  "mailinator.com", "tempmail.com", "temp-mail.org", "10minutemail.com",
+  "guerrillamail.com", "yopmail.com", "trashmail.com", "throwawaymail.com",
+  "fakeinbox.com", "getnada.com", "maildrop.cc", "sharklasers.com",
+  "dispostable.com", "mintemail.com", "mailnesia.com",
+]);
+
+const guestEmailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(1, "Email is required")
+  .max(255, "Email is too long")
+  .email("Please enter a valid email address")
+  .refine(
+    (email) => {
+      const domain = email.split("@")[1];
+      return domain ? !DISPOSABLE_EMAIL_DOMAINS.has(domain) : false;
+    },
+    { message: "Please use a work or permanent email address" },
+  );
 import { getCourseCover } from "@/assets/academy";
 import AcademyLogo from "@/components/AcademyLogo";
 import worldAmlLogoDark from "@/assets/worldaml-logo-dark.png.asset.json";
@@ -100,18 +126,27 @@ const Academy = () => {
   const [annualLoading, setAnnualLoading] = useState(false);
   const [annualGuestEmail, setAnnualGuestEmail] = useState("");
   const [annualPromptOpen, setAnnualPromptOpen] = useState(false);
+  const [annualEmailError, setAnnualEmailError] = useState<string | null>(null);
+  // Ref guard runs synchronously on click — prevents the double-Stripe-session
+  // race where rapid clicks fire before React commits `setAnnualLoading(true)`.
+  const annualInFlightRef = useRef(false);
 
   const startAnnualCheckout = async (emailOverride?: string) => {
+    if (annualInFlightRef.current) return;
     const invokeBody: Record<string, unknown> = { currency };
     if (!user) {
-      const email = (emailOverride ?? annualGuestEmail).trim().toLowerCase();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      const raw = emailOverride ?? annualGuestEmail;
+      const parsed = guestEmailSchema.safeParse(raw);
+      if (!parsed.success) {
+        setAnnualEmailError(parsed.error.issues[0]?.message ?? "Invalid email");
         setAnnualPromptOpen(true);
         return;
       }
+      const email = parsed.data;
       invokeBody.guestEmail = email;
       try { window.localStorage.setItem("academy_last_email", email); } catch { /* noop */ }
     }
+    annualInFlightRef.current = true;
     setAnnualLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke(
@@ -119,22 +154,31 @@ const Academy = () => {
         { body: invokeBody },
       );
       if (error) throw error;
-      if (!data?.url) throw new Error("No checkout URL returned");
+      if (!data?.url || typeof data.url !== "string" || !data.url.startsWith("https://checkout.stripe.com/")) {
+        throw new Error("Invalid checkout URL returned");
+      }
       window.location.href = data.url;
     } catch (err) {
       console.error("Annual checkout failed:", err);
       toast.error(err instanceof Error ? err.message : "Could not start checkout. Please try again.");
+      annualInFlightRef.current = false;
       setAnnualLoading(false);
     }
   };
 
-  // Post-checkout success toast (Stripe redirects back with ?purchase=success)
+  // Post-checkout success toast (Stripe redirects back with ?purchase=success).
+  // Intentionally runs once on mount only — the URL param is stripped via
+  // setSearchParams below, so re-running on every searchParams change would
+  // either no-op or duplicate the toast. Browser back/forward landing on the
+  // same param again is an accepted edge case (user can refresh to retrigger).
   useEffect(() => {
     const purchase = searchParams.get("purchase");
     if (purchase === "success") {
-      // Snapshot cart contents BEFORE clearing so we can show what was unlocked.
-      const unlocked = Array.from(cart.items);
-      if (unlocked.length > 0) setJustPurchasedSlugs(unlocked);
+      // Snapshot cart BEFORE clearing so we can show what was unlocked, but
+      // intersect with the server-confirmed `purchasedSlugs` after refetch so
+      // a stale cart (e.g. cleared in another tab) doesn't show fake unlocks.
+      const snapshot = Array.from(cart.items);
+      if (snapshot.length > 0) setJustPurchasedSlugs(snapshot);
 
       toast.success("Payment received — your courses are unlocked.", {
         description: "Scroll down to start learning.",
@@ -143,10 +187,16 @@ const Academy = () => {
       // Clear cart locally; the webhook has recorded the purchase server-side.
       cart.clear();
       // Refetch purchases so card CTAs flip from "Unlock course" to "Start course".
-      // Webhook may take a moment; retry a few times.
-      void refetchPurchases();
-      const t1 = setTimeout(() => { void refetchPurchases(); }, 1500);
-      const t2 = setTimeout(() => { void refetchPurchases(); }, 4000);
+      // Webhook may take a moment; retry a few times, then reconcile the banner.
+      const reconcile = async () => {
+        await refetchPurchases();
+        setJustPurchasedSlugs((prev) =>
+          prev.filter((slug) => purchasedSlugs.has(slug)),
+        );
+      };
+      void reconcile();
+      const t1 = setTimeout(() => { void reconcile(); }, 1500);
+      const t2 = setTimeout(() => { void reconcile(); }, 4000);
       const next = new URLSearchParams(searchParams);
       next.delete("purchase");
       setSearchParams(next, { replace: true });
@@ -157,6 +207,7 @@ const Academy = () => {
       next.delete("purchase");
       setSearchParams(next, { replace: true });
     }
+    // Mount-only; see comment above for rationale.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -188,7 +239,8 @@ const Academy = () => {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
   const [bannerDismissed, setBannerDismissed] = useState(() => {
-    try { return sessionStorage.getItem("academy-new-courses-dismissed") === "1"; } catch { return false; }
+    if (typeof window === "undefined") return false;
+    try { return window.sessionStorage.getItem("academy-new-courses-dismissed") === "1"; } catch { return false; }
   });
 
   const dismissBanner = () => {
@@ -1700,35 +1752,55 @@ const Academy = () => {
       <Footer />
 
       {/* Guest email prompt for annual all-access pass */}
-      <Dialog open={annualPromptOpen} onOpenChange={setAnnualPromptOpen}>
+      <Dialog
+        open={annualPromptOpen}
+        onOpenChange={(open) => {
+          setAnnualPromptOpen(open);
+          if (!open) setAnnualEmailError(null);
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Buy annual access</DialogTitle>
             <DialogDescription>
-              Enter your email to start checkout. We'll send your access link as soon as payment completes — no account setup required.
+              Enter your email to start checkout. We'll send your receipt and access link there as soon as payment completes — no account setup required.
             </DialogDescription>
           </DialogHeader>
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              const email = annualGuestEmail.trim().toLowerCase();
-              if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                toast.error("Please enter a valid email.");
+              const parsed = guestEmailSchema.safeParse(annualGuestEmail);
+              if (!parsed.success) {
+                setAnnualEmailError(parsed.error.issues[0]?.message ?? "Invalid email");
                 return;
               }
+              setAnnualEmailError(null);
               setAnnualPromptOpen(false);
-              startAnnualCheckout(email);
+              startAnnualCheckout(parsed.data);
             }}
             className="space-y-3"
+            noValidate
           >
             <Input
               type="email"
               placeholder="you@example.com"
               value={annualGuestEmail}
-              onChange={(e) => setAnnualGuestEmail(e.target.value)}
+              onChange={(e) => {
+                setAnnualGuestEmail(e.target.value);
+                if (annualEmailError) setAnnualEmailError(null);
+              }}
               autoFocus
+              maxLength={255}
+              aria-invalid={annualEmailError ? true : undefined}
+              aria-describedby={annualEmailError ? "annual-email-error" : undefined}
+              className={annualEmailError ? "border-destructive focus-visible:ring-destructive" : undefined}
               required
             />
+            {annualEmailError && (
+              <p id="annual-email-error" role="alert" className="text-caption text-destructive">
+                {annualEmailError}
+              </p>
+            )}
             <Button type="submit" variant="accent" className="w-full" disabled={annualLoading}>
               {annualLoading ? (
                 <>
