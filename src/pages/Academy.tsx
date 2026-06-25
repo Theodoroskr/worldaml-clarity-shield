@@ -239,7 +239,8 @@ const Academy = () => {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
   const [bannerDismissed, setBannerDismissed] = useState(() => {
-    try { return sessionStorage.getItem("academy-new-courses-dismissed") === "1"; } catch { return false; }
+    if (typeof window === "undefined") return false;
+    try { return window.sessionStorage.getItem("academy-new-courses-dismissed") === "1"; } catch { return false; }
   });
 
   const dismissBanner = () => {
