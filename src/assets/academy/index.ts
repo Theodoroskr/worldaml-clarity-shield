@@ -61,6 +61,8 @@ export const COURSE_COVERS: Record<string, string> = {
   "aml-real-estate": "/__l5e/assets-v1/f5159f07-f984-4fc6-8644-f8bb8a6fcffa/course-aml-real-estate.jpg",
   "aml-gaming-gambling": "/__l5e/assets-v1/dc7a8601-463a-43fa-980f-52c6460a4612/course-aml-gaming.jpg",
   "terrorist-financing-essentials": "/__l5e/assets-v1/4f098ad1-32f7-449f-bad1-151a58fbe25e/course-terrorist-financing.jpg",
+  "aml-uk": "/__l5e/assets-v1/9b0ab7be-18ec-400d-a392-96892048ff90/course-aml-uk.jpg",
+  "mlro-masterclass": "/__l5e/assets-v1/a82357dc-0604-49a9-bfec-74ee45e6497b/course-mlro-masterclass.jpg",
 };
 
 export const COURSE_DIAGRAMS: Record<string, string> = {
