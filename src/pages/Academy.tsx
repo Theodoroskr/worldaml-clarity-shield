@@ -15,6 +15,7 @@ import { getCourseCover } from "@/assets/academy";
 import AcademyLogo from "@/components/AcademyLogo";
 import AcademyCartButton from "@/components/academy/AcademyCartDrawer";
 import LearnerLogos from "@/components/academy/LearnerLogos";
+import StickyMobileCTA from "@/components/academy/StickyMobileCTA";
 import { useCart } from "@/contexts/CartContext";
 import { useAcademyPurchases } from "@/hooks/useAcademyPurchases";
 import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/academyPricing";
@@ -1692,6 +1693,11 @@ const Academy = () => {
           </form>
         </DialogContent>
       </Dialog>
+      <StickyMobileCTA
+        onAnnualClick={() => startAnnualCheckout()}
+        annualLoading={annualLoading}
+        annualPriceLabel={formatPrice(convertEurCents(19900, currency), currency)}
+      />
     </div>
   );
 };
