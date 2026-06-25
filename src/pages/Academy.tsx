@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ArrowRight, ArrowLeft, GraduationCap, Clock, Award, Shield, BookOpen, CheckCircle, BarChart3, Globe, MapPin, Layers, Sparkles, X, Linkedin, Star, FileText, PlayCircle, Lock, ShoppingBag, Check, LogIn, Calendar, RefreshCw, Crown, Loader2 } from "lucide-react";
 import { getCourseCover } from "@/assets/academy";
 import AcademyLogo from "@/components/AcademyLogo";
+import worldAmlLogoDark from "@/assets/worldaml-logo-dark.png.asset.json";
 import heroShield from "@/assets/academy-hero-professional.jpg";
 import AcademyCartButton from "@/components/academy/AcademyCartDrawer";
 import LearnerLogos from "@/components/academy/LearnerLogos";
