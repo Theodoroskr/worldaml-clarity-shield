@@ -270,7 +270,7 @@ const ResourcesDataCoverage = () => {
                   </p>
                   <Button asChild variant="outline" className="mt-4">
                     <Link to="/data-sources/worldcompliance">
-                      Learn More
+                      Learn more about WorldCompliance
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
@@ -289,7 +289,7 @@ const ResourcesDataCoverage = () => {
                   </p>
                   <Button asChild variant="outline" className="mt-4">
                     <Link to="/data-sources/bridger-xg">
-                      Learn More
+                      Learn more about Bridger Insight XG
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
