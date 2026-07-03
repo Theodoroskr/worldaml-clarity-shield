@@ -198,6 +198,7 @@ ${urls}
 const ACADEMY_STATIC_ROUTES: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: 1.0 },
   { path: "/templates", changefreq: "monthly", priority: 0.7 },
+  { path: "/annual-pass-active", changefreq: "yearly", priority: 0.3 },
   { path: "/login", changefreq: "yearly", priority: 0.3 },
   { path: "/signup", changefreq: "yearly", priority: 0.3 },
 ];
