@@ -318,23 +318,33 @@ Deno.serve(async (req) => {
 
     // Parse body first so we can decide which paths need admin auth
     const body = await req.json();
-    const { recipientEmail: rawEmail, recipientName, templateId, setPassword } = body as {
+    const {
+      recipientEmail: rawEmail,
+      recipientName,
+      templateId,
+      setPassword,
+      templateData,
+    } = body as {
       recipientEmail: string;
       recipientName?: string;
       templateId: TemplateId;
       setPassword?: string;
+      templateData?: TemplateData;
     };
 
     // Public path: anyone can request a password reset email for their own account.
-    // Supabase admin.generateLink only emits a valid recovery link for an actual user,
-    // and the link is delivered to that user's verified email — safe to expose.
     const isPublicPasswordReset =
       templateId === "password-reset-academy" && !setPassword;
 
-    // Audit user for non-public paths (admin-only)
+    // Internal call from another edge function (queue worker) — uses shared secret
+    const internalSecret = req.headers.get("x-internal-secret");
+    const isInternalCall =
+      !!internalSecret && internalSecret === supabaseServiceKey;
+
+    // Audit user for non-public, non-internal paths (admin-only)
     let user: { id: string } | null = null;
 
-    if (!isPublicPasswordReset) {
+    if (!isPublicPasswordReset && !isInternalCall) {
       const token = authHeader.replace("Bearer ", "");
       const { data: { user: authedUser }, error: authError } =
         await supabase.auth.getUser(token);
