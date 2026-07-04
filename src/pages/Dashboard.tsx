@@ -43,6 +43,14 @@ const Dashboard = () => {
   const [certsLoading, setCertsLoading] = useState(true);
   const [inProgressCourses, setInProgressCourses] = useState<any[]>([]);
   const [showFirstLessonNudge, setShowFirstLessonNudge] = useState(false);
+  const [showAmlUpsell, setShowAmlUpsell] = useState(() => {
+    try { return localStorage.getItem("dashboard_aml_upsell_dismissed") !== "1"; }
+    catch { return true; }
+  });
+  const dismissAmlUpsell = () => {
+    try { localStorage.setItem("dashboard_aml_upsell_dismissed", "1"); } catch { /* ignore */ }
+    setShowAmlUpsell(false);
+  };
 
   /* ─── fetch certificates + in-progress courses ─── */
   useEffect(() => {
@@ -322,6 +330,49 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
+
+              {/* ── AML Screening upsell (registered non-Suite users) ── */}
+              {showAmlUpsell && (
+                <div className="mb-6 rounded-xl border border-navy/15 bg-gradient-to-br from-navy/[0.04] via-teal/[0.05] to-transparent p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-navy/10 text-navy flex-shrink-0">
+                      <Shield className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3 mb-1 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-sm font-bold text-navy">Screen customers against 1,900+ global lists</h3>
+                          <span className="inline-flex items-center rounded-full bg-navy/10 px-2 py-0.5 text-[10px] font-semibold text-navy uppercase tracking-wider">
+                            Upgrade
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={dismissAmlUpsell}
+                          className="text-[11px] text-text-secondary hover:text-navy underline underline-offset-2"
+                          aria-label="Dismiss AML Screening upsell"
+                        >
+                          Dismiss
+                        </button>
+                      </div>
+                      <p className="text-xs text-text-secondary leading-relaxed mb-3">
+                        Upgrade from ad-hoc lookups to <strong className="text-navy">continuous AML screening &amp; monitoring</strong> —
+                        sanctions, PEPs, adverse media and RCAs at onboarding and throughout the relationship.
+                        Powered by WorldCompliance® and Bridger Insight XG® data. FATF R.6, R.12 &amp; R.16 aligned.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Button size="sm" variant="accent" onClick={() => navigate("/platform/aml-screening")}>
+                          Explore AML Screening <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => navigate("/contact-sales")}>
+                          Talk to sales
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
 
               {/* ── Your first lesson is free (≥7-day-old users, 0 purchases) ── */}
               {showFirstLessonNudge && (
