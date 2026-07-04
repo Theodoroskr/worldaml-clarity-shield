@@ -25,6 +25,42 @@ interface Profile {
   signup_landing_path: string | null;
   signup_referrer: string | null;
   signup_utm: Record<string, string> | null;
+  marketing_consent: boolean | null;
+  marketing_consent_at: string | null;
+  marketing_opt_out_at: string | null;
+}
+
+type EligibilityReason =
+  | "explicit_consent"
+  | "legitimate_interest"
+  | "opted_out"
+  | "account_not_approved"
+  | "account_too_new"
+  | "already_customer"
+  | "user_not_found"
+  | "not_eligible";
+
+const REASON_LABELS: Record<string, string> = {
+  explicit_consent: "Opted in",
+  legitimate_interest: "Legitimate interest",
+  opted_out: "Opted out of marketing",
+  account_not_approved: "Account not approved",
+  account_too_new: "Account under 30 days old",
+  already_customer: "Already a Suite customer",
+  user_not_found: "Not a registered user",
+  not_eligible: "Not eligible",
+};
+
+function evaluateEligibility(p: Profile): { eligible: boolean; reason: EligibilityReason } {
+  if (p.marketing_opt_out_at) return { eligible: false, reason: "opted_out" };
+  if (p.marketing_consent) return { eligible: true, reason: "explicit_consent" };
+  if (p.status !== "approved") return { eligible: false, reason: "account_not_approved" };
+  const ageMs = Date.now() - new Date(p.created_at).getTime();
+  if (ageMs < 30 * 24 * 60 * 60 * 1000) return { eligible: false, reason: "account_too_new" };
+  if (p.subscription_tier === "suite" || p.subscription_tier === "enterprise") {
+    return { eligible: false, reason: "already_customer" };
+  }
+  return { eligible: true, reason: "legitimate_interest" };
 }
 
 
@@ -184,6 +220,21 @@ export default function AdminUsers() {
     }
     setActionLoading(null);
     setGrantDialog({ open: false, profile: null });
+  };
+
+  const toggleMarketingConsent = async (profile: Profile, optIn: boolean) => {
+    setActionLoading(profile.id);
+    const now = new Date().toISOString();
+    const patch = optIn
+      ? { marketing_consent: true, marketing_consent_at: now, marketing_opt_out_at: null }
+      : { marketing_consent: false, marketing_opt_out_at: now };
+    const { error } = await supabase.from("profiles").update(patch as any).eq("id", profile.id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(optIn ? "Marketing consent recorded" : "Marketing opt-out recorded");
+      setProfiles(prev => prev.map(p => p.id === profile.id ? { ...p, ...patch } as Profile : p));
+    }
+    setActionLoading(null);
   };
 
   const revokeSuiteAccess = async (email: string, profileId: string) => {
@@ -359,11 +410,23 @@ export default function AdminUsers() {
                         <KeyRound className="w-3.5 h-3.5 mr-1" />Grant Suite
                       </Button>
                     )}
-                    {p.email && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-teal-600" onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellDialog({ open: true, profile: p }); }}>
-                        <Send className="w-3.5 h-3.5 mr-1" />Upsell
-                      </Button>
-                    )}
+                    {p.email && (() => {
+                      const el = evaluateEligibility(p);
+                      return (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className={`h-7 text-xs ${el.eligible ? "text-teal-600" : "text-muted-foreground"}`}
+                          onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellDialog({ open: true, profile: p }); }}
+                          disabled={!el.eligible}
+                          title={el.eligible ? `Basis: ${REASON_LABELS[el.reason]}` : `Blocked: ${REASON_LABELS[el.reason]}`}
+                        >
+                          <Send className="w-3.5 h-3.5 mr-1" />
+                          Upsell
+                          {!el.eligible && <span className="ml-1 text-[10px] opacity-70">· blocked</span>}
+                        </Button>
+                      );
+                    })()}
                     {p.email && (upsellCounts[p.user_id] || upsellCounts[p.email] || 0) > 0 && (
                       <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => openHistory(p)}>
                         <History className="w-3.5 h-3.5 mr-1" />
@@ -372,6 +435,21 @@ export default function AdminUsers() {
                           {upsellCounts[p.user_id] || upsellCounts[p.email] || 0}
                         </Badge>
                       </Button>
+                    )}
+                    {p.email && (
+                      p.marketing_opt_out_at ? (
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-red-600" onClick={() => toggleMarketingConsent(p, true)} disabled={actionLoading === p.id} title={`Opted out ${new Date(p.marketing_opt_out_at).toLocaleDateString()}`}>
+                          Opted out · re-enable
+                        </Button>
+                      ) : p.marketing_consent ? (
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-emerald-600" onClick={() => toggleMarketingConsent(p, false)} disabled={actionLoading === p.id} title={p.marketing_consent_at ? `Opted in ${new Date(p.marketing_consent_at).toLocaleDateString()}` : "Opted in"}>
+                          Opted in · opt out
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => toggleMarketingConsent(p, true)} disabled={actionLoading === p.id}>
+                          Record opt-in
+                        </Button>
+                      )
                     )}
                   </div>
                 </td>
@@ -555,6 +633,24 @@ export default function AdminUsers() {
                 </SelectContent>
               </Select>
             </div>
+            {upsellDialog.profile && (() => {
+              const el = evaluateEligibility(upsellDialog.profile);
+              return el.eligible ? (
+                <div className="p-3 rounded-lg border border-emerald-200 bg-emerald-50/50 text-xs text-emerald-800">
+                  <strong>Eligible to receive sales outreach.</strong><br />
+                  Legal basis: <span className="font-medium">{REASON_LABELS[el.reason]}</span>
+                  {el.reason === "legitimate_interest" && " — approved account &gt; 30 days, not yet a Suite customer."}
+                  {upsellDialog.profile.marketing_consent_at && (
+                    <> · Consent recorded {new Date(upsellDialog.profile.marketing_consent_at).toLocaleDateString()}</>
+                  )}
+                </div>
+              ) : (
+                <div className="p-3 rounded-lg border border-red-200 bg-red-50/50 text-xs text-red-800">
+                  <strong>Send blocked:</strong> {REASON_LABELS[el.reason]}.
+                  <br />This user does not meet the consent or legitimate-interest rules for one-to-one sales outreach.
+                </div>
+              );
+            })()}
             <div className="p-3 rounded-lg border border-amber-200 bg-amber-50/50 text-xs text-amber-800">
               <strong>Note:</strong> This sends a single personalised email via Resend to this user. A copy is CC'd to compliance@infocreditgroup.com and logged in the audit trail.
             </div>
@@ -563,7 +659,12 @@ export default function AdminUsers() {
             <Button variant="outline" size="sm" onClick={() => setUpsellDialog({ open: false, profile: null })}>
               Cancel
             </Button>
-            <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white" onClick={sendUpsellEmail} disabled={upsellSending}>
+            <Button
+              size="sm"
+              className="bg-teal-600 hover:bg-teal-700 text-white"
+              onClick={sendUpsellEmail}
+              disabled={upsellSending || !(upsellDialog.profile && evaluateEligibility(upsellDialog.profile).eligible)}
+            >
               {upsellSending ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
               ) : (
