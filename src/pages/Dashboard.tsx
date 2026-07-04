@@ -321,6 +321,14 @@ const Dashboard = () => {
                 <div className="flex items-start gap-4">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-teal/20 to-navy/10 text-teal flex-shrink-0">
                     <Sparkles className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-lg font-bold text-navy mb-1">Welcome to WorldAML</h2>
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      Get started with free compliance tools. Explore sanctions screening, earn certifications, and upgrade when you're ready.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* ── AML Screening upsell (registered non-Suite users) ── */}
@@ -365,14 +373,6 @@ const Dashboard = () => {
                 </div>
               )}
 
-                  <div className="flex-1">
-                    <h2 className="text-lg font-bold text-navy mb-1">Welcome to WorldAML</h2>
-                    <p className="text-sm text-text-secondary leading-relaxed">
-                      Get started with free compliance tools. Explore sanctions screening, earn certifications, and upgrade when you're ready.
-                    </p>
-                  </div>
-                </div>
-              </div>
 
               {/* ── Your first lesson is free (≥7-day-old users, 0 purchases) ── */}
               {showFirstLessonNudge && (
