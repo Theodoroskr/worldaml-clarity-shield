@@ -364,6 +364,15 @@ export default function AdminUsers() {
                         <Send className="w-3.5 h-3.5 mr-1" />Upsell
                       </Button>
                     )}
+                    {p.email && (upsellCounts[p.user_id] || upsellCounts[p.email] || 0) > 0 && (
+                      <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => openHistory(p)}>
+                        <History className="w-3.5 h-3.5 mr-1" />
+                        History
+                        <Badge variant="outline" className="ml-1 h-4 px-1 text-[10px]">
+                          {upsellCounts[p.user_id] || upsellCounts[p.email] || 0}
+                        </Badge>
+                      </Button>
+                    )}
                   </div>
                 </td>
               </tr>
