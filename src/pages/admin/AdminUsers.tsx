@@ -222,6 +222,21 @@ export default function AdminUsers() {
     setGrantDialog({ open: false, profile: null });
   };
 
+  const toggleMarketingConsent = async (profile: Profile, optIn: boolean) => {
+    setActionLoading(profile.id);
+    const now = new Date().toISOString();
+    const patch = optIn
+      ? { marketing_consent: true, marketing_consent_at: now, marketing_opt_out_at: null }
+      : { marketing_consent: false, marketing_opt_out_at: now };
+    const { error } = await supabase.from("profiles").update(patch as any).eq("id", profile.id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(optIn ? "Marketing consent recorded" : "Marketing opt-out recorded");
+      setProfiles(prev => prev.map(p => p.id === profile.id ? { ...p, ...patch } as Profile : p));
+    }
+    setActionLoading(null);
+  };
+
   const revokeSuiteAccess = async (email: string, profileId: string) => {
     setActionLoading(profileId);
     const { error } = await supabase.rpc("admin_revoke_suite_access", { target_email: email });
