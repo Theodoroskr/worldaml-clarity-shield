@@ -25,6 +25,42 @@ interface Profile {
   signup_landing_path: string | null;
   signup_referrer: string | null;
   signup_utm: Record<string, string> | null;
+  marketing_consent: boolean | null;
+  marketing_consent_at: string | null;
+  marketing_opt_out_at: string | null;
+}
+
+type EligibilityReason =
+  | "explicit_consent"
+  | "legitimate_interest"
+  | "opted_out"
+  | "account_not_approved"
+  | "account_too_new"
+  | "already_customer"
+  | "user_not_found"
+  | "not_eligible";
+
+const REASON_LABELS: Record<string, string> = {
+  explicit_consent: "Opted in",
+  legitimate_interest: "Legitimate interest",
+  opted_out: "Opted out of marketing",
+  account_not_approved: "Account not approved",
+  account_too_new: "Account under 30 days old",
+  already_customer: "Already a Suite customer",
+  user_not_found: "Not a registered user",
+  not_eligible: "Not eligible",
+};
+
+function evaluateEligibility(p: Profile): { eligible: boolean; reason: EligibilityReason } {
+  if (p.marketing_opt_out_at) return { eligible: false, reason: "opted_out" };
+  if (p.marketing_consent) return { eligible: true, reason: "explicit_consent" };
+  if (p.status !== "approved") return { eligible: false, reason: "account_not_approved" };
+  const ageMs = Date.now() - new Date(p.created_at).getTime();
+  if (ageMs < 30 * 24 * 60 * 60 * 1000) return { eligible: false, reason: "account_too_new" };
+  if (p.subscription_tier === "suite" || p.subscription_tier === "enterprise") {
+    return { eligible: false, reason: "already_customer" };
+  }
+  return { eligible: true, reason: "legitimate_interest" };
 }
 
 
