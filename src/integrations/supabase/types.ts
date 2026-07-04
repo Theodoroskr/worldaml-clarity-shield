@@ -918,6 +918,9 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          marketing_consent: boolean
+          marketing_consent_at: string | null
+          marketing_opt_out_at: string | null
           phone: string | null
           regulator: string | null
           signup_landing_path: string | null
@@ -937,6 +940,9 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          marketing_consent?: boolean
+          marketing_consent_at?: string | null
+          marketing_opt_out_at?: string | null
           phone?: string | null
           regulator?: string | null
           signup_landing_path?: string | null
@@ -956,6 +962,9 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          marketing_consent?: boolean
+          marketing_consent_at?: string | null
+          marketing_opt_out_at?: string | null
           phone?: string | null
           regulator?: string | null
           signup_landing_path?: string | null
@@ -3672,6 +3681,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      is_eligible_for_sales_outreach: {
+        Args: { _user_id: string }
+        Returns: Json
       }
       rcm_can_edit: { Args: { _org: string }; Returns: boolean }
       rcm_can_manage: { Args: { _org: string }; Returns: boolean }
