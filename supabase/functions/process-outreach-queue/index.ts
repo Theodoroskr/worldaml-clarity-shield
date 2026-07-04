@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 const COUPON_ID = "seminar-suite-20";
+const ACADEMY_COUPON_ID = "academy-paid-30";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -57,22 +58,29 @@ Deno.serve(async (req) => {
       let promoCode: string | null = item.promo_code ?? null;
       const templateData: Record<string, unknown> = {};
 
-      // Generate a unique per-user Stripe promotion code for the seminar discount
-      if (item.template_id === "seminar-discount-suite" && !promoCode) {
+      // Generate a unique per-user Stripe promotion code depending on template
+      const needsPromo =
+        (item.template_id === "seminar-discount-suite" ||
+          item.template_id === "academy-paid-discount") && !promoCode;
+      if (needsPromo) {
         try {
-          const code = `SEMINAR-${item.user_id.split("-")[0].toUpperCase()}-${
+          const isAcademy = item.template_id === "academy-paid-discount";
+          const prefix = isAcademy ? "ACADEMY" : "SEMINAR";
+          const coupon = isAcademy ? ACADEMY_COUPON_ID : COUPON_ID;
+          const trigger = isAcademy ? "free_course_completion" : "seminar_completion";
+          const code = `${prefix}-${item.user_id.split("-")[0].toUpperCase()}-${
             Math.random().toString(36).slice(2, 6).toUpperCase()
           }`;
           const expires = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
           const promo = await stripe.promotionCodes.create({
-            coupon: COUPON_ID,
+            coupon,
             code,
             max_redemptions: 1,
             expires_at: expires,
             metadata: {
               user_id: item.user_id,
               queue_id: item.id,
-              trigger: "seminar_completion",
+              trigger,
             },
           });
           promoCode = promo.code;
