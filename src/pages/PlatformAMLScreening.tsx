@@ -96,7 +96,18 @@ const faqData = {
 
 const structuredData = [softwareData, faqData];
 
-const PlatformAMLScreening = () => (
+const PlatformAMLScreening = () => {
+  useEffect(() => {
+    // Fire-and-forget: only tracked for authenticated users; edge function requires JWT
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) return;
+      supabase.functions.invoke("log-outreach-event", {
+        body: { event_type: "aml_page_view", path: "/platform/aml-screening" },
+      }).catch(() => {});
+    });
+  }, []);
+
+  return (
   <div className="min-h-screen flex flex-col">
     <SEO
       title="AML Screening & Monitoring — Sanctions & PEP"
