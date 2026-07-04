@@ -45,7 +45,8 @@ type TemplateId =
   | "screening-upsell"
   | "password-reset-academy"
   | "aml-signal-outreach"
-  | "seminar-discount-suite";
+  | "seminar-discount-suite"
+  | "academy-paid-discount";
 
 interface TemplateData {
   promoCode?: string;
