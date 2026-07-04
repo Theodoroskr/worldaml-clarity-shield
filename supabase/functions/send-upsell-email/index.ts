@@ -492,7 +492,8 @@ Deno.serve(async (req) => {
       templateId === "suite-upsell" ||
       templateId === "screening-upsell" ||
       templateId === "aml-signal-outreach" ||
-      templateId === "seminar-discount-suite";
+      templateId === "seminar-discount-suite" ||
+      templateId === "academy-paid-discount";
 
     if (isSalesOutreach) {
       const { data: recipientProfile } = await supabase
