@@ -302,6 +302,49 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
     buildText: (firstName: string, _resetLink?: string, data?: TemplateData) =>
       `Hi ${firstName || "there"},\n\nCongrats on completing your WorldAML seminar! As a thank-you, here's 20% off WorldAML Suite:\n\n  Code: ${data?.promoCode || "SEMINAR20"}\n  Valid 30 days, single use.\n\nRedeem: https://worldaml.com/contact-sales?product=suite&promo=${data?.promoCode || "SEMINAR20"}\n\nThe WorldAML Team`,
   },
+
+  "academy-paid-discount": {
+    subject: "You've completed a free WorldAML course — 30% off your next paid course",
+    buildHtml: (firstName: string, _resetLink?: string, data?: TemplateData) => {
+      const code = escapeHtml(data?.promoCode || "ACADEMY30");
+      return `
+<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#0f1b3d;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:32px 16px;"><tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);">
+      <tr><td style="background:linear-gradient(135deg,#1e3a5f 0%,#0d2137 100%);padding:28px 32px;text-align:center;">
+        <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;">Ready for your next step, ${firstName || "learner"}?</h1>
+        <p style="margin:6px 0 0;color:#5eead4;font-size:13px;">WorldAML Academy — Advanced Courses</p>
+      </td></tr>
+      <tr><td style="padding:32px;">
+        <p style="margin:0 0 14px;font-size:15px;color:#374151;">Hi ${firstName || "there"},</p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:#374151;">
+          Great job finishing your free WorldAML course. As a thank-you, here's <strong>30% off any paid course</strong> in the WorldAML Academy — including our MLRO, EDD, and iGaming compliance tracks.
+        </p>
+        <div style="margin:20px 0;padding:18px;border:2px dashed #1e3a5f;border-radius:10px;text-align:center;background:#f0f5ff;">
+          <p style="margin:0 0 6px;font-size:12px;color:#1e3a5f;text-transform:uppercase;letter-spacing:1px;">Your discount code</p>
+          <p style="margin:0;font-size:26px;font-weight:700;color:#1e3a5f;letter-spacing:2px;">${code}</p>
+          <p style="margin:8px 0 0;font-size:12px;color:#6b7280;">Valid for 30 days · single use · applies at checkout</p>
+        </div>
+        <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 4px;">
+          <a href="https://academy.worldaml.com/?promo=${code}&utm_source=email&utm_medium=triggered&utm_campaign=academy-paid-discount"
+             style="display:inline-block;background:linear-gradient(135deg,#0d9488,#0f766e);color:#fff;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;">
+            Browse paid courses →
+          </a>
+        </td></tr></table>
+      </td></tr>
+      <tr><td style="padding:20px 32px;background:#f9fafb;border-top:1px solid #e5e7eb;">
+        <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center;">
+          WorldAML by Infocredit Group · <a href="https://worldaml.com" style="color:#9ca3af;">worldaml.com</a>
+        </p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`;
+    },
+    buildText: (firstName: string, _resetLink?: string, data?: TemplateData) =>
+      `Hi ${firstName || "there"},\n\nCongrats on finishing your free WorldAML course! Here's 30% off any paid Academy course:\n\n  Code: ${data?.promoCode || "ACADEMY30"}\n  Valid 30 days, single use.\n\nBrowse: https://academy.worldaml.com/?promo=${data?.promoCode || "ACADEMY30"}\n\nThe WorldAML Team`,
+  },
 };
 
 /* ── Handler ── */
