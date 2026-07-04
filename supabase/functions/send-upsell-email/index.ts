@@ -548,28 +548,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Audit log (only when there is an authenticated actor)
-    if (user) {
-      await supabase.from("suite_audit_log").insert({
-        user_id: user.id,
-        action: `Sent ${templateId} email to ${recipientEmail}`,
+    // Audit log — actor is admin user, or null when triggered internally by queue worker
+    await supabase.from("suite_audit_log").insert({
+      user_id: user?.id ?? null,
+      action: `Sent ${templateId} email to ${recipientEmail}${isInternalCall ? " (auto/queue)" : ""}`,
+    }).then(() => {});
+
+    // Per-user upsell email history (visible on admin user profile)
+    if (templateId !== "password-reset-academy") {
+      const { data: recipientProfile } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("email", recipientEmail)
+        .maybeSingle();
+
+      await supabase.from("admin_upsell_email_log").insert({
+        recipient_user_id: recipientProfile?.user_id ?? null,
+        recipient_email: recipientEmail,
+        template_id: templateId,
+        sent_by: user?.id ?? null,
       }).then(() => {});
-
-      // Per-user upsell email history (visible on admin user profile)
-      if (templateId !== "password-reset-academy") {
-        const { data: recipientProfile } = await supabase
-          .from("profiles")
-          .select("user_id")
-          .eq("email", recipientEmail)
-          .maybeSingle();
-
-        await supabase.from("admin_upsell_email_log").insert({
-          recipient_user_id: recipientProfile?.user_id ?? null,
-          recipient_email: recipientEmail,
-          template_id: templateId,
-          sent_by: user.id,
-        }).then(() => {});
-      }
     }
 
 
