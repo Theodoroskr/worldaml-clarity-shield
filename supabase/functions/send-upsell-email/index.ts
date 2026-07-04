@@ -536,8 +536,8 @@ Deno.serve(async (req) => {
       to: [recipientEmail],
       cc: CC,
       subject: template.subject,
-      html: template.buildHtml(safeName, passwordResetLink),
-      text: template.buildText(safeName, passwordResetLink),
+      html: template.buildHtml(safeName, passwordResetLink, templateData),
+      text: template.buildText(safeName, passwordResetLink, templateData),
     });
 
     if (sendError) {
