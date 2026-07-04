@@ -395,11 +395,23 @@ export default function AdminUsers() {
                         <KeyRound className="w-3.5 h-3.5 mr-1" />Grant Suite
                       </Button>
                     )}
-                    {p.email && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-teal-600" onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellDialog({ open: true, profile: p }); }}>
-                        <Send className="w-3.5 h-3.5 mr-1" />Upsell
-                      </Button>
-                    )}
+                    {p.email && (() => {
+                      const el = evaluateEligibility(p);
+                      return (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className={`h-7 text-xs ${el.eligible ? "text-teal-600" : "text-muted-foreground"}`}
+                          onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellDialog({ open: true, profile: p }); }}
+                          disabled={!el.eligible}
+                          title={el.eligible ? `Basis: ${REASON_LABELS[el.reason]}` : `Blocked: ${REASON_LABELS[el.reason]}`}
+                        >
+                          <Send className="w-3.5 h-3.5 mr-1" />
+                          Upsell
+                          {!el.eligible && <span className="ml-1 text-[10px] opacity-70">· blocked</span>}
+                        </Button>
+                      );
+                    })()}
                     {p.email && (upsellCounts[p.user_id] || upsellCounts[p.email] || 0) > 0 && (
                       <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => openHistory(p)}>
                         <History className="w-3.5 h-3.5 mr-1" />
