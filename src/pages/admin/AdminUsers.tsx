@@ -95,6 +95,8 @@ export default function AdminUsers() {
       if (data?.error) throw new Error(data.error);
       toast.success(`Upsell email sent to ${recipientEmail}`);
       setUpsellDialog({ open: false, profile: null });
+      const key = upsellDialog.profile?.user_id || recipientEmail;
+      setUpsellCounts(prev => ({ ...prev, [key]: (prev[key] || 0) + 1 }));
     } catch (err: any) {
       toast.error(err.message || "Failed to send email");
     } finally {
@@ -104,9 +106,10 @@ export default function AdminUsers() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [{ data: p }, { data: r }] = await Promise.all([
+    const [{ data: p }, { data: r }, { data: logs }] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("*"),
+      supabase.from("admin_upsell_email_log").select("recipient_user_id, recipient_email"),
     ]);
     setProfiles((p || []) as Profile[]);
     const roleMap: Record<string, string[]> = {};
@@ -115,6 +118,12 @@ export default function AdminUsers() {
       roleMap[row.user_id].push(row.role);
     });
     setUserRoles(roleMap);
+    const counts: Record<string, number> = {};
+    (logs || []).forEach((row: any) => {
+      const key = row.recipient_user_id || row.recipient_email;
+      if (key) counts[key] = (counts[key] || 0) + 1;
+    });
+    setUpsellCounts(counts);
     setLoading(false);
   };
 
