@@ -574,6 +574,57 @@ export default function AdminUsers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Upsell Email History Dialog */}
+      <Dialog open={historyDialog.open} onOpenChange={(open) => !open && setHistoryDialog({ open: false, profile: null })}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-4 h-4 text-primary" />
+              Upsell Email History
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="p-3 bg-muted/30 rounded-lg border border-border">
+              <p className="text-sm font-medium">{historyDialog.profile?.full_name || "—"}</p>
+              <p className="text-xs text-muted-foreground">{historyDialog.profile?.email}</p>
+            </div>
+            {historyLoading ? (
+              <div className="flex justify-center py-6"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
+            ) : historyRows.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">No upsell emails sent to this user yet.</p>
+            ) : (
+              <div className="max-h-80 overflow-auto border border-border rounded-lg">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/40">
+                    <tr>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Template</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Sent</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {historyRows.map(row => (
+                      <tr key={row.id}>
+                        <td className="px-3 py-2">
+                          <Badge variant="outline" className="text-xs bg-teal-50 text-teal-700 border-teal-200">
+                            {row.template_id}
+                          </Badge>
+                        </td>
+                        <td className="px-3 py-2 text-xs text-muted-foreground">
+                          {new Date(row.created_at).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setHistoryDialog({ open: false, profile: null })}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
