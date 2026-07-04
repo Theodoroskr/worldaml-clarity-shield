@@ -336,6 +336,47 @@ Deno.serve(async (req) => {
 
     console.log("Sending upsell email", { recipientEmail, templateId });
 
+    // Consent / eligibility gate for sales-outreach templates
+    const isSalesOutreach =
+      templateId === "suite-upsell" || templateId === "screening-upsell";
+
+    if (isSalesOutreach) {
+      const { data: recipientProfile } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("email", recipientEmail)
+        .maybeSingle();
+
+      if (!recipientProfile?.user_id) {
+        return new Response(JSON.stringify({
+          error: "Recipient is not a registered user — one-to-one sales outreach is only permitted to registered users.",
+          reason: "user_not_registered",
+        }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const { data: eligibility, error: elErr } = await supabase.rpc(
+        "is_eligible_for_sales_outreach",
+        { _user_id: recipientProfile.user_id },
+      );
+
+      if (elErr) {
+        console.error("Eligibility check failed:", elErr);
+        return new Response(JSON.stringify({ error: "Failed to verify recipient eligibility" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!eligibility?.eligible) {
+        console.log("Blocked upsell send", { recipientEmail, eligibility });
+        return new Response(JSON.stringify({
+          error: "This user is not eligible for sales outreach.",
+          reason: eligibility?.reason ?? "not_eligible",
+          eligibility,
+        }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
+
+
     if (templateId === "password-reset-academy") {
       console.log("[password-reset] Generating recovery link via admin.generateLink", {
         email: recipientEmail,
