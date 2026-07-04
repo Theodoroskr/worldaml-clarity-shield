@@ -435,6 +435,21 @@ export default function AdminUsers() {
                           {upsellCounts[p.user_id] || upsellCounts[p.email] || 0}
                         </Badge>
                       </Button>
+                    {p.email && (
+                      p.marketing_opt_out_at ? (
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-red-600" onClick={() => toggleMarketingConsent(p, true)} disabled={actionLoading === p.id} title={`Opted out ${new Date(p.marketing_opt_out_at).toLocaleDateString()}`}>
+                          Opted out · re-enable
+                        </Button>
+                      ) : p.marketing_consent ? (
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-emerald-600" onClick={() => toggleMarketingConsent(p, false)} disabled={actionLoading === p.id} title={p.marketing_consent_at ? `Opted in ${new Date(p.marketing_consent_at).toLocaleDateString()}` : "Opted in"}>
+                          Opted in · opt out
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => toggleMarketingConsent(p, true)} disabled={actionLoading === p.id}>
+                          Record opt-in
+                        </Button>
+                      )
+                    )}
                     )}
                   </div>
                 </td>
