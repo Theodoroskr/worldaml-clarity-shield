@@ -536,6 +536,33 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_upsell_email_log: {
+        Row: {
+          created_at: string
+          id: string
+          recipient_email: string
+          recipient_user_id: string | null
+          sent_by: string | null
+          template_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipient_email: string
+          recipient_user_id?: string | null
+          sent_by?: string | null
+          template_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipient_email?: string
+          recipient_user_id?: string | null
+          sent_by?: string | null
+          template_id?: string
+        }
+        Relationships: []
+      }
       admin_user_subscriptions: {
         Row: {
           created_at: string

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, FileText, Send } from "lucide-react";
+import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, FileText, Send, History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -56,6 +56,25 @@ export default function AdminUsers() {
   const [upsellDialog, setUpsellDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
   const [upsellTemplate, setUpsellTemplate] = useState<"suite-upsell" | "screening-upsell">("suite-upsell");
   const [upsellSending, setUpsellSending] = useState(false);
+  const [upsellCounts, setUpsellCounts] = useState<Record<string, number>>({});
+  const [historyDialog, setHistoryDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
+  const [historyRows, setHistoryRows] = useState<Array<{ id: string; template_id: string; created_at: string; sent_by: string | null }>>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const openHistory = async (profile: Profile) => {
+    setHistoryDialog({ open: true, profile });
+    setHistoryLoading(true);
+    setHistoryRows([]);
+    const query = supabase
+      .from("admin_upsell_email_log")
+      .select("id, template_id, created_at, sent_by")
+      .order("created_at", { ascending: false });
+    const { data } = profile.user_id
+      ? await query.or(`recipient_user_id.eq.${profile.user_id},recipient_email.eq.${profile.email}`)
+      : await query.eq("recipient_email", profile.email ?? "");
+    setHistoryRows((data as any) || []);
+    setHistoryLoading(false);
+  };
 
   const sendUpsellEmail = async () => {
     const recipientEmail = normalizeEmail(upsellDialog.profile?.email);
@@ -76,6 +95,8 @@ export default function AdminUsers() {
       if (data?.error) throw new Error(data.error);
       toast.success(`Upsell email sent to ${recipientEmail}`);
       setUpsellDialog({ open: false, profile: null });
+      const key = upsellDialog.profile?.user_id || recipientEmail;
+      setUpsellCounts(prev => ({ ...prev, [key]: (prev[key] || 0) + 1 }));
     } catch (err: any) {
       toast.error(err.message || "Failed to send email");
     } finally {
@@ -85,9 +106,10 @@ export default function AdminUsers() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [{ data: p }, { data: r }] = await Promise.all([
+    const [{ data: p }, { data: r }, { data: logs }] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("*"),
+      supabase.from("admin_upsell_email_log").select("recipient_user_id, recipient_email"),
     ]);
     setProfiles((p || []) as Profile[]);
     const roleMap: Record<string, string[]> = {};
@@ -96,6 +118,12 @@ export default function AdminUsers() {
       roleMap[row.user_id].push(row.role);
     });
     setUserRoles(roleMap);
+    const counts: Record<string, number> = {};
+    (logs || []).forEach((row: any) => {
+      const key = row.recipient_user_id || row.recipient_email;
+      if (key) counts[key] = (counts[key] || 0) + 1;
+    });
+    setUpsellCounts(counts);
     setLoading(false);
   };
 
@@ -336,6 +364,15 @@ export default function AdminUsers() {
                         <Send className="w-3.5 h-3.5 mr-1" />Upsell
                       </Button>
                     )}
+                    {p.email && (upsellCounts[p.user_id] || upsellCounts[p.email] || 0) > 0 && (
+                      <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => openHistory(p)}>
+                        <History className="w-3.5 h-3.5 mr-1" />
+                        History
+                        <Badge variant="outline" className="ml-1 h-4 px-1 text-[10px]">
+                          {upsellCounts[p.user_id] || upsellCounts[p.email] || 0}
+                        </Badge>
+                      </Button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -534,6 +571,57 @@ export default function AdminUsers() {
               )}
               Send Email
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upsell Email History Dialog */}
+      <Dialog open={historyDialog.open} onOpenChange={(open) => !open && setHistoryDialog({ open: false, profile: null })}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-4 h-4 text-primary" />
+              Upsell Email History
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="p-3 bg-muted/30 rounded-lg border border-border">
+              <p className="text-sm font-medium">{historyDialog.profile?.full_name || "—"}</p>
+              <p className="text-xs text-muted-foreground">{historyDialog.profile?.email}</p>
+            </div>
+            {historyLoading ? (
+              <div className="flex justify-center py-6"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
+            ) : historyRows.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">No upsell emails sent to this user yet.</p>
+            ) : (
+              <div className="max-h-80 overflow-auto border border-border rounded-lg">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/40">
+                    <tr>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Template</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Sent</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {historyRows.map(row => (
+                      <tr key={row.id}>
+                        <td className="px-3 py-2">
+                          <Badge variant="outline" className="text-xs bg-teal-50 text-teal-700 border-teal-200">
+                            {row.template_id}
+                          </Badge>
+                        </td>
+                        <td className="px-3 py-2 text-xs text-muted-foreground">
+                          {new Date(row.created_at).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setHistoryDialog({ open: false, profile: null })}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
