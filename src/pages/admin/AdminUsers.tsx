@@ -56,6 +56,25 @@ export default function AdminUsers() {
   const [upsellDialog, setUpsellDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
   const [upsellTemplate, setUpsellTemplate] = useState<"suite-upsell" | "screening-upsell">("suite-upsell");
   const [upsellSending, setUpsellSending] = useState(false);
+  const [upsellCounts, setUpsellCounts] = useState<Record<string, number>>({});
+  const [historyDialog, setHistoryDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
+  const [historyRows, setHistoryRows] = useState<Array<{ id: string; template_id: string; created_at: string; sent_by: string | null }>>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const openHistory = async (profile: Profile) => {
+    setHistoryDialog({ open: true, profile });
+    setHistoryLoading(true);
+    setHistoryRows([]);
+    const query = supabase
+      .from("admin_upsell_email_log")
+      .select("id, template_id, created_at, sent_by")
+      .order("created_at", { ascending: false });
+    const { data } = profile.user_id
+      ? await query.or(`recipient_user_id.eq.${profile.user_id},recipient_email.eq.${profile.email}`)
+      : await query.eq("recipient_email", profile.email ?? "");
+    setHistoryRows((data as any) || []);
+    setHistoryLoading(false);
+  };
 
   const sendUpsellEmail = async () => {
     const recipientEmail = normalizeEmail(upsellDialog.profile?.email);
