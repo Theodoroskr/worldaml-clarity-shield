@@ -8,6 +8,8 @@ import AMLDataSourcesSection from "@/components/aml-screening/AMLDataSourcesSect
 import AMLUseCasesSection from "@/components/aml-screening/AMLUseCasesSection";
 import AMLCTASection from "@/components/aml-screening/AMLCTASection";
 import StickyDemoCTA from "@/components/StickyDemoCTA";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const softwareData = {
   "@context": "https://schema.org",
