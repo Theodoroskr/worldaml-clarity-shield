@@ -40,12 +40,22 @@ function escapeAttribute(str: string): string {
 
 /* ── Email templates ── */
 
-type TemplateId = "suite-upsell" | "screening-upsell" | "password-reset-academy";
+type TemplateId =
+  | "suite-upsell"
+  | "screening-upsell"
+  | "password-reset-academy"
+  | "aml-signal-outreach"
+  | "seminar-discount-suite";
+
+interface TemplateData {
+  promoCode?: string;
+  courseTitle?: string;
+}
 
 interface TemplateConfig {
   subject: string;
-  buildHtml: (firstName: string, resetLink?: string) => string;
-  buildText: (firstName: string, resetLink?: string) => string;
+  buildHtml: (firstName: string, resetLink?: string, data?: TemplateData) => string;
+  buildText: (firstName: string, resetLink?: string, data?: TemplateData) => string;
 }
 
 const TEMPLATES: Record<TemplateId, TemplateConfig> = {
@@ -204,6 +214,93 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
     buildText: (firstName: string, resetLink = "https://www.worldaml.com/forgot-password") =>
       `Hi ${firstName || "there"},\n\nWe noticed you recently registered for WorldAML. To access your free Academy courses, please reset your password.\n\nReset your password here: ${resetLink}\n\nAs a registered user, you have free access to AML compliance training courses including AML Fundamentals, KYC & Customer Due Diligence, Sanctions Screening, and CPD-Accredited Certificates.\n\nOnce logged in, visit https://worldaml.com/academy to start learning.\n\nBest regards,\nThe WorldAML Team`,
   },
+
+  "aml-signal-outreach": {
+    subject: "Ready to automate your AML screening?",
+    buildHtml: (firstName: string) => `
+<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#0f1b3d;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:32px 16px;"><tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);">
+      <tr><td style="background:linear-gradient(135deg,#1e3a5f 0%,#0d2137 100%);padding:28px 32px;text-align:center;">
+        <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;">WorldAML Screening</h1>
+        <p style="margin:6px 0 0;color:#5eead4;font-size:13px;">1,900+ Global Watchlists · Continuous Monitoring</p>
+      </td></tr>
+      <tr><td style="padding:32px;">
+        <p style="margin:0 0 14px;font-size:15px;color:#374151;">Hi ${firstName || "there"},</p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:#374151;">
+          We noticed you've been exploring AML screening on WorldAML. If you're evaluating how to automate sanctions, PEP and adverse-media checks at scale, we'd love to show you how our production customers cut screening review time by 60–80%.
+        </p>
+        <ul style="margin:0 0 24px;padding-left:20px;font-size:14px;line-height:1.8;color:#374151;">
+          <li><strong>1,900+ watchlists</strong>, refreshed hourly</li>
+          <li><strong>Ongoing monitoring</strong> alerts when a customer's status changes</li>
+          <li><strong>API + UI</strong> — bulk import your book of business in minutes</li>
+          <li><strong>Audit-ready evidence</strong> for every screening decision</li>
+        </ul>
+        <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 4px;">
+          <a href="https://worldaml.com/contact-sales?product=aml-screening&utm_source=email&utm_medium=triggered&utm_campaign=aml-signal"
+             style="display:inline-block;background:linear-gradient(135deg,#0d9488,#0f766e);color:#fff;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;">
+            Book a 15-min walkthrough →
+          </a>
+        </td></tr></table>
+        <p style="margin:24px 0 0;font-size:13px;color:#6b7280;">
+          Or reply to this email with your use case — happy to answer any question directly.
+        </p>
+      </td></tr>
+      <tr><td style="padding:20px 32px;background:#f9fafb;border-top:1px solid #e5e7eb;">
+        <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center;">
+          WorldAML by Infocredit Group · <a href="https://worldaml.com" style="color:#9ca3af;">worldaml.com</a>
+        </p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`,
+    buildText: (firstName: string) =>
+      `Hi ${firstName || "there"},\n\nWe noticed you've been exploring AML screening on WorldAML. Happy to show you how customers cut screening review time by 60–80%.\n\n• 1,900+ watchlists refreshed hourly\n• Ongoing monitoring alerts on status change\n• Bulk API + UI import\n• Audit-ready evidence per decision\n\nBook a 15-min walkthrough: https://worldaml.com/contact-sales?product=aml-screening\n\nOr reply directly.\n\nThe WorldAML Team`,
+  },
+
+  "seminar-discount-suite": {
+    subject: "Congrats on completing your WorldAML seminar — here's 20% off the Suite",
+    buildHtml: (firstName: string, _resetLink?: string, data?: TemplateData) => {
+      const code = escapeHtml(data?.promoCode || "SEMINAR20");
+      return `
+<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#0f1b3d;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:32px 16px;"><tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);">
+      <tr><td style="background:linear-gradient(135deg,#0d9488 0%,#0f766e 100%);padding:28px 32px;text-align:center;">
+        <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;">Well done, ${firstName || "learner"} 🎓</h1>
+        <p style="margin:6px 0 0;color:#ccfbf1;font-size:13px;">You've completed a WorldAML seminar</p>
+      </td></tr>
+      <tr><td style="padding:32px;">
+        <p style="margin:0 0 14px;font-size:15px;color:#374151;">Hi ${firstName || "there"},</p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:#374151;">
+          As a thank-you for completing your seminar, here's <strong>20% off WorldAML Suite</strong> — the same platform your instructors use for real-world compliance operations.
+        </p>
+        <div style="margin:20px 0;padding:18px;border:2px dashed #0d9488;border-radius:10px;text-align:center;background:#f0fdfa;">
+          <p style="margin:0 0 6px;font-size:12px;color:#0f766e;text-transform:uppercase;letter-spacing:1px;">Your discount code</p>
+          <p style="margin:0;font-size:26px;font-weight:700;color:#0d9488;letter-spacing:2px;">${code}</p>
+          <p style="margin:8px 0 0;font-size:12px;color:#6b7280;">Valid for 30 days · single use · applies to WorldAML Suite</p>
+        </div>
+        <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 4px;">
+          <a href="https://worldaml.com/contact-sales?product=suite&promo=${code}&utm_source=email&utm_medium=triggered&utm_campaign=seminar-discount"
+             style="display:inline-block;background:linear-gradient(135deg,#0d9488,#0f766e);color:#fff;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;">
+            Redeem 20% off →
+          </a>
+        </td></tr></table>
+      </td></tr>
+      <tr><td style="padding:20px 32px;background:#f9fafb;border-top:1px solid #e5e7eb;">
+        <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center;">
+          WorldAML by Infocredit Group · <a href="https://worldaml.com" style="color:#9ca3af;">worldaml.com</a>
+        </p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`;
+    },
+    buildText: (firstName: string, _resetLink?: string, data?: TemplateData) =>
+      `Hi ${firstName || "there"},\n\nCongrats on completing your WorldAML seminar! As a thank-you, here's 20% off WorldAML Suite:\n\n  Code: ${data?.promoCode || "SEMINAR20"}\n  Valid 30 days, single use.\n\nRedeem: https://worldaml.com/contact-sales?product=suite&promo=${data?.promoCode || "SEMINAR20"}\n\nThe WorldAML Team`,
+  },
 };
 
 /* ── Handler ── */
@@ -221,23 +318,33 @@ Deno.serve(async (req) => {
 
     // Parse body first so we can decide which paths need admin auth
     const body = await req.json();
-    const { recipientEmail: rawEmail, recipientName, templateId, setPassword } = body as {
+    const {
+      recipientEmail: rawEmail,
+      recipientName,
+      templateId,
+      setPassword,
+      templateData,
+    } = body as {
       recipientEmail: string;
       recipientName?: string;
       templateId: TemplateId;
       setPassword?: string;
+      templateData?: TemplateData;
     };
 
     // Public path: anyone can request a password reset email for their own account.
-    // Supabase admin.generateLink only emits a valid recovery link for an actual user,
-    // and the link is delivered to that user's verified email — safe to expose.
     const isPublicPasswordReset =
       templateId === "password-reset-academy" && !setPassword;
 
-    // Audit user for non-public paths (admin-only)
+    // Internal call from another edge function (queue worker) — uses shared secret
+    const internalSecret = req.headers.get("x-internal-secret");
+    const isInternalCall =
+      !!internalSecret && internalSecret === supabaseServiceKey;
+
+    // Audit user for non-public, non-internal paths (admin-only)
     let user: { id: string } | null = null;
 
-    if (!isPublicPasswordReset) {
+    if (!isPublicPasswordReset && !isInternalCall) {
       const token = authHeader.replace("Bearer ", "");
       const { data: { user: authedUser }, error: authError } =
         await supabase.auth.getUser(token);
@@ -338,7 +445,10 @@ Deno.serve(async (req) => {
 
     // Consent / eligibility gate for sales-outreach templates
     const isSalesOutreach =
-      templateId === "suite-upsell" || templateId === "screening-upsell";
+      templateId === "suite-upsell" ||
+      templateId === "screening-upsell" ||
+      templateId === "aml-signal-outreach" ||
+      templateId === "seminar-discount-suite";
 
     if (isSalesOutreach) {
       const { data: recipientProfile } = await supabase
@@ -426,8 +536,8 @@ Deno.serve(async (req) => {
       to: [recipientEmail],
       cc: CC,
       subject: template.subject,
-      html: template.buildHtml(safeName, passwordResetLink),
-      text: template.buildText(safeName, passwordResetLink),
+      html: template.buildHtml(safeName, passwordResetLink, templateData),
+      text: template.buildText(safeName, passwordResetLink, templateData),
     });
 
     if (sendError) {
@@ -438,28 +548,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Audit log (only when there is an authenticated actor)
-    if (user) {
-      await supabase.from("suite_audit_log").insert({
-        user_id: user.id,
-        action: `Sent ${templateId} email to ${recipientEmail}`,
+    // Audit log — actor is admin user, or null when triggered internally by queue worker
+    await supabase.from("suite_audit_log").insert({
+      user_id: user?.id ?? null,
+      action: `Sent ${templateId} email to ${recipientEmail}${isInternalCall ? " (auto/queue)" : ""}`,
+    }).then(() => {});
+
+    // Per-user upsell email history (visible on admin user profile)
+    if (templateId !== "password-reset-academy") {
+      const { data: recipientProfile } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("email", recipientEmail)
+        .maybeSingle();
+
+      await supabase.from("admin_upsell_email_log").insert({
+        recipient_user_id: recipientProfile?.user_id ?? null,
+        recipient_email: recipientEmail,
+        template_id: templateId,
+        sent_by: user?.id ?? null,
       }).then(() => {});
-
-      // Per-user upsell email history (visible on admin user profile)
-      if (templateId !== "password-reset-academy") {
-        const { data: recipientProfile } = await supabase
-          .from("profiles")
-          .select("user_id")
-          .eq("email", recipientEmail)
-          .maybeSingle();
-
-        await supabase.from("admin_upsell_email_log").insert({
-          recipient_user_id: recipientProfile?.user_id ?? null,
-          recipient_email: recipientEmail,
-          template_id: templateId,
-          sent_by: user.id,
-        }).then(() => {});
-      }
     }
 
 

@@ -8,6 +8,8 @@ import AMLDataSourcesSection from "@/components/aml-screening/AMLDataSourcesSect
 import AMLUseCasesSection from "@/components/aml-screening/AMLUseCasesSection";
 import AMLCTASection from "@/components/aml-screening/AMLCTASection";
 import StickyDemoCTA from "@/components/StickyDemoCTA";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const softwareData = {
   "@context": "https://schema.org",
@@ -94,7 +96,18 @@ const faqData = {
 
 const structuredData = [softwareData, faqData];
 
-const PlatformAMLScreening = () => (
+const PlatformAMLScreening = () => {
+  useEffect(() => {
+    // Fire-and-forget: only tracked for authenticated users; edge function requires JWT
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) return;
+      supabase.functions.invoke("log-outreach-event", {
+        body: { event_type: "aml_page_view", path: "/platform/aml-screening" },
+      }).catch(() => {});
+    });
+  }, []);
+
+  return (
   <div className="min-h-screen flex flex-col">
     <SEO
       title="AML Screening & Monitoring — Sanctions & PEP"
@@ -118,7 +131,8 @@ const PlatformAMLScreening = () => (
     </main>
     <Footer />
     <StickyDemoCTA product="aml" label="Book an AML Demo" />
-  </div>
-);
+    </div>
+  );
+};
 
 export default PlatformAMLScreening;

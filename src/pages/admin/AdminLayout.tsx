@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; path: string; icon: any; section?: string };
@@ -19,6 +19,7 @@ const NAV: NavItem[] = [
   { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText, section: "Platform" },
   { label: "Regulatory Hub", path: "/admin/regulatory", icon: Landmark, section: "Platform" },
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Platform" },
+  { label: "Outreach Queue", path: "/admin/outreach-queue", icon: Send, section: "Platform" },
 
   { label: "Academy Signups", path: "/admin/academy-users", icon: GraduationCap, section: "Academy" },
   { label: "Funnel Metrics", path: "/admin/academy-funnel", icon: TrendingUp, section: "Academy" },

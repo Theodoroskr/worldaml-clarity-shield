@@ -783,6 +783,90 @@ export type Database = {
         }
         Relationships: []
       }
+      outreach_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          path: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          path?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          path?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      outreach_queue: {
+        Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          promo_code: string | null
+          recipient_email: string
+          scheduled_at: string
+          sent_at: string | null
+          skip_reason: string | null
+          status: string
+          template_id: string
+          trigger_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          promo_code?: string | null
+          recipient_email: string
+          scheduled_at?: string
+          sent_at?: string | null
+          skip_reason?: string | null
+          status?: string
+          template_id: string
+          trigger_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          promo_code?: string | null
+          recipient_email?: string
+          scheduled_at?: string
+          sent_at?: string | null
+          skip_reason?: string | null
+          status?: string
+          template_id?: string
+          trigger_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       partner_applications: {
         Row: {
           company_name: string
@@ -3637,6 +3721,16 @@ export type Database = {
       }
       current_user_has_suite_access: { Args: never; Returns: boolean }
       current_user_org_id: { Args: never; Returns: string }
+      enqueue_outreach: {
+        Args: {
+          _delay?: string
+          _metadata?: Json
+          _template_id: string
+          _trigger_type: string
+          _user_id: string
+        }
+        Returns: string
+      }
       file_str_amendment: {
         Args: { _explanation: string; _report_id: string }
         Returns: undefined
