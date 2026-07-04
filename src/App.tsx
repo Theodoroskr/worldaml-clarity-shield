@@ -122,6 +122,7 @@ const AdminPartners = lazy(() => import("./pages/admin/AdminPartners"));
 const AdminDomains = lazy(() => import("./pages/admin/AdminDomains"));
 const AdminAcademyUsers = lazy(() => import("./pages/admin/AdminAcademyUsers"));
 const AdminAcademyFunnel = lazy(() => import("./pages/admin/AdminAcademyFunnel"));
+const AdminOutreachQueue = lazy(() => import("./pages/admin/AdminOutreachQueue"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
