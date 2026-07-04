@@ -131,7 +131,8 @@ const PlatformAMLScreening = () => {
     </main>
     <Footer />
     <StickyDemoCTA product="aml" label="Book an AML Demo" />
-  </div>
-);
+    </div>
+  );
+};
 
 export default PlatformAMLScreening;
