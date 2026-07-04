@@ -603,6 +603,24 @@ export default function AdminUsers() {
                 </SelectContent>
               </Select>
             </div>
+            {upsellDialog.profile && (() => {
+              const el = evaluateEligibility(upsellDialog.profile);
+              return el.eligible ? (
+                <div className="p-3 rounded-lg border border-emerald-200 bg-emerald-50/50 text-xs text-emerald-800">
+                  <strong>Eligible to receive sales outreach.</strong><br />
+                  Legal basis: <span className="font-medium">{REASON_LABELS[el.reason]}</span>
+                  {el.reason === "legitimate_interest" && " — approved account &gt; 30 days, not yet a Suite customer."}
+                  {upsellDialog.profile.marketing_consent_at && (
+                    <> · Consent recorded {new Date(upsellDialog.profile.marketing_consent_at).toLocaleDateString()}</>
+                  )}
+                </div>
+              ) : (
+                <div className="p-3 rounded-lg border border-red-200 bg-red-50/50 text-xs text-red-800">
+                  <strong>Send blocked:</strong> {REASON_LABELS[el.reason]}.
+                  <br />This user does not meet the consent or legitimate-interest rules for one-to-one sales outreach.
+                </div>
+              );
+            })()}
             <div className="p-3 rounded-lg border border-amber-200 bg-amber-50/50 text-xs text-amber-800">
               <strong>Note:</strong> This sends a single personalised email via Resend to this user. A copy is CC'd to compliance@infocreditgroup.com and logged in the audit trail.
             </div>
@@ -611,7 +629,12 @@ export default function AdminUsers() {
             <Button variant="outline" size="sm" onClick={() => setUpsellDialog({ open: false, profile: null })}>
               Cancel
             </Button>
-            <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white" onClick={sendUpsellEmail} disabled={upsellSending}>
+            <Button
+              size="sm"
+              className="bg-teal-600 hover:bg-teal-700 text-white"
+              onClick={sendUpsellEmail}
+              disabled={upsellSending || !(upsellDialog.profile && evaluateEligibility(upsellDialog.profile).eligible)}
+            >
               {upsellSending ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
               ) : (
