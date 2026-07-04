@@ -43,6 +43,14 @@ const Dashboard = () => {
   const [certsLoading, setCertsLoading] = useState(true);
   const [inProgressCourses, setInProgressCourses] = useState<any[]>([]);
   const [showFirstLessonNudge, setShowFirstLessonNudge] = useState(false);
+  const [showAmlUpsell, setShowAmlUpsell] = useState(() => {
+    try { return localStorage.getItem("dashboard_aml_upsell_dismissed") !== "1"; }
+    catch { return true; }
+  });
+  const dismissAmlUpsell = () => {
+    try { localStorage.setItem("dashboard_aml_upsell_dismissed", "1"); } catch { /* ignore */ }
+    setShowAmlUpsell(false);
+  };
 
   /* ─── fetch certificates + in-progress courses ─── */
   useEffect(() => {
