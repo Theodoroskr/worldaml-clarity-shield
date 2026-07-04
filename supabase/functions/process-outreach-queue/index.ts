@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 const COUPON_ID = "seminar-suite-20";
+const ACADEMY_COUPON_ID = "academy-paid-30";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
