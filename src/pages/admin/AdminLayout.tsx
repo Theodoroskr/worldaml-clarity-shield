@@ -19,6 +19,7 @@ const NAV: NavItem[] = [
   { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText, section: "Platform" },
   { label: "Regulatory Hub", path: "/admin/regulatory", icon: Landmark, section: "Platform" },
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Platform" },
+  { label: "Outreach Queue", path: "/admin/outreach-queue", icon: Send, section: "Platform" },
 
   { label: "Academy Signups", path: "/admin/academy-users", icon: GraduationCap, section: "Academy" },
   { label: "Funnel Metrics", path: "/admin/academy-funnel", icon: TrendingUp, section: "Academy" },
