@@ -445,7 +445,10 @@ Deno.serve(async (req) => {
 
     // Consent / eligibility gate for sales-outreach templates
     const isSalesOutreach =
-      templateId === "suite-upsell" || templateId === "screening-upsell";
+      templateId === "suite-upsell" ||
+      templateId === "screening-upsell" ||
+      templateId === "aml-signal-outreach" ||
+      templateId === "seminar-discount-suite";
 
     if (isSalesOutreach) {
       const { data: recipientProfile } = await supabase
