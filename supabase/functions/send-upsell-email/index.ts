@@ -40,12 +40,22 @@ function escapeAttribute(str: string): string {
 
 /* ── Email templates ── */
 
-type TemplateId = "suite-upsell" | "screening-upsell" | "password-reset-academy";
+type TemplateId =
+  | "suite-upsell"
+  | "screening-upsell"
+  | "password-reset-academy"
+  | "aml-signal-outreach"
+  | "seminar-discount-suite";
+
+interface TemplateData {
+  promoCode?: string;
+  courseTitle?: string;
+}
 
 interface TemplateConfig {
   subject: string;
-  buildHtml: (firstName: string, resetLink?: string) => string;
-  buildText: (firstName: string, resetLink?: string) => string;
+  buildHtml: (firstName: string, resetLink?: string, data?: TemplateData) => string;
+  buildText: (firstName: string, resetLink?: string, data?: TemplateData) => string;
 }
 
 const TEMPLATES: Record<TemplateId, TemplateConfig> = {
