@@ -127,7 +127,16 @@ export default function AdminUsers() {
           templateId: upsellTemplate,
         },
       });
-      if (error) throw error;
+      if (error) {
+        // Try to surface the real error message from the function response body
+        let detail = error.message;
+        try {
+          const ctx: any = (error as any).context;
+          const body = ctx && typeof ctx.json === "function" ? await ctx.json() : null;
+          if (body?.error) detail = body.error;
+        } catch { /* ignore */ }
+        throw new Error(detail);
+      }
       if (data?.error) throw new Error(data.error);
       toast.success(`Upsell email sent to ${recipientEmail}`);
       setUpsellDialog({ open: false, profile: null });
