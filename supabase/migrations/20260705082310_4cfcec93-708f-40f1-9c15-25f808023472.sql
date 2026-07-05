@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Public read academy images by path" ON storage.objects;
