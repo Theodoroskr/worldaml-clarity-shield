@@ -495,7 +495,11 @@ Deno.serve(async (req) => {
       templateId === "seminar-discount-suite" ||
       templateId === "academy-paid-discount";
 
-    if (isSalesOutreach) {
+    // Admins performing manual sends bypass the automated eligibility gate;
+    // the gate only applies to queue-worker / internal calls.
+    const isAdminManualSend = !!user && !isInternalCall;
+
+    if (isSalesOutreach && !isAdminManualSend) {
       const { data: recipientProfile } = await supabase
         .from("profiles")
         .select("user_id")
