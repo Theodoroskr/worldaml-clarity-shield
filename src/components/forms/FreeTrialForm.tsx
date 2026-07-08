@@ -129,6 +129,7 @@ export const FreeTrialForm = ({ region = "eu-me" }: FreeTrialFormProps) => {
             industry: data.industry,
             message: data.comments,
             region,
+            metadata: { attribution: getWebAttribution() },
           }),
         }
       );
