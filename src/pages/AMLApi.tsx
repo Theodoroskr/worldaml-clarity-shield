@@ -76,7 +76,7 @@ const AMLApiPage = () => {
           { name: "Home", url: "/" },
           { name: "AML API", url: "/aml-api" },
         ]}
-        structuredData={[faqStructuredData, softwareStructuredData]}
+        structuredData={[faqStructuredData, softwareStructuredData, webApiStructuredData]}
       />
       <Header />
       <main className="flex-1">
