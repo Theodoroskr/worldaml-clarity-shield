@@ -53,6 +53,17 @@ const softwareStructuredData = {
   },
 };
 
+const webApiStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebAPI",
+  name: "WorldAML Sanctions Screening API",
+  description: "Real-time sanctions list screening API covering OFAC, EU, UN, HMT and 1,400+ global sanctions lists with sub-second response times.",
+  url: "https://worldaml.com/sanctions-screening-api",
+  provider: { "@id": "https://worldaml.com/#organization" },
+  documentation: "https://worldaml.com/sanctions-screening-api",
+  termsOfService: "https://worldaml.com/terms",
+};
+
 const SanctionsScreeningApiPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
