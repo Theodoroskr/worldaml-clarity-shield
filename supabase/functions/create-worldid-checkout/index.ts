@@ -33,15 +33,15 @@ serve(async (req) => {
   );
 
   try {
+    // Guest checkout: auth is optional. If a valid session is provided we
+    // reuse the user's email + existing Stripe customer; otherwise Stripe
+    // collects the email in Checkout and we create the account post-payment.
+    let userEmail: string | undefined;
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return errorResponse("Authentication required", 401);
-    }
-    const token = authHeader.replace("Bearer ", "");
-    const { data } = await supabaseClient.auth.getUser(token);
-    const user = data.user;
-    if (!user?.email) {
-      return errorResponse("Authentication required", 401);
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data } = await supabaseClient.auth.getUser(token);
+      if (data.user?.email) userEmail = data.user.email;
     }
 
     let body: unknown;
@@ -65,20 +65,25 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    let customerId;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
+    let customerId: string | undefined;
+    if (userEmail) {
+      const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
+      if (customers.data.length > 0) customerId = customers.data[0].id;
     }
 
+    const origin = req.headers.get("origin") ?? "https://www.worldaml.com";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      // If signed in without an existing customer, pre-fill; otherwise let Stripe collect.
+      customer_email: !customerId && userEmail ? userEmail : undefined,
+      customer_creation: customerId ? undefined : "always",
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/dashboard?subscription=success&product=worldid`,
-      cancel_url: `${req.headers.get("origin")}/products/worldid?canceled=true`,
-      metadata: { plan: normalizedPlan, product: "worldid" },
+      allow_promotion_codes: true,
+      billing_address_collection: "auto",
+      success_url: `${origin}/dashboard?subscription=success&product=worldid&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/products/worldid?canceled=true`,
+      metadata: { plan: normalizedPlan, product: "worldid", guest: userEmail ? "0" : "1" },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
