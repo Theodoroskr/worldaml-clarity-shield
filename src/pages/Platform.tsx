@@ -41,6 +41,26 @@ const Platform = () => {
           { name: "Home", url: "/" },
           { name: "Platform", url: "/platform" },
         ]}
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "@id": "https://worldaml.com/#product",
+          name: "WorldAML Platform",
+          description:
+            "Unified compliance platform for AML sanctions screening, PEP checks, adverse media monitoring, KYC/KYB verification, transaction monitoring and regulatory reporting.",
+          url: "https://worldaml.com/platform",
+          brand: { "@id": "https://worldaml.com/#organization" },
+          category: "Compliance Software",
+          offers: {
+            "@type": "AggregateOffer",
+            priceCurrency: "EUR",
+            lowPrice: "99",
+            highPrice: "499",
+            offerCount: "2",
+            availability: "https://schema.org/OnlineOnly",
+            url: "https://worldaml.com/pricing",
+          },
+        }}
       />
       <Header />
       <main className="flex-1">
