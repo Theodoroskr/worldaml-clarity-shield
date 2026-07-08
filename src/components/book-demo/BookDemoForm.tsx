@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { calculateLeadScore, isFreeEmail, type BookDemoLead } from "@/lib/leadScoring";
+import { getWebAttribution } from "@/lib/webAttribution";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 const schema = z.object({
