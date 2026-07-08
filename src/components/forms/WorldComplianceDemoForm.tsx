@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { getWebAttribution } from "@/lib/webAttribution";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import lexisnexisLogo from "@/assets/lexisnexis-logo.png";
