@@ -189,6 +189,7 @@ Preferred start date and number of seats below.`,
             job_title: formData.jobTitle,
             message: formData.message,
             products: selectedProducts,
+            metadata: { attribution: getWebAttribution() },
           }),
         }
       );
