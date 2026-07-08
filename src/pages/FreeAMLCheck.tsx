@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getWebAttribution } from "@/lib/webAttribution";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check, Send, FileSearch, MessageSquare, BarChart3, ShieldCheck, ExternalLink } from "lucide-react";
 import SEO from "@/components/SEO";
@@ -97,6 +98,7 @@ const FreeAMLCheck = () => {
             company: formData.company,
             country: formData.country,
             message: formData.lookingFor,
+            metadata: { attribution: getWebAttribution() },
           }),
         }
       );
