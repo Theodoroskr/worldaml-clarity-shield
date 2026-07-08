@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getWebAttribution } from "@/lib/webAttribution";
 
 const GetStarted = () => {
   const [accountType, setAccountType] = useState<"business" | "developer">("business");
