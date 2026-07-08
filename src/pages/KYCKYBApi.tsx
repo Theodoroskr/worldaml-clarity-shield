@@ -76,7 +76,7 @@ const KYCKYBApiPage = () => {
           { name: "Home", url: "/" },
           { name: "KYC & KYB API", url: "/kyc-kyb-api" },
         ]}
-        structuredData={[faqStructuredData, softwareStructuredData]}
+        structuredData={[faqStructuredData, softwareStructuredData, webApiStructuredData]}
       />
       <Header />
       <main className="flex-1">
