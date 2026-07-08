@@ -33,22 +33,6 @@ const Index = () => {
             }
           }
         ]}
-          {
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "WorldAML",
-            "url": "https://www.worldaml.com",
-            "logo": "https://www.worldaml.com/og-image.png",
-            "areaServed": [
-              { "@type": "Country", "name": "United States" },
-              { "@type": "Country", "name": "United Kingdom" },
-              { "@type": "Country", "name": "United Arab Emirates" },
-              { "@type": "AdministrativeArea", "name": "European Union" }
-            ],
-            "knowsLanguage": "en",
-            "description": "AML compliance platform providing sanctions screening, KYC/KYB verification, PEP checks and transaction monitoring for regulated firms in the US, UK, EU and Middle East."
-          }
-        ]}
       />
       <Header />
       <main className="flex-1">
