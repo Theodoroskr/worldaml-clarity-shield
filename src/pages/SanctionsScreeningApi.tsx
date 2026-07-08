@@ -75,7 +75,7 @@ const SanctionsScreeningApiPage = () => {
           { name: "Home", url: "/" },
           { name: "Sanctions Screening API", url: "/sanctions-screening-api" },
         ]}
-        structuredData={[faqStructuredData, softwareStructuredData]}
+        structuredData={[faqStructuredData, softwareStructuredData, webApiStructuredData]}
       />
       <Header />
       <main className="flex-1">
