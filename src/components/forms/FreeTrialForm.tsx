@@ -15,6 +15,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { getWebAttribution } from "@/lib/webAttribution";
 import lexisnexisLogo from "@/assets/lexisnexis-logo.png";
 
 const industries = [
