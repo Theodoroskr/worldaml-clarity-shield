@@ -65,16 +65,7 @@ const WorldIDPricingSection = () => {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   const handleCheckout = async (planName: string) => {
-    if (!user) {
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to subscribe to a plan.",
-        variant: "destructive",
-      });
-      navigate(`/login?redirect=/products/worldid&plan=${planName.toLowerCase()}`);
-      return;
-    }
-
+    // Guest checkout: no login gate. Stripe collects the email at checkout.
     setLoadingPlan(planName);
     try {
       const { data, error } = await supabase.functions.invoke("create-worldid-checkout", {
@@ -83,8 +74,11 @@ const WorldIDPricingSection = () => {
 
       if (error) throw error;
       if (data?.url) {
-        window.open(data.url, "_blank");
+        // Same-tab redirect — new-tab popups after await are commonly blocked.
+        window.location.href = data.url;
+        return;
       }
+      throw new Error("No checkout URL returned");
     } catch (error) {
       console.error("Checkout error:", error);
       toast({
@@ -92,7 +86,6 @@ const WorldIDPricingSection = () => {
         description: error instanceof Error ? error.message : "Something went wrong",
         variant: "destructive",
       });
-    } finally {
       setLoadingPlan(null);
     }
   };

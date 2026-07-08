@@ -71,16 +71,7 @@ export const APICompanyPricingSection = () => {
   const navigate = useNavigate();
 
   const handleCheckout = async (planName: string) => {
-    if (!user) {
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to subscribe to a plan.",
-        variant: "destructive",
-      });
-      navigate(`/login?redirect=/pricing&plan=${planName.toLowerCase()}`);
-      return;
-    }
-
+    // Guest checkout: no login gate. Stripe collects the email at checkout.
     setLoadingPlan(planName);
     try {
       const { data, error } = await supabase.functions.invoke("create-worldaml-checkout", {
@@ -88,8 +79,11 @@ export const APICompanyPricingSection = () => {
       });
       if (error) throw error;
       if (data?.url) {
-        window.open(data.url, "_blank");
+        // Same-tab redirect avoids popup-blocker "silent failures" after await.
+        window.location.href = data.url;
+        return;
       }
+      throw new Error("No checkout URL returned");
     } catch (error) {
       console.error("Checkout error:", error);
       toast({
@@ -97,7 +91,6 @@ export const APICompanyPricingSection = () => {
         description: error instanceof Error ? error.message : "Something went wrong",
         variant: "destructive",
       });
-    } finally {
       setLoadingPlan(null);
     }
   };
