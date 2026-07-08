@@ -97,6 +97,7 @@ const FreeAMLCheck = () => {
             company: formData.company,
             country: formData.country,
             message: formData.lookingFor,
+            metadata: { attribution: getWebAttribution() },
           }),
         }
       );
