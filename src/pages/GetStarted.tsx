@@ -44,6 +44,7 @@ const GetStarted = () => {
             email: formData.email,
             company: formData.company,
             account_type: accountType,
+            metadata: { attribution: getWebAttribution() },
           }),
         }
       );
