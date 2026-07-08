@@ -54,6 +54,17 @@ const softwareStructuredData = {
   },
 };
 
+const webApiStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebAPI",
+  name: "WorldAML KYC/KYB API",
+  description: "Programmatic KYC and KYB verification API for identity verification, company due diligence, and beneficial ownership screening.",
+  url: "https://worldaml.com/kyc-kyb-api",
+  provider: { "@id": "https://worldaml.com/#organization" },
+  documentation: "https://worldaml.com/kyc-kyb-api",
+  termsOfService: "https://worldaml.com/terms",
+};
+
 const KYCKYBApiPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
@@ -65,7 +76,7 @@ const KYCKYBApiPage = () => {
           { name: "Home", url: "/" },
           { name: "KYC & KYB API", url: "/kyc-kyb-api" },
         ]}
-        structuredData={[faqStructuredData, softwareStructuredData]}
+        structuredData={[faqStructuredData, softwareStructuredData, webApiStructuredData]}
       />
       <Header />
       <main className="flex-1">

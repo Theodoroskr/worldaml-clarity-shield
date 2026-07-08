@@ -54,6 +54,17 @@ const softwareStructuredData = {
   },
 };
 
+const webApiStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebAPI",
+  name: "WorldAML AML Screening API",
+  description: "RESTful API for automated AML sanctions, PEP, and adverse media screening with real-time results and ongoing monitoring.",
+  url: "https://worldaml.com/aml-api",
+  provider: { "@id": "https://worldaml.com/#organization" },
+  documentation: "https://worldaml.com/aml-api",
+  termsOfService: "https://worldaml.com/terms",
+};
+
 const AMLApiPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
@@ -65,7 +76,7 @@ const AMLApiPage = () => {
           { name: "Home", url: "/" },
           { name: "AML API", url: "/aml-api" },
         ]}
-        structuredData={[faqStructuredData, softwareStructuredData]}
+        structuredData={[faqStructuredData, softwareStructuredData, webApiStructuredData]}
       />
       <Header />
       <main className="flex-1">
