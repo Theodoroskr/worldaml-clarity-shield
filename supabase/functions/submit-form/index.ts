@@ -175,7 +175,98 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Send email notification via Resend
+    // Create a Lead in Zoho CRM via the connector gateway (non-blocking)
+    try {
+      const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+      const zohoKey = Deno.env.get("ZOHO_CRM_API_KEY");
+      if (lovableKey && zohoKey) {
+        const attribution = (metadata as any)?.attribution ?? {};
+        const leadDesc = [
+          message?.trim() || null,
+          form_type ? `Form: ${form_type}` : null,
+          products?.length ? `Products: ${products.join(", ")}` : null,
+          region ? `Region: ${region}` : null,
+          account_type ? `Account type: ${account_type}` : null,
+        ]
+          .filter(Boolean)
+          .join("\n");
+
+        const leadRecord: Record<string, unknown> = {
+          First_Name: first_name?.trim().slice(0, 40) || undefined,
+          Last_Name: (last_name?.trim() || first_name?.trim() || "Unknown").slice(0, 80),
+          Email: email.trim().slice(0, 100),
+          Company: (company?.trim() || "Individual").slice(0, 200),
+          Phone: phone?.trim().slice(0, 30) || undefined,
+          Designation: job_title?.trim().slice(0, 100) || undefined,
+          Country: country?.trim().slice(0, 100) || undefined,
+          Industry: industry?.trim().slice(0, 100) || undefined,
+          Description: leadDesc || undefined,
+          Lead_Source: "WorldAML Website",
+          Lead_Status: "New",
+          // Attribution — mapped to standard Zoho campaign UTM-style fields where possible.
+          $utm_source: attribution.utm_source || undefined,
+          $utm_medium: attribution.utm_medium || undefined,
+          $utm_campaign: attribution.utm_campaign || undefined,
+          $utm_term: attribution.utm_term || undefined,
+          $utm_content: attribution.utm_content || undefined,
+        };
+
+        // Append attribution + landing/referrer to Description so nothing is lost
+        // if Zoho does not have custom UTM fields configured.
+        const attrLines = [
+          attribution.utm_source && `utm_source: ${attribution.utm_source}`,
+          attribution.utm_medium && `utm_medium: ${attribution.utm_medium}`,
+          attribution.utm_campaign && `utm_campaign: ${attribution.utm_campaign}`,
+          attribution.utm_term && `utm_term: ${attribution.utm_term}`,
+          attribution.utm_content && `utm_content: ${attribution.utm_content}`,
+          attribution.landing_page && `Landing page: ${attribution.landing_page}`,
+          attribution.referrer && `Referrer: ${attribution.referrer}`,
+        ].filter(Boolean);
+        if (attrLines.length) {
+          leadRecord.Description = [leadRecord.Description, "", ...attrLines]
+            .filter(Boolean)
+            .join("\n");
+        }
+
+        // Strip undefined values before sending.
+        Object.keys(leadRecord).forEach(
+          (k) => leadRecord[k] === undefined && delete leadRecord[k],
+        );
+
+        const zohoRes = await fetch(
+          "https://connector-gateway.lovable.dev/zoho_crm/Leads",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${lovableKey}`,
+              "X-Connection-Api-Key": zohoKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ data: [leadRecord] }),
+          },
+        );
+
+        if (!zohoRes.ok) {
+          const errBody = await zohoRes.text();
+          console.error(
+            `Zoho CRM lead creation failed [${zohoRes.status}]: ${errBody}`,
+          );
+        } else {
+          const okBody = await zohoRes.json().catch(() => null);
+          const record = okBody?.data?.[0];
+          if (record?.status && record.status !== "success") {
+            console.error("Zoho CRM lead rejected:", JSON.stringify(record));
+          } else {
+            console.log("Zoho CRM lead created:", record?.details?.id ?? "ok");
+          }
+        }
+      } else {
+        console.warn("Zoho CRM connector secrets not configured — skipping lead sync");
+      }
+    } catch (zohoErr) {
+      console.error("Zoho CRM lead sync failed (non-blocking):", zohoErr);
+    }
+
     try {
       const resendApiKey = Deno.env.get("RESEND_API_KEY");
       if (resendApiKey) {
