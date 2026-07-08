@@ -31,7 +31,8 @@ const Index = () => {
               "applicationCategory": "BusinessApplication",
               "operatingSystem": "Web"
             }
-          },
+          }
+        ]}
           {
             "@context": "https://schema.org",
             "@type": "Organization",
