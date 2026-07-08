@@ -117,6 +117,7 @@ const BookDemoForm = () => {
             lead_score: score,
             lead_tier: tier,
             score_breakdown: breakdown,
+            attribution: getWebAttribution(),
           },
         },
       });
