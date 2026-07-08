@@ -158,7 +158,7 @@ export const WorldComplianceDemoForm = () => {
             country: countryName,
             industry: data.industry,
             message: data.comments,
-            metadata: { product: "WorldCompliance", trial_days: 7 },
+            metadata: { product: "WorldCompliance", trial_days: 7, attribution: getWebAttribution() },
           }),
         }
       );
