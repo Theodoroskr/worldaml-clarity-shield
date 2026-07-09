@@ -260,18 +260,9 @@ Deno.serve(async (req) => {
           })(),
 
           // High-level category picklist "Product type list" (api_name:
-          // Product_type_list1). Business categorises selected products into
-          // Training / Platform / Data Source, with priority
-          // Training > Platform > Data Source when multiple categories appear.
-          //
-          // Zoho's Product_type_list1 picklist does not currently contain
-          // literal "Platform" or "Data Source" options — the closest
-          // existing values are "Training" and "Regulatory Compliance".
-          // Platform and Data Source therefore map to "Regulatory Compliance"
-          // so the value passes Zoho picklist validation while preserving
-          // the priority semantics (Training still wins). If Zoho adds
-          // "Platform" / "Data Source" picklist values later, update
-          // PICKLIST_FOR_CATEGORY below.
+          // Product_type_list1). Zoho picklist values: Platform, Data Source,
+          // Training. Priority when multiple categories present:
+          // Training > Platform > Data Source.
           Product_type_list1: (() => {
             if (!Array.isArray(products) || products.length === 0) return undefined;
             type Category = "Training" | "Platform" | "Data Source";
@@ -299,12 +290,12 @@ Deno.serve(async (req) => {
               "academy-team-plan": "Training",
               "training": "Training",
             };
-            // Priority: Training > Platform > Data Source
             const PICKLIST_FOR_CATEGORY: Record<Category, string> = {
               Training: "Training",
-              Platform: "Regulatory Compliance",
-              "Data Source": "Regulatory Compliance",
+              Platform: "Platform",
+              "Data Source": "Data Source",
             };
+
             const seen = new Set<Category>();
             for (const raw of products) {
               const key = String(raw ?? "").trim().toLowerCase();
