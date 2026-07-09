@@ -206,7 +206,10 @@ Deno.serve(async (req) => {
           Designation: job_title?.trim().slice(0, 100) || undefined,
           Country: country?.trim().slice(0, 100) || undefined,
           Industry: industry?.trim().slice(0, 100) || undefined,
-          Description: descriptionValue,
+          // This Zoho tenant uses "Note" (textarea) as the long-text field on
+          // Leads — there is no "Description" field on the layout. The
+          // visitor's message is stored verbatim here.
+          Note: descriptionValue,
           Lead_Source: "WorldAML Website",
           Lead_Status: "New",
           // Detailed multi-select picklist "Products Multi Selection" (api_name:
