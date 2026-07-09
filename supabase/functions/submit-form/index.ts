@@ -242,7 +242,13 @@ Deno.serve(async (req) => {
               "X-Connection-Api-Key": zohoKey,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ data: [leadRecord] }),
+            body: JSON.stringify({
+              data: [leadRecord],
+              trigger: ["approval", "workflow", "blueprint"],
+              // Executes the active Zoho CRM Lead Assignment Rule so ownership
+              // is determined by Zoho instead of being set here.
+              lar_id: undefined,
+            }),
           },
         );
 
