@@ -203,10 +203,52 @@ Deno.serve(async (req) => {
           Description: leadDesc || undefined,
           Lead_Source: "WorldAML Website",
           Lead_Status: "New",
-          // Multi-select picklist of selected products of interest
-          Product_type_list: Array.isArray(products) && products.length
-            ? products.map((p: unknown) => String(p).trim()).filter(Boolean)
-            : undefined,
+          // Multi-select picklist "Product type list" in Zoho CRM (api_name: Product_type_list1).
+          // Zoho enforces a fixed set of picklist values, so map WorldAML product IDs/names
+          // to the exact Zoho picklist entries. Unknown selections are dropped, and any
+          // WorldAML product falls under "Regulatory Compliance".
+          Product_type_list1: (() => {
+            if (!Array.isArray(products) || products.length === 0) return undefined;
+            const ZOHO_ALLOWED = new Set([
+              "Call Center Services",
+              "Corporate Governance Solutions",
+              "Corporate Services",
+              "Credit Risk Solutions",
+              "Debt Collection Services",
+              "Insurance",
+              "Legal Solutions",
+              "Regulatory Compliance",
+              "System Solutions",
+              "Training",
+            ]);
+            const PRODUCT_MAP: Record<string, string> = {
+              // WorldAML platform + APIs + data sources → Regulatory Compliance
+              "worldaml-suite": "Regulatory Compliance",
+              "worldaml-api": "Regulatory Compliance",
+              "worldid": "Regulatory Compliance",
+              "worldcompliance": "Regulatory Compliance",
+              "bridger-xg": "Regulatory Compliance",
+              "sanctions-api": "Regulatory Compliance",
+              "kyc-kyb-api": "Regulatory Compliance",
+              "aml-screening": "Regulatory Compliance",
+              "transaction-monitoring": "Regulatory Compliance",
+              "regulatory-reporting": "Regulatory Compliance",
+              "risk-assessment": "Regulatory Compliance",
+              "academy": "Training",
+              "training": "Training",
+            };
+            const mapped = new Set<string>();
+            for (const raw of products) {
+              const key = String(raw ?? "").trim();
+              if (!key) continue;
+              const candidate =
+                PRODUCT_MAP[key.toLowerCase()] ??
+                (ZOHO_ALLOWED.has(key) ? key : null);
+              if (candidate) mapped.add(candidate);
+            }
+            return mapped.size ? Array.from(mapped) : undefined;
+          })(),
+
           // Custom fields (Zoho CRM API names)
           Website_Name: "WorldAML",
           Landing_Page_URL: attribution.landing_page || undefined,
