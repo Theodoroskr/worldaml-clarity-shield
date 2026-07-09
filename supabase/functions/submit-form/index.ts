@@ -181,8 +181,12 @@ Deno.serve(async (req) => {
       const zohoKey = Deno.env.get("ZOHO_CRM_API_KEY");
       if (lovableKey && zohoKey) {
         const attribution = (metadata as any)?.attribution ?? {};
-        const leadDesc = [
-          message?.trim() || null,
+
+        // Description = visitor's message exactly as submitted. If no message,
+        // fall back to a short auto-generated summary so the Lead still has
+        // useful context.
+        const trimmedMessage = message?.trim() || "";
+        const fallbackDesc = [
           form_type ? `Form: ${form_type}` : null,
           products?.length ? `Products: ${products.join(", ")}` : null,
           region ? `Region: ${region}` : null,
@@ -190,6 +194,7 @@ Deno.serve(async (req) => {
         ]
           .filter(Boolean)
           .join("\n");
+        const descriptionValue = trimmedMessage || fallbackDesc || undefined;
 
         const leadRecord: Record<string, unknown> = {
           First_Name: first_name?.trim().slice(0, 40) || undefined,
@@ -197,10 +202,11 @@ Deno.serve(async (req) => {
           Email: email.trim().slice(0, 100),
           Company: (company?.trim() || "Individual").slice(0, 200),
           Phone: phone?.trim().slice(0, 30) || undefined,
+          // Zoho's "Title" field has api_name "Designation".
           Designation: job_title?.trim().slice(0, 100) || undefined,
           Country: country?.trim().slice(0, 100) || undefined,
           Industry: industry?.trim().slice(0, 100) || undefined,
-          Description: leadDesc || undefined,
+          Description: descriptionValue,
           Lead_Source: "WorldAML Website",
           Lead_Status: "New",
           // Detailed multi-select picklist "Products Multi Selection" (api_name:
@@ -251,37 +257,68 @@ Deno.serve(async (req) => {
           })(),
 
           // High-level category picklist "Product type list" (api_name:
-          // Product_type_list1). Kept only as a coarse classifier; detailed
-          // product choices go to Products_Multi_Selection above.
+          // Product_type_list1). Business categorises selected products into
+          // Training / Platform / Data Source, with priority
+          // Training > Platform > Data Source when multiple categories appear.
+          //
+          // Zoho's Product_type_list1 picklist does not currently contain
+          // literal "Platform" or "Data Source" options — the closest
+          // existing values are "Training" and "Regulatory Compliance".
+          // Platform and Data Source therefore map to "Regulatory Compliance"
+          // so the value passes Zoho picklist validation while preserving
+          // the priority semantics (Training still wins). If Zoho adds
+          // "Platform" / "Data Source" picklist values later, update
+          // PICKLIST_FOR_CATEGORY below.
           Product_type_list1: (() => {
             if (!Array.isArray(products) || products.length === 0) return undefined;
-            const CATEGORY_MAP: Record<string, string> = {
-              "worldaml-suite": "Regulatory Compliance",
-              "worldaml-api": "Regulatory Compliance",
-              "worldid": "Regulatory Compliance",
-              "worldcompliance": "Regulatory Compliance",
-              "bridger-xg": "Regulatory Compliance",
-              "sanctions-api": "Regulatory Compliance",
-              "kyc-kyb-api": "Regulatory Compliance",
-              "aml-screening": "Regulatory Compliance",
-              "transaction-monitoring": "Regulatory Compliance",
-              "regulatory-reporting": "Regulatory Compliance",
-              "risk-assessment": "Regulatory Compliance",
+            type Category = "Training" | "Platform" | "Data Source";
+            const CATEGORY_MAP: Record<string, Category> = {
+              // Platform
+              "worldaml-suite": "Platform",
+              "worldaml-api": "Platform",
+              "worldid": "Platform",
+              "sanctions-api": "Platform",
+              "kyc-kyb-api": "Platform",
+              "aml-screening": "Platform",
+              "transaction-monitoring": "Platform",
+              "regulatory-reporting": "Platform",
+              "risk-assessment": "Platform",
+              // Data Source
+              "worldcompliance": "Data Source",
+              "worldcompliance®": "Data Source",
+              "bridger-xg": "Data Source",
+              "bridger-insight-xg": "Data Source",
+              "bridger insight xg": "Data Source",
+              "bridger insight xg®": "Data Source",
+              // Training
               "academy": "Training",
               "academy-team": "Training",
+              "academy-team-plan": "Training",
               "training": "Training",
             };
-            const mapped = new Set<string>();
+            // Priority: Training > Platform > Data Source
+            const PICKLIST_FOR_CATEGORY: Record<Category, string> = {
+              Training: "Training",
+              Platform: "Regulatory Compliance",
+              "Data Source": "Regulatory Compliance",
+            };
+            const seen = new Set<Category>();
             for (const raw of products) {
               const key = String(raw ?? "").trim().toLowerCase();
-              const candidate = CATEGORY_MAP[key];
-              if (candidate) mapped.add(candidate);
+              const cat = CATEGORY_MAP[key];
+              if (cat) seen.add(cat);
             }
-            return mapped.size ? Array.from(mapped) : undefined;
+            const chosen: Category | undefined = seen.has("Training")
+              ? "Training"
+              : seen.has("Platform")
+                ? "Platform"
+                : seen.has("Data Source")
+                  ? "Data Source"
+                  : undefined;
+            return chosen ? [PICKLIST_FOR_CATEGORY[chosen]] : undefined;
           })(),
 
-
-          // Custom fields (Zoho CRM API names)
+          // Marketing / attribution custom fields (Zoho CRM API names)
           Website_Name: "WorldAML",
           Landing_Page_URL: attribution.landing_page || undefined,
           Referrer_URL: attribution.referrer || undefined,
@@ -296,23 +333,6 @@ Deno.serve(async (req) => {
           $utm_content: attribution.utm_content || undefined,
         };
 
-
-        // Append attribution + landing/referrer to Description so nothing is lost
-        // if Zoho does not have custom UTM fields configured.
-        const attrLines = [
-          attribution.utm_source && `utm_source: ${attribution.utm_source}`,
-          attribution.utm_medium && `utm_medium: ${attribution.utm_medium}`,
-          attribution.utm_campaign && `utm_campaign: ${attribution.utm_campaign}`,
-          attribution.utm_term && `utm_term: ${attribution.utm_term}`,
-          attribution.utm_content && `utm_content: ${attribution.utm_content}`,
-          attribution.landing_page && `Landing page: ${attribution.landing_page}`,
-          attribution.referrer && `Referrer: ${attribution.referrer}`,
-        ].filter(Boolean);
-        if (attrLines.length) {
-          leadRecord.Description = [leadRecord.Description, "", ...attrLines]
-            .filter(Boolean)
-            .join("\n");
-        }
 
         // Strip undefined values before sending.
         Object.keys(leadRecord).forEach(
