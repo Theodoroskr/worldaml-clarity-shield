@@ -203,26 +203,59 @@ Deno.serve(async (req) => {
           Description: leadDesc || undefined,
           Lead_Source: "WorldAML Website",
           Lead_Status: "New",
-          // Multi-select picklist "Product type list" in Zoho CRM (api_name: Product_type_list1).
-          // Zoho enforces a fixed set of picklist values, so map WorldAML product IDs/names
-          // to the exact Zoho picklist entries. Unknown selections are dropped, and any
-          // WorldAML product falls under "Regulatory Compliance".
+          // Detailed multi-select picklist "Products Multi Selection" (api_name:
+          // Products_Multi_Selection) — the specific WorldAML products the lead
+          // selected on the website. Values must exactly match the Zoho picklist.
+          Products_Multi_Selection: (() => {
+            if (!Array.isArray(products) || products.length === 0) return undefined;
+            const PMS_ALLOWED = new Set([
+              "WorldAML Suite",
+              "WorldAML API",
+              "WorldID",
+              "WorldCompliance",
+              "Bridger Insight XG",
+              "Academy \u2014 Team Plan",
+            ]);
+            const PMS_MAP: Record<string, string> = {
+              "worldaml-suite": "WorldAML Suite",
+              "worldaml-api": "WorldAML API",
+              "worldid": "WorldID",
+              "worldcompliance": "WorldCompliance",
+              "worldcompliance®": "WorldCompliance",
+              "bridger-xg": "Bridger Insight XG",
+              "bridger-insight-xg": "Bridger Insight XG",
+              "bridger insight xg": "Bridger Insight XG",
+              "bridger insight xg®": "Bridger Insight XG",
+              "academy": "Academy \u2014 Team Plan",
+              "academy-team": "Academy \u2014 Team Plan",
+              "academy-team-plan": "Academy \u2014 Team Plan",
+              "training": "Academy \u2014 Team Plan",
+              // Related APIs / features roll up to WorldAML API
+              "sanctions-api": "WorldAML API",
+              "kyc-kyb-api": "WorldAML API",
+              "aml-screening": "WorldAML API",
+              "transaction-monitoring": "WorldAML API",
+              "regulatory-reporting": "WorldAML API",
+              "risk-assessment": "WorldAML API",
+            };
+            const mapped = new Set<string>();
+            for (const raw of products) {
+              const key = String(raw ?? "").trim();
+              if (!key) continue;
+              const candidate =
+                PMS_MAP[key.toLowerCase()] ??
+                (PMS_ALLOWED.has(key) ? key : null);
+              if (candidate) mapped.add(candidate);
+            }
+            return mapped.size ? Array.from(mapped) : undefined;
+          })(),
+
+          // High-level category picklist "Product type list" (api_name:
+          // Product_type_list1). Kept only as a coarse classifier; detailed
+          // product choices go to Products_Multi_Selection above.
           Product_type_list1: (() => {
             if (!Array.isArray(products) || products.length === 0) return undefined;
-            const ZOHO_ALLOWED = new Set([
-              "Call Center Services",
-              "Corporate Governance Solutions",
-              "Corporate Services",
-              "Credit Risk Solutions",
-              "Debt Collection Services",
-              "Insurance",
-              "Legal Solutions",
-              "Regulatory Compliance",
-              "System Solutions",
-              "Training",
-            ]);
-            const PRODUCT_MAP: Record<string, string> = {
-              // WorldAML platform + APIs + data sources → Regulatory Compliance
+            const CATEGORY_MAP: Record<string, string> = {
               "worldaml-suite": "Regulatory Compliance",
               "worldaml-api": "Regulatory Compliance",
               "worldid": "Regulatory Compliance",
@@ -235,19 +268,18 @@ Deno.serve(async (req) => {
               "regulatory-reporting": "Regulatory Compliance",
               "risk-assessment": "Regulatory Compliance",
               "academy": "Training",
+              "academy-team": "Training",
               "training": "Training",
             };
             const mapped = new Set<string>();
             for (const raw of products) {
-              const key = String(raw ?? "").trim();
-              if (!key) continue;
-              const candidate =
-                PRODUCT_MAP[key.toLowerCase()] ??
-                (ZOHO_ALLOWED.has(key) ? key : null);
+              const key = String(raw ?? "").trim().toLowerCase();
+              const candidate = CATEGORY_MAP[key];
               if (candidate) mapped.add(candidate);
             }
             return mapped.size ? Array.from(mapped) : undefined;
           })(),
+
 
           // Custom fields (Zoho CRM API names)
           Website_Name: "WorldAML",
