@@ -233,6 +233,51 @@ Deno.serve(async (req) => {
           (k) => leadRecord[k] === undefined && delete leadRecord[k],
         );
 
+        // Resolve the Zoho Lead Assignment Rule ID so ownership is decided by
+        // Zoho CRM (via the configured Assignment Rule) rather than set here.
+        // Prefer an explicit env override; otherwise auto-discover the first
+        // active Leads assignment rule and cache it on the module.
+        let larId: string | undefined = Deno.env.get("ZOHO_CRM_LEAD_ASSIGNMENT_RULE_ID") || undefined;
+        if (!larId) {
+          larId = (globalThis as any).__zohoLeadsLarId;
+        }
+        if (!larId) {
+          try {
+            const rulesRes = await fetch(
+              "https://connector-gateway.lovable.dev/zoho_crm/settings/automation/assignment_rules?module=Leads",
+              {
+                headers: {
+                  Authorization: `Bearer ${lovableKey}`,
+                  "X-Connection-Api-Key": zohoKey,
+                },
+              },
+            );
+            if (rulesRes.ok) {
+              const rulesBody = await rulesRes.json().catch(() => null);
+              const rules = rulesBody?.assignment_rules ?? [];
+              larId = rules[0]?.id;
+              if (larId) (globalThis as any).__zohoLeadsLarId = larId;
+            } else {
+              console.warn(
+                `Zoho assignment rule lookup failed [${rulesRes.status}]: ${await rulesRes.text()}`,
+              );
+            }
+          } catch (lookupErr) {
+            console.warn("Zoho assignment rule lookup error:", lookupErr);
+          }
+        }
+
+        const leadPayload: Record<string, unknown> = {
+          data: [leadRecord],
+          trigger: ["approval", "workflow", "blueprint"],
+        };
+        if (larId) leadPayload.lar_id = larId;
+        else {
+          console.warn(
+            "No Zoho Lead Assignment Rule ID available — lead will be created without triggering an assignment rule.",
+          );
+        }
+
         const zohoRes = await fetch(
           "https://connector-gateway.lovable.dev/zoho_crm/Leads",
           {
@@ -242,7 +287,7 @@ Deno.serve(async (req) => {
               "X-Connection-Api-Key": zohoKey,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ data: [leadRecord] }),
+            body: JSON.stringify(leadPayload),
           },
         );
 
