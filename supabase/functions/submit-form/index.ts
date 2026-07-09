@@ -203,6 +203,13 @@ Deno.serve(async (req) => {
           Description: leadDesc || undefined,
           Lead_Source: "WorldAML Website",
           Lead_Status: "New",
+          // Custom fields (Zoho CRM API names)
+          Website_Name: "WorldAML",
+          Landing_Page_URL: attribution.landing_page || undefined,
+          Referrer_URL: attribution.referrer || undefined,
+          Source_UTM: attribution.utm_source || undefined,
+          Medium_UTM: attribution.utm_medium || undefined,
+          Name_UTM: attribution.utm_campaign || undefined,
           // Attribution — mapped to standard Zoho campaign UTM-style fields where possible.
           $utm_source: attribution.utm_source || undefined,
           $utm_medium: attribution.utm_medium || undefined,
@@ -210,6 +217,7 @@ Deno.serve(async (req) => {
           $utm_term: attribution.utm_term || undefined,
           $utm_content: attribution.utm_content || undefined,
         };
+
 
         // Append attribution + landing/referrer to Description so nothing is lost
         // if Zoho does not have custom UTM fields configured.
