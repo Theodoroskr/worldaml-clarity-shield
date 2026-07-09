@@ -203,6 +203,10 @@ Deno.serve(async (req) => {
           Description: leadDesc || undefined,
           Lead_Source: "WorldAML Website",
           Lead_Status: "New",
+          // Multi-select picklist of selected products of interest
+          Product_type_list: Array.isArray(products) && products.length
+            ? products.map((p: unknown) => String(p).trim()).filter(Boolean)
+            : undefined,
           // Custom fields (Zoho CRM API names)
           Website_Name: "WorldAML",
           Landing_Page_URL: attribution.landing_page || undefined,
