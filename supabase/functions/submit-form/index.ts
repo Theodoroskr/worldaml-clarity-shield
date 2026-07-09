@@ -315,12 +315,9 @@ Deno.serve(async (req) => {
           // Marketing / attribution custom fields (Zoho CRM API names)
           Website_Name: "WorldAML",
           Landing_Page_URL: attribution.landing_page || undefined,
-          // NOTE: Zoho's standard "Referrer" (api_name: Referrer) field is
-          // system-populated by Zoho's built-in visitor tracking and is
-          // read-only via the API — writes are silently ignored. To store
-          // document.referrer, a custom writable field must be added in
-          // Zoho (e.g. Referrer_URL). Until then, we surface it in Note.
-          // Referrer: attribution.referrer || undefined,
+          // Custom writable URL field on Leads for document.referrer.
+          Referrer_URL: attribution.referrer || undefined,
+
           Source_UTM: attribution.utm_source || undefined,
           Medium_UTM: attribution.utm_medium || undefined,
           Name_UTM: attribution.utm_campaign || undefined,
