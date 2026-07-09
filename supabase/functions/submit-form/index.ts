@@ -332,25 +332,44 @@ Deno.serve(async (req) => {
           );
         }
 
-        const zohoRes = await fetch(
-          "https://connector-gateway.lovable.dev/zoho_crm/Leads",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${lovableKey}`,
-              "X-Connection-Api-Key": zohoKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(leadPayload),
-          },
-        );
+        // Retry transient upstream failures (5xx / network resets) up to 3 attempts
+        // with exponential backoff. The connector gateway sometimes returns 503
+        // "upstream connect error" when Zoho briefly resets the connection.
+        let zohoRes: Response | null = null;
+        let lastErrBody = "";
+        const MAX_ATTEMPTS = 3;
+        for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+          try {
+            zohoRes = await fetch(
+              "https://connector-gateway.lovable.dev/zoho_crm/Leads",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${lovableKey}`,
+                  "X-Connection-Api-Key": zohoKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(leadPayload),
+              },
+            );
+            if (zohoRes.ok) break;
+            lastErrBody = await zohoRes.text();
+            const retriable = zohoRes.status >= 500 && zohoRes.status < 600;
+            console.error(
+              `Zoho CRM lead creation failed [${zohoRes.status}] attempt ${attempt}/${MAX_ATTEMPTS}: ${lastErrBody}`,
+            );
+            if (!retriable || attempt === MAX_ATTEMPTS) break;
+          } catch (netErr) {
+            console.error(
+              `Zoho CRM lead creation network error attempt ${attempt}/${MAX_ATTEMPTS}:`,
+              netErr,
+            );
+            if (attempt === MAX_ATTEMPTS) throw netErr;
+          }
+          await new Promise((r) => setTimeout(r, 500 * attempt));
+        }
 
-        if (!zohoRes.ok) {
-          const errBody = await zohoRes.text();
-          console.error(
-            `Zoho CRM lead creation failed [${zohoRes.status}]: ${errBody}`,
-          );
-        } else {
+        if (zohoRes && zohoRes.ok) {
           const okBody = await zohoRes.json().catch(() => null);
           const record = okBody?.data?.[0];
           if (record?.status && record.status !== "success") {
@@ -359,6 +378,7 @@ Deno.serve(async (req) => {
             console.log("Zoho CRM lead created:", record?.details?.id ?? "ok");
           }
         }
+
       } else {
         console.warn("Zoho CRM connector secrets not configured — skipping lead sync");
       }
