@@ -425,147 +425,110 @@ const Academy = () => {
       />
       <Header />
       <main className="flex-1">
-        {/* Hero — editorial split with cinematic visual */}
+        {/* Hero — bold typographic, editorial */}
         <section className="relative bg-navy overflow-hidden border-b border-white/5">
           {/* ambient teal glow */}
-          <div className="pointer-events-none absolute -top-40 -right-20 h-[600px] w-[600px] rounded-full bg-teal-light/10 blur-[140px]" aria-hidden />
-          <div className="pointer-events-none absolute bottom-0 left-1/4 h-[300px] w-[600px] rounded-full bg-teal-light/5 blur-[120px]" aria-hidden />
+          <div className="pointer-events-none absolute -top-40 -left-32 h-[600px] w-[600px] rounded-full bg-teal-light/10 blur-[140px]" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-40 right-0 h-[500px] w-[500px] rounded-full bg-teal-light/[0.06] blur-[140px]" aria-hidden />
 
-          <div className="container-enterprise relative pt-12 lg:pt-16 pb-10 lg:pb-14">
+          <div className="container-enterprise relative pt-16 lg:pt-24 pb-16 lg:pb-24">
             {user && (
-              <Link to="/dashboard" className="inline-flex items-center gap-1 text-slate-light/70 hover:text-white text-body-sm mb-6 transition-colors">
+              <Link to="/dashboard" className="inline-flex items-center gap-1 text-slate-light/70 hover:text-white text-body-sm mb-8 transition-colors">
                 <ArrowLeft className="h-4 w-4" /> Back to Dashboard
               </Link>
             )}
 
-            <div className="grid lg:grid-cols-[1.05fr,0.95fr] gap-10 lg:gap-14 items-center">
-              {/* Left — copy */}
-              <div className="max-w-xl">
-                <div className="inline-flex items-center gap-2 mb-7">
-                  <span className="h-px w-8 bg-teal-light" />
-                  <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-teal-light">
-                    WorldAML Academy · CPD-Accredited
-                  </span>
-                </div>
+            <div className="max-w-4xl">
+              <span className="inline-block py-1 px-3 rounded-full border border-teal-light/30 bg-teal-light/5 text-teal-light text-[11px] font-medium tracking-[0.22em] uppercase mb-8">
+                WorldAML Academy · CPD-Accredited
+              </span>
 
-                <h1 className="font-display text-white text-[2.5rem] sm:text-5xl lg:text-[3.75rem] leading-[1.05] tracking-tight mb-6">
-                  Exceptional <span className="text-teal-light">compliance</span> training.
-                  <span className="block text-slate-light font-normal text-3xl sm:text-4xl lg:text-[2.5rem] mt-3 leading-[1.15]">
-                    Training that changes behaviour. Evidence that proves it.
-                  </span>
-                </h1>
+              <h1 className="text-white font-bold leading-[0.92] tracking-tighter mb-8 text-[3rem] sm:text-6xl lg:text-[6.5rem]">
+                Exceptional{" "}
+                <span
+                  className="text-slate-light/70 italic font-normal"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  compliance
+                </span>{" "}
+                training.
+              </h1>
 
-                <p className="text-body-lg text-slate-light/85 mb-9 max-w-lg leading-relaxed">
-                  AML, KYC and sanctions courses written by working MLROs. Pass the quiz, download a verifiable
-                  certificate, and walk into your next audit with the evidence in hand.
-                </p>
+              <p className="max-w-2xl text-lg lg:text-xl text-slate-light/75 leading-relaxed mb-10">
+                AML, KYC and sanctions courses written by working MLROs. Pass the quiz, download a verifiable
+                certificate, and walk into your next audit with the evidence in hand.
+              </p>
 
-                <div className="flex flex-col sm:flex-row gap-3 mb-8">
-                  <Button asChild variant="accent" size="lg" className="font-semibold rounded-full px-7">
-                    <Link to="/academy/aml-fundamentals">
-                      <BookOpen className="h-4 w-4" /> Start free course
-                    </Link>
+              <div className="flex flex-col sm:flex-row gap-3 mb-9">
+                <Button asChild size="lg" className="bg-teal-light hover:bg-teal-light/90 text-navy font-semibold px-8 py-6 rounded-none transition-all duration-300">
+                  <Link to="/academy/aml-fundamentals">
+                    <BookOpen className="h-4 w-4" /> Start free course
+                  </Link>
+                </Button>
+                {hasAnnualPass ? (
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="bg-transparent border-white/25 text-white hover:bg-white/10 hover:text-white font-semibold px-8 py-6 rounded-none"
+                  >
+                    <a href="#courses-grid">Browse your courses</a>
                   </Button>
-                  {hasAnnualPass ? (
-                    <Button
-                      asChild
-                      size="lg"
-                      variant="outline"
-                      className="bg-transparent border-white/25 text-white hover:bg-white/10 hover:text-white font-semibold rounded-full px-7"
-                    >
-                      <a href="#courses-grid">Browse your courses</a>
-                    </Button>
-                  ) : (
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="bg-transparent border-white/25 text-white hover:bg-white/10 hover:text-white font-semibold rounded-full px-7"
-                      onClick={() => startAnnualCheckout()}
-                      disabled={annualLoading}
-                    >
-                      {annualLoading ? "Opening checkout…" : <>Buy Annual Pass — €199</>}
-                    </Button>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap gap-x-6 gap-y-2 text-body-sm text-slate-light/80">
-                  <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-teal-light" /> CPD-Accredited</span>
-                  <span className="flex items-center gap-2"><Award className="h-4 w-4 text-teal-light" /> Verifiable certificate</span>
-                  <span className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-teal-light" /> Unlimited retakes</span>
-                  <span className="flex items-center gap-2"><Globe className="h-4 w-4 text-teal-light" /> Regulator-aligned</span>
-                </div>
-
-                <div className="mt-5">
-                  <AcademyCartButton />
-                </div>
+                ) : (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="bg-transparent border-white/25 text-white hover:bg-white/10 hover:text-white font-semibold px-8 py-6 rounded-none"
+                    onClick={() => startAnnualCheckout()}
+                    disabled={annualLoading}
+                  >
+                    {annualLoading ? "Opening checkout…" : <>Buy Annual Pass — €199</>}
+                  </Button>
+                )}
               </div>
 
-              {/* Right — cinematic visual */}
-              <div className="relative hidden lg:block">
-                <div className="relative aspect-[4/5] w-full max-w-[520px] ml-auto">
-                  {/* circular vignette mask */}
-                  <div
-                    className="absolute inset-0 overflow-hidden"
-                    style={{
-                      WebkitMaskImage:
-                        "radial-gradient(ellipse 60% 70% at 55% 50%, #000 55%, transparent 85%)",
-                      maskImage:
-                        "radial-gradient(ellipse 60% 70% at 55% 50%, #000 55%, transparent 85%)",
-                    }}
-                  >
-                    <img
-                      src={heroShield}
-                      alt="AML compliance shield and verifiable certificate visualization"
-                      width={1024}
-                      height={1280}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  {/* WorldAML monogram outline overlay */}
-                  <svg
-                    className="absolute inset-0 m-auto h-3/4 w-3/4 text-teal-light/35"
-                    viewBox="0 0 200 200"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    aria-hidden
-                  >
-                    <circle cx="100" cy="100" r="92" strokeDasharray="2 6" />
-                    <circle cx="100" cy="100" r="70" />
-                  </svg>
-                </div>
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-body-sm text-slate-light/80">
+                <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-teal-light" /> CPD-Accredited</span>
+                <span className="flex items-center gap-2"><Award className="h-4 w-4 text-teal-light" /> Verifiable certificate</span>
+                <span className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-teal-light" /> Unlimited retakes</span>
+                <span className="flex items-center gap-2"><Globe className="h-4 w-4 text-teal-light" /> Regulator-aligned</span>
+              </div>
+
+              <div className="mt-6">
+                <AcademyCartButton />
               </div>
             </div>
           </div>
 
-          {/* Slim stat ledger — institutional hairline grid */}
+          {/* Slim stat ledger — hairline grid, no dividers */}
           <div className="relative border-t border-white/10 bg-navy/60 backdrop-blur-sm">
             <div className="container-enterprise">
-              <dl className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/10">
-                <div className="px-5 py-5 sm:px-6 sm:py-6">
-                  <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-light/60 font-semibold mb-1">Professionals certified</dt>
-                  <dd className="text-2xl sm:text-3xl font-semibold text-white tabular-nums">
+              <dl className="grid grid-cols-2 md:grid-cols-4 gap-8 py-10 px-2 sm:px-4">
+                <div className="space-y-1">
+                  <dd className="text-2xl sm:text-3xl font-bold text-white tabular-nums">
                     {typeof certifiedCount === "number" && certifiedCount > 0 ? certifiedCount.toLocaleString() : "1,200+"}
                   </dd>
+                  <dt className="text-[10px] uppercase tracking-[0.22em] text-slate-light/55 font-semibold">Professionals certified</dt>
                 </div>
-                <div className="px-5 py-5 sm:px-6 sm:py-6">
-                  <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-light/60 font-semibold mb-1">Specialist courses</dt>
-                  <dd className="text-2xl sm:text-3xl font-semibold text-white tabular-nums">{courses?.length ?? 12}</dd>
+                <div className="space-y-1">
+                  <dd className="text-2xl sm:text-3xl font-bold text-white tabular-nums">{courses?.length ?? 12}</dd>
+                  <dt className="text-[10px] uppercase tracking-[0.22em] text-slate-light/55 font-semibold">Specialist courses</dt>
                 </div>
-                <div className="px-5 py-5 sm:px-6 sm:py-6">
-                  <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-light/60 font-semibold mb-1">Countries reached</dt>
-                  <dd className="text-2xl sm:text-3xl font-semibold text-white tabular-nums">40+</dd>
+                <div className="space-y-1">
+                  <dd className="text-2xl sm:text-3xl font-bold text-white tabular-nums">40+</dd>
+                  <dt className="text-[10px] uppercase tracking-[0.22em] text-slate-light/55 font-semibold">Countries reached</dt>
                 </div>
-                <div className="px-5 py-5 sm:px-6 sm:py-6">
-                  <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-light/60 font-semibold mb-1">Learner rating</dt>
-                  <dd className="text-2xl sm:text-3xl font-semibold text-white tabular-nums flex items-baseline gap-1">
+                <div className="space-y-1">
+                  <dd className="text-2xl sm:text-3xl font-bold text-white tabular-nums flex items-baseline gap-1">
                     4.8 <span className="text-teal-light text-lg">★</span>
                   </dd>
+                  <dt className="text-[10px] uppercase tracking-[0.22em] text-slate-light/55 font-semibold">Learner rating</dt>
                 </div>
               </dl>
             </div>
           </div>
         </section>
+
 
         {/* Team quote banner (≥3 colleagues from same domain) */}
         {user && (
