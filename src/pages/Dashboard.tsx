@@ -663,6 +663,11 @@ const Dashboard = () => {
                             onClick={() => navigate(`/academy/certificate/${cert.share_token}`)}>
                             <ExternalLink className="h-4 w-4" />
                           </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" title={`Resend certificate to ${user?.email ?? "my email"}`}
+                            disabled={resendingId === cert.id}
+                            onClick={() => handleResendCertificate(cert)}>
+                            {resendingId === cert.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                          </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8" title="Share on LinkedIn"
                             onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(certUrl)}`, "_blank")}>
                             <Share2 className="h-4 w-4" />
