@@ -47,7 +47,7 @@ const Dashboard = () => {
     if (!user) return;
     setResendingId(cert.id);
     try {
-      const certUrl = `${window.location.origin}/academy/certificate/${cert.share_token}`;
+      const certUrl = `https://worldaml.com/academy/certificate/${cert.share_token}`;
       const { error } = await supabase.functions.invoke("send-certificate-email", {
         body: {
           holder_name: cert.holder_name,
