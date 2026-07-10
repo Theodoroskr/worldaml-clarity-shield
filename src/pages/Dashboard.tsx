@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Loader2, User, Building2, LogOut, CreditCard, ShieldAlert,
-  GraduationCap, Award, Share2, ExternalLink, Copy, Globe,
+  GraduationCap, Award, Share2, ExternalLink, Copy, Globe, Mail,
   Search, BookOpen, Shield, ChevronRight, Sparkles, PlayCircle, CheckCircle2
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -41,6 +41,31 @@ const Dashboard = () => {
   }, [searchParams]);
   const [certificates, setCertificates] = useState<any[]>([]);
   const [certsLoading, setCertsLoading] = useState(true);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+
+  const handleResendCertificate = async (cert: any) => {
+    if (!user) return;
+    setResendingId(cert.id);
+    try {
+      const certUrl = `https://worldaml.com/academy/certificate/${cert.share_token}`;
+      const { error } = await supabase.functions.invoke("send-certificate-email", {
+        body: {
+          holder_name: cert.holder_name,
+          email: user.email,
+          course_title: cert.academy_courses?.title ?? "Course",
+          score: cert.score,
+          certificate_url: certUrl,
+          certificate_id: cert.id,
+        },
+      });
+      if (error) throw error;
+      toast.success(`Certificate email sent to ${user.email}`);
+    } catch (e: any) {
+      toast.error(e?.message || "Could not resend certificate email");
+    } finally {
+      setResendingId(null);
+    }
+  };
   const [inProgressCourses, setInProgressCourses] = useState<any[]>([]);
   const [showFirstLessonNudge, setShowFirstLessonNudge] = useState(false);
   const [showAmlUpsell, setShowAmlUpsell] = useState(() => {
@@ -637,6 +662,11 @@ const Dashboard = () => {
                           <Button variant="ghost" size="icon" className="h-8 w-8" title="View certificate"
                             onClick={() => navigate(`/academy/certificate/${cert.share_token}`)}>
                             <ExternalLink className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" title={`Resend certificate to ${user?.email ?? "my email"}`}
+                            disabled={resendingId === cert.id}
+                            onClick={() => handleResendCertificate(cert)}>
+                            {resendingId === cert.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
                           </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8" title="Share on LinkedIn"
                             onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(certUrl)}`, "_blank")}>
