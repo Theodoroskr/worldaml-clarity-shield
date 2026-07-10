@@ -295,6 +295,7 @@ Deno.serve(async (req) => {
             const CATEGORY_MAP: Record<string, Category> = {
               // Platform
               "worldaml-suite": "Platform",
+              "suite": "Platform",
               "worldaml-api": "Platform",
               "worldid": "Platform",
               "sanctions-api": "Platform",
@@ -303,6 +304,12 @@ Deno.serve(async (req) => {
               "transaction-monitoring": "Platform",
               "regulatory-reporting": "Platform",
               "risk-assessment": "Platform",
+              // Book-a-Demo use-case codes
+              "aml": "Platform",
+              "kyc": "Platform",
+              "kyb": "Platform",
+              "tm": "Platform",
+              "reporting": "Platform",
               // Data Source
               "worldcompliance": "Data Source",
               "worldcompliance®": "Data Source",
@@ -316,7 +323,8 @@ Deno.serve(async (req) => {
               "academy-team-plan": "Training",
               "training": "Training",
             };
-            // Zoho picklist values: 'Platforms', 'Data Sources', 'Training'.
+            // Live Zoho picklist values (from settings/fields metadata):
+            // 'Platforms', 'Data Sources', 'Training'.
             const PICKLIST_FOR_CATEGORY: Record<Category, string> = {
               Training: "Training",
               Platform: "Platforms",
