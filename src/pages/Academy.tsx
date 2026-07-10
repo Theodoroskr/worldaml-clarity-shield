@@ -114,7 +114,7 @@ type DifficultyFilter = "all" | "beginner" | "intermediate" | "advanced";
 const Academy = () => {
   const { user } = useAuth();
   const cart = useCart();
-  const { purchasedSlugs, refetch: refetchPurchases } = useAcademyPurchases();
+  const { purchasedSlugs, hasAnnualPass, refetch: refetchPurchases } = useAcademyPurchases();
   const { region, regionConfig, wasAutoDetected, isLoading: regionLoading } = useRegion();
   const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [searchParams, setSearchParams] = useSearchParams();
@@ -1572,7 +1572,7 @@ const Academy = () => {
                       <div className="flex items-center justify-between mt-auto pt-2 border-t border-border/50">
                         {(() => {
                           const isFree = FREE_ACADEMY_COURSES.has(course.slug);
-                          const purchased = purchasedSlugs.has(course.slug);
+                          const purchased = hasAnnualPass || purchasedSlugs.has(course.slug);
                           const requiresPurchase = !isFree && !purchased;
                           const inCart = cart.has(course.slug);
 
