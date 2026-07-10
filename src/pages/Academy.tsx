@@ -542,59 +542,112 @@ const Academy = () => {
         {/* Access & pricing callout */}
         <section className="bg-background border-b border-border">
           <div className="container-enterprise py-6">
-            <div
-              className="rounded-xl border border-border bg-card p-5 sm:p-6 flex flex-col lg:flex-row gap-5 lg:items-center lg:justify-between"
-              role="region"
-              aria-label="Course access and pricing"
-            >
-              <div className="flex gap-4 min-w-0">
-                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Lock className="h-5 w-5 text-primary" />
+            <div className="max-w-2xl mb-12">
+              <p className="text-caption uppercase tracking-[0.22em] font-semibold text-teal-DEFAULT/80 mb-3">
+                How access works
+              </p>
+              <h2 className="text-headline text-foreground mb-3">
+                A seamless framework for individuals and institutions.
+              </h2>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+              {[
+                {
+                  n: "01",
+                  title: "2 free courses",
+                  body: "AML Fundamentals & Sanctions Screening Essentials. Sign in and start instantly.",
+                },
+                {
+                  n: "02",
+                  title: "Paid specialisations",
+                  body: "All other courses from €29. Add to basket, check out, then unlock modules, quiz & certificate.",
+                },
+                {
+                  n: "03",
+                  title: "Bundle discount",
+                  body: "5% off 2 courses, 10% off 3+. Applied automatically at checkout — no code needed.",
+                },
+              ].map((step) => (
+                <div key={step.n} className="group space-y-5">
+                  <div className="w-12 h-12 flex items-center justify-center border border-teal-DEFAULT/50 text-teal-DEFAULT font-bold tabular-nums group-hover:bg-teal-DEFAULT group-hover:text-white transition-colors duration-300">
+                    {step.n}
+                  </div>
+                  <h3 className="text-title font-semibold text-foreground">{step.title}</h3>
+                  <p className="text-body-sm text-muted-foreground leading-relaxed">{step.body}</p>
                 </div>
-                <div className="min-w-0">
-                  <h2 className="text-subtitle font-semibold text-foreground mb-1">
-                    How access works
-                  </h2>
-                  <ul className="text-body-sm text-muted-foreground space-y-1.5">
-                    <li className="flex gap-2">
-                      <CheckCircle className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
-                      <span>
-                        <strong className="text-foreground">2 free courses</strong> — AML Fundamentals & Sanctions Screening Essentials. Sign in and start instantly.
-                      </span>
-                    </li>
-                    <li className="flex gap-2">
-                      <Lock className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-                      <span>
-                        <strong className="text-foreground">All other courses</strong> are paid (from €29). Add to basket, check out, then access modules, quiz & certificate.
-                      </span>
-                    </li>
-                    <li className="flex gap-2">
-                      <Sparkles className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
-                      <span>
-                        <strong className="text-foreground">Bundle discount</strong> — 5% off 2 courses, 10% off 3+. Applied automatically at checkout.
-                      </span>
-                    </li>
-                  </ul>
+              ))}
+            </div>
+            {!user && (
+              <div className="mt-12 flex flex-col sm:flex-row gap-3">
+                <Button asChild size="lg">
+                  <Link to={`/signup?redirect=${encodeURIComponent("/academy")}`}>
+                    Create free account
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link to={`/login?redirect=${encodeURIComponent("/academy")}`}>
+                    Sign in
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Social proof — editorial pull-quote */}
+        <section className="bg-secondary/30 border-b border-border">
+          <div className="container-enterprise section-padding">
+            <div className="max-w-4xl mx-auto">
+              <p className="text-caption uppercase tracking-[0.22em] font-semibold text-teal-DEFAULT/80 mb-6 text-center">
+                Trusted by compliance teams worldwide
+              </p>
+              <div className="bg-card border-l-4 border-teal-DEFAULT p-8 sm:p-12">
+                <p
+                  className="text-2xl sm:text-3xl text-foreground italic leading-snug mb-8"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  "Crisp, practical, and aligned with what regulators actually expect. Our analysts use the regional courses as onboarding day one — the certificate is a nice extra to put on LinkedIn."
+                </p>
+                <div className="flex items-center gap-4 border-t border-border pt-6">
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, s) => (
+                      <Star key={s} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <div>
+                    <p className="text-body-sm font-semibold text-foreground">MLRO</p>
+                    <p className="text-caption text-muted-foreground">EU-licensed payments firm</p>
+                  </div>
                 </div>
               </div>
-              {!user && (
-                <div className="flex flex-col sm:flex-row gap-2 lg:flex-shrink-0 lg:ml-4">
-                  <Button asChild size="sm">
-                    <Link to={`/signup?redirect=${encodeURIComponent("/academy")}`}>
-                      Create free account
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Button>
-                  <Button asChild size="sm" variant="outline">
-                    <Link to={`/login?redirect=${encodeURIComponent("/academy")}`}>
-                      Sign in
-                    </Link>
-                  </Button>
-                </div>
-              )}
+
+              <div className="grid md:grid-cols-2 gap-5 mt-5">
+                {[
+                  {
+                    quote: "The crypto and sanctions modules saved us weeks of policy drafting.",
+                    name: "Compliance Lead",
+                    role: "VASP, MENA region",
+                  },
+                  {
+                    quote: "Finally, AML training that doesn't read like a textbook. The case studies are realistic and decision-driven.",
+                    name: "Senior Analyst",
+                    role: "Tier-1 retail bank",
+                  },
+                ].map((t, i) => (
+                  <div key={i} className="border border-border bg-card p-6">
+                    <p className="text-body-sm text-foreground mb-4 leading-relaxed">"{t.quote}"</p>
+                    <div className="border-t border-border pt-3">
+                      <p className="text-body-sm font-semibold text-foreground">{t.name}</p>
+                      <p className="text-caption text-muted-foreground">{t.role}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
+
 
         {/* Social proof — testimonials */}
         <section className="bg-secondary/30 border-b border-border">
