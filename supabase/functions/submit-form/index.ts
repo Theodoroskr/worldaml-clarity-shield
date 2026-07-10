@@ -204,8 +204,89 @@ Deno.serve(async (req) => {
           Phone: phone?.trim().slice(0, 30) || undefined,
           // Zoho's "Title" field has api_name "Designation".
           Designation: job_title?.trim().slice(0, 100) || undefined,
+          // Contact Information → "Job title" (api_name: Job_title). Populated
+          // verbatim from the website's Job Title input.
+          Job_title: job_title?.trim().slice(0, 100) || undefined,
           Country: country?.trim().slice(0, 100) || undefined,
-          Industry: industry?.trim().slice(0, 100) || undefined,
+          // Industry is a Zoho picklist — map website codes to allowed values.
+          Industry: (() => {
+            const raw = industry?.trim();
+            if (!raw) return undefined;
+            const INDUSTRY_MAP: Record<string, string> = {
+              "bank": "Financial Institutions",
+              "banking": "Financial Institutions",
+              "fintech": "Financial Institutions",
+              "crypto": "Financial Institutions",
+              "vasp": "Financial Institutions",
+              "crypto/vasp": "Financial Institutions",
+              "payments": "Payment Solutions & Processors",
+              "igaming": "Betting, Gaming and Casino",
+              "gaming": "Betting, Gaming and Casino",
+              "casino": "Betting, Gaming and Casino",
+              "legal": "Law firms",
+              "law": "Law firms",
+              "insurance": "Insurance",
+              "forex": "Forex Companies",
+              "real-estate": "Real Estate Agents",
+              "real_estate": "Real Estate Agents",
+              "government": "Government/Military",
+              "healthcare": "Healthcare Services",
+              "education": "Education",
+              "shipping": "Shipping",
+              "telecom": "Telecommunications",
+              "other": "Other",
+            };
+            const mapped = INDUSTRY_MAP[raw.toLowerCase()];
+            if (mapped) return mapped;
+            console.warn(`Unknown industry value from website form: "${raw}" — leaving Zoho Industry unset`);
+            return undefined;
+          })(),
+          // Topic — fixed value for every WorldAML lead so CRM workflows can
+          // segment by source brand.
+          Topic: "WorldAML",
+          // Business Use Cases (multiselectpicklist) — mapped from the
+          // website's use-case codes to Zoho's exact allowed values.
+          Business_Use_Cases: (() => {
+            if (!Array.isArray(products) || products.length === 0) return undefined;
+            const BUC_MAP: Record<string, string> = {
+              "aml": "AML Screening",
+              "aml_screening": "AML Screening",
+              "aml-screening": "AML Screening",
+              "sanctions": "Sanctions Screening",
+              "sanctions_screening": "Sanctions Screening",
+              "sanctions-api": "Sanctions Screening",
+              "kyc": "KYC",
+              "kyb": "KYB",
+              "kyc-kyb-api": "KYC",
+              "cdd": "CDD",
+              "edd": "EDD",
+              "tm": "Transaction Monitoring",
+              "transaction_monitoring": "Transaction Monitoring",
+              "transaction-monitoring": "Transaction Monitoring",
+              "pep": "PEP Screening",
+              "pep_screening": "PEP Screening",
+              "adverse_media": "Adverse Media",
+              "adverse-media": "Adverse Media",
+              "api": "API Integration",
+              "api_integration": "API Integration",
+              "worldaml-api": "API Integration",
+              "training": "Training",
+              "academy": "Training",
+              "academy-team": "Training",
+              "academy-team-plan": "Training",
+              "consulting": "Consulting",
+              "advisory": "Consulting",
+            };
+            const out = new Set<string>();
+            for (const raw of products) {
+              const key = String(raw ?? "").trim().toLowerCase();
+              if (!key) continue;
+              const mapped = BUC_MAP[key];
+              if (mapped) out.add(mapped);
+              else console.warn(`Unknown use-case value for Business_Use_Cases: "${raw}"`);
+            }
+            return out.size ? Array.from(out) : undefined;
+          })(),
           // This Zoho tenant uses "Note" (textarea) as the long-text field on
           // Leads — there is no "Description" field on the layout. The
           // visitor's message is stored verbatim here.
