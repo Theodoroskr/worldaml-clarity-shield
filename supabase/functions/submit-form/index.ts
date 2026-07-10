@@ -212,6 +212,21 @@ Deno.serve(async (req) => {
           Note: descriptionValue,
           Lead_Source: "WorldAML Website",
           Lead_Status: "New",
+          // Distinguishes originating website form so Zoho CRM workflows can
+          // route leads to different email sequences (e.g. Sales nurture vs.
+          // Free AML Check journey). Values must match the Zoho picklist.
+          Form_Type: (() => {
+            const map: Record<string, string> = {
+              "contact-sales": "Contact Sales",
+              "free-aml-check": "Free AML Check",
+              "free-trial": "Free Trial",
+              "book-demo": "Book Demo",
+              "partner-application": "Partner Application",
+              "worldcompliance-demo": "WorldCompliance Demo",
+            };
+            const key = String(form_type ?? "").trim().toLowerCase();
+            return map[key] || (form_type ? String(form_type) : undefined);
+          })(),
           // Detailed multi-select picklist "Products Multi Selection" (api_name:
           // Products_Multi_Selection) — the specific WorldAML products the lead
           // selected on the website. Values must exactly match the Zoho picklist.
