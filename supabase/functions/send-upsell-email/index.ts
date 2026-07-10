@@ -137,8 +137,8 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
           </ul>
           <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 4px;">
             <a href="https://worldaml.com/contact-sales?product=screening&utm_source=email&utm_medium=upsell&utm_campaign=screening-upgrade"
-               style="display:inline-block;background:linear-gradient(135deg,#1e3a5f,#0d2137);color:#fff;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;letter-spacing:0.3px;">
-              Try AML Screening →
+               style="display:inline-block;background-color:#1e3a5f;background-image:linear-gradient(135deg,#1e3a5f,#0d2137);color:#ffffff;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;letter-spacing:0.3px;">
+              <span style="color:#ffffff;">Try AML Screening &rarr;</span>
             </a>
           </td></tr></table>
           <p style="margin:24px 0 0;font-size:13px;color:#6b7280;text-align:center;">
