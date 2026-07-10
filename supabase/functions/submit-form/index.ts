@@ -246,6 +246,7 @@ Deno.serve(async (req) => {
             ]);
             const PMS_MAP: Record<string, string> = {
               "worldaml-suite": "WorldAML Suite",
+              "suite": "WorldAML Suite",
               "worldaml-api": "WorldAML API",
               "worldid": "WorldID",
               "worldcompliance": "WorldCompliance",
@@ -265,6 +266,12 @@ Deno.serve(async (req) => {
               "transaction-monitoring": "WorldAML API",
               "regulatory-reporting": "WorldAML API",
               "risk-assessment": "WorldAML API",
+              // Book-a-Demo use-case codes → default to WorldAML Suite
+              "aml": "WorldAML Suite",
+              "kyc": "WorldAML Suite",
+              "kyb": "WorldAML Suite",
+              "tm": "WorldAML Suite",
+              "reporting": "WorldAML Suite",
             };
             const mapped = new Set<string>();
             for (const raw of products) {
