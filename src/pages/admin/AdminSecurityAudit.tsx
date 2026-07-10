@@ -52,7 +52,7 @@ const AUTH_BADGE: Record<AuthLevel, { label: string; color: string; icon: typeof
   service_role:   { label: "Service Role",  color: "bg-amber-500/15 text-amber-400 border-amber-500/30", icon: Lock },
   webhook_secret: { label: "Webhook",       color: "bg-purple-500/15 text-purple-400 border-purple-500/30", icon: Lock },
   anon_key:       { label: "Anon Key",      color: "bg-orange-500/15 text-orange-400 border-orange-500/30", icon: Unlock },
-  none:           { label: "Public",        color: "bg-slate-500/15 text-slate-400 border-slate-500/30",    icon: ShieldX },
+  none:           { label: "Public",        color: "bg-slate-500/15 text-slate-200 border-slate-500/30",    icon: ShieldX },
 };
 
 /* ── RLS Policy types ── */
