@@ -676,34 +676,33 @@ const AcademyCourse = () => {
       />
       <Header />
       <main className="flex-1">
-        {/* Course Header */}
-        <section className="bg-navy py-6 sm:py-8">
-          <div className="container-enterprise">
-            <Link to="/academy" className="text-slate-light text-body-sm hover:text-white inline-flex items-center gap-1 mb-3 sm:mb-4">
+        {/* Course Header — editorial */}
+        <section className="relative bg-navy overflow-hidden border-b border-white/5">
+          <div className="pointer-events-none absolute -top-40 -left-32 h-[500px] w-[500px] rounded-full bg-teal-light/10 blur-[140px]" aria-hidden />
+          <div className="container-enterprise relative py-10 sm:py-14">
+            <Link to="/academy" className="text-slate-light/70 text-body-sm hover:text-white inline-flex items-center gap-1 mb-6 transition-colors">
               <ArrowLeft className="h-4 w-4" /> Back to Academy
             </Link>
-            <h1 className="text-2xl sm:text-3xl md:text-headline text-primary-foreground mb-2 leading-tight">{course.title}</h1>
-            <p className="text-body-sm sm:text-body text-slate-light mb-4">{course.description}</p>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-body-sm text-slate-light">
-              <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {course.duration_minutes} min</span>
-              <Badge variant="secondary">{course.difficulty}</Badge>
+
+            <div className="flex flex-wrap items-center gap-3 mb-5">
+              <span className="inline-block py-1 px-3 rounded-full border border-teal-light/30 bg-teal-light/5 text-teal-light text-[11px] font-medium tracking-[0.22em] uppercase">
+                WorldAML Academy · Course
+              </span>
               {(() => {
                 if (FREE_ACADEMY_COURSES.has(course.slug)) {
                   return (
-                    <Badge variant="outline" className="border-accent/40 text-accent bg-accent/10">
+                    <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-teal-light">
                       Free
-                    </Badge>
+                    </span>
                   );
                 }
                 if (isPaidCourse(course.slug)) {
                   const cents = convertEurCents(ACADEMY_PRICING[course.slug].eurCents, currency);
                   return (
-                    <span className="inline-flex items-center gap-2">
-                      <Badge variant="outline" className="border-primary/40 text-primary-foreground bg-primary/20">
-                        {formatPrice(cents, currency)}
-                      </Badge>
-                      <span className="text-slate-light">
-                        <CurrencyIndicator variant="full" showTooltip className="!text-slate-light" />
+                    <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] font-semibold text-white/80">
+                      {formatPrice(cents, currency)}
+                      <span className="text-slate-light/70 normal-case tracking-normal">
+                        <CurrencyIndicator variant="full" showTooltip className="!text-slate-light/70" />
                       </span>
                     </span>
                   );
@@ -711,34 +710,51 @@ const AcademyCourse = () => {
                 return null;
               })()}
             </div>
+
+            <h1 className="text-white font-bold leading-[0.95] tracking-tighter mb-5 text-3xl sm:text-5xl lg:text-6xl max-w-4xl">
+              {course.title}
+            </h1>
+            <p className="text-body-lg text-slate-light/80 max-w-2xl leading-relaxed mb-6">{course.description}</p>
+
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-body-sm text-slate-light/75 mb-6">
+              <span className="inline-flex items-center gap-2"><Clock className="h-4 w-4 text-teal-light" /> {course.duration_minutes} min</span>
+              <span className="inline-flex items-center gap-2"><BookOpen className="h-4 w-4 text-teal-light" /> {modules?.length || 0} modules</span>
+              <span className="inline-flex items-center gap-2 uppercase tracking-widest text-[11px] font-semibold">{course.difficulty}</span>
+            </div>
+
             {user ? (
-              <div className="mt-4 max-w-sm">
-                <div className="flex justify-between text-caption text-slate-light mb-1">
+              <div className="mt-2 max-w-md">
+                <div className="flex justify-between items-baseline text-[11px] uppercase tracking-[0.22em] text-slate-light/60 font-semibold mb-2">
                   <span>Progress</span>
-                  <span>{Math.round(progressPercent)}%</span>
+                  <span className="text-white tabular-nums text-body-sm normal-case tracking-normal">{Math.round(progressPercent)}%</span>
                 </div>
-                <Progress value={progressPercent} className="h-2" />
+                <div className="h-px w-full bg-white/10 relative">
+                  <div
+                    className="absolute inset-y-0 left-0 bg-teal-light transition-all duration-500"
+                    style={{ width: `${progressPercent}%`, height: "2px", top: "-0.5px" }}
+                  />
+                </div>
               </div>
             ) : (
-              <div className="mt-4 inline-flex items-start gap-2 text-caption text-slate-light bg-white/5 border border-white/10 rounded-md px-3 py-2 max-w-full">
+              <div className="mt-2 inline-flex items-start gap-2 text-caption text-slate-light bg-white/5 border border-white/10 px-3 py-2 max-w-full">
                 <BookOpen className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
-                <span className="leading-snug">Reading freely — <Link to="/signup" className="text-white underline hover:text-accent">sign up</Link> to save progress and earn a certificate.</span>
+                <span className="leading-snug">Reading freely — <Link to="/signup" className="text-teal-light underline hover:text-white">sign up</Link> to save progress and earn a certificate.</span>
               </div>
             )}
           </div>
         </section>
 
-        {/* Tabs */}
+        {/* Tabs — teal underline */}
         <section className="border-b border-border bg-background sticky top-16 z-30">
           <div className="container-enterprise flex gap-0">
             <button
               onClick={() => setActiveTab("learn")}
-              className={`px-6 py-3 text-body-sm font-medium border-b-2 transition-colors ${
-                activeTab === "learn" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              className={`px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-semibold border-b-2 transition-colors ${
+                activeTab === "learn" ? "border-teal text-teal" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              <BookOpen className="h-4 w-4 inline mr-1.5" />
-              Learn ({modules?.length || 0} modules)
+              <BookOpen className="h-4 w-4 inline mr-2" />
+              Learn · {modules?.length || 0} modules
             </button>
             <button
               onClick={() => {
@@ -757,102 +773,105 @@ const AcademyCourse = () => {
                 }
                 setActiveTab("quiz");
               }}
-              className={`px-6 py-3 text-body-sm font-medium border-b-2 transition-colors ${
-                activeTab === "quiz" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              className={`px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-semibold border-b-2 transition-colors ${
+                activeTab === "quiz" ? "border-teal text-teal" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Award className="h-4 w-4 inline mr-1.5" />
+              <Award className="h-4 w-4 inline mr-2" />
               Quiz & Certificate
-              {(!user || !allModulesComplete) && <Lock className="h-3 w-3 inline ml-1" />}
+              {(!user || !allModulesComplete) && <Lock className="h-3 w-3 inline ml-2" />}
             </button>
           </div>
         </section>
+
 
         {/* Content */}
         <section className="py-8 md:py-12 bg-background">
           <div className="container-enterprise">
             {activeTab === "learn" ? (
               <div className="grid lg:grid-cols-[300px_1fr] gap-8 lg:gap-12">
-                {/* Module sidebar */}
-                <aside className="lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto">
-                  <div className="rounded-xl border border-border bg-card p-4">
-                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-border">
-                      <p className="text-caption font-semibold text-foreground uppercase tracking-wide">
-                        Course Modules
-                      </p>
-                      <span className="text-caption text-muted-foreground">
-                        {completedModules.length}/{modules?.length || 0}
-                      </span>
-                    </div>
-                    <nav className="space-y-1">
-                      {modules?.map((mod, i) => {
-                        const isComplete = completedModules.includes(mod.id);
-                        const isActive = i === activeModule;
-                        return (
-                          <button
-                            key={mod.id}
-                            onClick={() => {
-                              setActiveModule(i);
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                            }}
-                            className={`w-full text-left px-3 py-2.5 rounded-lg text-body-sm transition-all flex items-start gap-2.5 ${
-                              isActive
-                                ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
-                                : "text-muted-foreground hover:bg-secondary border-l-2 border-transparent"
-                            }`}
-                          >
-                            {isComplete ? (
-                              <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                            ) : (
-                              <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-semibold ${
-                                isActive ? "bg-primary text-primary-foreground" : "border border-border"
-                              }`}>
-                                {i + 1}
-                              </span>
-                            )}
-                            <span className="leading-snug">{mod.title}</span>
-                          </button>
-                        );
-                      })}
-                    </nav>
-                    {modules && modules.length > 0 && (
-                      <div className="mt-4 pt-4 border-t border-border">
-                        <div className="flex items-center gap-2 text-caption text-muted-foreground">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>~{modules.reduce((s, m) => s + computeReadingMinutes(m.content), 0)} min total reading</span>
-                        </div>
-                      </div>
-                    )}
+                {/* Module rail — numbered, hairline */}
+                <aside className="lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto pr-1">
+                  <div className="flex items-baseline justify-between mb-6 pb-4 border-b border-border">
+                    <p className="text-[10px] uppercase tracking-[0.22em] font-semibold text-teal">
+                      Curriculum
+                    </p>
+                    <span className="text-caption text-muted-foreground tabular-nums">
+                      {completedModules.length} / {modules?.length || 0}
+                    </span>
                   </div>
+                  <nav className="space-y-1">
+                    {modules?.map((mod, i) => {
+                      const isComplete = completedModules.includes(mod.id);
+                      const isActive = i === activeModule;
+                      return (
+                        <button
+                          key={mod.id}
+                          onClick={() => {
+                            setActiveModule(i);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          className={`group w-full text-left px-4 py-3.5 text-body-sm transition-all flex items-start gap-3.5 border-l-2 ${
+                            isActive
+                              ? "border-teal bg-teal/5 text-foreground font-medium"
+                              : "border-transparent text-muted-foreground hover:text-foreground hover:border-border hover:bg-secondary/40"
+                          }`}
+                        >
+                          {isComplete ? (
+                            <span className="w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 bg-teal text-white">
+                              <CheckCircle className="h-3.5 w-3.5" />
+                            </span>
+                          ) : (
+                            <span className={`w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold tabular-nums border transition-colors ${
+                              isActive
+                                ? "border-teal text-teal bg-transparent"
+                                : "border-border text-muted-foreground group-hover:border-teal/40 group-hover:text-teal"
+                            }`}>
+                              {String(i + 1).padStart(2, "0")}
+                            </span>
+                          )}
+                          <span className="leading-snug pt-0.5">{mod.title}</span>
+                        </button>
+                      );
+                    })}
+                  </nav>
+                  {modules && modules.length > 0 && (
+                    <div className="mt-6 pt-4 border-t border-border">
+                      <div className="flex items-center gap-2 text-caption text-muted-foreground">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>~{modules.reduce((s, m) => s + computeReadingMinutes(m.content), 0)} min total reading</span>
+                      </div>
+                    </div>
+                  )}
                 </aside>
 
                 {/* Module content */}
                 {modules && modules[activeModule] && (
                   <article className="min-w-0 max-w-3xl">
-                    {/* Module header */}
-                    <div className="mb-6 pb-6 border-b border-border">
-                      <p className="text-caption text-primary font-semibold uppercase tracking-wide mb-2">
-                        Module {activeModule + 1} of {modules.length}
+                    {/* Module header — editorial */}
+                    <div className="mb-10 pb-8 border-b border-border">
+                      <p className="text-[10px] uppercase tracking-[0.22em] text-teal font-semibold mb-4 tabular-nums">
+                        Module {String(activeModule + 1).padStart(2, "0")} / {String(modules.length).padStart(2, "0")}
                       </p>
-                      <h2 className="text-3xl md:text-4xl font-bold text-foreground leading-tight tracking-tight mb-3">
+                      <h2 className="text-4xl md:text-5xl font-bold text-foreground leading-[1.05] tracking-tighter mb-5">
                         {modules[activeModule].title}
                       </h2>
-                      <div className="flex items-center gap-4 text-caption text-muted-foreground">
+                      <div className="flex items-center gap-4 text-caption uppercase tracking-widest text-muted-foreground font-semibold">
                         <span className="inline-flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5" />
+                          <Clock className="h-3.5 w-3.5 text-teal" />
                           {computeReadingMinutes(modules[activeModule].content)} min read
                         </span>
-                        <span aria-hidden>·</span>
-                        <span>{modules[activeModule].content.replace(/\\n/g, " ").split(/\s+/).filter(Boolean).length} words</span>
+                        <span className="h-px w-8 bg-border" aria-hidden />
+                        <span className="tabular-nums normal-case tracking-normal">
+                          {modules[activeModule].content.replace(/\\n/g, " ").split(/\s+/).filter(Boolean).length} words
+                        </span>
                       </div>
                     </div>
 
-                    {/* In-page table of contents (auto-built from headings) */}
                     <ModuleTOC content={modules[activeModule].content} />
 
-                    {/* Course diagram - shown only for first module */}
                     {activeModule === 0 && course?.slug && getCourseDiagram(course.slug) && (
-                      <div className="mb-8 rounded-xl border border-border bg-card overflow-hidden">
+                      <div className="mb-10 border border-border bg-card overflow-hidden">
                         <div className="aspect-video relative">
                           <img
                             src={getCourseDiagram(course.slug)}
@@ -861,7 +880,7 @@ const AcademyCourse = () => {
                           />
                         </div>
                         <div className="px-4 py-3 bg-muted/30 border-t border-border">
-                          <p className="text-caption text-muted-foreground flex items-center gap-2">
+                          <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground font-semibold flex items-center gap-2">
                             <ImageIcon className="h-3.5 w-3.5" />
                             Key concepts visualized
                           </p>
@@ -869,34 +888,37 @@ const AcademyCourse = () => {
                       </div>
                     )}
 
-                    {/* Article body */}
                     <ContentProtection watermarkLabel={user?.email || "WorldAML Academy"}>
-                      <ModuleContent content={modules[activeModule].content} className="mb-10" />
+                      <ModuleContent content={modules[activeModule].content} className="mb-12" />
                     </ContentProtection>
 
-                    {/* Mark as complete card */}
+                    {/* Mark complete — teal-bordered ribbon */}
                     {!completedModules.includes(modules[activeModule].id) && (
-                      <div className="mb-6 rounded-xl border border-border bg-secondary/30 p-5 flex items-center justify-between gap-4 flex-wrap">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <CheckCircle className="h-5 w-5 text-primary" />
+                      <div className="mb-8 border-l-4 border-teal bg-card p-6 flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex items-center gap-4">
+                          <div className="h-10 w-10 border border-teal/40 flex items-center justify-center flex-shrink-0 text-teal">
+                            <CheckCircle className="h-5 w-5" />
                           </div>
                           <div>
-                            <p className="text-body font-medium text-foreground">Finished reading?</p>
+                            <p className="text-body font-semibold text-foreground">Finished reading?</p>
                             <p className="text-body-sm text-muted-foreground">Mark this module complete to track your progress.</p>
                           </div>
                         </div>
-                        <Button onClick={() => markModuleComplete(modules[activeModule].id)}>
+                        <Button
+                          onClick={() => markModuleComplete(modules[activeModule].id)}
+                          className="bg-teal hover:bg-teal/90 text-white font-semibold rounded-none px-6"
+                        >
                           <CheckCircle className="h-4 w-4 mr-2" />
                           Mark Complete
                         </Button>
                       </div>
                     )}
 
-                    {/* Prev/Next navigation */}
-                    <div className="flex items-center justify-between gap-4 pt-6 border-t border-border">
+                    {/* Prev/Next — squared, editorial */}
+                    <div className="flex items-center justify-between gap-4 pt-8 border-t border-border">
                       <Button
                         variant="outline"
+                        className="rounded-none px-6 py-6 border-border text-foreground hover:bg-secondary disabled:opacity-30"
                         disabled={activeModule === 0}
                         onClick={() => {
                           setActiveModule(activeModule - 1);
@@ -909,7 +931,7 @@ const AcademyCourse = () => {
 
                       {activeModule < modules.length - 1 ? (
                         <Button
-                          variant="default"
+                          className="rounded-none px-6 py-6 bg-teal hover:bg-teal/90 text-white font-semibold"
                           onClick={() => {
                             markModuleComplete(modules[activeModule].id);
                             setActiveModule(activeModule + 1);
@@ -920,7 +942,7 @@ const AcademyCourse = () => {
                         </Button>
                       ) : allModulesComplete ? (
                         <Button
-                          variant="accent"
+                          className="rounded-none px-6 py-6 bg-teal hover:bg-teal/90 text-white font-semibold"
                           onClick={() => {
                             if (user) {
                               setActiveTab("quiz");
@@ -935,7 +957,7 @@ const AcademyCourse = () => {
                         </Button>
                       ) : (
                         <Button
-                          variant="default"
+                          className="rounded-none px-6 py-6 bg-teal hover:bg-teal/90 text-white font-semibold"
                           onClick={() => markModuleComplete(modules[activeModule].id)}
                           disabled={completedModules.includes(modules[activeModule].id)}
                         >
@@ -947,6 +969,7 @@ const AcademyCourse = () => {
                   </article>
                 )}
               </div>
+
             ) : !user ? (
               <div className="max-w-md mx-auto text-center py-12">
                 <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
