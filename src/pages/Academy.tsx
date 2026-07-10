@@ -466,15 +466,26 @@ const Academy = () => {
                       <BookOpen className="h-4 w-4" /> Start free course
                     </Link>
                   </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="bg-transparent border-white/25 text-white hover:bg-white/10 hover:text-white font-semibold rounded-full px-7"
-                    onClick={() => startAnnualCheckout()}
-                    disabled={annualLoading}
-                  >
-                    {annualLoading ? "Opening checkout…" : <>Buy Annual Pass — €199</>}
-                  </Button>
+                  {hasAnnualPass ? (
+                    <Button
+                      asChild
+                      size="lg"
+                      variant="outline"
+                      className="bg-transparent border-white/25 text-white hover:bg-white/10 hover:text-white font-semibold rounded-full px-7"
+                    >
+                      <a href="#courses-grid">Browse your courses</a>
+                    </Button>
+                  ) : (
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="bg-transparent border-white/25 text-white hover:bg-white/10 hover:text-white font-semibold rounded-full px-7"
+                      onClick={() => startAnnualCheckout()}
+                      disabled={annualLoading}
+                    >
+                      {annualLoading ? "Opening checkout…" : <>Buy Annual Pass — €199</>}
+                    </Button>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap gap-x-6 gap-y-2 text-body-sm text-slate-light/80">
@@ -746,14 +757,12 @@ const Academy = () => {
                     </li>
                   ))}
                 </ul>
-                {(
-                  <Button asChild className="w-full" variant="outline">
-                    <a href="#courses-grid">
-                      Browse paid courses
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </a>
-                  </Button>
-                )}
+                <Button asChild className="w-full" variant="outline">
+                  <a href="#courses-grid">
+                    {hasAnnualPass ? "Browse your courses" : "Browse paid courses"}
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </a>
+                </Button>
 
               </div>
 
@@ -792,27 +801,43 @@ const Academy = () => {
                     );
                   })}
                 </ul>
-                <Button
-                  variant="accent"
-                  className="w-full"
-                  onClick={() => startAnnualCheckout()}
-                  disabled={annualLoading}
-                >
-                  {annualLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      Starting checkout…
-                    </>
-                  ) : (
-                    <>
-                      Buy annual access
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </>
-                  )}
-                </Button>
-                <p className="mt-2 text-caption text-muted-foreground text-center">
-                  Instant checkout — no onboarding required.
-                </p>
+                {hasAnnualPass ? (
+                  <>
+                    <Button asChild variant="accent" className="w-full">
+                      <a href="#courses-grid">
+                        Browse your courses
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </a>
+                    </Button>
+                    <p className="mt-2 text-caption text-accent text-center font-medium">
+                      ✓ You have active All-Access — no additional purchase needed.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="accent"
+                      className="w-full"
+                      onClick={() => startAnnualCheckout()}
+                      disabled={annualLoading}
+                    >
+                      {annualLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          Starting checkout…
+                        </>
+                      ) : (
+                        <>
+                          Buy annual access
+                          <ArrowRight className="h-4 w-4 ml-1" />
+                        </>
+                      )}
+                    </Button>
+                    <p className="mt-2 text-caption text-muted-foreground text-center">
+                      Instant checkout — no onboarding required.
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
