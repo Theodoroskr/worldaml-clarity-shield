@@ -676,34 +676,33 @@ const AcademyCourse = () => {
       />
       <Header />
       <main className="flex-1">
-        {/* Course Header */}
-        <section className="bg-navy py-6 sm:py-8">
-          <div className="container-enterprise">
-            <Link to="/academy" className="text-slate-light text-body-sm hover:text-white inline-flex items-center gap-1 mb-3 sm:mb-4">
+        {/* Course Header — editorial */}
+        <section className="relative bg-navy overflow-hidden border-b border-white/5">
+          <div className="pointer-events-none absolute -top-40 -left-32 h-[500px] w-[500px] rounded-full bg-teal-light/10 blur-[140px]" aria-hidden />
+          <div className="container-enterprise relative py-10 sm:py-14">
+            <Link to="/academy" className="text-slate-light/70 text-body-sm hover:text-white inline-flex items-center gap-1 mb-6 transition-colors">
               <ArrowLeft className="h-4 w-4" /> Back to Academy
             </Link>
-            <h1 className="text-2xl sm:text-3xl md:text-headline text-primary-foreground mb-2 leading-tight">{course.title}</h1>
-            <p className="text-body-sm sm:text-body text-slate-light mb-4">{course.description}</p>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-body-sm text-slate-light">
-              <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {course.duration_minutes} min</span>
-              <Badge variant="secondary">{course.difficulty}</Badge>
+
+            <div className="flex flex-wrap items-center gap-3 mb-5">
+              <span className="inline-block py-1 px-3 rounded-full border border-teal-light/30 bg-teal-light/5 text-teal-light text-[11px] font-medium tracking-[0.22em] uppercase">
+                WorldAML Academy · Course
+              </span>
               {(() => {
                 if (FREE_ACADEMY_COURSES.has(course.slug)) {
                   return (
-                    <Badge variant="outline" className="border-accent/40 text-accent bg-accent/10">
+                    <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-teal-light">
                       Free
-                    </Badge>
+                    </span>
                   );
                 }
                 if (isPaidCourse(course.slug)) {
                   const cents = convertEurCents(ACADEMY_PRICING[course.slug].eurCents, currency);
                   return (
-                    <span className="inline-flex items-center gap-2">
-                      <Badge variant="outline" className="border-primary/40 text-primary-foreground bg-primary/20">
-                        {formatPrice(cents, currency)}
-                      </Badge>
-                      <span className="text-slate-light">
-                        <CurrencyIndicator variant="full" showTooltip className="!text-slate-light" />
+                    <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] font-semibold text-white/80">
+                      {formatPrice(cents, currency)}
+                      <span className="text-slate-light/70 normal-case tracking-normal">
+                        <CurrencyIndicator variant="full" showTooltip className="!text-slate-light/70" />
                       </span>
                     </span>
                   );
@@ -711,34 +710,51 @@ const AcademyCourse = () => {
                 return null;
               })()}
             </div>
+
+            <h1 className="text-white font-bold leading-[0.95] tracking-tighter mb-5 text-3xl sm:text-5xl lg:text-6xl max-w-4xl">
+              {course.title}
+            </h1>
+            <p className="text-body-lg text-slate-light/80 max-w-2xl leading-relaxed mb-6">{course.description}</p>
+
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-body-sm text-slate-light/75 mb-6">
+              <span className="inline-flex items-center gap-2"><Clock className="h-4 w-4 text-teal-light" /> {course.duration_minutes} min</span>
+              <span className="inline-flex items-center gap-2"><BookOpen className="h-4 w-4 text-teal-light" /> {modules?.length || 0} modules</span>
+              <span className="inline-flex items-center gap-2 uppercase tracking-widest text-[11px] font-semibold">{course.difficulty}</span>
+            </div>
+
             {user ? (
-              <div className="mt-4 max-w-sm">
-                <div className="flex justify-between text-caption text-slate-light mb-1">
+              <div className="mt-2 max-w-md">
+                <div className="flex justify-between items-baseline text-[11px] uppercase tracking-[0.22em] text-slate-light/60 font-semibold mb-2">
                   <span>Progress</span>
-                  <span>{Math.round(progressPercent)}%</span>
+                  <span className="text-white tabular-nums text-body-sm normal-case tracking-normal">{Math.round(progressPercent)}%</span>
                 </div>
-                <Progress value={progressPercent} className="h-2" />
+                <div className="h-px w-full bg-white/10 relative">
+                  <div
+                    className="absolute inset-y-0 left-0 bg-teal-light transition-all duration-500"
+                    style={{ width: `${progressPercent}%`, height: "2px", top: "-0.5px" }}
+                  />
+                </div>
               </div>
             ) : (
-              <div className="mt-4 inline-flex items-start gap-2 text-caption text-slate-light bg-white/5 border border-white/10 rounded-md px-3 py-2 max-w-full">
+              <div className="mt-2 inline-flex items-start gap-2 text-caption text-slate-light bg-white/5 border border-white/10 px-3 py-2 max-w-full">
                 <BookOpen className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
-                <span className="leading-snug">Reading freely — <Link to="/signup" className="text-white underline hover:text-accent">sign up</Link> to save progress and earn a certificate.</span>
+                <span className="leading-snug">Reading freely — <Link to="/signup" className="text-teal-light underline hover:text-white">sign up</Link> to save progress and earn a certificate.</span>
               </div>
             )}
           </div>
         </section>
 
-        {/* Tabs */}
+        {/* Tabs — teal underline */}
         <section className="border-b border-border bg-background sticky top-16 z-30">
           <div className="container-enterprise flex gap-0">
             <button
               onClick={() => setActiveTab("learn")}
-              className={`px-6 py-3 text-body-sm font-medium border-b-2 transition-colors ${
-                activeTab === "learn" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              className={`px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-semibold border-b-2 transition-colors ${
+                activeTab === "learn" ? "border-teal text-teal" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              <BookOpen className="h-4 w-4 inline mr-1.5" />
-              Learn ({modules?.length || 0} modules)
+              <BookOpen className="h-4 w-4 inline mr-2" />
+              Learn · {modules?.length || 0} modules
             </button>
             <button
               onClick={() => {
@@ -757,16 +773,17 @@ const AcademyCourse = () => {
                 }
                 setActiveTab("quiz");
               }}
-              className={`px-6 py-3 text-body-sm font-medium border-b-2 transition-colors ${
-                activeTab === "quiz" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              className={`px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-semibold border-b-2 transition-colors ${
+                activeTab === "quiz" ? "border-teal text-teal" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Award className="h-4 w-4 inline mr-1.5" />
+              <Award className="h-4 w-4 inline mr-2" />
               Quiz & Certificate
-              {(!user || !allModulesComplete) && <Lock className="h-3 w-3 inline ml-1" />}
+              {(!user || !allModulesComplete) && <Lock className="h-3 w-3 inline ml-2" />}
             </button>
           </div>
         </section>
+
 
         {/* Content */}
         <section className="py-8 md:py-12 bg-background">
