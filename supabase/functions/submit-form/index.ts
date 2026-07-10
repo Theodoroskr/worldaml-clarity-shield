@@ -443,7 +443,52 @@ Deno.serve(async (req) => {
           $utm_campaign: attribution.utm_campaign || undefined,
           $utm_term: attribution.utm_term || undefined,
           $utm_content: attribution.utm_content || undefined,
+
+          // ── Additional WorldAML Book Demo mappings ────────────────────────
+          // Sales Organisation Unit — WorldAML leads belong to the ICG parent
+          // sales unit. Exact Zoho picklist value.
+          Sales_Organisation_Unit: "Infocredit Group (ICG)",
+
+          // Qualification level — derived from lead-scoring tier:
+          //   hot → Hot, qualified → Warm, low → Cold.
+          Qualification_level: (() => {
+            const tier = String((metadata as any)?.lead_tier ?? "").toLowerCase();
+            if (tier === "hot") return "Hot";
+            if (tier === "qualified") return "Warm";
+            if (tier === "low") return "Cold";
+            return undefined;
+          })(),
+
+          // Communication Consents (multiselectpicklist) — WorldAML leads
+          // consent to regulatory/compliance communications by submitting a
+          // demo request. Exact Zoho picklist value.
+          Communication_Consents: ["Regulatory Compliance & Corp Governance"],
+
+          // Marketing Communication Consent (boolean) — set true when the
+          // visitor explicitly opts in via metadata.marketing_consent; leave
+          // unset otherwise so Zoho does not record a false consent.
+          Marketing_Communication_Consent:
+            (metadata as any)?.marketing_consent === true ? true : undefined,
+
+          // Attendance — only applies to webinar / event registrations.
+          Attendance: (() => {
+            const ft = String(form_type ?? "").toLowerCase();
+            if (ft.includes("webinar") || ft.includes("event")) return "Attending";
+            return undefined;
+          })(),
+
+          // Old_CRM_lead_ID and Account_Party_ID are legacy identifiers from
+          // Infocredit's previous CRM — populated only when the website sends
+          // an explicit value via metadata (never fabricated).
+          Old_CRM_lead_ID: (metadata as any)?.old_crm_lead_id
+            ? String((metadata as any).old_crm_lead_id).slice(0, 100)
+            : undefined,
+          Account_Party_ID: (metadata as any)?.account_party_id
+            ? String((metadata as any).account_party_id).slice(0, 100)
+            : undefined,
         };
+
+
 
 
         // Strip undefined values before sending.
