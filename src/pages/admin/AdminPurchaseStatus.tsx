@@ -415,7 +415,7 @@ function StatCard({
       : accent === "rose"
       ? "text-rose-400"
       : accent === "slate"
-      ? "text-slate-400"
+      ? "text-slate-200"
       : "text-foreground";
   return (
     <Card className="p-3">

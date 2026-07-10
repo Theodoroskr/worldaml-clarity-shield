@@ -37,7 +37,7 @@ const AMLDataSourcesSection = () => {
           {sources.map((src) => (
             <div key={src.name} className="bg-white/5 border border-white/10 rounded-xl p-8">
               <h3 className="text-white text-2xl font-bold mb-2">{src.name}</h3>
-              <p className="text-white/60 text-body-sm mb-5">{src.description}</p>
+              <p className="text-white/80 text-body-sm mb-5">{src.description}</p>
               <ul className="space-y-2 mb-6">
                 {src.metrics.map((m) => (
                   <li key={m} className="flex items-center gap-2 text-teal text-body-sm font-medium">

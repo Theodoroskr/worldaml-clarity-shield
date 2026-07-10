@@ -38,7 +38,7 @@ export const DataSourceCTA = ({
                 <Calendar className="w-7 h-7" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">Start Free Trial</h3>
-              <p className="text-sm text-white/60 mb-6">
+              <p className="text-sm text-white/80 mb-6">
                 Try the full platform free for 7 days — no credit card required.
               </p>
               <Button variant="accent" className="w-full" asChild>
@@ -57,7 +57,7 @@ export const DataSourceCTA = ({
                 <MessageSquare className="w-7 h-7" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">Talk to Sales</h3>
-              <p className="text-sm text-white/60 mb-6">
+              <p className="text-sm text-white/80 mb-6">
                 Discuss your requirements and get a custom quote tailored to your needs.
               </p>
               <Button variant="outline-light" className="w-full" asChild>
@@ -76,7 +76,7 @@ export const DataSourceCTA = ({
                 <FileText className="w-7 h-7" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">View Resources</h3>
-              <p className="text-sm text-white/60 mb-6">
+              <p className="text-sm text-white/80 mb-6">
                 Explore documentation, integration guides, and technical specifications.
               </p>
               <Button variant="outline-light" className="w-full" asChild>

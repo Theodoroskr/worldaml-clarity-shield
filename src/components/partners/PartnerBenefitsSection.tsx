@@ -99,7 +99,7 @@ const PartnerBenefitsSection = () => (
                   <span className="text-white/75 text-sm">commission</span>
                 </div>
                 <h3 className="text-xl font-semibold text-white mt-3 mb-3">{t.name}</h3>
-                <p className="text-white/60 text-sm leading-relaxed mb-6">{t.description}</p>
+                <p className="text-white/80 text-sm leading-relaxed mb-6">{t.description}</p>
                 <ul className="space-y-2.5 mb-8 flex-1">
                   {t.features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm text-white/80">
