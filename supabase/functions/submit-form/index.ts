@@ -246,6 +246,7 @@ Deno.serve(async (req) => {
             ]);
             const PMS_MAP: Record<string, string> = {
               "worldaml-suite": "WorldAML Suite",
+              "suite": "WorldAML Suite",
               "worldaml-api": "WorldAML API",
               "worldid": "WorldID",
               "worldcompliance": "WorldCompliance",
@@ -265,6 +266,12 @@ Deno.serve(async (req) => {
               "transaction-monitoring": "WorldAML API",
               "regulatory-reporting": "WorldAML API",
               "risk-assessment": "WorldAML API",
+              // Book-a-Demo use-case codes → default to WorldAML Suite
+              "aml": "WorldAML Suite",
+              "kyc": "WorldAML Suite",
+              "kyb": "WorldAML Suite",
+              "tm": "WorldAML Suite",
+              "reporting": "WorldAML Suite",
             };
             const mapped = new Set<string>();
             for (const raw of products) {
@@ -288,6 +295,7 @@ Deno.serve(async (req) => {
             const CATEGORY_MAP: Record<string, Category> = {
               // Platform
               "worldaml-suite": "Platform",
+              "suite": "Platform",
               "worldaml-api": "Platform",
               "worldid": "Platform",
               "sanctions-api": "Platform",
@@ -296,6 +304,12 @@ Deno.serve(async (req) => {
               "transaction-monitoring": "Platform",
               "regulatory-reporting": "Platform",
               "risk-assessment": "Platform",
+              // Book-a-Demo use-case codes
+              "aml": "Platform",
+              "kyc": "Platform",
+              "kyb": "Platform",
+              "tm": "Platform",
+              "reporting": "Platform",
               // Data Source
               "worldcompliance": "Data Source",
               "worldcompliance®": "Data Source",
@@ -309,7 +323,8 @@ Deno.serve(async (req) => {
               "academy-team-plan": "Training",
               "training": "Training",
             };
-            // Zoho picklist values: 'Platforms', 'Data Sources', 'Training'.
+            // Live Zoho picklist values (from settings/fields metadata):
+            // 'Platforms', 'Data Sources', 'Training'.
             const PICKLIST_FOR_CATEGORY: Record<Category, string> = {
               Training: "Training",
               Platform: "Platforms",
