@@ -210,19 +210,23 @@ Deno.serve(async (req) => {
           // Leads — there is no "Description" field on the layout. The
           // visitor's message is stored verbatim here.
           Note: descriptionValue,
-          Lead_Source: "WorldAML Website",
+          Lead_Source: "Website - WorldAML",
           Lead_Status: "New",
           // Distinguishes originating website form so Zoho CRM workflows and
           // Cadences can route leads to the correct email sequences. Values
-          // must match the Zoho "Form Type" picklist exactly.
+          // must match the Zoho "Form Type" picklist exactly:
+          // ['Contact Sales', 'Book Demo', 'Newsletter', 'Webinar',
+          //  'Event Registration', 'Partner Request', 'General Contact']
           Form_Type: (() => {
             const map: Record<string, string> = {
               "contact-sales": "Contact Sales",
-              "free-trial": "Free Trial",
-              "book-demo": "Book a Demo",
-              "book_demo": "Book a Demo",
-              "partner-application": "Partner Application",
-              "worldcompliance-demo": "WorldCompliance Demo",
+              "contact_sales": "Contact Sales",
+              "book-demo": "Book Demo",
+              "book_demo": "Book Demo",
+              "free-trial": "Book Demo",
+              "worldcompliance-demo": "Book Demo",
+              "partner-application": "Partner Request",
+              "newsletter": "Newsletter",
             };
             const key = String(form_type ?? "").trim().toLowerCase();
             return map[key] || (form_type ? String(form_type) : undefined);
