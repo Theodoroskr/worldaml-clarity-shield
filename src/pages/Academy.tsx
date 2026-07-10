@@ -757,14 +757,12 @@ const Academy = () => {
                     </li>
                   ))}
                 </ul>
-                {(
-                  <Button asChild className="w-full" variant="outline">
-                    <a href="#courses-grid">
-                      Browse paid courses
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </a>
-                  </Button>
-                )}
+                <Button asChild className="w-full" variant="outline">
+                  <a href="#courses-grid">
+                    {hasAnnualPass ? "Browse your courses" : "Browse paid courses"}
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </a>
+                </Button>
 
               </div>
 
