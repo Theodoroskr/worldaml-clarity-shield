@@ -744,43 +744,72 @@ const AcademyCourse = () => {
           </div>
         </section>
 
-        {/* Tabs — teal underline */}
+        {/* Tabs — teal underline with progress + lock state */}
         <section className="border-b border-border bg-background sticky top-16 z-30">
-          <div className="container-enterprise flex gap-0">
-            <button
-              onClick={() => setActiveTab("learn")}
-              className={`px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-semibold border-b-2 transition-colors ${
-                activeTab === "learn" ? "border-teal text-teal" : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <BookOpen className="h-4 w-4 inline mr-2" />
-              Learn · {modules?.length || 0} modules
-            </button>
-            <button
-              onClick={() => {
-                if (!user) {
-                  navigate(`/signup?redirect=${encodeURIComponent(`/academy/${slug}?tab=quiz`)}`);
-                  return;
-                }
-                if (!allModulesComplete) {
-                  toast({
-                    title: "Complete all modules first",
-                    description: `Finish all ${modules?.length || 0} modules to unlock the quiz.`,
-                    variant: "destructive",
-                  });
-                  setActiveTab("learn");
-                  return;
-                }
-                setActiveTab("quiz");
-              }}
-              className={`px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-semibold border-b-2 transition-colors ${
-                activeTab === "quiz" ? "border-teal text-teal" : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Award className="h-4 w-4 inline mr-2" />
-              Quiz & Certificate
-              {(!user || !allModulesComplete) && <Lock className="h-3 w-3 inline ml-2" />}
-            </button>
+          <div className="container-enterprise">
+            <div className="flex gap-0 items-stretch">
+              <button
+                onClick={() => setActiveTab("learn")}
+                className={`px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+                  activeTab === "learn" ? "border-teal text-teal" : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+                aria-current={activeTab === "learn" ? "page" : undefined}
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>Learn</span>
+                <span className="text-muted-foreground/70 font-normal normal-case tracking-normal tabular-nums ml-1">
+                  {completedModules.length}/{modules?.length || 0}
+                </span>
+              </button>
+              <button
+                onClick={() => {
+                  if (!user) {
+                    navigate(`/signup?redirect=${encodeURIComponent(`/academy/${slug}?tab=quiz`)}`);
+                    return;
+                  }
+                  if (!allModulesComplete) {
+                    toast({
+                      title: "Complete all modules first",
+                      description: `Finish all ${modules?.length || 0} modules to unlock the quiz.`,
+                      variant: "destructive",
+                    });
+                    setActiveTab("learn");
+                    return;
+                  }
+                  setActiveTab("quiz");
+                }}
+                aria-disabled={!user || !allModulesComplete}
+                aria-current={activeTab === "quiz" ? "page" : undefined}
+                className={`px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+                  activeTab === "quiz"
+                    ? "border-teal text-teal"
+                    : (!user || !allModulesComplete)
+                      ? "border-transparent text-muted-foreground/60 cursor-not-allowed"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {(!user || !allModulesComplete) ? <Lock className="h-3.5 w-3.5" /> : <Award className="h-4 w-4" />}
+                <span>Quiz & Certificate</span>
+                {user && !allModulesComplete && modules?.length ? (
+                  <span className="text-muted-foreground/70 font-normal normal-case tracking-normal tabular-nums ml-1">
+                    {modules.length - completedModules.length} left
+                  </span>
+                ) : null}
+              </button>
+              {modules && modules.length > 0 && (
+                <div className="hidden md:flex ml-auto items-center gap-3 py-4 pl-6">
+                  <div className="h-1 w-40 bg-secondary overflow-hidden">
+                    <div
+                      className="h-full bg-teal transition-all duration-500"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                  <span className="text-[11px] tabular-nums text-muted-foreground uppercase tracking-[0.18em]">
+                    {Math.round(progressPercent)}%
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
