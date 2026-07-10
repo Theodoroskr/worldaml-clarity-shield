@@ -803,27 +803,43 @@ const Academy = () => {
                     );
                   })}
                 </ul>
-                <Button
-                  variant="accent"
-                  className="w-full"
-                  onClick={() => startAnnualCheckout()}
-                  disabled={annualLoading}
-                >
-                  {annualLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      Starting checkout…
-                    </>
-                  ) : (
-                    <>
-                      Buy annual access
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </>
-                  )}
-                </Button>
-                <p className="mt-2 text-caption text-muted-foreground text-center">
-                  Instant checkout — no onboarding required.
-                </p>
+                {hasAnnualPass ? (
+                  <>
+                    <Button asChild variant="accent" className="w-full">
+                      <a href="#courses-grid">
+                        Browse your courses
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </a>
+                    </Button>
+                    <p className="mt-2 text-caption text-accent text-center font-medium">
+                      ✓ You have active All-Access — no additional purchase needed.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="accent"
+                      className="w-full"
+                      onClick={() => startAnnualCheckout()}
+                      disabled={annualLoading}
+                    >
+                      {annualLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          Starting checkout…
+                        </>
+                      ) : (
+                        <>
+                          Buy annual access
+                          <ArrowRight className="h-4 w-4 ml-1" />
+                        </>
+                      )}
+                    </Button>
+                    <p className="mt-2 text-caption text-muted-foreground text-center">
+                      Instant checkout — no onboarding required.
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
