@@ -41,6 +41,31 @@ const Dashboard = () => {
   }, [searchParams]);
   const [certificates, setCertificates] = useState<any[]>([]);
   const [certsLoading, setCertsLoading] = useState(true);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+
+  const handleResendCertificate = async (cert: any) => {
+    if (!user) return;
+    setResendingId(cert.id);
+    try {
+      const certUrl = `${window.location.origin}/academy/certificate/${cert.share_token}`;
+      const { error } = await supabase.functions.invoke("send-certificate-email", {
+        body: {
+          holder_name: cert.holder_name,
+          email: user.email,
+          course_title: cert.academy_courses?.title ?? "Course",
+          score: cert.score,
+          certificate_url: certUrl,
+          certificate_id: cert.id,
+        },
+      });
+      if (error) throw error;
+      toast.success(`Certificate email sent to ${user.email}`);
+    } catch (e: any) {
+      toast.error(e?.message || "Could not resend certificate email");
+    } finally {
+      setResendingId(null);
+    }
+  };
   const [inProgressCourses, setInProgressCourses] = useState<any[]>([]);
   const [showFirstLessonNudge, setShowFirstLessonNudge] = useState(false);
   const [showAmlUpsell, setShowAmlUpsell] = useState(() => {
