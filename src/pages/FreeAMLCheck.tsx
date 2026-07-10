@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { getWebAttribution } from "@/lib/webAttribution";
 import { Link } from "react-router-dom";
-import { ArrowRight, Check, Send, FileSearch, MessageSquare, BarChart3, ShieldCheck, ExternalLink } from "lucide-react";
+import { ArrowRight, Check, Send, Clock, Monitor, MessageSquare, ShieldCheck, ExternalLink } from "lucide-react";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -13,32 +13,33 @@ import { useToast } from "@/hooks/use-toast";
 
 const benefits = [
   {
-    icon: FileSearch,
-    title: "Sample Screening Report",
-    description: "Receive a real screening output showing how entities are matched against global watchlists.",
+    icon: Monitor,
+    title: "Live Platform Walkthrough",
+    description: "See sanctions, PEP, and adverse media screening in action across 1,900+ global watchlists — powered by LexisNexis data.",
   },
   {
     icon: MessageSquare,
-    title: "Quick Consultation",
-    description: "A brief call with our compliance team to discuss your specific requirements.",
-  },
-  {
-    icon: BarChart3,
-    title: "Platform Walkthrough",
-    description: "See the full WorldAML Suite in action — onboarding, screening, monitoring, and reporting.",
+    title: "Tailored to Your Use Case",
+    description: "Bring your entity types, jurisdictions, and volumes. We'll show exactly how WorldAML fits your workflow.",
   },
   {
     icon: ShieldCheck,
-    title: "Audit-Readiness Tips",
-    description: "Practical recommendations to strengthen your compliance posture and documentation.",
+    title: "Audit-Readiness Guidance",
+    description: "Practical recommendations to strengthen your compliance posture, documentation, and MLRO reporting.",
+  },
+  {
+    icon: Clock,
+    title: "Just 30 Minutes",
+    description: "A focused, no-pressure session with a compliance specialist. No slides, no sales pitch — just answers.",
   },
 ];
 
 const valuePoints = [
-  "Screen against 1,900+ global watchlists",
-  "Sanctions, PEP, and adverse media coverage",
+  "Live demo of onboarding, screening & monitoring",
+  "Coverage across 1,900+ global watchlists",
+  "Sanctions, PEP, and adverse media in one view",
   "Powered by LexisNexis data",
-  "Results delivered within 1 business day",
+  "Book within 1 business day",
   "No commitment required",
 ];
 
@@ -105,8 +106,8 @@ const FreeAMLCheck = () => {
       if (!response.ok) throw new Error("Submission failed");
 
       toast({
-        title: "Request Submitted",
-        description: "Thank you! Our team will send your free AML check results within 1 business day.",
+        title: "Request Received",
+        description: "Thank you! Our team will reach out within 1 business day to book your 30-minute walkthrough.",
       });
       setFormData({ firstName: "", lastName: "", email: "", company: "", country: "", lookingFor: "" });
     } catch {
@@ -119,12 +120,12 @@ const FreeAMLCheck = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Free AML Check — Sanctions, PEP & Adverse Media"
-        description="Run a free AML check online against 1,900+ sanctions, PEP and adverse media lists. Sample screening report delivered within 1 business day. Powered by LexisNexis data."
+        title="Free 30-Minute Screening Walkthrough Demo"
+        description="Book a free 30-minute walkthrough demo and see how WorldAML screens against 1,900+ sanctions, PEP and adverse media lists. Live session with a compliance specialist — powered by LexisNexis data."
         canonical="/free-aml-check"
         breadcrumbs={[
           { name: "Home", url: "/" },
-          { name: "Free AML Check", url: "/free-aml-check" },
+          { name: "Free Walkthrough Demo", url: "/free-aml-check" },
         ]}
         structuredData={{
           "@context": "https://schema.org",
@@ -132,42 +133,42 @@ const FreeAMLCheck = () => {
           mainEntity: [
             {
               "@type": "Question",
-              name: "What is a free AML check?",
+              name: "What is the free 30-minute walkthrough demo?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "A free AML check screens an individual or company against global sanctions lists, Politically Exposed Persons (PEP) databases, and adverse media sources to identify financial crime risk. WorldAML's free check returns a sample screening report against 1,900+ watchlists within one business day, with no commitment.",
+                text: "A focused 30-minute live session with a WorldAML compliance specialist. We walk you through sanctions, PEP and adverse media screening across 1,900+ global watchlists, tailored to your entity types and jurisdictions — powered by LexisNexis data.",
               },
             },
             {
               "@type": "Question",
-              name: "How do I run an AML check online for free?",
+              name: "How do I book the walkthrough?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "Submit your name, work email and company on this page, and our compliance team sends back a sample screening report. For instant ad-hoc sanctions screening, use our free Sanctions Check tool which queries the EU, UK OFSI, US OFAC and UN consolidated lists in real time.",
+                text: "Submit your name, work email and company on this page. Our team will reach out within one business day to schedule your 30-minute session at a time that works for you.",
               },
             },
             {
               "@type": "Question",
-              name: "Which sanctions and watchlists are covered?",
+              name: "Which screening solutions will you demo?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "WorldAML screens against 1,900+ global lists including the OFAC SDN list, EU consolidated financial sanctions, UK OFSI consolidated list, UN Security Council list, HM Treasury, EU CFSP regimes, Interpol notices, and major regulator enforcement databases — powered by LexisNexis WorldCompliance and BridgerXG data.",
+                text: "The full WorldAML screening stack: sanctions screening across OFAC, EU, UK OFSI, UN and 1,900+ lists; PEP and adverse media coverage via LexisNexis WorldCompliance; ongoing monitoring; case management; and API access for real-time integrations.",
               },
             },
             {
               "@type": "Question",
-              name: "Is the free AML check really free?",
+              name: "Is the walkthrough really free?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "Yes. The sample screening report and consultation are free with no obligation. Paid plans start when you need ongoing screening, transaction monitoring, case management or API access.",
+                text: "Yes. The 30-minute session is free with no obligation and no sales pitch. Paid plans start when you need ongoing screening, transaction monitoring, case management or API access.",
               },
             },
             {
               "@type": "Question",
-              name: "Who is the free AML check for?",
+              name: "Who is the walkthrough for?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "MLROs, compliance officers and risk managers at banks, fintechs, EMIs, payment institutions, crypto-asset firms, gaming operators, law firms and accountants — anyone subject to AML/CFT obligations who wants to evaluate a screening tool before committing.",
+                text: "MLROs, compliance officers and risk managers at banks, fintechs, EMIs, payment institutions, crypto-asset firms, gaming operators, law firms and accountants — anyone subject to AML/CFT obligations evaluating a screening solution.",
               },
             },
           ],
@@ -178,14 +179,17 @@ const FreeAMLCheck = () => {
         {/* Hero */}
         <section className="bg-navy text-white py-20 md:py-28">
           <div className="container-enterprise text-center">
-            <h1 className="text-display mb-4">Run a Free AML Check</h1>
+            <div className="inline-flex items-center gap-2 rounded-full bg-teal/15 border border-teal/30 px-4 py-1.5 text-body-sm text-teal font-medium mb-6">
+              <Clock className="w-4 h-4" /> 30-minute live session · Free
+            </div>
+            <h1 className="text-display mb-4">Free 30-Minute Walkthrough Demo</h1>
             <p className="text-body-lg text-white/80 max-w-2xl mx-auto mb-8">
-              See how a modern compliance workflow can improve onboarding, screening, and audit readiness — powered by LexisNexis data across 1,900+ global watchlists.
+              Learn about our screening solutions in a focused live session. See sanctions, PEP and adverse media screening in action — across 1,900+ global watchlists, powered by LexisNexis data.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="accent" asChild>
                 <a href="#lead-form">
-                  Request Your Free Check <ArrowRight className="ml-2 h-4 w-4" />
+                  Book Your Free Walkthrough <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
               <Button size="lg" variant="outline-light" asChild>
@@ -200,9 +204,9 @@ const FreeAMLCheck = () => {
         {/* Benefits */}
         <section className="section-padding bg-background">
           <div className="container-enterprise">
-            <h2 className="text-heading text-navy text-center mb-4">What You'll Receive</h2>
+            <h2 className="text-heading text-navy text-center mb-4">What's in the 30 Minutes</h2>
             <p className="text-body text-text-secondary text-center max-w-2xl mx-auto mb-12">
-              Submit your details and our compliance team will provide a personalised assessment of your screening needs.
+              A live, tailored walkthrough with a compliance specialist. No slides — just the platform, your questions, and answers grounded in your use case.
             </p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {benefits.map((b) => (
@@ -224,9 +228,9 @@ const FreeAMLCheck = () => {
             <div className="grid lg:grid-cols-5 gap-12">
               {/* Form */}
               <div className="lg:col-span-3">
-                <h2 className="text-heading text-navy mb-2">Request Your Free AML Check</h2>
+                <h2 className="text-heading text-navy mb-2">Book Your Free 30-Minute Walkthrough</h2>
                 <p className="text-body text-text-secondary mb-8">
-                  Fill in your details and we'll get back to you within 1 business day with a sample screening report.
+                  Fill in your details and we'll reach out within 1 business day to schedule your live session at a time that works for you.
                 </p>
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="grid sm:grid-cols-2 gap-4">
@@ -265,20 +269,20 @@ const FreeAMLCheck = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lookingFor">What are you looking for?</Label>
+                    <Label htmlFor="lookingFor">What would you like to cover?</Label>
                     <Textarea
                       id="lookingFor"
                       name="lookingFor"
                       value={formData.lookingFor}
                       onChange={handleInputChange}
-                      placeholder="Tell us about your compliance needs — entity types, volumes, jurisdictions..."
+                      placeholder="Tell us about your compliance needs — entity types, volumes, jurisdictions, or specific questions you'd like answered..."
                       rows={4}
                       maxLength={1000}
                     />
                   </div>
                   <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? "Submitting..." : (
-                      <>Submit Request <Send className="ml-2 h-4 w-4" /></>
+                      <>Book My Walkthrough <Send className="ml-2 h-4 w-4" /></>
                     )}
                   </Button>
                   <p className="text-caption text-text-tertiary text-center">
@@ -292,7 +296,7 @@ const FreeAMLCheck = () => {
               <div className="lg:col-span-2">
                 <div className="sticky top-28 space-y-8">
                   <div className="p-6 rounded-xl border border-divider bg-card">
-                    <h3 className="text-body font-semibold text-navy mb-4">Why WorldAML?</h3>
+                    <h3 className="text-body font-semibold text-navy mb-4">What You'll See</h3>
                     <ul className="space-y-3">
                       {valuePoints.map((point) => (
                         <li key={point} className="flex items-start gap-3">
@@ -317,31 +321,31 @@ const FreeAMLCheck = () => {
         {/* FAQ */}
         <section className="section-padding bg-surface-subtle">
           <div className="container-enterprise max-w-3xl">
-            <h2 className="text-heading text-navy mb-2 text-center">Free AML Check — FAQ</h2>
+            <h2 className="text-heading text-navy mb-2 text-center">Walkthrough Demo — FAQ</h2>
             <p className="text-body text-text-secondary text-center mb-10">
-              Everything regulated firms ask before running an AML check online.
+              Everything regulated firms ask before booking a screening walkthrough.
             </p>
             <div className="space-y-6">
               {[
                 {
-                  q: "What is a free AML check?",
-                  a: "A free AML check screens an individual or company against global sanctions lists, Politically Exposed Persons (PEP) databases, and adverse media sources to identify financial crime risk. WorldAML's free check returns a sample screening report against 1,900+ watchlists within one business day, with no commitment.",
+                  q: "What is the free 30-minute walkthrough demo?",
+                  a: "A focused 30-minute live session with a WorldAML compliance specialist. We walk you through sanctions, PEP and adverse media screening across 1,900+ global watchlists, tailored to your entity types and jurisdictions — powered by LexisNexis data.",
                 },
                 {
-                  q: "How do I run an AML check online for free?",
-                  a: "Submit your name, work email and company in the form above and our compliance team sends back a sample screening report. For instant ad-hoc sanctions screening, use our free Sanctions Check tool which queries the EU, UK OFSI, US OFAC and UN consolidated lists in real time.",
+                  q: "How do I book the walkthrough?",
+                  a: "Submit your name, work email and company in the form above. Our team will reach out within one business day to schedule your session at a time that works for you.",
                 },
                 {
-                  q: "Which sanctions and watchlists are covered?",
-                  a: "1,900+ global lists including OFAC SDN, EU consolidated financial sanctions, UK OFSI consolidated list, UN Security Council list, HM Treasury, EU CFSP regimes, Interpol notices, and major regulator enforcement databases — powered by LexisNexis WorldCompliance and BridgerXG data.",
+                  q: "Which screening solutions will you demo?",
+                  a: "The full WorldAML screening stack: sanctions screening across OFAC, EU, UK OFSI, UN and 1,900+ lists; PEP and adverse media coverage via LexisNexis WorldCompliance; ongoing monitoring; case management; and API access for real-time integrations.",
                 },
                 {
-                  q: "Is the free AML check really free?",
-                  a: "Yes. The sample screening report and consultation are free with no obligation. Paid plans start when you need ongoing screening, transaction monitoring, case management or API access.",
+                  q: "Is the walkthrough really free?",
+                  a: "Yes. The 30-minute session is free with no obligation and no sales pitch. Paid plans start when you need ongoing screening, transaction monitoring, case management or API access.",
                 },
                 {
-                  q: "Who is the free AML check for?",
-                  a: "MLROs, compliance officers and risk managers at banks, fintechs, EMIs, payment institutions, crypto-asset firms, gaming operators, law firms and accountants — anyone subject to AML/CFT obligations evaluating a screening tool before committing.",
+                  q: "Who is the walkthrough for?",
+                  a: "MLROs, compliance officers and risk managers at banks, fintechs, EMIs, payment institutions, crypto-asset firms, gaming operators, law firms and accountants — anyone subject to AML/CFT obligations evaluating a screening solution.",
                 },
               ].map((item) => (
                 <div key={item.q} className="border-b border-divider pb-6">
@@ -359,9 +363,9 @@ const FreeAMLCheck = () => {
             <h2 className="text-heading text-navy text-center mb-12">How It Works</h2>
             <div className="grid md:grid-cols-3 gap-8 max-w-3xl mx-auto">
               {[
-                { step: "1", title: "Submit Your Details", desc: "Fill in the form above with your company information and compliance needs." },
-                { step: "2", title: "Receive Your Report", desc: "Our team sends a sample screening report within 1 business day." },
-                { step: "3", title: "Book a Full Demo", desc: "See the complete WorldAML platform in action with a personalised walkthrough." },
+                { step: "1", title: "Submit Your Details", desc: "Fill in the form above with your company information and what you'd like to cover." },
+                { step: "2", title: "Pick a Time", desc: "Our team reaches out within 1 business day to schedule your 30-minute session." },
+                { step: "3", title: "Join the Walkthrough", desc: "See WorldAML live, ask questions, and leave with a clear picture of the fit." },
               ].map((item) => (
                 <div key={item.step} className="text-center">
                   <div className="w-12 h-12 rounded-full bg-navy text-white flex items-center justify-center text-lg font-bold mx-auto mb-4">
@@ -384,7 +388,7 @@ const FreeAMLCheck = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="accent" asChild>
-                <Link to="/contact-sales">Book a Demo <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to="/contact-sales">Contact Sales <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
               <Button size="lg" variant="outline-light" asChild>
                 <Link to="/pricing">View Pricing</Link>
