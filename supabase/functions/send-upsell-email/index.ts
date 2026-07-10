@@ -69,8 +69,8 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:32px 16px;">
     <tr><td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);">
-        <tr><td style="background:linear-gradient(135deg,#1e3a5f 0%,#0d2137 100%);padding:28px 32px;text-align:center;">
-          <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;letter-spacing:0.3px;">WorldAML Suite</h1>
+        <tr><td bgcolor="#1e3a5f" style="background-color:#1e3a5f;background-image:linear-gradient(135deg,#1e3a5f 0%,#0d2137 100%);padding:28px 32px;text-align:center;">
+          <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.3px;">WorldAML Suite</h1>
           <p style="margin:6px 0 0;color:#5eead4;font-size:13px;">Complete Compliance Platform</p>
         </td></tr>
         <tr><td style="padding:32px;">
@@ -88,8 +88,8 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
           </ul>
           <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 4px;">
             <a href="https://worldaml.com/contact-sales?product=suite&utm_source=email&utm_medium=upsell&utm_campaign=suite-upgrade"
-               style="display:inline-block;background:linear-gradient(135deg,#0d9488,#0f766e);color:#fff;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;letter-spacing:0.3px;">
-              Request a Demo →
+               style="display:inline-block;background-color:#0d9488;background-image:linear-gradient(135deg,#0d9488,#0f766e);color:#ffffff;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;letter-spacing:0.3px;mso-padding-alt:0;">
+              <!--[if mso]>&nbsp;&nbsp;&nbsp;&nbsp;<![endif]--><span style="color:#ffffff;">Request a Demo &rarr;</span><!--[if mso]>&nbsp;&nbsp;&nbsp;&nbsp;<![endif]-->
             </a>
           </td></tr></table>
           <p style="margin:24px 0 0;font-size:13px;color:#6b7280;text-align:center;">
@@ -118,8 +118,8 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:32px 16px;">
     <tr><td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);">
-        <tr><td style="background:linear-gradient(135deg,#0d9488 0%,#0f766e 100%);padding:28px 32px;text-align:center;">
-          <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;letter-spacing:0.3px;">AML Screening</h1>
+        <tr><td bgcolor="#0d9488" style="background-color:#0d9488;background-image:linear-gradient(135deg,#0d9488 0%,#0f766e 100%);padding:28px 32px;text-align:center;">
+          <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.3px;">AML Screening</h1>
           <p style="margin:6px 0 0;color:#ccfbf1;font-size:13px;">1,900+ Global Watchlists</p>
         </td></tr>
         <tr><td style="padding:32px;">
@@ -137,8 +137,8 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
           </ul>
           <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 4px;">
             <a href="https://worldaml.com/contact-sales?product=screening&utm_source=email&utm_medium=upsell&utm_campaign=screening-upgrade"
-               style="display:inline-block;background:linear-gradient(135deg,#1e3a5f,#0d2137);color:#fff;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;letter-spacing:0.3px;">
-              Try AML Screening →
+               style="display:inline-block;background-color:#1e3a5f;background-image:linear-gradient(135deg,#1e3a5f,#0d2137);color:#ffffff;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;letter-spacing:0.3px;">
+              <span style="color:#ffffff;">Try AML Screening &rarr;</span>
             </a>
           </td></tr></table>
           <p style="margin:24px 0 0;font-size:13px;color:#6b7280;text-align:center;">
