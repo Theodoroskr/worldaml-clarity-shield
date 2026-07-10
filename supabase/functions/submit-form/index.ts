@@ -309,10 +309,11 @@ Deno.serve(async (req) => {
               "academy-team-plan": "Training",
               "training": "Training",
             };
+            // Zoho picklist values: 'Platforms', 'Data Sources', 'Training'.
             const PICKLIST_FOR_CATEGORY: Record<Category, string> = {
               Training: "Training",
-              Platform: "Platform",
-              "Data Source": "Data Source",
+              Platform: "Platforms",
+              "Data Source": "Data Sources",
             };
 
             const seen = new Set<Category>();
