@@ -28,17 +28,6 @@ export const HomeCTASection = () => {
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline-light" 
-              asChild
-              className="group"
-            >
-              <Link to="/free-aml-check">
-                Run a Free AML Check
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </Button>
           </div>
           
           <p className="text-body-sm text-slate-muted mt-8">
