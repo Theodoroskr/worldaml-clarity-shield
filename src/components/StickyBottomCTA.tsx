@@ -33,7 +33,7 @@ const StickyBottomCTA = () => {
           </Button>
           <Button size="sm" variant="outline-light" asChild className="flex-1 sm:flex-none">
             <Link to="/free-aml-check">
-              Try Free Check
+              Run a Free AML Check
             </Link>
           </Button>
           <button
