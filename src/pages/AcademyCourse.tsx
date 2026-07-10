@@ -277,7 +277,30 @@ const AcademyCourse = () => {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      const holderName = profile?.full_name || user.email || "Learner";
+      // Certificates must always be issued in the learner's real name (first + surname),
+      // never their email address. If the profile has no full name, prompt for one and
+      // persist it so future certificates are correct.
+      const looksLikeFullName = (v: string | null | undefined) =>
+        !!v && v.trim().includes(" ") && !v.includes("@");
+
+      let holderName = profile?.full_name?.trim() || "";
+      if (!looksLikeFullName(holderName)) {
+        const entered = window.prompt(
+          "Please enter your full name (first name and surname) as it should appear on your certificate:",
+          holderName || ""
+        )?.trim() || "";
+        if (!looksLikeFullName(entered)) {
+          setGenerating(false);
+          toast({
+            title: "Full name required",
+            description: "Certificates are issued in your full name (first name and surname). Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+        holderName = entered;
+        await supabase.from("profiles").update({ full_name: holderName }).eq("user_id", user.id);
+      }
 
       // Submit answers to server-side validation function, with a 25s
       // client-side timeout so the user is never stuck on "Generating…".
