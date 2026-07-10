@@ -212,15 +212,15 @@ Deno.serve(async (req) => {
           Note: descriptionValue,
           Lead_Source: "WorldAML Website",
           Lead_Status: "New",
-          // Distinguishes originating website form so Zoho CRM workflows can
-          // route leads to different email sequences (e.g. Sales nurture vs.
-          // Free AML Check journey). Values must match the Zoho picklist.
+          // Distinguishes originating website form so Zoho CRM workflows and
+          // Cadences can route leads to the correct email sequences. Values
+          // must match the Zoho "Form Type" picklist exactly.
           Form_Type: (() => {
             const map: Record<string, string> = {
               "contact-sales": "Contact Sales",
-              "free-aml-check": "Free AML Check",
               "free-trial": "Free Trial",
-              "book-demo": "Book Demo",
+              "book-demo": "Book a Demo",
+              "book_demo": "Book a Demo",
               "partner-application": "Partner Application",
               "worldcompliance-demo": "WorldCompliance Demo",
             };
