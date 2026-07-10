@@ -829,40 +829,84 @@ const AcademyCourse = () => {
                       {completedModules.length} / {modules?.length || 0}
                     </span>
                   </div>
-                  <nav className="space-y-1">
-                    {modules?.map((mod, i) => {
-                      const isComplete = completedModules.includes(mod.id);
-                      const isActive = i === activeModule;
-                      return (
-                        <button
-                          key={mod.id}
-                          onClick={() => {
-                            setActiveModule(i);
-                            window.scrollTo({ top: 0, behavior: "smooth" });
-                          }}
-                          className={`group w-full text-left px-4 py-3.5 text-body-sm transition-all flex items-start gap-3.5 border-l-2 ${
-                            isActive
-                              ? "border-teal bg-teal/5 text-foreground font-medium"
-                              : "border-transparent text-muted-foreground hover:text-foreground hover:border-border hover:bg-secondary/40"
-                          }`}
-                        >
-                          {isComplete ? (
-                            <span className="w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 bg-teal text-white">
-                              <CheckCircle className="h-3.5 w-3.5" />
-                            </span>
-                          ) : (
-                            <span className={`w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold tabular-nums border transition-colors ${
+                  <nav className="space-y-1" aria-label="Course modules">
+                    {(() => {
+                      const nextUpIdx = modules?.findIndex(
+                        (m: any, idx: number) => !completedModules.includes(m.id) && idx !== activeModule
+                      ) ?? -1;
+                      return modules?.map((mod, i) => {
+                        const isComplete = completedModules.includes(mod.id);
+                        const isActive = i === activeModule;
+                        const isNextUp = !isComplete && !isActive && i === nextUpIdx;
+                        const statusLabel = isActive
+                          ? "Now reading"
+                          : isComplete
+                            ? "Completed"
+                            : isNextUp
+                              ? "Up next"
+                              : "Not started";
+                        return (
+                          <button
+                            key={mod.id}
+                            onClick={() => {
+                              setActiveModule(i);
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                            aria-current={isActive ? "step" : undefined}
+                            className={`group relative w-full text-left pl-4 pr-3 py-3 text-body-sm transition-all flex items-start gap-3.5 border-l-2 ${
                               isActive
-                                ? "border-teal text-teal bg-transparent"
-                                : "border-border text-muted-foreground group-hover:border-teal/40 group-hover:text-teal"
-                            }`}>
-                              {String(i + 1).padStart(2, "0")}
+                                ? "border-teal bg-teal/10 text-foreground font-medium"
+                                : isComplete
+                                  ? "border-teal/40 text-foreground/80 hover:bg-secondary/40 hover:border-teal"
+                                  : isNextUp
+                                    ? "border-teal/50 text-foreground hover:bg-secondary/40"
+                                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-border hover:bg-secondary/40"
+                            }`}
+                          >
+                            {isComplete ? (
+                              <span className="w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 bg-teal text-white" aria-hidden="true">
+                                <CheckCircle className="h-3.5 w-3.5" />
+                              </span>
+                            ) : (
+                              <span
+                                aria-hidden="true"
+                                className={`w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold tabular-nums border transition-colors ${
+                                  isActive
+                                    ? "border-teal text-white bg-teal"
+                                    : isNextUp
+                                      ? "border-teal text-teal bg-transparent"
+                                      : "border-border text-muted-foreground group-hover:border-teal/40 group-hover:text-teal"
+                                }`}
+                              >
+                                {String(i + 1).padStart(2, "0")}
+                              </span>
+                            )}
+                            <span className="flex-1 min-w-0 pt-0.5">
+                              <span className="block leading-snug">{mod.title}</span>
+                              <span
+                                className={`mt-1 block text-[10px] uppercase tracking-[0.18em] font-semibold ${
+                                  isActive
+                                    ? "text-teal"
+                                    : isComplete
+                                      ? "text-teal/80"
+                                      : isNextUp
+                                        ? "text-teal"
+                                        : "text-muted-foreground/70"
+                                }`}
+                              >
+                                {statusLabel}
+                              </span>
                             </span>
-                          )}
-                          <span className="leading-snug pt-0.5">{mod.title}</span>
-                        </button>
-                      );
-                    })}
+                            {isActive && (
+                              <span
+                                aria-hidden="true"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-teal animate-pulse"
+                              />
+                            )}
+                          </button>
+                        );
+                      });
+                    })()}
                   </nav>
                   {modules && modules.length > 0 && (
                     <div className="mt-6 pt-4 border-t border-border">
