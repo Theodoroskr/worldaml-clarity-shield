@@ -744,43 +744,72 @@ const AcademyCourse = () => {
           </div>
         </section>
 
-        {/* Tabs — teal underline */}
+        {/* Tabs — teal underline with progress + lock state */}
         <section className="border-b border-border bg-background sticky top-16 z-30">
-          <div className="container-enterprise flex gap-0">
-            <button
-              onClick={() => setActiveTab("learn")}
-              className={`px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-semibold border-b-2 transition-colors ${
-                activeTab === "learn" ? "border-teal text-teal" : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <BookOpen className="h-4 w-4 inline mr-2" />
-              Learn · {modules?.length || 0} modules
-            </button>
-            <button
-              onClick={() => {
-                if (!user) {
-                  navigate(`/signup?redirect=${encodeURIComponent(`/academy/${slug}?tab=quiz`)}`);
-                  return;
-                }
-                if (!allModulesComplete) {
-                  toast({
-                    title: "Complete all modules first",
-                    description: `Finish all ${modules?.length || 0} modules to unlock the quiz.`,
-                    variant: "destructive",
-                  });
-                  setActiveTab("learn");
-                  return;
-                }
-                setActiveTab("quiz");
-              }}
-              className={`px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-semibold border-b-2 transition-colors ${
-                activeTab === "quiz" ? "border-teal text-teal" : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Award className="h-4 w-4 inline mr-2" />
-              Quiz & Certificate
-              {(!user || !allModulesComplete) && <Lock className="h-3 w-3 inline ml-2" />}
-            </button>
+          <div className="container-enterprise">
+            <div className="flex gap-0 items-stretch">
+              <button
+                onClick={() => setActiveTab("learn")}
+                className={`px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+                  activeTab === "learn" ? "border-teal text-teal" : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+                aria-current={activeTab === "learn" ? "page" : undefined}
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>Learn</span>
+                <span className="text-muted-foreground/70 font-normal normal-case tracking-normal tabular-nums ml-1">
+                  {completedModules.length}/{modules?.length || 0}
+                </span>
+              </button>
+              <button
+                onClick={() => {
+                  if (!user) {
+                    navigate(`/signup?redirect=${encodeURIComponent(`/academy/${slug}?tab=quiz`)}`);
+                    return;
+                  }
+                  if (!allModulesComplete) {
+                    toast({
+                      title: "Complete all modules first",
+                      description: `Finish all ${modules?.length || 0} modules to unlock the quiz.`,
+                      variant: "destructive",
+                    });
+                    setActiveTab("learn");
+                    return;
+                  }
+                  setActiveTab("quiz");
+                }}
+                aria-disabled={!user || !allModulesComplete}
+                aria-current={activeTab === "quiz" ? "page" : undefined}
+                className={`px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+                  activeTab === "quiz"
+                    ? "border-teal text-teal"
+                    : (!user || !allModulesComplete)
+                      ? "border-transparent text-muted-foreground/60 cursor-not-allowed"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {(!user || !allModulesComplete) ? <Lock className="h-3.5 w-3.5" /> : <Award className="h-4 w-4" />}
+                <span>Quiz & Certificate</span>
+                {user && !allModulesComplete && modules?.length ? (
+                  <span className="text-muted-foreground/70 font-normal normal-case tracking-normal tabular-nums ml-1">
+                    {modules.length - completedModules.length} left
+                  </span>
+                ) : null}
+              </button>
+              {modules && modules.length > 0 && (
+                <div className="hidden md:flex ml-auto items-center gap-3 py-4 pl-6">
+                  <div className="h-1 w-40 bg-secondary overflow-hidden">
+                    <div
+                      className="h-full bg-teal transition-all duration-500"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                  <span className="text-[11px] tabular-nums text-muted-foreground uppercase tracking-[0.18em]">
+                    {Math.round(progressPercent)}%
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
@@ -800,40 +829,84 @@ const AcademyCourse = () => {
                       {completedModules.length} / {modules?.length || 0}
                     </span>
                   </div>
-                  <nav className="space-y-1">
-                    {modules?.map((mod, i) => {
-                      const isComplete = completedModules.includes(mod.id);
-                      const isActive = i === activeModule;
-                      return (
-                        <button
-                          key={mod.id}
-                          onClick={() => {
-                            setActiveModule(i);
-                            window.scrollTo({ top: 0, behavior: "smooth" });
-                          }}
-                          className={`group w-full text-left px-4 py-3.5 text-body-sm transition-all flex items-start gap-3.5 border-l-2 ${
-                            isActive
-                              ? "border-teal bg-teal/5 text-foreground font-medium"
-                              : "border-transparent text-muted-foreground hover:text-foreground hover:border-border hover:bg-secondary/40"
-                          }`}
-                        >
-                          {isComplete ? (
-                            <span className="w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 bg-teal text-white">
-                              <CheckCircle className="h-3.5 w-3.5" />
-                            </span>
-                          ) : (
-                            <span className={`w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold tabular-nums border transition-colors ${
+                  <nav className="space-y-1" aria-label="Course modules">
+                    {(() => {
+                      const nextUpIdx = modules?.findIndex(
+                        (m: any, idx: number) => !completedModules.includes(m.id) && idx !== activeModule
+                      ) ?? -1;
+                      return modules?.map((mod, i) => {
+                        const isComplete = completedModules.includes(mod.id);
+                        const isActive = i === activeModule;
+                        const isNextUp = !isComplete && !isActive && i === nextUpIdx;
+                        const statusLabel = isActive
+                          ? "Now reading"
+                          : isComplete
+                            ? "Completed"
+                            : isNextUp
+                              ? "Up next"
+                              : "Not started";
+                        return (
+                          <button
+                            key={mod.id}
+                            onClick={() => {
+                              setActiveModule(i);
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                            aria-current={isActive ? "step" : undefined}
+                            className={`group relative w-full text-left pl-4 pr-3 py-3 text-body-sm transition-all flex items-start gap-3.5 border-l-2 ${
                               isActive
-                                ? "border-teal text-teal bg-transparent"
-                                : "border-border text-muted-foreground group-hover:border-teal/40 group-hover:text-teal"
-                            }`}>
-                              {String(i + 1).padStart(2, "0")}
+                                ? "border-teal bg-teal/10 text-foreground font-medium"
+                                : isComplete
+                                  ? "border-teal/40 text-foreground/80 hover:bg-secondary/40 hover:border-teal"
+                                  : isNextUp
+                                    ? "border-teal/50 text-foreground hover:bg-secondary/40"
+                                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-border hover:bg-secondary/40"
+                            }`}
+                          >
+                            {isComplete ? (
+                              <span className="w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 bg-teal text-white" aria-hidden="true">
+                                <CheckCircle className="h-3.5 w-3.5" />
+                              </span>
+                            ) : (
+                              <span
+                                aria-hidden="true"
+                                className={`w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold tabular-nums border transition-colors ${
+                                  isActive
+                                    ? "border-teal text-white bg-teal"
+                                    : isNextUp
+                                      ? "border-teal text-teal bg-transparent"
+                                      : "border-border text-muted-foreground group-hover:border-teal/40 group-hover:text-teal"
+                                }`}
+                              >
+                                {String(i + 1).padStart(2, "0")}
+                              </span>
+                            )}
+                            <span className="flex-1 min-w-0 pt-0.5">
+                              <span className="block leading-snug">{mod.title}</span>
+                              <span
+                                className={`mt-1 block text-[10px] uppercase tracking-[0.18em] font-semibold ${
+                                  isActive
+                                    ? "text-teal"
+                                    : isComplete
+                                      ? "text-teal/80"
+                                      : isNextUp
+                                        ? "text-teal"
+                                        : "text-muted-foreground/70"
+                                }`}
+                              >
+                                {statusLabel}
+                              </span>
                             </span>
-                          )}
-                          <span className="leading-snug pt-0.5">{mod.title}</span>
-                        </button>
-                      );
-                    })}
+                            {isActive && (
+                              <span
+                                aria-hidden="true"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-teal animate-pulse"
+                              />
+                            )}
+                          </button>
+                        );
+                      });
+                    })()}
                   </nav>
                   {modules && modules.length > 0 && (
                     <div className="mt-6 pt-4 border-t border-border">
