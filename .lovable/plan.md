@@ -1,31 +1,60 @@
+# Academy premium visual redesign
 
-## What changes
+Brand tokens stay locked (deep navy, slate, teal accent, dark default). This is a **visual** pass — no changes to Stripe, quiz logic, certificate generation, or DB. I'll rework layout, hierarchy, typography scale, motion, empty states, and micro-detail across the four surfaces.
 
-Replace the current two-column "What you get" section (Free vs Paid) on the Academy page with a polished three-tier pricing card layout:
+## Approach
 
-1. **Free tier** (€0) — unchanged: 2 free courses, quizzes, certificates.
-2. **Per-Course tier** (from €29) — existing one-time purchase model with bundle discounts.
-3. **Annual All-Access tier** (new, e.g. €199/year) — annual prepaid subscription unlocking every course, with rollover messaging.
+Redesign one surface at a time, in order. For each surface I:
 
-### Pricing card details for the new Annual tier
-- Badge: "Best value"
-- Price display: €199/year (or localised equivalent via existing FX logic)
-- Feature list:
-  - Unlimited access to all 16+ courses
-  - Annual prepaid billing — one payment, full year of access
-  - Unused course completions roll over (certificates never expire)
-  - Priority access to new courses added during your subscription
-  - All CPD certificates and MLRO Toolkit included
-  - Cancel anytime, keep certificates earned
-- CTA: "Subscribe annually" (links to contact-sales for now — no Stripe subscription wired yet)
+1. Capture the current screen.
+2. Generate **3 rendered design directions** (locked palette + type, varying composition/density/motion).
+3. Show them to you — you pick one.
+4. Implement the chosen direction, matching composition exactly.
 
-### Rollover usage callout
-- Add a small highlighted callout below the pricing cards:
-  > "Annual subscribers: your access renews each year. Certificates and CPD credits you've earned are yours forever — they never expire, even if you cancel."
+This way you steer each surface instead of me shipping 4 redesigns blind.
 
-### Technical details
-- **File modified**: `src/pages/Academy.tsx` — the "What you get" section (lines ~464–565)
-- **No backend changes** — this is a UI-only update. The annual tier CTA will route to `/contact-sales` until a Stripe annual subscription product is created.
-- **No new Stripe products created** in this step — the UI is forward-looking. When you're ready to wire up actual annual billing, we'll create the Stripe product and checkout flow.
-- Existing per-course pricing, cart, and checkout remain completely untouched.
-- Uses the existing design system: `bg-card`, `border-border`, `Badge`, teal accent for the recommended tier.
+## Phase order & what changes per surface
+
+**1. Landing + course catalog** (`/academy`)
+- Hero: stronger editorial headline treatment, replace stock portrait vibe with a more distinctive art-directed asset or typographic hero
+- Stats strip: quieter, more premium (right-aligned metrics, hairline dividers)
+- "How access works" card: reformat as a 3-step ribbon instead of bullet list
+- Course grid: richer cards — level badge, duration, price, region, hover state
+- Testimonials: pull-quote editorial layout instead of 3 equal cards
+- Plan comparison: clearer free vs paid vs annual pass
+
+**2. Course player + module flow** (`/academy/course/:slug`)
+- Two-pane reading layout (module rail left, content right) with progress woven in
+- Reading typography: tighter measure, better rhythm, callout/case-study components
+- Sticky module progress + "next module" affordance
+- Distinct states for locked / in-progress / complete modules
+
+**3. Quiz + certificate issuance**
+- Full-focus quiz view (chrome hidden, one question at a time, keyboard nav)
+- Pass/fail reveal with proper reward moment (motion, seal animation)
+- Certificate preview card: paper texture, seal, verifiable URL, share row (LinkedIn, copy link, email)
+- Name-capture prompt replaced with an inline modal, not `window.prompt`
+
+**4. Checkout + cart + post-purchase**
+- Basket drawer redesign (line items, bundle discount visible, region/currency chip)
+- Post-purchase success screen: "You're in" moment → jump straight into first module
+- Dashboard certificates section: gallery-style cards with resend/share/download inline
+
+## Cross-cutting polish (applied in every phase)
+- Consistent motion register (framer-motion, restrained — 200–400ms, ease-out)
+- Real skeletons + empty states instead of blank areas
+- Regional currency chip treated as a first-class UI element, not a floating toast
+- Hairline dividers, generous negative space, one accent color at a time
+- Kill any remaining generic AI-hero look
+
+## Out of scope
+- No copy rewrite beyond micro-labels
+- No pricing/plan structure changes
+- No new courses or module content
+- No backend/schema/edge-function changes
+
+## Kickoff
+
+If you approve, I start **Phase 1 (Landing + catalog)** immediately: capture → 3 directions → you pick → I ship. Then Phase 2, and so on.
+
+Reply "go" (or "start with phase 2/3/4") and I begin.
