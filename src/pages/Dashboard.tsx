@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Loader2, User, Building2, LogOut, CreditCard, ShieldAlert,
-  GraduationCap, Award, Share2, ExternalLink, Copy, Globe,
+  GraduationCap, Award, Share2, ExternalLink, Copy, Globe, Mail,
   Search, BookOpen, Shield, ChevronRight, Sparkles, PlayCircle, CheckCircle2
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
