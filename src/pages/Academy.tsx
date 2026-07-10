@@ -543,7 +543,7 @@ const Academy = () => {
         <section className="bg-background border-b border-border">
           <div className="container-enterprise py-6">
             <div className="max-w-2xl mb-12">
-              <p className="text-caption uppercase tracking-[0.22em] font-semibold text-teal-DEFAULT/80 mb-3">
+              <p className="text-caption uppercase tracking-[0.22em] font-semibold text-teal/80 mb-3">
                 How access works
               </p>
               <h2 className="text-headline text-foreground mb-3">
@@ -569,7 +569,7 @@ const Academy = () => {
                 },
               ].map((step) => (
                 <div key={step.n} className="group space-y-5">
-                  <div className="w-12 h-12 flex items-center justify-center border border-teal-DEFAULT/50 text-teal-DEFAULT font-bold tabular-nums group-hover:bg-teal-DEFAULT group-hover:text-white transition-colors duration-300">
+                  <div className="w-12 h-12 flex items-center justify-center border border-teal/50 text-teal font-bold tabular-nums group-hover:bg-teal group-hover:text-white transition-colors duration-300">
                     {step.n}
                   </div>
                   <h3 className="text-title font-semibold text-foreground">{step.title}</h3>
@@ -599,10 +599,10 @@ const Academy = () => {
         <section className="bg-secondary/30 border-b border-border">
           <div className="container-enterprise section-padding">
             <div className="max-w-4xl mx-auto">
-              <p className="text-caption uppercase tracking-[0.22em] font-semibold text-teal-DEFAULT/80 mb-6 text-center">
+              <p className="text-caption uppercase tracking-[0.22em] font-semibold text-teal/80 mb-6 text-center">
                 Trusted by compliance teams worldwide
               </p>
-              <div className="bg-card border-l-4 border-teal-DEFAULT p-8 sm:p-12">
+              <div className="bg-card border-l-4 border-teal p-8 sm:p-12">
                 <p
                   className="text-2xl sm:text-3xl text-foreground italic leading-snug mb-8"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
