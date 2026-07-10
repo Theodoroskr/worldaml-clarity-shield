@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import Layout from "@/components/Layout";
 import ScrollToTop from "@/components/ScrollToTop";
+import AuthQueryInvalidator from "@/components/AuthQueryInvalidator";
 import { lazy, Suspense } from "react";
 import { isAcademyHost } from "@/lib/academyHost";
 import {
@@ -156,6 +157,7 @@ const App = () => (
     <TooltipProvider>
       <RegionProvider>
         <AuthProvider>
+          <AuthQueryInvalidator />
           <CartProvider>
           <Toaster />
           <Sonner />
