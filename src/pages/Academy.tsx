@@ -378,6 +378,7 @@ const Academy = () => {
   const completedCount = courses?.filter((c) => getCourseStatus(c.id) === "completed").length || 0;
   const inProgressCount = courses?.filter((c) => getCourseStatus(c.id) === "in-progress").length || 0;
   const certsCount = certificates?.length || 0;
+  const isReturningLearner = !!user && (hasAnnualPass || purchasedSlugs.size > 0);
 
   const formatCpd = (hours: number) => {
     if (!hours) return null;
