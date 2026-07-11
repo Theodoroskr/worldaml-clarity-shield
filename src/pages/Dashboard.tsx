@@ -13,8 +13,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import {
   Loader2, User, Building2, LogOut, CreditCard, ShieldAlert,
   GraduationCap, Award, Share2, ExternalLink, Copy, Globe, Mail,
-  Search, BookOpen, Shield, ChevronRight, Sparkles, PlayCircle, CheckCircle2
+  Search, BookOpen, Shield, ChevronRight, Sparkles, PlayCircle, CheckCircle2,
+  FileText, ArrowRight
 } from "lucide-react";
+import { useAcademyPurchases } from "@/hooks/useAcademyPurchases";
 import { Progress } from "@/components/ui/progress";
 import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
 import { SearchHistoryPanel, SearchHistoryHandle } from "@/components/sanctions/SearchHistoryPanel";
