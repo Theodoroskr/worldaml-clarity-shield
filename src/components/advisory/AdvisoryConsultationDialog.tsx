@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+// Submits through the submit-form edge function (direct inserts blocked by RLS).
 import { toast } from "@/hooks/use-toast";
 import {
   Dialog,
