@@ -106,6 +106,7 @@ const EUSanctionsCountry = lazy(() => import("./pages/EUSanctionsCountry"));
 const AMLScreeningEU = lazy(() => import("./pages/AMLScreeningEU"));
 const AMLScreeningUK = lazy(() => import("./pages/AMLScreeningUK"));
 const WorldCheckAlternative = lazy(() => import("./pages/WorldCheckAlternative"));
+const Advisory = lazy(() => import("./pages/Advisory"));
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
