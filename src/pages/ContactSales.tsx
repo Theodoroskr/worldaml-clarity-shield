@@ -134,6 +134,14 @@ Preferred start date and number of seats below.`,
         message: prev.message || "I'd like to learn more about the WorldAML Partner Program and how to get started.",
       }));
     }
+
+    if (productParam === "worldaml-advisory" || productParam === "advisory") {
+      setSelectedProducts((prev) => (prev.includes("worldaml-advisory") ? prev : [...prev, "worldaml-advisory"]));
+      setFormData((prev) => ({
+        ...prev,
+        message: prev.message || "I'd like to learn more about WorldAML Advisory services (EWRA, AML policies, AMLCO reports, regulator questionnaires, internal audit and MLRO/VMLRO support).",
+      }));
+    }
   }, [searchParams]);
 
   const handleProductToggle = (productId: string) => {
