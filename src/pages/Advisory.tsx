@@ -103,16 +103,19 @@ const Advisory = () => {
                 your AML and Sanctions framework across every jurisdiction you operate in.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button asChild size="lg" className="bg-accent text-accent-foreground shadow-lg hover:bg-accent/90">
-                  <Link to="/contact-sales">
-                    Request a Consultation Quote
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                <Button
+                  size="lg"
+                  className="bg-accent text-accent-foreground shadow-lg hover:bg-accent/90"
+                  onClick={() => openWith()}
+                >
+                  Request a Consultation Quote
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button asChild size="lg" variant="outline">
                   <Link to="/templates">Browse Policy Templates</Link>
                 </Button>
               </div>
+
             </div>
           </div>
         </section>
