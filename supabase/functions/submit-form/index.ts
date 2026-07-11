@@ -324,6 +324,7 @@ Deno.serve(async (req) => {
               "WorldCompliance",
               "Bridger Insight XG",
               "Academy \u2014 Team Plan",
+              "Partner Program",
             ]);
             const PMS_MAP: Record<string, string> = {
               "worldaml-suite": "WorldAML Suite",
@@ -353,6 +354,11 @@ Deno.serve(async (req) => {
               "kyb": "WorldAML Suite",
               "tm": "WorldAML Suite",
               "reporting": "WorldAML Suite",
+              // Partner Program — Zoho picklist value
+              "partnership": "Partner Program",
+              "partner": "Partner Program",
+              "partner-program": "Partner Program",
+              "partner_program": "Partner Program",
             };
             const mapped = new Set<string>();
             for (const raw of products) {
@@ -446,8 +452,15 @@ Deno.serve(async (req) => {
 
           // ── Additional WorldAML Book Demo mappings ────────────────────────
           // Sales Organisation Unit — WorldAML leads belong to the ICG parent
-          // sales unit. Exact Zoho picklist value.
-          Sales_Organisation_Unit: "Infocredit Group (ICG)",
+          // sales unit, EXCEPT partnership enquiries which route to the
+          // WorldAML Partnership sales unit for the partner team to own.
+          Sales_Organisation_Unit: (() => {
+            const isPartnership = Array.isArray(products) && products.some((p) => {
+              const k = String(p ?? "").trim().toLowerCase();
+              return k === "partnership" || k === "partner" || k === "partner-program" || k === "partner_program";
+            });
+            return isPartnership ? "WorldAML Partnership" : "Infocredit Group (ICG)";
+          })(),
 
           // Qualification level — derived from lead-scoring tier:
           //   hot → Hot, qualified → Warm, low → Cold.
