@@ -106,7 +106,7 @@ const AcademyTemplates = () => {
     if (!hasProAccess) {
       toast({
         title: "Pro Toolkit locked",
-        description: "Pass any Academy course quiz to unlock all MLRO templates.",
+        description: "Buy the Academy Annual Pass, or pass any Academy course quiz, to unlock all MLRO templates.",
       });
       return;
     }
