@@ -313,7 +313,35 @@ const AcademyTemplates = () => {
           </div>
         </section>
 
+        {/* Consultation banner */}
+        <section className="bg-navy">
+          <div className="container-enterprise py-10">
+            <div className="rounded-2xl border border-teal-light/30 bg-gradient-to-r from-primary/40 via-primary/20 to-accent/20 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="flex items-start gap-4">
+                <div className="hidden sm:flex flex-shrink-0 h-12 w-12 rounded-full bg-teal-light/15 border border-teal-light/30 items-center justify-center">
+                  <Sparkles className="h-6 w-6 text-teal-light" />
+                </div>
+                <div>
+                  <h3 className="text-xl md:text-2xl font-semibold text-primary-foreground mb-1">
+                    Need help turning templates into board-approved policies?
+                  </h3>
+                  <p className="text-body-sm text-slate-light max-w-2xl">
+                    Request a consultation quote and our MLROs will tailor these frameworks
+                    to your business, jurisdiction, and regulator — ready for sign-off.
+                  </p>
+                </div>
+              </div>
+              <Button asChild size="lg" className="flex-shrink-0">
+                <Link to="/contact-sales?topic=policy-consultation">
+                  Request a Consultation Quote <ArrowRight className="h-4 w-4 ml-1" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
         {/* Why these templates */}
+
         <section className="bg-secondary/30 section-padding">
           <div className="container-enterprise max-w-4xl">
             <h2 className="text-headline text-foreground mb-8 text-center">
