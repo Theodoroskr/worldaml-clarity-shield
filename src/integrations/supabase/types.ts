@@ -198,6 +198,42 @@ export type Database = {
           },
         ]
       }
+      academy_pending_grants: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          grant_kind: string
+          granted_at: string | null
+          granted_user_id: string | null
+          id: string
+          note: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          grant_kind?: string
+          granted_at?: string | null
+          granted_user_id?: string | null
+          id?: string
+          note?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          grant_kind?: string
+          granted_at?: string | null
+          granted_user_id?: string | null
+          id?: string
+          note?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       academy_pro_certificates: {
         Row: {
           amount_cents: number
