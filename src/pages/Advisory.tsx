@@ -66,8 +66,17 @@ const services = [
 ];
 
 const Advisory = () => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [defaultService, setDefaultService] = useState<string | undefined>();
+
+  const openWith = (svc?: string) => {
+    setDefaultService(svc);
+    setDialogOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
+
       <SEO
         title="WorldAML Advisory — MLRO & AML Compliance Consulting"
         description="Advisory services from WorldAML MLROs: EWRA, AML & Sanctions policies, AMLCO reports, regulator questionnaires, internal audit, inspection preparation, and VMLRO support."
