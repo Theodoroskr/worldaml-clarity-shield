@@ -437,6 +437,14 @@ const Advisory = () => {
                             Request quote for {s.shortLabel}
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </Button>
+                          {s.slug === "ewra" && (
+                            <Button asChild variant="outline">
+                              <Link to="/advisory/ewra">
+                                Full EWRA page
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Link>
+                            </Button>
+                          )}
                           {idx < services.length - 1 && (
                             <Button
                               variant="ghost"
@@ -446,6 +454,7 @@ const Advisory = () => {
                             </Button>
                           )}
                         </div>
+
                       </div>
                     </div>
                   </article>
