@@ -602,7 +602,31 @@ const Dashboard = () => {
 
           {/* ══════════ QUICK TOOLS ══════════ */}
           <div className="mt-10 space-y-6">
-            <h2 className="text-xl font-semibold text-navy">Quick Tools</h2>
+          {/* ══════════ MLRO TOOLKIT ══════════ */}
+          <div className="mt-10 space-y-6">
+            <h2 className="text-xl font-semibold text-navy">MLRO Toolkit</h2>
+            {hasToolkitAccess && (
+              <Card className="border-teal/40 bg-gradient-to-r from-teal/5 to-navy/5">
+                <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-4 py-4">
+                  <div className="w-10 h-10 rounded-lg bg-teal/15 flex items-center justify-center flex-shrink-0">
+                    <FileText className="h-5 w-5 text-teal" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-navy">
+                      MLRO templates unlocked
+                    </p>
+                    <p className="text-xs text-text-secondary">
+                      {hasAnnualPass
+                        ? "Your annual All-Access includes the full MLRO Toolkit — editable policies, SAR/STR narratives and risk assessment forms."
+                        : "Your course purchase unlocks the MLRO Toolkit — editable policies, SAR/STR narratives and risk assessment forms."}
+                    </p>
+                  </div>
+                  <Button size="sm" onClick={() => navigate("/academy/templates")} className="flex-shrink-0">
+                    View MLRO Templates <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
             <Card className="border-navy/20 hover:shadow-md transition-shadow">
               <CardContent className="flex items-center gap-4 py-4">
                 <div className="w-10 h-10 rounded-lg bg-navy/10 flex items-center justify-center flex-shrink-0">
