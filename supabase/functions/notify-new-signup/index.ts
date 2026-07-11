@@ -226,6 +226,28 @@ Deno.serve(async (req) => {
     });
     console.log(`✅ Admin notification sent for: ${safeEmail} (cc: ${COMPLIANCE_EMAIL})`);
 
+    // 3. Partner Program invite (non-blocking) — sent as part of welcome sequence
+    try {
+      const partnerFnUrl = `${supabaseUrl}/functions/v1/send-partner-invite-email`;
+      fetch(partnerFnUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${serviceKey}`,
+          apikey: serviceKey,
+        },
+        body: JSON.stringify({
+          to: email,
+          name: full_name || "",
+          context:
+            "As part of your WorldAML welcome, we wanted to let you know about our Partner Program — a way to add recurring commission on top of your compliance work.",
+          source: "new-signup",
+        }),
+      }).catch((e) => console.warn("Partner invite dispatch failed:", e?.message));
+    } catch (e) {
+      console.warn("Partner invite non-blocking error:", (e as Error)?.message);
+    }
+
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
