@@ -26,10 +26,11 @@ import { formatDistanceToNow } from "date-fns";
 
 const Dashboard = () => {
   const { user, profile, isLoading, isApproved, isAdmin, signOut } = useAuth();
-  const { hasSuiteAccess, isAdmin, subscriptionTier } = useAccess();
+  const { hasSuiteAccess, subscriptionTier } = useAccess();
   const { membership: rcmMembership } = useRcmOrg();
   const { purchasedSlugs, hasAnnualPass } = useAcademyPurchases();
-  const hasToolkitAccess = hasAnnualPass || purchasedSlugs.size > 0;
+  const hasPaidSubscription = ["suite", "enterprise", "premium", "pro", "annual"].includes((subscriptionTier || "").toLowerCase());
+  const hasToolkitAccess = hasAnnualPass || purchasedSlugs.size > 0 || hasPaidSubscription || isAdmin;
   const isOrgAdmin = rcmMembership?.role === "admin";
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
