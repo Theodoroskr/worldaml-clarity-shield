@@ -212,6 +212,20 @@ Preferred start date and number of seats below.`,
 
       if (!response.ok) throw new Error("Submission failed");
 
+      // Automated Partner Program invite — triggered ONLY by explicit partnership interest
+      if (selectedProducts.includes("partnership")) {
+        supabase.functions
+          .invoke("send-partner-invite-email", {
+            body: {
+              to: formData.email,
+              name: `${formData.firstName} ${formData.lastName}`.trim(),
+              context: `Thanks for expressing interest in the WorldAML Partner Program${formData.company ? ` on behalf of ${formData.company}` : ""}.`,
+              source: "contact-sales-form",
+            },
+          })
+          .catch((err) => console.warn("Partner invite email failed (non-blocking):", err));
+      }
+
       toast({
         title: "Request Submitted",
         description: "Thank you for your interest. Our team will contact you within 1-2 business days.",
