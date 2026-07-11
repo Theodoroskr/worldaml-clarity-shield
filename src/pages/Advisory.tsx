@@ -20,7 +20,6 @@ import {
   Gavel,
   Users,
   Building2,
-  Sparkles,
   MessageSquarePlus,
   CheckCircle2,
 } from "lucide-react";
