@@ -71,18 +71,30 @@ const AcademyTemplates = () => {
     },
   });
 
-  // Pro access = user has any issued certificate (proxy for "Pro toolkit" entitlement)
-  // This will be replaced by Stripe-backed academy_pro_certificates check once checkout ships.
+  // Pro access = any issued certificate OR active Annual Pass purchase
   const { data: hasProAccess } = useQuery({
     queryKey: ["academy-pro-access", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { count, error } = await supabase
-        .from("academy_certificates")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user!.id);
-      if (error) throw error;
-      return (count ?? 0) > 0;
+      const [{ count: certCount, error: certErr }, { data: annual, error: annualErr }] =
+        await Promise.all([
+          supabase
+            .from("academy_certificates")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", user!.id),
+          supabase
+            .from("academy_course_purchases")
+            .select("id, expires_at")
+            .eq("user_id", user!.id)
+            .eq("course_slug", "__annual_pass__")
+            .eq("status", "paid"),
+        ]);
+      if (certErr) throw certErr;
+      if (annualErr) throw annualErr;
+      const hasAnnual = (annual ?? []).some(
+        (p: any) => !p.expires_at || new Date(p.expires_at) > new Date(),
+      );
+      return (certCount ?? 0) > 0 || hasAnnual;
     },
   });
 
