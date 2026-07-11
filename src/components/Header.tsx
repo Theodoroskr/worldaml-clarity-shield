@@ -91,6 +91,7 @@ const navLinks: NavLink[] = [
   },
   { href: "/pricing", label: "Pricing" },
   { href: "/academy", label: "Academy" },
+  { href: "/advisory", label: "Advisory" },
   { href: "/partners", label: "Partners" },
   {
     label: "Resources",
