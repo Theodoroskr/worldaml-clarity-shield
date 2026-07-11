@@ -251,31 +251,58 @@ const Advisory = () => {
 
       <main>
         {/* Hero */}
-        <section className="relative overflow-hidden border-b border-border/50 bg-gradient-to-br from-primary/60 via-primary/30 to-accent/20">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--accent)/0.25),transparent_60%)]" />
-          <div className="container relative mx-auto px-4 py-20 md:py-28">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-teal-light/40 bg-teal-light/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-teal-light">
-                <Sparkles className="h-3.5 w-3.5" />
+        <section className="relative overflow-hidden bg-navy-dark text-primary-foreground">
+          {/* Ambient glow */}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-[120px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--accent)/0.08),transparent_70%)]" />
+
+          <div className="container relative mx-auto px-4 py-24 md:py-32">
+            <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+              <div className="inline-flex items-center gap-2 rounded-full border border-navy-light bg-navy-dark/50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-muted backdrop-blur-md">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
                 WorldAML Advisory
               </div>
-              <h1 className="mt-6 text-4xl font-bold text-foreground md:text-5xl lg:text-6xl">
-                Regulator-ready AML advisory, delivered by practicing MLROs.
+
+              <h1 className="mt-8 text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-7xl">
+                Regulator-ready AML advisory,{" "}
+                <span className="text-slate-muted">delivered by practicing MLROs.</span>
               </h1>
-              <p className="mt-6 text-lg text-muted-foreground md:text-xl">
+
+              <p className="mt-6 max-w-2xl text-lg text-slate-muted md:text-xl">
                 From risk assessments and policy drafting to inspection preparation and
                 outsourced MLRO cover — our advisory team builds, reviews, and defends
                 your AML and Sanctions framework across every jurisdiction you operate in.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+
+              <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
                 <Button
                   size="lg"
-                  className="bg-accent text-accent-foreground shadow-lg hover:bg-accent/90"
+                  className="group relative bg-accent text-accent-foreground shadow-[0_0_20px_hsl(var(--accent)/0.2)] transition-all hover:bg-accent/90 hover:shadow-[0_0_30px_hsl(var(--accent)/0.4)]"
                   onClick={() => openWith()}
                 >
                   Request a Consultation Quote
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
+                <button
+                  onClick={() => scrollToService("ewra")}
+                  className="group flex items-center gap-2 text-sm font-semibold text-slate-muted transition-colors hover:text-white"
+                >
+                  View service scope
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </button>
+              </div>
+
+              {/* Trust markers */}
+              <div className="mt-20 flex w-full max-w-4xl flex-wrap items-center justify-center gap-6 border-t border-navy-light/60 pt-8 opacity-60 md:gap-16">
+                <span className="text-xs font-semibold uppercase tracking-widest text-slate-muted">
+                  AML &amp; Sanctions
+                </span>
+                <span className="text-xs font-semibold uppercase tracking-widest text-slate-muted">
+                  MLRO-Led
+                </span>
+                <span className="text-xs font-semibold uppercase tracking-widest text-slate-muted">
+                  Board-Ready
+                </span>
               </div>
             </div>
           </div>
