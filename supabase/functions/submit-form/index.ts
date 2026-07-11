@@ -241,9 +241,12 @@ Deno.serve(async (req) => {
             console.warn(`Unknown industry value from website form: "${raw}" — leaving Zoho Industry unset`);
             return undefined;
           })(),
-          // Topic — fixed value for every WorldAML lead so CRM workflows can
-          // segment by source brand.
-          Topic: "WorldAML",
+          // Topic — "Partnership" when the visitor picked Partner Program on
+          // the Contact Sales form; otherwise the default WorldAML brand tag
+          // so CRM workflows can segment by source brand.
+          Topic: Array.isArray(products) && products.includes("partnership")
+            ? "Partnership"
+            : "WorldAML",
           // Business Use Cases (multiselectpicklist) — mapped from the
           // website's use-case codes to Zoho's exact allowed values.
           Business_Use_Cases: (() => {
@@ -324,6 +327,7 @@ Deno.serve(async (req) => {
               "WorldCompliance",
               "Bridger Insight XG",
               "Academy \u2014 Team Plan",
+              "Partner Program",
             ]);
             const PMS_MAP: Record<string, string> = {
               "worldaml-suite": "WorldAML Suite",
@@ -340,6 +344,9 @@ Deno.serve(async (req) => {
               "academy-team": "Academy \u2014 Team Plan",
               "academy-team-plan": "Academy \u2014 Team Plan",
               "training": "Academy \u2014 Team Plan",
+              "partnership": "Partner Program",
+              "partner-program": "Partner Program",
+              "partner program": "Partner Program",
               // Related APIs / features roll up to WorldAML API
               "sanctions-api": "WorldAML API",
               "kyc-kyb-api": "WorldAML API",
