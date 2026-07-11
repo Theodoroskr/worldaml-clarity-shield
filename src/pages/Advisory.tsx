@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
@@ -14,7 +15,10 @@ import {
   Users,
   Building2,
   Sparkles,
+  MessageSquarePlus,
 } from "lucide-react";
+import AdvisoryConsultationDialog from "@/components/advisory/AdvisoryConsultationDialog";
+
 
 const services = [
   {
@@ -62,8 +66,17 @@ const services = [
 ];
 
 const Advisory = () => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [defaultService, setDefaultService] = useState<string | undefined>();
+
+  const openWith = (svc?: string) => {
+    setDefaultService(svc);
+    setDialogOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
+
       <SEO
         title="WorldAML Advisory — MLRO & AML Compliance Consulting"
         description="Advisory services from WorldAML MLROs: EWRA, AML & Sanctions policies, AMLCO reports, regulator questionnaires, internal audit, inspection preparation, and VMLRO support."
@@ -90,16 +103,19 @@ const Advisory = () => {
                 your AML and Sanctions framework across every jurisdiction you operate in.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button asChild size="lg" className="bg-accent text-accent-foreground shadow-lg hover:bg-accent/90">
-                  <Link to="/contact-sales">
-                    Request a Consultation Quote
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                <Button
+                  size="lg"
+                  className="bg-accent text-accent-foreground shadow-lg hover:bg-accent/90"
+                  onClick={() => openWith()}
+                >
+                  Request a Consultation Quote
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button asChild size="lg" variant="outline">
                   <Link to="/templates">Browse Policy Templates</Link>
                 </Button>
               </div>
+
             </div>
           </div>
         </section>
@@ -120,7 +136,7 @@ const Advisory = () => {
               return (
                 <Card
                   key={s.title}
-                  className="border-border/60 bg-card/60 transition-all hover:-translate-y-1 hover:border-accent/50 hover:shadow-xl"
+                  className="flex flex-col border-border/60 bg-card/60 transition-all hover:-translate-y-1 hover:border-accent/50 hover:shadow-xl"
                 >
                   <CardHeader>
                     <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-lg border border-teal-light/40 bg-teal-light/10 text-teal-light">
@@ -128,16 +144,26 @@ const Advisory = () => {
                     </div>
                     <CardTitle className="text-xl">{s.title}</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex flex-1 flex-col justify-between gap-4">
                     <CardDescription className="text-sm leading-relaxed">
                       {s.description}
                     </CardDescription>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="self-start px-0 text-teal-light hover:bg-transparent hover:text-teal-light/80"
+                      onClick={() => openWith(s.title)}
+                    >
+                      Request quote for this
+                      <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                    </Button>
                   </CardContent>
                 </Card>
               );
             })}
           </div>
         </section>
+
 
         {/* How we work */}
         <section className="border-y border-border/50 bg-muted/20">
@@ -185,20 +211,42 @@ const Advisory = () => {
                 Request a consultation quote and our MLROs will tailor the engagement to
                 your business, jurisdiction, and regulator — ready for sign-off.
               </p>
-              <Button asChild size="lg" className="mt-6 bg-accent text-accent-foreground shadow-lg hover:bg-accent/90">
-                <Link to="/contact-sales">
-                  Request a Consultation Quote
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+              <Button
+                size="lg"
+                className="mt-6 bg-accent text-accent-foreground shadow-lg hover:bg-accent/90"
+                onClick={() => openWith()}
+              >
+                Request a Consultation Quote
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>
         </section>
       </main>
 
+      {/* Persistent floating CTA */}
+      <div className="fixed bottom-6 right-6 z-40 print:hidden">
+        <Button
+          size="lg"
+          onClick={() => openWith()}
+          className="group gap-2 rounded-full bg-accent px-5 py-6 text-accent-foreground shadow-2xl ring-1 ring-accent/40 hover:bg-accent/90"
+        >
+          <MessageSquarePlus className="h-5 w-5" />
+          <span className="hidden sm:inline">Request a Consultation Quote</span>
+          <span className="sm:hidden">Consultation Quote</span>
+        </Button>
+      </div>
+
+      <AdvisoryConsultationDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        defaultService={defaultService}
+      />
+
       <Footer />
     </div>
   );
 };
+
 
 export default Advisory;
