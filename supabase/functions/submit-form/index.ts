@@ -325,6 +325,7 @@ Deno.serve(async (req) => {
               "Bridger Insight XG",
               "Academy \u2014 Team Plan",
               "Partner Program",
+              "WorldAML Advisory",
             ]);
             const PMS_MAP: Record<string, string> = {
               "worldaml-suite": "WorldAML Suite",
@@ -359,6 +360,10 @@ Deno.serve(async (req) => {
               "partner": "Partner Program",
               "partner-program": "Partner Program",
               "partner_program": "Partner Program",
+              // WorldAML Advisory
+              "worldaml-advisory": "WorldAML Advisory",
+              "advisory": "WorldAML Advisory",
+              "mlro-advisory": "WorldAML Advisory",
             };
             const mapped = new Set<string>();
             for (const raw of products) {
