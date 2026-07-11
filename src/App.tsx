@@ -327,6 +327,10 @@ const App = () => (
                 {/* Comparison landing pages */}
                 <Route path="/world-check-alternative" element={<WorldCheckAlternative />} />
 
+                {/* Advisory */}
+                <Route path="/advisory" element={<Advisory />} />
+
+
                 <Route path="/suite-layout-preview" element={<SuiteLayout />} />
 
                 {/* Suite App (functional dashboard) */}
