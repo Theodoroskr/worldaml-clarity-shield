@@ -136,7 +136,7 @@ const Advisory = () => {
               return (
                 <Card
                   key={s.title}
-                  className="border-border/60 bg-card/60 transition-all hover:-translate-y-1 hover:border-accent/50 hover:shadow-xl"
+                  className="flex flex-col border-border/60 bg-card/60 transition-all hover:-translate-y-1 hover:border-accent/50 hover:shadow-xl"
                 >
                   <CardHeader>
                     <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-lg border border-teal-light/40 bg-teal-light/10 text-teal-light">
@@ -144,16 +144,26 @@ const Advisory = () => {
                     </div>
                     <CardTitle className="text-xl">{s.title}</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex flex-1 flex-col justify-between gap-4">
                     <CardDescription className="text-sm leading-relaxed">
                       {s.description}
                     </CardDescription>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="self-start px-0 text-teal-light hover:bg-transparent hover:text-teal-light/80"
+                      onClick={() => openWith(s.title)}
+                    >
+                      Request quote for this
+                      <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                    </Button>
                   </CardContent>
                 </Card>
               );
             })}
           </div>
         </section>
+
 
         {/* How we work */}
         <section className="border-y border-border/50 bg-muted/20">
