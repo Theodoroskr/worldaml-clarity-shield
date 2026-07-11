@@ -354,6 +354,11 @@ Deno.serve(async (req) => {
               "kyb": "WorldAML Suite",
               "tm": "WorldAML Suite",
               "reporting": "WorldAML Suite",
+              // Partner Program — Zoho picklist value
+              "partnership": "Partner Program",
+              "partner": "Partner Program",
+              "partner-program": "Partner Program",
+              "partner_program": "Partner Program",
             };
             const mapped = new Set<string>();
             for (const raw of products) {
