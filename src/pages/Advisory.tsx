@@ -253,60 +253,107 @@ const Advisory = () => {
         {/* Hero */}
         <section className="relative overflow-hidden bg-navy-dark text-primary-foreground">
           {/* Ambient glow */}
-          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-[120px]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--accent)/0.08),transparent_70%)]" />
+          <div className="pointer-events-none absolute -left-32 top-1/3 h-[600px] w-[600px] rounded-full bg-accent/15 blur-[140px] animate-pulse" />
+          <div className="pointer-events-none absolute -right-40 -bottom-20 h-[500px] w-[500px] rounded-full bg-teal-light/10 blur-[120px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,hsl(var(--accent)/0.08),transparent_60%)]" />
+          {/* Subtle grid */}
+          <div className="absolute inset-0 opacity-[0.04] [background-image:linear-gradient(hsl(var(--accent))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--accent))_1px,transparent_1px)] [background-size:56px_56px]" />
 
-          <div className="container relative mx-auto px-4 py-24 md:py-32">
-            <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-navy-light bg-navy-dark/50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-muted backdrop-blur-md">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-                WorldAML Advisory
+          <div className="container relative mx-auto px-4 py-20 md:py-28">
+            <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+              {/* Left: copy */}
+              <div className="flex flex-col items-start text-left animate-fade-in">
+                <div className="inline-flex items-center gap-2 rounded-full border border-navy-light bg-navy-dark/50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-muted backdrop-blur-md">
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+                  WorldAML Advisory
+                </div>
+
+                <h1 className="mt-8 text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+                  Regulator-ready AML advisory,{" "}
+                  <span className="text-slate-muted">delivered by practicing MLROs.</span>
+                </h1>
+
+                <p className="mt-6 max-w-xl text-lg text-slate-muted md:text-xl">
+                  From risk assessments and policy drafting to inspection preparation and
+                  outsourced MLRO cover — our advisory team builds, reviews, and defends
+                  your AML and Sanctions framework across every jurisdiction you operate in.
+                </p>
+
+                <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:gap-6">
+                  <Button
+                    size="lg"
+                    className="group relative bg-accent text-accent-foreground shadow-[0_0_20px_hsl(var(--accent)/0.2)] transition-all hover:bg-accent/90 hover:shadow-[0_0_30px_hsl(var(--accent)/0.4)]"
+                    onClick={() => openWith()}
+                  >
+                    Request a Consultation Quote
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                  <button
+                    onClick={() => scrollToService("ewra")}
+                    className="group flex items-center gap-2 text-sm font-semibold text-slate-muted transition-colors hover:text-white"
+                  >
+                    View service scope
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </button>
+                </div>
+
+                {/* Trust markers */}
+                <div className="mt-12 flex w-full flex-wrap items-center gap-6 border-t border-navy-light/60 pt-6 opacity-70 md:gap-10">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-slate-muted">AML &amp; Sanctions</span>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-slate-muted">MLRO-Led</span>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-slate-muted">Board-Ready</span>
+                </div>
               </div>
 
-              <h1 className="mt-8 text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-7xl">
-                Regulator-ready AML advisory,{" "}
-                <span className="text-slate-muted">delivered by practicing MLROs.</span>
-              </h1>
+              {/* Right: advisor portrait */}
+              <div className="relative mx-auto w-full max-w-md lg:max-w-none animate-scale-in">
+                {/* Decorative frame accents */}
+                <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-accent/30 via-teal-light/10 to-transparent blur-2xl" />
+                <div className="absolute -top-3 -left-3 h-16 w-16 rounded-tl-2xl border-t-2 border-l-2 border-accent/60" />
+                <div className="absolute -bottom-3 -right-3 h-16 w-16 rounded-br-2xl border-b-2 border-r-2 border-accent/60" />
 
-              <p className="mt-6 max-w-2xl text-lg text-slate-muted md:text-xl">
-                From risk assessments and policy drafting to inspection preparation and
-                outsourced MLRO cover — our advisory team builds, reviews, and defends
-                your AML and Sanctions framework across every jurisdiction you operate in.
-              </p>
+                <div className="relative overflow-hidden rounded-2xl border border-navy-light/60 shadow-[0_30px_80px_-20px_hsl(var(--accent)/0.35)]">
+                  <img
+                    src={advisorPortrait}
+                    alt="Senior MLRO advisor at WorldAML"
+                    width={1024}
+                    height={1280}
+                    className="h-full w-full object-cover"
+                  />
+                  {/* Gradient wash for legibility of overlay */}
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-dark/85 via-navy-dark/10 to-transparent" />
 
-              <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-                <Button
-                  size="lg"
-                  className="group relative bg-accent text-accent-foreground shadow-[0_0_20px_hsl(var(--accent)/0.2)] transition-all hover:bg-accent/90 hover:shadow-[0_0_30px_hsl(var(--accent)/0.4)]"
-                  onClick={() => openWith()}
-                >
-                  Request a Consultation Quote
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-                <button
-                  onClick={() => scrollToService("ewra")}
-                  className="group flex items-center gap-2 text-sm font-semibold text-slate-muted transition-colors hover:text-white"
-                >
-                  View service scope
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </button>
-              </div>
+                  {/* Floating status chip */}
+                  <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-navy-dark/70 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
+                    </span>
+                    Available for engagement
+                  </div>
 
-              {/* Trust markers */}
-              <div className="mt-20 flex w-full max-w-4xl flex-wrap items-center justify-center gap-6 border-t border-navy-light/60 pt-8 opacity-60 md:gap-16">
-                <span className="text-xs font-semibold uppercase tracking-widest text-slate-muted">
-                  AML &amp; Sanctions
-                </span>
-                <span className="text-xs font-semibold uppercase tracking-widest text-slate-muted">
-                  MLRO-Led
-                </span>
-                <span className="text-xs font-semibold uppercase tracking-widest text-slate-muted">
-                  Board-Ready
-                </span>
+                  {/* Advisor identity */}
+                  <div className="absolute inset-x-4 bottom-4 rounded-xl border border-white/10 bg-navy-dark/70 p-4 backdrop-blur-md">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-accent">Your MLRO advisor</p>
+                    <p className="mt-1 text-base font-semibold text-white">Practicing MLROs · 12+ yrs</p>
+                    <p className="mt-0.5 text-xs text-slate-muted">EU · UK · MENA · APAC coverage</p>
+                  </div>
+                </div>
+
+                {/* Floating metric cards */}
+                <div className="absolute -left-6 top-8 hidden rounded-xl border border-navy-light/60 bg-navy-dark/80 px-4 py-3 shadow-xl backdrop-blur-md md:block animate-fade-in">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-muted">EWRAs delivered</p>
+                  <p className="mt-1 text-2xl font-bold text-white">180<span className="text-accent">+</span></p>
+                </div>
+                <div className="absolute -right-6 bottom-24 hidden rounded-xl border border-navy-light/60 bg-navy-dark/80 px-4 py-3 shadow-xl backdrop-blur-md md:block animate-fade-in">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-muted">Inspections defended</p>
+                  <p className="mt-1 text-2xl font-bold text-white">40<span className="text-accent">+</span></p>
+                </div>
               </div>
             </div>
           </div>
         </section>
+
 
         {/* Sticky sub-nav */}
         <div className="sticky top-16 z-30 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
