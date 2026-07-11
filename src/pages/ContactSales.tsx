@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { getWebAttribution } from "@/lib/webAttribution";
+import { supabase } from "@/integrations/supabase/client";
 
 const products = [
   {
