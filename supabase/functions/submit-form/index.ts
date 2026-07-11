@@ -48,6 +48,22 @@ async function sendEmailWithRetry(resend: any, params: any, retries = 1): Promis
   }
 }
 
+function formatProducts(products: string[] | undefined): string {
+  if (!Array.isArray(products) || products.length === 0) return "—";
+  const LABELS: Record<string, string> = {
+    "worldaml-suite": "WorldAML Suite",
+    "worldaml-api": "WorldAML API",
+    "worldid": "WorldID",
+    "worldcompliance": "WorldCompliance",
+    "bridger-xg": "Bridger Insight XG",
+    "academy-team": "Academy \u2014 Team Plan",
+    "partnership": "Partner Program",
+    "worldaml-advisory": "WorldAML Advisory",
+    "advisory": "WorldAML Advisory",
+  };
+  return products.map((p) => LABELS[String(p ?? "").trim().toLowerCase()] || p).join(", ");
+}
+
 // Rate limit: 5 submissions per IP per hour
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour in ms
