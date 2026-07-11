@@ -605,22 +605,35 @@ const Dashboard = () => {
           <div className="mt-10 space-y-6">
             <h2 className="text-xl font-semibold text-navy">MLRO Toolkit</h2>
             {hasToolkitAccess && (
-              <Card className="border-teal/40 bg-gradient-to-r from-teal/5 to-navy/5">
-                <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-4 py-4">
-                  <div className="w-10 h-10 rounded-lg bg-teal/15 flex items-center justify-center flex-shrink-0">
-                    <FileText className="h-5 w-5 text-teal" />
+              <Card className="relative overflow-hidden border-2 border-accent/60 bg-gradient-to-br from-accent/10 via-teal/5 to-navy/5 shadow-[0_8px_30px_-8px_hsl(var(--accent)/0.35)]">
+                {/* Accent corner highlight */}
+                <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-accent/20 blur-2xl" />
+                <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-accent via-teal to-accent" />
+
+                <CardContent className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 py-5">
+                  <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center flex-shrink-0 ring-1 ring-accent/40">
+                    <FileText className="h-6 w-6 text-accent" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-navy">
-                      MLRO templates unlocked
-                    </p>
-                    <p className="text-xs text-text-secondary">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-navy">
+                        MLRO templates unlocked
+                      </p>
+                      <span className="inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent ring-1 ring-accent/30">
+                        Included
+                      </span>
+                    </div>
+                    <p className="text-xs text-text-secondary mt-1">
                       {hasAnnualPass
                         ? "Your annual All-Access includes the full MLRO Toolkit — editable policies, SAR/STR narratives and risk assessment forms."
                         : "Your course purchase unlocks the MLRO Toolkit — editable policies, SAR/STR narratives and risk assessment forms."}
                     </p>
                   </div>
-                  <Button size="sm" onClick={() => navigate("/academy/templates")} className="flex-shrink-0">
+                  <Button
+                    size="sm"
+                    onClick={() => navigate("/academy/templates")}
+                    className="flex-shrink-0 bg-accent text-accent-foreground shadow-lg shadow-accent/25 hover:bg-accent/90"
+                  >
                     View MLRO Templates <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </CardContent>
