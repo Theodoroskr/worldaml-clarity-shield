@@ -330,6 +330,7 @@ const App = () => (
 
                 {/* Advisory */}
                 <Route path="/advisory" element={<Advisory />} />
+                <Route path="/advisory/ewra" element={<AdvisoryEwra />} />
 
 
                 <Route path="/suite-layout-preview" element={<SuiteLayout />} />
