@@ -49,6 +49,12 @@ const products = [
     description: "Bulk seats (5+) with 20% discount, invoice / PO billing and admin dashboard",
     category: "Training",
   },
+  {
+    id: "partnership",
+    name: "Partner Program",
+    description: "Refer, resell, or white-label WorldAML and earn 5–15% recurring commission",
+    category: "Partnership",
+  },
 ];
 
 const ContactSales = () => {
