@@ -86,29 +86,46 @@ const AdvisoryConsultationDialog = ({ open, onOpenChange, defaultService }: Prop
     }
 
     setSubmitting(true);
-    const { error } = await supabase.from("form_submissions").insert({
-      form_type: "advisory_consultation",
-      first_name: parsed.data.first_name,
-      last_name: parsed.data.last_name,
-      email: parsed.data.email,
-      phone: parsed.data.phone || null,
-      company: parsed.data.company || null,
-      job_title: parsed.data.job_title || null,
-      country: parsed.data.country || null,
-      message: parsed.data.message || null,
-      products: selected,
-      metadata: { source: "advisory_page", services: selected },
-    });
+    let ok = false;
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-form`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            form_type: "advisory-consultation",
+            first_name: parsed.data.first_name,
+            last_name: parsed.data.last_name,
+            email: parsed.data.email,
+            phone: parsed.data.phone || undefined,
+            company: parsed.data.company || undefined,
+            job_title: parsed.data.job_title || undefined,
+            country: parsed.data.country || undefined,
+            message: parsed.data.message || undefined,
+            products: selected,
+            metadata: { source: "advisory_page", services: selected },
+          }),
+        },
+      );
+      ok = res.ok;
+    } catch {
+      ok = false;
+    }
     setSubmitting(false);
 
-    if (error) {
+    if (!ok) {
       toast({
         title: "Something went wrong",
-        description: "Please try again or email hello@worldaml.com.",
+        description: "Please try again or email info@worldaml.com.",
         variant: "destructive",
       });
       return;
     }
+
 
     toast({
       title: "Request received",
