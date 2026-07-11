@@ -276,9 +276,6 @@ const Advisory = () => {
                   Request a Consultation Quote
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button asChild size="lg" variant="outline">
-                  <Link to="/templates">Browse Policy Templates</Link>
-                </Button>
               </div>
             </div>
           </div>
