@@ -28,8 +28,8 @@ const Dashboard = () => {
   const { user, profile, isLoading, isApproved, isAdmin, signOut } = useAuth();
   const { hasSuiteAccess } = useAccess();
   const { membership: rcmMembership } = useRcmOrg();
-  const { data: purchases } = useAcademyPurchases();
-  const hasToolkitAccess = !!purchases?.hasAnnualPass || (purchases?.slugs.size ?? 0) > 0;
+  const { purchasedSlugs, hasAnnualPass } = useAcademyPurchases();
+  const hasToolkitAccess = hasAnnualPass || purchasedSlugs.size > 0;
   const isOrgAdmin = rcmMembership?.role === "admin";
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
