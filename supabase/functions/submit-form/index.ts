@@ -324,6 +324,7 @@ Deno.serve(async (req) => {
               "WorldCompliance",
               "Bridger Insight XG",
               "Academy \u2014 Team Plan",
+              "Partner Program",
             ]);
             const PMS_MAP: Record<string, string> = {
               "worldaml-suite": "WorldAML Suite",
