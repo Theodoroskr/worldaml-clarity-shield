@@ -1,4 +1,4 @@
-// One-off: send AML toolkit access email to a specific recipient.
+// One-off: send a checkout-recovery help email to a specific recipient.
 import { Resend } from "npm:resend";
 
 const corsHeaders = {
@@ -18,9 +18,9 @@ Deno.serve(async (req) => {
     }
     const resend = new Resend(resendApiKey);
 
-    const to = "sarwar_0901@yahoo.com";
-    const toolkitUrl = "https://academy.worldaml.com/templates";
-    const coursesUrl = "https://academy.worldaml.com";
+    const to = "shahbaz@arabianca.com";
+    const cc = "info@worldaml.com";
+    const checkoutUrl = "https://academy.worldaml.com";
 
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;background:#fff;">
@@ -29,17 +29,25 @@ Deno.serve(async (req) => {
         </div>
         <div style="padding:28px 32px;color:#374151;font-size:15px;line-height:1.6;">
           <p>Hi Shahbaz,</p>
-          <p>Thank you for subscribing to the <strong>WorldAML Academy Annual Pass</strong>. Your subscription includes full access to the <strong>MLRO Pro Toolkit</strong> — a library of regulator-ready Word and Excel templates (board reports, enterprise risk assessments, SAR logs, and more) aligned with FATF, 6AMLD, FCA, and MOKAS guidance.</p>
-          <p>You can access the toolkit here:</p>
+          <p>We noticed that your recent checkout for the <strong>WorldAML Academy Annual Pass</strong> (€199) did not complete — the Stripe checkout session expired before payment was confirmed.</p>
+          <p>No charge was made, and no action is needed on your side unless you'd still like to subscribe. If you were having trouble completing the payment, we're happy to help.</p>
           <p style="margin:24px 0;">
-            <a href="${toolkitUrl}" style="display:inline-block;background:#0d9488;color:#fff;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:600;font-size:14px;">
-              Open MLRO Toolkit →
+            <a href="${checkoutUrl}" style="display:inline-block;background:#0d9488;color:#fff;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:600;font-size:14px;">
+              Retry Checkout →
             </a>
           </p>
-          <p>Please make sure you are signed in with the same email address you used at checkout so the toolkit unlocks automatically.</p>
-          <p>You can also browse all your Academy courses here: <a href="${coursesUrl}" style="color:#0d9488;">${coursesUrl}</a></p>
-          <p>If you have any questions or trouble accessing the templates, just reply to this email.</p>
+          <p><strong>Need help?</strong> Just reply to this email (our team at <a href="mailto:info@worldaml.com" style="color:#0d9488;">info@worldaml.com</a> is on copy) and let us know what happened — for example:</p>
+          <ul style="padding-left:20px;margin:8px 0 16px;">
+            <li>Card declined or 3DS verification failed</li>
+            <li>Prefer a different payment method (bank transfer, invoice)</li>
+            <li>Need a VAT-compliant invoice or want to pay in a different currency</li>
+            <li>Interested in a team / multi-seat plan</li>
+          </ul>
+          <p>We'll get you sorted quickly so you can access the courses, certificates, and the MLRO Pro Toolkit included with the Annual Pass.</p>
           <p style="margin-top:28px;">Best regards,<br/>The WorldAML Team</p>
+          <p style="color:#9ca3af;font-size:12px;margin-top:24px;">
+            Reference: checkout session cs_live_a10HlG… · 2026-07-10 22:33 UTC
+          </p>
         </div>
         <div style="padding:16px 32px;border-top:1px solid #e5e7eb;">
           <p style="color:#9ca3af;font-size:12px;margin:0;">WorldAML · info@worldaml.com</p>
@@ -50,7 +58,8 @@ Deno.serve(async (req) => {
     const { data, error } = await resend.emails.send({
       from: "WorldAML Academy <academy@worldaml.com>",
       to: [to],
-      subject: "Your MLRO Pro Toolkit — included with your Annual Pass",
+      cc: [cc],
+      subject: "Trouble completing your Academy Annual Pass checkout? We can help",
       html,
       reply_to: "info@worldaml.com",
     });
