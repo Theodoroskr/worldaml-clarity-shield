@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
@@ -14,7 +15,10 @@ import {
   Users,
   Building2,
   Sparkles,
+  MessageSquarePlus,
 } from "lucide-react";
+import AdvisoryConsultationDialog from "@/components/advisory/AdvisoryConsultationDialog";
+
 
 const services = [
   {
