@@ -211,20 +211,42 @@ const Advisory = () => {
                 Request a consultation quote and our MLROs will tailor the engagement to
                 your business, jurisdiction, and regulator — ready for sign-off.
               </p>
-              <Button asChild size="lg" className="mt-6 bg-accent text-accent-foreground shadow-lg hover:bg-accent/90">
-                <Link to="/contact-sales">
-                  Request a Consultation Quote
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+              <Button
+                size="lg"
+                className="mt-6 bg-accent text-accent-foreground shadow-lg hover:bg-accent/90"
+                onClick={() => openWith()}
+              >
+                Request a Consultation Quote
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>
         </section>
       </main>
 
+      {/* Persistent floating CTA */}
+      <div className="fixed bottom-6 right-6 z-40 print:hidden">
+        <Button
+          size="lg"
+          onClick={() => openWith()}
+          className="group gap-2 rounded-full bg-accent px-5 py-6 text-accent-foreground shadow-2xl ring-1 ring-accent/40 hover:bg-accent/90"
+        >
+          <MessageSquarePlus className="h-5 w-5" />
+          <span className="hidden sm:inline">Request a Consultation Quote</span>
+          <span className="sm:hidden">Consultation Quote</span>
+        </Button>
+      </div>
+
+      <AdvisoryConsultationDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        defaultService={defaultService}
+      />
+
       <Footer />
     </div>
   );
 };
+
 
 export default Advisory;
