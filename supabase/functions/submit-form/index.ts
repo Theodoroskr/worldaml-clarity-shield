@@ -645,7 +645,7 @@ Deno.serve(async (req) => {
           ["Industry", industry || "—"],
           ["Region", region || "—"],
           ["Account Type", account_type || "—"],
-          ["Products", products?.join(", ") || "—"],
+          ["Products", formatProducts(products)],
           ["Message", message || "—"],
         ]
           .map(([label, value]) => `<tr><td style="padding:6px 12px;font-weight:600;color:#374151;">${escapeHtml(label)}</td><td style="padding:6px 12px;color:#111827;">${escapeHtml(value)}</td></tr>`)
