@@ -24,6 +24,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import AdvisoryConsultationDialog from "@/components/advisory/AdvisoryConsultationDialog";
+import advisorPortrait from "@/assets/advisory-mlro-advisor.jpg";
 
 type Service = {
   slug: string;
