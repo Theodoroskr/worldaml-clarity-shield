@@ -120,49 +120,59 @@ async function sendCustomerRecoveryEmail(params: {
     if (course?.title) courseTitle = course.title;
   }
 
-  const retryUrl = slug
-    ? `https://worldaml.com/academy/${slug}`
-    : "https://worldaml.com/academy";
+  // Annual pass has no per-course page — send buyers back to the Academy landing.
+  const isAnnualPass = !slug || slug === "__annual_pass__";
+  const retryUrl = isAnnualPass
+    ? "https://academy.worldaml.com"
+    : `https://worldaml.com/academy/${slug}`;
+  const displayTitle = isAnnualPass
+    ? "WorldAML Academy — Annual All-Access Pass"
+    : courseTitle;
   const amountFmt =
     params.amountCents != null
       ? `${(params.amountCents / 100).toFixed(2)} ${(params.currency ?? "eur").toUpperCase()}`
       : null;
 
   const html = `
-    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a;background:#ffffff;">
-      <h2 style="margin:0 0 12px;color:#0f172a;">Your payment didn't go through</h2>
-      <p style="margin:0 0 16px;line-height:1.55;">
-        Hi there,
-      </p>
-      <p style="margin:0 0 16px;line-height:1.55;">
-        We weren't able to complete your purchase of
-        <strong>${courseTitle}</strong>${amountFmt ? ` (${amountFmt})` : ""}.
-        ${params.failureReason ? `Stripe reported: <em>${params.failureReason}</em>.` : "This sometimes happens when a card is declined, a 3-D Secure prompt times out, or the checkout window is closed."}
-      </p>
-      <p style="margin:0 0 24px;line-height:1.55;">
-        Your spot is still available — you can try again with the same card or a different payment method:
-      </p>
-      <p style="margin:0 0 24px;">
-        <a href="${retryUrl}"
-           style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:6px;">
-          Retry your purchase
-        </a>
-      </p>
-      <p style="margin:0 0 8px;font-size:13px;color:#475569;line-height:1.55;">
-        If you keep seeing an error, just reply to this email and our team will help you get sorted.
-      </p>
-      <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
-      <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
-        You're receiving this because a checkout was started on worldaml.com with this email address. This is a one-time transactional message — no further emails will be sent about this attempt.
-      </p>
+    <div style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;background:#ffffff;">
+      <div style="background:#1e3a5f;padding:28px 32px;">
+        <h1 style="color:#ffffff;margin:0;font-size:20px;font-weight:700;letter-spacing:0.5px;">WorldAML Academy</h1>
+      </div>
+      <div style="padding:28px 32px;color:#374151;font-size:15px;line-height:1.6;">
+        <p>Hi there,</p>
+        <p>We noticed that your recent checkout for <strong>${displayTitle}</strong>${amountFmt ? ` (${amountFmt})` : ""} did not complete — ${params.failureReason ?? "the checkout session expired before payment was confirmed"}.</p>
+        <p>No charge was made, and no action is needed on your side unless you'd still like to subscribe. If you were having trouble completing the payment, we're happy to help.</p>
+        <p style="margin:24px 0;">
+          <a href="${retryUrl}" style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:600;font-size:14px;">
+            Retry Checkout →
+          </a>
+        </p>
+        <p><strong>Need help?</strong> Just reply to this email (our team at <a href="mailto:info@worldaml.com" style="color:#0d9488;">info@worldaml.com</a> is on copy) and let us know what happened — for example:</p>
+        <ul style="padding-left:20px;margin:8px 0 16px;">
+          <li>Card declined or 3DS verification failed</li>
+          <li>Prefer a different payment method (bank transfer, invoice)</li>
+          <li>Need a VAT-compliant invoice or want to pay in a different currency</li>
+          <li>Interested in a team / multi-seat plan</li>
+        </ul>
+        <p>We'll get you sorted quickly so you can access the courses, certificates${isAnnualPass ? ", and the MLRO Pro Toolkit included with the Annual Pass" : ""}.</p>
+        <p style="margin-top:28px;">Best regards,<br/>The WorldAML Team</p>
+        <p style="color:#9ca3af;font-size:12px;margin-top:24px;">
+          Reference: ${params.sessionId ?? params.paymentIntentId ?? "—"} · ${new Date().toISOString()}
+        </p>
+      </div>
+      <div style="padding:16px 32px;border-top:1px solid #e5e7eb;">
+        <p style="color:#9ca3af;font-size:12px;margin:0;">WorldAML · info@worldaml.com</p>
+      </div>
     </div>`;
 
   try {
     const resend = new Resend(apiKey);
     await resend.emails.send({
-      from: FROM_EMAIL,
+      from: "WorldAML Academy <academy@worldaml.com>",
       to: [params.toEmail],
-      subject: `Your WorldAML Academy payment didn't go through — try again`,
+      cc: ["info@worldaml.com"],
+      reply_to: "info@worldaml.com",
+      subject: `Trouble completing your ${isAnnualPass ? "Academy Annual Pass" : "Academy"} checkout? We can help`,
       html,
     });
     await params.supabase
