@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { getWebAttribution } from "@/lib/webAttribution";
+import { supabase } from "@/integrations/supabase/client";
 
 const products = [
   {
@@ -48,6 +49,12 @@ const products = [
     name: "Academy — Team Plan",
     description: "Bulk seats (5+) with 20% discount, invoice / PO billing and admin dashboard",
     category: "Training",
+  },
+  {
+    id: "partnership",
+    name: "Partner Program",
+    description: "Refer, resell, or white-label WorldAML and earn 5–15% recurring commission",
+    category: "Partnership",
   },
 ];
 
@@ -112,6 +119,14 @@ Preferred start date and number of seats below.`,
           message: `Interested in WorldID ${bundleParam.replace("-", " ")} bundle.`
         }));
       }
+    }
+
+    if (productParam === "partnership") {
+      setSelectedProducts((prev) => (prev.includes("partnership") ? prev : [...prev, "partnership"]));
+      setFormData((prev) => ({
+        ...prev,
+        message: prev.message || "I'd like to learn more about the WorldAML Partner Program and how to get started.",
+      }));
     }
   }, [searchParams]);
 
@@ -196,6 +211,20 @@ Preferred start date and number of seats below.`,
       );
 
       if (!response.ok) throw new Error("Submission failed");
+
+      // Automated Partner Program invite — triggered ONLY by explicit partnership interest
+      if (selectedProducts.includes("partnership")) {
+        supabase.functions
+          .invoke("send-partner-invite-email", {
+            body: {
+              to: formData.email,
+              name: `${formData.firstName} ${formData.lastName}`.trim(),
+              context: `Thanks for expressing interest in the WorldAML Partner Program${formData.company ? ` on behalf of ${formData.company}` : ""}.`,
+              source: "contact-sales-form",
+            },
+          })
+          .catch((err) => console.warn("Partner invite email failed (non-blocking):", err));
+      }
 
       toast({
         title: "Request Submitted",

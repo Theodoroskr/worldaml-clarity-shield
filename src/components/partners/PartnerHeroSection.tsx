@@ -15,41 +15,50 @@ const highlights = [
 ];
 
 const PartnerHeroSection = () => (
-  <section className="section-padding bg-surface-subtle">
-    <div className="container-enterprise">
+  <section className="relative section-padding bg-gradient-to-br from-navy via-navy to-navy-light overflow-hidden">
+    {/* Decorative accent */}
+    <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
+      style={{
+        backgroundImage:
+          "radial-gradient(circle at 20% 20%, #14b8a6 0%, transparent 40%), radial-gradient(circle at 80% 70%, #14b8a6 0%, transparent 45%)",
+      }}
+    />
+    <div className="container-enterprise relative">
       <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         {/* Left content */}
         <div className="max-w-xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal/10 text-teal text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal/15 text-teal text-sm font-medium mb-6 border border-teal/20">
             <Handshake className="h-4 w-4" />
-            Partner Program
+            Partner Program · Now Open
           </div>
-          <h1 className="text-navy mb-6">
+          <h1 className="text-white mb-6 text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
             Grow Your Revenue with <span className="text-teal">WorldAML</span>
           </h1>
-          <p className="text-body-lg text-text-secondary mb-4">
-            Join a global network of compliance professionals earning recurring commissions.
-            Refer clients, access co-branded resources, and scale with dedicated support.
+          <p className="text-white/80 text-lg md:text-xl mb-4 leading-relaxed">
+            Join a global network of compliance professionals earning{" "}
+            <span className="text-teal font-semibold">5–15% recurring commission</span>{" "}
+            on every client they refer.
           </p>
-          <p className="text-body text-text-secondary mb-8">
+          <p className="text-white/60 mb-8 leading-relaxed">
             Three flexible tiers designed for consultancies, technology partners, and resellers
-            across every major compliance market.
+            across every major compliance market — with co-branded assets, a dedicated partner
+            manager, and monthly payouts.
           </p>
           <div className="flex flex-wrap gap-4 mb-8">
-            <Button asChild size="lg">
+            <Button asChild variant="accent" size="lg">
               <Link to="/partners/apply">
                 Apply Now <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link to="/contact-sales">Talk to Sales</Link>
+            <Button variant="outline-light" size="lg" asChild>
+              <Link to="/contact-sales?product=partnership">Talk to Partnerships</Link>
             </Button>
           </div>
           <div className="flex flex-wrap gap-3">
             {highlights.map((h) => (
               <div
                 key={h.label}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border text-text-secondary text-sm"
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-sm"
               >
                 <h.icon className="h-3.5 w-3.5 text-teal" />
                 {h.label}
@@ -60,18 +69,24 @@ const PartnerHeroSection = () => (
 
         {/* Right visual — partner tier cards */}
         <div className="space-y-4">
-          {tiers.map((tier, i) => (
+          {tiers.map((tier) => (
             <div
               key={tier.label}
-              className="rounded-xl border border-border bg-white p-5 flex items-center justify-between gap-4 shadow-sm"
+              className="rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-6 flex items-center justify-between gap-4 hover:border-teal/40 hover:bg-white/[0.06] transition-all"
             >
               <div>
-                <p className="font-semibold text-navy text-base">{tier.label}</p>
-                <p className="text-text-secondary text-sm mt-0.5">{tier.desc}</p>
+                <p className="font-semibold text-white text-base">{tier.label}</p>
+                <p className="text-white/60 text-sm mt-1">{tier.desc}</p>
               </div>
-              <span className="text-2xl font-bold text-teal whitespace-nowrap">{tier.rate}</span>
+              <div className="text-right whitespace-nowrap">
+                <span className="text-3xl font-bold text-teal">{tier.rate}</span>
+                <p className="text-white/50 text-[11px] uppercase tracking-wider mt-0.5">Commission</p>
+              </div>
             </div>
           ))}
+          <p className="text-white/50 text-xs text-center pt-2">
+            Recurring · Paid monthly · No cap
+          </p>
         </div>
       </div>
     </div>
