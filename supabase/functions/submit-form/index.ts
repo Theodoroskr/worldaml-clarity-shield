@@ -48,6 +48,22 @@ async function sendEmailWithRetry(resend: any, params: any, retries = 1): Promis
   }
 }
 
+function formatProducts(products: string[] | undefined): string {
+  if (!Array.isArray(products) || products.length === 0) return "—";
+  const LABELS: Record<string, string> = {
+    "worldaml-suite": "WorldAML Suite",
+    "worldaml-api": "WorldAML API",
+    "worldid": "WorldID",
+    "worldcompliance": "WorldCompliance",
+    "bridger-xg": "Bridger Insight XG",
+    "academy-team": "Academy \u2014 Team Plan",
+    "partnership": "Partner Program",
+    "worldaml-advisory": "WorldAML Advisory",
+    "advisory": "WorldAML Advisory",
+  };
+  return products.map((p) => LABELS[String(p ?? "").trim().toLowerCase()] || p).join(", ");
+}
+
 // Rate limit: 5 submissions per IP per hour
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour in ms
@@ -325,6 +341,7 @@ Deno.serve(async (req) => {
               "Bridger Insight XG",
               "Academy \u2014 Team Plan",
               "Partner Program",
+              "WorldAML Advisory",
             ]);
             const PMS_MAP: Record<string, string> = {
               "worldaml-suite": "WorldAML Suite",
@@ -359,6 +376,10 @@ Deno.serve(async (req) => {
               "partner": "Partner Program",
               "partner-program": "Partner Program",
               "partner_program": "Partner Program",
+              // WorldAML Advisory
+              "worldaml-advisory": "WorldAML Advisory",
+              "advisory": "WorldAML Advisory",
+              "mlro-advisory": "WorldAML Advisory",
             };
             const mapped = new Set<string>();
             for (const raw of products) {
@@ -624,7 +645,7 @@ Deno.serve(async (req) => {
           ["Industry", industry || "—"],
           ["Region", region || "—"],
           ["Account Type", account_type || "—"],
-          ["Products", products?.join(", ") || "—"],
+          ["Products", formatProducts(products)],
           ["Message", message || "—"],
         ]
           .map(([label, value]) => `<tr><td style="padding:6px 12px;font-weight:600;color:#374151;">${escapeHtml(label)}</td><td style="padding:6px 12px;color:#111827;">${escapeHtml(value)}</td></tr>`)

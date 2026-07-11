@@ -56,6 +56,12 @@ const products = [
     description: "Refer, resell, or white-label WorldAML and earn 5–15% recurring commission",
     category: "Partnership",
   },
+  {
+    id: "worldaml-advisory",
+    name: "WorldAML Advisory",
+    description: "MLRO-led advisory for EWRA, AML policies, AMLCO reports, regulator questionnaires, internal audit and VMLRO support",
+    category: "Advisory",
+  },
 ];
 
 const ContactSales = () => {
