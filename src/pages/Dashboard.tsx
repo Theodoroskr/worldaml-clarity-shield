@@ -600,8 +600,6 @@ const Dashboard = () => {
             </Card>
           </div>
 
-          {/* ══════════ QUICK TOOLS ══════════ */}
-          <div className="mt-10 space-y-6">
           {/* ══════════ MLRO TOOLKIT ══════════ */}
           <div className="mt-10 space-y-6">
             <h2 className="text-xl font-semibold text-navy">MLRO Toolkit</h2>
