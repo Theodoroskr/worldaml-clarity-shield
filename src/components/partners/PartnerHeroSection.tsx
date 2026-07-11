@@ -80,11 +80,11 @@ const PartnerHeroSection = () => (
               </div>
               <div className="text-right whitespace-nowrap">
                 <span className="text-3xl font-bold text-teal">{tier.rate}</span>
-                <p className="text-white/50 text-[11px] uppercase tracking-wider mt-0.5">Commission</p>
+                <p className="text-white/80 text-[11px] uppercase tracking-wider mt-0.5">Commission</p>
               </div>
             </div>
           ))}
-          <p className="text-white/50 text-xs text-center pt-2">
+          <p className="text-white/80 text-xs text-center pt-2">
             Recurring · Paid monthly · No cap
           </p>
         </div>
