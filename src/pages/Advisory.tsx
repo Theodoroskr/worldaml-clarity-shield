@@ -324,7 +324,7 @@ const Advisory = () => {
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-dark/85 via-navy-dark/10 to-transparent" />
 
                   {/* Floating status chip */}
-                  <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-navy-dark/70 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
+                  <div className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-navy-dark/70 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
                     <span className="relative flex h-2 w-2">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
