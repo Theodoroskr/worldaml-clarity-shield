@@ -308,6 +308,32 @@ Deno.serve(async (req) => {
         resend_message_id: result.messageId,
       });
       success++;
+
+      // Dispatch Partner Program invite 1 day after registration (non-blocking).
+      // Users who explicitly requested partnership via Contact Sales already
+      // received an immediate invite from that flow.
+      try {
+        await fetch(`${SUPABASE_URL}/functions/v1/send-partner-invite-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${SERVICE_KEY}`,
+            apikey: SERVICE_KEY,
+          },
+          body: JSON.stringify({
+            to: user.email,
+            name: user.full_name ?? "",
+            context:
+              "Now that you've had a chance to explore WorldAML, we wanted to introduce our Partner Program — a way to earn recurring commission alongside your compliance work.",
+            source: "signup-followup-24h",
+          }),
+        });
+      } catch (e) {
+        console.warn(
+          `[followup] partner invite dispatch failed for ${user.email}:`,
+          (e as Error)?.message,
+        );
+      }
     }
 
     return new Response(
