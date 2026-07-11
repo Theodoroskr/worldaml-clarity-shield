@@ -26,7 +26,7 @@ import { formatDistanceToNow } from "date-fns";
 
 const Dashboard = () => {
   const { user, profile, isLoading, isApproved, isAdmin, signOut } = useAuth();
-  const { hasSuiteAccess } = useAccess();
+  const { hasSuiteAccess, isAdmin, subscriptionTier } = useAccess();
   const { membership: rcmMembership } = useRcmOrg();
   const { purchasedSlugs, hasAnnualPass } = useAcademyPurchases();
   const hasToolkitAccess = hasAnnualPass || purchasedSlugs.size > 0;
