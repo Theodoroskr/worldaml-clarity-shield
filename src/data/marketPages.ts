@@ -865,4 +865,69 @@ export const marketPages: Record<string, MarketPageData> = {
       description: "Speak with our team about how WorldAML supports Nigerian financial institutions with scalable, audit-ready AML infrastructure.",
     },
   },
+
+  "east-africa": {
+    slug: "east-africa",
+    regionLabel: "East Africa",
+    flag: "🌍",
+    seo: {
+      title: "AML & KYC Software for East Africa | WorldAML",
+      description: "AML compliance platform for banks, fintechs, mobile money operators, and SACCOs across Kenya, Uganda, Tanzania, Rwanda, and Ethiopia. Aligned with CBK, BoU, BoT, NBR, and ESAAMLG expectations.",
+      canonical: "/markets/east-africa",
+    },
+    hero: {
+      headline: "AML & KYC Software for East Africa",
+      subheadline: "Meet regional AML/CFT obligations across Kenya, Uganda, Tanzania, Rwanda, and Ethiopia with a scalable compliance platform built for banks, mobile money operators, SACCOs, and fintechs.",
+      primaryCta: { label: "Book a Demo", href: "/contact-sales" },
+      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+    },
+    challenges: {
+      title: "East Africa Compliance Challenges",
+      description: "East African financial institutions operate in one of the world's most dynamic mobile money markets while facing intensifying AML/CFT supervision from central banks and ESAAMLG mutual evaluations.",
+      items: [
+        { title: "Mobile Money at Scale", description: "M-Pesa, MTN MoMo, Airtel Money and Tigo Pesa move billions in daily transactions, creating unique typologies for money laundering, fraud, and terrorism financing that traditional monitoring rules miss." },
+        { title: "ESAAMLG Mutual Evaluations", description: "Kenya, Uganda, and Tanzania face ongoing ESAAMLG scrutiny, with several jurisdictions on FATF grey list watch — driving stricter enforcement of CDD, screening, and STR reporting obligations." },
+        { title: "Fragmented Regional Regulation", description: "Institutions operating across borders must satisfy CBK, BoU, BoT, NBR, and NBE requirements simultaneously — each with distinct FIU reporting formats and licensing regimes." },
+        { title: "SACCO & Microfinance Supervision", description: "SASRA, UMRA, and equivalents are extending AML/CFT obligations to SACCOs and microfinance institutions historically outside formal compliance frameworks." },
+      ],
+    },
+    regulations: {
+      title: "East Africa Regulatory Framework",
+      rows: [
+        { regulation: "Kenya POCAMLA & CBK Guidelines", requirement: "CDD, EDD, and ongoing monitoring for banks and PSPs", module: "KYC & KYB" },
+        { regulation: "Uganda AMLA 2013 (as amended)", requirement: "AML/CFT obligations for accountable persons", module: "Full Platform" },
+        { regulation: "Tanzania AMLA 2006 & BoT Guidelines", requirement: "Risk-based CDD and STR filing", module: "AML Screening" },
+        { regulation: "Rwanda Law N°75/2019", requirement: "AML/CFT and proliferation financing controls", module: "Risk Assessment" },
+        { regulation: "Ethiopia Proclamation 780/2013", requirement: "AML/CFT obligations for financial institutions", module: "Transaction Monitoring" },
+        { regulation: "UN & ESAAMLG Sanctions", requirement: "UNSC and regional sanctions screening", module: "Sanctions Screening" },
+        { regulation: "FRC / FIA / FIU-U / FIC STR Filing", requirement: "Suspicious transaction reporting to national FIUs", module: "Regulatory Reporting" },
+      ],
+    },
+    modules: [
+      { icon: Users, title: "KYC & KYB Onboarding", description: "Individual and corporate onboarding with national ID, Huduma, NIN, NIDA, and business registry verification, UBO mapping, and document collection aligned to regional CDD requirements." },
+      { icon: Shield, title: "Sanctions & PEP Screening", description: "Real-time screening against UN Security Council, OFAC, EU, UK HMT, and 500+ global lists with African name matching, transliteration, and local PEP coverage." },
+      { icon: Search, title: "Adverse Media Monitoring", description: "Continuous monitoring across East African and international media sources for negative coverage related to financial crime, corruption, and terrorism financing." },
+      { icon: BarChart3, title: "Risk Scoring", description: "Automated risk-based scoring aligned to ESAAMLG typologies and country-specific risk assessments issued by CBK, BoU, BoT, NBR, and NBE." },
+      { icon: AlertTriangle, title: "Transaction Monitoring", description: "Rule-based monitoring with typologies covering mobile money patterns, cross-border remittances, agent networks, and cash-intensive transaction anomalies." },
+      { icon: FileCheck, title: "FIU Reporting", description: "Automated STR and CTR generation for FRC (Kenya), FIA (Uganda), FIU-U (Tanzania), FIC (Rwanda), and FIC (Ethiopia) submissions with full case management and audit trails." },
+    ],
+    industries: [
+      { icon: Landmark, title: "Banks & Microfinance", description: "Full AML compliance for CBK, BoU, BoT, NBR, and NBE-licensed banks, deposit-taking microfinance, and SACCOs." },
+      { icon: Wallet, title: "Mobile Money Operators", description: "Scalable AML infrastructure for mobile money issuers, super-agents, and agent networks operating across the region." },
+      { icon: CreditCard, title: "Fintechs & PSPs", description: "Compliance controls for licensed payment service providers, remittance operators, and digital lending platforms." },
+      { icon: Bitcoin, title: "Crypto & VASPs", description: "AML controls for virtual asset service providers as regulators formalise licensing regimes across East Africa." },
+    ],
+    faqs: [
+      { question: "Which East African countries does WorldAML support?", answer: "WorldAML supports institutions across Kenya, Uganda, Tanzania, Rwanda, Ethiopia, Burundi, and South Sudan, with configurable workflows for each jurisdiction's central bank and FIU requirements." },
+      { question: "Can WorldAML monitor mobile money transactions at scale?", answer: "Yes. Our transaction monitoring engine is built for high-volume, low-value flows typical of M-Pesa, MTN MoMo, Airtel Money, and Tigo Pesa, with pre-built typologies for agent fraud, structuring, and cross-border remittance risk." },
+      { question: "Does WorldAML support STR filing to regional FIUs?", answer: "WorldAML provides automated STR and CTR generation for Kenya's FRC, Uganda's FIA, Tanzania's FIU, Rwanda's FIC, and Ethiopia's FIC, with full audit trails and case management workflows." },
+      { question: "Is WorldAML suitable for SACCOs and microfinance institutions?", answer: "Absolutely. WorldAML is scalable for SASRA-regulated SACCOs, UMRA-licensed microfinance, and equivalent tiers across the region, with pricing and workflows designed for smaller institutions extending AML controls." },
+      { question: "How does WorldAML help with ESAAMLG mutual evaluation readiness?", answer: "WorldAML provides the comprehensive screening, monitoring, and reporting infrastructure — with documented policies, audit trails, and MI dashboards — that demonstrates effective AML/CFT controls to ESAAMLG assessors and national supervisors." },
+    ],
+    cta: {
+      headline: "Ready to strengthen your East African AML programme?",
+      description: "Speak with our team about how WorldAML supports banks, mobile money operators, SACCOs, and fintechs across East Africa with scalable, audit-ready AML infrastructure.",
+    },
+  },
 };
+
