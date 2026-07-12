@@ -6,14 +6,22 @@ interface BreadcrumbItem {
   url: string;
 }
 
+interface AlternateLocale {
+  hreflang: string;
+  path: string;
+}
+
 interface SEOProps {
   title: string;
   description: string;
   canonical?: string;
   noindex?: boolean;
   ogType?: string;
+  ogLocale?: string;
   breadcrumbs?: BreadcrumbItem[];
   structuredData?: Record<string, unknown> | Record<string, unknown>[];
+  /** Extra hreflang alternates for localized variants of this page (adds to default English targets). */
+  alternateLocales?: AlternateLocale[];
 }
 
 const MAIN_SITE_NAME = "WorldAML";
