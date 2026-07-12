@@ -17,7 +17,7 @@ const PartnerApplicationForm = () => {
   const [form, setForm] = useState({
     company_name: "",
     website: "",
-    partner_type: "referral" as "referral" | "affiliate" | "reseller",
+    partner_type: "referral" as "referral" | "affiliate" | "reseller" | "technology",
     description: "",
   });
 
