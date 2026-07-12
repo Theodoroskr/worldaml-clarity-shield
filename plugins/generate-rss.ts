@@ -157,9 +157,9 @@ function applyDripSchedule(root: string, posts: RssItem[]): RssItem[] {
     upcomingCount: posts.length - released.length,
     nextRelease: nextUpcoming
       ? {
-          date: new Date(nextUpcoming.releaseAt).toISOString(),
-          title: posts[nextUpcoming.index].title,
-          slug: posts[nextUpcoming.index].slug,
+          date: new Date((nextUpcoming as { index: number; releaseAt: number }).releaseAt).toISOString(),
+          title: posts[(nextUpcoming as { index: number; releaseAt: number }).index].title,
+          slug: posts[(nextUpcoming as { index: number; releaseAt: number }).index].slug,
         }
       : null,
   };
