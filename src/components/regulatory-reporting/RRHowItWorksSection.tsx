@@ -54,7 +54,7 @@ const RRHowItWorksSection = () => {
                 {/* Step circle */}
                 <div className="relative z-10 flex items-center justify-center w-20 h-20 rounded-2xl bg-navy text-white mb-5 shrink-0">
                   <div>
-                    <p className="text-caption text-white/60 font-mono">{step.number}</p>
+                    <p className="text-caption text-white/80 font-mono">{step.number}</p>
                     <p className="text-lg font-bold leading-tight">{step.title}</p>
                   </div>
                 </div>

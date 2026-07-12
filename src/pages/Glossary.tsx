@@ -181,7 +181,7 @@ function StatChip({ target, label, suffix = "+" }: { target: number; label: stri
       <span className="text-2xl font-bold text-white tabular-nums">
         {value}{suffix}
       </span>
-      <span className="text-xs text-white/60 mt-0.5 whitespace-nowrap">{label}</span>
+      <span className="text-xs text-white/80 mt-0.5 whitespace-nowrap">{label}</span>
     </div>
   );
 }

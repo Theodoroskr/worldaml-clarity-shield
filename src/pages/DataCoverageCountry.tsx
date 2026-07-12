@@ -71,7 +71,7 @@ const DataCoverageCountry = () => {
         <div className="container-enterprise">
           <Link
             to="/data-coverage"
-            className="inline-flex items-center gap-1.5 text-body-sm text-white/60 hover:text-white/90 transition-colors mb-6"
+            className="inline-flex items-center gap-1.5 text-body-sm text-white/80 hover:text-white/90 transition-colors mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
             All Jurisdictions
