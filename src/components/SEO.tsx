@@ -6,14 +6,22 @@ interface BreadcrumbItem {
   url: string;
 }
 
+interface AlternateLocale {
+  hreflang: string;
+  path: string;
+}
+
 interface SEOProps {
   title: string;
   description: string;
   canonical?: string;
   noindex?: boolean;
   ogType?: string;
+  ogLocale?: string;
   breadcrumbs?: BreadcrumbItem[];
   structuredData?: Record<string, unknown> | Record<string, unknown>[];
+  /** Extra hreflang alternates for localized variants of this page (adds to default English targets). */
+  alternateLocales?: AlternateLocale[];
 }
 
 const MAIN_SITE_NAME = "WorldAML";
@@ -42,7 +50,7 @@ const stripAcademyPrefix = (path: string): string => {
   return cleaned === "" ? "/" : cleaned;
 };
 
-const SEO = ({ title, description, canonical, noindex = false, ogType = "website", breadcrumbs, structuredData }: SEOProps) => {
+const SEO = ({ title, description, canonical, noindex = false, ogType = "website", ogLocale, breadcrumbs, structuredData, alternateLocales }: SEOProps) => {
   const onAcademy = isAcademyHost();
   const SITE_NAME = onAcademy ? ACADEMY_SITE_NAME : MAIN_SITE_NAME;
   const BASE_URL = onAcademy ? ACADEMY_BASE_URL : MAIN_BASE_URL;
@@ -86,6 +94,11 @@ const SEO = ({ title, description, canonical, noindex = false, ogType = "website
         <link key={hreflang} rel="alternate" hrefLang={hreflang} href={canonicalUrl} data-rh="true" />
       ))}
 
+      {/* Extra hreflang alternates for localized variants */}
+      {alternateLocales?.map(({ hreflang, path }) => (
+        <link key={`alt-${hreflang}`} rel="alternate" hrefLang={hreflang} href={`${BASE_URL}${path}`} data-rh="true" />
+      ))}
+
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} data-rh="true" />
       <meta property="og:description" content={description} data-rh="true" />
@@ -93,6 +106,11 @@ const SEO = ({ title, description, canonical, noindex = false, ogType = "website
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} data-rh="true" />}
       <meta property="og:type" content={ogType} data-rh="true" />
       <meta property="og:site_name" content={SITE_NAME} data-rh="true" />
+      {ogLocale && <meta property="og:locale" content={ogLocale} data-rh="true" />}
+      {alternateLocales?.map(({ hreflang }) => {
+        const locale = hreflang.replace("-", "_");
+        return <meta key={`ogl-${hreflang}`} property="og:locale:alternate" content={locale} data-rh="true" />;
+      })}
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" data-rh="true" />

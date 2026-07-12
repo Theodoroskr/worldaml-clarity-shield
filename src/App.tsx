@@ -313,8 +313,22 @@ const App = () => (
 
                 {/* Markets */}
                 <Route path="/markets/:market" element={<MarketPage />} />
-                <Route path="/ro" element={<Navigate to="/markets/romania" replace />} />
-                <Route path="/market/romania" element={<Navigate to="/markets/romania" replace />} />
+                <Route
+                  path="/ro"
+                  element={
+                    <MarketPage
+                      marketSlug="romania"
+                      localeOverride={{
+                        lang: "ro-RO",
+                        ogLocale: "ro_RO",
+                        title: "Software AML și Conformitate ANSPDCP pentru România | WorldAML",
+                        description: "Platformă AML și de protecție a datelor pentru bănci, fintech-uri și instituții de plată din România. Aliniată cu Legea 129/2019, ONPCSB, BNR, ASF și ANSPDCP (GDPR). KYC/KYB, screening sancțiuni, monitorizare tranzacții și raportare STR.",
+                        canonical: "/ro",
+                      }}
+                    />
+                  }
+                />
+                <Route path="/market/romania" element={<Navigate to="/ro" replace />} />
                 
                 {/* API Product Pages */}
                 <Route path="/aml-api" element={<AMLApi />} />

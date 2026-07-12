@@ -6,24 +6,50 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { marketPages } from "@/data/marketPages";
 
-const MarketPage = () => {
-  const { market } = useParams<{ market: string }>();
+interface MarketPageProps {
+  /** Override slug (bypass useParams). Used for localized aliases like /ro. */
+  marketSlug?: string;
+  /** Locale override for SEO meta (e.g. Romanian variant). */
+  localeOverride?: {
+    lang: string; // e.g. "ro-RO"
+    ogLocale: string; // e.g. "ro_RO"
+    title: string;
+    description: string;
+    canonical: string; // localized URL path
+  };
+}
+
+const MarketPage = ({ marketSlug, localeOverride }: MarketPageProps = {}) => {
+  const params = useParams<{ market: string }>();
+  const market = marketSlug ?? params.market;
   const data = market ? marketPages[market] : undefined;
 
   if (!data) return <Navigate to="/markets/uk" replace />;
 
+  const seoTitle = localeOverride?.title ?? data.seo.title;
+  const seoDescription = localeOverride?.description ?? data.seo.description;
+  const seoCanonical = localeOverride?.canonical ?? data.seo.canonical;
+
+  // Cross-link English canonical and Romanian variant via hreflang
+  const alternateLocales = market === "romania"
+    ? (localeOverride
+        ? [{ hreflang: "en", path: data.seo.canonical }, { hreflang: "x-default", path: data.seo.canonical }]
+        : [{ hreflang: "ro-RO", path: "/ro" }, { hreflang: "ro", path: "/ro" }])
+    : undefined;
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: data.seo.title,
-    description: data.seo.description,
-    url: `https://www.worldaml.com${data.seo.canonical}`,
+    name: seoTitle,
+    description: seoDescription,
+    url: `https://www.worldaml.com${seoCanonical}`,
+    inLanguage: localeOverride?.lang ?? "en",
     breadcrumb: {
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: "https://www.worldaml.com/" },
         { "@type": "ListItem", position: 2, name: "Markets", item: "https://www.worldaml.com/markets/uk" },
-        { "@type": "ListItem", position: 3, name: data.regionLabel, item: `https://www.worldaml.com${data.seo.canonical}` },
+        { "@type": "ListItem", position: 3, name: data.regionLabel, item: `https://www.worldaml.com${seoCanonical}` },
       ],
     },
     mainEntity: {
@@ -39,16 +65,19 @@ const MarketPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title={data.seo.title}
-        description={data.seo.description}
-        canonical={data.seo.canonical}
+        title={seoTitle}
+        description={seoDescription}
+        canonical={seoCanonical}
+        ogLocale={localeOverride?.ogLocale ?? "en_US"}
+        alternateLocales={alternateLocales}
         breadcrumbs={[
           { name: "Home", url: "/" },
           { name: "Markets", url: "/markets/uk" },
-          { name: data.regionLabel, url: data.seo.canonical },
+          { name: data.regionLabel, url: seoCanonical },
         ]}
         structuredData={structuredData}
       />
+
       <Header />
       <main className="flex-1">
         {/* Hero */}
