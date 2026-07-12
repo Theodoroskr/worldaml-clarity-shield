@@ -112,10 +112,44 @@ const RssPage = () => {
                   </a>
                 </Button>
               </div>
-              <p className="text-caption text-text-tertiary mt-3">
+            <p className="text-caption text-text-tertiary mt-3">
                 RSS 2.0 · UTF-8 · Includes title, description, publication date, author, and categories.
               </p>
             </div>
+
+            {/* Next scheduled release */}
+            {meta && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-6">
+                <h2 className="text-lg font-semibold text-navy mb-3 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-primary" />
+                  Next scheduled release
+                </h2>
+                {meta.nextRelease ? (
+                  <div className="space-y-2">
+                    <p className="text-body text-navy">
+                      <strong>{meta.nextRelease.title}</strong>
+                    </p>
+                    <div className="flex items-start gap-2 text-body-sm text-text-secondary">
+                      <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div>
+                        <p>{formatReleaseDate(meta.nextRelease.date)}</p>
+                        <p className="text-text-tertiary">{formatReleaseUtc(meta.nextRelease.date)}</p>
+                      </div>
+                    </div>
+                    <p className="text-caption text-text-tertiary mt-3">
+                      {meta.releasedCount} of {meta.totalArticles} articles released so far. New articles appear roughly once a day.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-body text-navy">All scheduled articles are currently live.</p>
+                    <p className="text-caption text-text-tertiary">
+                      {meta.releasedCount} of {meta.totalArticles} articles released. The feed will update as soon as new analysis is published.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* One-click subscribe */}
             <div>
