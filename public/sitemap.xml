@@ -551,6 +551,18 @@
     <lastmod>2026-07-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://worldaml.com/markets/romania" />
+    <xhtml:link rel="alternate" hreflang="ro-RO" href="https://worldaml.com/ro" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://worldaml.com/markets/romania" />
+  </url>
+  <url>
+    <loc>https://worldaml.com/ro</loc>
+    <lastmod>2026-07-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://worldaml.com/markets/romania" />
+    <xhtml:link rel="alternate" hreflang="ro-RO" href="https://worldaml.com/ro" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://worldaml.com/markets/romania" />
   </url>
   <url>
     <loc>https://worldaml.com/markets/singapore</loc>
