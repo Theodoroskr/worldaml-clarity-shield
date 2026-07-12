@@ -62,7 +62,7 @@ const AMLScreeningEU = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="EU AML Screening & Sanctions Compliance Software"
-        description="AML screening, sanctions and PEP compliance built for the EU — AMLR, 6AMLD, AMLA, EBA guidelines, EU consolidated sanctions list and goAML reporting for all 27 Member States."
+        description="EU AML screening & sanctions compliance software — AMLR, 6AMLD, AMLA, EU consolidated sanctions and goAML reporting across all 27 Member States."
         canonical="/aml-screening/eu"
         breadcrumbs={[
           { name: "Home", url: "/" },
