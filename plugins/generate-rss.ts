@@ -31,8 +31,14 @@ function escapeXml(s: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+    .replace(/'/g, "&#39;");
 }
+
+function cdata(s: string): string {
+  // Safe CDATA — split any accidental "]]>" sequences.
+  return `<![CDATA[${s.replace(/]]>/g, "]]]]><![CDATA[>")}]]>`;
+}
+
 
 function unquote(s: string): string {
   // Handle "..." with escaped quotes inside a TS/JS string literal
@@ -108,15 +114,16 @@ function buildRssXml(items: RssItem[]): string {
     <link>${url}</link>
     <guid isPermaLink="true">${url}</guid>
     <pubDate>${toRfc822(it.date)}</pubDate>
-    <description>${escapeXml(it.description)}</description>
+    <description>${cdata(it.description)}</description>
     <author>${FEED_AUTHOR_EMAIL} (${escapeXml(it.author)})</author>
+    <dc:creator>${cdata(it.author)}</dc:creator>
 ${cats}
   </item>`;
     })
     .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel>
   <title>${escapeXml(FEED_TITLE)}</title>
   <link>${BASE_URL}/blog</link>
@@ -131,6 +138,7 @@ ${itemsXml}
 </rss>
 `;
 }
+
 
 function generateRss(root: string): string {
   const posts = extractPosts(path.join(root, "src/data/blogPosts.ts"));
