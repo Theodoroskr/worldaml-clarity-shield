@@ -92,6 +92,7 @@ const FreeAMLCheck = lazy(() => import("./pages/FreeAMLCheck"));
 const Partners = lazy(() => import("./pages/Partners"));
 const PartnerApply = lazy(() => import("./pages/PartnerApply"));
 const PartnerDashboard = lazy(() => import("./pages/PartnerDashboard"));
+const PartnersDirectory = lazy(() => import("./pages/PartnersDirectory"));
 const DataCoverageIndex = lazy(() => import("./pages/DataCoverageIndex"));
 const DataCoverageCountry = lazy(() => import("./pages/DataCoverageCountry"));
 const Academy = lazy(() => import("./pages/Academy"));
