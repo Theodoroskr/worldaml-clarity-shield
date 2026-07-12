@@ -85,6 +85,7 @@ const navLinks: NavLink[] = [
           { href: "/markets/uae", label: "UAE" },
           { href: "/markets/south-africa", label: "South Africa" },
           { href: "/markets/nigeria", label: "Nigeria" },
+          { href: "/markets/east-africa", label: "East Africa" },
         ],
       },
     ],
