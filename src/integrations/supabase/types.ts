@@ -2226,6 +2226,104 @@ export type Database = {
           },
         ]
       }
+      rss_feeds: {
+        Row: {
+          created_at: string
+          description: string | null
+          feed_url: string
+          id: string
+          is_active: boolean
+          item_count: number
+          last_fetch_error: string | null
+          last_fetch_status: string | null
+          last_fetched_at: string | null
+          site_url: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          feed_url: string
+          id?: string
+          is_active?: boolean
+          item_count?: number
+          last_fetch_error?: string | null
+          last_fetch_status?: string | null
+          last_fetched_at?: string | null
+          site_url?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          feed_url?: string
+          id?: string
+          is_active?: boolean
+          item_count?: number
+          last_fetch_error?: string | null
+          last_fetch_status?: string | null
+          last_fetched_at?: string | null
+          site_url?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rss_items: {
+        Row: {
+          author: string | null
+          content: string | null
+          feed_id: string
+          fetched_at: string
+          guid: string
+          id: string
+          link: string | null
+          published_at: string | null
+          summary: string | null
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          author?: string | null
+          content?: string | null
+          feed_id: string
+          fetched_at?: string
+          guid: string
+          id?: string
+          link?: string | null
+          published_at?: string | null
+          summary?: string | null
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          author?: string | null
+          content?: string | null
+          feed_id?: string
+          fetched_at?: string
+          guid?: string
+          id?: string
+          link?: string | null
+          published_at?: string | null
+          summary?: string | null
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rss_items_feed_id_fkey"
+            columns: ["feed_id"]
+            isOneToOne: false
+            referencedRelation: "rss_feeds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sanctions_searches: {
         Row: {
           created_at: string
