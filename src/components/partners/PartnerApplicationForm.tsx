@@ -17,7 +17,7 @@ const PartnerApplicationForm = () => {
   const [form, setForm] = useState({
     company_name: "",
     website: "",
-    partner_type: "referral" as "referral" | "affiliate" | "reseller",
+    partner_type: "referral" as "referral" | "affiliate" | "reseller" | "technology",
     description: "",
   });
 
@@ -84,9 +84,10 @@ const PartnerApplicationForm = () => {
             <Select value={form.partner_type} onValueChange={(v) => setForm({ ...form, partner_type: v as any })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="referral">Referral Partner</SelectItem>
-                <SelectItem value="affiliate">Affiliate Partner</SelectItem>
-                <SelectItem value="reseller">Reseller Partner</SelectItem>
+                <SelectItem value="referral">Referral Partner (5%)</SelectItem>
+                <SelectItem value="affiliate">Affiliate Partner (10%)</SelectItem>
+                <SelectItem value="reseller">Reseller Partner (15%)</SelectItem>
+                <SelectItem value="technology">Technology / Integration Partner</SelectItem>
               </SelectContent>
             </Select>
           </div>
