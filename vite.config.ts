@@ -4,6 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { seoPrerender } from "./plugins/seo-prerender";
 import { sitemapGenerator } from "./plugins/generate-sitemap";
+import { rssGenerator } from "./plugins/generate-rss";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -19,6 +20,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     seoPrerender(),
     sitemapGenerator(),
+    rssGenerator(),
   ].filter(Boolean),
   resolve: {
     alias: {
