@@ -112,7 +112,7 @@ const RssPage = () => {
                   </a>
                 </Button>
               </div>
-            <p className="text-caption text-text-tertiary mt-3">
+              <p className="text-caption text-text-tertiary mt-3">
                 RSS 2.0 · UTF-8 · Includes title, description, publication date, author, and categories.
               </p>
             </div>
