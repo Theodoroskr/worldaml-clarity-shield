@@ -313,6 +313,8 @@ const App = () => (
 
                 {/* Markets */}
                 <Route path="/markets/:market" element={<MarketPage />} />
+                <Route path="/ro" element={<Navigate to="/markets/romania" replace />} />
+                <Route path="/market/romania" element={<Navigate to="/markets/romania" replace />} />
                 
                 {/* API Product Pages */}
                 <Route path="/aml-api" element={<AMLApi />} />
