@@ -98,6 +98,18 @@ function toRfc822(dateStr: string | Date): string {
   return d.toUTCString();
 }
 
+export interface RssMeta {
+  anchor: string;
+  totalArticles: number;
+  releasedCount: number;
+  upcomingCount: number;
+  nextRelease: {
+    date: string;
+    title: string;
+    slug: string;
+  } | null;
+}
+
 /**
  * Drip-release schedule: one post per day starting from an anchor date.
  * Anchor is persisted in public/.rss-anchor.json so the schedule is stable
@@ -127,12 +139,36 @@ function applyDripSchedule(root: string, posts: RssItem[]): RssItem[] {
   const DAY = 24 * 60 * 60 * 1000;
 
   const released: RssItem[] = [];
+  let nextUpcoming: { index: number; releaseAt: number } | null = null;
+
   posts.forEach((p, i) => {
     const releaseAt = anchor + i * DAY;
     if (releaseAt <= now) {
       released.push({ ...p, date: new Date(releaseAt).toISOString() });
+    } else if (!nextUpcoming) {
+      nextUpcoming = { index: i, releaseAt };
     }
   });
+
+  const meta: RssMeta = {
+    anchor: anchorIso,
+    totalArticles: posts.length,
+    releasedCount: released.length,
+    upcomingCount: posts.length - released.length,
+    nextRelease: nextUpcoming
+      ? {
+          date: new Date(nextUpcoming.releaseAt).toISOString(),
+          title: posts[nextUpcoming.index].title,
+          slug: posts[nextUpcoming.index].slug,
+        }
+      : null,
+  };
+
+  try {
+    fs.writeFileSync(path.join(root, "public/rss-meta.json"), JSON.stringify(meta, null, 2), "utf-8");
+  } catch (e) {
+    console.warn(`[rss] Could not persist meta:`, e);
+  }
 
   // Newest release first in the feed
   released.reverse();
