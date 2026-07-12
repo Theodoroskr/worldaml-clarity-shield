@@ -94,6 +94,11 @@ const SEO = ({ title, description, canonical, noindex = false, ogType = "website
         <link key={hreflang} rel="alternate" hrefLang={hreflang} href={canonicalUrl} data-rh="true" />
       ))}
 
+      {/* Extra hreflang alternates for localized variants */}
+      {alternateLocales?.map(({ hreflang, path }) => (
+        <link key={`alt-${hreflang}`} rel="alternate" hrefLang={hreflang} href={`${BASE_URL}${path}`} data-rh="true" />
+      ))}
+
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} data-rh="true" />
       <meta property="og:description" content={description} data-rh="true" />
@@ -101,6 +106,11 @@ const SEO = ({ title, description, canonical, noindex = false, ogType = "website
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} data-rh="true" />}
       <meta property="og:type" content={ogType} data-rh="true" />
       <meta property="og:site_name" content={SITE_NAME} data-rh="true" />
+      {ogLocale && <meta property="og:locale" content={ogLocale} data-rh="true" />}
+      {alternateLocales?.map(({ hreflang }) => {
+        const locale = hreflang.replace("-", "_");
+        return <meta key={`ogl-${hreflang}`} property="og:locale:alternate" content={locale} data-rh="true" />;
+      })}
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" data-rh="true" />
