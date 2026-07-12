@@ -64,6 +64,7 @@ const footerLinks = {
     { href: "/data-coverage", label: "Data Coverage" },
     { href: "/eu-sanctions-map", label: "EU Sanctions Map" },
     { href: "/demo", label: "Request Demo" },
+    { href: "/rss.xml", label: "RSS Feed", external: true },
   ],
 };
 
