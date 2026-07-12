@@ -290,6 +290,7 @@ const App = () => (
                 <Route path="/resources/aml-regulations" element={<AMLRegulations />} />
                 <Route path="/resources/what-is-sanctions-screening" element={<WhatIsSanctionsScreening />} />
                 <Route path="/resources/uae-aml-compliance-guide" element={<UAEAMLComplianceGuide />} />
+                <Route path="/resources/aml-compliance-checklist" element={<AMLComplianceChecklist />} />
                 <Route path="/resources/fatf-travel-rule-compliance-guide" element={<FATFTravelRuleGuide />} />
                 <Route path="/sanctions-check" element={<SanctionsCheck />} />
                 <Route path="/free-aml-check" element={<FreeAMLCheck />} />
