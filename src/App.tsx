@@ -39,6 +39,7 @@ const WorldComplianceNA = lazy(() => import("./pages/WorldComplianceNA"));
 const ResourcesDataCoverage = lazy(() => import("./pages/ResourcesDataCoverage"));
 const WhatIsSanctionsScreening = lazy(() => import("./pages/WhatIsSanctionsScreening"));
 const UAEAMLComplianceGuide = lazy(() => import("./pages/UAEAMLComplianceGuide"));
+const AMLComplianceChecklist = lazy(() => import("./pages/AMLComplianceChecklist"));
 const FATFTravelRuleGuide = lazy(() => import("./pages/FATFTravelRuleGuide"));
 const BridgerXG = lazy(() => import("./pages/BridgerXG"));
 const BridgerXGEUME = lazy(() => import("./pages/BridgerXGEUME"));
