@@ -741,6 +741,74 @@ export type Database = {
         }
         Relationships: []
       }
+      deal_registrations: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          estimated_arr_eur: number | null
+          id: string
+          notes: string | null
+          partner_id: string
+          product_interest: string[]
+          prospect_company: string
+          prospect_contact_name: string | null
+          prospect_country: string | null
+          prospect_email: string | null
+          protection_expires_at: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["deal_registration_status"]
+          submitted_by: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          estimated_arr_eur?: number | null
+          id?: string
+          notes?: string | null
+          partner_id: string
+          product_interest?: string[]
+          prospect_company: string
+          prospect_contact_name?: string | null
+          prospect_country?: string | null
+          prospect_email?: string | null
+          protection_expires_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["deal_registration_status"]
+          submitted_by: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          estimated_arr_eur?: number | null
+          id?: string
+          notes?: string | null
+          partner_id?: string
+          product_interest?: string[]
+          prospect_company?: string
+          prospect_contact_name?: string | null
+          prospect_country?: string | null
+          prospect_email?: string | null
+          protection_expires_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["deal_registration_status"]
+          submitted_by?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_registrations_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fatf_country_risk: {
         Row: {
           country_code: string
@@ -944,31 +1012,67 @@ export type Database = {
       }
       partners: {
         Row: {
+          academy_seats_granted: number
+          bio: string | null
+          certification_level: Database["public"]["Enums"]["partner_certification"]
+          commission_lifetime_months: number
           commission_rate: number
           created_at: string
+          display_name: string | null
           id: string
           is_active: boolean
+          is_featured: boolean
+          logo_url: string | null
           partner_type: Database["public"]["Enums"]["partner_type"]
           referral_code: string
+          sandbox_key: string | null
+          sandbox_key_issued_at: string | null
+          tagline: string | null
           user_id: string
+          verticals: string[]
+          website_url: string | null
         }
         Insert: {
+          academy_seats_granted?: number
+          bio?: string | null
+          certification_level?: Database["public"]["Enums"]["partner_certification"]
+          commission_lifetime_months?: number
           commission_rate?: number
           created_at?: string
+          display_name?: string | null
           id?: string
           is_active?: boolean
+          is_featured?: boolean
+          logo_url?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
           referral_code?: string
+          sandbox_key?: string | null
+          sandbox_key_issued_at?: string | null
+          tagline?: string | null
           user_id: string
+          verticals?: string[]
+          website_url?: string | null
         }
         Update: {
+          academy_seats_granted?: number
+          bio?: string | null
+          certification_level?: Database["public"]["Enums"]["partner_certification"]
+          commission_lifetime_months?: number
           commission_rate?: number
           created_at?: string
+          display_name?: string | null
           id?: string
           is_active?: boolean
+          is_featured?: boolean
+          logo_url?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
           referral_code?: string
+          sandbox_key?: string | null
+          sandbox_key_issued_at?: string | null
+          tagline?: string | null
           user_id?: string
+          verticals?: string[]
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -3940,14 +4044,22 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      deal_registration_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "won"
+        | "lost"
+        | "expired"
       org_member_role:
         | "admin"
         | "mlro"
         | "compliance_officer"
         | "analyst"
         | "viewer"
+      partner_certification: "none" | "bronze" | "silver" | "gold"
       partner_status: "pending" | "approved" | "rejected"
-      partner_type: "referral" | "affiliate" | "reseller"
+      partner_type: "referral" | "affiliate" | "reseller" | "technology"
       referral_status: "clicked" | "signed_up" | "converted"
     }
     CompositeTypes: {
@@ -4077,6 +4189,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      deal_registration_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "won",
+        "lost",
+        "expired",
+      ],
       org_member_role: [
         "admin",
         "mlro",
@@ -4084,8 +4204,9 @@ export const Constants = {
         "analyst",
         "viewer",
       ],
+      partner_certification: ["none", "bronze", "silver", "gold"],
       partner_status: ["pending", "approved", "rejected"],
-      partner_type: ["referral", "affiliate", "reseller"],
+      partner_type: ["referral", "affiliate", "reseller", "technology"],
       referral_status: ["clicked", "signed_up", "converted"],
     },
   },
