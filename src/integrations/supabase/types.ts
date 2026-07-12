@@ -3916,6 +3916,7 @@ export type Database = {
       }
       rcm_can_edit: { Args: { _org: string }; Returns: boolean }
       rcm_can_manage: { Args: { _org: string }; Returns: boolean }
+      rcm_is_org_admin: { Args: { _org: string }; Returns: boolean }
       rcm_is_org_member: { Args: { _org: string }; Returns: boolean }
       rcm_member_role: {
         Args: { _org: string }
