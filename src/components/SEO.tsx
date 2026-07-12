@@ -50,7 +50,7 @@ const stripAcademyPrefix = (path: string): string => {
   return cleaned === "" ? "/" : cleaned;
 };
 
-const SEO = ({ title, description, canonical, noindex = false, ogType = "website", breadcrumbs, structuredData }: SEOProps) => {
+const SEO = ({ title, description, canonical, noindex = false, ogType = "website", ogLocale, breadcrumbs, structuredData, alternateLocales }: SEOProps) => {
   const onAcademy = isAcademyHost();
   const SITE_NAME = onAcademy ? ACADEMY_SITE_NAME : MAIN_SITE_NAME;
   const BASE_URL = onAcademy ? ACADEMY_BASE_URL : MAIN_BASE_URL;
