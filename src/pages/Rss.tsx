@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Rss, Copy, Check, ExternalLink } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Rss, Copy, Check, ExternalLink, Calendar, Clock } from "lucide-react";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -8,6 +8,18 @@ import { Button } from "@/components/ui/button";
 
 const FEED_URL = "https://worldaml.com/rss.xml";
 
+interface RssMeta {
+  anchor: string;
+  totalArticles: number;
+  releasedCount: number;
+  upcomingCount: number;
+  nextRelease: {
+    date: string;
+    title: string;
+    slug: string;
+  } | null;
+}
+
 const readers = [
   { name: "Feedly", url: `https://feedly.com/i/subscription/feed/${encodeURIComponent(FEED_URL)}` },
   { name: "Inoreader", url: `https://www.inoreader.com/?add_feed=${encodeURIComponent(FEED_URL)}` },
@@ -15,8 +27,34 @@ const readers = [
   { name: "The Old Reader", url: `https://theoldreader.com/feeds/subscribe?url=${encodeURIComponent(FEED_URL)}` },
 ];
 
+function formatReleaseDate(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleString("en-GB", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+}
+
+function formatReleaseUtc(iso: string): string {
+  const d = new Date(iso);
+  return d.toUTCString();
+}
+
 const RssPage = () => {
   const [copied, setCopied] = useState(false);
+  const [meta, setMeta] = useState<RssMeta | null>(null);
+
+  useEffect(() => {
+    fetch("/rss-meta.json")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setMeta(data))
+      .catch(() => setMeta(null));
+  }, []);
 
   const copy = async () => {
     try {
