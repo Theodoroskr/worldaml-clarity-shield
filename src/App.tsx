@@ -84,6 +84,7 @@ const RcmHelp = lazy(() => import("./pages/rcm/RcmHelp"));
 const SuiteLayout = lazy(() => import("./pages/SuiteLayout"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
+const RssPage = lazy(() => import("./pages/Rss"));
 const Glossary = lazy(() => import("./pages/Glossary"));
 const AMLRegulations = lazy(() => import("./pages/AMLRegulations"));
 const MarketPage = lazy(() => import("./pages/MarketPage"));
@@ -299,6 +300,8 @@ const App = () => (
                 <Route path="/data-coverage/:country" element={<DataCoverageCountry />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/rss" element={<RssPage />} />
+
                 
                 {/* Partners */}
                 <Route path="/partners" element={<Partners />} />
