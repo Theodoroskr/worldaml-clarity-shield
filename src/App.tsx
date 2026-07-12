@@ -306,6 +306,7 @@ const App = () => (
                 
                 {/* Partners */}
                 <Route path="/partners" element={<Partners />} />
+                <Route path="/partners/directory" element={<PartnersDirectory />} />
                 <Route path="/partners/apply" element={<PartnerApply />} />
                 <Route path="/partners/dashboard" element={<PartnerDashboard />} />
 
