@@ -257,9 +257,15 @@ Deno.serve(async (req) => {
     }
 
     // Fire-and-forget warm-lead tagging + sales notification
-    await tagWarmLeadAndNotify({
-      email, holder_name, course_title, score, certificate_url, resend,
-    });
+    // Skip for allow-listed recipients who should receive certificates privately (no CC/notify)
+    const NO_NOTIFY_EMAILS = new Set(["info@neculailegal.com"]);
+    if (!NO_NOTIFY_EMAILS.has(email.toLowerCase())) {
+      await tagWarmLeadAndNotify({
+        email, holder_name, course_title, score, certificate_url, resend,
+      });
+    } else {
+      console.log(`ℹ️ Skipping sales notification/warm-lead tagging for allow-listed recipient: ${email}`);
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
