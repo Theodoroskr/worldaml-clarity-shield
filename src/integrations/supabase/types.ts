@@ -804,6 +804,13 @@ export type Database = {
             foreignKeyName: "deal_registrations_partner_id_fkey"
             columns: ["partner_id"]
             isOneToOne: false
+            referencedRelation: "featured_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_registrations_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
             referencedRelation: "partners"
             referencedColumns: ["id"]
           },
@@ -2325,6 +2332,13 @@ export type Database = {
             foreignKeyName: "referrals_partner_id_fkey"
             columns: ["partner_id"]
             isOneToOne: false
+            referencedRelation: "featured_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
             referencedRelation: "partners"
             referencedColumns: ["id"]
           },
@@ -3826,6 +3840,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      featured_partners: {
+        Row: {
+          bio: string | null
+          certification_level:
+            | Database["public"]["Enums"]["partner_certification"]
+            | null
+          display_name: string | null
+          id: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          logo_url: string | null
+          partner_type: Database["public"]["Enums"]["partner_type"] | null
+          tagline: string | null
+          verticals: string[] | null
+          website_url: string | null
+        }
+        Insert: {
+          bio?: string | null
+          certification_level?:
+            | Database["public"]["Enums"]["partner_certification"]
+            | null
+          display_name?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          logo_url?: string | null
+          partner_type?: Database["public"]["Enums"]["partner_type"] | null
+          tagline?: string | null
+          verticals?: string[] | null
+          website_url?: string | null
+        }
+        Update: {
+          bio?: string | null
+          certification_level?:
+            | Database["public"]["Enums"]["partner_certification"]
+            | null
+          display_name?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          logo_url?: string | null
+          partner_type?: Database["public"]["Enums"]["partner_type"] | null
+          tagline?: string | null
+          verticals?: string[] | null
+          website_url?: string | null
+        }
+        Relationships: []
       }
       str_reports_overdue_amendments: {
         Row: {
