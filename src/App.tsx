@@ -300,6 +300,8 @@ const App = () => (
                 <Route path="/data-coverage/:country" element={<DataCoverageCountry />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/rss" element={<RssPage />} />
+
                 
                 {/* Partners */}
                 <Route path="/partners" element={<Partners />} />
