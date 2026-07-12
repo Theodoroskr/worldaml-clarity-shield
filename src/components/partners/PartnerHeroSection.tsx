@@ -39,7 +39,7 @@ const PartnerHeroSection = () => (
             <span className="text-teal font-semibold">5–15% recurring commission</span>{" "}
             on every client they refer.
           </p>
-          <p className="text-white/60 mb-8 leading-relaxed">
+          <p className="text-white/80 mb-8 leading-relaxed">
             Three flexible tiers designed for consultancies, technology partners, and resellers
             across every major compliance market — with co-branded assets, a dedicated partner
             manager, and monthly payouts.
@@ -76,7 +76,7 @@ const PartnerHeroSection = () => (
             >
               <div>
                 <p className="font-semibold text-white text-base">{tier.label}</p>
-                <p className="text-white/60 text-sm mt-1">{tier.desc}</p>
+                <p className="text-white/80 text-sm mt-1">{tier.desc}</p>
               </div>
               <div className="text-right whitespace-nowrap">
                 <span className="text-3xl font-bold text-teal">{tier.rate}</span>

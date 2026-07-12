@@ -411,7 +411,7 @@ const Advisory = () => {
                         View details
                         <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
                       </button>
-                      <span className="text-muted-foreground/40">•</span>
+                      <span className="text-muted-foreground" aria-hidden="true">•</span>
                       <button
                         onClick={() => openWith(s.title)}
                         className="text-sm font-medium text-muted-foreground hover:text-foreground"
