@@ -39,6 +39,7 @@ const WorldComplianceNA = lazy(() => import("./pages/WorldComplianceNA"));
 const ResourcesDataCoverage = lazy(() => import("./pages/ResourcesDataCoverage"));
 const WhatIsSanctionsScreening = lazy(() => import("./pages/WhatIsSanctionsScreening"));
 const UAEAMLComplianceGuide = lazy(() => import("./pages/UAEAMLComplianceGuide"));
+const AMLComplianceChecklist = lazy(() => import("./pages/AMLComplianceChecklist"));
 const FATFTravelRuleGuide = lazy(() => import("./pages/FATFTravelRuleGuide"));
 const BridgerXG = lazy(() => import("./pages/BridgerXG"));
 const BridgerXGEUME = lazy(() => import("./pages/BridgerXGEUME"));
@@ -289,6 +290,7 @@ const App = () => (
                 <Route path="/resources/aml-regulations" element={<AMLRegulations />} />
                 <Route path="/resources/what-is-sanctions-screening" element={<WhatIsSanctionsScreening />} />
                 <Route path="/resources/uae-aml-compliance-guide" element={<UAEAMLComplianceGuide />} />
+                <Route path="/resources/aml-compliance-checklist" element={<AMLComplianceChecklist />} />
                 <Route path="/resources/fatf-travel-rule-compliance-guide" element={<FATFTravelRuleGuide />} />
                 <Route path="/sanctions-check" element={<SanctionsCheck />} />
                 <Route path="/free-aml-check" element={<FreeAMLCheck />} />
