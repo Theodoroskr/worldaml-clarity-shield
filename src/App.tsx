@@ -146,6 +146,7 @@ const SuiteHelp = lazy(() => import("./pages/suite/SuiteHelp"));
 const SuiteRegulatory = lazy(() => import("./pages/suite/SuiteRegulatory"));
 const SuiteSourceOfFunds = lazy(() => import("./pages/suite/SuiteSourceOfFunds"));
 const SuiteAmlAr = lazy(() => import("./pages/suite/SuiteAmlAr"));
+const SuiteRss = lazy(() => import("./pages/suite/SuiteRss"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -371,6 +372,7 @@ const App = () => (
                   <Route path="settings" element={<SuiteSettings />} />
                   <Route path="help" element={<SuiteHelp />} />
                   <Route path="regulatory" element={<SuiteRegulatory />} />
+                  <Route path="rss" element={<SuiteRss />} />
                 </Route>
 
                 {/* RCM Module */}
