@@ -87,15 +87,56 @@ function extractPosts(filePath: string): RssItem[] {
     });
   }
 
-  // Newest first
-  posts.sort((a, b) => b.date.localeCompare(a.date));
+  // Oldest first — drip release consumes backlog chronologically
+  posts.sort((a, b) => a.date.localeCompare(b.date));
   return posts;
 }
 
-function toRfc822(dateStr: string): string {
-  const d = new Date(dateStr);
+function toRfc822(dateStr: string | Date): string {
+  const d = dateStr instanceof Date ? dateStr : new Date(dateStr);
   if (isNaN(d.getTime())) return new Date().toUTCString();
   return d.toUTCString();
+}
+
+/**
+ * Drip-release schedule: one post per day starting from an anchor date.
+ * Anchor is persisted in public/.rss-anchor.json so the schedule is stable
+ * across rebuilds. Only posts whose release date <= now appear in the feed.
+ */
+function applyDripSchedule(root: string, posts: RssItem[]): RssItem[] {
+  const anchorPath = path.join(root, "public/.rss-anchor.json");
+  let anchorIso: string;
+  try {
+    anchorIso = JSON.parse(fs.readFileSync(anchorPath, "utf-8")).anchor;
+    if (!anchorIso || isNaN(new Date(anchorIso).getTime())) throw new Error();
+  } catch {
+    // Anchor at start of today (UTC)
+    const now = new Date();
+    const anchor = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    anchorIso = anchor.toISOString();
+    try {
+      fs.writeFileSync(anchorPath, JSON.stringify({ anchor: anchorIso }, null, 2), "utf-8");
+      console.log(`[rss] Initialised drip anchor at ${anchorIso}`);
+    } catch (e) {
+      console.warn(`[rss] Could not persist anchor:`, e);
+    }
+  }
+
+  const anchor = new Date(anchorIso).getTime();
+  const now = Date.now();
+  const DAY = 24 * 60 * 60 * 1000;
+
+  const released: RssItem[] = [];
+  posts.forEach((p, i) => {
+    const releaseAt = anchor + i * DAY;
+    if (releaseAt <= now) {
+      released.push({ ...p, date: new Date(releaseAt).toISOString() });
+    }
+  });
+
+  // Newest release first in the feed
+  released.reverse();
+  return released;
 }
 
 function buildRssXml(items: RssItem[]): string {
@@ -141,9 +182,11 @@ ${itemsXml}
 
 
 function generateRss(root: string): string {
-  const posts = extractPosts(path.join(root, "src/data/blogPosts.ts"));
-  return buildRssXml(posts);
+  const allPosts = extractPosts(path.join(root, "src/data/blogPosts.ts"));
+  const released = applyDripSchedule(root, allPosts);
+  return buildRssXml(released);
 }
+
 
 export function rssGenerator(): Plugin {
   let projectRoot = "";
