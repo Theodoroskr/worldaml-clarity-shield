@@ -84,6 +84,7 @@ const RcmHelp = lazy(() => import("./pages/rcm/RcmHelp"));
 const SuiteLayout = lazy(() => import("./pages/SuiteLayout"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
+const RssPage = lazy(() => import("./pages/Rss"));
 const Glossary = lazy(() => import("./pages/Glossary"));
 const AMLRegulations = lazy(() => import("./pages/AMLRegulations"));
 const MarketPage = lazy(() => import("./pages/MarketPage"));
