@@ -465,6 +465,7 @@ export const marketPages: Record<string, MarketPageData> = {
       { icon: BarChart3, title: "Risk Scoring", description: "Automated risk-based scoring aligned to NBR and ASF risk-based approach requirements for the Romanian market." },
       { icon: AlertTriangle, title: "Transaction Monitoring", description: "Rule-based monitoring with configurable typologies for patterns common in Romanian financial markets and cross-border EUR/RON transactions." },
       { icon: FileCheck, title: "ONPCSB Reporting", description: "Structured STR generation for ONPCSB submissions with full case management, investigation workflows, and audit trails." },
+      { icon: Scale, title: "ANSPDCP-Aligned Data Governance", description: "Role-based access, retention policies, DSAR workflows, and encryption for KYC and screening records — aligned with GDPR and Romania's Law 190/2018." },
     ],
     industries: [
       { icon: Landmark, title: "Banks & Credit Institutions", description: "Full AML compliance for NBR-supervised banks and credit institutions operating in Romania." },
@@ -475,6 +476,8 @@ export const marketPages: Record<string, MarketPageData> = {
     faqs: [
       { question: "Is WorldAML aligned with Romanian AML legislation?", answer: "Yes. WorldAML supports the risk-based approach required by Law 129/2019 and the directly applicable EU AML Regulation. Workflows are configurable to reflect your firm's risk appetite and NBR or ASF supervisory expectations." },
       { question: "Does WorldAML support ONPCSB STR filing?", answer: "WorldAML provides automated STR generation workflows with full audit trails. Suspicious activity triggers can be configured within the transaction monitoring module, with cases routed to your compliance officer for review and submission to ONPCSB." },
+      { question: "How does WorldAML help with ANSPDCP (GDPR) compliance?", answer: "WorldAML enforces role-based access controls, configurable data-retention schedules, encryption at rest and in transit, and DSAR-ready audit trails for all KYC and screening records — supporting the requirements of Law 190/2018 and ANSPDCP supervisory expectations." },
+      { question: "Where is Romanian customer data stored?", answer: "Customer data can be hosted within the EU to satisfy ANSPDCP data-transfer expectations. Deployment options are discussed during scoping to align with your firm's data-protection impact assessment (DPIA)." },
       { question: "Is the platform suitable for Romanian fintechs?", answer: "Absolutely. WorldAML is designed for the compliance requirements of NBR-licensed fintechs and payment institutions, including customer due diligence, sanctions screening, and transaction monitoring at scale." },
       { question: "Does WorldAML screen against EU sanctions lists?", answer: "Yes. WorldAML screens against the EU Consolidated Sanctions List in real time, alongside OFAC, UN, and 500+ additional global lists. This is essential for Romanian firms operating within the EU single market." },
       { question: "How quickly can a Romanian firm go live?", answer: "Most Romanian firms are operational within 2–4 weeks, depending on integration complexity. Our team provides dedicated onboarding support, including policy configuration and data source setup." },
