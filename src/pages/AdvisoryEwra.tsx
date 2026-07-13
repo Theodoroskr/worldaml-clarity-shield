@@ -284,7 +284,7 @@ const EwraAdvisory = () => {
                   <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
                     {outOfScope.map((i) => (
                       <li key={i} className="flex gap-2">
-                        <span className="mt-0.5 text-muted-foreground/50">—</span>
+                        <span className="mt-0.5 text-muted-foreground">—</span>
                         <span>{i}</span>
                       </li>
                     ))}
