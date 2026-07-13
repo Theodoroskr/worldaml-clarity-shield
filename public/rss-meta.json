@@ -1,11 +1,11 @@
 {
   "anchor": "2026-07-12T00:00:00.000Z",
   "totalArticles": 18,
-  "releasedCount": 1,
-  "upcomingCount": 17,
+  "releasedCount": 2,
+  "upcomingCount": 16,
   "nextRelease": {
-    "date": "2026-07-13T00:00:00.000Z",
-    "title": "Beneficial Ownership Verification: Regulatory Requirements and Practical Steps",
-    "slug": "beneficial-ownership-guide"
+    "date": "2026-07-14T00:00:00.000Z",
+    "title": "FATCA and CRS Reporting: Obligations for Financial Institutions",
+    "slug": "fatca-crs-reporting-guide"
   }
 }

@@ -6,9 +6,26 @@
   <atom:link href="https://worldaml.com/rss.xml" rel="self" type="application/rss+xml" />
   <description>Practical AML, KYC/KYB, sanctions and regulatory compliance analysis from the WorldAML team.</description>
   <language>en</language>
-  <lastBuildDate>Sun, 12 Jul 2026 20:14:58 GMT</lastBuildDate>
-  <pubDate>Sun, 12 Jul 2026 00:00:00 GMT</pubDate>
+  <lastBuildDate>Mon, 13 Jul 2026 06:52:14 GMT</lastBuildDate>
+  <pubDate>Mon, 13 Jul 2026 00:00:00 GMT</pubDate>
   <generator>WorldAML RSS Generator</generator>
+  <item>
+    <title>Beneficial Ownership Verification: Regulatory Requirements and Practical Steps</title>
+    <link>https://worldaml.com/blog/beneficial-ownership-guide</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/beneficial-ownership-guide</guid>
+    <pubDate>Mon, 13 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[A comprehensive guide to beneficial ownership identification and verification — covering EU 6AMLD, UK MLRs, FATF standards, and how to operationalise UBO checks at scale.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>KYC &amp; KYB</category>
+    <category>beneficial ownership</category>
+    <category>UBO</category>
+    <category>6AMLD</category>
+    <category>MLRs</category>
+    <category>FATF</category>
+    <category>corporate transparency</category>
+    <category>KYB</category>
+  </item>
   <item>
     <title>PEP Screening Guide: Who Are PEPs and How to Screen Them Effectively</title>
     <link>https://worldaml.com/blog/pep-screening-guide</link>
