@@ -3849,8 +3849,6 @@ export type Database = {
             | null
           display_name: string | null
           id: string | null
-          is_active: boolean | null
-          is_featured: boolean | null
           logo_url: string | null
           partner_type: Database["public"]["Enums"]["partner_type"] | null
           tagline: string | null
@@ -3864,8 +3862,6 @@ export type Database = {
             | null
           display_name?: string | null
           id?: string | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
           logo_url?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"] | null
           tagline?: string | null
@@ -3879,8 +3875,6 @@ export type Database = {
             | null
           display_name?: string | null
           id?: string | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
           logo_url?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"] | null
           tagline?: string | null
