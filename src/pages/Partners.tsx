@@ -5,6 +5,7 @@ import PartnerHeroSection from "@/components/partners/PartnerHeroSection";
 import PartnerSocialProofSection from "@/components/partners/PartnerSocialProofSection";
 import PartnerBenefitsSection from "@/components/partners/PartnerBenefitsSection";
 import PartnerFAQSection from "@/components/partners/PartnerFAQSection";
+import PartnerContactSection from "@/components/partners/PartnerContactSection";
 
 const faqStructured = {
   "@context": "https://schema.org",
@@ -80,6 +81,7 @@ const Partners = () => (
       <PartnerSocialProofSection />
       <PartnerBenefitsSection />
       <PartnerFAQSection />
+      <PartnerContactSection />
     </main>
     <Footer />
   </div>

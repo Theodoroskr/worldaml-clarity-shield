@@ -51,7 +51,7 @@ const PartnerHeroSection = () => (
               </Link>
             </Button>
             <Button variant="outline-light" size="lg" asChild>
-              <Link to="/contact-sales?product=partnership">Talk to Partnerships</Link>
+              <a href="#partner-contact">Talk to Partnerships</a>
             </Button>
           </div>
           <div className="flex flex-wrap gap-3">
