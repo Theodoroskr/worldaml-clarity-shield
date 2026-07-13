@@ -2,6 +2,7 @@ import { useState } from "react";
 import { z } from "zod";
 // Submits through the submit-form edge function (direct inserts blocked by RLS).
 import { toast } from "@/hooks/use-toast";
+import { getWebAttribution } from "@/lib/webAttribution";
 import {
   Dialog,
   DialogContent,
