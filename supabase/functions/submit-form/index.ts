@@ -520,6 +520,31 @@ Deno.serve(async (req) => {
           Account_Party_ID: (metadata as any)?.account_party_id
             ? String((metadata as any).account_party_id).slice(0, 100)
             : undefined,
+
+          // Partner Type (picklist on Leads) — mapped from the Partner
+          // contact form's partner_type value. Zoho picklist values must
+          // match exactly:
+          //   'Referral Partner 5%', 'Affiliate Partner 10%',
+          //   'Reseller Partner 15%', 'Technology / Integration Partner',
+          //   'Not sure yet'.
+          Partner_Type: (() => {
+            const raw = String((metadata as any)?.partner_type ?? "").trim().toLowerCase();
+            if (!raw) return undefined;
+            const PARTNER_TYPE_MAP: Record<string, string> = {
+              "referral": "Referral Partner 5%",
+              "affiliate": "Affiliate Partner 10%",
+              "reseller": "Reseller Partner 15%",
+              "technology": "Technology / Integration Partner",
+              "not-sure": "Not sure yet",
+              "not_sure": "Not sure yet",
+            };
+            const mapped = PARTNER_TYPE_MAP[raw];
+            if (!mapped) {
+              console.warn(`Unknown partner_type value from website form: "${raw}"`);
+              return undefined;
+            }
+            return mapped;
+          })(),
         };
 
 
