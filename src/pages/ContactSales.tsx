@@ -121,13 +121,6 @@ Preferred start date and number of seats below.`,
       }
     }
 
-    if (productParam === "partnership") {
-      setSelectedProducts((prev) => (prev.includes("partnership") ? prev : [...prev, "partnership"]));
-      setFormData((prev) => ({
-        ...prev,
-        message: prev.message || "I'd like to learn more about the WorldAML Partner Program and how to get started.",
-      }));
-    }
 
     if (productParam === "worldaml-advisory" || productParam === "advisory") {
       setSelectedProducts((prev) => (prev.includes("worldaml-advisory") ? prev : [...prev, "worldaml-advisory"]));
