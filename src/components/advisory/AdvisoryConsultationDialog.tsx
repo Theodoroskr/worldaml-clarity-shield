@@ -107,7 +107,7 @@ const AdvisoryConsultationDialog = ({ open, onOpenChange, defaultService }: Prop
             country: parsed.data.country || undefined,
             message: parsed.data.message || undefined,
             products: selected,
-            metadata: { source: "advisory_page", services: selected },
+            metadata: { source: "advisory_page", services: selected, attribution: getWebAttribution() },
           }),
         },
       );
