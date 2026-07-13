@@ -149,10 +149,11 @@ const PartnerBenefitsSection = () => (
                   ))}
                 </ul>
                 <Button asChild variant={t.highlighted ? "accent" : "outline-light"} size="sm" className="w-full">
-                  <Link to={t.href}>
+                  <a href={t.href}>
                     {t.cta} <ArrowRight className="ml-2 h-3.5 w-3.5" />
-                  </Link>
+                  </a>
                 </Button>
+
               </div>
             </div>
           ))}
