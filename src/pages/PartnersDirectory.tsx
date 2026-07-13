@@ -44,10 +44,8 @@ const PartnersDirectory = () => {
   useEffect(() => {
     (async () => {
       const { data } = await supabase
-        .from("partners")
+        .from("featured_partners")
         .select("id,display_name,logo_url,tagline,bio,verticals,website_url,partner_type,certification_level")
-        .eq("is_featured", true)
-        .eq("is_active", true)
         .order("certification_level", { ascending: false });
       setPartners((data as any as FeaturedPartner[]) || []);
       setLoading(false);
