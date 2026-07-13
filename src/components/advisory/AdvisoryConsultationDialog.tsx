@@ -2,6 +2,7 @@ import { useState } from "react";
 import { z } from "zod";
 // Submits through the submit-form edge function (direct inserts blocked by RLS).
 import { toast } from "@/hooks/use-toast";
+import { getWebAttribution } from "@/lib/webAttribution";
 import {
   Dialog,
   DialogContent,
@@ -107,7 +108,7 @@ const AdvisoryConsultationDialog = ({ open, onOpenChange, defaultService }: Prop
             country: parsed.data.country || undefined,
             message: parsed.data.message || undefined,
             products: selected,
-            metadata: { source: "advisory_page", services: selected },
+            metadata: { source: "advisory_page", services: selected, attribution: getWebAttribution() },
           }),
         },
       );
