@@ -322,11 +322,23 @@ Deno.serve(async (req) => {
               "book_demo": "Book Demo",
               "free-trial": "Book Demo",
               "worldcompliance-demo": "Book Demo",
+              "free-aml-check": "Book Demo",
+              "free_aml_check": "Book Demo",
               "partner-application": "Partner Request",
               "newsletter": "Newsletter",
             };
             const key = String(form_type ?? "").trim().toLowerCase();
             return map[key] || (form_type ? String(form_type) : undefined);
+          })(),
+          // Product_Demo (picklist on Leads) — identifies which product-specific
+          // demo funnel the lead came from. Set to "free_aml_check" for the
+          // /free-aml-check#lead-form walkthrough demo page.
+          Product_Demo: (() => {
+            const key = String(form_type ?? "").trim().toLowerCase();
+            if (key === "free-aml-check" || key === "free_aml_check") {
+              return "free_aml_check";
+            }
+            return undefined;
           })(),
           // Detailed multi-select picklist "Products Multi Selection" (api_name:
           // Products_Multi_Selection) — the specific WorldAML products the lead
