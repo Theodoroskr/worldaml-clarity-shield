@@ -94,8 +94,8 @@ const WorldCheckAlternative = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="World-Check Alternative — Sanctions & PEP"
-        description="Looking for a World-Check alternative? Compare WorldAML vs Refinitiv World-Check — same global sanctions, PEP and adverse media coverage, plus built-in case management, monitoring and transparent pricing."
+        title="World-Check vs WorldCompliance — Alternative Compared"
+        description="World-Check vs WorldCompliance: compare Refinitiv World-Check and LexisNexis WorldCompliance on data coverage, pricing and workflow. See why compliance teams switch to WorldAML."
         canonical="/world-check-alternative"
         breadcrumbs={[
           { name: "Home", url: "/" },
