@@ -39,7 +39,7 @@ const tiers = [
     features: ["Unique referral link", "Automated tracking", "2 free Academy seats", "Bronze certification eligible"],
     highlighted: false,
     cta: "Apply Now",
-    href: "/partners/apply",
+    href: "#partner-contact",
   },
   {
     name: "Affiliate Partner",
@@ -49,7 +49,7 @@ const tiers = [
     features: ["Everything in Referral", "Campaign tracking codes", "Co-branded collateral", "5 free Academy seats", "Silver certification eligible", "Quarterly business reviews"],
     highlighted: true,
     cta: "Apply Now",
-    href: "/partners/apply",
+    href: "#partner-contact",
   },
   {
     name: "Reseller Partner",
@@ -59,7 +59,7 @@ const tiers = [
     features: ["Everything in Affiliate", "White-label options", "Custom pricing", "10 free Academy seats", "Gold certification eligible", "Dedicated account manager", "API access"],
     highlighted: false,
     cta: "Apply Now",
-    href: "/partners/apply",
+    href: "#partner-contact",
   },
   {
     name: "Technology Partner",
@@ -69,9 +69,10 @@ const tiers = [
     features: ["Wholesale/bundled pricing", "Priority API access & higher rate limits", "Joint go-to-market", "5 free Academy seats", "Listing in partner directory", "Technical enablement"],
     highlighted: false,
     cta: "Talk to Partnerships",
-    href: "/contact-sales?product=partnership",
+    href: "#partner-contact",
   },
 ];
+
 
 const certifications = [
   { level: "Bronze", color: "from-amber-700 to-amber-500", req: "Complete AML Fundamentals + 1 vertical course." },
