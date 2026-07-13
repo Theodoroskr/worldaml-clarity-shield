@@ -81,6 +81,7 @@ const Partners = () => (
       <PartnerSocialProofSection />
       <PartnerBenefitsSection />
       <PartnerFAQSection />
+      <PartnerContactSection />
     </main>
     <Footer />
   </div>
