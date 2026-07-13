@@ -229,10 +229,11 @@ const PartnerBenefitsSection = () => (
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild variant="accent" size="lg">
-            <Link to="/partners/apply">
+            <a href="#partner-contact">
               Apply Now <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
+            </a>
           </Button>
+
           <Button asChild variant="outline-light" size="lg">
             <Link to="/partners/directory">Browse Partners</Link>
           </Button>
