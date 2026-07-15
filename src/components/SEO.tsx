@@ -54,11 +54,12 @@ const stripAcademyPrefix = (path: string): string => {
   return cleaned === "" ? "/" : cleaned;
 };
 
-const SEO = ({ title, description, canonical, noindex = false, ogType = "website", ogLocale, breadcrumbs, structuredData, alternateLocales }: SEOProps) => {
+const SEO = ({ title, description, canonical, noindex = false, ogType = "website", ogLocale, breadcrumbs, structuredData, alternateLocales, ogImage, ogImageAlt }: SEOProps) => {
   const onAcademy = isAcademyHost();
   const SITE_NAME = onAcademy ? ACADEMY_SITE_NAME : MAIN_SITE_NAME;
   const BASE_URL = onAcademy ? ACADEMY_BASE_URL : MAIN_BASE_URL;
-  const OG_IMAGE = `${BASE_URL}/og-image.png`;
+  const OG_IMAGE = ogImage ?? `${BASE_URL}/og-image.png`;
+  const OG_IMAGE_ALT = ogImageAlt ?? title;
 
   const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
   const canonicalPath = canonical ? (onAcademy ? stripAcademyPrefix(canonical) : canonical) : undefined;
