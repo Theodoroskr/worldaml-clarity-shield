@@ -30,6 +30,8 @@ export default function AdminPartners() {
   const [partnerApps, setPartnerApps] = useState<any[]>([]);
   const [partners, setPartners] = useState<any[]>([]);
   const [deals, setDeals] = useState<any[]>([]);
+  const [referrals, setReferrals] = useState<any[]>([]);
+  const [refFilter, setRefFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
@@ -37,14 +39,16 @@ export default function AdminPartners() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [{ data: apps }, { data: pts }, { data: dl }] = await Promise.all([
+    const [{ data: apps }, { data: pts }, { data: dl }, { data: refs }] = await Promise.all([
       supabase.from("partner_applications").select("*").order("created_at", { ascending: false }),
       supabase.from("partners").select("*").order("created_at", { ascending: false }),
       supabase.from("deal_registrations").select("*").order("created_at", { ascending: false }),
+      supabase.from("referrals").select("*").order("created_at", { ascending: false }),
     ]);
     setPartnerApps((apps as any[]) || []);
     setPartners((pts as any[]) || []);
     setDeals((dl as any[]) || []);
+    setReferrals((refs as any[]) || []);
     setLoading(false);
   }, []);
 
@@ -318,6 +322,169 @@ export default function AdminPartners() {
           )}
         </CardContent>
       </Card>
+
+      {/* Referrals */}
+      {(() => {
+        const partnerById = new Map(partners.map((p: any) => [p.id, p]));
+        const filtered = refFilter === "all"
+          ? referrals
+          : referrals.filter((r: any) => r.partner_id === refFilter);
+
+        const perPartner = new Map<string, { total: number; converted: number; paid: number; value: number; commission: number }>();
+        for (const r of referrals) {
+          const bucket = perPartner.get(r.partner_id) ?? { total: 0, converted: 0, paid: 0, value: 0, commission: 0 };
+          bucket.total += 1;
+          if (["converted", "paid"].includes(r.status)) bucket.converted += 1;
+          if (r.status === "paid") bucket.paid += 1;
+          bucket.value += Number(r.conversion_value || 0);
+          bucket.commission += Number(r.commission_earned || 0);
+          perPartner.set(r.partner_id, bucket);
+        }
+
+        const totalRefs = referrals.length;
+        const totalConv = referrals.filter((r: any) => ["converted", "paid"].includes(r.status)).length;
+        const overallRate = totalRefs > 0 ? Math.round((totalConv / totalRefs) * 100) : 0;
+        const totalValue = referrals.reduce((s: number, r: any) => s + Number(r.conversion_value || 0), 0);
+        const totalCommission = referrals.reduce((s: number, r: any) => s + Number(r.commission_earned || 0), 0);
+
+        const partnerLabel = (id: string) => {
+          const p: any = partnerById.get(id);
+          if (!p) return id.slice(0, 8);
+          return p.display_name || p.referral_code || id.slice(0, 8);
+        };
+
+        return (
+          <Card>
+            <CardHeader>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <CardTitle className="text-navy flex items-center gap-2">
+                  <Handshake className="h-4 w-4 text-teal" /> Referrals
+                </CardTitle>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <Badge variant="outline">{totalRefs} total</Badge>
+                  <Badge className="bg-green-100 text-green-800 border-green-200">{totalConv} converted ({overallRate}%)</Badge>
+                  <Badge className="bg-blue-100 text-blue-800 border-blue-200">€{totalValue.toLocaleString()} ARR attributed</Badge>
+                  <Badge className="bg-purple-100 text-purple-800 border-purple-200">€{totalCommission.toLocaleString()} commission</Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Per-partner attribution */}
+              {perPartner.size === 0 ? (
+                <p className="text-text-secondary text-sm py-4 text-center">No referrals recorded yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <h4 className="text-sm font-semibold text-navy mb-2">Attribution by partner</h4>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-divider text-left">
+                        <th className="pb-2 pr-4 font-semibold text-navy">Partner</th>
+                        <th className="pb-2 pr-4 font-semibold text-navy">Referrals</th>
+                        <th className="pb-2 pr-4 font-semibold text-navy">Converted</th>
+                        <th className="pb-2 pr-4 font-semibold text-navy">Paid</th>
+                        <th className="pb-2 pr-4 font-semibold text-navy">Conversion rate</th>
+                        <th className="pb-2 pr-4 font-semibold text-navy">Attributed ARR</th>
+                        <th className="pb-2 font-semibold text-navy">Commission</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.from(perPartner.entries())
+                        .sort((a, b) => b[1].total - a[1].total)
+                        .map(([pid, s]) => {
+                          const rate = s.total > 0 ? Math.round((s.converted / s.total) * 100) : 0;
+                          const p: any = partnerById.get(pid);
+                          return (
+                            <tr key={pid} className="border-b border-divider/50 hover:bg-surface-subtle">
+                              <td className="py-2 pr-4">
+                                <button
+                                  className="text-left hover:underline"
+                                  onClick={() => setRefFilter(pid)}
+                                >
+                                  <div className="font-medium text-navy">{p?.display_name || "—"}</div>
+                                  <div className="font-mono text-xs text-text-secondary">{p?.referral_code ?? pid.slice(0, 8)}</div>
+                                </button>
+                              </td>
+                              <td className="py-2 pr-4 text-text-secondary">{s.total}</td>
+                              <td className="py-2 pr-4 text-text-secondary">{s.converted}</td>
+                              <td className="py-2 pr-4 text-text-secondary">{s.paid}</td>
+                              <td className="py-2 pr-4">
+                                <Badge className={rate >= 30 ? "bg-green-100 text-green-800 border-green-200" : rate >= 10 ? "bg-amber-100 text-amber-800 border-amber-200" : "bg-slate-100 text-slate-700 border-slate-200"}>
+                                  {rate}%
+                                </Badge>
+                              </td>
+                              <td className="py-2 pr-4 text-text-secondary">{s.value ? `€${s.value.toLocaleString()}` : "—"}</td>
+                              <td className="py-2 text-text-secondary">{s.commission ? `€${s.commission.toLocaleString()}` : "—"}</td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Signup / customer list */}
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <h4 className="text-sm font-semibold text-navy">Signups & customers</h4>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-xs text-text-secondary">Partner</Label>
+                    <Select value={refFilter} onValueChange={setRefFilter}>
+                      <SelectTrigger className="h-8 w-56 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All partners</SelectItem>
+                        {partners.map((p: any) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.display_name || p.referral_code}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                {filtered.length === 0 ? (
+                  <p className="text-text-secondary text-sm py-4 text-center">No referrals for this filter.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-divider text-left">
+                          <th className="pb-2 pr-4 font-semibold text-navy">Referred</th>
+                          <th className="pb-2 pr-4 font-semibold text-navy">Partner</th>
+                          <th className="pb-2 pr-4 font-semibold text-navy">Code</th>
+                          <th className="pb-2 pr-4 font-semibold text-navy">Status</th>
+                          <th className="pb-2 pr-4 font-semibold text-navy">Value</th>
+                          <th className="pb-2 pr-4 font-semibold text-navy">Commission</th>
+                          <th className="pb-2 pr-4 font-semibold text-navy">Signed up</th>
+                          <th className="pb-2 font-semibold text-navy">Converted</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.map((r: any) => (
+                          <tr key={r.id} className="border-b border-divider/50 hover:bg-surface-subtle">
+                            <td className="py-2 pr-4 text-navy">
+                              {r.referred_email ? (
+                                <a href={`mailto:${r.referred_email}`} className="hover:underline">{r.referred_email}</a>
+                              ) : <span className="text-text-secondary">(anonymous click)</span>}
+                            </td>
+                            <td className="py-2 pr-4 text-text-secondary text-xs">{partnerLabel(r.partner_id)}</td>
+                            <td className="py-2 pr-4 font-mono text-xs text-text-secondary">{r.referral_code_used}</td>
+                            <td className="py-2 pr-4"><Badge className={STATUS_STYLES[r.status] ?? "bg-slate-100 text-slate-700 border-slate-200"}>{r.status}</Badge></td>
+                            <td className="py-2 pr-4 text-text-secondary">{r.conversion_value ? `€${Number(r.conversion_value).toLocaleString()}` : "—"}</td>
+                            <td className="py-2 pr-4 text-text-secondary">{r.commission_earned ? `€${Number(r.commission_earned).toLocaleString()}` : "—"}</td>
+                            <td className="py-2 pr-4 text-text-secondary text-xs">{new Date(r.created_at).toLocaleDateString("en-GB")}</td>
+                            <td className="py-2 text-text-secondary text-xs">{r.converted_at ? new Date(r.converted_at).toLocaleDateString("en-GB") : "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
 
       {/* Edit dialog */}
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
