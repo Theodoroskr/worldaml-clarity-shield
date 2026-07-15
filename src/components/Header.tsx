@@ -260,6 +260,11 @@ export const Header = () => {
                     Dashboard
                   </Link>
                 </Button>
+                {isAdmin && (
+                  <Button variant="outline" size="sm" asChild className="border-navy/30 text-navy hover:bg-navy/5">
+                    <Link to="/admin">Admin</Link>
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-1" />
                   Sign Out
