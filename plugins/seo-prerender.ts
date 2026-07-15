@@ -13,9 +13,30 @@
 import type { Plugin } from "vite";
 import * as fs from "fs";
 import * as path from "path";
+import { blogPosts } from "../src/data/blogPosts";
 
 const BASE_URL = "https://www.worldaml.com";
 const SITE_NAME = "WorldAML";
+// Supabase edge function that renders per-post OG images (1200x630 PNG)
+const OG_FUNCTION_URL =
+  "https://uxjjxnnyrjkhcggptihx.supabase.co/functions/v1/blog-og";
+
+function encodeParam(value: string): string {
+  return encodeURIComponent(value);
+}
+
+function buildBlogOgImageUrl(title: string, category: string, slug: string): string {
+  return `${OG_FUNCTION_URL}?slug=${encodeParam(slug)}&title=${encodeParam(title)}&category=${encodeParam(category)}`;
+}
+
+function escapeHtmlAttr(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 interface RouteMeta {
   title: string;
@@ -576,13 +597,83 @@ export function seoPrerender(): Plugin {
       rootHtml = rootHtml.replace("</head>", `  <link data-rh="true" rel="canonical" href="${BASE_URL}/" />\n  </head>`);
       fs.writeFileSync(path.join(distDir, "index.html"), rootHtml, "utf-8");
 
+      // --- Per-blog-post HTML with unique OG image ---
+      for (const post of blogPosts) {
+        const canonicalUrl = `${BASE_URL}/blog/${post.slug}`;
+        const ogImage = buildBlogOgImageUrl(post.title, post.category, post.slug);
+        const fullTitle = `${post.title} | ${SITE_NAME}`;
+        const description = post.description;
+
+        let html = indexHtml;
+
+        html = html.replace(
+          /<title>[^<]*<\/title>/,
+          `<title>${escapeHtmlAttr(fullTitle)}</title>`
+        );
+        if (html.includes('<meta name="description"')) {
+          html = html.replace(
+            /<meta name="description" content="[^"]*"[^>]*/,
+            `<meta data-rh="true" name="description" content="${escapeHtmlAttr(description)}"`
+          );
+        } else {
+          html = html.replace(
+            "</head>",
+            `  <meta data-rh="true" name="description" content="${escapeHtmlAttr(description)}" />\n  </head>`
+          );
+        }
+        html = html.replace(
+          "</head>",
+          `  <link data-rh="true" rel="canonical" href="${canonicalUrl}" />\n  </head>`
+        );
+
+        const ogBlock = [
+          `<meta data-rh="true" property="og:title" content="${escapeHtmlAttr(post.title)}" />`,
+          `<meta data-rh="true" property="og:description" content="${escapeHtmlAttr(description)}" />`,
+          `<meta data-rh="true" property="og:url" content="${canonicalUrl}" />`,
+          `<meta data-rh="true" property="og:image" content="${ogImage}" />`,
+          `<meta data-rh="true" property="og:image:width" content="1200" />`,
+          `<meta data-rh="true" property="og:image:height" content="630" />`,
+          `<meta data-rh="true" property="og:image:alt" content="${escapeHtmlAttr(post.title)}" />`,
+          `<meta data-rh="true" property="og:type" content="article" />`,
+          `<meta data-rh="true" property="og:site_name" content="${SITE_NAME}" />`,
+          `<meta data-rh="true" property="article:section" content="${escapeHtmlAttr(post.category)}" />`,
+          `<meta data-rh="true" property="article:published_time" content="${post.date}" />`,
+          `<meta data-rh="true" name="twitter:card" content="summary_large_image" />`,
+          `<meta data-rh="true" name="twitter:title" content="${escapeHtmlAttr(post.title)}" />`,
+          `<meta data-rh="true" name="twitter:description" content="${escapeHtmlAttr(description)}" />`,
+          `<meta data-rh="true" name="twitter:image" content="${ogImage}" />`,
+        ];
+
+        if (html.includes('property="og:title"')) {
+          html = html.replace(/<meta[^>]*property="og:title"[^>]*>/, ogBlock[0]);
+          html = html.replace(/<meta[^>]*property="og:description"[^>]*>/, ogBlock[1]);
+          html = html.replace(/<meta[^>]*property="og:url"[^>]*>/, ogBlock[2]);
+          html = html.replace(/<meta[^>]*property="og:image"[^>]*>/, ogBlock[3]);
+          html = html.replace(
+            "</head>",
+            `  ${ogBlock.slice(4).join("\n  ")}\n  </head>`
+          );
+        } else {
+          html = html.replace("</head>", `  ${ogBlock.join("\n  ")}\n  </head>`);
+        }
+
+        html = html.replace(
+          /<h1 style="position:absolute;left:-9999px">[^<]*<\/h1>/,
+          `<h1 style="position:absolute;left:-9999px">${escapeHtmlAttr(post.title)}</h1>`
+        );
+
+        const postDir = path.join(distDir, "blog", post.slug);
+        fs.mkdirSync(postDir, { recursive: true });
+        fs.writeFileSync(path.join(postDir, "index.html"), html, "utf-8");
+      }
+
       // --- Generate fresh sitemap.xml ---
       const sitemapXml = generateSitemapXml();
       fs.writeFileSync(path.join(distDir, "sitemap.xml"), sitemapXml, "utf-8");
 
       const entryCount = buildSitemapEntries().length;
       console.log(
-        `[seo-prerender] Generated ${Object.keys(routes).length} pre-rendered HTML files + sitemap.xml (${entryCount} URLs)`
+        `[seo-prerender] Generated ${Object.keys(routes).length} static + ${blogPosts.length} blog HTML files + sitemap.xml (${entryCount} URLs)`
       );
     },
   };
