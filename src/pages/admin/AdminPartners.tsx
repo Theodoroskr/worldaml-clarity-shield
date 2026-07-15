@@ -43,23 +43,46 @@ export default function AdminPartners() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [editForm, setEditForm] = useState<any>({});
+  const [auditLog, setAuditLog] = useState<any[]>([]);
+  const [auditEntity, setAuditEntity] = useState<string>("all");
+  const [notifSettings, setNotifSettings] = useState<any[]>([]);
+  const [myNotif, setMyNotif] = useState<any>({
+    notify_new_application: true,
+    notify_new_deal: true,
+    notify_deal_status_change: false,
+    is_active: true,
+  });
+  const [savingNotif, setSavingNotif] = useState(false);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [{ data: apps }, { data: pts }, { data: dl }, { data: refs }, { data: cst }] = await Promise.all([
+    const [{ data: apps }, { data: pts }, { data: dl }, { data: refs }, { data: cst }, { data: audit }, { data: nset }] = await Promise.all([
       supabase.from("partner_applications").select("*").order("created_at", { ascending: false }),
       supabase.from("partners").select("*").order("created_at", { ascending: false }),
       supabase.from("deal_registrations").select("*").order("created_at", { ascending: false }),
       supabase.from("referrals").select("*").order("created_at", { ascending: false }),
       supabase.from("suite_customers").select("id,name,company_name,email").order("created_at", { ascending: false }).limit(500),
+      supabase.from("partner_admin_audit_log" as any).select("*").order("created_at", { ascending: false }).limit(200),
+      supabase.from("partner_notification_settings" as any).select("*").order("email", { ascending: true }),
     ]);
     setPartnerApps((apps as any[]) || []);
     setPartners((pts as any[]) || []);
     setDeals((dl as any[]) || []);
     setReferrals((refs as any[]) || []);
     setCustomers((cst as any[]) || []);
+    setAuditLog((audit as any[]) || []);
+    setNotifSettings((nset as any[]) || []);
+    const mine = ((nset as any[]) || []).find((n: any) => n.user_id === user?.id);
+    if (mine) {
+      setMyNotif({
+        notify_new_application: mine.notify_new_application,
+        notify_new_deal: mine.notify_new_deal,
+        notify_deal_status_change: mine.notify_deal_status_change,
+        is_active: mine.is_active,
+      });
+    }
     setLoading(false);
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
