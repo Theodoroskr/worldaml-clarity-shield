@@ -140,7 +140,7 @@ export default function PartnerContactsPage() {
   const togglePref = async (c: Contact, key: keyof Contact, value: boolean) => {
     const { error } = await supabase
       .from("partner_contacts")
-      .update({ [key]: value })
+      .update({ [key]: value } as any)
       .eq("id", c.id);
     if (error) return toast.error(error.message);
     setContacts((prev) => prev.map((x) => (x.id === c.id ? { ...x, [key]: value } as Contact : x)));
