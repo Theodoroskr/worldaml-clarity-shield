@@ -116,7 +116,7 @@ const navLinks: NavLink[] = [
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const headerRef = useRef<HTMLElement>(null);
   const academyHost = isAcademyHost();
 
@@ -260,6 +260,11 @@ export const Header = () => {
                     Dashboard
                   </Link>
                 </Button>
+                {isAdmin && (
+                  <Button variant="outline" size="sm" asChild className="border-navy/30 text-navy hover:bg-navy/5">
+                    <Link to="/admin">Admin</Link>
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-1" />
                   Sign Out
@@ -371,6 +376,11 @@ export const Header = () => {
                         Dashboard
                       </Link>
                     </Button>
+                    {isAdmin && (
+                      <Button variant="outline" asChild className="border-navy/30 text-navy">
+                        <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>Admin</Link>
+                      </Button>
+                    )}
                     <Button onClick={handleSignOut}>
                       <LogOut className="h-4 w-4 mr-2" />
                       Sign Out
