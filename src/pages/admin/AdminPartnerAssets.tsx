@@ -400,6 +400,9 @@ export default function AdminPartnerAssets() {
                         </Badge>
                       </td>
                       <td className="py-2.5 text-right space-x-1">
+                        <Button size="icon" variant="ghost" title="Version history" onClick={() => openVersions(a)}>
+                          <History className="w-4 h-4" />
+                        </Button>
                         <Button size="icon" variant="ghost" onClick={() => startEdit(a)}>
                           <Pencil className="w-4 h-4" />
                         </Button>
@@ -415,6 +418,67 @@ export default function AdminPartnerAssets() {
           )}
         </CardContent>
       </Card>
+
+      {/* Version history dialog */}
+      <Dialog open={versionOpen} onOpenChange={setVersionOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Versions — {versionAsset?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border border-border rounded-md p-3 space-y-2">
+              <p className="text-sm font-medium">Publish a new version</p>
+              <Input
+                type="file"
+                onChange={(e) => setNewVersionFile(e.target.files?.[0] ?? null)}
+                disabled={publishing}
+              />
+              <Textarea
+                rows={2}
+                placeholder="Changelog (what changed?)"
+                value={newVersionChangelog}
+                onChange={(e) => setNewVersionChangelog(e.target.value)}
+                disabled={publishing}
+              />
+              <div className="flex justify-end">
+                <Button size="sm" onClick={publishVersion} disabled={!newVersionFile || publishing}>
+                  {publishing ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />}
+                  Publish version
+                </Button>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium mb-2">History</p>
+              {versionsLoading ? (
+                <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin" /></div>
+              ) : versions.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-3">No prior versions — the current file is the original upload.</p>
+              ) : (
+                <div className="divide-y divide-border max-h-[45vh] overflow-y-auto">
+                  {versions.map((v) => (
+                    <div key={v.id} className="py-2.5 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-sm">v{v.version_number}</span>
+                          {v.is_current && (
+                            <Badge className="bg-teal text-white text-[10px] px-1.5 py-0">Current</Badge>
+                          )}
+                          <span className="text-[11px] text-muted-foreground">
+                            {formatDistanceToNow(new Date(v.created_at))} ago
+                          </span>
+                        </div>
+                        {v.changelog && (
+                          <p className="text-xs text-muted-foreground mt-0.5">{v.changelog}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
