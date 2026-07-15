@@ -263,6 +263,11 @@ export const Header = () => {
                     Dashboard
                   </Link>
                 </Button>
+                {isActivePartner && (
+                  <Button variant="outline" size="sm" asChild className="border-teal/40 text-teal hover:bg-teal/5">
+                    <Link to="/partner-portal">Partner Portal</Link>
+                  </Button>
+                )}
                 {isAdmin && (
                   <Button variant="outline" size="sm" asChild className="border-navy/30 text-navy hover:bg-navy/5">
                     <Link to="/admin">Admin</Link>
