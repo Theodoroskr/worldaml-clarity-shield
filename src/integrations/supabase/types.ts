@@ -1194,6 +1194,81 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_contacts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          id: string
+          is_primary: boolean
+          name: string
+          notify_deal_new: boolean
+          notify_deal_status_change: boolean
+          notify_deal_won: boolean
+          notify_monthly_summary: boolean
+          notify_payouts: boolean
+          notify_referral_converted: boolean
+          notify_referral_new: boolean
+          partner_id: string
+          phone: string | null
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          id?: string
+          is_primary?: boolean
+          name: string
+          notify_deal_new?: boolean
+          notify_deal_status_change?: boolean
+          notify_deal_won?: boolean
+          notify_monthly_summary?: boolean
+          notify_payouts?: boolean
+          notify_referral_converted?: boolean
+          notify_referral_new?: boolean
+          partner_id: string
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          id?: string
+          is_primary?: boolean
+          name?: string
+          notify_deal_new?: boolean
+          notify_deal_status_change?: boolean
+          notify_deal_won?: boolean
+          notify_monthly_summary?: boolean
+          notify_payouts?: boolean
+          notify_referral_converted?: boolean
+          notify_referral_new?: boolean
+          partner_id?: string
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_contacts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "featured_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_contacts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_notification_settings: {
         Row: {
           created_at: string

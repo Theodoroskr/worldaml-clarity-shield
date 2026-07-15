@@ -141,6 +141,7 @@ const PartnerCommissionsPage = lazy(() => import("./pages/partner-portal/Commiss
 const PartnerAssetsPage = lazy(() => import("./pages/partner-portal/Assets"));
 const PartnerProfilePage = lazy(() => import("./pages/partner-portal/Profile"));
 const PartnerSettingsPage = lazy(() => import("./pages/partner-portal/Settings"));
+const PartnerContactsPage = lazy(() => import("./pages/partner-portal/Contacts"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
@@ -330,6 +331,7 @@ const App = () => (
                   <Route path="deals" element={<PartnerDealsPage />} />
                   <Route path="commissions" element={<PartnerCommissionsPage />} />
                   <Route path="assets" element={<PartnerAssetsPage />} />
+                  <Route path="contacts" element={<PartnerContactsPage />} />
                   <Route path="profile" element={<PartnerProfilePage />} />
                   <Route path="settings" element={<PartnerSettingsPage />} />
                 </Route>

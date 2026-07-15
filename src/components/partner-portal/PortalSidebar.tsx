@@ -9,6 +9,7 @@ import {
   Settings,
   ArrowLeft,
   Handshake,
+  Contact as ContactIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ const NAV = [
   { label: "Deals", path: "/partner-portal/deals", icon: Briefcase },
   { label: "Commissions", path: "/partner-portal/commissions", icon: DollarSign },
   { label: "Marketing Assets", path: "/partner-portal/assets", icon: ImageIcon },
+  { label: "Contacts", path: "/partner-portal/contacts", icon: ContactIcon },
   { label: "Profile", path: "/partner-portal/profile", icon: UserCircle },
   { label: "Settings", path: "/partner-portal/settings", icon: Settings },
 ];
