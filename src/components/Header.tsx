@@ -117,6 +117,8 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut, isAdmin } = useAuth();
+  const { partner } = usePartner();
+  const isActivePartner = !!partner?.is_active;
   const headerRef = useRef<HTMLElement>(null);
   const academyHost = isAcademyHost();
 
