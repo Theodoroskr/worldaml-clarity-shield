@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccess } from "@/hooks/useAccess";
+import { usePartner } from "@/hooks/usePartner";
+import { Handshake } from "lucide-react";
 import { useRcmOrg } from "@/hooks/useRcmOrg";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
