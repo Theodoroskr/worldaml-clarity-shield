@@ -130,6 +130,35 @@ export default function AdminPartners() {
     setActionLoading(null);
   };
 
+  const openWinDialog = (deal: any) => {
+    setWinDeal(deal);
+    setWinForm({
+      customer_id: deal.linked_customer_id ?? "",
+      actual_arr_eur: deal.actual_arr_eur ? String(deal.actual_arr_eur) : (deal.estimated_arr_eur ? String(deal.estimated_arr_eur) : ""),
+    });
+  };
+
+  const confirmWin = async () => {
+    if (!winDeal) return;
+    setActionLoading(winDeal.id);
+    const payload: any = {
+      status: "won",
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: user!.id,
+      won_at: new Date().toISOString(),
+      linked_customer_id: winForm.customer_id || null,
+      actual_arr_eur: winForm.actual_arr_eur ? Number(winForm.actual_arr_eur) : null,
+    };
+    const { error } = await supabase.from("deal_registrations").update(payload).eq("id", winDeal.id);
+    if (error) toast.error("Failed to mark won");
+    else {
+      toast.success("Deal marked as won" + (winForm.customer_id ? " and linked to customer" : ""));
+      setWinDeal(null);
+      fetchAll();
+    }
+    setActionLoading(null);
+  };
+
   const pendingCount = partnerApps.filter((a) => a.status === "pending").length;
   const pendingDeals = deals.filter((d) => d.status === "pending").length;
 
