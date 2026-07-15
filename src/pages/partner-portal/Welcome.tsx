@@ -119,7 +119,7 @@ export default function PartnerWelcome() {
                 ) : i === step ? (
                   <Circle className="w-4 h-4 text-teal fill-teal/20" />
                 ) : (
-                  <Circle className="w-4 h-4 text-muted-foreground/40" />
+                  <Circle className="w-4 h-4 text-muted-foreground" />
                 )}
                 <span className={`text-xs ${i === step ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                   {s}

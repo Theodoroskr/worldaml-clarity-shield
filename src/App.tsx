@@ -77,6 +77,7 @@ const BestPractices = lazy(() => import("./pages/BestPractices"));
 const SanctionsCheck = lazy(() => import("./pages/SanctionsCheck"));
 const SanctionsLists = lazy(() => import("./pages/SanctionsLists"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const CompareAmlDataProviders = lazy(() => import("./pages/CompareAmlDataProviders"));
 const RcmLayout = lazy(() => import("./pages/rcm/RcmLayout"));
 const RcmDashboard = lazy(() => import("./pages/rcm/RcmDashboard"));
 const RcmPlaceholder = lazy(() => import("./pages/rcm/RcmPlaceholder"));
@@ -317,6 +318,7 @@ const App = () => (
                 <Route path="/resources/uae-aml-compliance-guide" element={<UAEAMLComplianceGuide />} />
                 <Route path="/resources/aml-compliance-checklist" element={<AMLComplianceChecklist />} />
                 <Route path="/resources/fatf-travel-rule-compliance-guide" element={<FATFTravelRuleGuide />} />
+                <Route path="/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones" element={<CompareAmlDataProviders />} />
                 <Route path="/sanctions-check" element={<SanctionsCheck />} />
                 <Route path="/free-aml-check" element={<FreeAMLCheck />} />
                 <Route path="/data-coverage" element={<DataCoverageIndex />} />

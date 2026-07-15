@@ -93,6 +93,7 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/resources/what-is-sanctions-screening", changefreq: "monthly", priority: 0.8 },
   { path: "/resources/uae-aml-compliance-guide", changefreq: "monthly", priority: 0.8 },
   { path: "/resources/aml-compliance-checklist", changefreq: "monthly", priority: 0.8 },
+  { path: "/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones", changefreq: "monthly", priority: 0.8 },
 
   // Company
   { path: "/about", changefreq: "monthly", priority: 0.6 },
