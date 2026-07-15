@@ -25,8 +25,23 @@ function encodeParam(value: string): string {
   return encodeURIComponent(value);
 }
 
-function buildBlogOgImageUrl(title: string, category: string, slug: string): string {
-  return `${OG_FUNCTION_URL}?slug=${encodeParam(slug)}&title=${encodeParam(title)}&category=${encodeParam(category)}`;
+// Global cache-buster applied to every generated OG image URL.
+// Bump BLOG_OG_VERSION (env) to force LinkedIn/Facebook/Twitter to re-scrape
+// all posts without waiting for their ~7-day preview cache to expire.
+// The per-post `date` is also folded in so editing a single post's date
+// invalidates only that post's preview.
+const BLOG_OG_VERSION = process.env.BLOG_OG_VERSION ?? "2";
+
+function buildBlogOgImageUrl(
+  title: string,
+  category: string,
+  slug: string,
+  postDate?: string,
+): string {
+  const v = postDate
+    ? `${BLOG_OG_VERSION}-${postDate.replace(/-/g, "")}`
+    : BLOG_OG_VERSION;
+  return `${OG_FUNCTION_URL}?slug=${encodeParam(slug)}&title=${encodeParam(title)}&category=${encodeParam(category)}&v=${encodeParam(v)}`;
 }
 
 function escapeHtmlAttr(str: string): string {
@@ -600,7 +615,7 @@ export function seoPrerender(): Plugin {
       // --- Per-blog-post HTML with unique OG image ---
       for (const post of blogPosts) {
         const canonicalUrl = `${BASE_URL}/blog/${post.slug}`;
-        const ogImage = buildBlogOgImageUrl(post.title, post.category, post.slug);
+        const ogImage = buildBlogOgImageUrl(post.title, post.category, post.slug, post.date);
         const fullTitle = `${post.title} | ${SITE_NAME}`;
         const description = post.description;
 
