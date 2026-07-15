@@ -22,6 +22,10 @@ interface SEOProps {
   structuredData?: Record<string, unknown> | Record<string, unknown>[];
   /** Extra hreflang alternates for localized variants of this page (adds to default English targets). */
   alternateLocales?: AlternateLocale[];
+  /** Absolute https URL of a page-specific social preview image (1200x630 recommended). Overrides the default sitewide OG image. */
+  ogImage?: string;
+  /** Alt text for the OG image; defaults to the page title. */
+  ogImageAlt?: string;
 }
 
 const MAIN_SITE_NAME = "WorldAML";
