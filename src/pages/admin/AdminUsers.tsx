@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, FileText, Send, History } from "lucide-react";
+import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, FileText, Send, History, Handshake, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -84,6 +85,9 @@ export default function AdminUsers() {
   const [sourceFilter, setSourceFilter] = useState("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
+  const [partnerApplicantIds, setPartnerApplicantIds] = useState<Set<string>>(new Set());
+  const [partnerApplicantEmails, setPartnerApplicantEmails] = useState<Set<string>>(new Set());
+  const [partnerAppMeta, setPartnerAppMeta] = useState<Record<string, { status: string; partner_type: string | null; company_name: string | null; created_at: string }>>({});
 
 
   // Grant Suite dialog state
@@ -151,10 +155,11 @@ export default function AdminUsers() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [{ data: p }, { data: r }, { data: logs }] = await Promise.all([
+    const [{ data: p }, { data: r }, { data: logs }, { data: pa }] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("*"),
       supabase.from("admin_upsell_email_log").select("recipient_user_id, recipient_email"),
+      supabase.from("partner_applications").select("user_id, email, status, partner_type, company_name, created_at").order("created_at", { ascending: false }),
     ]);
     setProfiles((p || []) as Profile[]);
     const roleMap: Record<string, string[]> = {};
@@ -169,6 +174,19 @@ export default function AdminUsers() {
       if (key) counts[key] = (counts[key] || 0) + 1;
     });
     setUpsellCounts(counts);
+    const ids = new Set<string>();
+    const emails = new Set<string>();
+    const meta: Record<string, any> = {};
+    (pa || []).forEach((row: any) => {
+      if (row.user_id) ids.add(row.user_id);
+      if (row.email) emails.add(String(row.email).toLowerCase());
+      const key = row.user_id || String(row.email || "").toLowerCase();
+      // keep the most recent (first due to order desc)
+      if (key && !meta[key]) meta[key] = { status: row.status, partner_type: row.partner_type, company_name: row.company_name, created_at: row.created_at };
+    });
+    setPartnerApplicantIds(ids);
+    setPartnerApplicantEmails(emails);
+    setPartnerAppMeta(meta);
     setLoading(false);
   };
 
@@ -270,9 +288,14 @@ export default function AdminUsers() {
 
   const isSuiteUser = (p: Profile) => p.subscription_tier === "suite" || p.subscription_tier === "enterprise";
   const isAcademyUser = (p: Profile) => p.subscription_tier === "academy";
+  const isPartnerApplicant = (p: Profile) =>
+    (p.user_id && partnerApplicantIds.has(p.user_id)) ||
+    (p.email && partnerApplicantEmails.has(p.email.toLowerCase()));
   const nonAcademyProfiles = profiles.filter(p => !isAcademyUser(p));
-  const suiteUsers = nonAcademyProfiles.filter(isSuiteUser);
-  const regularUsers = nonAcademyProfiles.filter(p => !isSuiteUser(p));
+  const partnerApplicants = nonAcademyProfiles.filter(isPartnerApplicant);
+  const nonPartnerProfiles = nonAcademyProfiles.filter(p => !isPartnerApplicant(p));
+  const suiteUsers = nonPartnerProfiles.filter(isSuiteUser);
+  const regularUsers = nonPartnerProfiles.filter(p => !isSuiteUser(p));
   const academyUsers = profiles.filter(isAcademyUser);
 
   const allSources = Array.from(
@@ -471,6 +494,56 @@ export default function AdminUsers() {
     );
   };
 
+  const renderPartnerApplicantsTable = (list: Profile[]) => (
+    <div className="overflow-x-auto border border-border rounded-lg">
+      <table className="w-full text-sm">
+        <thead className="bg-muted/40 text-xs text-muted-foreground">
+          <tr>
+            <th className="text-left px-3 py-2 font-medium">User</th>
+            <th className="text-left px-3 py-2 font-medium">Company</th>
+            <th className="text-left px-3 py-2 font-medium">Partner type</th>
+            <th className="text-left px-3 py-2 font-medium">Application status</th>
+            <th className="text-left px-3 py-2 font-medium">Account</th>
+            <th className="text-left px-3 py-2 font-medium">Applied</th>
+            <th className="text-right px-3 py-2 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {list.map(p => {
+            const key = p.user_id || (p.email || "").toLowerCase();
+            const meta = partnerAppMeta[key];
+            const appStatus = meta?.status || "pending";
+            const appBadge =
+              appStatus === "approved" ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Approved</Badge>
+              : appStatus === "rejected" ? <Badge className="bg-red-50 text-red-700 border-red-200">Rejected</Badge>
+              : <Badge className="bg-amber-50 text-amber-700 border-amber-200">Pending</Badge>;
+            return (
+              <tr key={p.id} className="border-t border-border">
+                <td className="px-3 py-2">
+                  <div className="font-medium text-foreground">{p.full_name || "—"}</div>
+                  <div className="text-xs text-muted-foreground">{p.email}</div>
+                </td>
+                <td className="px-3 py-2">{meta?.company_name || p.company_name || "—"}</td>
+                <td className="px-3 py-2 capitalize">{meta?.partner_type || "—"}</td>
+                <td className="px-3 py-2">{appBadge}</td>
+                <td className="px-3 py-2">{statusBadge(p.status)}</td>
+                <td className="px-3 py-2 text-xs text-muted-foreground">
+                  {meta?.created_at ? new Date(meta.created_at).toLocaleDateString() : "—"}
+                </td>
+                <td className="px-3 py-2 text-right">
+                  <Link to="/admin/partners" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                    Review <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {list.length === 0 && <div className="text-center py-8 text-sm text-muted-foreground">No partner applicants match the current filters.</div>}
+    </div>
+  );
+
   const selectedProfile = REGULATORY_PROFILES[selectedRegulator];
 
   return (
@@ -479,7 +552,7 @@ export default function AdminUsers() {
         <div>
           <h1 className="text-xl font-bold text-foreground">User Management</h1>
           <p className="text-xs text-muted-foreground">
-            {nonAcademyProfiles.length} platform users · {suiteUsers.length} suite users · {academyUsers.length} academy learners (managed in <a href="/admin/academy-users" className="text-primary hover:underline">Academy Signups</a>)
+            {nonPartnerProfiles.length} platform users · {suiteUsers.length} suite users · {partnerApplicants.length} partner applicants (processed in <Link to="/admin/partners" className="text-primary hover:underline">Partner Program</Link>) · {academyUsers.length} academy learners (managed in <a href="/admin/academy-users" className="text-primary hover:underline">Academy Signups</a>)
           </p>
         </div>
       </div>
@@ -516,13 +589,26 @@ export default function AdminUsers() {
       ) : (
         <Tabs defaultValue="all" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="all">All Platform Users ({nonAcademyProfiles.length})</TabsTrigger>
+            <TabsTrigger value="all">Platform Users ({nonPartnerProfiles.length})</TabsTrigger>
             <TabsTrigger value="suite">Suite Users ({suiteUsers.length})</TabsTrigger>
             <TabsTrigger value="regular">Regular Users ({regularUsers.length})</TabsTrigger>
+            <TabsTrigger value="partners" className="gap-1.5">
+              <Handshake className="w-3.5 h-3.5" />
+              Partner Applicants ({partnerApplicants.length})
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="all">{renderTable(nonAcademyProfiles, false)}</TabsContent>
+          <TabsContent value="all">{renderTable(nonPartnerProfiles, false)}</TabsContent>
           <TabsContent value="suite">{renderTable(suiteUsers, true)}</TabsContent>
           <TabsContent value="regular">{renderTable(regularUsers, false)}</TabsContent>
+          <TabsContent value="partners">
+            <div className="mb-3 flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+              <span>These users applied to the Partner Program. Approve, reject, or edit their partner records in the dedicated workspace.</span>
+              <Link to="/admin/partners" className="inline-flex items-center gap-1 text-primary hover:underline">
+                Open Partner Program <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
+            {renderPartnerApplicantsTable(applyFilters(partnerApplicants))}
+          </TabsContent>
         </Tabs>
       )}
 
