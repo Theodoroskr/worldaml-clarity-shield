@@ -31,7 +31,13 @@ export default function AdminPartners() {
   const [partners, setPartners] = useState<any[]>([]);
   const [deals, setDeals] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
   const [refFilter, setRefFilter] = useState<string>("all");
+  const [dealSearch, setDealSearch] = useState("");
+  const [dealStatus, setDealStatus] = useState<string>("all");
+  const [dealPartner, setDealPartner] = useState<string>("all");
+  const [winDeal, setWinDeal] = useState<any | null>(null);
+  const [winForm, setWinForm] = useState<{ customer_id: string; actual_arr_eur: string }>({ customer_id: "", actual_arr_eur: "" });
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
@@ -39,16 +45,18 @@ export default function AdminPartners() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [{ data: apps }, { data: pts }, { data: dl }, { data: refs }] = await Promise.all([
+    const [{ data: apps }, { data: pts }, { data: dl }, { data: refs }, { data: cst }] = await Promise.all([
       supabase.from("partner_applications").select("*").order("created_at", { ascending: false }),
       supabase.from("partners").select("*").order("created_at", { ascending: false }),
       supabase.from("deal_registrations").select("*").order("created_at", { ascending: false }),
       supabase.from("referrals").select("*").order("created_at", { ascending: false }),
+      supabase.from("suite_customers").select("id,name,company_name,email").order("created_at", { ascending: false }).limit(500),
     ]);
     setPartnerApps((apps as any[]) || []);
     setPartners((pts as any[]) || []);
     setDeals((dl as any[]) || []);
     setReferrals((refs as any[]) || []);
+    setCustomers((cst as any[]) || []);
     setLoading(false);
   }, []);
 
@@ -119,6 +127,35 @@ export default function AdminPartners() {
       .eq("id", dealId);
     if (error) toast.error("Failed to update deal");
     else { toast.success(`Deal ${status}`); fetchAll(); }
+    setActionLoading(null);
+  };
+
+  const openWinDialog = (deal: any) => {
+    setWinDeal(deal);
+    setWinForm({
+      customer_id: deal.linked_customer_id ?? "",
+      actual_arr_eur: deal.actual_arr_eur ? String(deal.actual_arr_eur) : (deal.estimated_arr_eur ? String(deal.estimated_arr_eur) : ""),
+    });
+  };
+
+  const confirmWin = async () => {
+    if (!winDeal) return;
+    setActionLoading(winDeal.id);
+    const payload: any = {
+      status: "won",
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: user!.id,
+      won_at: new Date().toISOString(),
+      linked_customer_id: winForm.customer_id || null,
+      actual_arr_eur: winForm.actual_arr_eur ? Number(winForm.actual_arr_eur) : null,
+    };
+    const { error } = await supabase.from("deal_registrations").update(payload).eq("id", winDeal.id);
+    if (error) toast.error("Failed to mark won");
+    else {
+      toast.success("Deal marked as won" + (winForm.customer_id ? " and linked to customer" : ""));
+      setWinDeal(null);
+      fetchAll();
+    }
     setActionLoading(null);
   };
 
@@ -263,65 +300,172 @@ export default function AdminPartners() {
       </Card>
 
       {/* Deal registrations */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-navy flex items-center gap-2">
-            <FileSignature className="h-4 w-4 text-teal" /> Deal Registrations
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {deals.length === 0 ? (
-            <p className="text-text-secondary text-sm py-4 text-center">No deal registrations yet.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-divider text-left">
-                    <th className="pb-3 pr-4 font-semibold text-navy">Prospect</th>
-                    <th className="pb-3 pr-4 font-semibold text-navy">Contact</th>
-                    <th className="pb-3 pr-4 font-semibold text-navy">ARR</th>
-                    <th className="pb-3 pr-4 font-semibold text-navy">Status</th>
-                    <th className="pb-3 pr-4 font-semibold text-navy">Protected Until</th>
-                    <th className="pb-3 font-semibold text-navy">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {deals.map((d: any) => (
-                    <tr key={d.id} className="border-b border-divider/50 hover:bg-surface-subtle">
-                      <td className="py-3 pr-4">
-                        <div className="font-medium text-navy">{d.prospect_company}</div>
-                        <div className="text-xs text-text-secondary">{d.prospect_country || "—"}</div>
-                      </td>
-                      <td className="py-3 pr-4 text-text-secondary text-xs">
-                        {d.prospect_contact_name}<br />{d.prospect_email}
-                      </td>
-                      <td className="py-3 pr-4 text-text-secondary">{d.estimated_arr_eur ? `€${d.estimated_arr_eur.toLocaleString()}` : "—"}</td>
-                      <td className="py-3 pr-4"><Badge className={STATUS_STYLES[d.status]}>{d.status}</Badge></td>
-                      <td className="py-3 pr-4 text-text-secondary text-xs">{new Date(d.protection_expires_at).toLocaleDateString("en-GB")}</td>
-                      <td className="py-3">
-                        <div className="flex flex-wrap gap-1">
-                          {d.status === "pending" && (
-                            <>
-                              <Button size="sm" variant="outline" className="text-green-700" disabled={actionLoading === d.id} onClick={() => reviewDeal(d.id, "approved")}>Approve</Button>
-                              <Button size="sm" variant="outline" className="text-red-700" disabled={actionLoading === d.id} onClick={() => reviewDeal(d.id, "rejected")}>Reject</Button>
-                            </>
-                          )}
-                          {d.status === "approved" && (
-                            <>
-                              <Button size="sm" variant="outline" className="text-green-700" onClick={() => reviewDeal(d.id, "won")}>Mark Won</Button>
-                              <Button size="sm" variant="outline" onClick={() => reviewDeal(d.id, "lost")}>Mark Lost</Button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {(() => {
+        const partnerById = new Map(partners.map((p: any) => [p.id, p]));
+        const customerById = new Map(customers.map((c: any) => [c.id, c]));
+        const q = dealSearch.trim().toLowerCase();
+        const filteredDeals = deals.filter((d: any) => {
+          if (dealStatus !== "all" && d.status !== dealStatus) return false;
+          if (dealPartner !== "all" && d.partner_id !== dealPartner) return false;
+          if (!q) return true;
+          const p: any = partnerById.get(d.partner_id);
+          return [
+            d.prospect_company,
+            d.prospect_contact_name,
+            d.prospect_email,
+            d.prospect_country,
+            d.notes,
+            p?.display_name,
+            p?.referral_code,
+          ].filter(Boolean).some((v: string) => String(v).toLowerCase().includes(q));
+        });
+
+        const totalPipeline = deals
+          .filter((d: any) => ["pending", "approved"].includes(d.status))
+          .reduce((s: number, d: any) => s + Number(d.estimated_arr_eur || 0), 0);
+        const totalWon = deals
+          .filter((d: any) => d.status === "won")
+          .reduce((s: number, d: any) => s + Number(d.actual_arr_eur || d.estimated_arr_eur || 0), 0);
+        const wonCount = deals.filter((d: any) => d.status === "won").length;
+        const closeRate = deals.length > 0 ? Math.round((wonCount / deals.length) * 100) : 0;
+
+        return (
+          <Card>
+            <CardHeader>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <CardTitle className="text-navy flex items-center gap-2">
+                  <FileSignature className="h-4 w-4 text-teal" /> Deal Registrations
+                </CardTitle>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <Badge variant="outline">{deals.length} total</Badge>
+                  <Badge className="bg-blue-100 text-blue-800 border-blue-200">€{totalPipeline.toLocaleString()} pipeline</Badge>
+                  <Badge className="bg-green-100 text-green-800 border-green-200">€{totalWon.toLocaleString()} won ({closeRate}%)</Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {/* Filters */}
+              <div className="flex flex-wrap gap-2 items-center">
+                <Input
+                  placeholder="Search prospect, contact, country, partner…"
+                  value={dealSearch}
+                  onChange={(e) => setDealSearch(e.target.value)}
+                  className="h-9 w-72"
+                />
+                <Select value={dealStatus} onValueChange={setDealStatus}>
+                  <SelectTrigger className="h-9 w-40"><SelectValue placeholder="Status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All statuses</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="won">Won</SelectItem>
+                    <SelectItem value="lost">Lost</SelectItem>
+                    <SelectItem value="expired">Expired</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={dealPartner} onValueChange={setDealPartner}>
+                  <SelectTrigger className="h-9 w-56"><SelectValue placeholder="Partner" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All partners</SelectItem>
+                    {partners.map((p: any) => (
+                      <SelectItem key={p.id} value={p.id}>{p.display_name || p.referral_code}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {(dealSearch || dealStatus !== "all" || dealPartner !== "all") && (
+                  <Button size="sm" variant="ghost" onClick={() => { setDealSearch(""); setDealStatus("all"); setDealPartner("all"); }}>
+                    Clear
+                  </Button>
+                )}
+                <span className="text-xs text-text-secondary ml-auto">{filteredDeals.length} shown</span>
+              </div>
+
+              {filteredDeals.length === 0 ? (
+                <p className="text-text-secondary text-sm py-4 text-center">No deal registrations match these filters.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-divider text-left">
+                        <th className="pb-3 pr-4 font-semibold text-navy">Prospect</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Partner</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Contact</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">ARR</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Status</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Linked customer</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Protected until</th>
+                        <th className="pb-3 font-semibold text-navy">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredDeals.map((d: any) => {
+                        const p: any = partnerById.get(d.partner_id);
+                        const linked: any = d.linked_customer_id ? customerById.get(d.linked_customer_id) : null;
+                        return (
+                          <tr key={d.id} className="border-b border-divider/50 hover:bg-surface-subtle align-top">
+                            <td className="py-3 pr-4">
+                              <div className="font-medium text-navy">{d.prospect_company}</div>
+                              <div className="text-xs text-text-secondary">{d.prospect_country || "—"}</div>
+                            </td>
+                            <td className="py-3 pr-4">
+                              <div className="text-navy text-xs">{p?.display_name || "—"}</div>
+                              <div className="font-mono text-[11px] text-text-secondary">{p?.referral_code ?? d.partner_id.slice(0, 8)}</div>
+                            </td>
+                            <td className="py-3 pr-4 text-text-secondary text-xs">
+                              {d.prospect_contact_name || "—"}<br />
+                              {d.prospect_email ? <a href={`mailto:${d.prospect_email}`} className="text-teal hover:underline">{d.prospect_email}</a> : null}
+                            </td>
+                            <td className="py-3 pr-4 text-text-secondary text-xs">
+                              <div>Est: {d.estimated_arr_eur ? `€${d.estimated_arr_eur.toLocaleString()}` : "—"}</div>
+                              {d.actual_arr_eur ? <div className="text-navy">Actual: €{d.actual_arr_eur.toLocaleString()}</div> : null}
+                            </td>
+                            <td className="py-3 pr-4"><Badge className={STATUS_STYLES[d.status]}>{d.status}</Badge></td>
+                            <td className="py-3 pr-4 text-xs">
+                              {linked ? (
+                                <div>
+                                  <div className="text-navy">{linked.company_name || linked.name || "—"}</div>
+                                  <div className="text-text-secondary">{linked.email || ""}</div>
+                                </div>
+                              ) : (
+                                <span className="text-text-secondary">—</span>
+                              )}
+                            </td>
+                            <td className="py-3 pr-4 text-text-secondary text-xs">{new Date(d.protection_expires_at).toLocaleDateString("en-GB")}</td>
+                            <td className="py-3">
+                              <div className="flex flex-wrap gap-1">
+                                {d.status === "pending" && (
+                                  <>
+                                    <Button size="sm" variant="outline" className="text-green-700" disabled={actionLoading === d.id} onClick={() => reviewDeal(d.id, "approved")}>Approve</Button>
+                                    <Button size="sm" variant="outline" className="text-red-700" disabled={actionLoading === d.id} onClick={() => reviewDeal(d.id, "rejected")}>Reject</Button>
+                                  </>
+                                )}
+                                {d.status === "approved" && (
+                                  <>
+                                    <Button size="sm" variant="outline" className="text-green-700" onClick={() => openWinDialog(d)}>Convert to Won…</Button>
+                                    <Button size="sm" variant="outline" onClick={() => reviewDeal(d.id, "lost")}>Mark Lost</Button>
+                                  </>
+                                )}
+                                {d.status === "won" && (
+                                  <Button size="sm" variant="outline" onClick={() => openWinDialog(d)}>
+                                    {linked ? "Update link" : "Link customer"}
+                                  </Button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
+
+
 
       {/* Referrals */}
       {(() => {
@@ -485,6 +629,60 @@ export default function AdminPartners() {
         );
       })()}
 
+
+      {/* Convert to Won dialog */}
+      <Dialog open={!!winDeal} onOpenChange={(o) => !o && setWinDeal(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{winDeal?.status === "won" ? "Update customer link" : "Convert deal to Won"}</DialogTitle>
+          </DialogHeader>
+          {winDeal && (
+            <div className="grid gap-4 py-2">
+              <div className="text-sm">
+                <div className="font-medium text-navy">{winDeal.prospect_company}</div>
+                <div className="text-text-secondary text-xs">
+                  Partner: {(partners.find((p: any) => p.id === winDeal.partner_id) as any)?.display_name || winDeal.partner_id.slice(0, 8)}
+                </div>
+              </div>
+              <div>
+                <Label>Link to customer</Label>
+                <Select value={winForm.customer_id || "__none__"} onValueChange={(v) => setWinForm({ ...winForm, customer_id: v === "__none__" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="Choose a customer…" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    <SelectItem value="__none__">— No customer linked —</SelectItem>
+                    {customers.map((c: any) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {(c.company_name || c.name || "Unnamed")}{c.email ? ` · ${c.email}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-text-secondary mt-1">
+                  Attributes this deal to a customer record so commission and reporting stay in sync.
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="actual_arr_eur">Actual ARR (EUR)</Label>
+                <Input
+                  id="actual_arr_eur"
+                  type="number"
+                  min="0"
+                  value={winForm.actual_arr_eur}
+                  onChange={(e) => setWinForm({ ...winForm, actual_arr_eur: e.target.value })}
+                  placeholder={winDeal.estimated_arr_eur ? String(winDeal.estimated_arr_eur) : ""}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setWinDeal(null)}>Cancel</Button>
+            <Button onClick={confirmWin} disabled={actionLoading === winDeal?.id}>
+              {actionLoading === winDeal?.id ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {winDeal?.status === "won" ? "Save link" : "Confirm Won"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit dialog */}
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
