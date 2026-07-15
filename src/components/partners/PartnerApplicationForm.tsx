@@ -87,6 +87,24 @@ const PartnerApplicationForm = () => {
             <Label htmlFor="company_name">Company Name *</Label>
             <Input id="company_name" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} required maxLength={200} />
           </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="contact_name">Your Name *</Label>
+              <Input id="contact_name" value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} required maxLength={120} />
+            </div>
+            <div>
+              <Label htmlFor="contact_email">Contact Email *</Label>
+              <Input id="contact_email" type="email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} required maxLength={255} />
+            </div>
+            <div>
+              <Label htmlFor="contact_phone">Phone</Label>
+              <Input id="contact_phone" type="tel" value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} maxLength={40} />
+            </div>
+            <div>
+              <Label htmlFor="country">Country</Label>
+              <Input id="country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} maxLength={80} />
+            </div>
+          </div>
           <div>
             <Label htmlFor="website">Website</Label>
             <Input id="website" type="url" placeholder="https://" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} maxLength={500} />
