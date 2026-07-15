@@ -384,6 +384,11 @@ export const Header = () => {
                         Dashboard
                       </Link>
                     </Button>
+                    {isActivePartner && (
+                      <Button variant="outline" asChild className="border-teal/40 text-teal">
+                        <Link to="/partner-portal" onClick={() => setMobileMenuOpen(false)}>Partner Portal</Link>
+                      </Button>
+                    )}
                     {isAdmin && (
                       <Button variant="outline" asChild className="border-navy/30 text-navy">
                         <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>Admin</Link>
