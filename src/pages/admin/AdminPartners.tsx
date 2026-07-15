@@ -31,7 +31,13 @@ export default function AdminPartners() {
   const [partners, setPartners] = useState<any[]>([]);
   const [deals, setDeals] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
   const [refFilter, setRefFilter] = useState<string>("all");
+  const [dealSearch, setDealSearch] = useState("");
+  const [dealStatus, setDealStatus] = useState<string>("all");
+  const [dealPartner, setDealPartner] = useState<string>("all");
+  const [winDeal, setWinDeal] = useState<any | null>(null);
+  const [winForm, setWinForm] = useState<{ customer_id: string; actual_arr_eur: string }>({ customer_id: "", actual_arr_eur: "" });
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
@@ -39,16 +45,18 @@ export default function AdminPartners() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [{ data: apps }, { data: pts }, { data: dl }, { data: refs }] = await Promise.all([
+    const [{ data: apps }, { data: pts }, { data: dl }, { data: refs }, { data: cst }] = await Promise.all([
       supabase.from("partner_applications").select("*").order("created_at", { ascending: false }),
       supabase.from("partners").select("*").order("created_at", { ascending: false }),
       supabase.from("deal_registrations").select("*").order("created_at", { ascending: false }),
       supabase.from("referrals").select("*").order("created_at", { ascending: false }),
+      supabase.from("suite_customers").select("id,name,company_name,email").order("created_at", { ascending: false }).limit(500),
     ]);
     setPartnerApps((apps as any[]) || []);
     setPartners((pts as any[]) || []);
     setDeals((dl as any[]) || []);
     setReferrals((refs as any[]) || []);
+    setCustomers((cst as any[]) || []);
     setLoading(false);
   }, []);
 
