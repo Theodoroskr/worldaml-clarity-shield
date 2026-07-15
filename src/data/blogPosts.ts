@@ -10,6 +10,15 @@ export interface BlogPost {
   tags: string[];
   content: BlogSection[];
   relatedSlugs?: string[];
+  /**
+   * Optional hero image URL that overrides the auto-generated OG card
+   * for this specific post. Must be an absolute https:// URL (recommended
+   * 1200x630, <5MB) so LinkedIn/Facebook/Twitter crawlers can fetch it.
+   * When omitted, the branded blog-og edge function renders the preview.
+   */
+  heroImage?: string;
+  /** Optional alt text for heroImage; falls back to the post title. */
+  heroImageAlt?: string;
 }
 
 export interface BlogSection {

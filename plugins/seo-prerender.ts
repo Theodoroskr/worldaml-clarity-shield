@@ -615,7 +615,12 @@ export function seoPrerender(): Plugin {
       // --- Per-blog-post HTML with unique OG image ---
       for (const post of blogPosts) {
         const canonicalUrl = `${BASE_URL}/blog/${post.slug}`;
-        const ogImage = buildBlogOgImageUrl(post.title, post.category, post.slug, post.date);
+        // If a post declares an explicit heroImage, use it verbatim so the
+        // social preview shows the real photo instead of the branded card.
+        const ogImage = post.heroImage
+          ? post.heroImage
+          : buildBlogOgImageUrl(post.title, post.category, post.slug, post.date);
+        const ogImageAlt = post.heroImageAlt ?? post.title;
         const fullTitle = `${post.title} | ${SITE_NAME}`;
         const description = post.description;
 
@@ -648,7 +653,7 @@ export function seoPrerender(): Plugin {
           `<meta data-rh="true" property="og:image" content="${ogImage}" />`,
           `<meta data-rh="true" property="og:image:width" content="1200" />`,
           `<meta data-rh="true" property="og:image:height" content="630" />`,
-          `<meta data-rh="true" property="og:image:alt" content="${escapeHtmlAttr(post.title)}" />`,
+          `<meta data-rh="true" property="og:image:alt" content="${escapeHtmlAttr(ogImageAlt)}" />`,
           `<meta data-rh="true" property="og:type" content="article" />`,
           `<meta data-rh="true" property="og:site_name" content="${SITE_NAME}" />`,
           `<meta data-rh="true" property="article:section" content="${escapeHtmlAttr(post.category)}" />`,

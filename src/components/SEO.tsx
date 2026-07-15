@@ -22,6 +22,10 @@ interface SEOProps {
   structuredData?: Record<string, unknown> | Record<string, unknown>[];
   /** Extra hreflang alternates for localized variants of this page (adds to default English targets). */
   alternateLocales?: AlternateLocale[];
+  /** Absolute https URL of a page-specific social preview image (1200x630 recommended). Overrides the default sitewide OG image. */
+  ogImage?: string;
+  /** Alt text for the OG image; defaults to the page title. */
+  ogImageAlt?: string;
 }
 
 const MAIN_SITE_NAME = "WorldAML";
@@ -50,11 +54,12 @@ const stripAcademyPrefix = (path: string): string => {
   return cleaned === "" ? "/" : cleaned;
 };
 
-const SEO = ({ title, description, canonical, noindex = false, ogType = "website", ogLocale, breadcrumbs, structuredData, alternateLocales }: SEOProps) => {
+const SEO = ({ title, description, canonical, noindex = false, ogType = "website", ogLocale, breadcrumbs, structuredData, alternateLocales, ogImage, ogImageAlt }: SEOProps) => {
   const onAcademy = isAcademyHost();
   const SITE_NAME = onAcademy ? ACADEMY_SITE_NAME : MAIN_SITE_NAME;
   const BASE_URL = onAcademy ? ACADEMY_BASE_URL : MAIN_BASE_URL;
-  const OG_IMAGE = `${BASE_URL}/og-image.png`;
+  const OG_IMAGE = ogImage ?? `${BASE_URL}/og-image.png`;
+  const OG_IMAGE_ALT = ogImageAlt ?? title;
 
   const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
   const canonicalPath = canonical ? (onAcademy ? stripAcademyPrefix(canonical) : canonical) : undefined;
@@ -103,6 +108,7 @@ const SEO = ({ title, description, canonical, noindex = false, ogType = "website
       <meta property="og:title" content={fullTitle} data-rh="true" />
       <meta property="og:description" content={description} data-rh="true" />
       <meta property="og:image" content={OG_IMAGE} data-rh="true" />
+      <meta property="og:image:alt" content={OG_IMAGE_ALT} data-rh="true" />
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} data-rh="true" />}
       <meta property="og:type" content={ogType} data-rh="true" />
       <meta property="og:site_name" content={SITE_NAME} data-rh="true" />
