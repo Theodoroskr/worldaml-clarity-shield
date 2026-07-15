@@ -19,6 +19,10 @@ const PartnerApplicationForm = () => {
     website: "",
     partner_type: "referral" as "referral" | "affiliate" | "reseller" | "technology",
     description: "",
+    contact_name: "",
+    contact_email: "",
+    contact_phone: "",
+    country: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
