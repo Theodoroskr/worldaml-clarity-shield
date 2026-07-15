@@ -615,7 +615,12 @@ export function seoPrerender(): Plugin {
       // --- Per-blog-post HTML with unique OG image ---
       for (const post of blogPosts) {
         const canonicalUrl = `${BASE_URL}/blog/${post.slug}`;
-        const ogImage = buildBlogOgImageUrl(post.title, post.category, post.slug, post.date);
+        // If a post declares an explicit heroImage, use it verbatim so the
+        // social preview shows the real photo instead of the branded card.
+        const ogImage = post.heroImage
+          ? post.heroImage
+          : buildBlogOgImageUrl(post.title, post.category, post.slug, post.date);
+        const ogImageAlt = post.heroImageAlt ?? post.title;
         const fullTitle = `${post.title} | ${SITE_NAME}`;
         const description = post.description;
 
