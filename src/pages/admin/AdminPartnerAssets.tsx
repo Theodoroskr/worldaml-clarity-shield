@@ -16,8 +16,9 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, Pencil, Trash2, Upload } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Upload, History } from "lucide-react";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 
 const CATEGORIES = [
   "logo",
@@ -42,6 +43,7 @@ const EMPTY: any = {
   file_url: "",
   file_path: "",
   thumbnail_url: "",
+  preview_url: "",
   is_active: true,
   sort_order: 0,
 };
@@ -87,11 +89,106 @@ export default function AdminPartnerAssets() {
       file_url: a.file_url ?? "",
       file_path: a.file_path ?? "",
       thumbnail_url: a.thumbnail_url ?? "",
+      preview_url: a.preview_url ?? "",
       is_active: a.is_active,
       sort_order: a.sort_order ?? 0,
     });
     setOpen(true);
   };
+
+  // Version history state
+  const [versionOpen, setVersionOpen] = useState(false);
+  const [versionAsset, setVersionAsset] = useState<Asset | null>(null);
+  const [versions, setVersions] = useState<any[]>([]);
+  const [versionsLoading, setVersionsLoading] = useState(false);
+  const [newVersionFile, setNewVersionFile] = useState<File | null>(null);
+  const [newVersionChangelog, setNewVersionChangelog] = useState("");
+  const [publishing, setPublishing] = useState(false);
+
+  const openVersions = async (a: Asset) => {
+    setVersionAsset(a);
+    setVersionOpen(true);
+    setNewVersionFile(null);
+    setNewVersionChangelog("");
+    setVersionsLoading(true);
+    const { data, error } = await supabase
+      .from("partner_asset_versions")
+      .select("*")
+      .eq("asset_id", a.id)
+      .order("version_number", { ascending: false });
+    setVersionsLoading(false);
+    if (error) return toast.error(error.message);
+    setVersions(data ?? []);
+  };
+
+  const publishVersion = async () => {
+    if (!versionAsset || !newVersionFile || !user) return;
+    setPublishing(true);
+    try {
+      const safe = newVersionFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `assets/${versionAsset.id}/v${Date.now()}_${safe}`;
+      const up = await supabase.storage
+        .from("partner-assets")
+        .upload(path, newVersionFile, { upsert: false, contentType: newVersionFile.type });
+      if (up.error) throw up.error;
+
+      const nextVersion = (versionAsset.current_version ?? 1) + (versions.length ? 1 : 0) || 1;
+      // Ensure baseline: if no versions exist, insert the current file as v1 first
+      if (versions.length === 0) {
+        await supabase.from("partner_asset_versions").insert({
+          asset_id: versionAsset.id,
+          version_number: versionAsset.current_version ?? 1,
+          file_path: versionAsset.file_path,
+          file_url: versionAsset.file_url,
+          content_type: versionAsset.content_type,
+          file_size_bytes: versionAsset.file_size_bytes,
+          changelog: "Initial version",
+          is_current: false,
+          created_by: user.id,
+        });
+      } else {
+        await supabase
+          .from("partner_asset_versions")
+          .update({ is_current: false })
+          .eq("asset_id", versionAsset.id);
+      }
+
+      const newNum = (versionAsset.current_version ?? 1) + 1;
+      const ins = await supabase.from("partner_asset_versions").insert({
+        asset_id: versionAsset.id,
+        version_number: newNum,
+        file_path: path,
+        file_url: null,
+        content_type: newVersionFile.type,
+        file_size_bytes: newVersionFile.size,
+        changelog: newVersionChangelog || null,
+        is_current: true,
+        created_by: user.id,
+      });
+      if (ins.error) throw ins.error;
+
+      const upd = await supabase
+        .from("partner_assets")
+        .update({
+          file_path: path,
+          file_url: null,
+          content_type: newVersionFile.type,
+          file_size_bytes: newVersionFile.size,
+          current_version: newNum,
+        })
+        .eq("id", versionAsset.id);
+      if (upd.error) throw upd.error;
+
+      toast.success(`Published v${newNum}`);
+      await load();
+      await openVersions({ ...versionAsset, current_version: newNum, file_path: path });
+    } catch (e: any) {
+      toast.error(e.message || "Publish failed");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
 
   const upload = async (file: File) => {
     if (!user) return;
@@ -126,6 +223,7 @@ export default function AdminPartnerAssets() {
       file_url: form.file_url || null,
       file_path: form.file_path || null,
       thumbnail_url: form.thumbnail_url || null,
+      preview_url: form.preview_url || null,
       is_active: !!form.is_active,
       sort_order: Number(form.sort_order) || 0,
     };
@@ -232,6 +330,9 @@ export default function AdminPartnerAssets() {
               <Field label="Thumbnail URL (optional)">
                 <Input value={form.thumbnail_url} onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })} placeholder="https://..." />
               </Field>
+              <Field label="Preview URL (optional — image, PDF or video shown in the portal preview)">
+                <Input value={form.preview_url} onChange={(e) => setForm({ ...form, preview_url: e.target.value })} placeholder="https://... (defaults to the file itself)" />
+              </Field>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Sort order">
                   <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} />
@@ -299,6 +400,9 @@ export default function AdminPartnerAssets() {
                         </Badge>
                       </td>
                       <td className="py-2.5 text-right space-x-1">
+                        <Button size="icon" variant="ghost" title="Version history" onClick={() => openVersions(a)}>
+                          <History className="w-4 h-4" />
+                        </Button>
                         <Button size="icon" variant="ghost" onClick={() => startEdit(a)}>
                           <Pencil className="w-4 h-4" />
                         </Button>
@@ -314,6 +418,67 @@ export default function AdminPartnerAssets() {
           )}
         </CardContent>
       </Card>
+
+      {/* Version history dialog */}
+      <Dialog open={versionOpen} onOpenChange={setVersionOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Versions — {versionAsset?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border border-border rounded-md p-3 space-y-2">
+              <p className="text-sm font-medium">Publish a new version</p>
+              <Input
+                type="file"
+                onChange={(e) => setNewVersionFile(e.target.files?.[0] ?? null)}
+                disabled={publishing}
+              />
+              <Textarea
+                rows={2}
+                placeholder="Changelog (what changed?)"
+                value={newVersionChangelog}
+                onChange={(e) => setNewVersionChangelog(e.target.value)}
+                disabled={publishing}
+              />
+              <div className="flex justify-end">
+                <Button size="sm" onClick={publishVersion} disabled={!newVersionFile || publishing}>
+                  {publishing ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />}
+                  Publish version
+                </Button>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium mb-2">History</p>
+              {versionsLoading ? (
+                <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin" /></div>
+              ) : versions.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-3">No prior versions — the current file is the original upload.</p>
+              ) : (
+                <div className="divide-y divide-border max-h-[45vh] overflow-y-auto">
+                  {versions.map((v) => (
+                    <div key={v.id} className="py-2.5 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-sm">v{v.version_number}</span>
+                          {v.is_current && (
+                            <Badge className="bg-teal text-white text-[10px] px-1.5 py-0">Current</Badge>
+                          )}
+                          <span className="text-[11px] text-muted-foreground">
+                            {formatDistanceToNow(new Date(v.created_at))} ago
+                          </span>
+                        </div>
+                        {v.changelog && (
+                          <p className="text-xs text-muted-foreground mt-0.5">{v.changelog}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
