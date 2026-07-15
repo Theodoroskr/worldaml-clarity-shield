@@ -743,10 +743,12 @@ export type Database = {
       }
       deal_registrations: {
         Row: {
+          actual_arr_eur: number | null
           admin_notes: string | null
           created_at: string
           estimated_arr_eur: number | null
           id: string
+          linked_customer_id: string | null
           notes: string | null
           partner_id: string
           product_interest: string[]
@@ -760,12 +762,15 @@ export type Database = {
           status: Database["public"]["Enums"]["deal_registration_status"]
           submitted_by: string
           updated_at: string
+          won_at: string | null
         }
         Insert: {
+          actual_arr_eur?: number | null
           admin_notes?: string | null
           created_at?: string
           estimated_arr_eur?: number | null
           id?: string
+          linked_customer_id?: string | null
           notes?: string | null
           partner_id: string
           product_interest?: string[]
@@ -779,12 +784,15 @@ export type Database = {
           status?: Database["public"]["Enums"]["deal_registration_status"]
           submitted_by: string
           updated_at?: string
+          won_at?: string | null
         }
         Update: {
+          actual_arr_eur?: number | null
           admin_notes?: string | null
           created_at?: string
           estimated_arr_eur?: number | null
           id?: string
+          linked_customer_id?: string | null
           notes?: string | null
           partner_id?: string
           product_interest?: string[]
@@ -798,8 +806,16 @@ export type Database = {
           status?: Database["public"]["Enums"]["deal_registration_status"]
           submitted_by?: string
           updated_at?: string
+          won_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "deal_registrations_linked_customer_id_fkey"
+            columns: ["linked_customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "deal_registrations_partner_id_fkey"
             columns: ["partner_id"]
