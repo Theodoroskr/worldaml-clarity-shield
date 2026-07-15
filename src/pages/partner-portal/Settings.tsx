@@ -90,7 +90,7 @@ export default function PartnerSettings() {
               value={details}
               onChange={(e) => setDetails(e.target.value)}
               placeholder={
-                partner.payout_details_encrypted
+                (partner as any).payout_details_encrypted
                   ? "•••• update to change"
                   : "Enter details"
               }
