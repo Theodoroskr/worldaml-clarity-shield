@@ -630,6 +630,60 @@ export default function AdminPartners() {
       })()}
 
 
+      {/* Convert to Won dialog */}
+      <Dialog open={!!winDeal} onOpenChange={(o) => !o && setWinDeal(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{winDeal?.status === "won" ? "Update customer link" : "Convert deal to Won"}</DialogTitle>
+          </DialogHeader>
+          {winDeal && (
+            <div className="grid gap-4 py-2">
+              <div className="text-sm">
+                <div className="font-medium text-navy">{winDeal.prospect_company}</div>
+                <div className="text-text-secondary text-xs">
+                  Partner: {(partners.find((p: any) => p.id === winDeal.partner_id) as any)?.display_name || winDeal.partner_id.slice(0, 8)}
+                </div>
+              </div>
+              <div>
+                <Label>Link to customer</Label>
+                <Select value={winForm.customer_id || "__none__"} onValueChange={(v) => setWinForm({ ...winForm, customer_id: v === "__none__" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="Choose a customer…" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    <SelectItem value="__none__">— No customer linked —</SelectItem>
+                    {customers.map((c: any) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {(c.company_name || c.name || "Unnamed")}{c.email ? ` · ${c.email}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-text-secondary mt-1">
+                  Attributes this deal to a customer record so commission and reporting stay in sync.
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="actual_arr_eur">Actual ARR (EUR)</Label>
+                <Input
+                  id="actual_arr_eur"
+                  type="number"
+                  min="0"
+                  value={winForm.actual_arr_eur}
+                  onChange={(e) => setWinForm({ ...winForm, actual_arr_eur: e.target.value })}
+                  placeholder={winDeal.estimated_arr_eur ? String(winDeal.estimated_arr_eur) : ""}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setWinDeal(null)}>Cancel</Button>
+            <Button onClick={confirmWin} disabled={actionLoading === winDeal?.id}>
+              {actionLoading === winDeal?.id ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {winDeal?.status === "won" ? "Save link" : "Confirm Won"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Edit dialog */}
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent className="max-w-lg">
