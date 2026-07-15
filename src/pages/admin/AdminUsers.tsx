@@ -494,6 +494,56 @@ export default function AdminUsers() {
     );
   };
 
+  const renderPartnerApplicantsTable = (list: Profile[]) => (
+    <div className="overflow-x-auto border border-border rounded-lg">
+      <table className="w-full text-sm">
+        <thead className="bg-muted/40 text-xs text-muted-foreground">
+          <tr>
+            <th className="text-left px-3 py-2 font-medium">User</th>
+            <th className="text-left px-3 py-2 font-medium">Company</th>
+            <th className="text-left px-3 py-2 font-medium">Partner type</th>
+            <th className="text-left px-3 py-2 font-medium">Application status</th>
+            <th className="text-left px-3 py-2 font-medium">Account</th>
+            <th className="text-left px-3 py-2 font-medium">Applied</th>
+            <th className="text-right px-3 py-2 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {list.map(p => {
+            const key = p.user_id || (p.email || "").toLowerCase();
+            const meta = partnerAppMeta[key];
+            const appStatus = meta?.status || "pending";
+            const statusBadge =
+              appStatus === "approved" ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Approved</Badge>
+              : appStatus === "rejected" ? <Badge className="bg-red-50 text-red-700 border-red-200">Rejected</Badge>
+              : <Badge className="bg-amber-50 text-amber-700 border-amber-200">Pending</Badge>;
+            return (
+              <tr key={p.id} className="border-t border-border">
+                <td className="px-3 py-2">
+                  <div className="font-medium text-foreground">{p.full_name || "—"}</div>
+                  <div className="text-xs text-muted-foreground">{p.email}</div>
+                </td>
+                <td className="px-3 py-2">{meta?.company_name || p.company_name || "—"}</td>
+                <td className="px-3 py-2 capitalize">{meta?.partner_type || "—"}</td>
+                <td className="px-3 py-2">{statusBadge}</td>
+                <td className="px-3 py-2">{getStatusBadge(p.status)}</td>
+                <td className="px-3 py-2 text-xs text-muted-foreground">
+                  {meta?.created_at ? new Date(meta.created_at).toLocaleDateString() : "—"}
+                </td>
+                <td className="px-3 py-2 text-right">
+                  <Link to="/admin/partners" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                    Review <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {list.length === 0 && <div className="text-center py-8 text-sm text-muted-foreground">No partner applicants match the current filters.</div>}
+    </div>
+  );
+
   const selectedProfile = REGULATORY_PROFILES[selectedRegulator];
 
   return (
