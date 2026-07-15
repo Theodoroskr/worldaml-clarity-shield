@@ -236,6 +236,7 @@ const App = () => (
                   <Route path="reconcile-purchases" element={<AdminReconcilePurchases />} />
                   <Route path="purchase-status" element={<AdminPurchaseStatus />} />
                   <Route path="partners" element={<AdminPartners />} />
+                  <Route path="partner-assets" element={<AdminPartnerAssets />} />
                   <Route path="domains" element={<AdminDomains />} />
                   <Route path="academy-users" element={<AdminAcademyUsers />} />
                   <Route path="academy-funnel" element={<AdminAcademyFunnel />} />
