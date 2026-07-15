@@ -29,6 +29,10 @@ const PartnerApplicationForm = () => {
     e.preventDefault();
     if (!user) return;
     if (!form.company_name.trim()) { toast.error("Company name is required"); return; }
+    if (!form.contact_name.trim()) { toast.error("Your name is required"); return; }
+    if (!form.contact_email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contact_email.trim())) {
+      toast.error("A valid contact email is required"); return;
+    }
 
     setLoading(true);
     const { data: inserted, error } = await supabase.from("partner_applications").insert({
@@ -37,6 +41,10 @@ const PartnerApplicationForm = () => {
       website: form.website.trim() || null,
       partner_type: form.partner_type,
       description: form.description.trim() || null,
+      contact_name: form.contact_name.trim() || null,
+      contact_email: form.contact_email.trim().toLowerCase() || null,
+      contact_phone: form.contact_phone.trim() || null,
+      country: form.country.trim() || null,
     } as any).select("id").maybeSingle();
 
     if (error) {
