@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { RegionSelector } from "./RegionSelector";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePartner } from "@/hooks/usePartner";
 import {
   DropdownMenu,
   DropdownMenuContent,
