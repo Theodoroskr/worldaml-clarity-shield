@@ -131,6 +131,8 @@ const BlogPost = () => {
         description={post.description}
         canonical={`/blog/${post.slug}`}
         ogType="article"
+        ogImage={post.heroImage}
+        ogImageAlt={post.heroImageAlt ?? post.title}
         breadcrumbs={[
           { name: "Home", url: "/" },
           { name: "Blog", url: "/blog" },
