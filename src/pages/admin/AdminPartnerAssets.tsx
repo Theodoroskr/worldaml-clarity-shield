@@ -16,8 +16,9 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, Pencil, Trash2, Upload } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Upload, History } from "lucide-react";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 
 const CATEGORIES = [
   "logo",
@@ -42,6 +43,7 @@ const EMPTY: any = {
   file_url: "",
   file_path: "",
   thumbnail_url: "",
+  preview_url: "",
   is_active: true,
   sort_order: 0,
 };
