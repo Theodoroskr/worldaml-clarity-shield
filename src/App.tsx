@@ -91,7 +91,7 @@ const MarketPage = lazy(() => import("./pages/MarketPage"));
 const FreeAMLCheck = lazy(() => import("./pages/FreeAMLCheck"));
 const Partners = lazy(() => import("./pages/Partners"));
 const PartnerApply = lazy(() => import("./pages/PartnerApply"));
-const PartnerDashboard = lazy(() => import("./pages/PartnerDashboard"));
+
 const PartnersDirectory = lazy(() => import("./pages/PartnersDirectory"));
 const DataCoverageIndex = lazy(() => import("./pages/DataCoverageIndex"));
 const DataCoverageCountry = lazy(() => import("./pages/DataCoverageCountry"));
@@ -130,6 +130,16 @@ const AdminDomains = lazy(() => import("./pages/admin/AdminDomains"));
 const AdminAcademyUsers = lazy(() => import("./pages/admin/AdminAcademyUsers"));
 const AdminAcademyFunnel = lazy(() => import("./pages/admin/AdminAcademyFunnel"));
 const AdminOutreachQueue = lazy(() => import("./pages/admin/AdminOutreachQueue"));
+const AdminPartnerAssets = lazy(() => import("./pages/admin/AdminPartnerAssets"));
+
+const PartnerPortalLayout = lazy(() => import("./pages/partner-portal/PartnerPortalLayout"));
+const PartnerOverview = lazy(() => import("./pages/partner-portal/Overview"));
+const PartnerReferralsPage = lazy(() => import("./pages/partner-portal/Referrals"));
+const PartnerDealsPage = lazy(() => import("./pages/partner-portal/Deals"));
+const PartnerCommissionsPage = lazy(() => import("./pages/partner-portal/Commissions"));
+const PartnerAssetsPage = lazy(() => import("./pages/partner-portal/Assets"));
+const PartnerProfilePage = lazy(() => import("./pages/partner-portal/Profile"));
+const PartnerSettingsPage = lazy(() => import("./pages/partner-portal/Settings"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
@@ -226,6 +236,7 @@ const App = () => (
                   <Route path="reconcile-purchases" element={<AdminReconcilePurchases />} />
                   <Route path="purchase-status" element={<AdminPurchaseStatus />} />
                   <Route path="partners" element={<AdminPartners />} />
+                  <Route path="partner-assets" element={<AdminPartnerAssets />} />
                   <Route path="domains" element={<AdminDomains />} />
                   <Route path="academy-users" element={<AdminAcademyUsers />} />
                   <Route path="academy-funnel" element={<AdminAcademyFunnel />} />
@@ -308,7 +319,18 @@ const App = () => (
                 <Route path="/partners" element={<Partners />} />
                 <Route path="/partners/directory" element={<PartnersDirectory />} />
                 <Route path="/partners/apply" element={<PartnerApply />} />
-                <Route path="/partners/dashboard" element={<PartnerDashboard />} />
+                <Route path="/partners/dashboard" element={<Navigate to="/partner-portal" replace />} />
+
+                {/* Channel Partner Portal */}
+                <Route path="/partner-portal" element={<PartnerPortalLayout />}>
+                  <Route index element={<PartnerOverview />} />
+                  <Route path="referrals" element={<PartnerReferralsPage />} />
+                  <Route path="deals" element={<PartnerDealsPage />} />
+                  <Route path="commissions" element={<PartnerCommissionsPage />} />
+                  <Route path="assets" element={<PartnerAssetsPage />} />
+                  <Route path="profile" element={<PartnerProfilePage />} />
+                  <Route path="settings" element={<PartnerSettingsPage />} />
+                </Route>
 
                 {/* Academy */}
                 <Route path="/academy" element={<Academy />} />
