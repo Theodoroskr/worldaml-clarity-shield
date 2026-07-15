@@ -502,7 +502,7 @@ export default function AdminUsers() {
         <div>
           <h1 className="text-xl font-bold text-foreground">User Management</h1>
           <p className="text-xs text-muted-foreground">
-            {nonAcademyProfiles.length} platform users · {suiteUsers.length} suite users · {academyUsers.length} academy learners (managed in <a href="/admin/academy-users" className="text-primary hover:underline">Academy Signups</a>)
+            {nonPartnerProfiles.length} platform users · {suiteUsers.length} suite users · {partnerApplicants.length} partner applicants (processed in <Link to="/admin/partners" className="text-primary hover:underline">Partner Program</Link>) · {academyUsers.length} academy learners (managed in <a href="/admin/academy-users" className="text-primary hover:underline">Academy Signups</a>)
           </p>
         </div>
       </div>
