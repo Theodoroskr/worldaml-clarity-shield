@@ -111,6 +111,7 @@ const AMLScreeningEU = lazy(() => import("./pages/AMLScreeningEU"));
 const AMLScreeningUK = lazy(() => import("./pages/AMLScreeningUK"));
 const ComplianceSoftwareUS = lazy(() => import("./pages/ComplianceSoftwareUS"));
 const ComplianceSoftwareUK = lazy(() => import("./pages/ComplianceSoftwareUK"));
+const SanctionsScreeningSoftware = lazy(() => import("./pages/SanctionsScreeningSoftware"));
 const USAMLKYCComplianceGuide = lazy(() => import("./pages/USAMLKYCComplianceGuide"));
 const WorldCheckAlternative = lazy(() => import("./pages/WorldCheckAlternative"));
 const Advisory = lazy(() => import("./pages/Advisory"));
