@@ -55,6 +55,7 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/aml-screening/eu", changefreq: "monthly", priority: 0.9 },
   { path: "/aml-screening/uk", changefreq: "monthly", priority: 0.9 },
   { path: "/compliance-software/us", changefreq: "monthly", priority: 0.9 },
+  { path: "/resources/us-aml-kyc-compliance-guide", changefreq: "monthly", priority: 0.8 },
   { path: "/world-check-alternative", changefreq: "monthly", priority: 0.9 },
 
   // Data Sources (Lane 2)
