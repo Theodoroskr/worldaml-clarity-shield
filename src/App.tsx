@@ -110,6 +110,7 @@ const EUSanctionsCountry = lazy(() => import("./pages/EUSanctionsCountry"));
 const AMLScreeningEU = lazy(() => import("./pages/AMLScreeningEU"));
 const AMLScreeningUK = lazy(() => import("./pages/AMLScreeningUK"));
 const ComplianceSoftwareUS = lazy(() => import("./pages/ComplianceSoftwareUS"));
+const USAMLKYCComplianceGuide = lazy(() => import("./pages/USAMLKYCComplianceGuide"));
 const WorldCheckAlternative = lazy(() => import("./pages/WorldCheckAlternative"));
 const Advisory = lazy(() => import("./pages/Advisory"));
 const AdvisoryEwra = lazy(() => import("./pages/AdvisoryEwra"));
@@ -379,6 +380,7 @@ const App = () => (
                 <Route path="/aml-screening/uk" element={<AMLScreeningUK />} />
                 <Route path="/compliance-software/us" element={<ComplianceSoftwareUS />} />
                 <Route path="/compliance-software" element={<Navigate to="/compliance-software/us" replace />} />
+                <Route path="/resources/us-aml-kyc-compliance-guide" element={<USAMLKYCComplianceGuide />} />
 
                 {/* Comparison landing pages */}
                 <Route path="/world-check-alternative" element={<WorldCheckAlternative />} />
