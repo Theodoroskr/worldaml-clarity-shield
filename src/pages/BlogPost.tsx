@@ -188,6 +188,18 @@ const BlogPost = () => {
             <div className="grid lg:grid-cols-[1fr_280px] gap-12">
               {/* Main content */}
               <article className="max-w-3xl">
+                {post.heroImage && (
+                  <figure className="mb-10 -mt-2 overflow-hidden rounded-lg border border-divider bg-surface-subtle">
+                    <img
+                      src={post.heroImage}
+                      alt={post.heroImageAlt ?? post.title}
+                      loading="eager"
+                      width={1200}
+                      height={630}
+                      className="w-full h-auto aspect-[1200/630] object-cover"
+                    />
+                  </figure>
+                )}
                 {post.content.map((section, i) => (
                   <SectionRenderer key={i} section={section} />
                 ))}
