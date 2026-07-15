@@ -159,8 +159,8 @@ export default function AdminPartners() {
                 </thead>
                 <tbody>
                   {partnerApps.map((app: any) => (
-                    <>
-                    <tr key={app.id} className="border-b border-divider/30 hover:bg-surface-subtle">
+                    <Fragment key={app.id}>
+                    <tr className="border-b border-divider/30 hover:bg-surface-subtle">
                       <td className="py-3 pr-4 font-medium text-navy align-top">{app.company_name}</td>
                       <td className="py-3 pr-4 text-text-secondary align-top">
                         {app.contact_name ? <div className="text-navy">{app.contact_name}</div> : null}
