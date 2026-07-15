@@ -331,6 +331,7 @@ const App = () => (
                   <Route path="deals" element={<PartnerDealsPage />} />
                   <Route path="commissions" element={<PartnerCommissionsPage />} />
                   <Route path="assets" element={<PartnerAssetsPage />} />
+                  <Route path="contacts" element={<PartnerContactsPage />} />
                   <Route path="profile" element={<PartnerProfilePage />} />
                   <Route path="settings" element={<PartnerSettingsPage />} />
                 </Route>
