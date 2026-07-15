@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import Layout from "@/components/Layout";
 import ScrollToTop from "@/components/ScrollToTop";
+import PartnerOnlyRouteGuard from "@/components/PartnerOnlyRouteGuard";
 import AuthQueryInvalidator from "@/components/AuthQueryInvalidator";
 import { lazy, Suspense } from "react";
 import { isAcademyHost } from "@/lib/academyHost";
@@ -180,6 +181,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <ScrollToTop />
+            <PartnerOnlyRouteGuard />
             <Layout>
               <Suspense fallback={<div className="min-h-screen" />}>
               {isAcademyHost() ? (
