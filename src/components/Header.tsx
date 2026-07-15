@@ -256,28 +256,46 @@ export const Header = () => {
           <div className="hidden xl:flex items-center gap-2 shrink-0">
             <RegionSelector />
             {user ? (
-              <>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/dashboard">
-                    <User className="h-4 w-4 mr-1" />
-                    Dashboard
-                  </Link>
-                </Button>
-                {isActivePartner && (
-                  <Button variant="outline" size="sm" asChild className="border-teal/40 text-teal hover:bg-teal/5">
-                    <Link to="/partner-portal">Partner Portal</Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1.5">
+                    <User className="h-4 w-4" />
+                    <span className="max-w-[120px] truncate">Account</span>
+                    <ChevronDown className="h-3.5 w-3.5" />
                   </Button>
-                )}
-                {isAdmin && (
-                  <Button variant="outline" size="sm" asChild className="border-navy/30 text-navy hover:bg-navy/5">
-                    <Link to="/admin">Admin</Link>
-                  </Button>
-                )}
-                <Button variant="outline" size="sm" onClick={handleSignOut}>
-                  <LogOut className="h-4 w-4 mr-1" />
-                  Sign Out
-                </Button>
-              </>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  {user.email && (
+                    <>
+                      <DropdownMenuLabel className="text-caption text-text-tertiary font-normal truncate">
+                        {user.email}
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard">
+                      <User className="h-4 w-4 mr-2" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  {isActivePartner && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/partner-portal">Partner Portal</Link>
+                    </DropdownMenuItem>
+                  )}
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin">Admin</Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
