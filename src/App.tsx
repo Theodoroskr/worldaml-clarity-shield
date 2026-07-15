@@ -130,6 +130,16 @@ const AdminDomains = lazy(() => import("./pages/admin/AdminDomains"));
 const AdminAcademyUsers = lazy(() => import("./pages/admin/AdminAcademyUsers"));
 const AdminAcademyFunnel = lazy(() => import("./pages/admin/AdminAcademyFunnel"));
 const AdminOutreachQueue = lazy(() => import("./pages/admin/AdminOutreachQueue"));
+const AdminPartnerAssets = lazy(() => import("./pages/admin/AdminPartnerAssets"));
+
+const PartnerPortalLayout = lazy(() => import("./pages/partner-portal/PartnerPortalLayout"));
+const PartnerOverview = lazy(() => import("./pages/partner-portal/Overview"));
+const PartnerReferralsPage = lazy(() => import("./pages/partner-portal/Referrals"));
+const PartnerDealsPage = lazy(() => import("./pages/partner-portal/Deals"));
+const PartnerCommissionsPage = lazy(() => import("./pages/partner-portal/Commissions"));
+const PartnerAssetsPage = lazy(() => import("./pages/partner-portal/Assets"));
+const PartnerProfilePage = lazy(() => import("./pages/partner-portal/Profile"));
+const PartnerSettingsPage = lazy(() => import("./pages/partner-portal/Settings"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
