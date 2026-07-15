@@ -21,6 +21,7 @@ export type PartnerRow = {
   commission_lifetime_months: number | null;
   payout_method: string | null;
   notification_prefs: Record<string, boolean> | null;
+  onboarding_completed_at: string | null;
 };
 
 export type CommissionSummary = {
