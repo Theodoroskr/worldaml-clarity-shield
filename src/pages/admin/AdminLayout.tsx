@@ -13,6 +13,7 @@ const NAV: NavItem[] = [
   { label: "Organizations", path: "/admin/organizations", icon: Building2, section: "Platform" },
   { label: "Domains", path: "/admin/domains", icon: Globe, section: "Platform" },
   { label: "Partners", path: "/admin/partners", icon: Handshake, section: "Platform" },
+  { label: "Partner Assets", path: "/admin/partner-assets", icon: ImageIcon, section: "Platform" },
   { label: "Alert Rules", path: "/admin/alert-rules", icon: Bell, section: "Platform" },
   { label: "Forms", path: "/admin/forms", icon: FileText, section: "Platform" },
   { label: "Workflows", path: "/admin/workflows", icon: GitBranch, section: "Platform" },
