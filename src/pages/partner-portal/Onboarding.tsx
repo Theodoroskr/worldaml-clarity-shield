@@ -132,7 +132,7 @@ export default function PartnerOnboarding() {
                     ) : active ? (
                       <Circle className="w-5 h-5 text-teal fill-teal/20 mt-0.5" />
                     ) : (
-                      <Circle className="w-5 h-5 text-muted-foreground/40 mt-0.5" />
+                      <Circle className="w-5 h-5 text-muted-foreground mt-0.5" />
                     )}
                     <div>
                       <p className={`text-sm ${active || done ? "text-foreground font-medium" : "text-muted-foreground"}`}>
