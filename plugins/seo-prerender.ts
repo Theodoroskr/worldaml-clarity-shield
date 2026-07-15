@@ -653,7 +653,7 @@ export function seoPrerender(): Plugin {
           `<meta data-rh="true" property="og:image" content="${ogImage}" />`,
           `<meta data-rh="true" property="og:image:width" content="1200" />`,
           `<meta data-rh="true" property="og:image:height" content="630" />`,
-          `<meta data-rh="true" property="og:image:alt" content="${escapeHtmlAttr(post.title)}" />`,
+          `<meta data-rh="true" property="og:image:alt" content="${escapeHtmlAttr(ogImageAlt)}" />`,
           `<meta data-rh="true" property="og:type" content="article" />`,
           `<meta data-rh="true" property="og:site_name" content="${SITE_NAME}" />`,
           `<meta data-rh="true" property="article:section" content="${escapeHtmlAttr(post.category)}" />`,
