@@ -1017,6 +1017,56 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_asset_versions: {
+        Row: {
+          asset_id: string
+          changelog: string | null
+          content_type: string | null
+          created_at: string
+          created_by: string | null
+          file_path: string | null
+          file_size_bytes: number | null
+          file_url: string | null
+          id: string
+          is_current: boolean
+          version_number: number
+        }
+        Insert: {
+          asset_id: string
+          changelog?: string | null
+          content_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          file_path?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
+          id?: string
+          is_current?: boolean
+          version_number: number
+        }
+        Update: {
+          asset_id?: string
+          changelog?: string | null
+          content_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          file_path?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
+          id?: string
+          is_current?: boolean
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_asset_versions_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "partner_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_assets: {
         Row: {
           category: string
@@ -1024,12 +1074,14 @@ export type Database = {
           content_type: string | null
           created_at: string
           created_by: string | null
+          current_version: number
           description: string | null
           file_path: string | null
           file_size_bytes: number | null
           file_url: string | null
           id: string
           is_active: boolean
+          preview_url: string | null
           sort_order: number
           thumbnail_url: string | null
           title: string
@@ -1041,12 +1093,14 @@ export type Database = {
           content_type?: string | null
           created_at?: string
           created_by?: string | null
+          current_version?: number
           description?: string | null
           file_path?: string | null
           file_size_bytes?: number | null
           file_url?: string | null
           id?: string
           is_active?: boolean
+          preview_url?: string | null
           sort_order?: number
           thumbnail_url?: string | null
           title: string
@@ -1058,12 +1112,14 @@ export type Database = {
           content_type?: string | null
           created_at?: string
           created_by?: string | null
+          current_version?: number
           description?: string | null
           file_path?: string | null
           file_size_bytes?: number | null
           file_url?: string | null
           id?: string
           is_active?: boolean
+          preview_url?: string | null
           sort_order?: number
           thumbnail_url?: string | null
           title?: string
