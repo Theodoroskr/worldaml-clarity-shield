@@ -384,6 +384,7 @@ const App = () => (
                 <Route path="/compliance-software/uk" element={<ComplianceSoftwareUK />} />
                 <Route path="/compliance-software" element={<Navigate to="/compliance-software/us" replace />} />
                 <Route path="/resources/us-aml-kyc-compliance-guide" element={<USAMLKYCComplianceGuide />} />
+                <Route path="/sanctions-screening-software" element={<SanctionsScreeningSoftware />} />
 
                 {/* Comparison landing pages */}
                 <Route path="/world-check-alternative" element={<WorldCheckAlternative />} />
