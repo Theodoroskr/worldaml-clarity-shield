@@ -13,9 +13,30 @@
 import type { Plugin } from "vite";
 import * as fs from "fs";
 import * as path from "path";
+import { blogPosts } from "../src/data/blogPosts";
 
 const BASE_URL = "https://www.worldaml.com";
 const SITE_NAME = "WorldAML";
+// Supabase edge function that renders per-post OG images (1200x630 PNG)
+const OG_FUNCTION_URL =
+  "https://uxjjxnnyrjkhcggptihx.supabase.co/functions/v1/blog-og";
+
+function encodeParam(value: string): string {
+  return encodeURIComponent(value);
+}
+
+function buildBlogOgImageUrl(title: string, category: string, slug: string): string {
+  return `${OG_FUNCTION_URL}?slug=${encodeParam(slug)}&title=${encodeParam(title)}&category=${encodeParam(category)}`;
+}
+
+function escapeHtmlAttr(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 interface RouteMeta {
   title: string;
