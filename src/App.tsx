@@ -328,6 +328,7 @@ const App = () => (
                 {/* Channel Partner Portal */}
                 <Route path="/partner-portal" element={<PartnerPortalLayout />}>
                   <Route index element={<PartnerOverview />} />
+                  <Route path="welcome" element={<PartnerWelcomePage />} />
                   <Route path="referrals" element={<PartnerReferralsPage />} />
                   <Route path="deals" element={<PartnerDealsPage />} />
                   <Route path="commissions" element={<PartnerCommissionsPage />} />
