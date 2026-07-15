@@ -775,6 +775,178 @@ export default function AdminPartners() {
         );
       })()}
 
+      {/* Notification Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-navy flex items-center gap-2">
+            <Bell className="h-4 w-4 text-teal" /> Notification Settings
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="rounded-lg border border-divider p-4 bg-surface-subtle/40">
+            <div className="text-sm font-semibold text-navy mb-1">Your alerts</div>
+            <div className="text-xs text-text-secondary mb-3">
+              Sent to <span className="font-mono">{user?.email ?? "—"}</span>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <label className="flex items-center justify-between gap-3 text-sm">
+                <span>New partner applications</span>
+                <Switch
+                  checked={myNotif.notify_new_application}
+                  onCheckedChange={(v) => setMyNotif({ ...myNotif, notify_new_application: v })}
+                />
+              </label>
+              <label className="flex items-center justify-between gap-3 text-sm">
+                <span>New deal registrations</span>
+                <Switch
+                  checked={myNotif.notify_new_deal}
+                  onCheckedChange={(v) => setMyNotif({ ...myNotif, notify_new_deal: v })}
+                />
+              </label>
+              <label className="flex items-center justify-between gap-3 text-sm">
+                <span>Deal status changes</span>
+                <Switch
+                  checked={myNotif.notify_deal_status_change}
+                  onCheckedChange={(v) => setMyNotif({ ...myNotif, notify_deal_status_change: v })}
+                />
+              </label>
+              <label className="flex items-center justify-between gap-3 text-sm">
+                <span>Receive alerts</span>
+                <Switch
+                  checked={myNotif.is_active}
+                  onCheckedChange={(v) => setMyNotif({ ...myNotif, is_active: v })}
+                />
+              </label>
+            </div>
+            <div className="mt-4">
+              <Button onClick={saveMyNotif} disabled={savingNotif}>
+                {savingNotif ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Save preferences
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm font-semibold text-navy mb-2">All recipients</div>
+            {notifSettings.length === 0 ? (
+              <p className="text-text-secondary text-sm py-4 text-center">No admins have opted in yet.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-divider text-left">
+                      <th className="pb-2 pr-4 font-semibold text-navy">Admin</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Applications</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Deals</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Status changes</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Active</th>
+                      <th className="pb-2 font-semibold text-navy"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {notifSettings.map((n: any) => (
+                      <tr key={n.user_id} className="border-b border-divider/50">
+                        <td className="py-2 pr-4">
+                          <div className="text-navy">{n.email}</div>
+                          {n.user_id === user?.id && <div className="text-xs text-teal">(you)</div>}
+                        </td>
+                        <td className="py-2 pr-4">{n.notify_new_application ? "✓" : "—"}</td>
+                        <td className="py-2 pr-4">{n.notify_new_deal ? "✓" : "—"}</td>
+                        <td className="py-2 pr-4">{n.notify_deal_status_change ? "✓" : "—"}</td>
+                        <td className="py-2 pr-4">
+                          <Badge className={n.is_active ? "bg-green-100 text-green-800 border-green-200" : "bg-slate-100 text-slate-700 border-slate-200"}>
+                            {n.is_active ? "on" : "off"}
+                          </Badge>
+                        </td>
+                        <td className="py-2">
+                          {n.user_id === user?.id && (
+                            <Button size="sm" variant="ghost" className="text-red-700" onClick={() => removeNotifRecipient(n)}>
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <p className="text-xs text-text-secondary mt-2">
+              Each admin controls their own row. Toggle "Receive alerts" off to pause without removing yourself.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Audit Log */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <CardTitle className="text-navy flex items-center gap-2">
+              <History className="h-4 w-4 text-teal" /> Audit Log
+            </CardTitle>
+            <Select value={auditEntity} onValueChange={setAuditEntity}>
+              <SelectTrigger className="h-9 w-56 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All entity types</SelectItem>
+                <SelectItem value="partner_application">Applications</SelectItem>
+                <SelectItem value="partner">Partners</SelectItem>
+                <SelectItem value="deal_registration">Deal registrations</SelectItem>
+                <SelectItem value="notification_settings">Notification settings</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const rows = auditEntity === "all"
+              ? auditLog
+              : auditLog.filter((r: any) => r.entity_type === auditEntity);
+            if (rows.length === 0) {
+              return <p className="text-text-secondary text-sm py-4 text-center">No audit events yet.</p>;
+            }
+            return (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-divider text-left">
+                      <th className="pb-2 pr-4 font-semibold text-navy">When</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Actor</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Action</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Entity</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Target</th>
+                      <th className="pb-2 font-semibold text-navy">Changes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((r: any) => (
+                      <tr key={r.id} className="border-b border-divider/50 hover:bg-surface-subtle align-top">
+                        <td className="py-2 pr-4 text-text-secondary text-xs whitespace-nowrap">
+                          {new Date(r.created_at).toLocaleString("en-GB")}
+                        </td>
+                        <td className="py-2 pr-4 text-text-secondary text-xs">{r.actor_email ?? r.actor_user_id?.slice(0, 8) ?? "—"}</td>
+                        <td className="py-2 pr-4">
+                          <Badge variant="outline" className="capitalize font-mono text-[11px]">{r.action.replace(/_/g, " ")}</Badge>
+                        </td>
+                        <td className="py-2 pr-4 text-text-secondary text-xs">{r.entity_type.replace(/_/g, " ")}</td>
+                        <td className="py-2 pr-4 text-navy text-xs">{r.entity_label ?? r.entity_id?.slice(0, 8) ?? "—"}</td>
+                        <td className="py-2 text-text-secondary text-xs max-w-md">
+                          {r.changes && Object.keys(r.changes).length > 0 ? (
+                            <pre className="whitespace-pre-wrap font-mono text-[11px] bg-surface-subtle/60 p-2 rounded max-h-32 overflow-auto">
+{JSON.stringify(r.changes, null, 2)}
+                            </pre>
+                          ) : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
+
 
       {/* Convert to Won dialog */}
       <Dialog open={!!winDeal} onOpenChange={(o) => !o && setWinDeal(null)}>
