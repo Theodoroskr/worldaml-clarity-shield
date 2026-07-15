@@ -513,7 +513,7 @@ export default function AdminUsers() {
             const key = p.user_id || (p.email || "").toLowerCase();
             const meta = partnerAppMeta[key];
             const appStatus = meta?.status || "pending";
-            const statusBadge =
+            const appBadge =
               appStatus === "approved" ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Approved</Badge>
               : appStatus === "rejected" ? <Badge className="bg-red-50 text-red-700 border-red-200">Rejected</Badge>
               : <Badge className="bg-amber-50 text-amber-700 border-amber-200">Pending</Badge>;
@@ -525,8 +525,8 @@ export default function AdminUsers() {
                 </td>
                 <td className="px-3 py-2">{meta?.company_name || p.company_name || "—"}</td>
                 <td className="px-3 py-2 capitalize">{meta?.partner_type || "—"}</td>
-                <td className="px-3 py-2">{statusBadge}</td>
-                <td className="px-3 py-2">{getStatusBadge(p.status)}</td>
+                <td className="px-3 py-2">{appBadge}</td>
+                <td className="px-3 py-2">{statusBadge(p.status)}</td>
                 <td className="px-3 py-2 text-xs text-muted-foreground">
                   {meta?.created_at ? new Date(meta.created_at).toLocaleDateString() : "—"}
                 </td>
