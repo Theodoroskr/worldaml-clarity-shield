@@ -6,9 +6,42 @@
   <atom:link href="https://worldaml.com/rss.xml" rel="self" type="application/rss+xml" />
   <description>Practical AML, KYC/KYB, sanctions and regulatory compliance analysis from the WorldAML team.</description>
   <language>en</language>
-  <lastBuildDate>Mon, 13 Jul 2026 16:07:00 GMT</lastBuildDate>
-  <pubDate>Mon, 13 Jul 2026 00:00:00 GMT</pubDate>
+  <lastBuildDate>Wed, 15 Jul 2026 06:09:20 GMT</lastBuildDate>
+  <pubDate>Wed, 15 Jul 2026 00:00:00 GMT</pubDate>
   <generator>WorldAML RSS Generator</generator>
+  <item>
+    <title>The Risk-Based Approach to AML: A Practical Implementation Guide</title>
+    <link>https://worldaml.com/blog/risk-based-approach-aml</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/risk-based-approach-aml</guid>
+    <pubDate>Wed, 15 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[Learn how to implement a FATF-compliant risk-based approach to AML compliance — from business risk assessments to customer risk scoring and resource allocation.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>Risk Assessment</category>
+    <category>risk-based approach</category>
+    <category>FATF</category>
+    <category>risk assessment</category>
+    <category>customer risk scoring</category>
+    <category>AML</category>
+    <category>compliance framework</category>
+  </item>
+  <item>
+    <title>FATCA and CRS Reporting: Obligations for Financial Institutions</title>
+    <link>https://worldaml.com/blog/fatca-crs-reporting-guide</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/fatca-crs-reporting-guide</guid>
+    <pubDate>Tue, 14 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[A practical guide to FATCA and Common Reporting Standard (CRS) compliance — who must report, what information is required, key deadlines, and how to avoid the most common reporting failures.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>Regulatory Updates</category>
+    <category>FATCA</category>
+    <category>CRS</category>
+    <category>Common Reporting Standard</category>
+    <category>tax compliance</category>
+    <category>AEOI</category>
+    <category>OECD</category>
+    <category>regulatory reporting</category>
+  </item>
   <item>
     <title>Beneficial Ownership Verification: Regulatory Requirements and Practical Steps</title>
     <link>https://worldaml.com/blog/beneficial-ownership-guide</link>
