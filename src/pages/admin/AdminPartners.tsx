@@ -396,54 +396,121 @@ export default function AdminPartners() {
       </Card>
 
       {/* Active partners */}
-      <Card>
-        <CardHeader><CardTitle className="text-navy">Active Partners</CardTitle></CardHeader>
-        <CardContent>
-          {partners.length === 0 ? (
-            <p className="text-text-secondary text-sm py-4 text-center">No active partners yet.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-divider text-left">
-                    <th className="pb-3 pr-4 font-semibold text-navy">Display / Code</th>
-                    <th className="pb-3 pr-4 font-semibold text-navy">Type</th>
-                    <th className="pb-3 pr-4 font-semibold text-navy">Certification</th>
-                    <th className="pb-3 pr-4 font-semibold text-navy">Verticals</th>
-                    <th className="pb-3 pr-4 font-semibold text-navy">Featured</th>
-                    <th className="pb-3 pr-4 font-semibold text-navy">Active</th>
-                    <th className="pb-3 font-semibold text-navy">Edit</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {partners.map((p: any) => (
-                    <tr key={p.id} className="border-b border-divider/50 hover:bg-surface-subtle">
-                      <td className="py-3 pr-4">
-                        <div className="font-medium text-navy">{p.display_name ?? "—"}</div>
-                        <div className="font-mono text-xs text-text-secondary">{p.referral_code}</div>
-                      </td>
-                      <td className="py-3 pr-4"><Badge className="bg-purple-100 text-purple-800 border-purple-200">{p.partner_type}</Badge></td>
-                      <td className="py-3 pr-4"><Badge variant="outline" className="capitalize">{p.certification_level}</Badge></td>
-                      <td className="py-3 pr-4 text-xs text-text-secondary">{(p.verticals ?? []).join(", ") || "—"}</td>
-                      <td className="py-3 pr-4">
-                        <Switch checked={p.is_featured} onCheckedChange={(v) => togglePartner(p, "is_featured", v)} />
-                      </td>
-                      <td className="py-3 pr-4">
-                        <Switch checked={p.is_active} onCheckedChange={(v) => togglePartner(p, "is_active", v)} />
-                      </td>
-                      <td className="py-3">
-                        <Button size="sm" variant="outline" onClick={() => openEdit(p)}>
-                          <Pencil className="h-3 w-3 mr-1" /> Edit
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {(() => {
+        const appByUser = new Map(partnerApps.map((a: any) => [a.user_id, a]));
+        const certStyle = (lvl?: string | null) => {
+          switch ((lvl || "").toLowerCase()) {
+            case "gold": return "bg-amber-100 text-amber-800 border-amber-200";
+            case "silver": return "bg-slate-200 text-slate-800 border-slate-300";
+            case "bronze": return "bg-orange-100 text-orange-800 border-orange-200";
+            default: return "bg-muted text-muted-foreground border-border";
+          }
+        };
+        const activePartners = partners.filter((p: any) => p.is_active);
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-navy">Active Partners</CardTitle>
+              <p className="text-xs text-text-secondary mt-1">
+                {activePartners.length} active · {partners.length - activePartners.length} inactive
+              </p>
+            </CardHeader>
+            <CardContent>
+              {partners.length === 0 ? (
+                <p className="text-text-secondary text-sm py-4 text-center">No active partners yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-divider text-left">
+                        <th className="pb-3 pr-4 font-semibold text-navy">Partner</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Referral code</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Type</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Certification</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Verticals</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy text-center">Featured</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy text-center">Active</th>
+                        <th className="pb-3 font-semibold text-navy text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {partners.map((p: any) => {
+                        const app = appByUser.get(p.user_id);
+                        const displayName = p.display_name || app?.company_name || "Unnamed partner";
+                        const contactEmail = app?.contact_email;
+                        const cert = (p.certification_level || "").toLowerCase();
+                        const certLabel = cert && cert !== "none" ? cert : "—";
+                        const verticals = (p.verticals ?? []).filter(Boolean);
+                        return (
+                          <tr key={p.id} className="border-b border-divider/50 hover:bg-surface-subtle">
+                            <td className="py-3 pr-4">
+                              <div className="font-medium text-navy">{displayName}</div>
+                              {contactEmail && (
+                                <div className="text-xs text-text-secondary truncate max-w-[220px]">{contactEmail}</div>
+                              )}
+                            </td>
+                            <td className="py-3 pr-4">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(p.referral_code);
+                                  toast.success("Referral code copied");
+                                }}
+                                className="font-mono text-xs px-2 py-1 rounded bg-surface-subtle border border-divider hover:bg-muted"
+                                title="Click to copy"
+                              >
+                                {p.referral_code}
+                              </button>
+                            </td>
+                            <td className="py-3 pr-4">
+                              <Badge className="bg-purple-100 text-purple-800 border-purple-200 capitalize">
+                                {p.partner_type}
+                              </Badge>
+                            </td>
+                            <td className="py-3 pr-4">
+                              <Badge variant="outline" className={`capitalize ${certStyle(cert)}`}>
+                                {certLabel}
+                              </Badge>
+                            </td>
+                            <td className="py-3 pr-4">
+                              {verticals.length === 0 ? (
+                                <span className="text-xs text-text-secondary">—</span>
+                              ) : (
+                                <div className="flex flex-wrap gap-1 max-w-[220px]">
+                                  {verticals.slice(0, 3).map((v: string) => (
+                                    <Badge key={v} variant="outline" className="text-[10px] capitalize">
+                                      {v}
+                                    </Badge>
+                                  ))}
+                                  {verticals.length > 3 && (
+                                    <span className="text-[10px] text-text-secondary">+{verticals.length - 3}</span>
+                                  )}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-3 pr-4 text-center">
+                              <Switch checked={p.is_featured} onCheckedChange={(v) => togglePartner(p, "is_featured", v)} />
+                            </td>
+                            <td className="py-3 pr-4 text-center">
+                              <Switch checked={p.is_active} onCheckedChange={(v) => togglePartner(p, "is_active", v)} />
+                            </td>
+                            <td className="py-3 text-right">
+                              <Button size="sm" variant="outline" onClick={() => openEdit(p)}>
+                                <Pencil className="h-3 w-3 mr-1" /> Edit
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
+
 
       {/* Deal registrations */}
       {(() => {
