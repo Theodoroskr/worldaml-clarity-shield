@@ -155,10 +155,11 @@ export default function AdminUsers() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [{ data: p }, { data: r }, { data: logs }] = await Promise.all([
+    const [{ data: p }, { data: r }, { data: logs }, { data: pa }] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("*"),
       supabase.from("admin_upsell_email_log").select("recipient_user_id, recipient_email"),
+      supabase.from("partner_applications").select("user_id, email, status, partner_type, company_name, created_at").order("created_at", { ascending: false }),
     ]);
     setProfiles((p || []) as Profile[]);
     const roleMap: Record<string, string[]> = {};
@@ -173,6 +174,19 @@ export default function AdminUsers() {
       if (key) counts[key] = (counts[key] || 0) + 1;
     });
     setUpsellCounts(counts);
+    const ids = new Set<string>();
+    const emails = new Set<string>();
+    const meta: Record<string, any> = {};
+    (pa || []).forEach((row: any) => {
+      if (row.user_id) ids.add(row.user_id);
+      if (row.email) emails.add(String(row.email).toLowerCase());
+      const key = row.user_id || String(row.email || "").toLowerCase();
+      // keep the most recent (first due to order desc)
+      if (key && !meta[key]) meta[key] = { status: row.status, partner_type: row.partner_type, company_name: row.company_name, created_at: row.created_at };
+    });
+    setPartnerApplicantIds(ids);
+    setPartnerApplicantEmails(emails);
+    setPartnerAppMeta(meta);
     setLoading(false);
   };
 
