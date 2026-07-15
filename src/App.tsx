@@ -319,7 +319,18 @@ const App = () => (
                 <Route path="/partners" element={<Partners />} />
                 <Route path="/partners/directory" element={<PartnersDirectory />} />
                 <Route path="/partners/apply" element={<PartnerApply />} />
-                <Route path="/partners/dashboard" element={<PartnerDashboard />} />
+                <Route path="/partners/dashboard" element={<Navigate to="/partner-portal" replace />} />
+
+                {/* Channel Partner Portal */}
+                <Route path="/partner-portal" element={<PartnerPortalLayout />}>
+                  <Route index element={<PartnerOverview />} />
+                  <Route path="referrals" element={<PartnerReferralsPage />} />
+                  <Route path="deals" element={<PartnerDealsPage />} />
+                  <Route path="commissions" element={<PartnerCommissionsPage />} />
+                  <Route path="assets" element={<PartnerAssetsPage />} />
+                  <Route path="profile" element={<PartnerProfilePage />} />
+                  <Route path="settings" element={<PartnerSettingsPage />} />
+                </Route>
 
                 {/* Academy */}
                 <Route path="/academy" element={<Academy />} />
