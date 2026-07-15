@@ -85,6 +85,9 @@ export default function AdminUsers() {
   const [sourceFilter, setSourceFilter] = useState("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
+  const [partnerApplicantIds, setPartnerApplicantIds] = useState<Set<string>>(new Set());
+  const [partnerApplicantEmails, setPartnerApplicantEmails] = useState<Set<string>>(new Set());
+  const [partnerAppMeta, setPartnerAppMeta] = useState<Record<string, { status: string; partner_type: string | null; company_name: string | null; created_at: string }>>({});
 
 
   // Grant Suite dialog state
