@@ -199,7 +199,7 @@ export default function AdminPartners() {
                         </td>
                       </tr>
                     )}
-                    </>
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
