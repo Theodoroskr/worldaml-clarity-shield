@@ -180,6 +180,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <ScrollToTop />
+            <PartnerOnlyRouteGuard />
             <Layout>
               <Suspense fallback={<div className="min-h-screen" />}>
               {isAcademyHost() ? (
