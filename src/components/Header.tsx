@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { RegionSelector } from "./RegionSelector";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePartner } from "@/hooks/usePartner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -117,6 +118,8 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut, isAdmin } = useAuth();
+  const { partner } = usePartner();
+  const isActivePartner = !!partner?.is_active;
   const headerRef = useRef<HTMLElement>(null);
   const academyHost = isAcademyHost();
 
@@ -260,6 +263,11 @@ export const Header = () => {
                     Dashboard
                   </Link>
                 </Button>
+                {isActivePartner && (
+                  <Button variant="outline" size="sm" asChild className="border-teal/40 text-teal hover:bg-teal/5">
+                    <Link to="/partner-portal">Partner Portal</Link>
+                  </Button>
+                )}
                 {isAdmin && (
                   <Button variant="outline" size="sm" asChild className="border-navy/30 text-navy hover:bg-navy/5">
                     <Link to="/admin">Admin</Link>
@@ -376,6 +384,11 @@ export const Header = () => {
                         Dashboard
                       </Link>
                     </Button>
+                    {isActivePartner && (
+                      <Button variant="outline" asChild className="border-teal/40 text-teal">
+                        <Link to="/partner-portal" onClick={() => setMobileMenuOpen(false)}>Partner Portal</Link>
+                      </Button>
+                    )}
                     {isAdmin && (
                       <Button variant="outline" asChild className="border-navy/30 text-navy">
                         <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>Admin</Link>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -37,7 +38,25 @@ const Login = () => {
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-      const redirectTo = searchParams.get("redirect") || "/dashboard";
+      const explicit = searchParams.get("redirect");
+      let redirectTo = explicit || "/dashboard";
+      if (!explicit) {
+        // Route partner-only users straight to their portal.
+        const { data: authData } = await supabase.auth.getUser();
+        const uid = authData.user?.id;
+        if (uid) {
+          const [{ data: adminRole }, { data: partnerRow }, { data: prof }] = await Promise.all([
+            supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle(),
+            supabase.from("partners").select("is_active").eq("user_id", uid).maybeSingle(),
+            supabase.from("profiles").select("subscription_tier").eq("user_id", uid).maybeSingle(),
+          ]);
+          const tier = (prof as any)?.subscription_tier;
+          const hasSuite = tier === "suite" || tier === "enterprise";
+          if (!adminRole && !hasSuite && (partnerRow as any)?.is_active) {
+            redirectTo = "/partner-portal";
+          }
+        }
+      }
       navigate(redirectTo);
     }
 
