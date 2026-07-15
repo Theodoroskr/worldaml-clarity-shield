@@ -539,13 +539,26 @@ export default function AdminUsers() {
       ) : (
         <Tabs defaultValue="all" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="all">All Platform Users ({nonAcademyProfiles.length})</TabsTrigger>
+            <TabsTrigger value="all">Platform Users ({nonPartnerProfiles.length})</TabsTrigger>
             <TabsTrigger value="suite">Suite Users ({suiteUsers.length})</TabsTrigger>
             <TabsTrigger value="regular">Regular Users ({regularUsers.length})</TabsTrigger>
+            <TabsTrigger value="partners" className="gap-1.5">
+              <Handshake className="w-3.5 h-3.5" />
+              Partner Applicants ({partnerApplicants.length})
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="all">{renderTable(nonAcademyProfiles, false)}</TabsContent>
+          <TabsContent value="all">{renderTable(nonPartnerProfiles, false)}</TabsContent>
           <TabsContent value="suite">{renderTable(suiteUsers, true)}</TabsContent>
           <TabsContent value="regular">{renderTable(regularUsers, false)}</TabsContent>
+          <TabsContent value="partners">
+            <div className="mb-3 flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+              <span>These users applied to the Partner Program. Approve, reject, or edit their partner records in the dedicated workspace.</span>
+              <Link to="/admin/partners" className="inline-flex items-center gap-1 text-primary hover:underline">
+                Open Partner Program <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
+            {renderPartnerApplicantsTable(applyFilters(partnerApplicants))}
+          </TabsContent>
         </Tabs>
       )}
 
