@@ -12,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, CheckCircle, XCircle, Handshake, Pencil, FileSignature } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, Handshake, Pencil, FileSignature, Bell, History, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { logPartnerAdminAction } from "@/lib/partnerAudit";
 
 const VERTICALS = ["banking", "fintech", "crypto", "igaming", "payments", "legal"];
 const STATUS_STYLES: Record<string, string> = {
@@ -42,23 +43,46 @@ export default function AdminPartners() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [editForm, setEditForm] = useState<any>({});
+  const [auditLog, setAuditLog] = useState<any[]>([]);
+  const [auditEntity, setAuditEntity] = useState<string>("all");
+  const [notifSettings, setNotifSettings] = useState<any[]>([]);
+  const [myNotif, setMyNotif] = useState<any>({
+    notify_new_application: true,
+    notify_new_deal: true,
+    notify_deal_status_change: false,
+    is_active: true,
+  });
+  const [savingNotif, setSavingNotif] = useState(false);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [{ data: apps }, { data: pts }, { data: dl }, { data: refs }, { data: cst }] = await Promise.all([
+    const [{ data: apps }, { data: pts }, { data: dl }, { data: refs }, { data: cst }, { data: audit }, { data: nset }] = await Promise.all([
       supabase.from("partner_applications").select("*").order("created_at", { ascending: false }),
       supabase.from("partners").select("*").order("created_at", { ascending: false }),
       supabase.from("deal_registrations").select("*").order("created_at", { ascending: false }),
       supabase.from("referrals").select("*").order("created_at", { ascending: false }),
       supabase.from("suite_customers").select("id,name,company_name,email").order("created_at", { ascending: false }).limit(500),
+      supabase.from("partner_admin_audit_log" as any).select("*").order("created_at", { ascending: false }).limit(200),
+      supabase.from("partner_notification_settings" as any).select("*").order("email", { ascending: true }),
     ]);
     setPartnerApps((apps as any[]) || []);
     setPartners((pts as any[]) || []);
     setDeals((dl as any[]) || []);
     setReferrals((refs as any[]) || []);
     setCustomers((cst as any[]) || []);
+    setAuditLog((audit as any[]) || []);
+    setNotifSettings((nset as any[]) || []);
+    const mine = ((nset as any[]) || []).find((n: any) => n.user_id === user?.id);
+    if (mine) {
+      setMyNotif({
+        notify_new_application: mine.notify_new_application,
+        notify_new_deal: mine.notify_new_deal,
+        notify_deal_status_change: mine.notify_deal_status_change,
+        is_active: mine.is_active,
+      });
+    }
     setLoading(false);
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -76,25 +100,56 @@ export default function AdminPartners() {
       website_url: app.website,
     } as any);
     if (insertErr) { toast.error("Failed to create partner record"); console.error(insertErr); }
-    else { toast.success("Partner approved — sandbox key & Academy seats issued."); fetchAll(); }
+    else {
+      toast.success("Partner approved — sandbox key & Academy seats issued.");
+      await logPartnerAdminAction({
+        action: "approve_application",
+        entity_type: "partner_application",
+        entity_id: app.id,
+        entity_label: app.company_name,
+        changes: { status: { from: app.status, to: "approved" }, partner_type: app.partner_type },
+      });
+      fetchAll();
+    }
     setActionLoading(null);
   };
 
   const rejectPartnerApp = async (appId: string) => {
     setActionLoading(appId);
+    const app = partnerApps.find((a) => a.id === appId);
     const { error } = await supabase
       .from("partner_applications")
       .update({ status: "rejected", reviewed_at: new Date().toISOString(), reviewed_by: user!.id } as any)
       .eq("id", appId);
     if (error) toast.error("Failed to reject");
-    else { toast.success("Application rejected"); fetchAll(); }
+    else {
+      toast.success("Application rejected");
+      await logPartnerAdminAction({
+        action: "reject_application",
+        entity_type: "partner_application",
+        entity_id: appId,
+        entity_label: app?.company_name ?? null,
+        changes: { status: { from: app?.status, to: "rejected" } },
+      });
+      fetchAll();
+    }
     setActionLoading(null);
   };
 
   const togglePartner = async (p: any, field: string, value: any) => {
     const { error } = await supabase.from("partners").update({ [field]: value } as any).eq("id", p.id);
     if (error) toast.error("Update failed");
-    else { toast.success("Updated"); fetchAll(); }
+    else {
+      toast.success("Updated");
+      await logPartnerAdminAction({
+        action: field === "is_active" ? (value ? "activate_partner" : "deactivate_partner") : `toggle_${field}`,
+        entity_type: "partner",
+        entity_id: p.id,
+        entity_label: p.display_name ?? p.referral_code,
+        changes: { [field]: { from: p[field], to: value } },
+      });
+      fetchAll();
+    }
   };
 
   const openEdit = (p: any) => {
@@ -116,17 +171,47 @@ export default function AdminPartners() {
     if (!editing) return;
     const { error } = await supabase.from("partners").update(editForm as any).eq("id", editing.id);
     if (error) toast.error("Save failed");
-    else { toast.success("Partner profile updated"); setEditing(null); fetchAll(); }
+    else {
+      toast.success("Partner profile updated");
+      const diff: Record<string, any> = {};
+      for (const key of Object.keys(editForm)) {
+        const before = (editing as any)[key];
+        const after = (editForm as any)[key];
+        if (JSON.stringify(before) !== JSON.stringify(after)) {
+          diff[key] = { from: before, to: after };
+        }
+      }
+      await logPartnerAdminAction({
+        action: "edit_partner_profile",
+        entity_type: "partner",
+        entity_id: editing.id,
+        entity_label: editForm.display_name || editing.referral_code,
+        changes: diff,
+      });
+      setEditing(null);
+      fetchAll();
+    }
   };
 
   const reviewDeal = async (dealId: string, status: string) => {
     setActionLoading(dealId);
+    const before = deals.find((d) => d.id === dealId);
     const { error } = await supabase
       .from("deal_registrations")
       .update({ status, reviewed_at: new Date().toISOString(), reviewed_by: user!.id } as any)
       .eq("id", dealId);
     if (error) toast.error("Failed to update deal");
-    else { toast.success(`Deal ${status}`); fetchAll(); }
+    else {
+      toast.success(`Deal ${status}`);
+      await logPartnerAdminAction({
+        action: `deal_${status}`,
+        entity_type: "deal_registration",
+        entity_id: dealId,
+        entity_label: before?.prospect_company ?? null,
+        changes: { status: { from: before?.status, to: status } },
+      });
+      fetchAll();
+    }
     setActionLoading(null);
   };
 
@@ -153,11 +238,72 @@ export default function AdminPartners() {
     if (error) toast.error("Failed to mark won");
     else {
       toast.success("Deal marked as won" + (winForm.customer_id ? " and linked to customer" : ""));
+      await logPartnerAdminAction({
+        action: winDeal.status === "won" ? "update_deal_link" : "convert_deal_to_won",
+        entity_type: "deal_registration",
+        entity_id: winDeal.id,
+        entity_label: winDeal.prospect_company,
+        changes: {
+          status: { from: winDeal.status, to: "won" },
+          linked_customer_id: { from: winDeal.linked_customer_id ?? null, to: winForm.customer_id || null },
+          actual_arr_eur: { from: winDeal.actual_arr_eur ?? null, to: payload.actual_arr_eur },
+        },
+      });
       setWinDeal(null);
       fetchAll();
     }
     setActionLoading(null);
   };
+
+  const saveMyNotif = async () => {
+    if (!user) return;
+    setSavingNotif(true);
+    const existing = notifSettings.find((n: any) => n.user_id === user.id);
+    const payload = {
+      user_id: user.id,
+      email: user.email ?? "",
+      ...myNotif,
+    };
+    const { error } = await supabase
+      .from("partner_notification_settings" as any)
+      .upsert(payload as any, { onConflict: "user_id" });
+    if (error) toast.error("Failed to save preferences");
+    else {
+      toast.success("Notification preferences saved");
+      await logPartnerAdminAction({
+        action: existing ? "update_notification_settings" : "create_notification_settings",
+        entity_type: "notification_settings",
+        entity_id: user.id,
+        entity_label: user.email ?? null,
+        changes: myNotif,
+      });
+      fetchAll();
+    }
+    setSavingNotif(false);
+  };
+
+  const removeNotifRecipient = async (row: any) => {
+    if (row.user_id !== user?.id) {
+      toast.error("You can only remove your own row.");
+      return;
+    }
+    const { error } = await supabase
+      .from("partner_notification_settings" as any)
+      .delete()
+      .eq("user_id", row.user_id);
+    if (error) toast.error("Delete failed");
+    else {
+      toast.success("Removed from recipients");
+      await logPartnerAdminAction({
+        action: "remove_notification_settings",
+        entity_type: "notification_settings",
+        entity_id: row.user_id,
+        entity_label: row.email,
+      });
+      fetchAll();
+    }
+  };
+
 
   const pendingCount = partnerApps.filter((a) => a.status === "pending").length;
   const pendingDeals = deals.filter((d) => d.status === "pending").length;
@@ -628,6 +774,178 @@ export default function AdminPartners() {
           </Card>
         );
       })()}
+
+      {/* Notification Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-navy flex items-center gap-2">
+            <Bell className="h-4 w-4 text-teal" /> Notification Settings
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="rounded-lg border border-divider p-4 bg-surface-subtle/40">
+            <div className="text-sm font-semibold text-navy mb-1">Your alerts</div>
+            <div className="text-xs text-text-secondary mb-3">
+              Sent to <span className="font-mono">{user?.email ?? "—"}</span>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <label className="flex items-center justify-between gap-3 text-sm">
+                <span>New partner applications</span>
+                <Switch
+                  checked={myNotif.notify_new_application}
+                  onCheckedChange={(v) => setMyNotif({ ...myNotif, notify_new_application: v })}
+                />
+              </label>
+              <label className="flex items-center justify-between gap-3 text-sm">
+                <span>New deal registrations</span>
+                <Switch
+                  checked={myNotif.notify_new_deal}
+                  onCheckedChange={(v) => setMyNotif({ ...myNotif, notify_new_deal: v })}
+                />
+              </label>
+              <label className="flex items-center justify-between gap-3 text-sm">
+                <span>Deal status changes</span>
+                <Switch
+                  checked={myNotif.notify_deal_status_change}
+                  onCheckedChange={(v) => setMyNotif({ ...myNotif, notify_deal_status_change: v })}
+                />
+              </label>
+              <label className="flex items-center justify-between gap-3 text-sm">
+                <span>Receive alerts</span>
+                <Switch
+                  checked={myNotif.is_active}
+                  onCheckedChange={(v) => setMyNotif({ ...myNotif, is_active: v })}
+                />
+              </label>
+            </div>
+            <div className="mt-4">
+              <Button onClick={saveMyNotif} disabled={savingNotif}>
+                {savingNotif ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Save preferences
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm font-semibold text-navy mb-2">All recipients</div>
+            {notifSettings.length === 0 ? (
+              <p className="text-text-secondary text-sm py-4 text-center">No admins have opted in yet.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-divider text-left">
+                      <th className="pb-2 pr-4 font-semibold text-navy">Admin</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Applications</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Deals</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Status changes</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Active</th>
+                      <th className="pb-2 font-semibold text-navy"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {notifSettings.map((n: any) => (
+                      <tr key={n.user_id} className="border-b border-divider/50">
+                        <td className="py-2 pr-4">
+                          <div className="text-navy">{n.email}</div>
+                          {n.user_id === user?.id && <div className="text-xs text-teal">(you)</div>}
+                        </td>
+                        <td className="py-2 pr-4">{n.notify_new_application ? "✓" : "—"}</td>
+                        <td className="py-2 pr-4">{n.notify_new_deal ? "✓" : "—"}</td>
+                        <td className="py-2 pr-4">{n.notify_deal_status_change ? "✓" : "—"}</td>
+                        <td className="py-2 pr-4">
+                          <Badge className={n.is_active ? "bg-green-100 text-green-800 border-green-200" : "bg-slate-100 text-slate-700 border-slate-200"}>
+                            {n.is_active ? "on" : "off"}
+                          </Badge>
+                        </td>
+                        <td className="py-2">
+                          {n.user_id === user?.id && (
+                            <Button size="sm" variant="ghost" className="text-red-700" onClick={() => removeNotifRecipient(n)}>
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <p className="text-xs text-text-secondary mt-2">
+              Each admin controls their own row. Toggle "Receive alerts" off to pause without removing yourself.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Audit Log */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <CardTitle className="text-navy flex items-center gap-2">
+              <History className="h-4 w-4 text-teal" /> Audit Log
+            </CardTitle>
+            <Select value={auditEntity} onValueChange={setAuditEntity}>
+              <SelectTrigger className="h-9 w-56 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All entity types</SelectItem>
+                <SelectItem value="partner_application">Applications</SelectItem>
+                <SelectItem value="partner">Partners</SelectItem>
+                <SelectItem value="deal_registration">Deal registrations</SelectItem>
+                <SelectItem value="notification_settings">Notification settings</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const rows = auditEntity === "all"
+              ? auditLog
+              : auditLog.filter((r: any) => r.entity_type === auditEntity);
+            if (rows.length === 0) {
+              return <p className="text-text-secondary text-sm py-4 text-center">No audit events yet.</p>;
+            }
+            return (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-divider text-left">
+                      <th className="pb-2 pr-4 font-semibold text-navy">When</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Actor</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Action</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Entity</th>
+                      <th className="pb-2 pr-4 font-semibold text-navy">Target</th>
+                      <th className="pb-2 font-semibold text-navy">Changes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((r: any) => (
+                      <tr key={r.id} className="border-b border-divider/50 hover:bg-surface-subtle align-top">
+                        <td className="py-2 pr-4 text-text-secondary text-xs whitespace-nowrap">
+                          {new Date(r.created_at).toLocaleString("en-GB")}
+                        </td>
+                        <td className="py-2 pr-4 text-text-secondary text-xs">{r.actor_email ?? r.actor_user_id?.slice(0, 8) ?? "—"}</td>
+                        <td className="py-2 pr-4">
+                          <Badge variant="outline" className="capitalize font-mono text-[11px]">{r.action.replace(/_/g, " ")}</Badge>
+                        </td>
+                        <td className="py-2 pr-4 text-text-secondary text-xs">{r.entity_type.replace(/_/g, " ")}</td>
+                        <td className="py-2 pr-4 text-navy text-xs">{r.entity_label ?? r.entity_id?.slice(0, 8) ?? "—"}</td>
+                        <td className="py-2 text-text-secondary text-xs max-w-md">
+                          {r.changes && Object.keys(r.changes).length > 0 ? (
+                            <pre className="whitespace-pre-wrap font-mono text-[11px] bg-surface-subtle/60 p-2 rounded max-h-32 overflow-auto">
+{JSON.stringify(r.changes, null, 2)}
+                            </pre>
+                          ) : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
 
 
       {/* Convert to Won dialog */}
