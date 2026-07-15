@@ -223,6 +223,7 @@ export default function AdminPartnerAssets() {
       file_url: form.file_url || null,
       file_path: form.file_path || null,
       thumbnail_url: form.thumbnail_url || null,
+      preview_url: form.preview_url || null,
       is_active: !!form.is_active,
       sort_order: Number(form.sort_order) || 0,
     };
