@@ -288,9 +288,14 @@ export default function AdminUsers() {
 
   const isSuiteUser = (p: Profile) => p.subscription_tier === "suite" || p.subscription_tier === "enterprise";
   const isAcademyUser = (p: Profile) => p.subscription_tier === "academy";
+  const isPartnerApplicant = (p: Profile) =>
+    (p.user_id && partnerApplicantIds.has(p.user_id)) ||
+    (p.email && partnerApplicantEmails.has(p.email.toLowerCase()));
   const nonAcademyProfiles = profiles.filter(p => !isAcademyUser(p));
-  const suiteUsers = nonAcademyProfiles.filter(isSuiteUser);
-  const regularUsers = nonAcademyProfiles.filter(p => !isSuiteUser(p));
+  const partnerApplicants = nonAcademyProfiles.filter(isPartnerApplicant);
+  const nonPartnerProfiles = nonAcademyProfiles.filter(p => !isPartnerApplicant(p));
+  const suiteUsers = nonPartnerProfiles.filter(isSuiteUser);
+  const regularUsers = nonPartnerProfiles.filter(p => !isSuiteUser(p));
   const academyUsers = profiles.filter(isAcademyUser);
 
   const allSources = Array.from(
