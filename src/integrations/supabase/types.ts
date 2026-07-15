@@ -1382,6 +1382,7 @@ export type Database = {
           is_featured: boolean
           logo_url: string | null
           notification_prefs: Json
+          onboarding_completed_at: string | null
           partner_type: Database["public"]["Enums"]["partner_type"]
           payout_details_encrypted: string | null
           payout_method: string | null
@@ -1406,6 +1407,7 @@ export type Database = {
           is_featured?: boolean
           logo_url?: string | null
           notification_prefs?: Json
+          onboarding_completed_at?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
           payout_details_encrypted?: string | null
           payout_method?: string | null
@@ -1430,6 +1432,7 @@ export type Database = {
           is_featured?: boolean
           logo_url?: string | null
           notification_prefs?: Json
+          onboarding_completed_at?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
           payout_details_encrypted?: string | null
           payout_method?: string | null

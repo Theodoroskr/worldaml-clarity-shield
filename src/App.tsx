@@ -142,6 +142,7 @@ const PartnerAssetsPage = lazy(() => import("./pages/partner-portal/Assets"));
 const PartnerProfilePage = lazy(() => import("./pages/partner-portal/Profile"));
 const PartnerSettingsPage = lazy(() => import("./pages/partner-portal/Settings"));
 const PartnerContactsPage = lazy(() => import("./pages/partner-portal/Contacts"));
+const PartnerWelcomePage = lazy(() => import("./pages/partner-portal/Welcome"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
@@ -327,6 +328,7 @@ const App = () => (
                 {/* Channel Partner Portal */}
                 <Route path="/partner-portal" element={<PartnerPortalLayout />}>
                   <Route index element={<PartnerOverview />} />
+                  <Route path="welcome" element={<PartnerWelcomePage />} />
                   <Route path="referrals" element={<PartnerReferralsPage />} />
                   <Route path="deals" element={<PartnerDealsPage />} />
                   <Route path="commissions" element={<PartnerCommissionsPage />} />
