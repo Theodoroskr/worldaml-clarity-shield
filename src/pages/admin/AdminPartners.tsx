@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -147,6 +147,9 @@ export default function AdminPartners() {
                 <thead>
                   <tr className="border-b border-divider text-left">
                     <th className="pb-3 pr-4 font-semibold text-navy">Company</th>
+                    <th className="pb-3 pr-4 font-semibold text-navy">Contact</th>
+                    <th className="pb-3 pr-4 font-semibold text-navy">Phone</th>
+                    <th className="pb-3 pr-4 font-semibold text-navy">Country</th>
                     <th className="pb-3 pr-4 font-semibold text-navy">Website</th>
                     <th className="pb-3 pr-4 font-semibold text-navy">Type</th>
                     <th className="pb-3 pr-4 font-semibold text-navy">Date</th>
@@ -156,13 +159,26 @@ export default function AdminPartners() {
                 </thead>
                 <tbody>
                   {partnerApps.map((app: any) => (
-                    <tr key={app.id} className="border-b border-divider/50 hover:bg-surface-subtle">
-                      <td className="py-3 pr-4 font-medium text-navy">{app.company_name}</td>
-                      <td className="py-3 pr-4 text-text-secondary">{app.website || "—"}</td>
-                      <td className="py-3 pr-4"><Badge className="bg-purple-100 text-purple-800 border-purple-200">{app.partner_type}</Badge></td>
-                      <td className="py-3 pr-4 text-text-secondary">{new Date(app.created_at).toLocaleDateString("en-GB")}</td>
-                      <td className="py-3 pr-4"><Badge className={STATUS_STYLES[app.status]}>{app.status}</Badge></td>
-                      <td className="py-3">
+                    <Fragment key={app.id}>
+                    <tr className="border-b border-divider/30 hover:bg-surface-subtle">
+                      <td className="py-3 pr-4 font-medium text-navy align-top">{app.company_name}</td>
+                      <td className="py-3 pr-4 text-text-secondary align-top">
+                        {app.contact_name ? <div className="text-navy">{app.contact_name}</div> : null}
+                        {app.contact_email ? (
+                          <a href={`mailto:${app.contact_email}`} className="text-teal hover:underline text-xs">{app.contact_email}</a>
+                        ) : <span className="text-xs">—</span>}
+                      </td>
+                      <td className="py-3 pr-4 text-text-secondary align-top text-xs">
+                        {app.contact_phone ? <a href={`tel:${app.contact_phone}`} className="hover:underline">{app.contact_phone}</a> : "—"}
+                      </td>
+                      <td className="py-3 pr-4 text-text-secondary align-top text-xs">{app.country || "—"}</td>
+                      <td className="py-3 pr-4 text-text-secondary align-top text-xs">
+                        {app.website ? <a href={app.website} target="_blank" rel="noreferrer" className="text-teal hover:underline">{app.website}</a> : "—"}
+                      </td>
+                      <td className="py-3 pr-4 align-top"><Badge className="bg-purple-100 text-purple-800 border-purple-200">{app.partner_type}</Badge></td>
+                      <td className="py-3 pr-4 text-text-secondary align-top text-xs">{new Date(app.created_at).toLocaleDateString("en-GB")}</td>
+                      <td className="py-3 pr-4 align-top"><Badge className={STATUS_STYLES[app.status]}>{app.status}</Badge></td>
+                      <td className="py-3 align-top">
                         {app.status === "pending" && (
                           <div className="flex gap-2">
                             <Button size="sm" variant="outline" className="text-green-700 border-green-300 hover:bg-green-50" disabled={actionLoading === app.id} onClick={() => approvePartnerApp(app)}>
@@ -176,6 +192,14 @@ export default function AdminPartners() {
                         )}
                       </td>
                     </tr>
+                    {app.description && (
+                      <tr key={`${app.id}-notes`} className="border-b border-divider/50 bg-surface-subtle/40">
+                        <td colSpan={9} className="py-2 px-4 text-xs text-text-secondary">
+                          <span className="font-semibold text-navy">Notes: </span>{app.description}
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>

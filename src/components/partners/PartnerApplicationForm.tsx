@@ -19,12 +19,20 @@ const PartnerApplicationForm = () => {
     website: "",
     partner_type: "referral" as "referral" | "affiliate" | "reseller" | "technology",
     description: "",
+    contact_name: "",
+    contact_email: "",
+    contact_phone: "",
+    country: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     if (!form.company_name.trim()) { toast.error("Company name is required"); return; }
+    if (!form.contact_name.trim()) { toast.error("Your name is required"); return; }
+    if (!form.contact_email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contact_email.trim())) {
+      toast.error("A valid contact email is required"); return;
+    }
 
     setLoading(true);
     const { data: inserted, error } = await supabase.from("partner_applications").insert({
@@ -33,6 +41,10 @@ const PartnerApplicationForm = () => {
       website: form.website.trim() || null,
       partner_type: form.partner_type,
       description: form.description.trim() || null,
+      contact_name: form.contact_name.trim() || null,
+      contact_email: form.contact_email.trim().toLowerCase() || null,
+      contact_phone: form.contact_phone.trim() || null,
+      country: form.country.trim() || null,
     } as any).select("id").maybeSingle();
 
     if (error) {
@@ -74,6 +86,24 @@ const PartnerApplicationForm = () => {
           <div>
             <Label htmlFor="company_name">Company Name *</Label>
             <Input id="company_name" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} required maxLength={200} />
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="contact_name">Your Name *</Label>
+              <Input id="contact_name" value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} required maxLength={120} />
+            </div>
+            <div>
+              <Label htmlFor="contact_email">Contact Email *</Label>
+              <Input id="contact_email" type="email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} required maxLength={255} />
+            </div>
+            <div>
+              <Label htmlFor="contact_phone">Phone</Label>
+              <Input id="contact_phone" type="tel" value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} maxLength={40} />
+            </div>
+            <div>
+              <Label htmlFor="country">Country</Label>
+              <Input id="country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} maxLength={80} />
+            </div>
           </div>
           <div>
             <Label htmlFor="website">Website</Label>
