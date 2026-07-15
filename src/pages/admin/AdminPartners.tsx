@@ -100,25 +100,56 @@ export default function AdminPartners() {
       website_url: app.website,
     } as any);
     if (insertErr) { toast.error("Failed to create partner record"); console.error(insertErr); }
-    else { toast.success("Partner approved — sandbox key & Academy seats issued."); fetchAll(); }
+    else {
+      toast.success("Partner approved — sandbox key & Academy seats issued.");
+      await logPartnerAdminAction({
+        action: "approve_application",
+        entity_type: "partner_application",
+        entity_id: app.id,
+        entity_label: app.company_name,
+        changes: { status: { from: app.status, to: "approved" }, partner_type: app.partner_type },
+      });
+      fetchAll();
+    }
     setActionLoading(null);
   };
 
   const rejectPartnerApp = async (appId: string) => {
     setActionLoading(appId);
+    const app = partnerApps.find((a) => a.id === appId);
     const { error } = await supabase
       .from("partner_applications")
       .update({ status: "rejected", reviewed_at: new Date().toISOString(), reviewed_by: user!.id } as any)
       .eq("id", appId);
     if (error) toast.error("Failed to reject");
-    else { toast.success("Application rejected"); fetchAll(); }
+    else {
+      toast.success("Application rejected");
+      await logPartnerAdminAction({
+        action: "reject_application",
+        entity_type: "partner_application",
+        entity_id: appId,
+        entity_label: app?.company_name ?? null,
+        changes: { status: { from: app?.status, to: "rejected" } },
+      });
+      fetchAll();
+    }
     setActionLoading(null);
   };
 
   const togglePartner = async (p: any, field: string, value: any) => {
     const { error } = await supabase.from("partners").update({ [field]: value } as any).eq("id", p.id);
     if (error) toast.error("Update failed");
-    else { toast.success("Updated"); fetchAll(); }
+    else {
+      toast.success("Updated");
+      await logPartnerAdminAction({
+        action: field === "is_active" ? (value ? "activate_partner" : "deactivate_partner") : `toggle_${field}`,
+        entity_type: "partner",
+        entity_id: p.id,
+        entity_label: p.display_name ?? p.referral_code,
+        changes: { [field]: { from: p[field], to: value } },
+      });
+      fetchAll();
+    }
   };
 
   const openEdit = (p: any) => {
@@ -140,17 +171,47 @@ export default function AdminPartners() {
     if (!editing) return;
     const { error } = await supabase.from("partners").update(editForm as any).eq("id", editing.id);
     if (error) toast.error("Save failed");
-    else { toast.success("Partner profile updated"); setEditing(null); fetchAll(); }
+    else {
+      toast.success("Partner profile updated");
+      const diff: Record<string, any> = {};
+      for (const key of Object.keys(editForm)) {
+        const before = (editing as any)[key];
+        const after = (editForm as any)[key];
+        if (JSON.stringify(before) !== JSON.stringify(after)) {
+          diff[key] = { from: before, to: after };
+        }
+      }
+      await logPartnerAdminAction({
+        action: "edit_partner_profile",
+        entity_type: "partner",
+        entity_id: editing.id,
+        entity_label: editForm.display_name || editing.referral_code,
+        changes: diff,
+      });
+      setEditing(null);
+      fetchAll();
+    }
   };
 
   const reviewDeal = async (dealId: string, status: string) => {
     setActionLoading(dealId);
+    const before = deals.find((d) => d.id === dealId);
     const { error } = await supabase
       .from("deal_registrations")
       .update({ status, reviewed_at: new Date().toISOString(), reviewed_by: user!.id } as any)
       .eq("id", dealId);
     if (error) toast.error("Failed to update deal");
-    else { toast.success(`Deal ${status}`); fetchAll(); }
+    else {
+      toast.success(`Deal ${status}`);
+      await logPartnerAdminAction({
+        action: `deal_${status}`,
+        entity_type: "deal_registration",
+        entity_id: dealId,
+        entity_label: before?.prospect_company ?? null,
+        changes: { status: { from: before?.status, to: status } },
+      });
+      fetchAll();
+    }
     setActionLoading(null);
   };
 
@@ -177,11 +238,72 @@ export default function AdminPartners() {
     if (error) toast.error("Failed to mark won");
     else {
       toast.success("Deal marked as won" + (winForm.customer_id ? " and linked to customer" : ""));
+      await logPartnerAdminAction({
+        action: winDeal.status === "won" ? "update_deal_link" : "convert_deal_to_won",
+        entity_type: "deal_registration",
+        entity_id: winDeal.id,
+        entity_label: winDeal.prospect_company,
+        changes: {
+          status: { from: winDeal.status, to: "won" },
+          linked_customer_id: { from: winDeal.linked_customer_id ?? null, to: winForm.customer_id || null },
+          actual_arr_eur: { from: winDeal.actual_arr_eur ?? null, to: payload.actual_arr_eur },
+        },
+      });
       setWinDeal(null);
       fetchAll();
     }
     setActionLoading(null);
   };
+
+  const saveMyNotif = async () => {
+    if (!user) return;
+    setSavingNotif(true);
+    const existing = notifSettings.find((n: any) => n.user_id === user.id);
+    const payload = {
+      user_id: user.id,
+      email: user.email ?? "",
+      ...myNotif,
+    };
+    const { error } = await supabase
+      .from("partner_notification_settings" as any)
+      .upsert(payload as any, { onConflict: "user_id" });
+    if (error) toast.error("Failed to save preferences");
+    else {
+      toast.success("Notification preferences saved");
+      await logPartnerAdminAction({
+        action: existing ? "update_notification_settings" : "create_notification_settings",
+        entity_type: "notification_settings",
+        entity_id: user.id,
+        entity_label: user.email ?? null,
+        changes: myNotif,
+      });
+      fetchAll();
+    }
+    setSavingNotif(false);
+  };
+
+  const removeNotifRecipient = async (row: any) => {
+    if (row.user_id !== user?.id) {
+      toast.error("You can only remove your own row.");
+      return;
+    }
+    const { error } = await supabase
+      .from("partner_notification_settings" as any)
+      .delete()
+      .eq("user_id", row.user_id);
+    if (error) toast.error("Delete failed");
+    else {
+      toast.success("Removed from recipients");
+      await logPartnerAdminAction({
+        action: "remove_notification_settings",
+        entity_type: "notification_settings",
+        entity_id: row.user_id,
+        entity_label: row.email,
+      });
+      fetchAll();
+    }
+  };
+
 
   const pendingCount = partnerApps.filter((a) => a.status === "pending").length;
   const pendingDeals = deals.filter((d) => d.status === "pending").length;
