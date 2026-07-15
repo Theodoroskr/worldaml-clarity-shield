@@ -89,11 +89,106 @@ export default function AdminPartnerAssets() {
       file_url: a.file_url ?? "",
       file_path: a.file_path ?? "",
       thumbnail_url: a.thumbnail_url ?? "",
+      preview_url: a.preview_url ?? "",
       is_active: a.is_active,
       sort_order: a.sort_order ?? 0,
     });
     setOpen(true);
   };
+
+  // Version history state
+  const [versionOpen, setVersionOpen] = useState(false);
+  const [versionAsset, setVersionAsset] = useState<Asset | null>(null);
+  const [versions, setVersions] = useState<any[]>([]);
+  const [versionsLoading, setVersionsLoading] = useState(false);
+  const [newVersionFile, setNewVersionFile] = useState<File | null>(null);
+  const [newVersionChangelog, setNewVersionChangelog] = useState("");
+  const [publishing, setPublishing] = useState(false);
+
+  const openVersions = async (a: Asset) => {
+    setVersionAsset(a);
+    setVersionOpen(true);
+    setNewVersionFile(null);
+    setNewVersionChangelog("");
+    setVersionsLoading(true);
+    const { data, error } = await supabase
+      .from("partner_asset_versions")
+      .select("*")
+      .eq("asset_id", a.id)
+      .order("version_number", { ascending: false });
+    setVersionsLoading(false);
+    if (error) return toast.error(error.message);
+    setVersions(data ?? []);
+  };
+
+  const publishVersion = async () => {
+    if (!versionAsset || !newVersionFile || !user) return;
+    setPublishing(true);
+    try {
+      const safe = newVersionFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `assets/${versionAsset.id}/v${Date.now()}_${safe}`;
+      const up = await supabase.storage
+        .from("partner-assets")
+        .upload(path, newVersionFile, { upsert: false, contentType: newVersionFile.type });
+      if (up.error) throw up.error;
+
+      const nextVersion = (versionAsset.current_version ?? 1) + (versions.length ? 1 : 0) || 1;
+      // Ensure baseline: if no versions exist, insert the current file as v1 first
+      if (versions.length === 0) {
+        await supabase.from("partner_asset_versions").insert({
+          asset_id: versionAsset.id,
+          version_number: versionAsset.current_version ?? 1,
+          file_path: versionAsset.file_path,
+          file_url: versionAsset.file_url,
+          content_type: versionAsset.content_type,
+          file_size_bytes: versionAsset.file_size_bytes,
+          changelog: "Initial version",
+          is_current: false,
+          created_by: user.id,
+        });
+      } else {
+        await supabase
+          .from("partner_asset_versions")
+          .update({ is_current: false })
+          .eq("asset_id", versionAsset.id);
+      }
+
+      const newNum = (versionAsset.current_version ?? 1) + 1;
+      const ins = await supabase.from("partner_asset_versions").insert({
+        asset_id: versionAsset.id,
+        version_number: newNum,
+        file_path: path,
+        file_url: null,
+        content_type: newVersionFile.type,
+        file_size_bytes: newVersionFile.size,
+        changelog: newVersionChangelog || null,
+        is_current: true,
+        created_by: user.id,
+      });
+      if (ins.error) throw ins.error;
+
+      const upd = await supabase
+        .from("partner_assets")
+        .update({
+          file_path: path,
+          file_url: null,
+          content_type: newVersionFile.type,
+          file_size_bytes: newVersionFile.size,
+          current_version: newNum,
+        })
+        .eq("id", versionAsset.id);
+      if (upd.error) throw upd.error;
+
+      toast.success(`Published v${newNum}`);
+      await load();
+      await openVersions({ ...versionAsset, current_version: newNum, file_path: path });
+    } catch (e: any) {
+      toast.error(e.message || "Publish failed");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
 
   const upload = async (file: File) => {
     if (!user) return;
