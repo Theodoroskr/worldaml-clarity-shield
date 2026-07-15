@@ -142,6 +142,7 @@ const PartnerAssetsPage = lazy(() => import("./pages/partner-portal/Assets"));
 const PartnerProfilePage = lazy(() => import("./pages/partner-portal/Profile"));
 const PartnerSettingsPage = lazy(() => import("./pages/partner-portal/Settings"));
 const PartnerContactsPage = lazy(() => import("./pages/partner-portal/Contacts"));
+const PartnerWelcomePage = lazy(() => import("./pages/partner-portal/Welcome"));
 
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
