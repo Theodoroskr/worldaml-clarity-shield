@@ -376,6 +376,11 @@ export const Header = () => {
                         Dashboard
                       </Link>
                     </Button>
+                    {isAdmin && (
+                      <Button variant="outline" asChild className="border-navy/30 text-navy">
+                        <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>Admin</Link>
+                      </Button>
+                    )}
                     <Button onClick={handleSignOut}>
                       <LogOut className="h-4 w-4 mr-2" />
                       Sign Out
