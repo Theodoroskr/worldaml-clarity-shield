@@ -981,9 +981,14 @@ export type Database = {
       partner_applications: {
         Row: {
           company_name: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          country: string | null
           created_at: string
           description: string | null
           id: string
+          notes: string | null
           partner_type: Database["public"]["Enums"]["partner_type"]
           reviewed_at: string | null
           reviewed_by: string | null
@@ -993,9 +998,14 @@ export type Database = {
         }
         Insert: {
           company_name: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          notes?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1005,9 +1015,14 @@ export type Database = {
         }
         Update: {
           company_name?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          notes?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
           reviewed_at?: string | null
           reviewed_by?: string | null
