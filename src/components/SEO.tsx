@@ -108,6 +108,7 @@ const SEO = ({ title, description, canonical, noindex = false, ogType = "website
       <meta property="og:title" content={fullTitle} data-rh="true" />
       <meta property="og:description" content={description} data-rh="true" />
       <meta property="og:image" content={OG_IMAGE} data-rh="true" />
+      <meta property="og:image:alt" content={OG_IMAGE_ALT} data-rh="true" />
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} data-rh="true" />}
       <meta property="og:type" content={ogType} data-rh="true" />
       <meta property="og:site_name" content={SITE_NAME} data-rh="true" />
