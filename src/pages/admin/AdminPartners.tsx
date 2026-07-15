@@ -12,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, CheckCircle, XCircle, Handshake, Pencil, FileSignature } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, Handshake, Pencil, FileSignature, Bell, History, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { logPartnerAdminAction } from "@/lib/partnerAudit";
 
 const VERTICALS = ["banking", "fintech", "crypto", "igaming", "payments", "legal"];
 const STATUS_STYLES: Record<string, string> = {
