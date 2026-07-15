@@ -330,6 +330,9 @@ export default function AdminPartnerAssets() {
               <Field label="Thumbnail URL (optional)">
                 <Input value={form.thumbnail_url} onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })} placeholder="https://..." />
               </Field>
+              <Field label="Preview URL (optional — image, PDF or video shown in the portal preview)">
+                <Input value={form.preview_url} onChange={(e) => setForm({ ...form, preview_url: e.target.value })} placeholder="https://... (defaults to the file itself)" />
+              </Field>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Sort order">
                   <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} />
