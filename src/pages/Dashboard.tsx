@@ -208,7 +208,7 @@ const Dashboard = () => {
             </Button>
           </div>
 
-          {/* Admin / Suite banners */}
+          {/* Admin / Suite / Partner banners */}
           {isAdmin && (
             <div className="mb-6 p-4 rounded-lg border border-navy/20 bg-navy/5 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -221,6 +221,25 @@ const Dashboard = () => {
               <Button size="sm" onClick={() => navigate("/admin")}>Go to Admin Panel</Button>
             </div>
           )}
+
+          {/* Partner banner – active channel partners */}
+          {partner?.is_active && (
+            <div className="mb-6 p-5 rounded-lg border border-teal/20 bg-gradient-to-r from-teal/5 to-navy/5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-teal/10 text-teal">
+                  <Handshake className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-semibold text-navy text-sm">Partner Portal</p>
+                  <p className="text-text-secondary text-xs">Referrals, deal registrations, commissions & marketing assets</p>
+                </div>
+              </div>
+              <Button variant="accent" size="sm" onClick={() => navigate("/partner-portal")}>
+                Open Partner Portal <ExternalLink className="ml-1 h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+
 
           {/* Suite banner – only for suite/enterprise users */}
           {hasSuiteAccess && (
