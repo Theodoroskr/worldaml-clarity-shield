@@ -1,60 +1,84 @@
-# Academy premium visual redesign
+# Channel Partners Portal
 
-Brand tokens stay locked (deep navy, slate, teal accent, dark default). This is a **visual** pass — no changes to Stripe, quiz logic, certificate generation, or DB. I'll rework layout, hierarchy, typography scale, motion, empty states, and micro-detail across the four surfaces.
+A dedicated, branded portal for approved partners — separate from the main user Dashboard — with its own layout, sidebar, and gated routes. Reuses existing `partners`, `referrals`, `deal_registrations` tables and the standard Cloud auth session; adds a small commission-payouts table and marketing-assets registry.
 
-## Approach
+## Routes (all under `/partner-portal`, sign-in required)
 
-Redesign one surface at a time, in order. For each surface I:
+```text
+/partner-portal                → overview (stats, quick links)
+/partner-portal/referrals      → referral link + referred leads table
+/partner-portal/deals          → register / track deal protection
+/partner-portal/commissions    → earnings, pending vs paid, payout history
+/partner-portal/assets         → downloadable marketing kit (logos, one-pagers, decks, email templates, banners, co-branded PDFs)
+/partner-portal/profile        → display name, logo, tagline, verticals, website, sandbox key
+/partner-portal/settings       → payout details (bank/PayPal), notification prefs
+```
 
-1. Capture the current screen.
-2. Generate **3 rendered design directions** (locked palette + type, varying composition/density/motion).
-3. Show them to you — you pick one.
-4. Implement the chosen direction, matching composition exactly.
+Legacy `/partners/dashboard` redirects to `/partner-portal`.
 
-This way you steer each surface instead of me shipping 4 redesigns blind.
+## Access control
 
-## Phase order & what changes per surface
+- Must be signed in. If no `partners` row exists for the user → show "Apply to Partner Program" screen linking to `/partners/apply`.
+- If a row exists but `is_active = false` → "Application under review" screen.
+- Active partners see the full portal.
+- Admins can impersonate any partner via `?partner_id=` (admin-only, checked with `has_role`).
 
-**1. Landing + course catalog** (`/academy`)
-- Hero: stronger editorial headline treatment, replace stock portrait vibe with a more distinctive art-directed asset or typographic hero
-- Stats strip: quieter, more premium (right-aligned metrics, hairline dividers)
-- "How access works" card: reformat as a 3-step ribbon instead of bullet list
-- Course grid: richer cards — level badge, duration, price, region, hover state
-- Testimonials: pull-quote editorial layout instead of 3 equal cards
-- Plan comparison: clearer free vs paid vs annual pass
+## New DB objects
 
-**2. Course player + module flow** (`/academy/course/:slug`)
-- Two-pane reading layout (module rail left, content right) with progress woven in
-- Reading typography: tighter measure, better rhythm, callout/case-study components
-- Sticky module progress + "next module" affordance
-- Distinct states for locked / in-progress / complete modules
+- `partner_payouts` — payout ledger per partner (`amount_eur`, `currency`, `status: pending|processing|paid|failed`, `paid_at`, `method`, `reference`, `notes`).
+- `partner_assets` — marketing asset registry (`title`, `description`, `category: logo|one_pager|deck|email_template|banner|case_study|contract`, `file_url`, `thumbnail_url`, `certification_min: bronze|silver|gold`, `is_active`).
+- Extend `partners` with `payout_method`, `payout_details_encrypted`, `notification_prefs jsonb`.
 
-**3. Quiz + certificate issuance**
-- Full-focus quiz view (chrome hidden, one question at a time, keyboard nav)
-- Pass/fail reveal with proper reward moment (motion, seal animation)
-- Certificate preview card: paper texture, seal, verifiable URL, share row (LinkedIn, copy link, email)
-- Name-capture prompt replaced with an inline modal, not `window.prompt`
+RLS:
+- `partner_payouts`: partner reads own rows; admins full access; service role manages inserts from finance workflow.
+- `partner_assets`: any active partner reads active assets whose `certification_min` ≤ their level; admins manage.
 
-**4. Checkout + cart + post-purchase**
-- Basket drawer redesign (line items, bundle discount visible, region/currency chip)
-- Post-purchase success screen: "You're in" moment → jump straight into first module
-- Dashboard certificates section: gallery-style cards with resend/share/download inline
+All new tables get `GRANT`s for `authenticated` + `service_role` and RLS enabled.
 
-## Cross-cutting polish (applied in every phase)
-- Consistent motion register (framer-motion, restrained — 200–400ms, ease-out)
-- Real skeletons + empty states instead of blank areas
-- Regional currency chip treated as a first-class UI element, not a floating toast
-- Hairline dividers, generous negative space, one accent color at a time
-- Kill any remaining generic AI-hero look
+## Commission view
 
-## Out of scope
-- No copy rewrite beyond micro-labels
-- No pricing/plan structure changes
-- No new courses or module content
-- No backend/schema/edge-function changes
+Computed live from `referrals` + `deal_registrations`:
+- Lifetime earned = SUM(`commission_earned`) on `referrals` where converted.
+- Pending = converted referrals not yet in a paid `partner_payouts` row.
+- Paid = SUM(`partner_payouts.amount_eur` WHERE status='paid').
+- Deal pipeline value = SUM(`estimated_arr_eur`) grouped by status.
 
-## Kickoff
+Cards + monthly bar chart (recharts).
 
-If you approve, I start **Phase 1 (Landing + catalog)** immediately: capture → 3 directions → you pick → I ship. Then Phase 2, and so on.
+## Marketing assets
 
-Reply "go" (or "start with phase 2/3/4") and I begin.
+- Uploaded/managed by admin in `/admin/partners` → new "Assets" tab.
+- Files stored in existing Supabase storage bucket (new `partner-assets` bucket, private, signed URLs on download).
+- Portal `/assets` page: grid filtered by category, gated by partner's `certification_level`.
+- Co-branded PDF generator (basic): merges partner logo + name into a pre-made one-pager template client-side (jsPDF) — v1 stub, extendable.
+
+## Layout & design
+
+- New `PartnerPortalLayout` with sidebar (mirrors `AdminLayout` style, but branded teal/navy for partners).
+- Topbar shows partner name + certification badge (bronze/silver/gold) + copy-to-clipboard referral link.
+- Reuses design tokens; no hardcoded colors.
+
+## Technical details
+
+Files:
+- `src/pages/partner-portal/PartnerPortalLayout.tsx`
+- `src/pages/partner-portal/Overview.tsx`
+- `src/pages/partner-portal/Referrals.tsx`
+- `src/pages/partner-portal/Deals.tsx`
+- `src/pages/partner-portal/Commissions.tsx`
+- `src/pages/partner-portal/Assets.tsx`
+- `src/pages/partner-portal/Profile.tsx`
+- `src/pages/partner-portal/Settings.tsx`
+- `src/components/partner-portal/PortalSidebar.tsx`
+- `src/components/partner-portal/PortalTopbar.tsx`
+- `src/components/partner-portal/CommissionChart.tsx`
+- `src/components/partner-portal/AssetCard.tsx`
+- `src/hooks/usePartner.ts` — loads partner row + derived commission totals.
+- `src/pages/admin/AdminPartnerAssets.tsx` — asset CRUD for admins.
+- Migration: `partner_payouts`, `partner_assets`, `partners` column additions, RLS + GRANTs, storage bucket policy.
+- Route additions in `src/App.tsx`; redirect from `/partners/dashboard`.
+- Header: when signed-in user is an active partner, add "Partner Portal" link (alongside existing Admin link).
+
+Out of scope (can add later): automated Stripe payouts, tax-form collection, MDF request workflow, deep Zoho CRM sync of commissions.
+
+Confirm and I'll build it.

@@ -1017,6 +1017,126 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_assets: {
+        Row: {
+          category: string
+          certification_min: string
+          content_type: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          file_path: string | null
+          file_size_bytes: number | null
+          file_url: string | null
+          id: string
+          is_active: boolean
+          sort_order: number
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          certification_min?: string
+          content_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_path?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          certification_min?: string
+          content_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_path?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      partner_payouts: {
+        Row: {
+          amount_eur: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          method: string | null
+          notes: string | null
+          paid_at: string | null
+          partner_id: string
+          period_end: string | null
+          period_start: string | null
+          reference: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_eur: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          method?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          partner_id: string
+          period_end?: string | null
+          period_start?: string | null
+          reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_eur?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          method?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          partner_id?: string
+          period_end?: string | null
+          period_start?: string | null
+          reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_payouts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "featured_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_payouts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partners: {
         Row: {
           academy_seats_granted: number
@@ -1030,7 +1150,10 @@ export type Database = {
           is_active: boolean
           is_featured: boolean
           logo_url: string | null
+          notification_prefs: Json
           partner_type: Database["public"]["Enums"]["partner_type"]
+          payout_details_encrypted: string | null
+          payout_method: string | null
           referral_code: string
           sandbox_key: string | null
           sandbox_key_issued_at: string | null
@@ -1051,7 +1174,10 @@ export type Database = {
           is_active?: boolean
           is_featured?: boolean
           logo_url?: string | null
+          notification_prefs?: Json
           partner_type?: Database["public"]["Enums"]["partner_type"]
+          payout_details_encrypted?: string | null
+          payout_method?: string | null
           referral_code?: string
           sandbox_key?: string | null
           sandbox_key_issued_at?: string | null
@@ -1072,7 +1198,10 @@ export type Database = {
           is_active?: boolean
           is_featured?: boolean
           logo_url?: string | null
+          notification_prefs?: Json
           partner_type?: Database["public"]["Enums"]["partner_type"]
+          payout_details_encrypted?: string | null
+          payout_method?: string | null
           referral_code?: string
           sandbox_key?: string | null
           sandbox_key_issued_at?: string | null
@@ -4013,6 +4142,8 @@ export type Database = {
         Args: { p_customer_id: string }
         Returns: Json
       }
+      cert_rank: { Args: { _level: string }; Returns: number }
+      current_partner_cert_level: { Args: never; Returns: string }
       current_user_has_suite_access: { Args: never; Returns: boolean }
       current_user_org_id: { Args: never; Returns: string }
       enqueue_outreach: {
