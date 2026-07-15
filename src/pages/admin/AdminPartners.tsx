@@ -30,6 +30,8 @@ export default function AdminPartners() {
   const [partnerApps, setPartnerApps] = useState<any[]>([]);
   const [partners, setPartners] = useState<any[]>([]);
   const [deals, setDeals] = useState<any[]>([]);
+  const [referrals, setReferrals] = useState<any[]>([]);
+  const [refFilter, setRefFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
@@ -37,14 +39,16 @@ export default function AdminPartners() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [{ data: apps }, { data: pts }, { data: dl }] = await Promise.all([
+    const [{ data: apps }, { data: pts }, { data: dl }, { data: refs }] = await Promise.all([
       supabase.from("partner_applications").select("*").order("created_at", { ascending: false }),
       supabase.from("partners").select("*").order("created_at", { ascending: false }),
       supabase.from("deal_registrations").select("*").order("created_at", { ascending: false }),
+      supabase.from("referrals").select("*").order("created_at", { ascending: false }),
     ]);
     setPartnerApps((apps as any[]) || []);
     setPartners((pts as any[]) || []);
     setDeals((dl as any[]) || []);
+    setReferrals((refs as any[]) || []);
     setLoading(false);
   }, []);
 
