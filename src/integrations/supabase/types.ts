@@ -994,6 +994,42 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_admin_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_user_id: string | null
+          changes: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_label: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_user_id?: string | null
+          changes?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_label?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_user_id?: string | null
+          changes?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_label?: string | null
+          entity_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
       partner_applications: {
         Row: {
           company_name: string
@@ -1155,6 +1191,39 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      partner_notification_settings: {
+        Row: {
+          created_at: string
+          email: string
+          is_active: boolean
+          notify_deal_status_change: boolean
+          notify_new_application: boolean
+          notify_new_deal: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          is_active?: boolean
+          notify_deal_status_change?: boolean
+          notify_new_application?: boolean
+          notify_new_deal?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          is_active?: boolean
+          notify_deal_status_change?: boolean
+          notify_new_application?: boolean
+          notify_new_deal?: boolean
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
