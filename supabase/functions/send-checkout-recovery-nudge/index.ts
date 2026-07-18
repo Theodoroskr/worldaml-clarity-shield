@@ -26,6 +26,21 @@ const RETRY_BASE = "https://worldaml.com/academy";
 const MIN_AGE_MIN = 30;
 const MAX_AGE_HOURS = 6;
 
+function escapeHtml(str: string): string {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function safeUrl(url: string, fallback: string): string {
+  const s = String(url ?? "").trim();
+  if (!/^https?:\/\//i.test(s)) return fallback;
+  return s.replace(/"/g, "%22");
+}
+
 interface PendingRow {
   id: string;
   user_id: string;
