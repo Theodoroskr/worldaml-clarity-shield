@@ -64,6 +64,7 @@ Deno.serve(async (req) => {
     // Allow service role key for internal/cron invocations
     const isServiceRole = serviceKey && token === serviceKey;
 
+    let callerEmail: string | null = null;
     if (!isServiceRole) {
       // Otherwise require a valid user JWT
       if (!token) {
@@ -80,6 +81,7 @@ Deno.serve(async (req) => {
           status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      callerEmail = (data.user.email ?? "").toLowerCase();
     }
 
     const { full_name, company_name, email, signed_up_at, auto_approved } = await req.json();
@@ -88,6 +90,15 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Missing email" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Prevent using this endpoint to send branded emails to arbitrary third
+    // parties: non-service-role callers may only trigger notifications for
+    // their own account.
+    if (!isServiceRole && callerEmail !== String(email).toLowerCase()) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 

@@ -26,6 +26,21 @@ const RETRY_BASE = "https://worldaml.com/academy";
 const MIN_AGE_MIN = 30;
 const MAX_AGE_HOURS = 6;
 
+function escapeHtml(str: string): string {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function safeUrl(url: string, fallback: string): string {
+  const s = String(url ?? "").trim();
+  if (!/^https?:\/\//i.test(s)) return fallback;
+  return s.replace(/"/g, "%22");
+}
+
 interface PendingRow {
   id: string;
   user_id: string;
@@ -67,9 +82,18 @@ function buildHtml(p: { greetingName: string; courseList: string; amountFmt: str
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Internal-only endpoint (cron sweep + admin manual recovery). Require the
+  // service-role bearer for every invocation to prevent using it as an open
+  // relay for phishing emails through the WorldAML domain.
+  const serviceKeyEnv = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const authToken = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
+  if (!serviceKeyEnv || authToken !== serviceKeyEnv) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    serviceKeyEnv,
   );
 
   const resendKey = Deno.env.get("RESEND_API_KEY");
@@ -84,12 +108,12 @@ serve(async (req) => {
     try { body = await req.json(); } catch { /* fall through to cron */ }
     if (body && typeof body.email === "string" && body.email.includes("@")) {
       const html = buildHtml({
-        greetingName: body.name ?? "there",
-        courseList: body.courseList ?? "your WorldAML Academy courses",
+        greetingName: escapeHtml(body.name ?? "there"),
+        courseList: escapeHtml(body.courseList ?? "your WorldAML Academy courses"),
         amountFmt: body.amount && body.currency
-          ? `${Number(body.amount).toFixed(2)} ${String(body.currency).toUpperCase()}`
+          ? escapeHtml(`${Number(body.amount).toFixed(2)} ${String(body.currency).toUpperCase()}`)
           : "",
-        retryUrl: body.retryUrl ?? `${RETRY_BASE}?resume=basket`,
+        retryUrl: safeUrl(body.retryUrl, `${RETRY_BASE}?resume=basket`),
       });
       try {
         await resend.emails.send({
@@ -173,22 +197,25 @@ serve(async (req) => {
       continue;
     }
 
-    const courseList = group
-      .map((r) => titleBySlug.get(r.course_slug) ?? r.course_slug)
-      .join(", ");
+    const courseList = escapeHtml(
+      group.map((r) => titleBySlug.get(r.course_slug) ?? r.course_slug).join(", "),
+    );
     const totalCents = group.reduce((s, r) => s + (r.amount_cents ?? 0), 0);
     const currency = (first.currency ?? "eur").toUpperCase();
-    const amountFmt = `${(totalCents / 100).toFixed(2)} ${currency}`;
-    const retryUrl =
+    const amountFmt = escapeHtml(`${(totalCents / 100).toFixed(2)} ${currency}`);
+    const retryUrl = safeUrl(
       group.length === 1
-        ? `${RETRY_BASE}/${first.course_slug}`
-        : `${RETRY_BASE}?resume=basket`;
-    const greetingName = profile?.full_name?.split(" ")[0] ?? "there";
+        ? `${RETRY_BASE}/${encodeURIComponent(first.course_slug)}`
+        : `${RETRY_BASE}?resume=basket`,
+      `${RETRY_BASE}?resume=basket`,
+    );
+    const greetingName = escapeHtml(profile?.full_name?.split(" ")[0] ?? "there");
 
     const html = `
 <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a;background:#ffffff;">
   <h2 style="margin:0 0 12px;color:#0f172a;">You left your WorldAML Academy course in the basket</h2>
   <p style="margin:0 0 16px;line-height:1.55;">Hi ${greetingName},</p>
+
   <p style="margin:0 0 16px;line-height:1.55;">
     We saved your spot for <strong>${courseList}</strong> (${amountFmt}).
     Looks like the checkout window closed before payment went through —

@@ -1,11 +1,11 @@
 {
   "anchor": "2026-07-12T00:00:00.000Z",
   "totalArticles": 18,
-  "releasedCount": 4,
-  "upcomingCount": 14,
+  "releasedCount": 7,
+  "upcomingCount": 11,
   "nextRelease": {
-    "date": "2026-07-16T00:00:00.000Z",
-    "title": "Adverse Media Screening: Why Negative News Checks Are Essential for AML",
-    "slug": "adverse-media-screening-guide"
+    "date": "2026-07-19T00:00:00.000Z",
+    "title": "KYC vs KYB: Key Differences and Why Both Matter",
+    "slug": "kyc-vs-kyb-differences"
   }
 }

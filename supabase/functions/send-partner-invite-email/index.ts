@@ -104,6 +104,17 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Internal-only endpoint: require the service-role bearer. Public form
+    // flows should trigger this via submit-form / signup-followup, not
+    // directly from the browser (previously an open email relay).
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const token = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
+    if (!serviceKey || token !== serviceKey) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { to, name, context, source } = await req.json();
 
     if (!to || typeof to !== "string" || !isValidEmail(to)) {
