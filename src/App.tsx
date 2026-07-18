@@ -401,6 +401,11 @@ const App = () => (
 
                 {/* Comparison landing pages */}
                 <Route path="/world-check-alternative" element={<WorldCheckAlternative />} />
+                <Route path="/alternatives" element={<AlternativesIndex />} />
+                <Route path="/alternatives/comply-advantage" element={<ComplyAdvantageAlternative />} />
+                <Route path="/alternatives/dow-jones-risk-center" element={<DowJonesAlternative />} />
+                <Route path="/alternatives/napier" element={<NapierAlternative />} />
+                <Route path="/alternatives/sanction-scanner" element={<SanctionScannerAlternative />} />
 
                 {/* Advisory */}
                 <Route path="/advisory" element={<Advisory />} />
