@@ -374,6 +374,21 @@ const ComplianceSoftwareUK = () => {
             </div>
           </div>
         </section>
+        <RelatedGuidesSection
+          currentPath="/compliance-software/uk"
+          intro="Related UK, EU and screening resources for compliance and MLRO teams."
+          links={[
+            GUIDE_LINKS.amlScreeningUK,
+            GUIDE_LINKS.amlScreeningEU,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.sanctionsLists,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.csUS,
+            GUIDE_LINKS.csNL,
+            GUIDE_LINKS.amlChecklist,
+          ]}
+        />
       </main>
       <Footer />
     </div>
