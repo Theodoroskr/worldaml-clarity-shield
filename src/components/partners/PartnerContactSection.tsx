@@ -90,19 +90,9 @@ const PartnerContactSection = () => {
 
       if (!response.ok) throw new Error("Submission failed");
 
-      // Fire-and-forget partner invite email
-      supabase.functions
-        .invoke("send-partner-invite-email", {
-          body: {
-            to: form.email,
-            name: `${form.firstName} ${form.lastName}`.trim(),
-            context: `Thanks for your interest in the WorldAML Partner Program${
-              form.company ? ` on behalf of ${form.company}` : ""
-            }.`,
-            source: "partners-page-form",
-          },
-        })
-        .catch((err) => console.warn("Partner invite email failed (non-blocking):", err));
+      // Partner invite email is dispatched server-side by the signup
+      // follow-up cron (send-signup-followup) — not directly from the browser.
+
 
       toast({
         title: "Request submitted",
