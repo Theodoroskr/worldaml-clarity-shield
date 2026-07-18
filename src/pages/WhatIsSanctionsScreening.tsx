@@ -62,7 +62,7 @@ const WhatIsSanctionsScreening = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="What is Sanctions Screening? A Complete Guide (2026)"
+        title="What is Sanctions Screening? (2026 Guide)"
         description="Sanctions screening explained: how it works, OFAC/UN/EU/HMT lists, regulatory obligations, and how compliance teams build an effective screening programme."
         canonical="/resources/what-is-sanctions-screening"
         breadcrumbs={[
