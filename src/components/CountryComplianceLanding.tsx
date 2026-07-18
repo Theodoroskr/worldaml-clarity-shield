@@ -251,6 +251,22 @@ const CountryComplianceLanding = ({ config: c }: Props) => {
             </div>
           </div>
         </section>
+
+        <RelatedGuidesSection
+          currentPath={c.path}
+          intro={`Continue exploring compliance software and screening guides relevant to ${c.countryName} and neighbouring markets.`}
+          links={[
+            GUIDE_LINKS.csUS,
+            GUIDE_LINKS.csUK,
+            GUIDE_LINKS.csNL,
+            GUIDE_LINKS.csCH,
+            GUIDE_LINKS.csIT,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.amlChecklist,
+          ]}
+        />
       </main>
       <Footer />
     </div>
