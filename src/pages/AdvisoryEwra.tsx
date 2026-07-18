@@ -149,7 +149,7 @@ const EwraAdvisory = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="EWRA Advisory — AML-FWRA & Sanctions FWRA | WorldAML"
+        title="EWRA Advisory — AML-FWRA & Sanctions FWRA"
         description="Regulator-ready Enterprise-Wide Risk Assessment: AML-FWRA and Sanctions FWRA methodology, models, report, and board pack — typically delivered in 5–7 weeks."
         canonical="/advisory/ewra"
       />
