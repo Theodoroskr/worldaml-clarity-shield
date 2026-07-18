@@ -222,7 +222,7 @@ const SanctionsScreeningSoftware = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Sanctions Screening Software — OFAC, OFSI, EU & UN | WorldAML"
+        title="Sanctions Screening Software — OFAC & OFSI"
         description="Real-time sanctions screening software for OFAC, OFSI, EU, UN and 40+ national regimes. 50% Rule ownership resolution, sub-100ms payment screening, PEP and adverse-media data in one API."
         canonical="/sanctions-screening-software"
         breadcrumbs={[
