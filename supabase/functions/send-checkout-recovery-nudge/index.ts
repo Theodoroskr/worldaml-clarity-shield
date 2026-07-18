@@ -197,22 +197,25 @@ serve(async (req) => {
       continue;
     }
 
-    const courseList = group
-      .map((r) => titleBySlug.get(r.course_slug) ?? r.course_slug)
-      .join(", ");
+    const courseList = escapeHtml(
+      group.map((r) => titleBySlug.get(r.course_slug) ?? r.course_slug).join(", "),
+    );
     const totalCents = group.reduce((s, r) => s + (r.amount_cents ?? 0), 0);
     const currency = (first.currency ?? "eur").toUpperCase();
-    const amountFmt = `${(totalCents / 100).toFixed(2)} ${currency}`;
-    const retryUrl =
+    const amountFmt = escapeHtml(`${(totalCents / 100).toFixed(2)} ${currency}`);
+    const retryUrl = safeUrl(
       group.length === 1
-        ? `${RETRY_BASE}/${first.course_slug}`
-        : `${RETRY_BASE}?resume=basket`;
-    const greetingName = profile?.full_name?.split(" ")[0] ?? "there";
+        ? `${RETRY_BASE}/${encodeURIComponent(first.course_slug)}`
+        : `${RETRY_BASE}?resume=basket`,
+      `${RETRY_BASE}?resume=basket`,
+    );
+    const greetingName = escapeHtml(profile?.full_name?.split(" ")[0] ?? "there");
 
     const html = `
 <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a;background:#ffffff;">
   <h2 style="margin:0 0 12px;color:#0f172a;">You left your WorldAML Academy course in the basket</h2>
   <p style="margin:0 0 16px;line-height:1.55;">Hi ${greetingName},</p>
+
   <p style="margin:0 0 16px;line-height:1.55;">
     We saved your spot for <strong>${courseList}</strong> (${amountFmt}).
     Looks like the checkout window closed before payment went through —
