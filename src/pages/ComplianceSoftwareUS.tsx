@@ -367,6 +367,22 @@ const ComplianceSoftwareUS = () => {
             </div>
           </div>
         </section>
+
+        <RelatedGuidesSection
+          currentPath="/compliance-software/us"
+          intro="Go deeper into US regulator context, screening tooling, and comparable country landing pages."
+          links={[
+            GUIDE_LINKS.usGuide,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.sanctionsLists,
+            GUIDE_LINKS.amlChecklist,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.csUK,
+            GUIDE_LINKS.csNL,
+            GUIDE_LINKS.csCH,
+          ]}
+        />
       </main>
       <Footer />
     </div>
