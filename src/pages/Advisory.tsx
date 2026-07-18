@@ -243,7 +243,7 @@ const Advisory = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="WorldAML Advisory — MLRO & AML Compliance Consulting"
+        title="MLRO & AML Compliance Consulting"
         description="Advisory services from WorldAML MLROs: EWRA, AML & Sanctions policies, AMLCO reports, regulator questionnaires, internal audit, inspection preparation, and VMLRO support."
         canonical="/advisory"
       />

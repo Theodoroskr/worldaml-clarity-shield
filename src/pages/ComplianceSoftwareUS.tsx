@@ -196,7 +196,7 @@ const ComplianceSoftwareUS = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Compliance Software for US Banks, Fintechs & MSBs | WorldAML"
+        title="Compliance Software for US Banks & Fintechs"
         description="Compliance software for US financial institutions — BSA/AML, OFAC sanctions, KYC/CIP, transaction monitoring and SAR/CTR e-filing in one FFIEC- and NYDFS Part 504-ready platform."
         canonical="/compliance-software/us"
         breadcrumbs={[

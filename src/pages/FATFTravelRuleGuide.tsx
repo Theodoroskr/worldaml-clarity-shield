@@ -70,7 +70,7 @@ const FATFTravelRuleGuide = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="FATF Travel Rule Compliance Guide for VASPs (2026)"
+        title="FATF Travel Rule Guide for VASPs (2026)"
         description="Technical guide to FATF Recommendation 16 for VASPs: data requirements, thresholds, IVMS 101, self-hosted wallets, EU TFR and multi-jurisdictional obligations."
         canonical="/resources/fatf-travel-rule-compliance-guide"
         breadcrumbs={[

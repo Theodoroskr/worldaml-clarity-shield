@@ -197,7 +197,7 @@ const ComplianceSoftwareUK = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Compliance Software for UK Banks, EMIs & Crypto Firms | WorldAML"
+        title="Compliance Software for UK Banks & EMIs"
         description="AML compliance software for UK financial institutions — MLR 2017, OFSI sanctions, KYC/CDD, FCA-ready transaction monitoring and SAR/DAML submissions in one JMLSG-aligned platform."
         canonical="/compliance-software/uk"
         breadcrumbs={[

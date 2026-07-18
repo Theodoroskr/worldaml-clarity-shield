@@ -161,7 +161,7 @@ const AMLComplianceChecklist = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="AML Compliance Checklist — Audit-Ready Controls"
+        title="AML Compliance Checklist — Key Controls"
         description="Practical AML compliance and audit checklist for banks, fintechs, crypto, gaming and DNFBPs. Governance, CDD, sanctions screening, monitoring, SAR filing, training and record-keeping."
         canonical="/resources/aml-compliance-checklist"
         breadcrumbs={[

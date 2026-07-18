@@ -62,7 +62,7 @@ const UAEAMLComplianceGuide = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="UAE AML Compliance Guide for Free Zones (DIFC, ADGM)"
+        title="UAE AML Compliance Guide (DIFC & ADGM)"
         description="Practical AML/CFT guide for UAE Free Zone firms: DIFC, ADGM, DMCC obligations, sanctions screening, goAML reporting and FATF alignment."
         canonical="/resources/uae-aml-compliance-guide"
         breadcrumbs={[

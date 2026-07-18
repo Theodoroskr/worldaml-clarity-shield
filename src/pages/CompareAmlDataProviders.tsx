@@ -116,7 +116,7 @@ const CompareAmlDataProviders = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="World-Check vs WorldCompliance vs Dow Jones — Best AML Data Provider"
+        title="World-Check vs WorldCompliance vs Dow Jones"
         description="Compare Refinitiv World-Check, LexisNexis WorldCompliance and Dow Jones Risk & Compliance on data coverage, false positives, workflow and pricing. Choose the best AML data provider for UK, EU and UAE fintechs and banks."
         canonical="/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones"
         breadcrumbs={[
