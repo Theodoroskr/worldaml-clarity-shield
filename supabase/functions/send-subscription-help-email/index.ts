@@ -54,17 +54,17 @@ function buildHtml(params: {
         <h1 style="color:#ffffff;margin:0;font-size:20px;font-weight:700;letter-spacing:0.5px;">WorldAML Academy</h1>
       </div>
       <div style="padding:28px 32px;color:#374151;font-size:15px;line-height:1.6;">
-        <p>${params.greeting}</p>
+        <p>${escapeHtml(params.greeting)}</p>
         <p>
-          We noticed that your subscription for <strong>${params.productName}</strong> may need attention.
-          ${params.helpContext ? params.helpContext : "If you ran into any issue while completing your subscription, we're here to help."}
+          We noticed that your subscription for <strong>${escapeHtml(params.productName)}</strong> may need attention.
+          ${params.helpContext ? escapeHtml(params.helpContext) : "If you ran into any issue while completing your subscription, we're here to help."}
         </p>
         <p>
           No charge has been made, and there's no obligation — we just want to make sure you get the access you need.
         </p>
-        ${params.ctaUrl
+        ${safeUrl(params.ctaUrl)
           ? `<p style="margin:24px 0;">
-               <a href="${params.ctaUrl}" style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:600;font-size:14px;">
+               <a href="${safeUrl(params.ctaUrl)}" style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:600;font-size:14px;">
                  ${ctaLabel}
                </a>
              </p>`
@@ -81,7 +81,7 @@ function buildHtml(params: {
         <p>We'll get you sorted quickly so you can access your courses, certificates, and any tools included with your subscription.</p>
         <p style="margin-top:28px;">Best regards,<br/>The WorldAML Team</p>
         ${params.reference
-          ? `<p style="color:#9ca3af;font-size:12px;margin-top:24px;">Reference: ${params.reference}</p>`
+          ? `<p style="color:#9ca3af;font-size:12px;margin-top:24px;">Reference: ${escapeHtml(params.reference)}</p>`
           : ""
         }
       </div>
