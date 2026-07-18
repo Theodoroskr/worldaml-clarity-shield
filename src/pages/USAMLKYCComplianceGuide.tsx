@@ -223,7 +223,7 @@ const USAMLKYCComplianceGuide = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="US AML, KYC & Transaction Monitoring Compliance Guide (2026)"
+        title="US AML, KYC & Monitoring Guide (2026)"
         description="A US buyer's guide to BSA/AML, KYC/CIP/CDD, OFAC sanctions and transaction monitoring — five program pillars, SAR/CTR filing rules, CTA beneficial ownership, and NYDFS Part 504."
         canonical="/resources/us-aml-kyc-compliance-guide"
         breadcrumbs={[
