@@ -296,6 +296,22 @@ const AMLComplianceChecklist = () => {
             </div>
           </div>
         </section>
+
+        <RelatedGuidesSection
+          currentPath="/resources/aml-compliance-checklist"
+          intro="Extend the checklist with jurisdiction-specific guides and screening tooling."
+          links={[
+            GUIDE_LINKS.usGuide,
+            GUIDE_LINKS.uaeGuide,
+            GUIDE_LINKS.fatfTravel,
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.csUS,
+            GUIDE_LINKS.csUK,
+            GUIDE_LINKS.platformScreening,
+          ]}
+        />
       </main>
       <Footer />
     </div>
