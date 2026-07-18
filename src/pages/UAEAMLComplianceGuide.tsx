@@ -270,6 +270,21 @@ const UAEAMLComplianceGuide = () => {
             </div>
           </div>
         </section>
+
+        <RelatedGuidesSection
+          currentPath="/resources/uae-aml-compliance-guide"
+          intro="Related global AML/CFT context, screening tools and country guides."
+          links={[
+            GUIDE_LINKS.usGuide,
+            GUIDE_LINKS.fatfTravel,
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.sanctionsLists,
+            GUIDE_LINKS.amlChecklist,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.platformScreening,
+          ]}
+        />
       </main>
       <Footer />
     </div>
