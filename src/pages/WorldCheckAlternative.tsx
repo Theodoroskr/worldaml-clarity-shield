@@ -94,7 +94,7 @@ const WorldCheckAlternative = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="World-Check vs WorldCompliance — Alternative Compared"
+        title="World-Check vs WorldCompliance Alternative"
         description="World-Check vs WorldCompliance: compare Refinitiv World-Check and LexisNexis WorldCompliance on data coverage, pricing and workflow. See why compliance teams switch to WorldAML."
         canonical="/world-check-alternative"
         breadcrumbs={[
