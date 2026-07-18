@@ -118,6 +118,11 @@ const ComplianceSoftwareIT = lazy(() => import("./pages/ComplianceSoftwareIT"));
 const SanctionsScreeningSoftware = lazy(() => import("./pages/SanctionsScreeningSoftware"));
 const USAMLKYCComplianceGuide = lazy(() => import("./pages/USAMLKYCComplianceGuide"));
 const WorldCheckAlternative = lazy(() => import("./pages/WorldCheckAlternative"));
+const AlternativesIndex = lazy(() => import("./pages/alternatives/AlternativesIndex"));
+const ComplyAdvantageAlternative = lazy(() => import("./pages/alternatives/ComplyAdvantageAlternative"));
+const DowJonesAlternative = lazy(() => import("./pages/alternatives/DowJonesAlternative"));
+const NapierAlternative = lazy(() => import("./pages/alternatives/NapierAlternative"));
+const SanctionScannerAlternative = lazy(() => import("./pages/alternatives/SanctionScannerAlternative"));
 const Advisory = lazy(() => import("./pages/Advisory"));
 const AdvisoryEwra = lazy(() => import("./pages/AdvisoryEwra"));
 
