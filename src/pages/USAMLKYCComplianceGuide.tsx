@@ -483,6 +483,22 @@ const USAMLKYCComplianceGuide = () => {
             </div>
           </div>
         </section>
+
+        <RelatedGuidesSection
+          currentPath="/resources/us-aml-kyc-compliance-guide"
+          intro="Related tooling and country guides for US-regulated compliance teams."
+          links={[
+            GUIDE_LINKS.csUS,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.sanctionsLists,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.amlChecklist,
+            GUIDE_LINKS.fatfTravel,
+            GUIDE_LINKS.uaeGuide,
+            GUIDE_LINKS.csUK,
+          ]}
+        />
       </main>
       <Footer />
     </div>
