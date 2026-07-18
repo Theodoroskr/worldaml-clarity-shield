@@ -82,9 +82,18 @@ function buildHtml(p: { greetingName: string; courseList: string; amountFmt: str
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Internal-only endpoint (cron sweep + admin manual recovery). Require the
+  // service-role bearer for every invocation to prevent using it as an open
+  // relay for phishing emails through the WorldAML domain.
+  const serviceKeyEnv = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const authToken = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
+  if (!serviceKeyEnv || authToken !== serviceKeyEnv) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    serviceKeyEnv,
   );
 
   const resendKey = Deno.env.get("RESEND_API_KEY");
@@ -99,12 +108,12 @@ serve(async (req) => {
     try { body = await req.json(); } catch { /* fall through to cron */ }
     if (body && typeof body.email === "string" && body.email.includes("@")) {
       const html = buildHtml({
-        greetingName: body.name ?? "there",
-        courseList: body.courseList ?? "your WorldAML Academy courses",
+        greetingName: escapeHtml(body.name ?? "there"),
+        courseList: escapeHtml(body.courseList ?? "your WorldAML Academy courses"),
         amountFmt: body.amount && body.currency
-          ? `${Number(body.amount).toFixed(2)} ${String(body.currency).toUpperCase()}`
+          ? escapeHtml(`${Number(body.amount).toFixed(2)} ${String(body.currency).toUpperCase()}`)
           : "",
-        retryUrl: body.retryUrl ?? `${RETRY_BASE}?resume=basket`,
+        retryUrl: safeUrl(body.retryUrl, `${RETRY_BASE}?resume=basket`),
       });
       try {
         await resend.emails.send({
