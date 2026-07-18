@@ -231,6 +231,22 @@ const WhatIsSanctionsScreening = () => {
             </p>
           </article>
         </section>
+
+        <RelatedGuidesSection
+          currentPath="/resources/what-is-sanctions-screening"
+          intro="Move from theory to implementation with software, provider comparisons and country guides."
+          links={[
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.sanctionsLists,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.worldCheckAlt,
+            GUIDE_LINKS.amlChecklist,
+            GUIDE_LINKS.usGuide,
+            GUIDE_LINKS.uaeGuide,
+            GUIDE_LINKS.fatfTravel,
+            GUIDE_LINKS.platformScreening,
+          ]}
+        />
       </main>
       <Footer />
     </div>
