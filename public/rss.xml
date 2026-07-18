@@ -6,9 +6,58 @@
   <atom:link href="https://worldaml.com/rss.xml" rel="self" type="application/rss+xml" />
   <description>Practical AML, KYC/KYB, sanctions and regulatory compliance analysis from the WorldAML team.</description>
   <language>en</language>
-  <lastBuildDate>Wed, 15 Jul 2026 19:24:34 GMT</lastBuildDate>
-  <pubDate>Wed, 15 Jul 2026 00:00:00 GMT</pubDate>
+  <lastBuildDate>Sat, 18 Jul 2026 16:50:16 GMT</lastBuildDate>
+  <pubDate>Sat, 18 Jul 2026 00:00:00 GMT</pubDate>
   <generator>WorldAML RSS Generator</generator>
+  <item>
+    <title>EDD vs SDD: When to Apply Enhanced or Simplified Due Diligence</title>
+    <link>https://worldaml.com/blog/edd-vs-sdd-enhanced-simplified-due-diligence</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/edd-vs-sdd-enhanced-simplified-due-diligence</guid>
+    <pubDate>Sat, 18 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[A clear guide to Enhanced Due Diligence (EDD) and Simplified Due Diligence (SDD) — when each applies, what steps are required, and how to document your decisions to satisfy regulators.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>KYC &amp; KYB</category>
+    <category>EDD</category>
+    <category>SDD</category>
+    <category>Enhanced Due Diligence</category>
+    <category>Simplified Due Diligence</category>
+    <category>CDD</category>
+    <category>KYC</category>
+    <category>AML</category>
+  </item>
+  <item>
+    <title>Sanctions Screening Best Practices: Reducing False Positives Without Increasing Risk</title>
+    <link>https://worldaml.com/blog/sanctions-screening-best-practices</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/sanctions-screening-best-practices</guid>
+    <pubDate>Fri, 17 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[How to tune your sanctions screening programme to minimise false positives, maintain regulatory defensibility, and ensure no genuine hit goes undetected.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>Sanctions</category>
+    <category>sanctions screening</category>
+    <category>OFAC</category>
+    <category>false positives</category>
+    <category>watchlist management</category>
+    <category>fuzzy matching</category>
+    <category>compliance operations</category>
+  </item>
+  <item>
+    <title>Adverse Media Screening: Why Negative News Checks Are Essential for AML</title>
+    <link>https://worldaml.com/blog/adverse-media-screening-guide</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/adverse-media-screening-guide</guid>
+    <pubDate>Thu, 16 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[A comprehensive guide to adverse media screening in AML compliance — what it is, why it matters, how to implement it, and what the regulators expect.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>AML Compliance</category>
+    <category>adverse media</category>
+    <category>negative news screening</category>
+    <category>AML</category>
+    <category>KYC</category>
+    <category>reputational risk</category>
+    <category>EDD</category>
+  </item>
   <item>
     <title>The Risk-Based Approach to AML: A Practical Implementation Guide</title>
     <link>https://worldaml.com/blog/risk-based-approach-aml</link>
