@@ -49,7 +49,7 @@ const faqStructured = {
 const Partners = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
-      title="Partner Program — Earn Recurring Commission | WorldAML"
+      title="Partner Program — Earn Recurring Commission"
       description="Join the WorldAML Partner Program. Refer, resell, or white-label our AML, KYC & KYB platform. Earn 5–15% recurring commission with dedicated support."
       canonical="/partners"
       breadcrumbs={[
