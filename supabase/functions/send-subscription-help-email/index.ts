@@ -12,6 +12,7 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,6 +22,22 @@ const corsHeaders = {
 const FROM_EMAIL = "WorldAML Academy <academy@worldaml.com>";
 const SUPPORT_EMAIL = "info@worldaml.com";
 
+function escapeHtml(str: string): string {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function safeUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  const s = String(url).trim();
+  if (!/^https?:\/\//i.test(s)) return undefined;
+  return s.replace(/"/g, "%22");
+}
+
 function buildHtml(params: {
   greeting: string;
   productName: string;
@@ -29,7 +46,8 @@ function buildHtml(params: {
   ctaLabel?: string;
   reference?: string;
 }) {
-  const ctaLabel = params.ctaLabel ?? "Retry Checkout →";
+  const ctaLabel = escapeHtml(params.ctaLabel ?? "Retry Checkout →");
+
   return `
     <div style="font-family:Arial,Helvetica,sans-serif;max-width:620px;margin:0 auto;background:#ffffff;">
       <div style="background:#1e3a5f;padding:28px 32px;">
