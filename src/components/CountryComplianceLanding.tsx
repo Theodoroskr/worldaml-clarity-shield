@@ -15,6 +15,7 @@ import {
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import RelatedGuidesSection, { GUIDE_LINKS } from "@/components/RelatedGuidesSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -250,6 +251,22 @@ const CountryComplianceLanding = ({ config: c }: Props) => {
             </div>
           </div>
         </section>
+
+        <RelatedGuidesSection
+          currentPath={c.path}
+          intro={`Continue exploring compliance software and screening guides relevant to ${c.countryName} and neighbouring markets.`}
+          links={[
+            GUIDE_LINKS.csUS,
+            GUIDE_LINKS.csUK,
+            GUIDE_LINKS.csNL,
+            GUIDE_LINKS.csCH,
+            GUIDE_LINKS.csIT,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.amlChecklist,
+          ]}
+        />
       </main>
       <Footer />
     </div>

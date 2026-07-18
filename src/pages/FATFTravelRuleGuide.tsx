@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import RelatedGuidesSection, { GUIDE_LINKS } from "@/components/RelatedGuidesSection";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Bitcoin, ShieldCheck, Globe2, FileSearch, AlertTriangle, CheckCircle2 } from "lucide-react";
 
@@ -282,6 +283,21 @@ const FATFTravelRuleGuide = () => {
             </div>
           </div>
         </section>
+
+        <RelatedGuidesSection
+          currentPath="/resources/fatf-travel-rule-guide"
+          intro="Related sanctions, screening and country compliance resources."
+          links={[
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.sanctionsLists,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.usGuide,
+            GUIDE_LINKS.uaeGuide,
+            GUIDE_LINKS.amlChecklist,
+            GUIDE_LINKS.platformScreening,
+          ]}
+        />
       </main>
       <Footer />
     </div>

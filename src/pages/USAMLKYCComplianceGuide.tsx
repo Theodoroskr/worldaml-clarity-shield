@@ -14,6 +14,7 @@ import {
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import RelatedGuidesSection, { GUIDE_LINKS } from "@/components/RelatedGuidesSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -482,6 +483,22 @@ const USAMLKYCComplianceGuide = () => {
             </div>
           </div>
         </section>
+
+        <RelatedGuidesSection
+          currentPath="/resources/us-aml-kyc-compliance-guide"
+          intro="Related tooling and country guides for US-regulated compliance teams."
+          links={[
+            GUIDE_LINKS.csUS,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.sanctionsLists,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.amlChecklist,
+            GUIDE_LINKS.fatfTravel,
+            GUIDE_LINKS.uaeGuide,
+            GUIDE_LINKS.csUK,
+          ]}
+        />
       </main>
       <Footer />
     </div>

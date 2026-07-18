@@ -14,6 +14,7 @@ import {
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import RelatedGuidesSection, { GUIDE_LINKS } from "@/components/RelatedGuidesSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -373,6 +374,21 @@ const ComplianceSoftwareUK = () => {
             </div>
           </div>
         </section>
+        <RelatedGuidesSection
+          currentPath="/compliance-software/uk"
+          intro="Related UK, EU and screening resources for compliance and MLRO teams."
+          links={[
+            GUIDE_LINKS.amlScreeningUK,
+            GUIDE_LINKS.amlScreeningEU,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.sanctionsLists,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.csUS,
+            GUIDE_LINKS.csNL,
+            GUIDE_LINKS.amlChecklist,
+          ]}
+        />
       </main>
       <Footer />
     </div>

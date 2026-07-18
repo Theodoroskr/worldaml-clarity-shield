@@ -14,6 +14,7 @@ import {
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import RelatedGuidesSection, { GUIDE_LINKS } from "@/components/RelatedGuidesSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -366,6 +367,22 @@ const ComplianceSoftwareUS = () => {
             </div>
           </div>
         </section>
+
+        <RelatedGuidesSection
+          currentPath="/compliance-software/us"
+          intro="Go deeper into US regulator context, screening tooling, and comparable country landing pages."
+          links={[
+            GUIDE_LINKS.usGuide,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.sanctionsLists,
+            GUIDE_LINKS.amlChecklist,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.csUK,
+            GUIDE_LINKS.csNL,
+            GUIDE_LINKS.csCH,
+          ]}
+        />
       </main>
       <Footer />
     </div>

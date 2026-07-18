@@ -14,6 +14,7 @@ import {
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import RelatedGuidesSection, { GUIDE_LINKS } from "@/components/RelatedGuidesSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -397,6 +398,22 @@ const SanctionsScreeningSoftware = () => {
             </div>
           </div>
         </section>
+
+        <RelatedGuidesSection
+          currentPath="/sanctions-screening-software"
+          intro="Deepen your sanctions knowledge or compare tools by region and provider."
+          links={[
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.sanctionsLists,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.worldCheckAlt,
+            GUIDE_LINKS.platformScreening,
+            GUIDE_LINKS.csUS,
+            GUIDE_LINKS.csUK,
+            GUIDE_LINKS.amlChecklist,
+            GUIDE_LINKS.fatfTravel,
+          ]}
+        />
       </main>
       <Footer />
     </div>

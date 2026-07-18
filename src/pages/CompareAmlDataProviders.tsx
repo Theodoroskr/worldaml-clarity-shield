@@ -3,6 +3,7 @@ import { ArrowRight, Check, X, Minus } from "lucide-react";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import RelatedGuidesSection, { GUIDE_LINKS } from "@/components/RelatedGuidesSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -311,6 +312,22 @@ const CompareAmlDataProviders = () => {
             </Button>
           </div>
         </section>
+
+        <RelatedGuidesSection
+          currentPath="/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones"
+          intro="Related sanctions tooling, alternatives and jurisdictional guides."
+          links={[
+            GUIDE_LINKS.worldCheckAlt,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.sanctionsLists,
+            GUIDE_LINKS.platformScreening,
+            GUIDE_LINKS.usGuide,
+            GUIDE_LINKS.csUS,
+            GUIDE_LINKS.csUK,
+            GUIDE_LINKS.amlChecklist,
+          ]}
+        />
       </main>
       <Footer />
     </div>
