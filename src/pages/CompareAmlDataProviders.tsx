@@ -312,6 +312,22 @@ const CompareAmlDataProviders = () => {
             </Button>
           </div>
         </section>
+
+        <RelatedGuidesSection
+          currentPath="/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones"
+          intro="Related sanctions tooling, alternatives and jurisdictional guides."
+          links={[
+            GUIDE_LINKS.worldCheckAlt,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.whatIsSanctions,
+            GUIDE_LINKS.sanctionsLists,
+            GUIDE_LINKS.platformScreening,
+            GUIDE_LINKS.usGuide,
+            GUIDE_LINKS.csUS,
+            GUIDE_LINKS.csUK,
+            GUIDE_LINKS.amlChecklist,
+          ]}
+        />
       </main>
       <Footer />
     </div>
