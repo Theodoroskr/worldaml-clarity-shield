@@ -227,11 +227,11 @@ const AlternativeLandingTemplate = (p: AlternativeLandingProps) => {
         <RelatedGuidesSection
           currentPath={p.canonical}
           links={[
-            GUIDE_LINKS.worldCheckAlternative,
-            GUIDE_LINKS.comparisonGuide,
-            GUIDE_LINKS.sanctionsScreeningSoftware,
-            GUIDE_LINKS.usAmlKycGuide,
-          ].filter(Boolean) as typeof GUIDE_LINKS[keyof typeof GUIDE_LINKS][]}
+            GUIDE_LINKS.worldCheckAlt,
+            GUIDE_LINKS.compareProviders,
+            GUIDE_LINKS.sanctionsSoftware,
+            GUIDE_LINKS.usGuide,
+          ]}
         />
 
         {/* CTA */}
