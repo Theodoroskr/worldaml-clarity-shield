@@ -62,6 +62,11 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/sanctions-screening-software", changefreq: "monthly", priority: 0.9 },
   { path: "/resources/us-aml-kyc-compliance-guide", changefreq: "monthly", priority: 0.8 },
   { path: "/world-check-alternative", changefreq: "monthly", priority: 0.9 },
+  { path: "/alternatives", changefreq: "monthly", priority: 0.85 },
+  { path: "/alternatives/comply-advantage", changefreq: "monthly", priority: 0.85 },
+  { path: "/alternatives/dow-jones-risk-center", changefreq: "monthly", priority: 0.85 },
+  { path: "/alternatives/napier", changefreq: "monthly", priority: 0.8 },
+  { path: "/alternatives/sanction-scanner", changefreq: "monthly", priority: 0.8 },
 
   // Data Sources (Lane 2)
   { path: "/data-sources", changefreq: "monthly", priority: 0.9 },

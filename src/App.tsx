@@ -118,6 +118,11 @@ const ComplianceSoftwareIT = lazy(() => import("./pages/ComplianceSoftwareIT"));
 const SanctionsScreeningSoftware = lazy(() => import("./pages/SanctionsScreeningSoftware"));
 const USAMLKYCComplianceGuide = lazy(() => import("./pages/USAMLKYCComplianceGuide"));
 const WorldCheckAlternative = lazy(() => import("./pages/WorldCheckAlternative"));
+const AlternativesIndex = lazy(() => import("./pages/alternatives/AlternativesIndex"));
+const ComplyAdvantageAlternative = lazy(() => import("./pages/alternatives/ComplyAdvantageAlternative"));
+const DowJonesAlternative = lazy(() => import("./pages/alternatives/DowJonesAlternative"));
+const NapierAlternative = lazy(() => import("./pages/alternatives/NapierAlternative"));
+const SanctionScannerAlternative = lazy(() => import("./pages/alternatives/SanctionScannerAlternative"));
 const Advisory = lazy(() => import("./pages/Advisory"));
 const AdvisoryEwra = lazy(() => import("./pages/AdvisoryEwra"));
 
@@ -396,6 +401,11 @@ const App = () => (
 
                 {/* Comparison landing pages */}
                 <Route path="/world-check-alternative" element={<WorldCheckAlternative />} />
+                <Route path="/alternatives" element={<AlternativesIndex />} />
+                <Route path="/alternatives/comply-advantage" element={<ComplyAdvantageAlternative />} />
+                <Route path="/alternatives/dow-jones-risk-center" element={<DowJonesAlternative />} />
+                <Route path="/alternatives/napier" element={<NapierAlternative />} />
+                <Route path="/alternatives/sanction-scanner" element={<SanctionScannerAlternative />} />
 
                 {/* Advisory */}
                 <Route path="/advisory" element={<Advisory />} />
