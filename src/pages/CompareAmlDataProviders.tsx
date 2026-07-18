@@ -3,6 +3,7 @@ import { ArrowRight, Check, X, Minus } from "lucide-react";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import RelatedGuidesSection, { GUIDE_LINKS } from "@/components/RelatedGuidesSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
