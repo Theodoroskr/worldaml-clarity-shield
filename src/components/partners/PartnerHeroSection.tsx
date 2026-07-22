@@ -5,7 +5,7 @@ import { Handshake, ArrowRight, TrendingUp, Globe2, ShieldCheck } from "lucide-r
 const tiers = [
   { label: "Referral Partner", rate: "5%", desc: "Refer clients and earn per conversion" },
   { label: "Affiliate Partner", rate: "10%", desc: "Promote WorldAML with co-branded assets" },
-  { label: "Reseller Partner", rate: "15%", desc: "White-label and resell the full platform" },
+  { label: "Referral Partner", rate: "15%", desc: "White-label and resell the full platform" },
 ];
 
 const highlights = [
@@ -71,7 +71,7 @@ const PartnerHeroSection = () => (
         <div className="space-y-4">
           {tiers.map((tier) => (
             <div
-              key={tier.label}
+              key={tier.rate}
               className="rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-6 flex items-center justify-between gap-4 hover:border-teal/40 hover:bg-white/[0.06] transition-all"
             >
               <div>

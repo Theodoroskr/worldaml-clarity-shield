@@ -23,7 +23,7 @@ const benefits = [
   { icon: FileSignature, title: "Deal Registration", description: "Register prospects and get 90-day channel protection. No conflict with our direct sales team." },
   { icon: KeyRound, title: "Sandbox API Key on Day 1", description: "Approved partners get an instant sandbox key for AML, KYC & KYB APIs — build and test before you sell." },
   { icon: Award, title: "Certified Partner Track", description: "Earn Bronze, Silver, and Gold certifications through Academy training. Display verified badges on your site." },
-  { icon: GraduationCap, title: "Free Academy Seats", description: "2–10 free CPD-certified Academy seats for your team, granted the moment your partnership is approved." },
+  { icon: GraduationCap, title: "Free Academy Seats", description: "2 free CPD-certified Academy seats for your team, granted the moment your partnership is approved." },
   { icon: Tags, title: "Vertical Specialisation", description: "Get badged as a specialist in iGaming, Crypto, Payments, Banking, Fintech or Legal — matched to buyer intent." },
   { icon: Megaphone, title: "Co-Branded Materials", description: "Marketing collateral, one-pagers, and landing pages ready to co-brand with your logo." },
   { icon: HeadphonesIcon, title: "Dedicated Partner Manager", description: "A named contact to help you strategise, close deals, and grow your book." },
@@ -46,17 +46,17 @@ const tiers = [
     rate: "10%",
     tagline: "Promote & Scale",
     description: "Run campaigns with tracking codes and co-branded promotions for higher commissions.",
-    features: ["Everything in Referral", "Campaign tracking codes", "Co-branded collateral", "5 free Academy seats", "Silver certification eligible", "Quarterly business reviews"],
+    features: ["Everything in Referral", "Campaign tracking codes", "Co-branded collateral", "2 free Academy seats", "Silver certification eligible", "Quarterly business reviews"],
     highlighted: true,
     cta: "Apply Now",
     href: "#partner-contact",
   },
   {
-    name: "Reseller Partner",
+    name: "Referral Partner",
     rate: "15%",
     tagline: "Sell & Manage",
     description: "White-label the platform, set your pricing, and manage your entire client portfolio end-to-end.",
-    features: ["Everything in Affiliate", "White-label options", "Custom pricing", "10 free Academy seats", "Gold certification eligible", "Dedicated account manager", "API access"],
+    features: ["Everything in Affiliate", "White-label options", "Custom pricing", "2 free Academy seats", "Gold certification eligible", "Dedicated account manager", "API access"],
     highlighted: false,
     cta: "Apply Now",
     href: "#partner-contact",
@@ -66,7 +66,7 @@ const tiers = [
     rate: "Bundle",
     tagline: "Integrate & Embed",
     description: "For RegTech, core-banking and platform vendors embedding WorldAML APIs into their product.",
-    features: ["Wholesale/bundled pricing", "Priority API access & higher rate limits", "Joint go-to-market", "5 free Academy seats", "Listing in partner directory", "Technical enablement"],
+    features: ["Wholesale/bundled pricing", "Priority API access & higher rate limits", "Joint go-to-market", "2 free Academy seats", "Listing in partner directory", "Technical enablement"],
     highlighted: false,
     cta: "Talk to Partnerships",
     href: "#partner-contact",
@@ -124,7 +124,7 @@ const PartnerBenefitsSection = () => (
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {tiers.map((t) => (
             <div
-              key={t.name}
+              key={t.name + t.rate}
               className={`relative rounded-2xl p-px ${t.highlighted ? "bg-gradient-to-b from-teal to-teal/40" : "bg-white/10"}`}
             >
               {t.highlighted && (

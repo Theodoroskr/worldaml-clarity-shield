@@ -116,7 +116,7 @@ const PartnerApplicationForm = () => {
               <SelectContent>
                 <SelectItem value="referral">Referral Partner (5%)</SelectItem>
                 <SelectItem value="affiliate">Affiliate Partner (10%)</SelectItem>
-                <SelectItem value="reseller">Reseller Partner (15%)</SelectItem>
+                <SelectItem value="reseller">Referral Partner (15%)</SelectItem>
                 <SelectItem value="technology">Technology / Integration Partner</SelectItem>
               </SelectContent>
             </Select>
