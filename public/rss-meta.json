@@ -1,11 +1,11 @@
 {
   "anchor": "2026-07-12T00:00:00.000Z",
   "totalArticles": 18,
-  "releasedCount": 7,
-  "upcomingCount": 11,
+  "releasedCount": 11,
+  "upcomingCount": 7,
   "nextRelease": {
-    "date": "2026-07-19T00:00:00.000Z",
-    "title": "KYC vs KYB: Key Differences and Why Both Matter",
-    "slug": "kyc-vs-kyb-differences"
+    "date": "2026-07-23T00:00:00.000Z",
+    "title": "iGaming AML Obligations: What Online Gambling Operators Must Do",
+    "slug": "igaming-aml-obligations"
   }
 }
