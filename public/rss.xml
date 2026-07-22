@@ -6,9 +6,73 @@
   <atom:link href="https://worldaml.com/rss.xml" rel="self" type="application/rss+xml" />
   <description>Practical AML, KYC/KYB, sanctions and regulatory compliance analysis from the WorldAML team.</description>
   <language>en</language>
-  <lastBuildDate>Sat, 18 Jul 2026 20:47:18 GMT</lastBuildDate>
-  <pubDate>Sat, 18 Jul 2026 00:00:00 GMT</pubDate>
+  <lastBuildDate>Wed, 22 Jul 2026 06:36:05 GMT</lastBuildDate>
+  <pubDate>Wed, 22 Jul 2026 00:00:00 GMT</pubDate>
   <generator>WorldAML RSS Generator</generator>
+  <item>
+    <title>AML Compliance Checklist for Financial Institutions in 2025</title>
+    <link>https://worldaml.com/blog/aml-compliance-checklist-2025</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/aml-compliance-checklist-2025</guid>
+    <pubDate>Wed, 22 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[A practical, step-by-step AML compliance checklist covering risk assessments, CDD, transaction monitoring, and SAR filing — updated for 2025 regulatory requirements.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>AML Compliance</category>
+    <category>AML</category>
+    <category>compliance checklist</category>
+    <category>CDD</category>
+    <category>transaction monitoring</category>
+    <category>SAR</category>
+    <category>FATF</category>
+  </item>
+  <item>
+    <title>MLRO Responsibilities and Obligations: A Complete Guide for Money Laundering Reporting Officers</title>
+    <link>https://worldaml.com/blog/mlro-responsibilities-obligations</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/mlro-responsibilities-obligations</guid>
+    <pubDate>Tue, 21 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[Everything a Money Laundering Reporting Officer (MLRO) needs to know — legal obligations, SAR filing duties, governance responsibilities, and how to build a defensible compliance function.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>AML Compliance</category>
+    <category>MLRO</category>
+    <category>Money Laundering Reporting Officer</category>
+    <category>SAR</category>
+    <category>governance</category>
+    <category>compliance officer</category>
+    <category>AML</category>
+  </item>
+  <item>
+    <title>Transaction Monitoring Red Flags: 25 Indicators of Suspicious Activity</title>
+    <link>https://worldaml.com/blog/transaction-monitoring-red-flags</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/transaction-monitoring-red-flags</guid>
+    <pubDate>Mon, 20 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[A reference guide to the most important transaction monitoring red flags for AML compliance — covering structuring, layering, high-risk geography indicators, and sector-specific patterns.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>AML Compliance</category>
+    <category>transaction monitoring</category>
+    <category>red flags</category>
+    <category>suspicious activity</category>
+    <category>SAR</category>
+    <category>AML</category>
+    <category>money laundering</category>
+  </item>
+  <item>
+    <title>KYC vs KYB: Key Differences and Why Both Matter</title>
+    <link>https://worldaml.com/blog/kyc-vs-kyb-differences</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/kyc-vs-kyb-differences</guid>
+    <pubDate>Sun, 19 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[Understand the critical differences between Know Your Customer (KYC) and Know Your Business (KYB) verification, and why regulated organisations need both to manage onboarding risk.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>KYC &amp; KYB</category>
+    <category>KYC</category>
+    <category>KYB</category>
+    <category>customer onboarding</category>
+    <category>identity verification</category>
+    <category>beneficial ownership</category>
+    <category>CDD</category>
+  </item>
   <item>
     <title>EDD vs SDD: When to Apply Enhanced or Simplified Due Diligence</title>
     <link>https://worldaml.com/blog/edd-vs-sdd-enhanced-simplified-due-diligence</link>

@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 const partnerTypes = [
   { value: "referral", label: "Referral Partner (5%)" },
   { value: "affiliate", label: "Affiliate Partner (10%)" },
-  { value: "reseller", label: "Reseller Partner (15%)" },
+  { value: "reseller", label: "Referral Partner (15%)" },
   { value: "technology", label: "Technology / Integration Partner" },
   { value: "not-sure", label: "Not sure yet — advise me" },
 ];
