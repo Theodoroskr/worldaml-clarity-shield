@@ -293,6 +293,9 @@ const App = () => (
                 {/* Products */}
                 <Route path="/products" element={<Navigate to="/products/worldid" replace />} />
                 <Route path="/products/worldid" element={<WorldID />} />
+
+                {/* Public tenant onboarding form */}
+                <Route path="/onboard/:token" element={<OnboardPublic />} />
                 
                 
                 {/* Preserved pages */}
