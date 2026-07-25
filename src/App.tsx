@@ -438,6 +438,7 @@ const App = () => (
                   <Route path="risk" element={<SuiteRisk />} />
                   <Route path="ubo" element={<SuiteUBO />} />
                   <Route path="ubo/:customerId" element={<SuiteUBO />} />
+                  <Route path="periodic-reviews" element={<SuitePeriodicReviews />} />
                   <Route path="source-of-funds" element={<SuiteSourceOfFunds />} />
                   <Route path="aml-ar" element={<SuiteAmlAr />} />
                   <Route path="cases" element={<SuiteCases />} />
