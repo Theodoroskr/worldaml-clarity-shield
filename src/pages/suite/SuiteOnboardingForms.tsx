@@ -131,6 +131,23 @@ interface OnboardingForm {
   redirect_url: string | null;
   is_active: boolean;
   created_at: string;
+  published_version_id?: string | null;
+  current_draft_version_id?: string | null;
+  latest_version_number?: number | null;
+}
+
+interface FormVersion {
+  id: string;
+  form_id: string;
+  version_number: number;
+  status: "draft" | "published" | "archived";
+  name: string;
+  description: string | null;
+  notes: string | null;
+  published_at: string | null;
+  archived_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 const FIELD_LIBRARY: { type: FieldType; label: string; icon: any }[] = [
