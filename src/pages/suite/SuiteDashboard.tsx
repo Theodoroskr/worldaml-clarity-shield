@@ -65,10 +65,48 @@ export default function SuiteDashboard() {
   });
   const [recentActivity, setRecentActivity] = useState<{ id: string; type: string; label: string; detail: string; time: string; severity?: string }[]>([]);
 
+  // Time-range filter
+  const [range, setRange] = useState<RangeKey>("all");
+  const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
+  const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
+  const [rangeOpen, setRangeOpen] = useState(false);
+
+  const { from, to } = useMemo(() => {
+    const now = new Date();
+    switch (range) {
+      case "mtd": return { from: startOfMonth(now), to: endOfDay(now) };
+      case "qtd": return { from: startOfQuarter(now), to: endOfDay(now) };
+      case "ytd": return { from: startOfYear(now), to: endOfDay(now) };
+      case "custom":
+        return {
+          from: customFrom ?? null,
+          to: customTo ? endOfDay(customTo) : endOfDay(now),
+        };
+      case "all":
+      default: return { from: null as Date | null, to: null as Date | null };
+    }
+  }, [range, customFrom, customTo]);
+
+  const rangeLabel = useMemo(() => {
+    if (range === "custom" && (customFrom || customTo)) {
+      const f = customFrom ? format(customFrom, "d MMM yyyy") : "…";
+      const t = customTo ? format(customTo, "d MMM yyyy") : "today";
+      return `${f} – ${t}`;
+    }
+    return RANGE_LABELS[range];
+  }, [range, customFrom, customTo]);
+
   const fetchData = useCallback(async (silent = false) => {
     if (!orgId) return;
     if (!silent) setLoading(true);
     else setRefreshing(true);
+
+    const applyRange = <T extends { gte: any; lte: any }>(q: T): T => {
+      let out: any = q;
+      if (from) out = out.gte("created_at", from.toISOString());
+      if (to) out = out.lte("created_at", to.toISOString());
+      return out as T;
+    };
 
     const [
       customersRes,
@@ -83,15 +121,15 @@ export default function SuiteDashboard() {
       { data: recentCustomers },
       { data: recentAlerts },
     ] = await Promise.all([
-      supabase.from("suite_customers").select("id, risk_level").eq("organisation_id", orgId),
-      supabase.from("suite_customers").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-      supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-      supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_review"]),
-      supabase.from("suite_screenings").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-      supabase.from("suite_cases").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-      supabase.from("suite_cases").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_progress"]),
-      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("risk_flag", true),
+      applyRange(supabase.from("suite_customers").select("id, risk_level").eq("organisation_id", orgId)),
+      applyRange(supabase.from("suite_customers").select("id", { count: "exact", head: true }).eq("organisation_id", orgId)),
+      applyRange(supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId)),
+      applyRange(supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_review"])),
+      applyRange(supabase.from("suite_screenings").select("id", { count: "exact", head: true }).eq("organisation_id", orgId)),
+      applyRange(supabase.from("suite_cases").select("id", { count: "exact", head: true }).eq("organisation_id", orgId)),
+      applyRange(supabase.from("suite_cases").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_progress"])),
+      applyRange(supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId)),
+      applyRange(supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("risk_flag", true)),
       supabase.from("suite_customers").select("id, name, type, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(3),
       supabase.from("suite_alerts").select("id, title, severity, status, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(5),
     ]);
