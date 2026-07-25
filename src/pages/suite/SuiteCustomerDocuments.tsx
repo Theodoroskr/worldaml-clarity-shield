@@ -265,12 +265,15 @@ export default function SuiteCustomerDocuments() {
                       </td>
                       <td className="p-3">
                         <Badge variant="outline" className={cn("border", statusBadge(d.status))}>
-                          {d.status.replace("_", " ")}
+                          {statusLabel(d.status)}
                         </Badge>
                         {d.status === "rerequested" && d.rerequest_due && (
                           <div className="text-[11px] text-muted-foreground mt-1">
                             due {d.rerequest_due}
                           </div>
+                        )}
+                        {d.status === "pending_review" && (
+                          <div className="text-[11px] text-purple-400 mt-1">via portal</div>
                         )}
                       </td>
                       <td className="p-3">
@@ -278,6 +281,28 @@ export default function SuiteCustomerDocuments() {
                           <Button size="icon" variant="ghost" onClick={() => handleDownload(d)} title="Download">
                             <Download className="w-4 h-4" />
                           </Button>
+                          {d.status === "pending_review" && (
+                            <>
+                              <Button size="icon" variant="ghost" title="Accept replacement" onClick={async () => {
+                                const { error } = await supabase.rpc("portal_accept_document" as never, { _new_doc_id: d.id } as never);
+                                if (error) return toast({ title: "Accept failed", description: error.message, variant: "destructive" });
+                                toast({ title: "Replacement accepted" });
+                                if (selectedId) loadDocs(selectedId);
+                              }}>
+                                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                              </Button>
+                              <Button size="icon" variant="ghost" title="Reject" onClick={async () => {
+                                const reason = prompt("Reason for rejection?") ?? "";
+                                if (!reason) return;
+                                const { error } = await supabase.rpc("portal_reject_document" as never, { _new_doc_id: d.id, _reason: reason } as never);
+                                if (error) return toast({ title: "Reject failed", description: error.message, variant: "destructive" });
+                                toast({ title: "Replacement rejected" });
+                                if (selectedId) loadDocs(selectedId);
+                              }}>
+                                <XCircle className="w-4 h-4 text-red-500" />
+                              </Button>
+                            </>
+                          )}
                           {["expired", "expiring_soon", "valid"].includes(d.status) && (
                             <Button size="icon" variant="ghost" onClick={() => setRerequestDoc(d)} title="Re-request">
                               <Send className="w-4 h-4" />
@@ -288,6 +313,7 @@ export default function SuiteCustomerDocuments() {
                           </Button>
                         </div>
                       </td>
+
                     </tr>
                   );
                 })}
