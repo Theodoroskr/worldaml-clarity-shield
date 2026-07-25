@@ -429,11 +429,18 @@ export default function SuiteScreening() {
                           <Flag className="w-2.5 h-2.5" /> Create case
                         </button>
                         <button
+                          onClick={() => { setWlTarget(result); setWlReason(""); setWlReviewer(""); setWlExpiry(""); setWlAllLists(false); }}
+                          className="flex items-center gap-1 text-[10px] px-2 py-1 border border-border rounded text-muted-foreground hover:bg-muted"
+                        >
+                          <ShieldOff className="w-2.5 h-2.5" /> False positive
+                        </button>
+                        <button
                           onClick={() => setDismissedResults(s => new Set([...s, result.id]))}
                           className="text-[10px] px-2 py-1 border border-border rounded text-muted-foreground hover:bg-muted"
                         >
                           Dismiss
                         </button>
+
                       </div>
                     </div>
                   </div>
