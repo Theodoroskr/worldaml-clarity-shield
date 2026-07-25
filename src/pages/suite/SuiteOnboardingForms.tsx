@@ -663,20 +663,131 @@ export default function SuiteOnboardingForms() {
           }}
           placeholder="Form name (e.g. Corporate KYB)"
         />
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>Live</span>
-          <Switch checked={isActive} onCheckedChange={setIsActive} />
+        <div className="flex items-center gap-2">
+          {publishedVersionId ? (
+            <Badge variant="default" className="text-[10px]">
+              Live · v{versions.find((v) => v.id === publishedVersionId)?.version_number ?? "?"}
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-[10px]">Never published</Badge>
+          )}
+          {(currentDraftId || hasUnsavedChanges) && (
+            <Badge variant="secondary" className="text-[10px]">
+              Draft{hasUnsavedChanges ? " · unsaved" : ""}
+            </Badge>
+          )}
         </div>
         <div className="flex-1" />
-        <Button size="sm" onClick={saveForm} disabled={saving}>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!editingId || editingId === "new"}
+          onClick={() => setVersionsOpen(true)}
+        >
+          <History className="w-3.5 h-3.5 mr-1" /> Versions
+        </Button>
+        <Button size="sm" variant="outline" onClick={saveForm} disabled={saving}>
           {saving ? (
             <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
           ) : (
             <Save className="w-3.5 h-3.5 mr-1" />
           )}
-          Save
+          Save draft
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => setPublishOpen(true)}
+          disabled={!editingId || editingId === "new" || (!currentDraftId && !hasUnsavedChanges)}
+        >
+          <Rocket className="w-3.5 h-3.5 mr-1" /> Publish
         </Button>
       </div>
+
+      {/* Versions dialog */}
+      <Dialog open={versionsOpen} onOpenChange={setVersionsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Version history</DialogTitle>
+            <DialogDescription>
+              Every draft and publish is captured. Roll back to any previous version — the current live version is archived and the selected snapshot becomes live as a new version number.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto -mx-6 px-6 divide-y divide-border">
+            {versions.length === 0 && (
+              <div className="text-sm text-muted-foreground py-6">No versions yet.</div>
+            )}
+            {versions.map((v) => {
+              const isPublished = v.id === publishedVersionId;
+              const isDraft = v.id === currentDraftId;
+              return (
+                <div key={v.id} className="py-3 flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm">v{v.version_number}</span>
+                      {isPublished && <Badge className="text-[10px]">Live</Badge>}
+                      {isDraft && <Badge variant="secondary" className="text-[10px]">Draft</Badge>}
+                      {!isPublished && !isDraft && v.status === "archived" && (
+                        <Badge variant="outline" className="text-[10px]">Archived</Badge>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {v.published_at
+                        ? `Published ${new Date(v.published_at).toLocaleString()}`
+                        : `Updated ${new Date(v.updated_at).toLocaleString()}`}
+                      {v.notes ? ` · ${v.notes}` : ""}
+                    </div>
+                  </div>
+                  {!isPublished && v.status !== "draft" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={rollingBackId === v.id}
+                      onClick={() => rollbackToVersion(v.id, v.version_number)}
+                    >
+                      {rollingBackId === v.id ? (
+                        <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                      ) : (
+                        <Undo2 className="w-3.5 h-3.5 mr-1" />
+                      )}
+                      Roll back
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Publish dialog */}
+      <Dialog open={publishOpen} onOpenChange={setPublishOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Publish new version</DialogTitle>
+            <DialogDescription>
+              Your draft will become the live version served at the public onboarding link. The previous live version stays in history and can be rolled back to at any time.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label className="text-xs">Release notes (optional)</Label>
+            <Textarea
+              rows={3}
+              value={publishNotes}
+              onChange={(e) => setPublishNotes(e.target.value)}
+              placeholder="e.g. Added source-of-funds question and required proof-of-address"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPublishOpen(false)} disabled={publishing}>
+              Cancel
+            </Button>
+            <Button onClick={publishForm} disabled={publishing}>
+              {publishing ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Rocket className="w-3.5 h-3.5 mr-1" />}
+              Publish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="flex-1 grid grid-cols-[220px_1fr_320px] min-h-0 overflow-hidden">
         {/* Left: field library */}
