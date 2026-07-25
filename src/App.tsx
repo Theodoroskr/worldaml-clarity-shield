@@ -178,6 +178,8 @@ const SuiteHelp = lazy(() => import("./pages/suite/SuiteHelp"));
 const SuiteRegulatory = lazy(() => import("./pages/suite/SuiteRegulatory"));
 const SuiteRegulatorSubmissions = lazy(() => import("./pages/suite/SuiteRegulatorSubmissions"));
 const SuiteDsar = lazy(() => import("./pages/suite/SuiteDsar"));
+const SuiteRiskHeatmap = lazy(() => import("./pages/suite/SuiteRiskHeatmap"));
+
 
 const SuiteSourceOfFunds = lazy(() => import("./pages/suite/SuiteSourceOfFunds"));
 const SuiteAmlAr = lazy(() => import("./pages/suite/SuiteAmlAr"));
@@ -471,6 +473,8 @@ const App = () => (
                   <Route path="regulatory" element={<SuiteRegulatory />} />
                   <Route path="regulator-submissions" element={<SuiteRegulatorSubmissions />} />
                   <Route path="dsar" element={<SuiteDsar />} />
+                  <Route path="risk-heatmap" element={<SuiteRiskHeatmap />} />
+
 
                   <Route path="rss" element={<SuiteRss />} />
                 </Route>

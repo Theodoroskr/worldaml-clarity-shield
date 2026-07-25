@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, Shield, CreditCard, AlertTriangle,
   FileText, BarChart3, Settings, ChevronRight, Activity,
   UserCheck, Fingerprint, ClipboardList, Menu, Scale, ShieldCheck, HelpCircle, Radio,
-  LogOut, ArrowLeft, Wallet, BookOpen, ListChecks, Rss, Network, CalendarClock, ShieldAlert, FileClock, Trash2,
+  LogOut, ArrowLeft, Wallet, BookOpen, ListChecks, Rss, Network, CalendarClock, ShieldAlert, FileClock, Trash2, Grid3X3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +50,8 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
       },
       { icon: Activity, label: "Monitoring", path: "/suite/monitoring" },
       { icon: BarChart3, label: "Risk Assessment", path: "/suite/risk" },
+      { icon: Grid3X3, label: "Risk Heat-Map", path: "/suite/risk-heatmap" },
+
       { icon: CalendarClock, label: "Periodic Reviews", path: "/suite/periodic-reviews" },
       { icon: Wallet, label: "Source of Funds", path: "/suite/source-of-funds" },
       { icon: CreditCard, label: "AML Account Risk", path: "/suite/aml-ar" },
