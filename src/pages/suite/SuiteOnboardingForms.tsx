@@ -349,6 +349,20 @@ export default function SuiteOnboardingForms() {
     });
     setRedirectUrl("");
     setIsActive(false);
+    setPublishedVersionId(null);
+    setCurrentDraftId(null);
+    setLatestVersionNumber(0);
+    setHasUnsavedChanges(false);
+    setVersions([]);
+  };
+
+  const loadVersions = async (formId: string) => {
+    const { data } = await supabase
+      .from("suite_onboarding_form_versions")
+      .select("*")
+      .eq("form_id", formId)
+      .order("version_number", { ascending: false });
+    setVersions((data as any as FormVersion[]) || []);
   };
 
   const loadIntoEditor = (f: OnboardingForm) => {
@@ -368,7 +382,12 @@ export default function SuiteOnboardingForms() {
     setBranding(f.branding as Branding);
     setRedirectUrl(f.redirect_url || "");
     setIsActive(f.is_active);
+    setPublishedVersionId(f.published_version_id ?? null);
+    setCurrentDraftId(f.current_draft_version_id ?? null);
+    setLatestVersionNumber(f.latest_version_number ?? 0);
+    setHasUnsavedChanges(false);
     setSelectedFieldId(null);
+    loadVersions(f.id);
   };
 
   const handleDragEnd = (e: DragEndEvent) => {
