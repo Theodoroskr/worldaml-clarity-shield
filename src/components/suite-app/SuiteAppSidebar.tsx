@@ -59,6 +59,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
     title: "Investigations",
     items: [
       { icon: ShieldAlert, label: "Enhanced DD (EDD)", path: "/suite/edd" },
+      { icon: ClipboardList, label: "Case Queue", path: "/suite/case-queue" },
       { icon: ClipboardList, label: "Cases & SAR", path: "/suite/cases" },
       { icon: FileText, label: "Audit Trail", path: "/suite/audit" },
     ],

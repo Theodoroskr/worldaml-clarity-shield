@@ -171,6 +171,7 @@ const SuiteAlerts = lazy(() => import("./pages/suite/SuiteAlerts"));
 const SuiteAlertRules = lazy(() => import("./pages/suite/SuiteAlertRules"));
 const SuiteRisk = lazy(() => import("./pages/suite/SuiteRisk"));
 const SuiteCases = lazy(() => import("./pages/suite/SuiteCases"));
+const SuiteCaseQueue = lazy(() => import("./pages/suite/SuiteCaseQueue"));
 const SuiteAudit = lazy(() => import("./pages/suite/SuiteAudit"));
 const SuiteSettings = lazy(() => import("./pages/suite/SuiteSettings"));
 const SuiteHelp = lazy(() => import("./pages/suite/SuiteHelp"));
@@ -447,6 +448,7 @@ const App = () => (
                   <Route path="source-of-funds" element={<SuiteSourceOfFunds />} />
                   <Route path="aml-ar" element={<SuiteAmlAr />} />
                   <Route path="cases" element={<SuiteCases />} />
+                  <Route path="case-queue" element={<SuiteCaseQueue />} />
                   <Route path="audit" element={<SuiteAudit />} />
                   <Route path="settings" element={<SuiteSettings />} />
                   <Route path="help" element={<SuiteHelp />} />

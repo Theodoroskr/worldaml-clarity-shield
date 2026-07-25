@@ -3368,6 +3368,44 @@ export type Database = {
           },
         ]
       }
+      suite_case_activity: {
+        Row: {
+          action: string
+          actor_id: string | null
+          case_id: string
+          created_at: string
+          details: Json
+          id: string
+          organisation_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          case_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          organisation_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          case_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          organisation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_case_activity_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "suite_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_case_notes: {
         Row: {
           case_id: string
@@ -3410,16 +3448,55 @@ export type Database = {
           },
         ]
       }
+      suite_case_watchers: {
+        Row: {
+          case_id: string
+          created_at: string
+          organisation_id: string
+          user_id: string
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          organisation_id: string
+          user_id: string
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          organisation_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_case_watchers_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "suite_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_cases: {
         Row: {
           alert_id: string | null
           assigned_to: string | null
+          assignee_user_id: string | null
+          closed_at: string | null
+          closed_by: string | null
+          closure_notes: string | null
+          closure_reason: string | null
           created_at: string
           customer_id: string | null
+          due_at: string | null
           id: string
+          linked_entity_id: string | null
+          linked_entity_type: string | null
+          opened_at: string | null
           organisation_id: string | null
           priority: string
           resolution: string | null
+          sla_hours: number | null
           status: string
           title: string
           updated_at: string
@@ -3428,12 +3505,22 @@ export type Database = {
         Insert: {
           alert_id?: string | null
           assigned_to?: string | null
+          assignee_user_id?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          closure_notes?: string | null
+          closure_reason?: string | null
           created_at?: string
           customer_id?: string | null
+          due_at?: string | null
           id?: string
+          linked_entity_id?: string | null
+          linked_entity_type?: string | null
+          opened_at?: string | null
           organisation_id?: string | null
           priority?: string
           resolution?: string | null
+          sla_hours?: number | null
           status?: string
           title: string
           updated_at?: string
@@ -3442,12 +3529,22 @@ export type Database = {
         Update: {
           alert_id?: string | null
           assigned_to?: string | null
+          assignee_user_id?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          closure_notes?: string | null
+          closure_reason?: string | null
           created_at?: string
           customer_id?: string | null
+          due_at?: string | null
           id?: string
+          linked_entity_id?: string | null
+          linked_entity_type?: string | null
+          opened_at?: string | null
           organisation_id?: string | null
           priority?: string
           resolution?: string | null
+          sla_hours?: number | null
           status?: string
           title?: string
           updated_at?: string
