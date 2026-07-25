@@ -15,12 +15,13 @@ export const Layout = ({ children }: LayoutProps) => {
   // Academy subdomain renders an Academy-only experience — suppress
   // the marketing announcement bar and sticky CTA, keep the chatbot.
   const isAppShell = pathname.startsWith("/rcm") || pathname.startsWith("/suite");
+  const isOnboard = pathname.startsWith("/onboard/");
   return (
     <>
-      {!isAppShell && !academyHost && <AnnouncementBar />}
+      {!isAppShell && !academyHost && !isOnboard && <AnnouncementBar />}
       {children}
-      {!isAppShell && !academyHost && <StickyBottomCTA />}
-      {!isAppShell && <ChatbotWidget />}
+      {!isAppShell && !academyHost && !isOnboard && <StickyBottomCTA />}
+      {!isAppShell && !isOnboard && <ChatbotWidget />}
     </>
   );
 };
