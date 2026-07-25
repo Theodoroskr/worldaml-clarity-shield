@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, Shield, CreditCard, AlertTriangle,
   FileText, BarChart3, Settings, ChevronRight, Activity,
   UserCheck, Fingerprint, ClipboardList, Menu, Scale, ShieldCheck, HelpCircle, Radio,
-  LogOut, ArrowLeft, Wallet, BookOpen, ListChecks, Rss,
+  LogOut, ArrowLeft, Wallet, BookOpen, ListChecks, Rss, Network,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +32,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
           { label: "Onboarding Forms", path: "/suite/onboarding-forms" },
           { label: "Submissions Inbox", path: "/suite/onboarding-submissions" },
           { label: "IDV & Liveness", path: "/suite/idv" },
+          { label: "Ownership & UBO", path: "/suite/ubo" },
         ],
       },
     ],
