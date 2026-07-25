@@ -79,9 +79,14 @@ export default function SuiteCaseQueue() {
   const [members, setMembers] = useState<Member[]>([]);
   const [customersById, setCustomersById] = useState<Record<string, Customer>>({});
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<{ status: string; priority: string; assignee: string; q: string }>({
+  const [filter, setFilter] = useState<CaseFilter>({
     status: "open", priority: "all", assignee: "all", q: "",
+    risk: "all", customerId: "all", createdFrom: "", createdTo: "", dueFrom: "", dueTo: "",
   });
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
   const [selected, setSelected] = useState<CaseRow | null>(null);
   const [notes, setNotes] = useState<Note[]>([]);
   const [activity, setActivity] = useState<Activity[]>([]);
