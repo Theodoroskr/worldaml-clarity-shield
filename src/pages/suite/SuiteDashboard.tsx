@@ -170,7 +170,7 @@ export default function SuiteDashboard() {
     setLoading(false);
     setRefreshing(false);
     setLastRefresh(new Date());
-  }, [orgId, org]);
+  }, [orgId, org, from, to]);
 
   useEffect(() => { if (orgId) fetchData(); }, [fetchData]);
 
