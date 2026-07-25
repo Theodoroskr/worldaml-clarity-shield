@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, X, Loader2, Flag, CheckCircle2 } from "lucide-react";
+import { Search, X, Loader2, Flag, CheckCircle2, ShieldOff, ShieldCheck, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -8,6 +8,21 @@ import { useNavigate } from "react-router-dom";
 import { useOrganisation } from "@/hooks/useOrganisation";
 import { useFeatureLimits } from "@/hooks/useFeatureLimits";
 import UpgradeModal, { UpgradeBanner } from "@/components/suite/UpgradeModal";
+import {
+  applyWhitelist,
+  addWhitelistEntry,
+  revokeWhitelistEntry,
+  fetchWhitelist,
+  type WhitelistEntry,
+} from "@/lib/suite/screeningWhitelist";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+
 
 interface StoredScreening {
   id: string;
