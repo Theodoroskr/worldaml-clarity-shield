@@ -179,6 +179,7 @@ const SuiteSourceOfFunds = lazy(() => import("./pages/suite/SuiteSourceOfFunds")
 const SuiteAmlAr = lazy(() => import("./pages/suite/SuiteAmlAr"));
 const SuiteRss = lazy(() => import("./pages/suite/SuiteRss"));
 const SuiteUBO = lazy(() => import("./pages/suite/SuiteUBO"));
+const SuitePeriodicReviews = lazy(() => import("./pages/suite/SuitePeriodicReviews"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -437,6 +438,7 @@ const App = () => (
                   <Route path="risk" element={<SuiteRisk />} />
                   <Route path="ubo" element={<SuiteUBO />} />
                   <Route path="ubo/:customerId" element={<SuiteUBO />} />
+                  <Route path="periodic-reviews" element={<SuitePeriodicReviews />} />
                   <Route path="source-of-funds" element={<SuiteSourceOfFunds />} />
                   <Route path="aml-ar" element={<SuiteAmlAr />} />
                   <Route path="cases" element={<SuiteCases />} />
