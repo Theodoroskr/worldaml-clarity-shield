@@ -485,8 +485,19 @@ const App = () => (
                   <Route path="help" element={<RcmHelp />} />
                 </Route>
 
+                {/* Customer Portal (self-serve for tenants' customers) */}
+                <Route path="/portal/login" element={<PortalLogin />} />
+                <Route element={<CustomerPortalGuard />}>
+                  <Route path="/portal" element={<CustomerPortalLayout />}>
+                    <Route index element={<PortalOverview />} />
+                    <Route path="documents" element={<PortalDocuments />} />
+                    <Route path="activity" element={<PortalActivity />} />
+                  </Route>
+                </Route>
+
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
+
               </Routes>
               )}
               </Suspense>
