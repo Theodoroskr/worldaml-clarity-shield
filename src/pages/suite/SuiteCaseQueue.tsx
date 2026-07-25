@@ -639,17 +639,37 @@ export default function SuiteCaseQueue() {
                       <div className="space-y-2 max-h-64 overflow-y-auto">
                         {notes.map(n => (
                           <div key={n.id} className="border rounded p-2 text-sm">
-                            <div className="text-xs text-muted-foreground mb-1">{memberLabel(n.user_id)} · {formatDistanceToNow(new Date(n.created_at))} ago</div>
-                            <div className="whitespace-pre-wrap">{n.content}</div>
+                            <div className="text-xs text-muted-foreground mb-1 flex items-center gap-2">
+                              <span>{memberLabel(n.user_id)} · {formatDistanceToNow(new Date(n.created_at))} ago</span>
+                              {n.mentions && n.mentions.length > 0 && (
+                                <span className="inline-flex items-center gap-1 text-primary">
+                                  <AtSign className="h-3 w-3" />{n.mentions.length}
+                                </span>
+                              )}
+                            </div>
+                            <div className="whitespace-pre-wrap">{renderMentionText(n.content)}</div>
                           </div>
                         ))}
                         {notes.length === 0 && <div className="text-sm text-muted-foreground">No comments yet.</div>}
                       </div>
-                      <div className="flex gap-2">
-                        <Textarea value={newNote} onChange={e => setNewNote(e.target.value)}
-                          placeholder="Add a comment (visible to your organisation)…" rows={2} />
-                        <Button onClick={addNote} disabled={!newNote.trim()}>Post</Button>
+                      <div className="space-y-2">
+                        <MentionTextarea
+                          value={newNote}
+                          onChange={(v, m) => { setNewNote(v); setNewNoteMentions(m); }}
+                          members={members}
+                          placeholder="Add a comment — type @ to mention a teammate…"
+                          rows={2}
+                        />
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs text-muted-foreground">
+                            {newNoteMentions.length > 0
+                              ? <span className="inline-flex items-center gap-1"><AtSign className="h-3 w-3" />{newNoteMentions.length} teammate{newNoteMentions.length === 1 ? "" : "s"} will be notified</span>
+                              : "Visible to your organisation"}
+                          </div>
+                          <Button size="sm" onClick={addNote} disabled={!newNote.trim()}>Post</Button>
+                        </div>
                       </div>
+
                     </CardContent>
                   </Card>
 
