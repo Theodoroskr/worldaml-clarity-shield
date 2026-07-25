@@ -219,6 +219,9 @@ export default function SuiteCustomerDocuments() {
         </Select>
       </Card>
 
+      {selectedCustomer && <PortalPanel customer={selectedCustomer} />}
+
+
       {/* Docs list */}
       <Card className="p-0 overflow-hidden">
         {loading ? (
