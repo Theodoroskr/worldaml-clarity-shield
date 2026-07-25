@@ -88,10 +88,20 @@ export default function SuiteCaseQueue() {
   const [members, setMembers] = useState<Member[]>([]);
   const [customersById, setCustomersById] = useState<Record<string, Customer>>({});
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<CaseFilter>({
-    status: "open", priority: "all", assignee: "all", q: "",
-    risk: "all", customerId: "all", createdFrom: "", createdTo: "", dueFrom: "", dueTo: "",
-  });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [filter, setFilter] = useState<CaseFilter>(() => ({
+    status: searchParams.get("status") || "open",
+    priority: searchParams.get("priority") || "all",
+    assignee: searchParams.get("assignee") || "all",
+    q: searchParams.get("q") || "",
+    risk: searchParams.get("risk") || "all",
+    customerId: searchParams.get("customerId") || "all",
+    createdFrom: searchParams.get("createdFrom") || "",
+    createdTo: searchParams.get("createdTo") || "",
+    dueFrom: searchParams.get("dueFrom") || "",
+    dueTo: searchParams.get("dueTo") || "",
+    closureReason: searchParams.get("closureReason") || "all",
+  }));
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
   const [saveOpen, setSaveOpen] = useState(false);
