@@ -287,6 +287,16 @@ export default function SuiteOnboardingForms() {
   });
   const [redirectUrl, setRedirectUrl] = useState("");
   const [isActive, setIsActive] = useState(false);
+  const [publishedVersionId, setPublishedVersionId] = useState<string | null>(null);
+  const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
+  const [latestVersionNumber, setLatestVersionNumber] = useState<number>(0);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [versions, setVersions] = useState<FormVersion[]>([]);
+  const [versionsOpen, setVersionsOpen] = useState(false);
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [publishNotes, setPublishNotes] = useState("");
+  const [publishing, setPublishing] = useState(false);
+  const [rollingBackId, setRollingBackId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
