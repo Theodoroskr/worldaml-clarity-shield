@@ -448,6 +448,7 @@ const App = () => (
                   <Route path="source-of-funds" element={<SuiteSourceOfFunds />} />
                   <Route path="aml-ar" element={<SuiteAmlAr />} />
                   <Route path="cases" element={<SuiteCases />} />
+                  <Route path="case-queue" element={<SuiteCaseQueue />} />
                   <Route path="audit" element={<SuiteAudit />} />
                   <Route path="settings" element={<SuiteSettings />} />
                   <Route path="help" element={<SuiteHelp />} />
