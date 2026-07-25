@@ -185,6 +185,15 @@ const SuiteCustomerDocuments = lazy(() => import("./pages/suite/SuiteCustomerDoc
 const SuiteEDD = lazy(() => import("./pages/suite/SuiteEDD"));
 const SuiteSetup = lazy(() => import("./pages/suite/SuiteSetup"));
 
+const CustomerPortalGuard = lazy(() => import("./components/portal/CustomerPortalGuard"));
+const CustomerPortalLayout = lazy(() => import("./pages/portal/CustomerPortalLayout"));
+const PortalLogin = lazy(() => import("./pages/portal/PortalLogin"));
+const PortalOverview = lazy(() => import("./pages/portal/PortalOverview"));
+const PortalDocuments = lazy(() => import("./pages/portal/PortalDocuments"));
+const PortalActivity = lazy(() => import("./pages/portal/PortalActivity"));
+
+
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -476,8 +485,19 @@ const App = () => (
                   <Route path="help" element={<RcmHelp />} />
                 </Route>
 
+                {/* Customer Portal (self-serve for tenants' customers) */}
+                <Route path="/portal/login" element={<PortalLogin />} />
+                <Route element={<CustomerPortalGuard />}>
+                  <Route path="/portal" element={<CustomerPortalLayout />}>
+                    <Route index element={<PortalOverview />} />
+                    <Route path="documents" element={<PortalDocuments />} />
+                    <Route path="activity" element={<PortalActivity />} />
+                  </Route>
+                </Route>
+
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
+
               </Routes>
               )}
               </Suspense>

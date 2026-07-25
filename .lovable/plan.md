@@ -1,84 +1,79 @@
-# Channel Partners Portal
 
-A dedicated, branded portal for approved partners — separate from the main user Dashboard — with its own layout, sidebar, and gated routes. Reuses existing `partners`, `referrals`, `deal_registrations` tables and the standard Cloud auth session; adds a small commission-payouts table and marketing-assets registry.
+## Goal
 
-## Routes (all under `/partner-portal`, sign-in required)
+Give each tenant's approved customers a self-serve portal to sign in, see outstanding document requests, upload replacements, and leave a full audit trail — cutting ops load vs. the current one-shot public onboarding link.
+
+## Architecture
+
+Customers authenticate through Supabase Auth just like staff, but a new `suite_customer_portal_users` table links a Supabase `auth.users.id` to a `suite_customers` row. Portal identity is completely separate from `suite_org_members` (compliance team). RLS keys every portal query off the linked customer.
+
+Reuse the private `onboarding-submissions` storage bucket (already RLS-protected) for uploads.
 
 ```text
-/partner-portal                → overview (stats, quick links)
-/partner-portal/referrals      → referral link + referred leads table
-/partner-portal/deals          → register / track deal protection
-/partner-portal/commissions    → earnings, pending vs paid, payout history
-/partner-portal/assets         → downloadable marketing kit (logos, one-pagers, decks, email templates, banners, co-branded PDFs)
-/partner-portal/profile        → display name, logo, tagline, verticals, website, sandbox key
-/partner-portal/settings       → payout details (bank/PayPal), notification prefs
+auth.users ──┐
+             ├── suite_customer_portal_users ──▶ suite_customers ──▶ suite_customer_documents
+staff side:  └── suite_org_members ──▶ suite_organizations              (existing)
 ```
 
-Legacy `/partners/dashboard` redirects to `/partner-portal`.
+## Deliverables
 
-## Access control
+### 1. Database (migration)
 
-- Must be signed in. If no `partners` row exists for the user → show "Apply to Partner Program" screen linking to `/partners/apply`.
-- If a row exists but `is_active = false` → "Application under review" screen.
-- Active partners see the full portal.
-- Admins can impersonate any partner via `?partner_id=` (admin-only, checked with `has_role`).
+- `suite_customer_portal_users` — `id`, `customer_id`, `organisation_id`, `auth_user_id`, `email`, `invited_at`, `activated_at`, `last_login_at`, `status` (`invited|active|disabled`).
+- `suite_customer_portal_audit` — `id`, `customer_id`, `portal_user_id`, `event` (`invite_sent|logged_in|document_uploaded|document_replaced|rerequest_responded|profile_updated`), `details jsonb`, `ip`, `user_agent`, `created_at`.
+- Extend `suite_customer_documents` with `uploaded_via_portal boolean`, `replaces_document_id uuid` (self-FK).
+- New status `pending_review` used when the portal user just uploaded a replacement (staff must accept before it supersedes the old one).
+- RPC `portal_invite_customer(_customer_id)` — staff-only; creates row, returns single-use magic-link token via existing Supabase invite email.
+- RPC `portal_submit_document(_customer_doc_id, _new_storage_path, _issued_on, _expires_on, _notes)` — auth'd portal user; inserts a new row (status `pending_review`, `replaces_document_id` set), writes audit event, does **not** touch the old row until staff accept.
+- RPC `portal_accept_document(_new_doc_id)` — staff-only; marks new row `valid`, marks old row `replaced`, closes any open `document` alert.
+- RLS on all portal tables scoped by `auth.uid()`; helper `is_portal_user_of(_customer_id)`.
 
-## New DB objects
+### 2. Edge function
 
-- `partner_payouts` — payout ledger per partner (`amount_eur`, `currency`, `status: pending|processing|paid|failed`, `paid_at`, `method`, `reference`, `notes`).
-- `partner_assets` — marketing asset registry (`title`, `description`, `category: logo|one_pager|deck|email_template|banner|case_study|contract`, `file_url`, `thumbnail_url`, `certification_min: bronze|silver|gold`, `is_active`).
-- Extend `partners` with `payout_method`, `payout_details_encrypted`, `notification_prefs jsonb`.
+- `portal-invite` — invoked from staff UI; calls `supabase.auth.admin.inviteUserByEmail` with `data: { portal_customer_id }`, then upserts `suite_customer_portal_users` in `invited` state. Sends via existing Resend flow.
 
-RLS:
-- `partner_payouts`: partner reads own rows; admins full access; service role manages inserts from finance workflow.
-- `partner_assets`: any active partner reads active assets whose `certification_min` ≤ their level; admins manage.
+### 3. Staff-side UI
 
-All new tables get `GRANT`s for `authenticated` + `service_role` and RLS enabled.
+- On `SuiteCustomerDocuments` header: **"Invite to portal"** button per customer (visible when no active portal user). Shows portal status badge + "Resend invite" / "Disable access".
+- On each document row: a **Portal status** chip (`Requested from customer`, `Awaiting review — uploaded via portal`, `Accepted`).
+- New **Accept / Reject** buttons for `pending_review` rows → calls `portal_accept_document` or moves back to `rerequested`.
 
-## Commission view
+### 4. Customer portal (public routes)
 
-Computed live from `referrals` + `deal_registrations`:
-- Lifetime earned = SUM(`commission_earned`) on `referrals` where converted.
-- Pending = converted referrals not yet in a paid `partner_payouts` row.
-- Paid = SUM(`partner_payouts.amount_eur` WHERE status='paid').
-- Deal pipeline value = SUM(`estimated_arr_eur`) grouped by status.
+- `/portal/login` — email + password / magic-link, using existing `supabase.auth.signInWithOtp`.
+- `/portal/*` guarded by `CustomerPortalGuard` — requires session AND a `suite_customer_portal_users` row.
+- `/portal` (Overview) — tenant-branded header, greeting, count of outstanding items, "Refresh a document" CTA.
+- `/portal/documents` — table of the customer's documents with status, expiry, download link; inline **Upload replacement** flow for `expired | expiring_soon | rerequested` rows.
+- `/portal/activity` — read-only audit log for the customer's own events.
+- Every action writes to `suite_customer_portal_audit`.
 
-Cards + monthly bar chart (recharts).
+### 5. Routing / navigation
 
-## Marketing assets
+- New lazy routes in `src/App.tsx` under `/portal/*` with a dedicated `CustomerPortalLayout` (no Suite sidebar, tenant-branded).
+- Add `/portal` link from the staff "Invite" toast so ops can preview.
 
-- Uploaded/managed by admin in `/admin/partners` → new "Assets" tab.
-- Files stored in existing Supabase storage bucket (new `partner-assets` bucket, private, signed URLs on download).
-- Portal `/assets` page: grid filtered by category, gated by partner's `certification_level`.
-- Co-branded PDF generator (basic): merges partner logo + name into a pre-made one-pager template client-side (jsPDF) — v1 stub, extendable.
+## Out of scope for this cut
 
-## Layout & design
+- Portal user self-signup (invite-only for now).
+- Multiple portal users per customer (single contact for v1).
+- SSO / social providers on the portal.
+- Direct edit of `suite_customers` fields (read-only in v1; docs only).
 
-- New `PartnerPortalLayout` with sidebar (mirrors `AdminLayout` style, but branded teal/navy for partners).
-- Topbar shows partner name + certification badge (bronze/silver/gold) + copy-to-clipboard referral link.
-- Reuses design tokens; no hardcoded colors.
+## Files to add / change
 
-## Technical details
+**New**
+- `supabase/migrations/<ts>_customer_portal.sql`
+- `supabase/functions/portal-invite/index.ts`
+- `src/pages/portal/CustomerPortalLayout.tsx`
+- `src/pages/portal/PortalLogin.tsx`
+- `src/pages/portal/PortalOverview.tsx`
+- `src/pages/portal/PortalDocuments.tsx`
+- `src/pages/portal/PortalActivity.tsx`
+- `src/components/portal/CustomerPortalGuard.tsx`
+- `src/hooks/usePortalSession.ts`
 
-Files:
-- `src/pages/partner-portal/PartnerPortalLayout.tsx`
-- `src/pages/partner-portal/Overview.tsx`
-- `src/pages/partner-portal/Referrals.tsx`
-- `src/pages/partner-portal/Deals.tsx`
-- `src/pages/partner-portal/Commissions.tsx`
-- `src/pages/partner-portal/Assets.tsx`
-- `src/pages/partner-portal/Profile.tsx`
-- `src/pages/partner-portal/Settings.tsx`
-- `src/components/partner-portal/PortalSidebar.tsx`
-- `src/components/partner-portal/PortalTopbar.tsx`
-- `src/components/partner-portal/CommissionChart.tsx`
-- `src/components/partner-portal/AssetCard.tsx`
-- `src/hooks/usePartner.ts` — loads partner row + derived commission totals.
-- `src/pages/admin/AdminPartnerAssets.tsx` — asset CRUD for admins.
-- Migration: `partner_payouts`, `partner_assets`, `partners` column additions, RLS + GRANTs, storage bucket policy.
-- Route additions in `src/App.tsx`; redirect from `/partners/dashboard`.
-- Header: when signed-in user is an active partner, add "Partner Portal" link (alongside existing Admin link).
+**Changed**
+- `src/App.tsx` — mount `/portal/*` routes.
+- `src/pages/suite/SuiteCustomerDocuments.tsx` — invite button, portal status chips, accept/reject.
 
-Out of scope (can add later): automated Stripe payouts, tax-form collection, MDF request workflow, deep Zoho CRM sync of commissions.
-
-Confirm and I'll build it.
+Approve and I'll build it end-to-end in the next turn.

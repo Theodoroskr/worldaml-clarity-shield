@@ -15,6 +15,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import {
   FileText, Upload, AlertTriangle, RefreshCcw, Download, Trash2, Send, CalendarClock, ShieldCheck,
+  UserPlus, CheckCircle2, XCircle, Copy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -66,15 +67,19 @@ const DOC_TYPES = [
 
 const statusBadge = (s: string) => {
   switch (s) {
-    case "valid":         return "bg-emerald-500/15 text-emerald-500 border-emerald-500/30";
-    case "expiring_soon": return "bg-amber-500/15 text-amber-500 border-amber-500/30";
-    case "expired":       return "bg-red-500/15 text-red-500 border-red-500/30";
-    case "rerequested":   return "bg-blue-500/15 text-blue-500 border-blue-500/30";
-    case "replaced":      return "bg-slate-500/15 text-slate-400 border-slate-500/30";
-    case "archived":      return "bg-slate-500/15 text-slate-400 border-slate-500/30";
-    default:              return "bg-muted text-muted-foreground";
+    case "valid":          return "bg-emerald-500/15 text-emerald-500 border-emerald-500/30";
+    case "expiring_soon":  return "bg-amber-500/15 text-amber-500 border-amber-500/30";
+    case "expired":        return "bg-red-500/15 text-red-500 border-red-500/30";
+    case "rerequested":    return "bg-blue-500/15 text-blue-500 border-blue-500/30";
+    case "pending_review": return "bg-purple-500/15 text-purple-400 border-purple-500/30";
+    case "replaced":       return "bg-slate-500/15 text-slate-400 border-slate-500/30";
+    case "archived":       return "bg-slate-500/15 text-slate-400 border-slate-500/30";
+    default:               return "bg-muted text-muted-foreground";
   }
 };
+
+const statusLabel = (s: string) => s === "pending_review" ? "awaiting review" : s.replace("_", " ");
+
 
 const daysUntil = (d?: string | null) => {
   if (!d) return null;
@@ -214,6 +219,9 @@ export default function SuiteCustomerDocuments() {
         </Select>
       </Card>
 
+      {selectedCustomer && <PortalPanel customer={selectedCustomer} />}
+
+
       {/* Docs list */}
       <Card className="p-0 overflow-hidden">
         {loading ? (
@@ -260,12 +268,15 @@ export default function SuiteCustomerDocuments() {
                       </td>
                       <td className="p-3">
                         <Badge variant="outline" className={cn("border", statusBadge(d.status))}>
-                          {d.status.replace("_", " ")}
+                          {statusLabel(d.status)}
                         </Badge>
                         {d.status === "rerequested" && d.rerequest_due && (
                           <div className="text-[11px] text-muted-foreground mt-1">
                             due {d.rerequest_due}
                           </div>
+                        )}
+                        {d.status === "pending_review" && (
+                          <div className="text-[11px] text-purple-400 mt-1">via portal</div>
                         )}
                       </td>
                       <td className="p-3">
@@ -273,6 +284,28 @@ export default function SuiteCustomerDocuments() {
                           <Button size="icon" variant="ghost" onClick={() => handleDownload(d)} title="Download">
                             <Download className="w-4 h-4" />
                           </Button>
+                          {d.status === "pending_review" && (
+                            <>
+                              <Button size="icon" variant="ghost" title="Accept replacement" onClick={async () => {
+                                const { error } = await supabase.rpc("portal_accept_document" as never, { _new_doc_id: d.id } as never);
+                                if (error) return toast({ title: "Accept failed", description: error.message, variant: "destructive" });
+                                toast({ title: "Replacement accepted" });
+                                if (selectedId) loadDocs(selectedId);
+                              }}>
+                                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                              </Button>
+                              <Button size="icon" variant="ghost" title="Reject" onClick={async () => {
+                                const reason = prompt("Reason for rejection?") ?? "";
+                                if (!reason) return;
+                                const { error } = await supabase.rpc("portal_reject_document" as never, { _new_doc_id: d.id, _reason: reason } as never);
+                                if (error) return toast({ title: "Reject failed", description: error.message, variant: "destructive" });
+                                toast({ title: "Replacement rejected" });
+                                if (selectedId) loadDocs(selectedId);
+                              }}>
+                                <XCircle className="w-4 h-4 text-red-500" />
+                              </Button>
+                            </>
+                          )}
                           {["expired", "expiring_soon", "valid"].includes(d.status) && (
                             <Button size="icon" variant="ghost" onClick={() => setRerequestDoc(d)} title="Re-request">
                               <Send className="w-4 h-4" />
@@ -283,6 +316,7 @@ export default function SuiteCustomerDocuments() {
                           </Button>
                         </div>
                       </td>
+
                     </tr>
                   );
                 })}
@@ -534,3 +568,109 @@ function RerequestDialog({
     </Dialog>
   );
 }
+
+interface PortalUser {
+  id: string;
+  email: string;
+  status: string;
+  invited_at: string;
+  activated_at: string | null;
+  last_login_at: string | null;
+}
+
+function PortalPanel({ customer }: { customer: Customer }) {
+  const [pu, setPu] = useState<PortalUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [email, setEmail] = useState(customer.email ?? "");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("suite_customer_portal_users")
+      .select("id, email, status, invited_at, activated_at, last_login_at")
+      .eq("customer_id", customer.id)
+      .neq("status", "disabled")
+      .maybeSingle();
+    setPu((data as PortalUser) ?? null);
+    setEmail((data as PortalUser)?.email ?? customer.email ?? "");
+    setLoading(false);
+  }, [customer.id, customer.email]);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function invite() {
+    if (!email || !email.includes("@")) return toast({ title: "Enter a valid email", variant: "destructive" });
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("portal-invite", {
+        body: { customer_id: customer.id, email: email.trim().toLowerCase() },
+      });
+      if (error) throw error;
+      const existing = (data as { existing_user?: boolean } | null)?.existing_user;
+      toast({ title: "Invitation sent", description: existing ? "Magic-link sent to existing account." : "Signup email sent." });
+      load();
+    } catch (e) {
+      toast({ title: "Invite failed", description: (e as Error).message, variant: "destructive" });
+    } finally { setBusy(false); }
+  }
+
+  async function disable() {
+    if (!pu || !confirm("Disable portal access for this customer?")) return;
+    setBusy(true);
+    const { error } = await supabase
+      .from("suite_customer_portal_users")
+      .update({ status: "disabled", disabled_at: new Date().toISOString() })
+      .eq("id", pu.id);
+    setBusy(false);
+    if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
+    toast({ title: "Portal access disabled" });
+    load();
+  }
+
+  const portalUrl = `${window.location.origin}/portal/login`;
+
+  return (
+    <Card className="p-4">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <ShieldCheck className="w-4 h-4 text-accent" /> Customer portal access
+          </div>
+          {loading ? (
+            <p className="text-xs text-muted-foreground">Loading…</p>
+          ) : pu ? (
+            <div className="text-xs text-muted-foreground space-y-0.5">
+              <div><span className="text-foreground">{pu.email}</span>
+                <Badge variant="outline" className="ml-2 text-[10px]">{pu.status}</Badge>
+              </div>
+              <div>Invited {new Date(pu.invited_at).toLocaleDateString()} · Last login {pu.last_login_at ? new Date(pu.last_login_at).toLocaleDateString() : "never"}</div>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">No portal user yet. Invite the customer to self-serve document refresh.</p>
+          )}
+        </div>
+        <div className="flex gap-2 items-center">
+          {!pu && (
+            <>
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="customer email" className="h-9 w-56" />
+              <Button size="sm" onClick={invite} disabled={busy}>
+                <UserPlus className="w-4 h-4 mr-2" /> Invite
+              </Button>
+            </>
+          )}
+          {pu && (
+            <>
+              <Button size="sm" variant="outline" onClick={invite} disabled={busy}>Resend link</Button>
+              <Button size="sm" variant="ghost" onClick={disable} disabled={busy}>Disable</Button>
+              <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText(portalUrl); toast({ title: "Portal URL copied" }); }}>
+                <Copy className="w-4 h-4 mr-1" /> Portal URL
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+}
+

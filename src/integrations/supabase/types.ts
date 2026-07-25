@@ -3595,7 +3595,9 @@ export type Database = {
           mime_type: string | null
           notes: string | null
           organisation_id: string
+          portal_uploaded_by: string | null
           replaced_by_document_id: string | null
+          replaces_document_id: string | null
           rerequest_due: string | null
           rerequest_message: string | null
           rerequest_reason: string | null
@@ -3605,6 +3607,7 @@ export type Database = {
           status: string
           updated_at: string
           uploaded_by: string | null
+          uploaded_via_portal: boolean
           user_id: string
         }
         Insert: {
@@ -3621,7 +3624,9 @@ export type Database = {
           mime_type?: string | null
           notes?: string | null
           organisation_id: string
+          portal_uploaded_by?: string | null
           replaced_by_document_id?: string | null
+          replaces_document_id?: string | null
           rerequest_due?: string | null
           rerequest_message?: string | null
           rerequest_reason?: string | null
@@ -3631,6 +3636,7 @@ export type Database = {
           status?: string
           updated_at?: string
           uploaded_by?: string | null
+          uploaded_via_portal?: boolean
           user_id: string
         }
         Update: {
@@ -3647,7 +3653,9 @@ export type Database = {
           mime_type?: string | null
           notes?: string | null
           organisation_id?: string
+          portal_uploaded_by?: string | null
           replaced_by_document_id?: string | null
+          replaces_document_id?: string | null
           rerequest_due?: string | null
           rerequest_message?: string | null
           rerequest_reason?: string | null
@@ -3657,6 +3665,7 @@ export type Database = {
           status?: string
           updated_at?: string
           uploaded_by?: string | null
+          uploaded_via_portal?: boolean
           user_id?: string
         }
         Relationships: [
@@ -3668,8 +3677,22 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "suite_customer_documents_portal_uploaded_by_fkey"
+            columns: ["portal_uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "suite_customer_portal_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "suite_customer_documents_replaced_by_document_id_fkey"
             columns: ["replaced_by_document_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customer_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_customer_documents_replaces_document_id_fkey"
+            columns: ["replaces_document_id"]
             isOneToOne: false
             referencedRelation: "suite_customer_documents"
             referencedColumns: ["id"]
@@ -3720,6 +3743,122 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_customer_portal_audit: {
+        Row: {
+          actor_auth_id: string | null
+          actor_role: string
+          created_at: string
+          customer_id: string
+          details: Json
+          event: string
+          id: string
+          ip: string | null
+          organisation_id: string
+          portal_user_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          actor_auth_id?: string | null
+          actor_role: string
+          created_at?: string
+          customer_id: string
+          details?: Json
+          event: string
+          id?: string
+          ip?: string | null
+          organisation_id: string
+          portal_user_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          actor_auth_id?: string | null
+          actor_role?: string
+          created_at?: string
+          customer_id?: string
+          details?: Json
+          event?: string
+          id?: string
+          ip?: string | null
+          organisation_id?: string
+          portal_user_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_customer_portal_audit_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_customer_portal_audit_portal_user_id_fkey"
+            columns: ["portal_user_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customer_portal_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_customer_portal_users: {
+        Row: {
+          activated_at: string | null
+          auth_user_id: string | null
+          created_at: string
+          customer_id: string
+          disabled_at: string | null
+          disabled_by: string | null
+          email: string
+          id: string
+          invited_at: string
+          invited_by: string | null
+          last_login_at: string | null
+          organisation_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          auth_user_id?: string | null
+          created_at?: string
+          customer_id: string
+          disabled_at?: string | null
+          disabled_by?: string | null
+          email: string
+          id?: string
+          invited_at?: string
+          invited_by?: string | null
+          last_login_at?: string | null
+          organisation_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          auth_user_id?: string | null
+          created_at?: string
+          customer_id?: string
+          disabled_at?: string | null
+          disabled_by?: string | null
+          email?: string
+          id?: string
+          invited_at?: string
+          invited_by?: string | null
+          last_login_at?: string | null
+          organisation_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_customer_portal_users_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
             referencedColumns: ["id"]
           },
         ]
@@ -5222,6 +5361,7 @@ export type Database = {
       }
       cert_rank: { Args: { _level: string }; Returns: number }
       current_partner_cert_level: { Args: never; Returns: string }
+      current_portal_customer_id: { Args: never; Returns: string }
       current_user_has_suite_access: { Args: never; Returns: boolean }
       current_user_org_id: { Args: never; Returns: string }
       enqueue_outreach: {
@@ -5283,6 +5423,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Json
       }
+      is_portal_user_of: { Args: { _customer_id: string }; Returns: boolean }
       mark_overdue_periodic_reviews: { Args: never; Returns: number }
       onboarding_form_publish: {
         Args: { _form_id: string; _notes?: string }
@@ -5301,6 +5442,32 @@ export type Database = {
           _redirect_url: string
           _required_checks: Json
           _schema: Json
+        }
+        Returns: string
+      }
+      portal_accept_document: {
+        Args: { _new_doc_id: string }
+        Returns: undefined
+      }
+      portal_activate_session: { Args: never; Returns: string }
+      portal_invite_customer: {
+        Args: { _customer_id: string; _email: string }
+        Returns: string
+      }
+      portal_reject_document: {
+        Args: { _new_doc_id: string; _reason: string }
+        Returns: undefined
+      }
+      portal_submit_document: {
+        Args: {
+          _expires_on: string
+          _file_name: string
+          _file_path: string
+          _issued_on: string
+          _mime_type: string
+          _notes: string
+          _replaces_id: string
+          _size_bytes: number
         }
         Returns: string
       }
