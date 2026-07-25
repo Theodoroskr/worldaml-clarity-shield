@@ -290,7 +290,9 @@ export default function SuiteScreening() {
   const customerName = (id: string) =>
     customers.find(c => c.id === id)?.name ?? "Unknown";
 
-  const visibleResults = response?.results.filter(r => !dismissedResults.has(r.id)) ?? [];
+  const suppressedIds = useMemo(() => new Set(suppressed.map(s => s.result.id)), [suppressed]);
+  const visibleResults = response?.results.filter(r => !dismissedResults.has(r.id) && !suppressedIds.has(r.id)) ?? [];
+
 
   return (
     <div className="p-6 space-y-6 animate-fade-in h-full overflow-y-auto">
