@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, Shield, CreditCard, AlertTriangle,
   FileText, BarChart3, Settings, ChevronRight, Activity,
   UserCheck, Fingerprint, ClipboardList, Menu, Scale, ShieldCheck, HelpCircle, Radio,
-  LogOut, ArrowLeft, Wallet, BookOpen, ListChecks, Rss, Network, CalendarClock, ShieldAlert, FileClock,
+  LogOut, ArrowLeft, Wallet, BookOpen, ListChecks, Rss, Network, CalendarClock, ShieldAlert, FileClock, Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -88,6 +88,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
     items: [
       { icon: Scale, label: "Regulatory Hub", path: "/suite/regulatory" },
       { icon: FileClock, label: "Regulator Submissions", path: "/suite/regulator-submissions" },
+      { icon: Trash2, label: "DSAR & Retention", path: "/suite/dsar" },
 
       { icon: Rss, label: "RSS Feeds", path: "/suite/rss" },
       { icon: Settings, label: "Settings", path: "/suite/settings" },
