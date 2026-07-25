@@ -93,6 +93,7 @@ const MarketPage = lazy(() => import("./pages/MarketPage"));
 const FreeAMLCheck = lazy(() => import("./pages/FreeAMLCheck"));
 const Partners = lazy(() => import("./pages/Partners"));
 const PartnerApply = lazy(() => import("./pages/PartnerApply"));
+const OnboardPublic = lazy(() => import("./pages/OnboardPublic"));
 
 const PartnersDirectory = lazy(() => import("./pages/PartnersDirectory"));
 const DataCoverageIndex = lazy(() => import("./pages/DataCoverageIndex"));
