@@ -4355,36 +4355,75 @@ export type Database = {
       }
       suite_ubo: {
         Row: {
+          control_pct: number | null
+          control_type: string
+          country: string | null
           created_at: string
           customer_id: string
+          dob: string | null
+          entity_type: string
           id: string
+          is_pep: boolean
           is_verified: boolean
+          last_screened_at: string | null
+          last_screening_id: string | null
           name: string
           nationality: string | null
+          notes: string | null
           organisation_id: string | null
           ownership_pct: number
+          parent_ubo_id: string | null
+          registration_number: string | null
+          sanctions_status: string
+          updated_at: string
           user_id: string
         }
         Insert: {
+          control_pct?: number | null
+          control_type?: string
+          country?: string | null
           created_at?: string
           customer_id: string
+          dob?: string | null
+          entity_type?: string
           id?: string
+          is_pep?: boolean
           is_verified?: boolean
+          last_screened_at?: string | null
+          last_screening_id?: string | null
           name: string
           nationality?: string | null
+          notes?: string | null
           organisation_id?: string | null
           ownership_pct?: number
+          parent_ubo_id?: string | null
+          registration_number?: string | null
+          sanctions_status?: string
+          updated_at?: string
           user_id: string
         }
         Update: {
+          control_pct?: number | null
+          control_type?: string
+          country?: string | null
           created_at?: string
           customer_id?: string
+          dob?: string | null
+          entity_type?: string
           id?: string
+          is_pep?: boolean
           is_verified?: boolean
+          last_screened_at?: string | null
+          last_screening_id?: string | null
           name?: string
           nationality?: string | null
+          notes?: string | null
           organisation_id?: string | null
           ownership_pct?: number
+          parent_ubo_id?: string | null
+          registration_number?: string | null
+          sanctions_status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -4400,6 +4439,13 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_ubo_parent_ubo_id_fkey"
+            columns: ["parent_ubo_id"]
+            isOneToOne: false
+            referencedRelation: "suite_ubo"
             referencedColumns: ["id"]
           },
         ]
