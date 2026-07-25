@@ -57,6 +57,15 @@ export default function SuiteAppLayout() {
     );
   }
 
+  // First-run onboarding gate: send admins into the wizard until they finish it.
+  const onSetup = location.pathname.startsWith("/suite/setup");
+  if (!orgLoading && !onSetup) {
+    const needsSetup = !orgId || (org && !(org as any).onboarding_completed_at);
+    if (needsSetup) return <Navigate to="/suite/setup" replace />;
+  }
+
+
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       <SEO
