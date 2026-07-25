@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "@/hooks/use-toast";
 import { Inbox, Search, CheckCircle2, XCircle, Clock, FileText, User, Mail, Calendar, Download } from "lucide-react";
 import { format } from "date-fns";
+import { runScreening } from "@/services/screeningProvider";
 
 type Submission = {
   id: string;
@@ -106,18 +107,30 @@ export default function SuiteOnboardingSubmissions() {
       reviewed_at: new Date().toISOString(),
     };
 
-    // On approve, create a suite_customers record if not linked yet
+    // On approve, create a suite_customers record if not linked yet.
+    // Creating the customer fires the DB trigger `trigger_workflow_new_customer`
+    // which invokes the execute-workflow edge function automatically.
     let linkedId = selected.linked_customer_id;
+    let createdCustomer = false;
     if (status === "approved" && !linkedId && user && orgId) {
+      const inferredCountry =
+        (selected.data && (selected.data.country || selected.data.nationality || selected.data.country_of_residence)) ||
+        null;
+      const customerName =
+        selected.applicant_name || selected.applicant_email || "Onboarded customer";
+      const isBusiness = selected.applicant_type === "business";
+
       const { data: cust, error: custErr } = await supabase
         .from("suite_customers")
         .insert({
           user_id: user.id,
           organisation_id: orgId,
-          name: selected.applicant_name || selected.applicant_email || "Onboarded customer",
+          name: customerName,
           email: selected.applicant_email,
           type: selected.applicant_type || "individual",
           kyc_status: "verified",
+          country: inferredCountry,
+          company_name: isBusiness ? customerName : null,
           onboarding_data: selected.data,
         } as any)
         .select("id")
@@ -127,6 +140,7 @@ export default function SuiteOnboardingSubmissions() {
       } else if (cust) {
         linkedId = cust.id;
         patch.linked_customer_id = cust.id;
+        createdCustomer = true;
       }
     }
 
@@ -140,7 +154,75 @@ export default function SuiteOnboardingSubmissions() {
       toast({ title: "Update failed", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: `Submission ${status.replace("_", " ")}` });
+
+    // Fire automated AML screening once the customer exists. Insert into
+    // suite_screenings also fires `trigger_workflow_screening_match` when
+    // matches are found, chaining into the workflow engine.
+    if (createdCustomer && linkedId && user) {
+      const screenQuery = (selected.applicant_name || selected.applicant_email || "").trim();
+      if (screenQuery) {
+        try {
+          const res = await runScreening({ query: screenQuery, minConfidence: 20 });
+          const matchCount = res.results.length;
+          const highConfidence = res.results.filter((r) => r.confidence >= 70);
+          const result =
+            matchCount === 0 ? "clear" : highConfidence.length > 0 ? "potential_match" : "low_match";
+
+          await supabase.from("suite_screenings").insert({
+            customer_id: linkedId,
+            user_id: user.id,
+            screening_type: "sanctions_pep",
+            result,
+            match_count: matchCount,
+          });
+
+          if (highConfidence.length > 0) {
+            const topHit = highConfidence[0];
+            await supabase.from("suite_alerts").insert({
+              customer_id: linkedId,
+              user_id: user.id,
+              alert_type: "screening_match",
+              severity: highConfidence.length >= 2 ? "high" : "medium",
+              title: `Onboarding screening match — ${screenQuery}`,
+              description: `Auto-screening from onboarding submission returned ${highConfidence.length} high-confidence hit(s). Top: ${topHit.name} (${topHit.confidence}%).`,
+              status: "open",
+            } as any);
+          }
+
+          await supabase.from("suite_audit_log").insert({
+            user_id: user.id,
+            action: `Onboarding auto-screening — "${screenQuery}" — ${matchCount} matches`,
+            entity_type: "screening",
+            entity_id: linkedId,
+            details: {
+              detail: `Provider: ${res.provider}, Lists: ${res.listsSearched.length}, Result: ${result}`,
+              submission_id: selected.id,
+              query: screenQuery,
+              match_count: matchCount,
+            },
+          } as any);
+
+          toast({
+            title: "Submission approved",
+            description:
+              matchCount === 0
+                ? "Customer created, AML screening clear, workflows triggered."
+                : `Customer created, screening returned ${matchCount} hit(s). Workflows triggered.`,
+          });
+        } catch (e: any) {
+          toast({
+            title: "Approved — screening failed",
+            description: e?.message || "Customer was created but AML screening could not run. Retry from the Screening tab.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({ title: "Submission approved", description: "Customer created and workflows triggered." });
+      }
+    } else {
+      toast({ title: `Submission ${status.replace("_", " ")}` });
+    }
+
     setSelected(null);
     load();
   };
