@@ -4388,17 +4388,22 @@ export type Database = {
           country: string | null
           created_at: string
           created_by: string | null
+          default_thresholds: Json
           id: string
           industry: string | null
           max_api_requests_per_day: number
           max_screenings_per_month: number
           max_users: number
           name: string
+          onboarding_completed_at: string | null
+          onboarding_state: Json
+          onboarding_step: string
           primary_contact_email: string | null
           primary_contact_name: string | null
           primary_contact_phone: string | null
           registration_number: string | null
           regulator: string | null
+          risk_appetite: string | null
           status: string
           subscription_tier: string
           updated_at: string
@@ -4409,17 +4414,22 @@ export type Database = {
           country?: string | null
           created_at?: string
           created_by?: string | null
+          default_thresholds?: Json
           id?: string
           industry?: string | null
           max_api_requests_per_day?: number
           max_screenings_per_month?: number
           max_users?: number
           name: string
+          onboarding_completed_at?: string | null
+          onboarding_state?: Json
+          onboarding_step?: string
           primary_contact_email?: string | null
           primary_contact_name?: string | null
           primary_contact_phone?: string | null
           registration_number?: string | null
           regulator?: string | null
+          risk_appetite?: string | null
           status?: string
           subscription_tier?: string
           updated_at?: string
@@ -4430,17 +4440,22 @@ export type Database = {
           country?: string | null
           created_at?: string
           created_by?: string | null
+          default_thresholds?: Json
           id?: string
           industry?: string | null
           max_api_requests_per_day?: number
           max_screenings_per_month?: number
           max_users?: number
           name?: string
+          onboarding_completed_at?: string | null
+          onboarding_state?: Json
+          onboarding_step?: string
           primary_contact_email?: string | null
           primary_contact_name?: string | null
           primary_contact_phone?: string | null
           registration_number?: string | null
           regulator?: string | null
+          risk_appetite?: string | null
           status?: string
           subscription_tier?: string
           updated_at?: string
@@ -5312,6 +5327,11 @@ export type Database = {
       submit_quiz_and_issue_certificate: {
         Args: { _answers: Json; _course_id: string; _holder_name: string }
         Returns: Json
+      }
+      suite_bootstrap_org: { Args: { _name: string }; Returns: string }
+      suite_provision_baseline_rules: {
+        Args: { _org: string }
+        Returns: number
       }
       sweep_customer_document_expiry: { Args: never; Returns: Json }
     }

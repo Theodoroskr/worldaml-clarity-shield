@@ -183,6 +183,8 @@ const SuiteUBO = lazy(() => import("./pages/suite/SuiteUBO"));
 const SuitePeriodicReviews = lazy(() => import("./pages/suite/SuitePeriodicReviews"));
 const SuiteCustomerDocuments = lazy(() => import("./pages/suite/SuiteCustomerDocuments"));
 const SuiteEDD = lazy(() => import("./pages/suite/SuiteEDD"));
+const SuiteSetup = lazy(() => import("./pages/suite/SuiteSetup"));
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -428,6 +430,8 @@ const App = () => (
                 {/* Suite App (functional dashboard) */}
                 <Route path="/suite" element={<SuiteAppLayout />}>
                   <Route index element={<SuiteDashboard />} />
+                  <Route path="setup" element={<SuiteSetup />} />
+
                   <Route path="onboarding" element={<SuiteOnboarding />} />
                   <Route path="onboarding-forms" element={<SuiteOnboardingForms />} />
                   <Route path="onboarding-forms/:id" element={<SuiteOnboardingForms />} />
