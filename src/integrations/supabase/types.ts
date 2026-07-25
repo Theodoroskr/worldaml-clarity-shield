@@ -3129,6 +3129,7 @@ export type Database = {
           customer_id: string | null
           description: string | null
           id: string
+          metadata: Json
           organisation_id: string | null
           resolved_at: string | null
           rule_id: string | null
@@ -3146,6 +3147,7 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           id?: string
+          metadata?: Json
           organisation_id?: string | null
           resolved_at?: string | null
           rule_id?: string | null
@@ -3163,6 +3165,7 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           id?: string
+          metadata?: Json
           organisation_id?: string | null
           resolved_at?: string | null
           rule_id?: string | null
