@@ -704,6 +704,190 @@ export default function SuiteOnboardingForms() {
                     />
                   </label>
                 )}
+
+                {selected.type !== "heading" && selected.type !== "checkbox" && (
+                  <div className="pt-3 border-t border-border space-y-3">
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Validation
+                    </div>
+
+                    {(["text", "textarea", "email", "phone", "address"].includes(selected.type)) && (
+                      <>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-xs">Min length</Label>
+                            <Input
+                              type="number"
+                              min={0}
+                              value={selected.validation?.minLength ?? ""}
+                              onChange={(e) =>
+                                updateField({
+                                  ...selected,
+                                  validation: {
+                                    ...selected.validation,
+                                    minLength: e.target.value === "" ? undefined : Number(e.target.value),
+                                  },
+                                })
+                              }
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Max length</Label>
+                            <Input
+                              type="number"
+                              min={0}
+                              value={selected.validation?.maxLength ?? ""}
+                              onChange={(e) =>
+                                updateField({
+                                  ...selected,
+                                  validation: {
+                                    ...selected.validation,
+                                    maxLength: e.target.value === "" ? undefined : Number(e.target.value),
+                                  },
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Format preset</Label>
+                          <Select
+                            value={selected.validation?.format || ""}
+                            onValueChange={(v) =>
+                              updateField({
+                                ...selected,
+                                validation: {
+                                  ...selected.validation,
+                                  format: (v || "") as FieldValidation["format"],
+                                },
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="None" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">None</SelectItem>
+                              <SelectItem value="email">Email</SelectItem>
+                              <SelectItem value="url">URL</SelectItem>
+                              <SelectItem value="alpha">Letters only</SelectItem>
+                              <SelectItem value="alphanumeric">Letters &amp; numbers</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Regex pattern (advanced)</Label>
+                          <Input
+                            placeholder="^[A-Z]{2}[0-9]{6}$"
+                            value={selected.validation?.pattern || ""}
+                            onChange={(e) =>
+                              updateField({
+                                ...selected,
+                                validation: { ...selected.validation, pattern: e.target.value },
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Error message if pattern fails</Label>
+                          <Input
+                            placeholder="Please enter a valid value"
+                            value={selected.validation?.patternMessage || ""}
+                            onChange={(e) =>
+                              updateField({
+                                ...selected,
+                                validation: {
+                                  ...selected.validation,
+                                  patternMessage: e.target.value,
+                                },
+                              })
+                            }
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {selected.type === "number" && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-xs">Min value</Label>
+                          <Input
+                            type="number"
+                            value={selected.validation?.min ?? ""}
+                            onChange={(e) =>
+                              updateField({
+                                ...selected,
+                                validation: {
+                                  ...selected.validation,
+                                  min: e.target.value === "" ? undefined : Number(e.target.value),
+                                },
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Max value</Label>
+                          <Input
+                            type="number"
+                            value={selected.validation?.max ?? ""}
+                            onChange={(e) =>
+                              updateField({
+                                ...selected,
+                                validation: {
+                                  ...selected.validation,
+                                  max: e.target.value === "" ? undefined : Number(e.target.value),
+                                },
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {selected.type === "file" && (
+                      <>
+                        <div>
+                          <Label className="text-xs">Allowed file types (comma-separated)</Label>
+                          <Input
+                            placeholder="pdf, jpg, png"
+                            value={(selected.validation?.allowedFileTypes || []).join(", ")}
+                            onChange={(e) =>
+                              updateField({
+                                ...selected,
+                                validation: {
+                                  ...selected.validation,
+                                  allowedFileTypes: e.target.value
+                                    .split(",")
+                                    .map((s) => s.trim().replace(/^\./, "").toLowerCase())
+                                    .filter(Boolean),
+                                },
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Max file size (MB)</Label>
+                          <Input
+                            type="number"
+                            min={1}
+                            placeholder="10"
+                            value={selected.validation?.maxFileSizeMb ?? ""}
+                            onChange={(e) =>
+                              updateField({
+                                ...selected,
+                                validation: {
+                                  ...selected.validation,
+                                  maxFileSizeMb:
+                                    e.target.value === "" ? undefined : Number(e.target.value),
+                                },
+                              })
+                            }
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </>
           ) : (
