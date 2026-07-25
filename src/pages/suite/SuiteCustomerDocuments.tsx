@@ -15,6 +15,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import {
   FileText, Upload, AlertTriangle, RefreshCcw, Download, Trash2, Send, CalendarClock, ShieldCheck,
+  UserPlus, CheckCircle2, XCircle, Copy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
