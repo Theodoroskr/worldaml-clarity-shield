@@ -348,39 +348,130 @@ export default function SuiteCaseQueue() {
 
       {/* Filters */}
       <Card>
-        <CardContent className="pt-4 flex flex-wrap gap-3">
-          <Input placeholder="Search title or customer…" value={filter.q}
-            onChange={e => setFilter({ ...filter, q: e.target.value })} className="w-64" />
-          <Select value={filter.status} onValueChange={v => setFilter({ ...filter, status: v })}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="in_progress">In progress</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
-              <SelectItem value="resolved">Resolved</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filter.priority} onValueChange={v => setFilter({ ...filter, priority: v })}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All priorities</SelectItem>
-              <SelectItem value="critical">Critical</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filter.assignee} onValueChange={v => setFilter({ ...filter, assignee: v })}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All assignees</SelectItem>
-              <SelectItem value="me">Assigned to me</SelectItem>
-              <SelectItem value="unassigned">Unassigned</SelectItem>
-            </SelectContent>
-          </Select>
+        <CardContent className="pt-4 space-y-3">
+          <div className="flex flex-wrap gap-3 items-center">
+            <Input placeholder="Search title, customer, country, assignee, case #…" value={filter.q}
+              onChange={e => setFilter({ ...filter, q: e.target.value })} className="w-72" />
+            <Select value={filter.status} onValueChange={v => setFilter({ ...filter, status: v })}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="open">Open</SelectItem>
+                <SelectItem value="in_progress">In progress</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="resolved">Resolved</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filter.priority} onValueChange={v => setFilter({ ...filter, priority: v })}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All priorities</SelectItem>
+                <SelectItem value="critical">Critical</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filter.assignee} onValueChange={v => setFilter({ ...filter, assignee: v })}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All assignees</SelectItem>
+                <SelectItem value="me">Assigned to me</SelectItem>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {members.map(m => (
+                  <SelectItem key={m.user_id} value={m.user_id}>
+                    {m.full_name || m.email || m.user_id.slice(0, 8)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm" onClick={() => setShowAdvanced(v => !v)}>
+              <SlidersHorizontal className="h-4 w-4 mr-1" />
+              Advanced{activeFilterCount > 0 && <Badge variant="secondary" className="ml-2">{activeFilterCount}</Badge>}
+            </Button>
+            {activeFilterCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={resetFilters}>Clear</Button>
+            )}
+            <div className="flex-1" />
+            <Button variant="outline" size="sm" onClick={() => setSaveOpen(true)}>
+              <Save className="h-4 w-4 mr-1" />Save view
+            </Button>
+          </div>
+
+          {showAdvanced && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 border-t">
+              <div>
+                <label className="text-xs text-muted-foreground">Customer risk</label>
+                <Select value={filter.risk} onValueChange={v => setFilter({ ...filter, risk: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All risks</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Customer</label>
+                <Select value={filter.customerId} onValueChange={v => setFilter({ ...filter, customerId: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All customers</SelectItem>
+                    {customerOptions.map(([id, name]) => (
+                      <SelectItem key={id} value={id}>{name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Created between</label>
+                <div className="flex gap-1">
+                  <Input type="date" value={filter.createdFrom} onChange={e => setFilter({ ...filter, createdFrom: e.target.value })} />
+                  <Input type="date" value={filter.createdTo} onChange={e => setFilter({ ...filter, createdTo: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Due between</label>
+                <div className="flex gap-1">
+                  <Input type="date" value={filter.dueFrom} onChange={e => setFilter({ ...filter, dueFrom: e.target.value })} />
+                  <Input type="date" value={filter.dueTo} onChange={e => setFilter({ ...filter, dueTo: e.target.value })} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {savedFilters.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
+              <span className="text-xs text-muted-foreground flex items-center gap-1"><Bookmark className="h-3 w-3" />Saved:</span>
+              {savedFilters.map(s => (
+                <div key={s.id} className="inline-flex items-center gap-1 border rounded-full pl-2 pr-1 py-0.5 text-xs bg-muted/40">
+                  <button className="hover:underline" onClick={() => setFilter(s.filter)}>{s.name}</button>
+                  <button className="text-muted-foreground hover:text-red-400" onClick={() => deleteSaved(s.id)} title="Delete">
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Save filter dialog */}
+      <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Save current filters</DialogTitle>
+            <DialogDescription>Store this view for quick access later.</DialogDescription>
+          </DialogHeader>
+          <Input placeholder="e.g. My critical open cases" value={saveName} onChange={e => setSaveName(e.target.value)} />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveOpen(false)}>Cancel</Button>
+            <Button onClick={saveCurrentFilter}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Queue */}
       <Card>
