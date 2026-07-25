@@ -314,6 +314,64 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
     setEditing(false);
   }, [customer.id]);
 
+  const [idvLoading, setIdvLoading] = useState(false);
+  const [kycNote, setKycNote] = useState("");
+  const [kycSaving, setKycSaving] = useState(false);
+
+  const startIDV = async () => {
+    setIdvLoading(true);
+    const { data: session } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    try {
+      const res = await fetch(`https://${projectId}.supabase.co/functions/v1/idv-create-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: anonKey,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ customer_id: customer.id }),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(result.error || "Failed to start identity verification");
+      } else if (result.redirect_url) {
+        window.open(result.redirect_url, "_blank");
+      } else {
+        toast.success("Identity verification session created");
+      }
+    } catch (e) {
+      toast.error("IDV session request failed");
+    } finally {
+      setIdvLoading(false);
+    }
+  };
+
+  const updateKycStatus = async (status: string) => {
+    setKycSaving(true);
+    const { data: updated, error } = await supabase.from("suite_customers").update({
+      kyc_status: status,
+      onboarding_data: {
+        ...(customer.onboarding_data || {}),
+        kyc_review: {
+          status,
+          note: kycNote,
+          reviewed_at: new Date().toISOString(),
+        },
+      },
+    }).eq("id", customer.id).select().single();
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(`KYC status updated to ${status}`);
+      onUpdated(updated as Customer);
+      setKycNote("");
+    }
+    setKycSaving(false);
+  };
+
   const saveChanges = async () => {
     if (!edit.name.trim()) { toast.error("Name is required"); return; }
     setSaving(true);
