@@ -32,6 +32,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
           { label: "Onboarding Forms", path: "/suite/onboarding-forms" },
           { label: "Submissions Inbox", path: "/suite/onboarding-submissions" },
           { label: "IDV & Liveness", path: "/suite/idv" },
+          { label: "Ownership & UBO", path: "/suite/ubo" },
         ],
       },
     ],
