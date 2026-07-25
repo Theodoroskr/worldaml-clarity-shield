@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "@/hooks/use-toast";
 import { Inbox, Search, CheckCircle2, XCircle, Clock, FileText, User, Mail, Calendar, Download } from "lucide-react";
 import { format } from "date-fns";
+import { runScreening } from "@/services/screeningProvider";
 
 type Submission = {
   id: string;
