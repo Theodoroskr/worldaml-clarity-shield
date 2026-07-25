@@ -3629,6 +3629,62 @@ export type Database = {
           },
         ]
       }
+      suite_onboarding_forms: {
+        Row: {
+          branding: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          organisation_id: string
+          redirect_url: string | null
+          required_checks: Json
+          schema: Json
+          slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          branding?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          organisation_id: string
+          redirect_url?: string | null
+          required_checks?: Json
+          schema?: Json
+          slug: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          branding?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          organisation_id?: string
+          redirect_url?: string | null
+          required_checks?: Json
+          schema?: Json
+          slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_onboarding_forms_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_org_members: {
         Row: {
           created_at: string

@@ -160,6 +160,7 @@ const PartnerWelcomePage = lazy(() => import("./pages/partner-portal/Welcome"));
 const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
 const SuiteOnboarding = lazy(() => import("./pages/suite/SuiteOnboarding"));
+const SuiteOnboardingForms = lazy(() => import("./pages/suite/SuiteOnboardingForms"));
 const SuiteIDV = lazy(() => import("./pages/suite/SuiteIDV"));
 const SuiteScreening = lazy(() => import("./pages/suite/SuiteScreening"));
 const SuiteTransactions = lazy(() => import("./pages/suite/SuiteTransactions"));
@@ -418,6 +419,8 @@ const App = () => (
                 <Route path="/suite" element={<SuiteAppLayout />}>
                   <Route index element={<SuiteDashboard />} />
                   <Route path="onboarding" element={<SuiteOnboarding />} />
+                  <Route path="onboarding-forms" element={<SuiteOnboardingForms />} />
+                  <Route path="onboarding-forms/:id" element={<SuiteOnboardingForms />} />
                   <Route path="idv" element={<SuiteIDV />} />
                   <Route path="screening" element={<SuiteScreening />} />
                   <Route path="transactions" element={<SuiteTransactions />} />
