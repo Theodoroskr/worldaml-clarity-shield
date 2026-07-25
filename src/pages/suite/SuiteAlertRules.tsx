@@ -390,6 +390,9 @@ export default function SuiteAlertRules() {
     } finally {
       setBacktesting(false);
     }
+  };
+
+
 
   const deleteRule = async (id: string) => {
     await supabase.from("suite_alert_rules").delete().eq("id", id);
