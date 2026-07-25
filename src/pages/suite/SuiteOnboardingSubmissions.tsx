@@ -163,10 +163,13 @@ export default function SuiteOnboardingSubmissions() {
       if (screenQuery) {
         try {
           const res = await runScreening({ query: screenQuery, minConfidence: 20 });
-          const matchCount = res.results.length;
-          const highConfidence = res.results.filter((r) => r.confidence >= 70);
+          // Suppress known false positives remembered for this customer
+          const { live } = await applyWhitelist(linkedId, res.results);
+          const matchCount = live.length;
+          const highConfidence = live.filter((r) => r.confidence >= 70);
           const result =
             matchCount === 0 ? "clear" : highConfidence.length > 0 ? "potential_match" : "low_match";
+
 
           await supabase.from("suite_screenings").insert({
             customer_id: linkedId,
