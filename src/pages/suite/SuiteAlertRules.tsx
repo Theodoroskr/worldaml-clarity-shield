@@ -255,6 +255,10 @@ export default function SuiteAlertRules() {
   const [activeRegPanel, setActiveRegPanel] = useState<RegKey | null>(null);
   const [userRegulator, setUserRegulator] = useState<string | null>(null);
   const [showOtherRegs, setShowOtherRegs] = useState(false);
+  const [backtesting, setBacktesting] = useState(false);
+  const [backtestResult, setBacktestResult] = useState<any>(null);
+  const [showBacktest, setShowBacktest] = useState(false);
+  const [backtestDays, setBacktestDays] = useState(90);
 
   const { orgId, org, userId, isLoading: orgLoading } = useOrganisation();
 
