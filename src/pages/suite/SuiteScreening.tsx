@@ -141,16 +141,22 @@ export default function SuiteScreening() {
     setSearching(true);
     setResponse(null);
     setDismissedResults(new Set());
+    setSuppressed([]);
 
     try {
       const res = await runScreening({ query: searchName, minConfidence: 20 });
       setResponse(res);
 
+      // False-positive memory: suppress hits previously cleared for this customer
+      const { live, suppressed: sup, entries } = await applyWhitelist(selectedCustomerId, res.results);
+      setSuppressed(sup);
+      setWhitelist(entries);
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const matchCount = res.results.length;
-      const highConfidence = res.results.filter(r => r.confidence >= 70);
+      const matchCount = live.length;
+      const highConfidence = live.filter(r => r.confidence >= 70);
       const result = matchCount === 0 ? "clear" : highConfidence.length > 0 ? "potential_match" : "low_match";
 
       await supabase.from("suite_screenings").insert({
@@ -163,12 +169,13 @@ export default function SuiteScreening() {
 
       await supabase.from("suite_audit_log").insert({
         user_id: user.id,
-        action: `AML screening — "${searchName}" — ${matchCount} matches`,
+        action: `AML screening — "${searchName}" — ${matchCount} matches${sup.length ? ` (${sup.length} whitelisted)` : ""}`,
         entity_type: "screening",
         details: {
           detail: `Provider: ${res.provider}, Lists: ${res.listsSearched.length}, Result: ${result}`,
           query: searchName,
           match_count: matchCount,
+          suppressed_count: sup.length,
         },
       });
 
@@ -185,6 +192,8 @@ export default function SuiteScreening() {
         toast.warning(`${highConfidence.length} high-confidence match${highConfidence.length > 1 ? "es" : ""} found — alert created`);
       } else if (matchCount > 0) {
         toast.info(`${matchCount} low-confidence match${matchCount > 1 ? "es" : ""} found — review recommended`);
+      } else if (sup.length > 0) {
+        toast.success(`Clear — ${sup.length} known false positive${sup.length > 1 ? "s" : ""} suppressed, no alert raised`);
       } else {
         toast.success("Clear — no matches found across all lists");
       }
@@ -196,6 +205,67 @@ export default function SuiteScreening() {
       setSearching(false);
     }
   };
+
+  const saveWhitelistEntry = async () => {
+    if (!wlTarget) return;
+    if (!wlReason.trim()) { toast.error("A reason is required for the audit trail"); return; }
+    if (!selectedCustomerId) { toast.error("Select a customer first"); return; }
+    setWlSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setWlSaving(false); return; }
+
+    const { error } = await addWhitelistEntry({
+      orgId: orgId ?? null,
+      customerId: selectedCustomerId,
+      userId: user.id,
+      result: wlTarget,
+      reason: wlReason.trim(),
+      reviewedBy: wlReviewer.trim() || null,
+      expiresAt: wlExpiry ? new Date(wlExpiry).toISOString() : null,
+      scopeAllLists: wlAllLists,
+    });
+    setWlSaving(false);
+
+    if (error) {
+      toast.error(error.message.includes("duplicate") ? "This match is already whitelisted for the customer" : error.message);
+      return;
+    }
+
+    await supabase.from("suite_audit_log").insert({
+      user_id: user.id,
+      action: `Screening false positive whitelisted: ${wlTarget.name}`,
+      entity_type: "screening_whitelist",
+      entity_id: selectedCustomerId,
+      details: {
+        detail: `Reason: ${wlReason.trim()}`,
+        list_type: wlAllLists ? "all lists" : wlTarget.listType,
+        expires_at: wlExpiry || null,
+      },
+    });
+
+    setDismissedResults(s => new Set([...s, wlTarget.id]));
+    setWlTarget(null);
+    setWlReason(""); setWlReviewer(""); setWlExpiry(""); setWlAllLists(false);
+    toast.success("Marked as false positive — future hits won't raise alerts");
+    loadWhitelist();
+  };
+
+  const revokeEntry = async (entry: WhitelistEntry) => {
+    const { error } = await revokeWhitelistEntry(entry.id);
+    if (error) { toast.error(error.message); return; }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: `Screening whitelist revoked: ${entry.match_name}`,
+        entity_type: "screening_whitelist",
+        entity_id: entry.customer_id,
+      });
+    }
+    toast.success("Whitelist entry revoked — matches will alert again");
+    loadWhitelist();
+  };
+
 
   const createCase = async (result: ScreeningResult) => {
     const { data: { user } } = await supabase.auth.getUser();
