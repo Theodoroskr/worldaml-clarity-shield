@@ -764,7 +764,43 @@ export default function SuiteCaseQueue() {
         </DialogContent>
       </Dialog>
 
+      {/* Reassign dialog */}
+      <Dialog open={reassignOpen} onOpenChange={setReassignOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reassign case</DialogTitle>
+            <DialogDescription>Pick a new owner and leave a short handoff note. The new assignee is notified.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs text-muted-foreground">New assignee</label>
+              <Select value={reassignTo} onValueChange={setReassignTo}>
+                <SelectTrigger><SelectValue placeholder="Select teammate…" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {members.map(m => (
+                    <SelectItem key={m.user_id} value={m.user_id}>
+                      {m.full_name || m.email || m.user_id.slice(0, 8)} · {m.role}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Handoff note (recommended)</label>
+              <Textarea rows={3} value={reassignNote} onChange={e => setReassignNote(e.target.value)}
+                placeholder="Context, what's been done, what's next…" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReassignOpen(false)}>Cancel</Button>
+            <Button onClick={confirmReassign} disabled={!reassignTo}>Reassign</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* New case dialog */}
+
       <Dialog open={newOpen} onOpenChange={setNewOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>New case</DialogTitle></DialogHeader>
