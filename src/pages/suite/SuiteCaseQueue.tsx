@@ -44,6 +44,7 @@ type CaseFilter = {
   status: string; priority: string; assignee: string; q: string;
   risk: string; customerId: string;
   createdFrom: string; createdTo: string; dueFrom: string; dueTo: string;
+  closureReason: string;
 };
 type SavedFilter = { id: string; name: string; filter: CaseFilter };
 
