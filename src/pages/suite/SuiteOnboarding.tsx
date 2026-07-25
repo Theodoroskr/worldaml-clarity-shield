@@ -32,6 +32,8 @@ interface Customer {
   registration_number: string | null;
   date_of_birth: string | null;
   regulator: string | null;
+  organisation_id: string | null;
+  onboarding_data: Record<string, any> | null;
   created_at: string;
 }
 
@@ -597,7 +599,7 @@ export default function SuiteOnboarding() {
 
   const fetchCustomers = async () => {
     if (!orgId) return;
-    const { data } = await supabase.from("suite_customers").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false });
+    const { data } = await supabase.from("suite_customers").select("*, onboarding_data").eq("organisation_id", orgId).order("created_at", { ascending: false });
     setCustomers((data || []) as Customer[]);
     setLoading(false);
   };
