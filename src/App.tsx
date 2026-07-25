@@ -468,6 +468,8 @@ const App = () => (
                   <Route path="settings" element={<SuiteSettings />} />
                   <Route path="help" element={<SuiteHelp />} />
                   <Route path="regulatory" element={<SuiteRegulatory />} />
+                  <Route path="regulator-submissions" element={<SuiteRegulatorSubmissions />} />
+
                   <Route path="rss" element={<SuiteRss />} />
                 </Route>
 
