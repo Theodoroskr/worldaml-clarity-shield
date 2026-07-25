@@ -11,6 +11,8 @@ import { toast } from "@/hooks/use-toast";
 import { Inbox, Search, CheckCircle2, XCircle, Clock, FileText, User, Mail, Calendar, Download } from "lucide-react";
 import { format } from "date-fns";
 import { runScreening } from "@/services/screeningProvider";
+import { applyWhitelist } from "@/lib/suite/screeningWhitelist";
+
 
 type Submission = {
   id: string;
