@@ -72,6 +72,17 @@ export default function SuiteScreening() {
   const [dismissedResults, setDismissedResults] = useState<Set<string>>(new Set());
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
+  // False-positive memory (screening whitelist)
+  const [whitelist, setWhitelist] = useState<WhitelistEntry[]>([]);
+  const [suppressed, setSuppressed] = useState<{ result: ScreeningResult; entry: WhitelistEntry }[]>([]);
+  const [wlTarget, setWlTarget] = useState<ScreeningResult | null>(null);
+  const [wlReason, setWlReason] = useState("");
+  const [wlReviewer, setWlReviewer] = useState("");
+  const [wlExpiry, setWlExpiry] = useState("");
+  const [wlAllLists, setWlAllLists] = useState(false);
+  const [wlSaving, setWlSaving] = useState(false);
+
+
   const { checkLimit, subscriptionTier } = useFeatureLimits();
 
   // Count this month's screenings for limit check
