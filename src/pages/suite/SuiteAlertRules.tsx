@@ -546,6 +546,10 @@ export default function SuiteAlertRules() {
               <input value={activeRule.name} onChange={e => updateRule({ name: e.target.value })} className="font-semibold text-foreground text-sm bg-transparent border-0 outline-none focus:bg-muted/50 rounded px-1 py-0.5 w-72" />
             </div>
             <div className="flex items-center gap-2">
+              <button onClick={() => runBacktest(backtestDays)} disabled={backtesting} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors font-medium">
+                {backtesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <TrendingUp className="w-3 h-3" />}
+                Backtest 90d
+              </button>
               <button onClick={() => analyseRule(activeRule.id)} disabled={analysing} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors font-medium">
                 {analysing ? <Loader2 className="w-3 h-3 animate-spin" /> : <BarChart3 className="w-3 h-3" />}
                 Analyse Rule
