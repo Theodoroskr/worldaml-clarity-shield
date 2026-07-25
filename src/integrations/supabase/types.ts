@@ -3685,6 +3685,91 @@ export type Database = {
           },
         ]
       }
+      suite_onboarding_submissions: {
+        Row: {
+          applicant_email: string | null
+          applicant_name: string | null
+          applicant_type: string
+          created_at: string
+          data: Json
+          documents: Json
+          form_id: string
+          id: string
+          ip_address: string | null
+          linked_customer_id: string | null
+          organisation_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          submitted_at: string
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          applicant_email?: string | null
+          applicant_name?: string | null
+          applicant_type?: string
+          created_at?: string
+          data?: Json
+          documents?: Json
+          form_id: string
+          id?: string
+          ip_address?: string | null
+          linked_customer_id?: string | null
+          organisation_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          applicant_email?: string | null
+          applicant_name?: string | null
+          applicant_type?: string
+          created_at?: string
+          data?: Json
+          documents?: Json
+          form_id?: string
+          id?: string
+          ip_address?: string | null
+          linked_customer_id?: string | null
+          organisation_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_onboarding_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "suite_onboarding_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_onboarding_submissions_linked_customer_id_fkey"
+            columns: ["linked_customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_onboarding_submissions_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_org_members: {
         Row: {
           created_at: string
