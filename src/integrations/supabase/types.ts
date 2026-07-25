@@ -5074,6 +5074,78 @@ export type Database = {
           },
         ]
       }
+      suite_screening_whitelist: {
+        Row: {
+          created_at: string
+          customer_id: string
+          expires_at: string | null
+          hit_count: number
+          id: string
+          last_hit_at: string | null
+          list_type: string | null
+          match_id: string | null
+          match_key: string
+          match_name: string
+          organisation_id: string | null
+          reason: string
+          reviewed_by: string | null
+          revoked_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          expires_at?: string | null
+          hit_count?: number
+          id?: string
+          last_hit_at?: string | null
+          list_type?: string | null
+          match_id?: string | null
+          match_key: string
+          match_name: string
+          organisation_id?: string | null
+          reason: string
+          reviewed_by?: string | null
+          revoked_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          expires_at?: string | null
+          hit_count?: number
+          id?: string
+          last_hit_at?: string | null
+          list_type?: string | null
+          match_id?: string | null
+          match_key?: string
+          match_name?: string
+          organisation_id?: string | null
+          reason?: string
+          reviewed_by?: string | null
+          revoked_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_screening_whitelist_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_screening_whitelist_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_screenings: {
         Row: {
           created_at: string
