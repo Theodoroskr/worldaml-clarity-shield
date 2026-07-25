@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle, Trash2, Loader2 } from "lucide-react";
+import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle, Trash2, Loader2, Fingerprint, CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganisation } from "@/hooks/useOrganisation";
