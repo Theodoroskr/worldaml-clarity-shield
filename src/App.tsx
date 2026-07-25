@@ -177,6 +177,7 @@ const SuiteSettings = lazy(() => import("./pages/suite/SuiteSettings"));
 const SuiteHelp = lazy(() => import("./pages/suite/SuiteHelp"));
 const SuiteRegulatory = lazy(() => import("./pages/suite/SuiteRegulatory"));
 const SuiteRegulatorSubmissions = lazy(() => import("./pages/suite/SuiteRegulatorSubmissions"));
+const SuiteDsar = lazy(() => import("./pages/suite/SuiteDsar"));
 
 const SuiteSourceOfFunds = lazy(() => import("./pages/suite/SuiteSourceOfFunds"));
 const SuiteAmlAr = lazy(() => import("./pages/suite/SuiteAmlAr"));
