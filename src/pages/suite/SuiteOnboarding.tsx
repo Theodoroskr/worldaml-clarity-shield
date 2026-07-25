@@ -888,6 +888,7 @@ export default function SuiteOnboarding() {
 
     const { data: customer, error } = await supabase.from("suite_customers").insert({
       user_id: user.id,
+      organisation_id: orgId,
       name: kybForm.companyName.trim(),
       type: "business",
       email: kybForm.contactEmail.trim() || null,
@@ -895,6 +896,23 @@ export default function SuiteOnboarding() {
       company_name: kybForm.companyName.trim(),
       registration_number: kybForm.registrationNumber.trim() || null,
       regulator: kybForm.regulator || null,
+      onboarding_data: {
+        incorporation_date: kybForm.incorporationDate || null,
+        legal_structure: kybForm.legalStructure || null,
+        industry: kybForm.industry || null,
+        website: kybForm.website || null,
+        registered_address: kybForm.registeredAddress || null,
+        city: kybForm.city || null,
+        postal_code: kybForm.postalCode || null,
+        contact_name: kybForm.contactName || null,
+        contact_phone: kybForm.contactPhone || null,
+        annual_turnover: kybForm.annualTurnover || null,
+        number_of_employees: kybForm.numberOfEmployees || null,
+        source_of_funds: kybForm.sourceOfFunds || null,
+        directors: filledDirectors.map(d => ({ name: d.name.trim(), nationality: d.nationality || null, role: d.role, date_of_birth: d.dateOfBirth || null, pep: d.pep })),
+        ubos: filledUbos.map(u => ({ name: u.name.trim(), nationality: u.nationality || null, ownership_pct: parseFloat(u.ownershipPct) || 0, date_of_birth: u.dateOfBirth || null, pep: u.pep })),
+        custom_fields: Object.keys(customFieldValues).length > 0 ? customFieldValues : null,
+      },
     }).select("id").single();
 
     if (error) { toast.error(error.message); setSaving(false); return; }
