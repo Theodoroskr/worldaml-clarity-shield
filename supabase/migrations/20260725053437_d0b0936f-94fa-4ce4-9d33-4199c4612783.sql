@@ -1,0 +1,2 @@
+ALTER TABLE public.suite_customers ADD COLUMN IF NOT EXISTS onboarding_data jsonb NOT NULL DEFAULT '{}'::jsonb;
+UPDATE public.suite_customers SET onboarding_data = '{}'::jsonb WHERE onboarding_data IS NULL;
