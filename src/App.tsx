@@ -161,6 +161,7 @@ const SuiteAppLayout = lazy(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazy(() => import("./pages/suite/SuiteDashboard"));
 const SuiteOnboarding = lazy(() => import("./pages/suite/SuiteOnboarding"));
 const SuiteOnboardingForms = lazy(() => import("./pages/suite/SuiteOnboardingForms"));
+const SuiteOnboardingSubmissions = lazy(() => import("./pages/suite/SuiteOnboardingSubmissions"));
 const SuiteIDV = lazy(() => import("./pages/suite/SuiteIDV"));
 const SuiteScreening = lazy(() => import("./pages/suite/SuiteScreening"));
 const SuiteTransactions = lazy(() => import("./pages/suite/SuiteTransactions"));
