@@ -185,10 +185,14 @@ export default function SuiteCaseQueue() {
 
   const deleteSaved = (id: string) => persistSaved(savedFilters.filter(s => s.id !== id));
 
-  const resetFilters = () => setFilter({
-    status: "open", priority: "all", assignee: "all", q: "",
-    risk: "all", customerId: "all", createdFrom: "", createdTo: "", dueFrom: "", dueTo: "",
-  });
+  const resetFilters = () => {
+    setFilter({
+      status: "open", priority: "all", assignee: "all", q: "",
+      risk: "all", customerId: "all", createdFrom: "", createdTo: "", dueFrom: "", dueTo: "",
+      closureReason: "all",
+    });
+    setSearchParams({}, { replace: true });
+  };
 
   const loadDetail = useCallback(async (caseId: string) => {
     const [{ data: n }, { data: a }] = await Promise.all([
