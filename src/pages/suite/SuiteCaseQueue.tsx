@@ -719,6 +719,18 @@ export default function SuiteCaseQueue() {
                     </CardContent>
                   </Card>
 
+                  {selected.customer_id && orgId && userId && (
+                    <CustomerNotes
+                      customerId={selected.customer_id}
+                      organisationId={orgId}
+                      userId={userId}
+                      members={members}
+                      memberLabel={memberLabel}
+                    />
+                  )}
+
+
+
                   <Card>
                     <CardHeader className="pb-2"><CardTitle className="text-sm">Timing</CardTitle></CardHeader>
                     <CardContent className="text-xs space-y-1">
