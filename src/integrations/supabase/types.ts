@@ -3674,6 +3674,183 @@ export type Database = {
           },
         ]
       }
+      suite_edd_audit: {
+        Row: {
+          action: string
+          actor_id: string
+          case_id: string
+          created_at: string
+          details: Json
+          id: string
+          organisation_id: string
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          case_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          organisation_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          case_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          organisation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_edd_audit_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "suite_edd_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_edd_audit_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_edd_cases: {
+        Row: {
+          assigned_analyst: string | null
+          case_reference: string
+          created_at: string
+          customer_id: string | null
+          id: string
+          mlro_decision: string | null
+          mlro_id: string | null
+          mlro_reason: string | null
+          mlro_signed_at: string | null
+          organisation_id: string
+          questionnaire: Json
+          requested_by: string
+          risk_factors: Json
+          status: string
+          submitted_for_review_at: string | null
+          trigger_reason: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_analyst?: string | null
+          case_reference: string
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          mlro_decision?: string | null
+          mlro_id?: string | null
+          mlro_reason?: string | null
+          mlro_signed_at?: string | null
+          organisation_id: string
+          questionnaire?: Json
+          requested_by: string
+          risk_factors?: Json
+          status?: string
+          submitted_for_review_at?: string | null
+          trigger_reason: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_analyst?: string | null
+          case_reference?: string
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          mlro_decision?: string | null
+          mlro_id?: string | null
+          mlro_reason?: string | null
+          mlro_signed_at?: string | null
+          organisation_id?: string
+          questionnaire?: Json
+          requested_by?: string
+          risk_factors?: Json
+          status?: string
+          submitted_for_review_at?: string | null
+          trigger_reason?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_edd_cases_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_edd_cases_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_edd_evidence: {
+        Row: {
+          case_id: string
+          created_at: string
+          description: string | null
+          evidence_type: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          organisation_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          description?: string | null
+          evidence_type: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          organisation_id: string
+          uploaded_by: string
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          description?: string | null
+          evidence_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          organisation_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_edd_evidence_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "suite_edd_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_edd_evidence_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_idv_sessions: {
         Row: {
           created_at: string

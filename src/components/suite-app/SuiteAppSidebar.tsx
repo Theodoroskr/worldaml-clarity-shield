@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, Shield, CreditCard, AlertTriangle,
   FileText, BarChart3, Settings, ChevronRight, Activity,
   UserCheck, Fingerprint, ClipboardList, Menu, Scale, ShieldCheck, HelpCircle, Radio,
-  LogOut, ArrowLeft, Wallet, BookOpen, ListChecks, Rss, Network, CalendarClock,
+  LogOut, ArrowLeft, Wallet, BookOpen, ListChecks, Rss, Network, CalendarClock, ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -58,6 +58,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
   {
     title: "Investigations",
     items: [
+      { icon: ShieldAlert, label: "Enhanced DD (EDD)", path: "/suite/edd" },
       { icon: ClipboardList, label: "Cases & SAR", path: "/suite/cases" },
       { icon: FileText, label: "Audit Trail", path: "/suite/audit" },
     ],

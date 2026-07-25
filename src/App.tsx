@@ -181,6 +181,7 @@ const SuiteRss = lazy(() => import("./pages/suite/SuiteRss"));
 const SuiteUBO = lazy(() => import("./pages/suite/SuiteUBO"));
 const SuitePeriodicReviews = lazy(() => import("./pages/suite/SuitePeriodicReviews"));
 const SuiteCustomerDocuments = lazy(() => import("./pages/suite/SuiteCustomerDocuments"));
+const SuiteEDD = lazy(() => import("./pages/suite/SuiteEDD"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -442,6 +443,7 @@ const App = () => (
                   <Route path="periodic-reviews" element={<SuitePeriodicReviews />} />
                   <Route path="customer-documents" element={<SuiteCustomerDocuments />} />
                   <Route path="customer-documents/:customerId" element={<SuiteCustomerDocuments />} />
+                  <Route path="edd" element={<SuiteEDD />} />
                   <Route path="source-of-funds" element={<SuiteSourceOfFunds />} />
                   <Route path="aml-ar" element={<SuiteAmlAr />} />
                   <Route path="cases" element={<SuiteCases />} />
