@@ -443,6 +443,7 @@ const App = () => (
                   <Route path="periodic-reviews" element={<SuitePeriodicReviews />} />
                   <Route path="customer-documents" element={<SuiteCustomerDocuments />} />
                   <Route path="customer-documents/:customerId" element={<SuiteCustomerDocuments />} />
+                  <Route path="edd" element={<SuiteEDD />} />
                   <Route path="source-of-funds" element={<SuiteSourceOfFunds />} />
                   <Route path="aml-ar" element={<SuiteAmlAr />} />
                   <Route path="cases" element={<SuiteCases />} />
