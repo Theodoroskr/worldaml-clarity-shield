@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   ChevronRight, CalendarClock, RefreshCw, Users, AlertTriangle,
-  Shield, FileText, TrendingUp, Activity, BarChart3, ArrowUpRight, Clock,
+  Shield, FileText, TrendingUp, Activity, BarChart3, ArrowUpRight, Clock, CalendarIcon,
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid,
@@ -13,9 +13,23 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format, differenceInDays, addMonths, isPast, formatDistanceToNow } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  format, differenceInDays, addMonths, isPast, formatDistanceToNow,
+  startOfMonth, startOfQuarter, startOfYear, endOfDay,
+} from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useOrganisation } from "@/hooks/useOrganisation";
+
+type RangeKey = "mtd" | "qtd" | "ytd" | "all" | "custom";
+const RANGE_LABELS: Record<RangeKey, string> = {
+  mtd: "Month to date",
+  qtd: "Quarter to date",
+  ytd: "Year to date",
+  all: "All time",
+  custom: "Custom",
+};
 
 const RADIAN = Math.PI / 180;
 const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
@@ -51,10 +65,48 @@ export default function SuiteDashboard() {
   });
   const [recentActivity, setRecentActivity] = useState<{ id: string; type: string; label: string; detail: string; time: string; severity?: string }[]>([]);
 
+  // Time-range filter
+  const [range, setRange] = useState<RangeKey>("all");
+  const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
+  const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
+  const [rangeOpen, setRangeOpen] = useState(false);
+
+  const { from, to } = useMemo(() => {
+    const now = new Date();
+    switch (range) {
+      case "mtd": return { from: startOfMonth(now), to: endOfDay(now) };
+      case "qtd": return { from: startOfQuarter(now), to: endOfDay(now) };
+      case "ytd": return { from: startOfYear(now), to: endOfDay(now) };
+      case "custom":
+        return {
+          from: customFrom ?? null,
+          to: customTo ? endOfDay(customTo) : endOfDay(now),
+        };
+      case "all":
+      default: return { from: null as Date | null, to: null as Date | null };
+    }
+  }, [range, customFrom, customTo]);
+
+  const rangeLabel = useMemo(() => {
+    if (range === "custom" && (customFrom || customTo)) {
+      const f = customFrom ? format(customFrom, "d MMM yyyy") : "…";
+      const t = customTo ? format(customTo, "d MMM yyyy") : "today";
+      return `${f} – ${t}`;
+    }
+    return RANGE_LABELS[range];
+  }, [range, customFrom, customTo]);
+
   const fetchData = useCallback(async (silent = false) => {
     if (!orgId) return;
     if (!silent) setLoading(true);
     else setRefreshing(true);
+
+    const applyRange = <T extends { gte: any; lte: any }>(q: T): T => {
+      let out: any = q;
+      if (from) out = out.gte("created_at", from.toISOString());
+      if (to) out = out.lte("created_at", to.toISOString());
+      return out as T;
+    };
 
     const [
       customersRes,
@@ -69,15 +121,15 @@ export default function SuiteDashboard() {
       { data: recentCustomers },
       { data: recentAlerts },
     ] = await Promise.all([
-      supabase.from("suite_customers").select("id, risk_level").eq("organisation_id", orgId),
-      supabase.from("suite_customers").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-      supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-      supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_review"]),
-      supabase.from("suite_screenings").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-      supabase.from("suite_cases").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-      supabase.from("suite_cases").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_progress"]),
-      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-      supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("risk_flag", true),
+      applyRange(supabase.from("suite_customers").select("id, risk_level").eq("organisation_id", orgId)),
+      applyRange(supabase.from("suite_customers").select("id", { count: "exact", head: true }).eq("organisation_id", orgId)),
+      applyRange(supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId)),
+      applyRange(supabase.from("suite_alerts").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_review"])),
+      applyRange(supabase.from("suite_screenings").select("id", { count: "exact", head: true }).eq("organisation_id", orgId)),
+      applyRange(supabase.from("suite_cases").select("id", { count: "exact", head: true }).eq("organisation_id", orgId)),
+      applyRange(supabase.from("suite_cases").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("status", ["open", "in_progress"])),
+      applyRange(supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId)),
+      applyRange(supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("risk_flag", true)),
       supabase.from("suite_customers").select("id, name, type, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(3),
       supabase.from("suite_alerts").select("id, title, severity, status, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(5),
     ]);
@@ -118,7 +170,7 @@ export default function SuiteDashboard() {
     setLoading(false);
     setRefreshing(false);
     setLastRefresh(new Date());
-  }, [orgId, org]);
+  }, [orgId, org, from, to]);
 
   useEffect(() => { if (orgId) fetchData(); }, [fetchData]);
 
@@ -224,17 +276,89 @@ export default function SuiteDashboard() {
           <p className="text-sm text-muted-foreground mt-0.5">
             Real-time overview{loading ? " — loading…" : ""}
             {!loading && <span className="ml-2 text-xs">· Updated {formatDistanceToNow(lastRefresh, { addSuffix: true })}</span>}
+            <span className="ml-2 text-xs">· Period: <span className="font-medium text-foreground">{rangeLabel}</span></span>
           </p>
         </div>
-        <Button
-          variant="outline" size="sm"
-          onClick={() => fetchData(true)}
-          disabled={refreshing}
-          className="gap-1.5"
-        >
-          <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Time-range filter */}
+          <div className="hidden md:flex items-center rounded-md border border-border bg-card p-0.5">
+            {(["mtd", "qtd", "ytd", "all"] as RangeKey[]).map((k) => (
+              <button
+                key={k}
+                onClick={() => setRange(k)}
+                className={cn(
+                  "px-2.5 py-1 text-xs font-medium rounded-sm transition-colors",
+                  range === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {k.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <Popover open={rangeOpen} onOpenChange={setRangeOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant={range === "custom" ? "default" : "outline"}
+                size="sm"
+                className="gap-1.5"
+              >
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {range === "custom" ? rangeLabel : "Custom"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-3 space-y-3" align="end">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs font-medium mb-1.5 text-muted-foreground">From</p>
+                  <Calendar
+                    mode="single"
+                    selected={customFrom}
+                    onSelect={setCustomFrom}
+                    initialFocus
+                    className={cn("p-0 pointer-events-auto")}
+                  />
+                </div>
+                <div>
+                  <p className="text-xs font-medium mb-1.5 text-muted-foreground">To</p>
+                  <Calendar
+                    mode="single"
+                    selected={customTo}
+                    onSelect={setCustomTo}
+                    className={cn("p-0 pointer-events-auto")}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-border">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setCustomFrom(undefined); setCustomTo(undefined); }}
+                >
+                  Clear
+                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setRangeOpen(false)}>Cancel</Button>
+                  <Button
+                    size="sm"
+                    disabled={!customFrom && !customTo}
+                    onClick={() => { setRange("custom"); setRangeOpen(false); }}
+                  >
+                    Apply
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button
+            variant="outline" size="sm"
+            onClick={() => fetchData(true)}
+            disabled={refreshing}
+            className="gap-1.5"
+          >
+            <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* ══════════ LIVE OVERVIEW KPI CARDS ══════════ */}
