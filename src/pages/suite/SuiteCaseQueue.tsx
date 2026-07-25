@@ -464,7 +464,7 @@ export default function SuiteCaseQueue() {
               <span className="text-xs text-muted-foreground flex items-center gap-1"><Bookmark className="h-3 w-3" />Saved:</span>
               {savedFilters.map(s => (
                 <div key={s.id} className="inline-flex items-center gap-1 border rounded-full pl-2 pr-1 py-0.5 text-xs bg-muted/40">
-                  <button className="hover:underline" onClick={() => setFilter(s.filter)}>{s.name}</button>
+                  <button className="hover:underline" onClick={() => setFilter({ closureReason: "all", ...s.filter })}>{s.name}</button>
                   <button className="text-muted-foreground hover:text-red-400" onClick={() => deleteSaved(s.id)} title="Delete">
                     <Trash2 className="h-3 w-3" />
                   </button>
