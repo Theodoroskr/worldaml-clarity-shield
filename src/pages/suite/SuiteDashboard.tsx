@@ -124,6 +124,7 @@ export default function SuiteDashboard() {
       { count: flaggedTransactions },
       { data: recentCustomers },
       { data: recentAlerts },
+      casesRes,
     ] = await Promise.all([
       applyRange(supabase.from("suite_customers").select("id, risk_level").eq("organisation_id", orgId)),
       applyRange(supabase.from("suite_customers").select("id", { count: "exact", head: true }).eq("organisation_id", orgId)),
@@ -136,6 +137,7 @@ export default function SuiteDashboard() {
       applyRange(supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("risk_flag", true)),
       supabase.from("suite_customers").select("id, name, type, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(3),
       supabase.from("suite_alerts").select("id, title, severity, status, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(5),
+      applyRange(supabase.from("suite_cases").select("id, status, closure_reason, created_at, closed_at").eq("organisation_id", orgId)),
     ]);
 
     setKpi({
@@ -147,6 +149,23 @@ export default function SuiteDashboard() {
       totalCases: totalCases ?? 0,
       totalTransactions: totalTransactions ?? 0,
       flaggedTransactions: flaggedTransactions ?? 0,
+    });
+
+    // MLRO derived metrics
+    const caseRows: any[] = (casesRes as any)?.data || [];
+    const openRows = caseRows.filter(c => c.status === "open" || c.status === "in_progress");
+    const now = Date.now();
+    const avgAgeDays = openRows.length
+      ? Math.round(openRows.reduce((s, c) => s + (now - new Date(c.created_at).getTime()), 0) / openRows.length / 86_400_000)
+      : 0;
+    const sarFiled = caseRows.filter(c => c.closure_reason === "sar_filed").length;
+    const alertsCount = totalAlerts ?? 0;
+    const alertToSarRatio = alertsCount > 0 ? +(sarFiled / alertsCount * 100).toFixed(1) : 0;
+    setMlro({
+      backlog: openRows.length,
+      avgAgeDays,
+      sarFiled,
+      alertToSarRatio,
     });
 
     // Build recent activity
