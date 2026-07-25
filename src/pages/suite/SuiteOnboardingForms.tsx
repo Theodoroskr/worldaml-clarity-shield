@@ -148,6 +148,10 @@ interface FormVersion {
   archived_at: string | null;
   created_at: string;
   updated_at: string;
+  schema?: FormField[];
+  required_checks?: RequiredChecks;
+  branding?: Branding;
+  redirect_url?: string | null;
 }
 
 const FIELD_LIBRARY: { type: FieldType; label: string; icon: any }[] = [
