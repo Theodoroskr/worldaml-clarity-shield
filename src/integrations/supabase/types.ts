@@ -3129,6 +3129,7 @@ export type Database = {
           customer_id: string | null
           description: string | null
           id: string
+          metadata: Json
           organisation_id: string | null
           resolved_at: string | null
           rule_id: string | null
@@ -3146,6 +3147,7 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           id?: string
+          metadata?: Json
           organisation_id?: string | null
           resolved_at?: string | null
           rule_id?: string | null
@@ -3163,6 +3165,7 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           id?: string
+          metadata?: Json
           organisation_id?: string | null
           resolved_at?: string | null
           rule_id?: string | null
@@ -3470,6 +3473,102 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_customer_documents: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          customer_id: string
+          document_label: string | null
+          document_type: string
+          expires_on: string | null
+          file_name: string
+          file_path: string
+          id: string
+          issued_on: string | null
+          mime_type: string | null
+          notes: string | null
+          organisation_id: string
+          replaced_by_document_id: string | null
+          rerequest_due: string | null
+          rerequest_message: string | null
+          rerequest_reason: string | null
+          rerequested_at: string | null
+          rerequested_by: string | null
+          size_bytes: number | null
+          status: string
+          updated_at: string
+          uploaded_by: string | null
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          customer_id: string
+          document_label?: string | null
+          document_type: string
+          expires_on?: string | null
+          file_name: string
+          file_path: string
+          id?: string
+          issued_on?: string | null
+          mime_type?: string | null
+          notes?: string | null
+          organisation_id: string
+          replaced_by_document_id?: string | null
+          rerequest_due?: string | null
+          rerequest_message?: string | null
+          rerequest_reason?: string | null
+          rerequested_at?: string | null
+          rerequested_by?: string | null
+          size_bytes?: number | null
+          status?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          customer_id?: string
+          document_label?: string | null
+          document_type?: string
+          expires_on?: string | null
+          file_name?: string
+          file_path?: string
+          id?: string
+          issued_on?: string | null
+          mime_type?: string | null
+          notes?: string | null
+          organisation_id?: string
+          replaced_by_document_id?: string | null
+          rerequest_due?: string | null
+          rerequest_message?: string | null
+          rerequest_reason?: string | null
+          rerequested_at?: string | null
+          rerequested_by?: string | null
+          size_bytes?: number | null
+          status?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_customer_documents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_customer_documents_replaced_by_document_id_fkey"
+            columns: ["replaced_by_document_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customer_documents"
             referencedColumns: ["id"]
           },
         ]
@@ -4853,6 +4952,7 @@ export type Database = {
         Args: { _answers: Json; _course_id: string; _holder_name: string }
         Returns: Json
       }
+      sweep_customer_document_expiry: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

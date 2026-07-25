@@ -33,6 +33,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
           { label: "Submissions Inbox", path: "/suite/onboarding-submissions" },
           { label: "IDV & Liveness", path: "/suite/idv" },
           { label: "Ownership & UBO", path: "/suite/ubo" },
+          { label: "Documents & Expiry", path: "/suite/customer-documents" },
         ],
       },
     ],
