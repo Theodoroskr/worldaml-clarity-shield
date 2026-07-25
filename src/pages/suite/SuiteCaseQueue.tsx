@@ -569,19 +569,20 @@ export default function SuiteCaseQueue() {
                     <CardContent className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="text-xs text-muted-foreground">Assignee</label>
-                        <Select value={selected.assignee_user_id || "unassigned"}
-                          onValueChange={v => updateCase(selected.id, { assignee_user_id: v === "unassigned" ? null : v } as any)}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="unassigned">Unassigned</SelectItem>
-                            {members.map(m => (
-                              <SelectItem key={m.user_id} value={m.user_id}>
-                                {m.full_name || m.email || m.user_id.slice(0, 8)} · {m.role}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 truncate rounded-md border bg-background px-3 py-2 text-sm">
+                            {selected.assignee_user_id ? memberLabel(selected.assignee_user_id) : <span className="text-muted-foreground">Unassigned</span>}
+                          </div>
+                          <Button size="sm" variant="outline" onClick={() => {
+                            setReassignTo(selected.assignee_user_id || "unassigned");
+                            setReassignNote("");
+                            setReassignOpen(true);
+                          }}>
+                            <UserCog className="h-3.5 w-3.5 mr-1" />Reassign
+                          </Button>
+                        </div>
                       </div>
+
                       <div>
                         <label className="text-xs text-muted-foreground">Priority</label>
                         <Select value={selected.priority || "medium"}
