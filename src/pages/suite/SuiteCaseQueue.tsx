@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertTriangle, Clock, User, MessageSquare, Link2, Plus, CheckCircle2, Activity, SlidersHorizontal, Save, Trash2, Bookmark, AtSign, UserCog } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { MentionTextarea, renderMentionText, extractMentions } from "@/components/suite/MentionTextarea";
+import { CustomerNotes } from "@/components/suite/CustomerNotes";
+
 
 
 type CaseRow = {
