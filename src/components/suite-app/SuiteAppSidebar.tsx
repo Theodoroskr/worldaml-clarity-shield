@@ -29,6 +29,7 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
         icon: Users, label: "Customers",
         children: [
           { label: "Onboarding", path: "/suite/onboarding" },
+          { label: "Onboarding Forms", path: "/suite/onboarding-forms" },
           { label: "IDV & Liveness", path: "/suite/idv" },
         ],
       },
