@@ -67,15 +67,19 @@ const DOC_TYPES = [
 
 const statusBadge = (s: string) => {
   switch (s) {
-    case "valid":         return "bg-emerald-500/15 text-emerald-500 border-emerald-500/30";
-    case "expiring_soon": return "bg-amber-500/15 text-amber-500 border-amber-500/30";
-    case "expired":       return "bg-red-500/15 text-red-500 border-red-500/30";
-    case "rerequested":   return "bg-blue-500/15 text-blue-500 border-blue-500/30";
-    case "replaced":      return "bg-slate-500/15 text-slate-400 border-slate-500/30";
-    case "archived":      return "bg-slate-500/15 text-slate-400 border-slate-500/30";
-    default:              return "bg-muted text-muted-foreground";
+    case "valid":          return "bg-emerald-500/15 text-emerald-500 border-emerald-500/30";
+    case "expiring_soon":  return "bg-amber-500/15 text-amber-500 border-amber-500/30";
+    case "expired":        return "bg-red-500/15 text-red-500 border-red-500/30";
+    case "rerequested":    return "bg-blue-500/15 text-blue-500 border-blue-500/30";
+    case "pending_review": return "bg-purple-500/15 text-purple-400 border-purple-500/30";
+    case "replaced":       return "bg-slate-500/15 text-slate-400 border-slate-500/30";
+    case "archived":       return "bg-slate-500/15 text-slate-400 border-slate-500/30";
+    default:               return "bg-muted text-muted-foreground";
   }
 };
+
+const statusLabel = (s: string) => s === "pending_review" ? "awaiting review" : s.replace("_", " ");
+
 
 const daysUntil = (d?: string | null) => {
   if (!d) return null;
