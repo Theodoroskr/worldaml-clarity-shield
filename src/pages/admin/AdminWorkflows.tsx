@@ -174,7 +174,7 @@ export default function AdminWorkflows() {
     return (
       <div className="p-6 space-y-5">
         <div className="flex items-center justify-between">
-          <div><h1 className="text-xl font-bold text-foreground">Workflows</h1><p className="text-xs text-muted-foreground">Visual drag-and-drop workflow builder</p></div>
+          <div><h1 className="text-xl font-bold text-foreground">Suite Workflows</h1><p className="text-xs text-muted-foreground">Automations for the Suite compliance product only — triggers fire on customers, screenings, transactions and risk changes.</p></div>
           <Button size="sm" onClick={() => openEditor()}><Plus className="w-3.5 h-3.5 mr-1" /> New Workflow</Button>
         </div>
 
