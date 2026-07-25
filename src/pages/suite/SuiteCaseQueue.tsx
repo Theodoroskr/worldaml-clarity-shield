@@ -224,6 +224,7 @@ export default function SuiteCaseQueue() {
       if (filter.createdTo && new Date(c.created_at) > new Date(filter.createdTo + "T23:59:59")) return false;
       if (filter.dueFrom && (!c.due_at || new Date(c.due_at) < new Date(filter.dueFrom))) return false;
       if (filter.dueTo && (!c.due_at || new Date(c.due_at) > new Date(filter.dueTo + "T23:59:59"))) return false;
+      if (filter.closureReason !== "all" && (c.closure_reason || "") !== filter.closureReason) return false;
       if (filter.q) {
         const q = filter.q.toLowerCase();
         const custName = cust?.name?.toLowerCase() || "";
