@@ -39,6 +39,13 @@ type Customer = { id: string; name: string; type: string | null; risk_level: str
 type Note = { id: string; content: string; user_id: string; created_at: string };
 type Activity = { id: string; action: string; details: any; actor_id: string | null; created_at: string };
 
+type CaseFilter = {
+  status: string; priority: string; assignee: string; q: string;
+  risk: string; customerId: string;
+  createdFrom: string; createdTo: string; dueFrom: string; dueTo: string;
+};
+type SavedFilter = { id: string; name: string; filter: CaseFilter };
+
 const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
 const SLA_DEFAULT: Record<string, number> = { critical: 4, high: 24, medium: 72, low: 168 };
 
