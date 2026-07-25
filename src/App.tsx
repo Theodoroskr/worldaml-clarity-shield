@@ -181,6 +181,7 @@ const SuiteRss = lazy(() => import("./pages/suite/SuiteRss"));
 const SuiteUBO = lazy(() => import("./pages/suite/SuiteUBO"));
 const SuitePeriodicReviews = lazy(() => import("./pages/suite/SuitePeriodicReviews"));
 const SuiteCustomerDocuments = lazy(() => import("./pages/suite/SuiteCustomerDocuments"));
+const SuiteEDD = lazy(() => import("./pages/suite/SuiteEDD"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
