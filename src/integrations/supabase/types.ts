@@ -3412,6 +3412,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          mentions: string[]
           organisation_id: string | null
           user_id: string
         }
@@ -3420,6 +3421,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          mentions?: string[]
           organisation_id?: string | null
           user_id: string
         }
@@ -3428,6 +3430,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          mentions?: string[]
           organisation_id?: string | null
           user_id?: string
         }
@@ -3490,6 +3493,7 @@ export type Database = {
           customer_id: string | null
           due_at: string | null
           id: string
+          last_reassignment_note: string | null
           linked_entity_id: string | null
           linked_entity_type: string | null
           opened_at: string | null
@@ -3514,6 +3518,7 @@ export type Database = {
           customer_id?: string | null
           due_at?: string | null
           id?: string
+          last_reassignment_note?: string | null
           linked_entity_id?: string | null
           linked_entity_type?: string | null
           opened_at?: string | null
@@ -3538,6 +3543,7 @@ export type Database = {
           customer_id?: string | null
           due_at?: string | null
           id?: string
+          last_reassignment_note?: string | null
           linked_entity_id?: string | null
           linked_entity_type?: string | null
           opened_at?: string | null
@@ -3666,6 +3672,54 @@ export type Database = {
             columns: ["replaced_by_document_id"]
             isOneToOne: false
             referencedRelation: "suite_customer_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_customer_notes: {
+        Row: {
+          content: string
+          created_at: string
+          customer_id: string
+          id: string
+          mentions: string[]
+          organisation_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          mentions?: string[]
+          organisation_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          mentions?: string[]
+          organisation_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_customer_notes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_customer_notes_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
             referencedColumns: ["id"]
           },
         ]
