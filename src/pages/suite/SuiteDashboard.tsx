@@ -494,6 +494,80 @@ export default function SuiteDashboard() {
         </div>
       </div>
 
+      {/* ══════════ MLRO METRICS (drill-down into Case Queue) ══════════ */}
+      {(() => {
+        const iso = (d: Date | null) => d ? d.toISOString().slice(0, 10) : "";
+        const withPeriod = (extra: Record<string, string>) => {
+          const p = new URLSearchParams(extra);
+          if (from) p.set("createdFrom", iso(from));
+          if (to) p.set("createdTo", iso(to));
+          return `/suite/case-queue?${p.toString()}`;
+        };
+        const agedCutoff = iso(new Date(Date.now() - 7 * 86_400_000));
+        const mlroCards = [
+          {
+            label: "Case Backlog",
+            value: mlro.backlog.toLocaleString(),
+            hint: "Open + in-progress cases",
+            tone: "bg-amber-50 text-amber-600",
+            href: withPeriod({ status: "open" }),
+          },
+          {
+            label: "Avg Case Age",
+            value: `${mlro.avgAgeDays}d`,
+            hint: "Older than 7 days →",
+            tone: "bg-orange-50 text-orange-600",
+            href: `/suite/case-queue?status=open&createdTo=${agedCutoff}`,
+          },
+          {
+            label: "SARs Filed",
+            value: mlro.sarFiled.toLocaleString(),
+            hint: "closure = SAR/STR filed",
+            tone: "bg-emerald-50 text-emerald-600",
+            href: withPeriod({ status: "closed", closureReason: "sar_filed" }),
+          },
+          {
+            label: "Alert → SAR Ratio",
+            value: `${mlro.alertToSarRatio}%`,
+            hint: `${mlro.sarFiled} SARs / ${kpi.totalAlerts} alerts`,
+            tone: "bg-primary/10 text-primary",
+            href: withPeriod({ status: "all", closureReason: "sar_filed" }),
+          },
+        ];
+        return (
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+              <FileText className="h-4.5 w-4.5 text-primary" /> MLRO Metrics
+              <span className="text-xs font-normal text-muted-foreground">· click any card to open the Case Queue with these filters applied</span>
+            </h2>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {mlroCards.map(c => (
+                <Card
+                  key={c.label}
+                  onClick={() => navigate(c.href)}
+                  className="group cursor-pointer hover:shadow-md hover:border-primary/50 transition-all border-border"
+                >
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{c.label}</p>
+                        <p className="text-3xl font-bold text-foreground mt-1">{c.value}</p>
+                      </div>
+                      <div className={cn("p-2 rounded-lg", c.tone)}>
+                        <ArrowUpRight className="h-5 w-5" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">{c.hint}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
+
+
       {/* ══════════ CHARTS ROW (widgets) ══════════ */}
       <div className="grid grid-cols-[1fr_300px] gap-5">
         <div className="bg-card rounded-xl border border-border">
