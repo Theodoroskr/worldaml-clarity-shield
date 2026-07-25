@@ -39,8 +39,9 @@ type CaseRow = {
 
 type Member = { user_id: string; role: string; email: string | null; full_name: string | null };
 type Customer = { id: string; name: string; type: string | null; risk_level: string | null; country: string | null; kyc_status: string | null };
-type Note = { id: string; content: string; user_id: string; created_at: string };
+type Note = { id: string; content: string; user_id: string; created_at: string; mentions: string[] | null };
 type Activity = { id: string; action: string; details: any; actor_id: string | null; created_at: string };
+
 
 type CaseFilter = {
   status: string; priority: string; assignee: string; q: string;
@@ -112,11 +113,16 @@ export default function SuiteCaseQueue() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [activity, setActivity] = useState<Activity[]>([]);
   const [newNote, setNewNote] = useState("");
+  const [newNoteMentions, setNewNoteMentions] = useState<string[]>([]);
   const [closeOpen, setCloseOpen] = useState(false);
   const [closeReason, setCloseReason] = useState<string>("resolved_no_action");
   const [closeNotes, setCloseNotes] = useState("");
+  const [reassignOpen, setReassignOpen] = useState(false);
+  const [reassignTo, setReassignTo] = useState<string>("");
+  const [reassignNote, setReassignNote] = useState("");
   const [newOpen, setNewOpen] = useState(false);
   const [newCase, setNewCase] = useState({ title: "", priority: "medium", customer_id: "", assignee_user_id: "", sla_hours: 72 });
+
 
   const loadCases = useCallback(async () => {
     if (!orgId) return;
@@ -296,12 +302,29 @@ export default function SuiteCaseQueue() {
     const { error } = await supabase.from("suite_case_notes").insert({
       case_id: selected.id, content: newNote.trim(),
       user_id: userId, organisation_id: orgId,
+      mentions: newNoteMentions,
     });
     if (error) return toast.error(error.message);
     setNewNote("");
+    setNewNoteMentions([]);
     loadDetail(selected.id);
-    toast.success("Comment added");
+    toast.success(newNoteMentions.length ? `Comment added · ${newNoteMentions.length} notified` : "Comment added");
   }
+
+  async function confirmReassign() {
+    if (!selected) return;
+    const next = reassignTo === "unassigned" ? null : reassignTo || null;
+    const ok = await updateCase(selected.id, {
+      assignee_user_id: next,
+      last_reassignment_note: reassignNote || null,
+    } as any);
+    if (ok) {
+      setReassignOpen(false);
+      setReassignNote("");
+      toast.success(next ? "Case reassigned · assignee notified" : "Assignee cleared");
+    }
+  }
+
 
   async function closeCase() {
     if (!selected) return;
