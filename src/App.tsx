@@ -430,6 +430,8 @@ const App = () => (
                 {/* Suite App (functional dashboard) */}
                 <Route path="/suite" element={<SuiteAppLayout />}>
                   <Route index element={<SuiteDashboard />} />
+                  <Route path="setup" element={<SuiteSetup />} />
+
                   <Route path="onboarding" element={<SuiteOnboarding />} />
                   <Route path="onboarding-forms" element={<SuiteOnboardingForms />} />
                   <Route path="onboarding-forms/:id" element={<SuiteOnboardingForms />} />
