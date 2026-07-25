@@ -568,3 +568,109 @@ function RerequestDialog({
     </Dialog>
   );
 }
+
+interface PortalUser {
+  id: string;
+  email: string;
+  status: string;
+  invited_at: string;
+  activated_at: string | null;
+  last_login_at: string | null;
+}
+
+function PortalPanel({ customer }: { customer: Customer }) {
+  const [pu, setPu] = useState<PortalUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [email, setEmail] = useState(customer.email ?? "");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("suite_customer_portal_users")
+      .select("id, email, status, invited_at, activated_at, last_login_at")
+      .eq("customer_id", customer.id)
+      .neq("status", "disabled")
+      .maybeSingle();
+    setPu((data as PortalUser) ?? null);
+    setEmail((data as PortalUser)?.email ?? customer.email ?? "");
+    setLoading(false);
+  }, [customer.id, customer.email]);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function invite() {
+    if (!email || !email.includes("@")) return toast({ title: "Enter a valid email", variant: "destructive" });
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("portal-invite", {
+        body: { customer_id: customer.id, email: email.trim().toLowerCase() },
+      });
+      if (error) throw error;
+      const existing = (data as { existing_user?: boolean } | null)?.existing_user;
+      toast({ title: "Invitation sent", description: existing ? "Magic-link sent to existing account." : "Signup email sent." });
+      load();
+    } catch (e) {
+      toast({ title: "Invite failed", description: (e as Error).message, variant: "destructive" });
+    } finally { setBusy(false); }
+  }
+
+  async function disable() {
+    if (!pu || !confirm("Disable portal access for this customer?")) return;
+    setBusy(true);
+    const { error } = await supabase
+      .from("suite_customer_portal_users")
+      .update({ status: "disabled", disabled_at: new Date().toISOString() })
+      .eq("id", pu.id);
+    setBusy(false);
+    if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
+    toast({ title: "Portal access disabled" });
+    load();
+  }
+
+  const portalUrl = `${window.location.origin}/portal/login`;
+
+  return (
+    <Card className="p-4">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <ShieldCheck className="w-4 h-4 text-accent" /> Customer portal access
+          </div>
+          {loading ? (
+            <p className="text-xs text-muted-foreground">Loading…</p>
+          ) : pu ? (
+            <div className="text-xs text-muted-foreground space-y-0.5">
+              <div><span className="text-foreground">{pu.email}</span>
+                <Badge variant="outline" className="ml-2 text-[10px]">{pu.status}</Badge>
+              </div>
+              <div>Invited {new Date(pu.invited_at).toLocaleDateString()} · Last login {pu.last_login_at ? new Date(pu.last_login_at).toLocaleDateString() : "never"}</div>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">No portal user yet. Invite the customer to self-serve document refresh.</p>
+          )}
+        </div>
+        <div className="flex gap-2 items-center">
+          {!pu && (
+            <>
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="customer email" className="h-9 w-56" />
+              <Button size="sm" onClick={invite} disabled={busy}>
+                <UserPlus className="w-4 h-4 mr-2" /> Invite
+              </Button>
+            </>
+          )}
+          {pu && (
+            <>
+              <Button size="sm" variant="outline" onClick={invite} disabled={busy}>Resend link</Button>
+              <Button size="sm" variant="ghost" onClick={disable} disabled={busy}>Disable</Button>
+              <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText(portalUrl); toast({ title: "Portal URL copied" }); }}>
+                <Copy className="w-4 h-4 mr-1" /> Portal URL
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
