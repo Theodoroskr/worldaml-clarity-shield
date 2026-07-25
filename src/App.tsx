@@ -471,6 +471,8 @@ const App = () => (
                   <Route path="regulatory" element={<SuiteRegulatory />} />
                   <Route path="regulator-submissions" element={<SuiteRegulatorSubmissions />} />
                   <Route path="dsar" element={<SuiteDsar />} />
+                  <Route path="risk-heatmap" element={<SuiteRiskHeatmap />} />
+
 
                   <Route path="rss" element={<SuiteRss />} />
                 </Route>
