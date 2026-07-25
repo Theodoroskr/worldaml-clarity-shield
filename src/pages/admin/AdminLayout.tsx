@@ -8,25 +8,33 @@ import { cn } from "@/lib/utils";
 type NavItem = { label: string; path: string; icon: any; section?: string };
 
 const NAV: NavItem[] = [
+  // Platform-wide
   { label: "Dashboard", path: "/admin/dashboard", icon: Shield, section: "Platform" },
   { label: "Users", path: "/admin/users", icon: Users, section: "Platform" },
-  { label: "Organizations", path: "/admin/organizations", icon: Building2, section: "Platform" },
-  { label: "Domains", path: "/admin/domains", icon: Globe, section: "Platform" },
-  { label: "Partners", path: "/admin/partners", icon: Handshake, section: "Platform" },
-  { label: "Partner Assets", path: "/admin/partner-assets", icon: ImageIcon, section: "Platform" },
-  { label: "Alert Rules", path: "/admin/alert-rules", icon: Bell, section: "Platform" },
-  { label: "Forms", path: "/admin/forms", icon: FileText, section: "Platform" },
-  { label: "Workflows", path: "/admin/workflows", icon: GitBranch, section: "Platform" },
-  { label: "Pricing", path: "/admin/pricing", icon: CreditCard, section: "Platform" },
-  { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText, section: "Platform" },
-  { label: "Regulatory Hub", path: "/admin/regulatory", icon: Landmark, section: "Platform" },
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Platform" },
-  { label: "Outreach Queue", path: "/admin/outreach-queue", icon: Send, section: "Platform" },
 
+  // Marketing site + lead capture
+  { label: "Forms", path: "/admin/forms", icon: FileText, section: "Marketing" },
+  { label: "Outreach Queue", path: "/admin/outreach-queue", icon: Send, section: "Marketing" },
+  { label: "Regulatory Hub", path: "/admin/regulatory", icon: Landmark, section: "Marketing" },
+  { label: "Domains", path: "/admin/domains", icon: Globe, section: "Marketing" },
+
+  // Academy
   { label: "Academy Signups", path: "/admin/academy-users", icon: GraduationCap, section: "Academy" },
   { label: "Funnel Metrics", path: "/admin/academy-funnel", icon: TrendingUp, section: "Academy" },
   { label: "Purchase Status", path: "/admin/purchase-status", icon: Receipt, section: "Academy" },
   { label: "Reconcile Purchases", path: "/admin/reconcile-purchases", icon: RefreshCw, section: "Academy" },
+
+  // Partners
+  { label: "Partners", path: "/admin/partners", icon: Handshake, section: "Partners" },
+  { label: "Partner Assets", path: "/admin/partner-assets", icon: ImageIcon, section: "Partners" },
+
+  // Suite (compliance product)
+  { label: "Organizations", path: "/admin/organizations", icon: Building2, section: "Suite" },
+  { label: "Alert Rules", path: "/admin/alert-rules", icon: Bell, section: "Suite" },
+  { label: "Workflows", path: "/admin/workflows", icon: GitBranch, section: "Suite" },
+  { label: "Pricing", path: "/admin/pricing", icon: CreditCard, section: "Suite" },
+  { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText, section: "Suite" },
 ];
 
 
