@@ -10,8 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, Clock, User, MessageSquare, Link2, Plus, CheckCircle2, Activity, SlidersHorizontal, Save, Trash2, Bookmark } from "lucide-react";
+import { AlertTriangle, Clock, User, MessageSquare, Link2, Plus, CheckCircle2, Activity, SlidersHorizontal, Save, Trash2, Bookmark, AtSign, UserCog } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { MentionTextarea, renderMentionText, extractMentions } from "@/components/suite/MentionTextarea";
+import { CustomerNotes } from "@/components/suite/CustomerNotes";
+
+
 
 type CaseRow = {
   id: string;
@@ -37,8 +41,9 @@ type CaseRow = {
 
 type Member = { user_id: string; role: string; email: string | null; full_name: string | null };
 type Customer = { id: string; name: string; type: string | null; risk_level: string | null; country: string | null; kyc_status: string | null };
-type Note = { id: string; content: string; user_id: string; created_at: string };
+type Note = { id: string; content: string; user_id: string; created_at: string; mentions: string[] | null };
 type Activity = { id: string; action: string; details: any; actor_id: string | null; created_at: string };
+
 
 type CaseFilter = {
   status: string; priority: string; assignee: string; q: string;
@@ -110,11 +115,16 @@ export default function SuiteCaseQueue() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [activity, setActivity] = useState<Activity[]>([]);
   const [newNote, setNewNote] = useState("");
+  const [newNoteMentions, setNewNoteMentions] = useState<string[]>([]);
   const [closeOpen, setCloseOpen] = useState(false);
   const [closeReason, setCloseReason] = useState<string>("resolved_no_action");
   const [closeNotes, setCloseNotes] = useState("");
+  const [reassignOpen, setReassignOpen] = useState(false);
+  const [reassignTo, setReassignTo] = useState<string>("");
+  const [reassignNote, setReassignNote] = useState("");
   const [newOpen, setNewOpen] = useState(false);
   const [newCase, setNewCase] = useState({ title: "", priority: "medium", customer_id: "", assignee_user_id: "", sla_hours: 72 });
+
 
   const loadCases = useCallback(async () => {
     if (!orgId) return;
@@ -294,12 +304,29 @@ export default function SuiteCaseQueue() {
     const { error } = await supabase.from("suite_case_notes").insert({
       case_id: selected.id, content: newNote.trim(),
       user_id: userId, organisation_id: orgId,
+      mentions: newNoteMentions,
     });
     if (error) return toast.error(error.message);
     setNewNote("");
+    setNewNoteMentions([]);
     loadDetail(selected.id);
-    toast.success("Comment added");
+    toast.success(newNoteMentions.length ? `Comment added · ${newNoteMentions.length} notified` : "Comment added");
   }
+
+  async function confirmReassign() {
+    if (!selected) return;
+    const next = reassignTo === "unassigned" ? null : reassignTo || null;
+    const ok = await updateCase(selected.id, {
+      assignee_user_id: next,
+      last_reassignment_note: reassignNote || null,
+    } as any);
+    if (ok) {
+      setReassignOpen(false);
+      setReassignNote("");
+      toast.success(next ? "Case reassigned · assignee notified" : "Assignee cleared");
+    }
+  }
+
 
   async function closeCase() {
     if (!selected) return;
@@ -544,19 +571,20 @@ export default function SuiteCaseQueue() {
                     <CardContent className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="text-xs text-muted-foreground">Assignee</label>
-                        <Select value={selected.assignee_user_id || "unassigned"}
-                          onValueChange={v => updateCase(selected.id, { assignee_user_id: v === "unassigned" ? null : v } as any)}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="unassigned">Unassigned</SelectItem>
-                            {members.map(m => (
-                              <SelectItem key={m.user_id} value={m.user_id}>
-                                {m.full_name || m.email || m.user_id.slice(0, 8)} · {m.role}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 truncate rounded-md border bg-background px-3 py-2 text-sm">
+                            {selected.assignee_user_id ? memberLabel(selected.assignee_user_id) : <span className="text-muted-foreground">Unassigned</span>}
+                          </div>
+                          <Button size="sm" variant="outline" onClick={() => {
+                            setReassignTo(selected.assignee_user_id || "unassigned");
+                            setReassignNote("");
+                            setReassignOpen(true);
+                          }}>
+                            <UserCog className="h-3.5 w-3.5 mr-1" />Reassign
+                          </Button>
+                        </div>
                       </div>
+
                       <div>
                         <label className="text-xs text-muted-foreground">Priority</label>
                         <Select value={selected.priority || "medium"}
@@ -613,17 +641,37 @@ export default function SuiteCaseQueue() {
                       <div className="space-y-2 max-h-64 overflow-y-auto">
                         {notes.map(n => (
                           <div key={n.id} className="border rounded p-2 text-sm">
-                            <div className="text-xs text-muted-foreground mb-1">{memberLabel(n.user_id)} · {formatDistanceToNow(new Date(n.created_at))} ago</div>
-                            <div className="whitespace-pre-wrap">{n.content}</div>
+                            <div className="text-xs text-muted-foreground mb-1 flex items-center gap-2">
+                              <span>{memberLabel(n.user_id)} · {formatDistanceToNow(new Date(n.created_at))} ago</span>
+                              {n.mentions && n.mentions.length > 0 && (
+                                <span className="inline-flex items-center gap-1 text-primary">
+                                  <AtSign className="h-3 w-3" />{n.mentions.length}
+                                </span>
+                              )}
+                            </div>
+                            <div className="whitespace-pre-wrap">{renderMentionText(n.content)}</div>
                           </div>
                         ))}
                         {notes.length === 0 && <div className="text-sm text-muted-foreground">No comments yet.</div>}
                       </div>
-                      <div className="flex gap-2">
-                        <Textarea value={newNote} onChange={e => setNewNote(e.target.value)}
-                          placeholder="Add a comment (visible to your organisation)…" rows={2} />
-                        <Button onClick={addNote} disabled={!newNote.trim()}>Post</Button>
+                      <div className="space-y-2">
+                        <MentionTextarea
+                          value={newNote}
+                          onChange={(v, m) => { setNewNote(v); setNewNoteMentions(m); }}
+                          members={members}
+                          placeholder="Add a comment — type @ to mention a teammate…"
+                          rows={2}
+                        />
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs text-muted-foreground">
+                            {newNoteMentions.length > 0
+                              ? <span className="inline-flex items-center gap-1"><AtSign className="h-3 w-3" />{newNoteMentions.length} teammate{newNoteMentions.length === 1 ? "" : "s"} will be notified</span>
+                              : "Visible to your organisation"}
+                          </div>
+                          <Button size="sm" onClick={addNote} disabled={!newNote.trim()}>Post</Button>
+                        </div>
                       </div>
+
                     </CardContent>
                   </Card>
 
@@ -673,6 +721,18 @@ export default function SuiteCaseQueue() {
                     </CardContent>
                   </Card>
 
+                  {selected.customer_id && orgId && userId && (
+                    <CustomerNotes
+                      customerId={selected.customer_id}
+                      organisationId={orgId}
+                      userId={userId}
+                      members={members}
+                      memberLabel={memberLabel}
+                    />
+                  )}
+
+
+
                   <Card>
                     <CardHeader className="pb-2"><CardTitle className="text-sm">Timing</CardTitle></CardHeader>
                     <CardContent className="text-xs space-y-1">
@@ -718,7 +778,43 @@ export default function SuiteCaseQueue() {
         </DialogContent>
       </Dialog>
 
+      {/* Reassign dialog */}
+      <Dialog open={reassignOpen} onOpenChange={setReassignOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reassign case</DialogTitle>
+            <DialogDescription>Pick a new owner and leave a short handoff note. The new assignee is notified.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs text-muted-foreground">New assignee</label>
+              <Select value={reassignTo} onValueChange={setReassignTo}>
+                <SelectTrigger><SelectValue placeholder="Select teammate…" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {members.map(m => (
+                    <SelectItem key={m.user_id} value={m.user_id}>
+                      {m.full_name || m.email || m.user_id.slice(0, 8)} · {m.role}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Handoff note (recommended)</label>
+              <Textarea rows={3} value={reassignNote} onChange={e => setReassignNote(e.target.value)}
+                placeholder="Context, what's been done, what's next…" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReassignOpen(false)}>Cancel</Button>
+            <Button onClick={confirmReassign} disabled={!reassignTo}>Reassign</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* New case dialog */}
+
       <Dialog open={newOpen} onOpenChange={setNewOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>New case</DialogTitle></DialogHeader>
