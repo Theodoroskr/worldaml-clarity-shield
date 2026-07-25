@@ -417,6 +417,12 @@ export default function SuiteOnboardingForms() {
 
   const selected = fields.find((f) => f.id === selectedFieldId) || null;
 
+  // Any editor mutation marks the working copy dirty
+  useEffect(() => {
+    if (editingId && editingId !== "new") setHasUnsavedChanges(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name, description, fields, checks, branding, redirectUrl]);
+
   const saveForm = async () => {
     if (!name.trim()) {
       toast.error("Form name is required");
@@ -424,7 +430,6 @@ export default function SuiteOnboardingForms() {
     }
     setSaving(true);
 
-    // resolve organisation_id
     const { data: orgId } = await supabase.rpc("current_user_org_id");
     if (!orgId) {
       toast.error("No Suite organisation found for your account");
@@ -432,41 +437,130 @@ export default function SuiteOnboardingForms() {
       return;
     }
 
-    const payload = {
-      name,
-      slug: slug || slugify(name),
-      description: description || null,
-      schema: fields as any,
-      required_checks: checks as any,
-      branding: branding as any,
-      redirect_url: redirectUrl || null,
-      is_active: isActive,
-    };
-
-    if (editingId && editingId !== "new") {
-      const { error } = await supabase
-        .from("suite_onboarding_forms")
-        .update(payload)
-        .eq("id", editingId);
-      if (error) toast.error(error.message);
-      else toast.success("Form saved");
-    } else {
-      const { data, error } = await supabase
+    // New form: create the parent row (inactive by default) then save its first draft
+    if (!editingId || editingId === "new") {
+      const { data: created, error: createErr } = await supabase
         .from("suite_onboarding_forms")
         .insert({
-          ...payload,
+          name,
+          slug: slug || slugify(name),
+          description: description || null,
+          schema: fields as any,
+          required_checks: checks as any,
+          branding: branding as any,
+          redirect_url: redirectUrl || null,
+          is_active: false,
           user_id: user!.id,
           organisation_id: orgId as unknown as string,
         })
         .select()
         .single();
-      if (error) toast.error(error.message);
-      else {
-        toast.success("Form created");
-        navigate(`/suite/onboarding-forms/${data.id}`);
+
+      if (createErr || !created) {
+        toast.error(createErr?.message || "Failed to create form");
+        setSaving(false);
+        return;
       }
+
+      const { error: draftErr } = await supabase.rpc("onboarding_form_save_draft", {
+        _form_id: created.id,
+        _name: name,
+        _description: description || null,
+        _schema: fields as any,
+        _required_checks: checks as any,
+        _branding: branding as any,
+        _redirect_url: redirectUrl || null,
+      });
+      if (draftErr) toast.error(`Draft not saved: ${draftErr.message}`);
+      else toast.success("Draft saved. Publish when you're ready to go live.");
+
+      setSaving(false);
+      fetchForms();
+      navigate(`/suite/onboarding-forms/${created.id}`);
+      return;
+    }
+
+    // Existing form: save draft snapshot only (does not affect live version)
+    const { error } = await supabase.rpc("onboarding_form_save_draft", {
+      _form_id: editingId,
+      _name: name,
+      _description: description || null,
+      _schema: fields as any,
+      _required_checks: checks as any,
+      _branding: branding as any,
+      _redirect_url: redirectUrl || null,
+    });
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Draft saved");
+      setHasUnsavedChanges(false);
+      // Refresh form + versions
+      const { data: refreshed } = await supabase
+        .from("suite_onboarding_forms")
+        .select("*")
+        .eq("id", editingId)
+        .single();
+      if (refreshed) {
+        setCurrentDraftId((refreshed as any).current_draft_version_id ?? null);
+        setLatestVersionNumber((refreshed as any).latest_version_number ?? 0);
+      }
+      loadVersions(editingId);
     }
     setSaving(false);
+    fetchForms();
+  };
+
+  const publishForm = async () => {
+    if (!editingId || editingId === "new") return;
+    // Auto-save any pending edits first so the publish reflects them
+    if (hasUnsavedChanges) {
+      await saveForm();
+    }
+    setPublishing(true);
+    const { error } = await supabase.rpc("onboarding_form_publish", {
+      _form_id: editingId,
+      _notes: publishNotes || null,
+    });
+    setPublishing(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Form published — public link now serves the new version");
+    setPublishOpen(false);
+    setPublishNotes("");
+    // Refresh
+    const { data: refreshed } = await supabase
+      .from("suite_onboarding_forms")
+      .select("*")
+      .eq("id", editingId)
+      .single();
+    if (refreshed) loadIntoEditor(refreshed as any);
+    fetchForms();
+  };
+
+  const rollbackToVersion = async (versionId: string, versionNumber: number) => {
+    if (!editingId || editingId === "new") return;
+    if (!confirm(`Roll back to v${versionNumber}? This will replace the live form with the v${versionNumber} snapshot.`)) return;
+    setRollingBackId(versionId);
+    const { error } = await supabase.rpc("onboarding_form_rollback", {
+      _form_id: editingId,
+      _version_id: versionId,
+      _notes: `Rollback to v${versionNumber}`,
+    });
+    setRollingBackId(null);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`Rolled back to v${versionNumber}`);
+    setVersionsOpen(false);
+    const { data: refreshed } = await supabase
+      .from("suite_onboarding_forms")
+      .select("*")
+      .eq("id", editingId)
+      .single();
+    if (refreshed) loadIntoEditor(refreshed as any);
     fetchForms();
   };
 
