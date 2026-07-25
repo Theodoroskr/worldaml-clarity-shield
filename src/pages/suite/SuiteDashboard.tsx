@@ -442,7 +442,7 @@ export default function SuiteDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/cases")}>
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/case-queue?status=open")}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <div>
