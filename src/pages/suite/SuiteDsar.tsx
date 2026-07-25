@@ -146,7 +146,7 @@ export default function SuiteDsar() {
       });
       if (error) { toast.error(error.message); return; }
     } else {
-      const { error } = await supabase.from("suite_retention_policies").update(patch).eq("id", p.id);
+      const { error } = await supabase.from("suite_retention_policies").update(patch as any).eq("id", p.id);
       if (error) { toast.error(error.message); return; }
     }
     toast.success("Policy updated");
