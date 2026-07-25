@@ -419,6 +419,8 @@ const App = () => (
                 <Route path="/suite" element={<SuiteAppLayout />}>
                   <Route index element={<SuiteDashboard />} />
                   <Route path="onboarding" element={<SuiteOnboarding />} />
+                  <Route path="onboarding-forms" element={<SuiteOnboardingForms />} />
+                  <Route path="onboarding-forms/:id" element={<SuiteOnboardingForms />} />
                   <Route path="idv" element={<SuiteIDV />} />
                   <Route path="screening" element={<SuiteScreening />} />
                   <Route path="transactions" element={<SuiteTransactions />} />
