@@ -363,6 +363,34 @@ export default function SuiteAlertRules() {
     setSaving(false);
   };
 
+  const runBacktest = async (days = backtestDays) => {
+    if (!activeRule) return;
+    const valid = activeRule.conditions.filter(c => c.field && c.operator && c.value);
+    if (valid.length === 0) { toast.error("Add at least one complete condition to backtest"); return; }
+    setBacktesting(true);
+    setShowBacktest(true);
+    setBacktestResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("backtest-rule", {
+        body: {
+          rule_id: activeRule.id,
+          name: activeRule.name,
+          severity: activeRule.priority,
+          logic: activeRule.logic,
+          conditions: valid.map(c => ({ field: c.field, operator: c.operator, value: c.value })),
+          days,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setBacktestResult(data);
+    } catch (e: any) {
+      toast.error(e.message || "Backtest failed");
+      setShowBacktest(false);
+    } finally {
+      setBacktesting(false);
+    }
+
   const deleteRule = async (id: string) => {
     await supabase.from("suite_alert_rules").delete().eq("id", id);
     if (selected === id) setSelected(null);
