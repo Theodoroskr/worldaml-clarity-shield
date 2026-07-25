@@ -276,17 +276,89 @@ export default function SuiteDashboard() {
           <p className="text-sm text-muted-foreground mt-0.5">
             Real-time overview{loading ? " — loading…" : ""}
             {!loading && <span className="ml-2 text-xs">· Updated {formatDistanceToNow(lastRefresh, { addSuffix: true })}</span>}
+            <span className="ml-2 text-xs">· Period: <span className="font-medium text-foreground">{rangeLabel}</span></span>
           </p>
         </div>
-        <Button
-          variant="outline" size="sm"
-          onClick={() => fetchData(true)}
-          disabled={refreshing}
-          className="gap-1.5"
-        >
-          <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Time-range filter */}
+          <div className="hidden md:flex items-center rounded-md border border-border bg-card p-0.5">
+            {(["mtd", "qtd", "ytd", "all"] as RangeKey[]).map((k) => (
+              <button
+                key={k}
+                onClick={() => setRange(k)}
+                className={cn(
+                  "px-2.5 py-1 text-xs font-medium rounded-sm transition-colors",
+                  range === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {k.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <Popover open={rangeOpen} onOpenChange={setRangeOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant={range === "custom" ? "default" : "outline"}
+                size="sm"
+                className="gap-1.5"
+              >
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {range === "custom" ? rangeLabel : "Custom"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-3 space-y-3" align="end">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs font-medium mb-1.5 text-muted-foreground">From</p>
+                  <Calendar
+                    mode="single"
+                    selected={customFrom}
+                    onSelect={setCustomFrom}
+                    initialFocus
+                    className={cn("p-0 pointer-events-auto")}
+                  />
+                </div>
+                <div>
+                  <p className="text-xs font-medium mb-1.5 text-muted-foreground">To</p>
+                  <Calendar
+                    mode="single"
+                    selected={customTo}
+                    onSelect={setCustomTo}
+                    className={cn("p-0 pointer-events-auto")}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-border">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setCustomFrom(undefined); setCustomTo(undefined); }}
+                >
+                  Clear
+                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setRangeOpen(false)}>Cancel</Button>
+                  <Button
+                    size="sm"
+                    disabled={!customFrom && !customTo}
+                    onClick={() => { setRange("custom"); setRangeOpen(false); }}
+                  >
+                    Apply
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button
+            variant="outline" size="sm"
+            onClick={() => fetchData(true)}
+            disabled={refreshing}
+            className="gap-1.5"
+          >
+            <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* ══════════ LIVE OVERVIEW KPI CARDS ══════════ */}
