@@ -481,12 +481,12 @@ function RerequestDialog({
       user_id: customer.user_id,
       organisation_id: customer.organisation_id,
       customer_id: customer.id,
-      alert_type: "document_expiry",
+      alert_type: "document",
       severity: "medium",
       title: "Document re-request sent",
       description: `Re-requested ${doc.document_label || doc.document_type} from ${customer.name}. Due ${due}.`,
       status: "open",
-      metadata: { document_id: doc.id, due, reason },
+      metadata: { document_id: doc.id, due, reason, kind: "document_rerequest" },
     });
 
     toast({
