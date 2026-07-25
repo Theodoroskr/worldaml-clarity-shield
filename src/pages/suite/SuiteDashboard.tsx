@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   ChevronRight, CalendarClock, RefreshCw, Users, AlertTriangle,
-  Shield, FileText, TrendingUp, Activity, BarChart3, ArrowUpRight, Clock,
+  Shield, FileText, TrendingUp, Activity, BarChart3, ArrowUpRight, Clock, CalendarIcon,
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid,
@@ -13,9 +13,23 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format, differenceInDays, addMonths, isPast, formatDistanceToNow } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  format, differenceInDays, addMonths, isPast, formatDistanceToNow,
+  startOfMonth, startOfQuarter, startOfYear, endOfDay,
+} from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useOrganisation } from "@/hooks/useOrganisation";
+
+type RangeKey = "mtd" | "qtd" | "ytd" | "all" | "custom";
+const RANGE_LABELS: Record<RangeKey, string> = {
+  mtd: "Month to date",
+  qtd: "Quarter to date",
+  ytd: "Year to date",
+  all: "All time",
+  custom: "Custom",
+};
 
 const RADIAN = Math.PI / 180;
 const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
