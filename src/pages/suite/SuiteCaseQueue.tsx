@@ -201,10 +201,20 @@ export default function SuiteCaseQueue() {
       if (filter.priority !== "all" && (c.priority || "medium") !== filter.priority) return false;
       if (filter.assignee === "me" && c.assignee_user_id !== userId) return false;
       if (filter.assignee === "unassigned" && c.assignee_user_id) return false;
+      const cust = c.customer_id ? customersById[c.customer_id] : null;
+      if (filter.risk !== "all" && (cust?.risk_level || "").toLowerCase() !== filter.risk) return false;
+      if (filter.customerId !== "all" && c.customer_id !== filter.customerId) return false;
+      if (filter.createdFrom && new Date(c.created_at) < new Date(filter.createdFrom)) return false;
+      if (filter.createdTo && new Date(c.created_at) > new Date(filter.createdTo + "T23:59:59")) return false;
+      if (filter.dueFrom && (!c.due_at || new Date(c.due_at) < new Date(filter.dueFrom))) return false;
+      if (filter.dueTo && (!c.due_at || new Date(c.due_at) > new Date(filter.dueTo + "T23:59:59"))) return false;
       if (filter.q) {
         const q = filter.q.toLowerCase();
-        const cust = c.customer_id ? customersById[c.customer_id]?.name?.toLowerCase() : "";
-        if (!c.title.toLowerCase().includes(q) && !(cust || "").includes(q)) return false;
+        const custName = cust?.name?.toLowerCase() || "";
+        const custCountry = cust?.country?.toLowerCase() || "";
+        const assignee = memberLabel(c.assignee_user_id).toLowerCase();
+        const hay = [c.title, custName, custCountry, assignee, c.id.slice(0, 8), c.closure_reason || ""].join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
       }
       return true;
     });
@@ -216,7 +226,31 @@ export default function SuiteCaseQueue() {
       const db = b.due_at ? new Date(b.due_at).getTime() : Infinity;
       return da - db;
     });
-  }, [cases, filter, customersById, userId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cases, filter, customersById, userId, members]);
+
+  const customerOptions = useMemo(() => {
+    const seen = new Map<string, string>();
+    cases.forEach(c => {
+      if (c.customer_id && customersById[c.customer_id]) {
+        seen.set(c.customer_id, customersById[c.customer_id].name);
+      }
+    });
+    return Array.from(seen.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+  }, [cases, customersById]);
+
+  const activeFilterCount = useMemo(() => {
+    let n = 0;
+    if (filter.status !== "open") n++;
+    if (filter.priority !== "all") n++;
+    if (filter.assignee !== "all") n++;
+    if (filter.risk !== "all") n++;
+    if (filter.customerId !== "all") n++;
+    if (filter.q) n++;
+    if (filter.createdFrom || filter.createdTo) n++;
+    if (filter.dueFrom || filter.dueTo) n++;
+    return n;
+  }, [filter]);
 
   const kpi = useMemo(() => {
     const open = cases.filter(c => c.status === "open" || c.status === "in_progress");
