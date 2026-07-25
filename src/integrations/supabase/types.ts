@@ -3988,6 +3988,71 @@ export type Database = {
         }
         Relationships: []
       }
+      suite_periodic_reviews: {
+        Row: {
+          assigned_to: string | null
+          auto_generated: boolean
+          cadence_months: number
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          notes: string | null
+          organisation_id: string
+          outcome: string | null
+          risk_level_at_scheduling: string
+          scheduled_for: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          auto_generated?: boolean
+          cadence_months: number
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          notes?: string | null
+          organisation_id: string
+          outcome?: string | null
+          risk_level_at_scheduling: string
+          scheduled_for: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          auto_generated?: boolean
+          cadence_months?: number
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          notes?: string | null
+          organisation_id?: string
+          outcome?: string | null
+          risk_level_at_scheduling?: string
+          scheduled_for?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_periodic_reviews_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_screenings: {
         Row: {
           created_at: string
@@ -4743,6 +4808,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Json
       }
+      mark_overdue_periodic_reviews: { Args: never; Returns: number }
       onboarding_form_publish: {
         Args: { _form_id: string; _notes?: string }
         Returns: string
@@ -4775,6 +4841,7 @@ export type Database = {
         Args: { _reason: string; _report_id: string }
         Returns: string
       }
+      review_cadence_months: { Args: { _risk_level: string }; Returns: number }
       same_domain_signup_count: {
         Args: never
         Returns: {
