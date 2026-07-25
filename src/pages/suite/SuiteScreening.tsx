@@ -119,7 +119,14 @@ export default function SuiteScreening() {
     }
   }, [orgId, selectedCustomerId]);
 
+  const loadWhitelist = useCallback(async () => {
+    if (!selectedCustomerId) { setWhitelist([]); return; }
+    setWhitelist(await fetchWhitelist(selectedCustomerId));
+  }, [selectedCustomerId]);
+
   useEffect(() => { if (!orgLoading && orgId) loadHistory(); }, [orgId, orgLoading]);
+  useEffect(() => { loadWhitelist(); }, [loadWhitelist]);
+
 
   const runSearch = async () => {
     if (!searchName.trim()) { toast.error("Enter a name to search"); return; }
