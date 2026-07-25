@@ -63,6 +63,10 @@ export default function SuiteDashboard() {
     totalScreenings: 0, openCases: 0, totalCases: 0,
     totalTransactions: 0, flaggedTransactions: 0,
   });
+  // MLRO metrics (derived from cases in-period)
+  const [mlro, setMlro] = useState({
+    backlog: 0, avgAgeDays: 0, sarFiled: 0, alertToSarRatio: 0,
+  });
   const [recentActivity, setRecentActivity] = useState<{ id: string; type: string; label: string; detail: string; time: string; severity?: string }[]>([]);
 
   // Time-range filter
