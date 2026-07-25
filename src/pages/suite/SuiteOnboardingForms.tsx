@@ -752,13 +752,13 @@ export default function SuiteOnboardingForms() {
                         <div>
                           <Label className="text-xs">Format preset</Label>
                           <Select
-                            value={selected.validation?.format || ""}
+                            value={selected.validation?.format || "none"}
                             onValueChange={(v) =>
                               updateField({
                                 ...selected,
                                 validation: {
                                   ...selected.validation,
-                                  format: (v || "") as FieldValidation["format"],
+                                  format: (v === "none" ? "" : v) as FieldValidation["format"],
                                 },
                               })
                             }
