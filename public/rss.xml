@@ -6,9 +6,58 @@
   <atom:link href="https://worldaml.com/rss.xml" rel="self" type="application/rss+xml" />
   <description>Practical AML, KYC/KYB, sanctions and regulatory compliance analysis from the WorldAML team.</description>
   <language>en</language>
-  <lastBuildDate>Wed, 22 Jul 2026 06:36:05 GMT</lastBuildDate>
-  <pubDate>Wed, 22 Jul 2026 00:00:00 GMT</pubDate>
+  <lastBuildDate>Sat, 25 Jul 2026 05:02:28 GMT</lastBuildDate>
+  <pubDate>Sat, 25 Jul 2026 00:00:00 GMT</pubDate>
   <generator>WorldAML RSS Generator</generator>
+  <item>
+    <title>The FATF Travel Rule Explained: Obligations for VASPs and Financial Institutions</title>
+    <link>https://worldaml.com/blog/fatf-travel-rule-explained</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/fatf-travel-rule-explained</guid>
+    <pubDate>Sat, 25 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[A practical explainer on the FATF Travel Rule — what information must travel with wire transfers and crypto transactions, which firms are affected, and how to achieve compliance.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>Regulatory Updates</category>
+    <category>Travel Rule</category>
+    <category>FATF</category>
+    <category>VASP</category>
+    <category>wire transfer</category>
+    <category>crypto compliance</category>
+    <category>originator information</category>
+  </item>
+  <item>
+    <title>AML Compliance for Crypto Exchanges and VASPs: 2025 Regulatory Guide</title>
+    <link>https://worldaml.com/blog/aml-compliance-crypto-vasp</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/aml-compliance-crypto-vasp</guid>
+    <pubDate>Fri, 24 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[A complete guide to AML/CFT obligations for cryptocurrency exchanges and Virtual Asset Service Providers — covering FATF Travel Rule, MiCA, FinCEN requirements, and best-practice compliance frameworks.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>AML Compliance</category>
+    <category>crypto</category>
+    <category>VASP</category>
+    <category>Travel Rule</category>
+    <category>MiCA</category>
+    <category>FinCEN</category>
+    <category>FATF</category>
+    <category>AML</category>
+  </item>
+  <item>
+    <title>iGaming AML Obligations: What Online Gambling Operators Must Do</title>
+    <link>https://worldaml.com/blog/igaming-aml-obligations</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/igaming-aml-obligations</guid>
+    <pubDate>Thu, 23 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[A practical guide to AML compliance for online gambling and iGaming operators — covering customer due diligence, source of funds checks, transaction monitoring, and the EU and UK regulatory frameworks.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>AML Compliance</category>
+    <category>iGaming</category>
+    <category>gambling</category>
+    <category>AML</category>
+    <category>source of funds</category>
+    <category>UK Gambling Commission</category>
+    <category>EU AML</category>
+  </item>
   <item>
     <title>AML Compliance Checklist for Financial Institutions in 2025</title>
     <link>https://worldaml.com/blog/aml-compliance-checklist-2025</link>

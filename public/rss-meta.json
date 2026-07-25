@@ -1,11 +1,11 @@
 {
   "anchor": "2026-07-12T00:00:00.000Z",
   "totalArticles": 18,
-  "releasedCount": 11,
-  "upcomingCount": 7,
+  "releasedCount": 14,
+  "upcomingCount": 4,
   "nextRelease": {
-    "date": "2026-07-23T00:00:00.000Z",
-    "title": "iGaming AML Obligations: What Online Gambling Operators Must Do",
-    "slug": "igaming-aml-obligations"
+    "date": "2026-07-26T00:00:00.000Z",
+    "title": "AML for Real Estate Agents: Obligations, Red Flags, and Compliance Workflows",
+    "slug": "aml-real-estate-property-transactions"
   }
 }
