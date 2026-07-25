@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, Clock, User, MessageSquare, Link2, Plus, CheckCircle2, Activity } from "lucide-react";
+import { AlertTriangle, Clock, User, MessageSquare, Link2, Plus, CheckCircle2, Activity, SlidersHorizontal, Save, Trash2, Bookmark } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 type CaseRow = {
@@ -38,6 +38,13 @@ type Member = { user_id: string; role: string; email: string | null; full_name: 
 type Customer = { id: string; name: string; type: string | null; risk_level: string | null; country: string | null; kyc_status: string | null };
 type Note = { id: string; content: string; user_id: string; created_at: string };
 type Activity = { id: string; action: string; details: any; actor_id: string | null; created_at: string };
+
+type CaseFilter = {
+  status: string; priority: string; assignee: string; q: string;
+  risk: string; customerId: string;
+  createdFrom: string; createdTo: string; dueFrom: string; dueTo: string;
+};
+type SavedFilter = { id: string; name: string; filter: CaseFilter };
 
 const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
 const SLA_DEFAULT: Record<string, number> = { critical: 4, high: 24, medium: 72, low: 168 };
@@ -79,9 +86,14 @@ export default function SuiteCaseQueue() {
   const [members, setMembers] = useState<Member[]>([]);
   const [customersById, setCustomersById] = useState<Record<string, Customer>>({});
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<{ status: string; priority: string; assignee: string; q: string }>({
+  const [filter, setFilter] = useState<CaseFilter>({
     status: "open", priority: "all", assignee: "all", q: "",
+    risk: "all", customerId: "all", createdFrom: "", createdTo: "", dueFrom: "", dueTo: "",
   });
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
   const [selected, setSelected] = useState<CaseRow | null>(null);
   const [notes, setNotes] = useState<Note[]>([]);
   const [activity, setActivity] = useState<Activity[]>([]);
@@ -135,6 +147,37 @@ export default function SuiteCaseQueue() {
 
   useEffect(() => { if (!orgLoading) { loadCases(); loadMembers(); } }, [orgLoading, loadCases, loadMembers]);
 
+  // Load saved filters from localStorage (per org)
+  const storageKey = orgId ? `suite_case_saved_filters:${orgId}` : null;
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) setSavedFilters(JSON.parse(raw));
+    } catch { /* noop */ }
+  }, [storageKey]);
+
+  const persistSaved = (list: SavedFilter[]) => {
+    setSavedFilters(list);
+    if (storageKey) localStorage.setItem(storageKey, JSON.stringify(list));
+  };
+
+  const saveCurrentFilter = () => {
+    const name = saveName.trim();
+    if (!name) return toast.error("Name required");
+    const next = [...savedFilters.filter(s => s.name !== name), { id: crypto.randomUUID(), name, filter }];
+    persistSaved(next);
+    setSaveOpen(false); setSaveName("");
+    toast.success(`Saved "${name}"`);
+  };
+
+  const deleteSaved = (id: string) => persistSaved(savedFilters.filter(s => s.id !== id));
+
+  const resetFilters = () => setFilter({
+    status: "open", priority: "all", assignee: "all", q: "",
+    risk: "all", customerId: "all", createdFrom: "", createdTo: "", dueFrom: "", dueTo: "",
+  });
+
   const loadDetail = useCallback(async (caseId: string) => {
     const [{ data: n }, { data: a }] = await Promise.all([
       supabase.from("suite_case_notes").select("*").eq("case_id", caseId).order("created_at", { ascending: true }),
@@ -158,10 +201,20 @@ export default function SuiteCaseQueue() {
       if (filter.priority !== "all" && (c.priority || "medium") !== filter.priority) return false;
       if (filter.assignee === "me" && c.assignee_user_id !== userId) return false;
       if (filter.assignee === "unassigned" && c.assignee_user_id) return false;
+      const cust = c.customer_id ? customersById[c.customer_id] : null;
+      if (filter.risk !== "all" && (cust?.risk_level || "").toLowerCase() !== filter.risk) return false;
+      if (filter.customerId !== "all" && c.customer_id !== filter.customerId) return false;
+      if (filter.createdFrom && new Date(c.created_at) < new Date(filter.createdFrom)) return false;
+      if (filter.createdTo && new Date(c.created_at) > new Date(filter.createdTo + "T23:59:59")) return false;
+      if (filter.dueFrom && (!c.due_at || new Date(c.due_at) < new Date(filter.dueFrom))) return false;
+      if (filter.dueTo && (!c.due_at || new Date(c.due_at) > new Date(filter.dueTo + "T23:59:59"))) return false;
       if (filter.q) {
         const q = filter.q.toLowerCase();
-        const cust = c.customer_id ? customersById[c.customer_id]?.name?.toLowerCase() : "";
-        if (!c.title.toLowerCase().includes(q) && !(cust || "").includes(q)) return false;
+        const custName = cust?.name?.toLowerCase() || "";
+        const custCountry = cust?.country?.toLowerCase() || "";
+        const assignee = memberLabel(c.assignee_user_id).toLowerCase();
+        const hay = [c.title, custName, custCountry, assignee, c.id.slice(0, 8), c.closure_reason || ""].join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
       }
       return true;
     });
@@ -173,7 +226,31 @@ export default function SuiteCaseQueue() {
       const db = b.due_at ? new Date(b.due_at).getTime() : Infinity;
       return da - db;
     });
-  }, [cases, filter, customersById, userId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cases, filter, customersById, userId, members]);
+
+  const customerOptions = useMemo(() => {
+    const seen = new Map<string, string>();
+    cases.forEach(c => {
+      if (c.customer_id && customersById[c.customer_id]) {
+        seen.set(c.customer_id, customersById[c.customer_id].name);
+      }
+    });
+    return Array.from(seen.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+  }, [cases, customersById]);
+
+  const activeFilterCount = useMemo(() => {
+    let n = 0;
+    if (filter.status !== "open") n++;
+    if (filter.priority !== "all") n++;
+    if (filter.assignee !== "all") n++;
+    if (filter.risk !== "all") n++;
+    if (filter.customerId !== "all") n++;
+    if (filter.q) n++;
+    if (filter.createdFrom || filter.createdTo) n++;
+    if (filter.dueFrom || filter.dueTo) n++;
+    return n;
+  }, [filter]);
 
   const kpi = useMemo(() => {
     const open = cases.filter(c => c.status === "open" || c.status === "in_progress");
@@ -271,39 +348,130 @@ export default function SuiteCaseQueue() {
 
       {/* Filters */}
       <Card>
-        <CardContent className="pt-4 flex flex-wrap gap-3">
-          <Input placeholder="Search title or customer…" value={filter.q}
-            onChange={e => setFilter({ ...filter, q: e.target.value })} className="w-64" />
-          <Select value={filter.status} onValueChange={v => setFilter({ ...filter, status: v })}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="in_progress">In progress</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
-              <SelectItem value="resolved">Resolved</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filter.priority} onValueChange={v => setFilter({ ...filter, priority: v })}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All priorities</SelectItem>
-              <SelectItem value="critical">Critical</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filter.assignee} onValueChange={v => setFilter({ ...filter, assignee: v })}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All assignees</SelectItem>
-              <SelectItem value="me">Assigned to me</SelectItem>
-              <SelectItem value="unassigned">Unassigned</SelectItem>
-            </SelectContent>
-          </Select>
+        <CardContent className="pt-4 space-y-3">
+          <div className="flex flex-wrap gap-3 items-center">
+            <Input placeholder="Search title, customer, country, assignee, case #…" value={filter.q}
+              onChange={e => setFilter({ ...filter, q: e.target.value })} className="w-72" />
+            <Select value={filter.status} onValueChange={v => setFilter({ ...filter, status: v })}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="open">Open</SelectItem>
+                <SelectItem value="in_progress">In progress</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="resolved">Resolved</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filter.priority} onValueChange={v => setFilter({ ...filter, priority: v })}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All priorities</SelectItem>
+                <SelectItem value="critical">Critical</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filter.assignee} onValueChange={v => setFilter({ ...filter, assignee: v })}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All assignees</SelectItem>
+                <SelectItem value="me">Assigned to me</SelectItem>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {members.map(m => (
+                  <SelectItem key={m.user_id} value={m.user_id}>
+                    {m.full_name || m.email || m.user_id.slice(0, 8)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm" onClick={() => setShowAdvanced(v => !v)}>
+              <SlidersHorizontal className="h-4 w-4 mr-1" />
+              Advanced{activeFilterCount > 0 && <Badge variant="secondary" className="ml-2">{activeFilterCount}</Badge>}
+            </Button>
+            {activeFilterCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={resetFilters}>Clear</Button>
+            )}
+            <div className="flex-1" />
+            <Button variant="outline" size="sm" onClick={() => setSaveOpen(true)}>
+              <Save className="h-4 w-4 mr-1" />Save view
+            </Button>
+          </div>
+
+          {showAdvanced && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 border-t">
+              <div>
+                <label className="text-xs text-muted-foreground">Customer risk</label>
+                <Select value={filter.risk} onValueChange={v => setFilter({ ...filter, risk: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All risks</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Customer</label>
+                <Select value={filter.customerId} onValueChange={v => setFilter({ ...filter, customerId: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All customers</SelectItem>
+                    {customerOptions.map(([id, name]) => (
+                      <SelectItem key={id} value={id}>{name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Created between</label>
+                <div className="flex gap-1">
+                  <Input type="date" value={filter.createdFrom} onChange={e => setFilter({ ...filter, createdFrom: e.target.value })} />
+                  <Input type="date" value={filter.createdTo} onChange={e => setFilter({ ...filter, createdTo: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Due between</label>
+                <div className="flex gap-1">
+                  <Input type="date" value={filter.dueFrom} onChange={e => setFilter({ ...filter, dueFrom: e.target.value })} />
+                  <Input type="date" value={filter.dueTo} onChange={e => setFilter({ ...filter, dueTo: e.target.value })} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {savedFilters.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
+              <span className="text-xs text-muted-foreground flex items-center gap-1"><Bookmark className="h-3 w-3" />Saved:</span>
+              {savedFilters.map(s => (
+                <div key={s.id} className="inline-flex items-center gap-1 border rounded-full pl-2 pr-1 py-0.5 text-xs bg-muted/40">
+                  <button className="hover:underline" onClick={() => setFilter(s.filter)}>{s.name}</button>
+                  <button className="text-muted-foreground hover:text-red-400" onClick={() => deleteSaved(s.id)} title="Delete">
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Save filter dialog */}
+      <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Save current filters</DialogTitle>
+            <DialogDescription>Store this view for quick access later.</DialogDescription>
+          </DialogHeader>
+          <Input placeholder="e.g. My critical open cases" value={saveName} onChange={e => setSaveName(e.target.value)} />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveOpen(false)}>Cancel</Button>
+            <Button onClick={saveCurrentFilter}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Queue */}
       <Card>
