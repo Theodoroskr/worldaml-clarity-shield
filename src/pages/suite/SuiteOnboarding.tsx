@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle, Trash2, Loader2 } from "lucide-react";
+import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle, Trash2, Loader2, Fingerprint, CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganisation } from "@/hooks/useOrganisation";
@@ -32,6 +32,8 @@ interface Customer {
   registration_number: string | null;
   date_of_birth: string | null;
   regulator: string | null;
+  organisation_id: string | null;
+  onboarding_data: Record<string, any> | null;
   created_at: string;
 }
 
@@ -312,6 +314,64 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
     setEditing(false);
   }, [customer.id]);
 
+  const [idvLoading, setIdvLoading] = useState(false);
+  const [kycNote, setKycNote] = useState("");
+  const [kycSaving, setKycSaving] = useState(false);
+
+  const startIDV = async () => {
+    setIdvLoading(true);
+    const { data } = await supabase.auth.getSession();
+    const token = (data.session as any)?.access_token;
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    try {
+      const res = await fetch(`https://${projectId}.supabase.co/functions/v1/idv-create-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: anonKey,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ customer_id: customer.id }),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(result.error || "Failed to start identity verification");
+      } else if (result.redirect_url) {
+        window.open(result.redirect_url, "_blank");
+      } else {
+        toast.success("Identity verification session created");
+      }
+    } catch (e) {
+      toast.error("IDV session request failed");
+    } finally {
+      setIdvLoading(false);
+    }
+  };
+
+  const updateKycStatus = async (status: string) => {
+    setKycSaving(true);
+    const { data: updated, error } = await supabase.from("suite_customers").update({
+      kyc_status: status,
+      onboarding_data: {
+        ...(customer.onboarding_data || {}),
+        kyc_review: {
+          status,
+          note: kycNote,
+          reviewed_at: new Date().toISOString(),
+        },
+      },
+    }).eq("id", customer.id).select().single();
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(`KYC status updated to ${status}`);
+      onUpdated(updated as Customer);
+      setKycNote("");
+    }
+    setKycSaving(false);
+  };
+
   const saveChanges = async () => {
     if (!edit.name.trim()) { toast.error("Name is required"); return; }
     setSaving(true);
@@ -468,6 +528,159 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
           </div>
         </div>
 
+        {/* Onboarding Data */}
+        {customer.onboarding_data && Object.keys(customer.onboarding_data).length > 0 && (
+          <div>
+            <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Onboarding Data</h3>
+            <div className="space-y-3 text-sm">
+              {customer.onboarding_data.first_name && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">First name</span>
+                  <span>{customer.onboarding_data.first_name}</span>
+                </div>
+              )}
+              {customer.onboarding_data.last_name && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">Last name</span>
+                  <span>{customer.onboarding_data.last_name}</span>
+                </div>
+              )}
+              {customer.onboarding_data.nationality && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">Nationality</span>
+                  <span>{customer.onboarding_data.nationality}</span>
+                </div>
+              )}
+              {customer.onboarding_data.address && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">Address</span>
+                  <span>{customer.onboarding_data.address}</span>
+                </div>
+              )}
+              {customer.onboarding_data.id_type && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">ID</span>
+                  <span>{customer.onboarding_data.id_type} {customer.onboarding_data.id_number || ""}</span>
+                </div>
+              )}
+              {customer.onboarding_data.occupation && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">Occupation</span>
+                  <span>{customer.onboarding_data.occupation}</span>
+                </div>
+              )}
+              {customer.onboarding_data.source_of_funds && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">Source of funds</span>
+                  <span>{customer.onboarding_data.source_of_funds}</span>
+                </div>
+              )}
+              {customer.onboarding_data.legal_structure && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">Legal structure</span>
+                  <span>{customer.onboarding_data.legal_structure}</span>
+                </div>
+              )}
+              {customer.onboarding_data.industry && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">Industry</span>
+                  <span>{customer.onboarding_data.industry}</span>
+                </div>
+              )}
+              {customer.onboarding_data.website && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">Website</span>
+                  <a href={customer.onboarding_data.website} target="_blank" rel="noreferrer" className="text-primary hover:underline truncate">{customer.onboarding_data.website}</a>
+                </div>
+              )}
+              {customer.onboarding_data.contact_name && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">Contact</span>
+                  <span>{customer.onboarding_data.contact_name} {customer.onboarding_data.contact_phone ? "/ " + customer.onboarding_data.contact_phone : ""}</span>
+                </div>
+              )}
+              {customer.onboarding_data.annual_turnover && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">Annual turnover</span>
+                  <span>{customer.onboarding_data.annual_turnover}</span>
+                </div>
+              )}
+              {customer.onboarding_data.number_of_employees && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="text-xs text-muted-foreground">Employees</span>
+                  <span>{customer.onboarding_data.number_of_employees}</span>
+                </div>
+              )}
+              {customer.onboarding_data.directors && customer.onboarding_data.directors.length > 0 && (
+                <div>
+                  <span className="text-xs text-muted-foreground block mb-1">Directors</span>
+                  <ul className="space-y-1">
+                    {customer.onboarding_data.directors.map((d: any, i: number) => (
+                      <li key={i} className="text-xs border-l-2 border-primary/30 pl-2 py-1">
+                        {d.name}{d.role ? ` — ${d.role}` : ""}{d.nationality ? ` (${d.nationality})` : ""}{d.pep ? " — PEP" : ""}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {customer.onboarding_data.ubos && customer.onboarding_data.ubos.length > 0 && (
+                <div>
+                  <span className="text-xs text-muted-foreground block mb-1">UBOs</span>
+                  <ul className="space-y-1">
+                    {customer.onboarding_data.ubos.map((u: any, i: number) => (
+                      <li key={i} className="text-xs border-l-2 border-primary/30 pl-2 py-1">
+                        {u.name}{u.ownership_pct ? ` — ${u.ownership_pct}%` : ""}{u.nationality ? ` (${u.nationality})` : ""}{u.pep ? " — PEP" : ""}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {customer.onboarding_data.kyc_review && (
+                <div className="p-2 rounded bg-muted/50 text-xs">
+                  <span className="text-muted-foreground block">Review note</span>
+                  <span className="capitalize">{customer.onboarding_data.kyc_review.status}</span>
+                  {customer.onboarding_data.kyc_review.note && <p className="mt-1">{customer.onboarding_data.kyc_review.note}</p>}
+                  {customer.onboarding_data.kyc_review.reviewed_at && <p className="text-muted-foreground mt-0.5">{new Date(customer.onboarding_data.kyc_review.reviewed_at).toLocaleString()}</p>}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* IDV + KYC Workflow */}
+        <div>
+          <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Verification</h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Fingerprint className="w-4 h-4 text-primary" />
+                <span className="text-sm">Identity verification</span>
+              </div>
+              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={startIDV} disabled={idvLoading}>
+                {idvLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Fingerprint className="w-3.5 h-3.5 mr-1" />}
+                Start IDV
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <span className="text-xs text-muted-foreground">KYC/KYB review</span>
+              <Input
+                placeholder="Add review note (optional)"
+                value={kycNote}
+                onChange={e => setKycNote(e.target.value)}
+                className="h-8 text-sm"
+              />
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" className="h-7 text-xs flex-1" onClick={() => updateKycStatus("verified")} disabled={kycSaving || customer.kyc_status === "verified"}>
+                  <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Approve
+                </Button>
+                <Button size="sm" variant="outline" className="h-7 text-xs flex-1" onClick={() => updateKycStatus("rejected")} disabled={kycSaving || customer.kyc_status === "rejected"}>
+                  <XCircle className="w-3.5 h-3.5 mr-1" /> Reject
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Risk Scorecard */}
         <div>
           <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Composite Risk Score</h3>
@@ -597,7 +810,7 @@ export default function SuiteOnboarding() {
 
   const fetchCustomers = async () => {
     if (!orgId) return;
-    const { data } = await supabase.from("suite_customers").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false });
+    const { data } = await supabase.from("suite_customers").select("*, onboarding_data").eq("organisation_id", orgId).order("created_at", { ascending: false });
     setCustomers((data || []) as Customer[]);
     setLoading(false);
   };
@@ -803,12 +1016,27 @@ export default function SuiteOnboarding() {
     const fullName = `${kycForm.firstName.trim()} ${kycForm.lastName.trim()}`;
     const { error } = await supabase.from("suite_customers").insert({
       user_id: user.id,
+      organisation_id: orgId,
       name: fullName,
       type: "individual",
       email: kycForm.email.trim() || null,
       country: kycForm.country || null,
       date_of_birth: kycForm.dateOfBirth || null,
       regulator: kycForm.regulator || null,
+      onboarding_data: {
+        first_name: kycForm.firstName.trim(),
+        last_name: kycForm.lastName.trim(),
+        nationality: kycForm.nationality || null,
+        address: kycForm.address || null,
+        city: kycForm.city || null,
+        postal_code: kycForm.postalCode || null,
+        id_type: kycForm.idType || null,
+        id_number: kycForm.idNumber || null,
+        occupation: kycForm.occupation || null,
+        source_of_funds: kycForm.sourceOfFunds || null,
+        pep: kycForm.pep || null,
+        custom_fields: Object.keys(customFieldValues).length > 0 ? customFieldValues : null,
+      },
     });
 
     if (error) { toast.error(error.message); setSaving(false); return; }
@@ -871,6 +1099,7 @@ export default function SuiteOnboarding() {
 
     const { data: customer, error } = await supabase.from("suite_customers").insert({
       user_id: user.id,
+      organisation_id: orgId,
       name: kybForm.companyName.trim(),
       type: "business",
       email: kybForm.contactEmail.trim() || null,
@@ -878,6 +1107,23 @@ export default function SuiteOnboarding() {
       company_name: kybForm.companyName.trim(),
       registration_number: kybForm.registrationNumber.trim() || null,
       regulator: kybForm.regulator || null,
+      onboarding_data: {
+        incorporation_date: kybForm.incorporationDate || null,
+        legal_structure: kybForm.legalStructure || null,
+        industry: kybForm.industry || null,
+        website: kybForm.website || null,
+        registered_address: kybForm.registeredAddress || null,
+        city: kybForm.city || null,
+        postal_code: kybForm.postalCode || null,
+        contact_name: kybForm.contactName || null,
+        contact_phone: kybForm.contactPhone || null,
+        annual_turnover: kybForm.annualTurnover || null,
+        number_of_employees: kybForm.numberOfEmployees || null,
+        source_of_funds: kybForm.sourceOfFunds || null,
+        directors: filledDirectors.map(d => ({ name: d.name.trim(), nationality: d.nationality || null, role: d.role, date_of_birth: d.dateOfBirth || null, pep: d.pep })),
+        ubos: filledUbos.map(u => ({ name: u.name.trim(), nationality: u.nationality || null, ownership_pct: parseFloat(u.ownershipPct) || 0, date_of_birth: u.dateOfBirth || null, pep: u.pep })),
+        custom_fields: Object.keys(customFieldValues).length > 0 ? customFieldValues : null,
+      },
     }).select("id").single();
 
     if (error) { toast.error(error.message); setSaving(false); return; }

@@ -3490,6 +3490,7 @@ export type Database = {
           id: string
           kyc_status: string
           name: string
+          onboarding_data: Json
           organisation_id: string | null
           pep_status: string | null
           registration_number: string | null
@@ -3519,6 +3520,7 @@ export type Database = {
           id?: string
           kyc_status?: string
           name: string
+          onboarding_data?: Json
           organisation_id?: string | null
           pep_status?: string | null
           registration_number?: string | null
@@ -3548,6 +3550,7 @@ export type Database = {
           id?: string
           kyc_status?: string
           name?: string
+          onboarding_data?: Json
           organisation_id?: string | null
           pep_status?: string | null
           registration_number?: string | null
