@@ -444,6 +444,96 @@ export default function SuiteScreening() {
         </div>
       )}
 
+      {suppressed.length > 0 && (
+        <div className="bg-card rounded-xl border border-border animate-fade-in">
+          <div className="px-5 py-4 border-b border-border flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <div>
+              <h2 className="font-semibold text-foreground text-sm">
+                {suppressed.length} hit{suppressed.length > 1 ? "s" : ""} suppressed by false-positive memory
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Previously cleared for this customer — no alert raised, but still logged for audit.
+              </p>
+            </div>
+          </div>
+          <div className="divide-y divide-border">
+            {suppressed.map(({ result, entry }) => (
+              <div key={result.id} className="px-5 py-3 flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-medium text-foreground">{result.name}</span>
+                    <span className={cn("text-xs px-2 py-0.5 rounded border font-semibold", listBadge(result.listType))}>
+                      {result.listType}
+                    </span>
+                    <span className="text-xs font-mono text-muted-foreground">{result.confidence}%</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Cleared: {entry.reason}
+                    {entry.reviewed_by ? ` · by ${entry.reviewed_by}` : ""}
+                  </p>
+                </div>
+                <button
+                  onClick={() => revokeEntry(entry)}
+                  className="flex items-center gap-1 text-[10px] px-2 py-1 border border-border rounded text-muted-foreground hover:bg-muted shrink-0"
+                >
+                  <Undo2 className="w-2.5 h-2.5" /> Re-enable alerts
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {selectedCustomerId && whitelist.length > 0 && (
+        <div className="bg-card rounded-xl border border-border">
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="font-semibold text-foreground">
+              Whitelist — {customerName(selectedCustomerId)}
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {whitelist.length} active false-positive record{whitelist.length > 1 ? "s" : ""}. Suppressed hits never create alerts.
+            </p>
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/30">
+                {["Match", "List", "Reason", "Reviewer", "Suppressed", "Expires", ""].map(h => (
+                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {whitelist.map(e => (
+                <tr key={e.id} className="hover:bg-muted/20">
+                  <td className="px-5 py-3 font-medium text-foreground">{e.match_name}</td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground">{e.list_type ?? "All lists"}</td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground max-w-xs truncate" title={e.reason}>{e.reason}</td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground">{e.reviewed_by ?? "—"}</td>
+                  <td className="px-5 py-3 text-xs font-mono text-muted-foreground">
+                    {e.hit_count}
+                    {e.last_hit_at ? ` · ${new Date(e.last_hit_at).toLocaleDateString("en-GB")}` : ""}
+                  </td>
+                  <td className="px-5 py-3 text-xs font-mono text-muted-foreground">
+                    {e.expires_at ? new Date(e.expires_at).toLocaleDateString("en-GB") : "Never"}
+                  </td>
+                  <td className="px-5 py-3 text-right">
+                    <button
+                      onClick={() => revokeEntry(e)}
+                      className="text-[10px] px-2 py-1 border border-border rounded text-muted-foreground hover:bg-muted"
+                    >
+                      Revoke
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+
+
       <div className="bg-card rounded-xl border border-border">
         <div className="px-5 py-4 border-b border-border">
           <h2 className="font-semibold text-foreground">Screening History</h2>
