@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, Shield, CreditCard, AlertTriangle,
   FileText, BarChart3, Settings, ChevronRight, Activity,
   UserCheck, Fingerprint, ClipboardList, Menu, Scale, ShieldCheck, HelpCircle, Radio,
-  LogOut, ArrowLeft, Wallet, BookOpen, ListChecks, Rss, Network, CalendarClock, ShieldAlert,
+  LogOut, ArrowLeft, Wallet, BookOpen, ListChecks, Rss, Network, CalendarClock, ShieldAlert, FileClock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
