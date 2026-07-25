@@ -69,6 +69,18 @@ type FieldType =
   | "file"
   | "heading";
 
+interface FieldValidation {
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  pattern?: string;
+  patternMessage?: string;
+  format?: "" | "email" | "url" | "alpha" | "alphanumeric";
+  allowedFileTypes?: string[]; // e.g. ["pdf","jpg"]
+  maxFileSizeMb?: number;
+}
+
 interface FormField {
   id: string;
   type: FieldType;
@@ -78,6 +90,7 @@ interface FormField {
   required?: boolean;
   helpText?: string;
   options?: string[]; // for select
+  validation?: FieldValidation;
 }
 
 interface RequiredChecks {
