@@ -147,6 +147,37 @@ export default function SuiteCaseQueue() {
 
   useEffect(() => { if (!orgLoading) { loadCases(); loadMembers(); } }, [orgLoading, loadCases, loadMembers]);
 
+  // Load saved filters from localStorage (per org)
+  const storageKey = orgId ? `suite_case_saved_filters:${orgId}` : null;
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) setSavedFilters(JSON.parse(raw));
+    } catch { /* noop */ }
+  }, [storageKey]);
+
+  const persistSaved = (list: SavedFilter[]) => {
+    setSavedFilters(list);
+    if (storageKey) localStorage.setItem(storageKey, JSON.stringify(list));
+  };
+
+  const saveCurrentFilter = () => {
+    const name = saveName.trim();
+    if (!name) return toast.error("Name required");
+    const next = [...savedFilters.filter(s => s.name !== name), { id: crypto.randomUUID(), name, filter }];
+    persistSaved(next);
+    setSaveOpen(false); setSaveName("");
+    toast.success(`Saved "${name}"`);
+  };
+
+  const deleteSaved = (id: string) => persistSaved(savedFilters.filter(s => s.id !== id));
+
+  const resetFilters = () => setFilter({
+    status: "open", priority: "all", assignee: "all", q: "",
+    risk: "all", customerId: "all", createdFrom: "", createdTo: "", dueFrom: "", dueTo: "",
+  });
+
   const loadDetail = useCallback(async (caseId: string) => {
     const [{ data: n }, { data: a }] = await Promise.all([
       supabase.from("suite_case_notes").select("*").eq("case_id", caseId).order("created_at", { ascending: true }),
