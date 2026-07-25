@@ -28,6 +28,7 @@ type CaseRow = {
   closed_at: string | null;
   closure_reason: string | null;
   closure_notes: string | null;
+  closed_by: string | null;
   organisation_id: string;
   user_id: string;
   created_at: string;
