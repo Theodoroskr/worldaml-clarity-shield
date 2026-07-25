@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganisation } from "@/hooks/useOrganisation";
 import { runScreening } from "@/services/screeningProvider";
+import { applyWhitelist } from "@/lib/suite/screeningWhitelist";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -147,13 +149,18 @@ export default function SuiteUBO() {
     setScreeningId(node.id);
     try {
       const res = await runScreening({ query: node.name, minConfidence: 40 });
-      const top = res.results[0];
+      // Ignore hits already cleared as false positives for this customer
+      const { live, suppressed } = await applyWhitelist(node.customer_id, res.results);
+      const top = live[0];
       let newStatus = "clear";
       if (top) {
         if (top.confidence >= 85 && /OFAC|EU Sanctions|UN|HMT/.test(top.listType)) newStatus = "sanctions";
         else if (top.confidence >= 60 && /OFAC|EU|UN|HMT/.test(top.listType)) newStatus = "potential_match";
         else if (top.listType.startsWith("PEP")) newStatus = "pep";
         else if (top.listType === "Adverse Media") newStatus = "adverse_media";
+      }
+      if (suppressed.length > 0) {
+        toast({ title: `${suppressed.length} known false positive(s) suppressed`, description: `Whitelisted matches for ${node.name} were ignored.` });
       }
 
       const { data: screening } = await supabase.from("suite_screenings").insert({
@@ -162,8 +169,9 @@ export default function SuiteUBO() {
         customer_id: node.customer_id,
         screening_type: "ubo",
         result: newStatus === "clear" ? "no_match" : (newStatus === "sanctions" ? "confirmed_match" : "potential_match"),
-        match_count: res.results.length,
+        match_count: live.length,
       }).select("id").single();
+
 
       const { error } = await supabase.from("suite_ubo").update({
         sanctions_status: newStatus,

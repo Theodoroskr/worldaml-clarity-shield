@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, X, Loader2, Flag, CheckCircle2 } from "lucide-react";
+import { Search, X, Loader2, Flag, CheckCircle2, ShieldOff, ShieldCheck, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -8,6 +8,21 @@ import { useNavigate } from "react-router-dom";
 import { useOrganisation } from "@/hooks/useOrganisation";
 import { useFeatureLimits } from "@/hooks/useFeatureLimits";
 import UpgradeModal, { UpgradeBanner } from "@/components/suite/UpgradeModal";
+import {
+  applyWhitelist,
+  addWhitelistEntry,
+  revokeWhitelistEntry,
+  fetchWhitelist,
+  type WhitelistEntry,
+} from "@/lib/suite/screeningWhitelist";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+
 
 interface StoredScreening {
   id: string;
@@ -57,6 +72,17 @@ export default function SuiteScreening() {
   const [dismissedResults, setDismissedResults] = useState<Set<string>>(new Set());
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
+  // False-positive memory (screening whitelist)
+  const [whitelist, setWhitelist] = useState<WhitelistEntry[]>([]);
+  const [suppressed, setSuppressed] = useState<{ result: ScreeningResult; entry: WhitelistEntry }[]>([]);
+  const [wlTarget, setWlTarget] = useState<ScreeningResult | null>(null);
+  const [wlReason, setWlReason] = useState("");
+  const [wlReviewer, setWlReviewer] = useState("");
+  const [wlExpiry, setWlExpiry] = useState("");
+  const [wlAllLists, setWlAllLists] = useState(false);
+  const [wlSaving, setWlSaving] = useState(false);
+
+
   const { checkLimit, subscriptionTier } = useFeatureLimits();
 
   // Count this month's screenings for limit check
@@ -93,7 +119,14 @@ export default function SuiteScreening() {
     }
   }, [orgId, selectedCustomerId]);
 
+  const loadWhitelist = useCallback(async () => {
+    if (!selectedCustomerId) { setWhitelist([]); return; }
+    setWhitelist(await fetchWhitelist(selectedCustomerId));
+  }, [selectedCustomerId]);
+
   useEffect(() => { if (!orgLoading && orgId) loadHistory(); }, [orgId, orgLoading]);
+  useEffect(() => { loadWhitelist(); }, [loadWhitelist]);
+
 
   const runSearch = async () => {
     if (!searchName.trim()) { toast.error("Enter a name to search"); return; }
@@ -108,16 +141,22 @@ export default function SuiteScreening() {
     setSearching(true);
     setResponse(null);
     setDismissedResults(new Set());
+    setSuppressed([]);
 
     try {
       const res = await runScreening({ query: searchName, minConfidence: 20 });
       setResponse(res);
 
+      // False-positive memory: suppress hits previously cleared for this customer
+      const { live, suppressed: sup, entries } = await applyWhitelist(selectedCustomerId, res.results);
+      setSuppressed(sup);
+      setWhitelist(entries);
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const matchCount = res.results.length;
-      const highConfidence = res.results.filter(r => r.confidence >= 70);
+      const matchCount = live.length;
+      const highConfidence = live.filter(r => r.confidence >= 70);
       const result = matchCount === 0 ? "clear" : highConfidence.length > 0 ? "potential_match" : "low_match";
 
       await supabase.from("suite_screenings").insert({
@@ -130,12 +169,13 @@ export default function SuiteScreening() {
 
       await supabase.from("suite_audit_log").insert({
         user_id: user.id,
-        action: `AML screening — "${searchName}" — ${matchCount} matches`,
+        action: `AML screening — "${searchName}" — ${matchCount} matches${sup.length ? ` (${sup.length} whitelisted)` : ""}`,
         entity_type: "screening",
         details: {
           detail: `Provider: ${res.provider}, Lists: ${res.listsSearched.length}, Result: ${result}`,
           query: searchName,
           match_count: matchCount,
+          suppressed_count: sup.length,
         },
       });
 
@@ -152,6 +192,8 @@ export default function SuiteScreening() {
         toast.warning(`${highConfidence.length} high-confidence match${highConfidence.length > 1 ? "es" : ""} found — alert created`);
       } else if (matchCount > 0) {
         toast.info(`${matchCount} low-confidence match${matchCount > 1 ? "es" : ""} found — review recommended`);
+      } else if (sup.length > 0) {
+        toast.success(`Clear — ${sup.length} known false positive${sup.length > 1 ? "s" : ""} suppressed, no alert raised`);
       } else {
         toast.success("Clear — no matches found across all lists");
       }
@@ -163,6 +205,67 @@ export default function SuiteScreening() {
       setSearching(false);
     }
   };
+
+  const saveWhitelistEntry = async () => {
+    if (!wlTarget) return;
+    if (!wlReason.trim()) { toast.error("A reason is required for the audit trail"); return; }
+    if (!selectedCustomerId) { toast.error("Select a customer first"); return; }
+    setWlSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setWlSaving(false); return; }
+
+    const { error } = await addWhitelistEntry({
+      orgId: orgId ?? null,
+      customerId: selectedCustomerId,
+      userId: user.id,
+      result: wlTarget,
+      reason: wlReason.trim(),
+      reviewedBy: wlReviewer.trim() || null,
+      expiresAt: wlExpiry ? new Date(wlExpiry).toISOString() : null,
+      scopeAllLists: wlAllLists,
+    });
+    setWlSaving(false);
+
+    if (error) {
+      toast.error(error.message.includes("duplicate") ? "This match is already whitelisted for the customer" : error.message);
+      return;
+    }
+
+    await supabase.from("suite_audit_log").insert({
+      user_id: user.id,
+      action: `Screening false positive whitelisted: ${wlTarget.name}`,
+      entity_type: "screening_whitelist",
+      entity_id: selectedCustomerId,
+      details: {
+        detail: `Reason: ${wlReason.trim()}`,
+        list_type: wlAllLists ? "all lists" : wlTarget.listType,
+        expires_at: wlExpiry || null,
+      },
+    });
+
+    setDismissedResults(s => new Set([...s, wlTarget.id]));
+    setWlTarget(null);
+    setWlReason(""); setWlReviewer(""); setWlExpiry(""); setWlAllLists(false);
+    toast.success("Marked as false positive — future hits won't raise alerts");
+    loadWhitelist();
+  };
+
+  const revokeEntry = async (entry: WhitelistEntry) => {
+    const { error } = await revokeWhitelistEntry(entry.id);
+    if (error) { toast.error(error.message); return; }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from("suite_audit_log").insert({
+        user_id: user.id,
+        action: `Screening whitelist revoked: ${entry.match_name}`,
+        entity_type: "screening_whitelist",
+        entity_id: entry.customer_id,
+      });
+    }
+    toast.success("Whitelist entry revoked — matches will alert again");
+    loadWhitelist();
+  };
+
 
   const createCase = async (result: ScreeningResult) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -187,7 +290,9 @@ export default function SuiteScreening() {
   const customerName = (id: string) =>
     customers.find(c => c.id === id)?.name ?? "Unknown";
 
-  const visibleResults = response?.results.filter(r => !dismissedResults.has(r.id)) ?? [];
+  const suppressedIds = useMemo(() => new Set(suppressed.map(s => s.result.id)), [suppressed]);
+  const visibleResults = response?.results.filter(r => !dismissedResults.has(r.id) && !suppressedIds.has(r.id)) ?? [];
+
 
   return (
     <div className="p-6 space-y-6 animate-fade-in h-full overflow-y-auto">
@@ -326,11 +431,18 @@ export default function SuiteScreening() {
                           <Flag className="w-2.5 h-2.5" /> Create case
                         </button>
                         <button
+                          onClick={() => { setWlTarget(result); setWlReason(""); setWlReviewer(""); setWlExpiry(""); setWlAllLists(false); }}
+                          className="flex items-center gap-1 text-[10px] px-2 py-1 border border-border rounded text-muted-foreground hover:bg-muted"
+                        >
+                          <ShieldOff className="w-2.5 h-2.5" /> False positive
+                        </button>
+                        <button
                           onClick={() => setDismissedResults(s => new Set([...s, result.id]))}
                           className="text-[10px] px-2 py-1 border border-border rounded text-muted-foreground hover:bg-muted"
                         >
                           Dismiss
                         </button>
+
                       </div>
                     </div>
                   </div>
@@ -340,6 +452,96 @@ export default function SuiteScreening() {
           )}
         </div>
       )}
+
+      {suppressed.length > 0 && (
+        <div className="bg-card rounded-xl border border-border animate-fade-in">
+          <div className="px-5 py-4 border-b border-border flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <div>
+              <h2 className="font-semibold text-foreground text-sm">
+                {suppressed.length} hit{suppressed.length > 1 ? "s" : ""} suppressed by false-positive memory
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Previously cleared for this customer — no alert raised, but still logged for audit.
+              </p>
+            </div>
+          </div>
+          <div className="divide-y divide-border">
+            {suppressed.map(({ result, entry }) => (
+              <div key={result.id} className="px-5 py-3 flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-medium text-foreground">{result.name}</span>
+                    <span className={cn("text-xs px-2 py-0.5 rounded border font-semibold", listBadge(result.listType))}>
+                      {result.listType}
+                    </span>
+                    <span className="text-xs font-mono text-muted-foreground">{result.confidence}%</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Cleared: {entry.reason}
+                    {entry.reviewed_by ? ` · by ${entry.reviewed_by}` : ""}
+                  </p>
+                </div>
+                <button
+                  onClick={() => revokeEntry(entry)}
+                  className="flex items-center gap-1 text-[10px] px-2 py-1 border border-border rounded text-muted-foreground hover:bg-muted shrink-0"
+                >
+                  <Undo2 className="w-2.5 h-2.5" /> Re-enable alerts
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {selectedCustomerId && whitelist.length > 0 && (
+        <div className="bg-card rounded-xl border border-border">
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="font-semibold text-foreground">
+              Whitelist — {customerName(selectedCustomerId)}
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {whitelist.length} active false-positive record{whitelist.length > 1 ? "s" : ""}. Suppressed hits never create alerts.
+            </p>
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/30">
+                {["Match", "List", "Reason", "Reviewer", "Suppressed", "Expires", ""].map(h => (
+                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {whitelist.map(e => (
+                <tr key={e.id} className="hover:bg-muted/20">
+                  <td className="px-5 py-3 font-medium text-foreground">{e.match_name}</td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground">{e.list_type ?? "All lists"}</td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground max-w-xs truncate" title={e.reason}>{e.reason}</td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground">{e.reviewed_by ?? "—"}</td>
+                  <td className="px-5 py-3 text-xs font-mono text-muted-foreground">
+                    {e.hit_count}
+                    {e.last_hit_at ? ` · ${new Date(e.last_hit_at).toLocaleDateString("en-GB")}` : ""}
+                  </td>
+                  <td className="px-5 py-3 text-xs font-mono text-muted-foreground">
+                    {e.expires_at ? new Date(e.expires_at).toLocaleDateString("en-GB") : "Never"}
+                  </td>
+                  <td className="px-5 py-3 text-right">
+                    <button
+                      onClick={() => revokeEntry(e)}
+                      className="text-[10px] px-2 py-1 border border-border rounded text-muted-foreground hover:bg-muted"
+                    >
+                      Revoke
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+
 
       <div className="bg-card rounded-xl border border-border">
         <div className="px-5 py-4 border-b border-border">
@@ -382,6 +584,53 @@ export default function SuiteScreening() {
           </table>
         )}
       </div>
+
+      {/* Mark as false positive */}
+      <Dialog open={!!wlTarget} onOpenChange={o => !o && setWlTarget(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Mark as false positive</DialogTitle>
+            <DialogDescription>
+              {wlTarget
+                ? `"${wlTarget.name}" (${wlTarget.listType}) will be remembered for ${customerName(selectedCustomerId)} and won't raise new alerts.`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="wl-reason">Reason / rationale *</Label>
+              <Textarea
+                id="wl-reason"
+                value={wlReason}
+                onChange={e => setWlReason(e.target.value)}
+                placeholder="e.g. DOB and nationality mismatch confirmed against passport — different individual."
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="wl-reviewer">Reviewed by</Label>
+                <Input id="wl-reviewer" value={wlReviewer} onChange={e => setWlReviewer(e.target.value)} placeholder="MLRO name" />
+              </div>
+              <div>
+                <Label htmlFor="wl-expiry">Expires (optional)</Label>
+                <Input id="wl-expiry" type="date" value={wlExpiry} onChange={e => setWlExpiry(e.target.value)} />
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <input type="checkbox" checked={wlAllLists} onChange={e => setWlAllLists(e.target.checked)} />
+              Suppress this name across all lists (not just {wlTarget?.listType})
+            </label>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setWlTarget(null)}>Cancel</Button>
+            <Button onClick={saveWhitelistEntry} disabled={wlSaving}>
+              {wlSaving ? "Saving…" : "Whitelist match"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
