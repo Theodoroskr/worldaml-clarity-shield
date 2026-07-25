@@ -320,8 +320,8 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
 
   const startIDV = async () => {
     setIdvLoading(true);
-    const { data: session } = await supabase.auth.getSession();
-    const token = session?.access_token;
+    const { data } = await supabase.auth.getSession();
+    const token = (data.session as any)?.access_token;
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
     const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     try {
