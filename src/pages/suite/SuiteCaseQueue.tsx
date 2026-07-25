@@ -10,8 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, Clock, User, MessageSquare, Link2, Plus, CheckCircle2, Activity, SlidersHorizontal, Save, Trash2, Bookmark } from "lucide-react";
+import { AlertTriangle, Clock, User, MessageSquare, Link2, Plus, CheckCircle2, Activity, SlidersHorizontal, Save, Trash2, Bookmark, AtSign, UserCog } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { MentionTextarea, renderMentionText, extractMentions } from "@/components/suite/MentionTextarea";
+
 
 type CaseRow = {
   id: string;
