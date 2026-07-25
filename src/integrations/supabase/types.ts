@@ -3964,6 +3964,102 @@ export type Database = {
           },
         ]
       }
+      suite_dsar_requests: {
+        Row: {
+          created_at: string
+          description: string | null
+          due_by: string
+          export_url: string | null
+          fulfilled_at: string | null
+          fulfilled_by: string | null
+          id: string
+          identity_verified: boolean
+          identity_verified_at: string | null
+          identity_verified_by: string | null
+          legal_basis: string | null
+          organisation_id: string
+          received_via: string | null
+          redacted_record_count: number
+          rejection_reason: string | null
+          request_kind: string
+          status: string
+          subject_customer_id: string | null
+          subject_email: string | null
+          subject_name: string
+          subject_phone: string | null
+          updated_at: string
+          user_id: string
+          verification_notes: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          due_by?: string
+          export_url?: string | null
+          fulfilled_at?: string | null
+          fulfilled_by?: string | null
+          id?: string
+          identity_verified?: boolean
+          identity_verified_at?: string | null
+          identity_verified_by?: string | null
+          legal_basis?: string | null
+          organisation_id: string
+          received_via?: string | null
+          redacted_record_count?: number
+          rejection_reason?: string | null
+          request_kind: string
+          status?: string
+          subject_customer_id?: string | null
+          subject_email?: string | null
+          subject_name: string
+          subject_phone?: string | null
+          updated_at?: string
+          user_id: string
+          verification_notes?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          due_by?: string
+          export_url?: string | null
+          fulfilled_at?: string | null
+          fulfilled_by?: string | null
+          id?: string
+          identity_verified?: boolean
+          identity_verified_at?: string | null
+          identity_verified_by?: string | null
+          legal_basis?: string | null
+          organisation_id?: string
+          received_via?: string | null
+          redacted_record_count?: number
+          rejection_reason?: string | null
+          request_kind?: string
+          status?: string
+          subject_customer_id?: string | null
+          subject_email?: string | null
+          subject_name?: string
+          subject_phone?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_dsar_requests_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_dsar_requests_subject_customer_id_fkey"
+            columns: ["subject_customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_edd_audit: {
         Row: {
           action: string
@@ -4137,6 +4233,72 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_erasure_log: {
+        Row: {
+          actor_id: string | null
+          content_hash: string | null
+          created_at: string
+          disposition: string
+          dsar_request_id: string | null
+          fields_redacted: string[]
+          id: string
+          legal_basis: string | null
+          organisation_id: string
+          policy_id: string | null
+          reason: string | null
+          record_id: string
+          record_type: string
+          triggered_by: string
+        }
+        Insert: {
+          actor_id?: string | null
+          content_hash?: string | null
+          created_at?: string
+          disposition: string
+          dsar_request_id?: string | null
+          fields_redacted?: string[]
+          id?: string
+          legal_basis?: string | null
+          organisation_id: string
+          policy_id?: string | null
+          reason?: string | null
+          record_id: string
+          record_type: string
+          triggered_by: string
+        }
+        Update: {
+          actor_id?: string | null
+          content_hash?: string | null
+          created_at?: string
+          disposition?: string
+          dsar_request_id?: string | null
+          fields_redacted?: string[]
+          id?: string
+          legal_basis?: string | null
+          organisation_id?: string
+          policy_id?: string | null
+          reason?: string | null
+          record_id?: string
+          record_type?: string
+          triggered_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_erasure_log_dsar_request_id_fkey"
+            columns: ["dsar_request_id"]
+            isOneToOne: false
+            referencedRelation: "suite_dsar_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_erasure_log_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "suite_retention_policies"
             referencedColumns: ["id"]
           },
         ]
@@ -4865,6 +5027,53 @@ export type Database = {
           },
         ]
       }
+      suite_retention_policies: {
+        Row: {
+          created_at: string
+          description: string | null
+          disposition: string
+          id: string
+          is_active: boolean
+          legal_basis: string | null
+          organisation_id: string | null
+          record_type: string
+          retention_days: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          disposition?: string
+          id?: string
+          is_active?: boolean
+          legal_basis?: string | null
+          organisation_id?: string | null
+          record_type: string
+          retention_days: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          disposition?: string
+          id?: string
+          is_active?: boolean
+          legal_basis?: string | null
+          organisation_id?: string | null
+          record_type?: string
+          retention_days?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_retention_policies_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_screenings: {
         Row: {
           created_at: string
@@ -5562,6 +5771,10 @@ export type Database = {
       current_portal_customer_id: { Args: never; Returns: string }
       current_user_has_suite_access: { Args: never; Returns: boolean }
       current_user_org_id: { Args: never; Returns: string }
+      dsar_execute_erasure: {
+        Args: { _customer_id: string; _dsar_id?: string; _reason?: string }
+        Returns: Json
+      }
       enqueue_outreach: {
         Args: {
           _delay?: string
@@ -5700,6 +5913,7 @@ export type Database = {
       }
       sweep_customer_document_expiry: { Args: never; Returns: Json }
       sweep_regulator_submission_sla: { Args: never; Returns: number }
+      sweep_retention: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
