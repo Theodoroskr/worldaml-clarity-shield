@@ -303,6 +303,9 @@ export default function SuiteOnboardingForms() {
   const [publishNotes, setPublishNotes] = useState("");
   const [publishing, setPublishing] = useState(false);
   const [rollingBackId, setRollingBackId] = useState<string | null>(null);
+  const [compareA, setCompareA] = useState<string | null>(null);
+  const [compareB, setCompareB] = useState<string | null>(null);
+
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
