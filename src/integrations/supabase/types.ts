@@ -4002,6 +4002,39 @@ export type Database = {
           },
         ]
       }
+      suite_notification_log: {
+        Row: {
+          alert_ids: string[]
+          created_at: string
+          id: string
+          kind: string
+          organisation_id: string
+          recipients: string[]
+          reference_id: string
+          sent_at: string
+        }
+        Insert: {
+          alert_ids?: string[]
+          created_at?: string
+          id?: string
+          kind: string
+          organisation_id: string
+          recipients?: string[]
+          reference_id: string
+          sent_at?: string
+        }
+        Update: {
+          alert_ids?: string[]
+          created_at?: string
+          id?: string
+          kind?: string
+          organisation_id?: string
+          recipients?: string[]
+          reference_id?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
       suite_onboarding_form_versions: {
         Row: {
           archived_at: string | null

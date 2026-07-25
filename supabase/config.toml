@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.send-partner-invite-email]
 verify_jwt = false
+
+[functions.send-alert-notifications]
+verify_jwt = false
