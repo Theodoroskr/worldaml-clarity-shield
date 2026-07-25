@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganisation } from "@/hooks/useOrganisation";
 import { toast } from "sonner";
@@ -43,6 +44,7 @@ type CaseFilter = {
   status: string; priority: string; assignee: string; q: string;
   risk: string; customerId: string;
   createdFrom: string; createdTo: string; dueFrom: string; dueTo: string;
+  closureReason: string;
 };
 type SavedFilter = { id: string; name: string; filter: CaseFilter };
 
@@ -86,10 +88,20 @@ export default function SuiteCaseQueue() {
   const [members, setMembers] = useState<Member[]>([]);
   const [customersById, setCustomersById] = useState<Record<string, Customer>>({});
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<CaseFilter>({
-    status: "open", priority: "all", assignee: "all", q: "",
-    risk: "all", customerId: "all", createdFrom: "", createdTo: "", dueFrom: "", dueTo: "",
-  });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [filter, setFilter] = useState<CaseFilter>(() => ({
+    status: searchParams.get("status") || "open",
+    priority: searchParams.get("priority") || "all",
+    assignee: searchParams.get("assignee") || "all",
+    q: searchParams.get("q") || "",
+    risk: searchParams.get("risk") || "all",
+    customerId: searchParams.get("customerId") || "all",
+    createdFrom: searchParams.get("createdFrom") || "",
+    createdTo: searchParams.get("createdTo") || "",
+    dueFrom: searchParams.get("dueFrom") || "",
+    dueTo: searchParams.get("dueTo") || "",
+    closureReason: searchParams.get("closureReason") || "all",
+  }));
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
   const [saveOpen, setSaveOpen] = useState(false);
@@ -173,10 +185,14 @@ export default function SuiteCaseQueue() {
 
   const deleteSaved = (id: string) => persistSaved(savedFilters.filter(s => s.id !== id));
 
-  const resetFilters = () => setFilter({
-    status: "open", priority: "all", assignee: "all", q: "",
-    risk: "all", customerId: "all", createdFrom: "", createdTo: "", dueFrom: "", dueTo: "",
-  });
+  const resetFilters = () => {
+    setFilter({
+      status: "open", priority: "all", assignee: "all", q: "",
+      risk: "all", customerId: "all", createdFrom: "", createdTo: "", dueFrom: "", dueTo: "",
+      closureReason: "all",
+    });
+    setSearchParams({}, { replace: true });
+  };
 
   const loadDetail = useCallback(async (caseId: string) => {
     const [{ data: n }, { data: a }] = await Promise.all([
@@ -208,6 +224,7 @@ export default function SuiteCaseQueue() {
       if (filter.createdTo && new Date(c.created_at) > new Date(filter.createdTo + "T23:59:59")) return false;
       if (filter.dueFrom && (!c.due_at || new Date(c.due_at) < new Date(filter.dueFrom))) return false;
       if (filter.dueTo && (!c.due_at || new Date(c.due_at) > new Date(filter.dueTo + "T23:59:59"))) return false;
+      if (filter.closureReason !== "all" && (c.closure_reason || "") !== filter.closureReason) return false;
       if (filter.q) {
         const q = filter.q.toLowerCase();
         const custName = cust?.name?.toLowerCase() || "";
@@ -447,7 +464,7 @@ export default function SuiteCaseQueue() {
               <span className="text-xs text-muted-foreground flex items-center gap-1"><Bookmark className="h-3 w-3" />Saved:</span>
               {savedFilters.map(s => (
                 <div key={s.id} className="inline-flex items-center gap-1 border rounded-full pl-2 pr-1 py-0.5 text-xs bg-muted/40">
-                  <button className="hover:underline" onClick={() => setFilter(s.filter)}>{s.name}</button>
+                  <button className="hover:underline" onClick={() => setFilter({ closureReason: "all", ...s.filter })}>{s.name}</button>
                   <button className="text-muted-foreground hover:text-red-400" onClick={() => deleteSaved(s.id)} title="Delete">
                     <Trash2 className="h-3 w-3" />
                   </button>

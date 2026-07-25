@@ -63,6 +63,10 @@ export default function SuiteDashboard() {
     totalScreenings: 0, openCases: 0, totalCases: 0,
     totalTransactions: 0, flaggedTransactions: 0,
   });
+  // MLRO metrics (derived from cases in-period)
+  const [mlro, setMlro] = useState({
+    backlog: 0, avgAgeDays: 0, sarFiled: 0, alertToSarRatio: 0,
+  });
   const [recentActivity, setRecentActivity] = useState<{ id: string; type: string; label: string; detail: string; time: string; severity?: string }[]>([]);
 
   // Time-range filter
@@ -120,6 +124,7 @@ export default function SuiteDashboard() {
       { count: flaggedTransactions },
       { data: recentCustomers },
       { data: recentAlerts },
+      casesRes,
     ] = await Promise.all([
       applyRange(supabase.from("suite_customers").select("id, risk_level").eq("organisation_id", orgId)),
       applyRange(supabase.from("suite_customers").select("id", { count: "exact", head: true }).eq("organisation_id", orgId)),
@@ -132,6 +137,7 @@ export default function SuiteDashboard() {
       applyRange(supabase.from("suite_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("risk_flag", true)),
       supabase.from("suite_customers").select("id, name, type, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(3),
       supabase.from("suite_alerts").select("id, title, severity, status, created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(5),
+      applyRange(supabase.from("suite_cases").select("id, status, closure_reason, created_at, closed_at").eq("organisation_id", orgId)),
     ]);
 
     setKpi({
@@ -143,6 +149,23 @@ export default function SuiteDashboard() {
       totalCases: totalCases ?? 0,
       totalTransactions: totalTransactions ?? 0,
       flaggedTransactions: flaggedTransactions ?? 0,
+    });
+
+    // MLRO derived metrics
+    const caseRows: any[] = (casesRes as any)?.data || [];
+    const openRows = caseRows.filter(c => c.status === "open" || c.status === "in_progress");
+    const now = Date.now();
+    const avgAgeDays = openRows.length
+      ? Math.round(openRows.reduce((s, c) => s + (now - new Date(c.created_at).getTime()), 0) / openRows.length / 86_400_000)
+      : 0;
+    const sarFiled = caseRows.filter(c => c.closure_reason === "sar_filed").length;
+    const alertsCount = totalAlerts ?? 0;
+    const alertToSarRatio = alertsCount > 0 ? +(sarFiled / alertsCount * 100).toFixed(1) : 0;
+    setMlro({
+      backlog: openRows.length,
+      avgAgeDays,
+      sarFiled,
+      alertToSarRatio,
     });
 
     // Build recent activity
@@ -419,7 +442,7 @@ export default function SuiteDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/cases")}>
+          <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/case-queue?status=open")}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <div>
@@ -470,6 +493,80 @@ export default function SuiteDashboard() {
           </Card>
         </div>
       </div>
+
+      {/* ══════════ MLRO METRICS (drill-down into Case Queue) ══════════ */}
+      {(() => {
+        const iso = (d: Date | null) => d ? d.toISOString().slice(0, 10) : "";
+        const withPeriod = (extra: Record<string, string>) => {
+          const p = new URLSearchParams(extra);
+          if (from) p.set("createdFrom", iso(from));
+          if (to) p.set("createdTo", iso(to));
+          return `/suite/case-queue?${p.toString()}`;
+        };
+        const agedCutoff = iso(new Date(Date.now() - 7 * 86_400_000));
+        const mlroCards = [
+          {
+            label: "Case Backlog",
+            value: mlro.backlog.toLocaleString(),
+            hint: "Open + in-progress cases",
+            tone: "bg-amber-50 text-amber-600",
+            href: withPeriod({ status: "open" }),
+          },
+          {
+            label: "Avg Case Age",
+            value: `${mlro.avgAgeDays}d`,
+            hint: "Older than 7 days →",
+            tone: "bg-orange-50 text-orange-600",
+            href: `/suite/case-queue?status=open&createdTo=${agedCutoff}`,
+          },
+          {
+            label: "SARs Filed",
+            value: mlro.sarFiled.toLocaleString(),
+            hint: "closure = SAR/STR filed",
+            tone: "bg-emerald-50 text-emerald-600",
+            href: withPeriod({ status: "closed", closureReason: "sar_filed" }),
+          },
+          {
+            label: "Alert → SAR Ratio",
+            value: `${mlro.alertToSarRatio}%`,
+            hint: `${mlro.sarFiled} SARs / ${kpi.totalAlerts} alerts`,
+            tone: "bg-primary/10 text-primary",
+            href: withPeriod({ status: "all", closureReason: "sar_filed" }),
+          },
+        ];
+        return (
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+              <FileText className="h-4.5 w-4.5 text-primary" /> MLRO Metrics
+              <span className="text-xs font-normal text-muted-foreground">· click any card to open the Case Queue with these filters applied</span>
+            </h2>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {mlroCards.map(c => (
+                <Card
+                  key={c.label}
+                  onClick={() => navigate(c.href)}
+                  className="group cursor-pointer hover:shadow-md hover:border-primary/50 transition-all border-border"
+                >
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{c.label}</p>
+                        <p className="text-3xl font-bold text-foreground mt-1">{c.value}</p>
+                      </div>
+                      <div className={cn("p-2 rounded-lg", c.tone)}>
+                        <ArrowUpRight className="h-5 w-5" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">{c.hint}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
+
 
       {/* ══════════ CHARTS ROW (widgets) ══════════ */}
       <div className="grid grid-cols-[1fr_300px] gap-5">
