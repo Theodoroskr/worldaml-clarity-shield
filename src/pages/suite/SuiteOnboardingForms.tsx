@@ -713,15 +713,86 @@ export default function SuiteOnboardingForms() {
       </div>
 
       {/* Versions dialog */}
-      <Dialog open={versionsOpen} onOpenChange={setVersionsOpen}>
-        <DialogContent className="max-w-2xl">
+      <Dialog
+        open={versionsOpen}
+        onOpenChange={(o) => {
+          setVersionsOpen(o);
+          if (!o) {
+            setCompareA(null);
+            setCompareB(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Version history</DialogTitle>
             <DialogDescription>
-              Every draft and publish is captured. Roll back to any previous version — the current live version is archived and the selected snapshot becomes live as a new version number.
+              Every draft and publish is captured. Roll back to any previous version, or pick two versions below to see exactly what changed.
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-[60vh] overflow-y-auto -mx-6 px-6 divide-y divide-border">
+
+          {/* Compare selectors */}
+          {versions.length >= 2 && (
+            <div className="flex flex-wrap items-end gap-2 rounded-md border border-border bg-muted/30 p-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">Base</label>
+                <select
+                  className="h-8 rounded-md border border-border bg-background px-2 text-sm"
+                  value={compareA ?? ""}
+                  onChange={(e) => setCompareA(e.target.value || null)}
+                >
+                  <option value="">Select version…</option>
+                  {versions.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      v{v.version_number} {v.id === publishedVersionId ? "(live)" : v.id === currentDraftId ? "(draft)" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="text-muted-foreground pb-1.5">→</div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">Compare to</label>
+                <select
+                  className="h-8 rounded-md border border-border bg-background px-2 text-sm"
+                  value={compareB ?? ""}
+                  onChange={(e) => setCompareB(e.target.value || null)}
+                >
+                  <option value="">Select version…</option>
+                  {versions.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      v{v.version_number} {v.id === publishedVersionId ? "(live)" : v.id === currentDraftId ? "(draft)" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {(compareA || compareB) && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="ml-auto"
+                  onClick={() => {
+                    setCompareA(null);
+                    setCompareB(null);
+                  }}
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Diff panel */}
+          {compareA && compareB && compareA !== compareB && (
+            <VersionDiffPanel
+              a={versions.find((v) => v.id === compareA)!}
+              b={versions.find((v) => v.id === compareB)!}
+            />
+          )}
+          {compareA && compareB && compareA === compareB && (
+            <div className="text-xs text-muted-foreground">Pick two different versions to compare.</div>
+          )}
+
+          <div className="max-h-[45vh] overflow-y-auto -mx-6 px-6 divide-y divide-border">
             {versions.length === 0 && (
               <div className="text-sm text-muted-foreground py-6">No versions yet.</div>
             )}
@@ -746,6 +817,22 @@ export default function SuiteOnboardingForms() {
                       {v.notes ? ` · ${v.notes}` : ""}
                     </div>
                   </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      if (!compareA || (compareA && compareB)) {
+                        setCompareA(v.id);
+                        setCompareB(null);
+                      } else {
+                        setCompareB(v.id);
+                      }
+                    }}
+                    title={!compareA ? "Set as base" : "Compare to base"}
+                  >
+                    <GitCompareArrows className="w-3.5 h-3.5 mr-1" />
+                    {!compareA ? "Base" : compareA === v.id ? "Base ✓" : "Compare"}
+                  </Button>
                   {!isPublished && v.status !== "draft" && (
                     <Button
                       size="sm"
@@ -767,6 +854,7 @@ export default function SuiteOnboardingForms() {
           </div>
         </DialogContent>
       </Dialog>
+
 
       {/* Publish dialog */}
       <Dialog open={publishOpen} onOpenChange={setPublishOpen}>
