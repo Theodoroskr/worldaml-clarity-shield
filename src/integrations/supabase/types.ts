@@ -4667,6 +4667,204 @@ export type Database = {
           },
         ]
       }
+      suite_regulator_adapters: {
+        Row: {
+          config_schema: Json
+          created_at: string
+          default_sla_hours: number
+          description: string | null
+          is_active: boolean
+          is_live: boolean
+          jurisdiction: string | null
+          key: string
+          label: string
+          regulator: string
+          report_kinds: string[]
+          transport: string
+          updated_at: string
+        }
+        Insert: {
+          config_schema?: Json
+          created_at?: string
+          default_sla_hours?: number
+          description?: string | null
+          is_active?: boolean
+          is_live?: boolean
+          jurisdiction?: string | null
+          key: string
+          label: string
+          regulator: string
+          report_kinds?: string[]
+          transport: string
+          updated_at?: string
+        }
+        Update: {
+          config_schema?: Json
+          created_at?: string
+          default_sla_hours?: number
+          description?: string | null
+          is_active?: boolean
+          is_live?: boolean
+          jurisdiction?: string | null
+          key?: string
+          label?: string
+          regulator?: string
+          report_kinds?: string[]
+          transport?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      suite_regulator_submission_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          details: Json
+          event_type: string
+          from_status: string | null
+          id: string
+          organisation_id: string
+          submission_id: string
+          to_status: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          event_type: string
+          from_status?: string | null
+          id?: string
+          organisation_id: string
+          submission_id: string
+          to_status?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          event_type?: string
+          from_status?: string | null
+          id?: string
+          organisation_id?: string
+          submission_id?: string
+          to_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_regulator_submission_events_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "suite_regulator_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suite_regulator_submissions: {
+        Row: {
+          acknowledged_at: string | null
+          adapter: string
+          attempt_count: number
+          case_id: string | null
+          created_at: string
+          customer_id: string | null
+          external_reference: string | null
+          id: string
+          jurisdiction: string | null
+          last_error: string | null
+          organisation_id: string
+          regulator: string
+          rejected_at: string | null
+          rejection_reason: string | null
+          report_id: string | null
+          report_kind: string
+          request_payload: Json
+          response_payload: Json
+          sla_breached: boolean
+          sla_due_at: string | null
+          sla_hours: number | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          adapter: string
+          attempt_count?: number
+          case_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          external_reference?: string | null
+          id?: string
+          jurisdiction?: string | null
+          last_error?: string | null
+          organisation_id: string
+          regulator: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          report_id?: string | null
+          report_kind: string
+          request_payload?: Json
+          response_payload?: Json
+          sla_breached?: boolean
+          sla_due_at?: string | null
+          sla_hours?: number | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          adapter?: string
+          attempt_count?: number
+          case_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          external_reference?: string | null
+          id?: string
+          jurisdiction?: string | null
+          last_error?: string | null
+          organisation_id?: string
+          regulator?: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          report_id?: string | null
+          report_kind?: string
+          request_payload?: Json
+          response_payload?: Json
+          sla_breached?: boolean
+          sla_due_at?: string | null
+          sla_hours?: number | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_regulator_submissions_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "suite_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_regulator_submissions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_regulator_submissions_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_screenings: {
         Row: {
           created_at: string
@@ -5501,6 +5699,7 @@ export type Database = {
         Returns: number
       }
       sweep_customer_document_expiry: { Args: never; Returns: Json }
+      sweep_regulator_submission_sla: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
