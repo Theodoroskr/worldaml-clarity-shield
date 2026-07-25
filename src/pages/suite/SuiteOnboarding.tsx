@@ -805,12 +805,27 @@ export default function SuiteOnboarding() {
     const fullName = `${kycForm.firstName.trim()} ${kycForm.lastName.trim()}`;
     const { error } = await supabase.from("suite_customers").insert({
       user_id: user.id,
+      organisation_id: orgId,
       name: fullName,
       type: "individual",
       email: kycForm.email.trim() || null,
       country: kycForm.country || null,
       date_of_birth: kycForm.dateOfBirth || null,
       regulator: kycForm.regulator || null,
+      onboarding_data: {
+        first_name: kycForm.firstName.trim(),
+        last_name: kycForm.lastName.trim(),
+        nationality: kycForm.nationality || null,
+        address: kycForm.address || null,
+        city: kycForm.city || null,
+        postal_code: kycForm.postalCode || null,
+        id_type: kycForm.idType || null,
+        id_number: kycForm.idNumber || null,
+        occupation: kycForm.occupation || null,
+        source_of_funds: kycForm.sourceOfFunds || null,
+        pep: kycForm.pep || null,
+        custom_fields: Object.keys(customFieldValues).length > 0 ? customFieldValues : null,
+      },
     });
 
     if (error) { toast.error(error.message); setSaving(false); return; }
