@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -15,11 +15,23 @@ import {
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, CheckCircle2, Upload, FileText, X } from "lucide-react";
+import { Loader2, CheckCircle2, Upload, FileText, X, AlertCircle } from "lucide-react";
 
 type FieldType =
   | "text" | "email" | "phone" | "number" | "textarea"
   | "select" | "checkbox" | "date" | "address" | "file" | "heading";
+
+interface FieldValidation {
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  pattern?: string;
+  patternMessage?: string;
+  format?: "" | "email" | "url" | "alpha" | "alphanumeric";
+  allowedFileTypes?: string[];
+  maxFileSizeMb?: number;
+}
 
 interface FormField {
   id: string;
@@ -30,6 +42,7 @@ interface FormField {
   required?: boolean;
   helpText?: string;
   options?: string[];
+  validation?: FieldValidation;
 }
 
 interface Branding {
@@ -52,6 +65,71 @@ interface OnboardingForm {
   is_active: boolean;
 }
 
+const FORMAT_REGEX: Record<string, RegExp> = {
+  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  url: /^https?:\/\/[^\s]+$/,
+  alpha: /^[A-Za-z\s-]+$/,
+  alphanumeric: /^[A-Za-z0-9\s-]+$/,
+};
+
+function validateField(f: FormField, raw: any, file: File | null): string | null {
+  const v = f.validation || {};
+  const isEmpty =
+    f.type === "file"
+      ? !file
+      : f.type === "checkbox"
+      ? !raw
+      : raw === undefined || raw === null || String(raw).trim() === "";
+
+  if (f.required && isEmpty) return `${f.label} is required`;
+  if (isEmpty) return null;
+
+  if (["text", "textarea", "email", "phone", "address", "date", "select"].includes(f.type)) {
+    const str = String(raw);
+    if (v.minLength != null && str.length < v.minLength)
+      return `${f.label} must be at least ${v.minLength} characters`;
+    if (v.maxLength != null && str.length > v.maxLength)
+      return `${f.label} must be at most ${v.maxLength} characters`;
+
+    const fmt = f.type === "email" ? "email" : v.format || "";
+    if (fmt && FORMAT_REGEX[fmt] && !FORMAT_REGEX[fmt].test(str)) {
+      if (fmt === "email") return `${f.label} must be a valid email address`;
+      if (fmt === "url") return `${f.label} must be a valid URL (starting with http/https)`;
+      if (fmt === "alpha") return `${f.label} must contain only letters`;
+      if (fmt === "alphanumeric") return `${f.label} must contain only letters and numbers`;
+    }
+    if (v.pattern) {
+      try {
+        if (!new RegExp(v.pattern).test(str))
+          return v.patternMessage || `${f.label} has an invalid format`;
+      } catch { /* ignore malformed regex */ }
+    }
+    if (f.type === "select" && f.options && !f.options.includes(str)) {
+      return `${f.label} must be one of the available options`;
+    }
+  }
+
+  if (f.type === "number") {
+    const num = Number(raw);
+    if (Number.isNaN(num)) return `${f.label} must be a number`;
+    if (v.min != null && num < v.min) return `${f.label} must be at least ${v.min}`;
+    if (v.max != null && num > v.max) return `${f.label} must be at most ${v.max}`;
+  }
+
+  if (f.type === "file" && file) {
+    const maxMb = v.maxFileSizeMb ?? 10;
+    if (file.size > maxMb * 1024 * 1024) return `${f.label} must be at most ${maxMb} MB`;
+    const allowed = v.allowedFileTypes && v.allowedFileTypes.length
+      ? v.allowedFileTypes
+      : ["pdf", "jpg", "jpeg", "png"];
+    const ext = (file.name.split(".").pop() || "").toLowerCase();
+    if (!allowed.includes(ext))
+      return `${f.label} must be one of: ${allowed.join(", ").toUpperCase()}`;
+  }
+
+  return null;
+}
+
 export default function OnboardPublic() {
   const { token } = useParams<{ token: string }>();
   const [form, setForm] = useState<OnboardingForm | null>(null);
@@ -60,8 +138,11 @@ export default function OnboardPublic() {
   const [values, setValues] = useState<Record<string, any>>({});
   const [fieldFiles, setFieldFiles] = useState<Record<string, File | null>>({});
   const [docFiles, setDocFiles] = useState<Record<string, File | null>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const fieldRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     const load = async () => {
@@ -72,11 +153,8 @@ export default function OnboardPublic() {
         .eq("id", token)
         .eq("is_active", true)
         .maybeSingle();
-      if (error || !data) {
-        setNotFound(true);
-      } else {
-        setForm(data as any);
-      }
+      if (error || !data) setNotFound(true);
+      else setForm(data as any);
       setLoading(false);
     };
     load();
@@ -84,7 +162,21 @@ export default function OnboardPublic() {
 
   const primary = form?.branding?.primary_color || "#0f766e";
 
-  const setValue = (key: string, v: any) => setValues((s) => ({ ...s, [key]: v }));
+  const setValue = (key: string, v: any) => {
+    setValues((s) => ({ ...s, [key]: v }));
+    if (errors[key]) setErrors((e) => ({ ...e, [key]: "" }));
+  };
+
+  const setFieldFile = (key: string, file: File | null) => {
+    setFieldFiles((s) => ({ ...s, [key]: file }));
+    if (errors[key]) setErrors((e) => ({ ...e, [key]: "" }));
+  };
+
+  const setDocFile = (doc: string, file: File | null) => {
+    setDocFiles((s) => ({ ...s, [doc]: file }));
+    const k = `__doc__${doc}`;
+    if (errors[k]) setErrors((e) => ({ ...e, [k]: "" }));
+  };
 
   const uploadFile = async (file: File, folder: string, subkey: string) => {
     if (!form) throw new Error("form missing");
@@ -98,36 +190,37 @@ export default function OnboardPublic() {
     return { path, name: file.name, size: file.size, type: file.type };
   };
 
-  const validate = (): string | null => {
-    if (!form) return "Form not loaded";
+  const validateAll = (): Record<string, string> => {
+    const errs: Record<string, string> = {};
+    if (!form) return errs;
     for (const f of form.schema) {
       if (f.type === "heading") continue;
-      if (!f.required) continue;
-      if (f.type === "file") {
-        if (!fieldFiles[f.key]) return `${f.label} is required`;
-      } else if (f.type === "checkbox") {
-        if (!values[f.key]) return `${f.label} is required`;
-      } else {
-        const v = values[f.key];
-        if (v === undefined || v === null || String(v).trim() === "") return `${f.label} is required`;
-      }
+      const err = validateField(f, values[f.key], fieldFiles[f.key] || null);
+      if (err) errs[f.key] = err;
     }
     for (const doc of form.required_checks?.documents || []) {
-      if (!docFiles[doc]) return `${doc} document is required`;
+      if (!docFiles[doc]) errs[`__doc__${doc}`] = `${doc} is required`;
+      else if (docFiles[doc]!.size > 10 * 1024 * 1024)
+        errs[`__doc__${doc}`] = `${doc} must be at most 10 MB`;
     }
-    return null;
+    return errs;
   };
 
   const handleSubmit = async () => {
     if (!form) return;
-    const err = validate();
-    if (err) {
-      toast.error(err);
+    setServerError(null);
+    const errs = validateAll();
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      const firstKey = Object.keys(errs)[0];
+      const el = fieldRefs.current[firstKey];
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      toast.error("Please fix the highlighted fields");
       return;
     }
+    setErrors({});
     setSubmitting(true);
     try {
-      // Upload field files
       const dataOut: Record<string, any> = { ...values };
       for (const f of form.schema) {
         if (f.type === "file" && fieldFiles[f.key]) {
@@ -135,7 +228,6 @@ export default function OnboardPublic() {
           dataOut[f.key] = meta;
         }
       }
-      // Upload required documents
       const documents: any[] = [];
       for (const doc of form.required_checks?.documents || []) {
         if (docFiles[doc]) {
@@ -144,7 +236,6 @@ export default function OnboardPublic() {
         }
       }
 
-      // Infer applicant fields
       const findByKey = (needle: RegExp) => {
         const f = form.schema.find(
           (x) => x.type !== "heading" && (needle.test(x.key) || needle.test(x.label))
@@ -153,10 +244,9 @@ export default function OnboardPublic() {
       };
       const applicant_email =
         findByKey(/email/i) ||
-        form.schema.find((x) => x.type === "email") &&
-          dataOut[form.schema.find((x) => x.type === "email")!.key];
-      const applicant_name =
-        findByKey(/name|full.?name|company/i) || null;
+        (form.schema.find((x) => x.type === "email") &&
+          dataOut[form.schema.find((x) => x.type === "email")!.key]);
+      const applicant_name = findByKey(/name|full.?name|company/i) || null;
 
       const { error } = await supabase.from("suite_onboarding_submissions").insert({
         form_id: form.id,
@@ -173,12 +263,12 @@ export default function OnboardPublic() {
 
       setSubmitted(true);
       if (form.redirect_url) {
-        setTimeout(() => {
-          window.location.href = form.redirect_url!;
-        }, 1500);
+        setTimeout(() => { window.location.href = form.redirect_url!; }, 1500);
       }
     } catch (e: any) {
-      toast.error(e.message || "Failed to submit");
+      const msg = e?.message || "Failed to submit";
+      setServerError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -260,21 +350,31 @@ export default function OnboardPublic() {
                 </div>
               );
             }
-            const common = (
-              <Label className="flex items-center gap-1">
-                {f.label}
-                {f.required && <span className="text-destructive">*</span>}
-              </Label>
-            );
+            const err = errors[f.key];
+            const invalid = !!err;
+            const ariaProps = {
+              "aria-invalid": invalid || undefined,
+              "aria-describedby": invalid ? `${f.id}-err` : undefined,
+            } as const;
             return (
-              <div key={f.id} className="space-y-1.5">
-                {common}
+              <div
+                key={f.id}
+                ref={(el) => { fieldRefs.current[f.key] = el; }}
+                className="space-y-1.5 scroll-mt-24"
+              >
+                <Label className="flex items-center gap-1">
+                  {f.label}
+                  {f.required && <span className="text-destructive">*</span>}
+                </Label>
                 {f.helpText && <p className="text-xs text-muted-foreground">{f.helpText}</p>}
                 {(() => {
+                  const errCls = invalid ? "border-destructive focus-visible:ring-destructive/30" : "";
                   switch (f.type) {
                     case "textarea":
                       return (
                         <Textarea
+                          {...ariaProps}
+                          className={errCls}
                           placeholder={f.placeholder}
                           value={values[f.key] || ""}
                           onChange={(e) => setValue(f.key, e.target.value)}
@@ -284,7 +384,7 @@ export default function OnboardPublic() {
                     case "select":
                       return (
                         <Select value={values[f.key] || ""} onValueChange={(v) => setValue(f.key, v)}>
-                          <SelectTrigger>
+                          <SelectTrigger {...ariaProps} className={errCls}>
                             <SelectValue placeholder={f.placeholder || "Select..."} />
                           </SelectTrigger>
                           <SelectContent>
@@ -311,12 +411,17 @@ export default function OnboardPublic() {
                       return (
                         <FilePicker
                           file={fieldFiles[f.key] || null}
-                          onChange={(file) => setFieldFiles((s) => ({ ...s, [f.key]: file }))}
+                          onChange={(file) => setFieldFile(f.key, file)}
+                          allowed={f.validation?.allowedFileTypes}
+                          maxMb={f.validation?.maxFileSizeMb ?? 10}
+                          invalid={invalid}
                         />
                       );
                     case "address":
                       return (
                         <Textarea
+                          {...ariaProps}
+                          className={errCls}
                           placeholder={f.placeholder || "Street, City, Postal code, Country"}
                           value={values[f.key] || ""}
                           onChange={(e) => setValue(f.key, e.target.value)}
@@ -326,6 +431,8 @@ export default function OnboardPublic() {
                     default:
                       return (
                         <Input
+                          {...ariaProps}
+                          className={errCls}
                           type={
                             f.type === "email" ? "email" :
                             f.type === "phone" ? "tel" :
@@ -339,6 +446,11 @@ export default function OnboardPublic() {
                       );
                   }
                 })()}
+                {invalid && (
+                  <p id={`${f.id}-err`} className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" /> {err}
+                  </p>
+                )}
               </div>
             );
           })}
@@ -349,17 +461,41 @@ export default function OnboardPublic() {
               <p className="text-xs text-muted-foreground">
                 Please upload clear copies. Accepted formats: PDF, JPG, PNG (max 10MB each).
               </p>
-              {form.required_checks.documents.map((doc) => (
-                <div key={doc} className="space-y-1.5">
-                  <Label className="flex items-center gap-1">
-                    {doc} <span className="text-destructive">*</span>
-                  </Label>
-                  <FilePicker
-                    file={docFiles[doc] || null}
-                    onChange={(file) => setDocFiles((s) => ({ ...s, [doc]: file }))}
-                  />
-                </div>
-              ))}
+              {form.required_checks.documents.map((doc) => {
+                const k = `__doc__${doc}`;
+                const err = errors[k];
+                return (
+                  <div
+                    key={doc}
+                    ref={(el) => { fieldRefs.current[k] = el; }}
+                    className="space-y-1.5 scroll-mt-24"
+                  >
+                    <Label className="flex items-center gap-1">
+                      {doc} <span className="text-destructive">*</span>
+                    </Label>
+                    <FilePicker
+                      file={docFiles[doc] || null}
+                      onChange={(file) => setDocFile(doc, file)}
+                      invalid={!!err}
+                    />
+                    {err && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {err}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {serverError && (
+            <div className="border border-destructive/40 bg-destructive/10 text-destructive text-sm rounded-md p-3 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              <div>
+                <div className="font-medium">Could not submit</div>
+                <div className="text-xs opacity-90">{serverError}</div>
+              </div>
             </div>
           )}
 
@@ -392,14 +528,24 @@ export default function OnboardPublic() {
 function FilePicker({
   file,
   onChange,
+  allowed,
+  maxMb = 10,
+  invalid,
 }: {
   file: File | null;
   onChange: (f: File | null) => void;
+  allowed?: string[];
+  maxMb?: number;
+  invalid?: boolean;
 }) {
+  const accept =
+    allowed && allowed.length
+      ? allowed.map((e) => `.${e}`).join(",")
+      : ".pdf,.jpg,.jpeg,.png";
   return (
     <div>
       {file ? (
-        <div className="flex items-center gap-2 p-2 border rounded-md bg-muted/40">
+        <div className={`flex items-center gap-2 p-2 border rounded-md bg-muted/40 ${invalid ? "border-destructive" : ""}`}>
           <FileText className="w-4 h-4 text-muted-foreground" />
           <div className="flex-1 min-w-0">
             <div className="text-sm truncate">{file.name}</div>
@@ -412,20 +558,33 @@ function FilePicker({
           </Button>
         </div>
       ) : (
-        <label className="flex items-center justify-center gap-2 p-3 border border-dashed rounded-md cursor-pointer hover:bg-muted/40 text-sm text-muted-foreground">
+        <label
+          className={`flex items-center justify-center gap-2 p-3 border border-dashed rounded-md cursor-pointer hover:bg-muted/40 text-sm text-muted-foreground ${
+            invalid ? "border-destructive text-destructive" : ""
+          }`}
+        >
           <Upload className="w-4 h-4" />
-          <span>Click to upload</span>
+          <span>
+            Click to upload ({(allowed && allowed.length ? allowed : ["pdf","jpg","png"]).join(", ").toUpperCase()} · max {maxMb}MB)
+          </span>
           <input
             type="file"
             className="hidden"
-            accept=".pdf,.jpg,.jpeg,.png"
+            accept={accept}
             onChange={(e) => {
               const f = e.target.files?.[0];
-              if (f && f.size > 10 * 1024 * 1024) {
-                toast.error("File exceeds 10MB");
+              if (!f) return;
+              if (f.size > maxMb * 1024 * 1024) {
+                toast.error(`File exceeds ${maxMb}MB`);
                 return;
               }
-              onChange(f || null);
+              const ext = (f.name.split(".").pop() || "").toLowerCase();
+              const list = allowed && allowed.length ? allowed : ["pdf", "jpg", "jpeg", "png"];
+              if (!list.includes(ext)) {
+                toast.error(`Only ${list.join(", ").toUpperCase()} files allowed`);
+                return;
+              }
+              onChange(f);
             }}
           />
         </label>
