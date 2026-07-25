@@ -485,6 +485,53 @@ export default function SuiteScreening() {
           </table>
         )}
       </div>
+
+      {/* Mark as false positive */}
+      <Dialog open={!!wlTarget} onOpenChange={o => !o && setWlTarget(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Mark as false positive</DialogTitle>
+            <DialogDescription>
+              {wlTarget
+                ? `"${wlTarget.name}" (${wlTarget.listType}) will be remembered for ${customerName(selectedCustomerId)} and won't raise new alerts.`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="wl-reason">Reason / rationale *</Label>
+              <Textarea
+                id="wl-reason"
+                value={wlReason}
+                onChange={e => setWlReason(e.target.value)}
+                placeholder="e.g. DOB and nationality mismatch confirmed against passport — different individual."
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="wl-reviewer">Reviewed by</Label>
+                <Input id="wl-reviewer" value={wlReviewer} onChange={e => setWlReviewer(e.target.value)} placeholder="MLRO name" />
+              </div>
+              <div>
+                <Label htmlFor="wl-expiry">Expires (optional)</Label>
+                <Input id="wl-expiry" type="date" value={wlExpiry} onChange={e => setWlExpiry(e.target.value)} />
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <input type="checkbox" checked={wlAllLists} onChange={e => setWlAllLists(e.target.checked)} />
+              Suppress this name across all lists (not just {wlTarget?.listType})
+            </label>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setWlTarget(null)}>Cancel</Button>
+            <Button onClick={saveWhitelistEntry} disabled={wlSaving}>
+              {wlSaving ? "Saving…" : "Whitelist match"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
