@@ -3629,15 +3629,96 @@ export type Database = {
           },
         ]
       }
+      suite_onboarding_form_versions: {
+        Row: {
+          archived_at: string | null
+          branding: Json
+          created_at: string
+          description: string | null
+          form_id: string
+          id: string
+          name: string
+          notes: string | null
+          organisation_id: string
+          published_at: string | null
+          published_by: string | null
+          redirect_url: string | null
+          required_checks: Json
+          schema: Json
+          status: string
+          updated_at: string
+          user_id: string
+          version_number: number
+        }
+        Insert: {
+          archived_at?: string | null
+          branding?: Json
+          created_at?: string
+          description?: string | null
+          form_id: string
+          id?: string
+          name: string
+          notes?: string | null
+          organisation_id: string
+          published_at?: string | null
+          published_by?: string | null
+          redirect_url?: string | null
+          required_checks?: Json
+          schema?: Json
+          status?: string
+          updated_at?: string
+          user_id: string
+          version_number: number
+        }
+        Update: {
+          archived_at?: string | null
+          branding?: Json
+          created_at?: string
+          description?: string | null
+          form_id?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          organisation_id?: string
+          published_at?: string | null
+          published_by?: string | null
+          redirect_url?: string | null
+          required_checks?: Json
+          schema?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_onboarding_form_versions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "suite_onboarding_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_onboarding_form_versions_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_onboarding_forms: {
         Row: {
           branding: Json
           created_at: string
+          current_draft_version_id: string | null
           description: string | null
           id: string
           is_active: boolean
+          latest_version_number: number
           name: string
           organisation_id: string
+          published_version_id: string | null
           redirect_url: string | null
           required_checks: Json
           schema: Json
@@ -3648,11 +3729,14 @@ export type Database = {
         Insert: {
           branding?: Json
           created_at?: string
+          current_draft_version_id?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
+          latest_version_number?: number
           name: string
           organisation_id: string
+          published_version_id?: string | null
           redirect_url?: string | null
           required_checks?: Json
           schema?: Json
@@ -3663,11 +3747,14 @@ export type Database = {
         Update: {
           branding?: Json
           created_at?: string
+          current_draft_version_id?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
+          latest_version_number?: number
           name?: string
           organisation_id?: string
+          published_version_id?: string | null
           redirect_url?: string | null
           required_checks?: Json
           schema?: Json
@@ -3677,10 +3764,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "suite_onboarding_forms_current_draft_version_id_fkey"
+            columns: ["current_draft_version_id"]
+            isOneToOne: false
+            referencedRelation: "suite_onboarding_form_versions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "suite_onboarding_forms_organisation_id_fkey"
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_onboarding_forms_published_version_id_fkey"
+            columns: ["published_version_id"]
+            isOneToOne: false
+            referencedRelation: "suite_onboarding_form_versions"
             referencedColumns: ["id"]
           },
         ]
@@ -3694,6 +3795,8 @@ export type Database = {
           data: Json
           documents: Json
           form_id: string
+          form_version_id: string | null
+          form_version_number: number | null
           id: string
           ip_address: string | null
           linked_customer_id: string | null
@@ -3714,6 +3817,8 @@ export type Database = {
           data?: Json
           documents?: Json
           form_id: string
+          form_version_id?: string | null
+          form_version_number?: number | null
           id?: string
           ip_address?: string | null
           linked_customer_id?: string | null
@@ -3734,6 +3839,8 @@ export type Database = {
           data?: Json
           documents?: Json
           form_id?: string
+          form_version_id?: string | null
+          form_version_number?: number | null
           id?: string
           ip_address?: string | null
           linked_customer_id?: string | null
@@ -3752,6 +3859,13 @@ export type Database = {
             columns: ["form_id"]
             isOneToOne: false
             referencedRelation: "suite_onboarding_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suite_onboarding_submissions_form_version_id_fkey"
+            columns: ["form_version_id"]
+            isOneToOne: false
+            referencedRelation: "suite_onboarding_form_versions"
             referencedColumns: ["id"]
           },
           {
@@ -4582,6 +4696,26 @@ export type Database = {
       is_eligible_for_sales_outreach: {
         Args: { _user_id: string }
         Returns: Json
+      }
+      onboarding_form_publish: {
+        Args: { _form_id: string; _notes?: string }
+        Returns: string
+      }
+      onboarding_form_rollback: {
+        Args: { _form_id: string; _notes?: string; _version_id: string }
+        Returns: string
+      }
+      onboarding_form_save_draft: {
+        Args: {
+          _branding: Json
+          _description: string
+          _form_id: string
+          _name: string
+          _redirect_url: string
+          _required_checks: Json
+          _schema: Json
+        }
+        Returns: string
       }
       rcm_can_edit: { Args: { _org: string }; Returns: boolean }
       rcm_can_manage: { Args: { _org: string }; Returns: boolean }
