@@ -199,6 +199,60 @@ const defaultField = (type: FieldType): FormField => ({
   options: type === "select" ? ["Option 1", "Option 2"] : undefined,
 });
 
+const sampleKycForm = () => {
+  const heading = (label: string): FormField => ({
+    id: crypto.randomUUID(), type: "heading", label, key: slugify(label), required: false,
+  });
+  const field = (type: FieldType, label: string, key: string, required = true, extra?: Partial<FormField>): FormField => ({
+    id: crypto.randomUUID(), type, label, key, required, ...extra,
+  });
+  return {
+    name: "Individual KYC onboarding",
+    slug: "individual-kyc",
+    description: "Standard individual customer due diligence form. Collect identity, contact details, and required documentation.",
+    fields: [
+      heading("Personal information"),
+      field("text", "Full legal name", "full_legal_name", true),
+      field("email", "Email address", "email", true),
+      field("phone", "Phone number", "phone", true),
+      field("date", "Date of birth", "date_of_birth", true),
+      field("select", "Nationality", "nationality", true, {
+        options: ["United States", "United Kingdom", "Germany", "France", "Spain", "Italy", "Netherlands", "Switzerland", "Other"],
+      }),
+      field("address", "Residential address", "residential_address", true),
+      heading("Identity verification"),
+      field("file", "Government-issued ID", "government_id", true, {
+        helpText: "Passport, national ID, or driver's license (PDF, JPG, PNG, max 10MB)",
+        validation: { allowedFileTypes: ["pdf", "jpg", "jpeg", "png"], maxFileSizeMb: 10 },
+      }),
+      field("file", "Proof of address", "proof_of_address", true, {
+        helpText: "Utility bill or bank statement issued within the last 3 months",
+        validation: { allowedFileTypes: ["pdf", "jpg", "jpeg", "png"], maxFileSizeMb: 10 },
+      }),
+      heading("Declarations"),
+      field("checkbox", "I confirm I am not a politically exposed person (PEP)", "pep_declaration", true, {
+        placeholder: "I confirm I am not a PEP, or I will disclose details below",
+      }),
+      field("textarea", "PEP details (if applicable)", "pep_details", false, {
+        helpText: "If you or a close family member is a PEP, please describe the role and jurisdiction.",
+      }),
+      field("checkbox", "I agree to the terms and consent to identity verification", "terms_consent", true, {
+        placeholder: "I agree to the terms of service and privacy policy",
+      }),
+    ] as FormField[],
+    checks: { kyc: true, kyb: false, sof: false, documents: ["Passport", "Proof of Address"] } as RequiredChecks,
+    branding: {
+      logo_url: null,
+      primary_color: "#0f766e",
+      company_name: null,
+      support_email: null,
+      show_powered_by: true,
+    } as Branding,
+    redirectUrl: "",
+    isActive: false,
+  };
+};
+
 // ---------- Sortable field row ----------
 function SortableField({
   field,
