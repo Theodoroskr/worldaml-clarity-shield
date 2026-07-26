@@ -1124,8 +1124,11 @@ export default function SuiteOnboardingForms() {
             </div>
 
             {fields.length === 0 ? (
-              <div className="border-2 border-dashed border-border rounded-lg py-16 text-center text-sm text-muted-foreground">
-                Add fields from the left library to build your form
+              <div className="border-2 border-dashed border-border rounded-lg py-16 text-center space-y-3">
+                <p className="text-sm text-muted-foreground">Add fields from the left library to build your form</p>
+                <Button size="sm" variant="outline" onClick={loadSampleKyc}>
+                  <FileUp className="w-3.5 h-3.5 mr-1" /> Start from sample KYC
+                </Button>
               </div>
             ) : (
               <DndContext
