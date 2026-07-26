@@ -649,8 +649,8 @@ export default function SuiteOnboardingForms() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => copyPublicUrl(f)}>
-                    <Copy className="w-3.5 h-3.5 mr-1" /> Link
+                  <Button size="sm" variant="ghost" onClick={() => openShare(f)}>
+                    <Share2 className="w-3.5 h-3.5 mr-1" /> Share
                   </Button>
                   <Button
                     size="sm"
