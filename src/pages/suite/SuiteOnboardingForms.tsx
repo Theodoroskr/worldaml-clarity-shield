@@ -459,6 +459,25 @@ export default function SuiteOnboardingForms() {
     loadVersions(f.id);
   };
 
+  const loadSampleKyc = () => {
+    const sample = sampleKycForm();
+    setName(sample.name);
+    setSlug(sample.slug);
+    setDescription(sample.description);
+    setFields(sample.fields);
+    setChecks(sample.checks);
+    setBranding(sample.branding);
+    setRedirectUrl(sample.redirectUrl);
+    setIsActive(sample.isActive);
+    setPublishedVersionId(null);
+    setCurrentDraftId(null);
+    setLatestVersionNumber(0);
+    setHasUnsavedChanges(true);
+    setSelectedFieldId(null);
+    setVersions([]);
+    toast.success("Sample KYC form loaded. Save it as a draft when ready.");
+  };
+
   const handleDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
