@@ -11,7 +11,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { runSubmission } from "@/lib/suite/regulatorAdapters";
+import { runSubmission, getAdapter } from "@/lib/suite/regulatorAdapters";
 import {
   Send, CheckCircle2, XCircle, AlertTriangle, Clock, RefreshCcw, Plus, ExternalLink, FileClock,
 } from "lucide-react";
