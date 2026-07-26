@@ -704,6 +704,17 @@ export default function SuiteOnboardingForms() {
         <Button
           size="sm"
           variant="outline"
+          disabled={!editingId || editingId === "new" || !publishedVersionId}
+          onClick={() => {
+            const form = forms.find((f) => f.id === editingId);
+            if (form) openShare(form);
+          }}
+        >
+          <Share2 className="w-3.5 h-3.5 mr-1" /> Share link
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
           disabled={!editingId || editingId === "new"}
           onClick={() => setVersionsOpen(true)}
         >
