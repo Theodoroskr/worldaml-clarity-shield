@@ -911,6 +911,62 @@ export default function SuiteOnboardingForms() {
         </DialogContent>
       </Dialog>
 
+      {/* Share dialog */}
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share onboarding link</DialogTitle>
+            <DialogDescription>
+              Send this link to a client so they can complete their onboarding. The link is active only while the form is published.
+            </DialogDescription>
+          </DialogHeader>
+          {shareForm && (
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Public link</Label>
+                <div className="flex items-center gap-2">
+                  <Input readOnly value={publicUrl(shareForm)} className="text-sm" />
+                  <Button size="icon" variant="outline" onClick={copyCurrentUrl} className="shrink-0">
+                    {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => window.open(publicUrl(shareForm), "_blank", "noopener,noreferrer")}
+                >
+                  <ExternalLink className="w-4 h-4 mr-1.5" /> Open preview
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    const url = publicUrl(shareForm);
+                    const subject = encodeURIComponent(`Onboarding request from ${shareForm.branding.company_name || "WorldAML"}`);
+                    const body = encodeURIComponent(`Please complete your onboarding here:\n\n${url}\n\n`);
+                    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
+                  }}
+                >
+                  <Mail className="w-4 h-4 mr-1.5" /> Email client
+                </Button>
+              </div>
+
+              {!shareForm.is_active && (
+                <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-3">
+                  This form is not yet published. Publish it first so the link works for clients.
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setShareOpen(false)}>Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex-1 grid grid-cols-[220px_1fr_320px] min-h-0 overflow-hidden">
         {/* Left: field library */}
         <aside className="border-r border-border bg-muted/20 overflow-y-auto p-3">
