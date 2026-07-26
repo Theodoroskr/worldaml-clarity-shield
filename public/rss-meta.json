@@ -1,11 +1,11 @@
 {
   "anchor": "2026-07-12T00:00:00.000Z",
   "totalArticles": 18,
-  "releasedCount": 14,
-  "upcomingCount": 4,
+  "releasedCount": 15,
+  "upcomingCount": 3,
   "nextRelease": {
-    "date": "2026-07-26T00:00:00.000Z",
-    "title": "AML for Real Estate Agents: Obligations, Red Flags, and Compliance Workflows",
-    "slug": "aml-real-estate-property-transactions"
+    "date": "2026-07-27T00:00:00.000Z",
+    "title": "PSD2 and Open Banking: AML Obligations for Third-Party Providers",
+    "slug": "psd2-open-banking-aml-obligations"
   }
 }

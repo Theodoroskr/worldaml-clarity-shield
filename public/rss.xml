@@ -6,9 +6,26 @@
   <atom:link href="https://worldaml.com/rss.xml" rel="self" type="application/rss+xml" />
   <description>Practical AML, KYC/KYB, sanctions and regulatory compliance analysis from the WorldAML team.</description>
   <language>en</language>
-  <lastBuildDate>Sat, 25 Jul 2026 18:07:08 GMT</lastBuildDate>
-  <pubDate>Sat, 25 Jul 2026 00:00:00 GMT</pubDate>
+  <lastBuildDate>Sun, 26 Jul 2026 09:43:47 GMT</lastBuildDate>
+  <pubDate>Sun, 26 Jul 2026 00:00:00 GMT</pubDate>
   <generator>WorldAML RSS Generator</generator>
+  <item>
+    <title>AML for Real Estate Agents: Obligations, Red Flags, and Compliance Workflows</title>
+    <link>https://worldaml.com/blog/aml-real-estate-property-transactions</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/aml-real-estate-property-transactions</guid>
+    <pubDate>Sun, 26 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[Real estate is one of the highest-risk sectors for money laundering. This guide covers AML obligations for estate agents, property transaction red flags, CDD requirements, and how to build a compliant onboarding workflow.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>AML Compliance</category>
+    <category>real estate AML</category>
+    <category>property transactions</category>
+    <category>estate agents</category>
+    <category>CDD</category>
+    <category>beneficial ownership</category>
+    <category>FATF</category>
+    <category>money laundering</category>
+  </item>
   <item>
     <title>The FATF Travel Rule Explained: Obligations for VASPs and Financial Institutions</title>
     <link>https://worldaml.com/blog/fatf-travel-rule-explained</link>
