@@ -127,14 +127,24 @@ export default function SuiteRegulatorSubmissions() {
 
   async function dispatch(row: Submission) {
     try {
+      const adapter = getAdapter(row.adapter);
       const res = await runSubmission(row.id);
-      toast({ title: `Adapter ran: ${res.status}`, description: res.responsePayload?.note as string ?? undefined });
+      const note = (res.responsePayload?.note as string) ?? undefined;
+      if (adapter && !adapter.isLive) {
+        toast({
+          title: `${adapter.label} is not live yet`,
+          description: note ?? "The report stays queued — file it through the regulator portal and mark it submitted here.",
+        });
+      } else {
+        toast({ title: `Adapter ran: ${res.status}`, description: note });
+      }
       load();
       if (selected?.id === row.id) openDetail(row);
     } catch (e) {
       toast({ title: "Adapter failed", description: (e as Error).message, variant: "destructive" });
     }
   }
+
 
   async function markAck(row: Submission, reference: string) {
     const { error } = await supabase
