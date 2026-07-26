@@ -774,6 +774,11 @@ export default function SuiteOnboardingForms() {
           )}
         </div>
         <div className="flex-1" />
+        {(editingId === "new" || fields.length === 0) && (
+          <Button size="sm" variant="outline" onClick={loadSampleKyc}>
+            <FileUp className="w-3.5 h-3.5 mr-1" /> Sample KYC
+          </Button>
+        )}
         <Button
           size="sm"
           variant="outline"
