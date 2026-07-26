@@ -589,10 +589,18 @@ export default function SuiteOnboardingForms() {
     }
   };
 
-  const copyPublicUrl = (form: OnboardingForm) => {
-    const url = `${window.location.origin}/onboard/${form.id}`;
-    navigator.clipboard.writeText(url);
+  const openShare = (form: OnboardingForm) => {
+    setShareForm(form);
+    setCopied(false);
+    setShareOpen(true);
+  };
+
+  const copyCurrentUrl = async () => {
+    if (!shareForm) return;
+    await navigator.clipboard.writeText(publicUrl(shareForm));
+    setCopied(true);
     toast.success("Public link copied");
+    setTimeout(() => setCopied(false), 1500);
   };
 
   // ------- List view -------
