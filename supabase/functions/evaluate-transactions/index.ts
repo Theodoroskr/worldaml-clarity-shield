@@ -20,7 +20,7 @@ interface AlertRule { id: string; user_id: string; name: string; conditions: Rul
 const FATF_GREY_BLACK = ["KP","IR","SY","MM","YE","AF","AL","BF","CM","CD","HT","KE","ML","MZ","NG","PH","SS","TZ","VN","PA","JM","TT","UG","ZW","RU"];
 
 function resolveField(field: string, tx: Transaction, customer: Customer | null): string | number | null {
-  const f = field.toLowerCase().trim();
+  const f = String(field ?? "").toLowerCase().trim();
   if (f.includes("transaction amount") || f === "transaction.amount" || f === "amount") return tx.amount;
   if (f.includes("transaction direction") || f === "transaction.direction" || f === "direction") {
     return tx.direction === "inbound" ? "Inbound" : tx.direction === "outbound" ? "Outbound" : tx.direction;
@@ -36,15 +36,16 @@ function resolveField(field: string, tx: Transaction, customer: Customer | null)
   return null;
 }
 
-function parseNumericValue(val: string): number {
-  const cleaned = val.replace(/[^0-9.,\-]/g, "").replace(/,/g, "");
+function parseNumericValue(val: unknown): number {
+  if (typeof val === "number") return val;
+  const cleaned = String(val ?? "").replace(/[^0-9.,\-]/g, "").replace(/,/g, "");
   return parseFloat(cleaned) || 0;
 }
 
 function evaluateCondition(cond: RuleCondition, tx: Transaction, _customer: Customer | null): boolean {
   const actual = resolveField(cond.field, tx, _customer);
-  const op = cond.operator.trim().toUpperCase();
-  const expected = cond.value;
+  const op = String(cond.operator ?? "").trim().toUpperCase();
+  const expected = String(cond.value ?? "");
 
   if (actual === null || actual === undefined) return false;
 
