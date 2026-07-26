@@ -307,7 +307,11 @@ export default function SuiteOnboardingForms() {
   const [rollingBackId, setRollingBackId] = useState<string | null>(null);
   const [compareA, setCompareA] = useState<string | null>(null);
   const [compareB, setCompareB] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareForm, setShareForm] = useState<OnboardingForm | null>(null);
+  const [copied, setCopied] = useState(false);
 
+  const publicUrl = (form: OnboardingForm) => `${window.location.origin}/onboard/${form.id}`;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
