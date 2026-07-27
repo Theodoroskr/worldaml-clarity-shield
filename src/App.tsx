@@ -10,7 +10,7 @@ import Layout from "@/components/Layout";
 import ScrollToTop from "@/components/ScrollToTop";
 import PartnerOnlyRouteGuard from "@/components/PartnerOnlyRouteGuard";
 import AuthQueryInvalidator from "@/components/AuthQueryInvalidator";
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { isAcademyHost } from "@/lib/academyHost";
 import {
