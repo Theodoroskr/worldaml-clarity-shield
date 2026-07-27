@@ -6,9 +6,27 @@
   <atom:link href="https://worldaml.com/rss.xml" rel="self" type="application/rss+xml" />
   <description>Practical AML, KYC/KYB, sanctions and regulatory compliance analysis from the WorldAML team.</description>
   <language>en</language>
-  <lastBuildDate>Sun, 26 Jul 2026 10:06:08 GMT</lastBuildDate>
-  <pubDate>Sun, 26 Jul 2026 00:00:00 GMT</pubDate>
+  <lastBuildDate>Mon, 27 Jul 2026 06:57:56 GMT</lastBuildDate>
+  <pubDate>Mon, 27 Jul 2026 00:00:00 GMT</pubDate>
   <generator>WorldAML RSS Generator</generator>
+  <item>
+    <title>PSD2 and Open Banking: AML Obligations for Third-Party Providers</title>
+    <link>https://worldaml.com/blog/psd2-open-banking-aml-obligations</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/psd2-open-banking-aml-obligations</guid>
+    <pubDate>Mon, 27 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[PSD2 opened payment markets to new entrants — but it also extended AML obligations to Account Information Service Providers (AISPs) and Payment Initiation Service Providers (PISPs). This guide explains what is required.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>Regulatory Updates</category>
+    <category>PSD2</category>
+    <category>open banking</category>
+    <category>AML</category>
+    <category>AISP</category>
+    <category>PISP</category>
+    <category>payment services</category>
+    <category>fintech compliance</category>
+    <category>EU regulation</category>
+  </item>
   <item>
     <title>AML for Real Estate Agents: Obligations, Red Flags, and Compliance Workflows</title>
     <link>https://worldaml.com/blog/aml-real-estate-property-transactions</link>

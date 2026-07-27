@@ -1,11 +1,11 @@
 {
   "anchor": "2026-07-12T00:00:00.000Z",
   "totalArticles": 18,
-  "releasedCount": 15,
-  "upcomingCount": 3,
+  "releasedCount": 16,
+  "upcomingCount": 2,
   "nextRelease": {
-    "date": "2026-07-27T00:00:00.000Z",
-    "title": "PSD2 and Open Banking: AML Obligations for Third-Party Providers",
-    "slug": "psd2-open-banking-aml-obligations"
+    "date": "2026-07-28T00:00:00.000Z",
+    "title": "DORA Regulation: What Financial Institutions Need to Know About Digital Operational Resilience",
+    "slug": "dora-regulation-compliance-financial-institutions"
   }
 }
