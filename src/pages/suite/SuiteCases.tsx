@@ -560,6 +560,8 @@ export default function SuiteCases() {
         tprPropertyValue: "Property Value",
         tprPropertyDescription: "Property Description",
         tprDispositionAction: "Disposition Action",
+        pppType: "PPP Type",
+        selectedTransactions: "At least one transaction",
       };
       const missing = errors.map(e => labels[e] || e).join(", ");
       toast.error(`Missing mandatory fields: ${missing}`, { duration: 6000 });
