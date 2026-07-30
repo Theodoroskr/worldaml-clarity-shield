@@ -171,6 +171,15 @@ export interface FINTRACTransactionAction {
   };
 }
 
+// Per-transaction details (status, location, purpose, attempted-transaction reasonable measures)
+export interface FINTRACTransactionDetails {
+  transactionStatus?: "completed" | "attempted";
+  transactionLocation?: string;
+  transactionPurpose?: string;
+  attemptedReason?: string;
+  reasonableMeasuresTaken?: string;
+}
+
 export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
   methodOfTransaction: "",
   sourceOfFunds: "",
