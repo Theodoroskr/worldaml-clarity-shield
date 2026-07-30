@@ -146,6 +146,8 @@ export interface FINTRACManualFields {
   // ── FWR multi-action: per-transaction starting + completing actions ──
   // Keyed by transaction.id. When present, overrides the legacy aggregate fields above.
   transactionActions?: Record<string, FINTRACTransactionAction>;
+  // ── FINTRAC transaction status / location / purpose / attempted-transaction details ──
+  transactionDetails?: Record<string, FINTRACTransactionDetails>;
 }
 
 // One starting+completing action pair per transaction (FWR multi-action support)
