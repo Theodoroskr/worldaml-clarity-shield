@@ -1863,6 +1863,33 @@ export default function SuiteCases() {
                 )}
               </div>
 
+              {/* Section 2g: Prepaid Payment Product (PPP) */}
+              <div className="bg-white border border-red-200 rounded-xl p-4">
+                <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                  <input type="checkbox" checked={mf.isPpp} onChange={e => setMF({ isPpp: e.target.checked })} className="accent-red-700" />
+                  <h3 className="text-xs font-bold text-red-900">Transaction involves a Prepaid Payment Product (PPP)</h3>
+                </label>
+                {mf.isPpp && (
+                  <>
+                    <p className="text-[10px] text-red-600 mb-3">PCMLTFR s.7.1 — Required for suspicious activity involving prepaid cards, digital wallets, or stored-value products.</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input value={mf.ppp.pppType || ""} onChange={e => setMF({ ppp: { ...mf.ppp, pppType: e.target.value } })}
+                        placeholder="PPP type (prepaid card, digital wallet, voucher…) *" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.ppp.pppProvider || ""} onChange={e => setMF({ ppp: { ...mf.ppp, pppProvider: e.target.value } })}
+                        placeholder="Issuer / program manager" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.ppp.pppNumber || ""} onChange={e => setMF({ ppp: { ...mf.ppp, pppNumber: e.target.value } })}
+                        placeholder="Card / account number (masked if required)" className="border border-red-200 rounded px-2 py-1 text-xs font-mono bg-white text-foreground" />
+                      <input value={mf.ppp.pppHolderName || ""} onChange={e => setMF({ ppp: { ...mf.ppp, pppHolderName: e.target.value } })}
+                        placeholder="PPP holder / user name" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.ppp.loadMethod || ""} onChange={e => setMF({ ppp: { ...mf.ppp, loadMethod: e.target.value } })}
+                        placeholder="How the product was loaded / funded" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.ppp.unloadMethod || ""} onChange={e => setMF({ ppp: { ...mf.ppp, unloadMethod: e.target.value } })}
+                        placeholder="How funds were redeemed / transferred out" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                    </div>
+                  </>
+                )}
+              </div>
+
               {/* Section 3: Grounds for Suspicion */}
               <div className="bg-white border border-red-200 rounded-xl p-4">
                 <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
