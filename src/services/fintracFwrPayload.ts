@@ -256,6 +256,22 @@ export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
               receiverAccount: mf.emt.receiverAccount,
             }
           : undefined,
+        isPpp: mf.isPpp,
+        ppp: mf.isPpp
+          ? {
+              pppType: mf.ppp.pppType,
+              pppNumber: mf.ppp.pppNumber,
+              pppProvider: mf.ppp.pppProvider,
+              pppHolderName: mf.ppp.pppHolderName,
+              loadMethod: mf.ppp.loadMethod,
+              unloadMethod: mf.ppp.unloadMethod,
+            }
+          : undefined,
+        transactionStatus: tx.transaction_status ?? undefined,
+        attemptedReason: tx.attempted_reason ?? undefined,
+        reasonableMeasuresTaken: tx.reasonable_measures_taken ?? undefined,
+        transactionLocation: tx.transaction_location ?? undefined,
+        transactionPurpose: tx.transaction_purpose ?? undefined,
       })),
     },
 
