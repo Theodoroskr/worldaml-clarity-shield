@@ -497,6 +497,34 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y += 2;
   }
 
+  if (mf.isPpp) {
+    const ppp = mf.ppp;
+    y = checkPage(doc, y, 50);
+    subHeader("2.3 — PREPAID PAYMENT PRODUCT DETAILS (PCMLTFR s.7.1)");
+    y = fieldPair(doc, "PPP Type", ppp.pppType || "—", "PPP Provider / Issuer", ppp.pppProvider || "—", y);
+    y = fieldPair(doc, "PPP Number / Identifier", ppp.pppNumber || "—", "PPP Holder Name", ppp.pppHolderName || "—", y);
+    y = fieldPair(doc, "Load / Funding Method", ppp.loadMethod || "—", "Unload / Redemption Method", ppp.unloadMethod || "—", y);
+    y += 2;
+  }
+
+  // Attempted transactions addendum
+  const attemptedTxs = transactions.filter(t => t.transaction_status === "attempted");
+  if (attemptedTxs.length > 0) {
+    y = checkPage(doc, y, 30 + attemptedTxs.length * 14);
+    y = header(doc, "Attempted Transactions — Reasonable Measures", y);
+    doc.setFontSize(7.5); doc.setFont("helvetica", "italic"); doc.setTextColor(100, 100, 100);
+    doc.text("PCMLTFR s.9 — For attempted transactions, explain why completion was prevented and the reasonable measures taken.", MARGIN, y);
+    doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal");
+    y += 6;
+    attemptedTxs.forEach((tx, idx) => {
+      y = checkPage(doc, y, 28);
+      const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
+      y = field(doc, `Attempted Transaction ${idx + 1} — ${tx.id.slice(0, 8)} · ${txDate} · ${tx.amount.toLocaleString("en-CA")} ${tx.currency}`, tx.attempted_reason || "Reason not specified", y);
+      y = field(doc, "Reasonable Measures Taken", tx.reasonable_measures_taken || "Reasonable measures not recorded", y);
+    });
+    y += 2;
+  }
+
   // ── SECTION 3 — Starting Action (per-transaction multi-action) ──
   y = checkPage(doc, y, 30);
   y = header(doc, "Section 3 — Starting Action (PCMLTFR s.132)", y);
