@@ -136,11 +136,13 @@ export interface FINTRACManualFields {
   conductors: FINTRACPartyConductor[];
   beneficialOwners: FINTRACPartyBeneficialOwner[];
   thirdParties: FINTRACPartyThirdParty[];
-  // ── Virtual currency / EMT ──
+  // ── Virtual currency / EMT / PPP ──
   isVirtualCurrency: boolean;
   virtualCurrency: FINTRACVirtualCurrencyDetails;
   isEmt: boolean;
   emt: FINTRACEmtDetails;
+  isPpp: boolean;
+  ppp: FINTRACPppDetails;
   // ── FWR multi-action: per-transaction starting + completing actions ──
   // Keyed by transaction.id. When present, overrides the legacy aggregate fields above.
   transactionActions?: Record<string, FINTRACTransactionAction>;
