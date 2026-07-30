@@ -76,6 +76,20 @@ export interface FwrPayload {
         senderAccount?: string;
         receiverAccount?: string;
       };
+      isPpp: boolean;
+      ppp?: {
+        pppType: string;
+        pppNumber?: string;
+        pppProvider?: string;
+        pppHolderName?: string;
+        loadMethod?: string;
+        unloadMethod?: string;
+      };
+      transactionStatus?: "completed" | "attempted";
+      attemptedReason?: string;
+      reasonableMeasuresTaken?: string;
+      transactionLocation?: string;
+      transactionPurpose?: string;
     }>;
   };
 
