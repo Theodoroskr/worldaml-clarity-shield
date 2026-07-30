@@ -31,7 +31,7 @@ const REGULATOR_REPORTS: Record<string, ReportObligation[]> = {
     { id: "ctr", name: "CTR", regulator: "FinCEN", description: "Currency Transaction Report (cash ≥ $10,000)", deadline: "15 calendar days", threshold: "$10,000 cash", legalBasis: "BSA 31 CFR §1010.311", exportKey: "sar" },
   ],
   FINTRAC: [
-    { id: "str", name: "STR", regulator: "FINTRAC", description: "Suspicious Transaction Report", deadline: "3 business days", legalBasis: "PCMLTFA s.7", exportKey: "fintrac" },
+    { id: "str", name: "STR", regulator: "FINTRAC", description: "Suspicious Transaction Report", deadline: "As soon as practicable", legalBasis: "PCMLTFA s.7", exportKey: "fintrac" },
     { id: "lctr", name: "LCTR", regulator: "FINTRAC", description: "Large Cash Transaction Report (≥ CAD 10,000)", deadline: "15 calendar days", threshold: "CAD 10,000", legalBasis: "PCMLTFR s.132", exportKey: "fintrac" },
     { id: "eftr", name: "EFTR", regulator: "FINTRAC", description: "Electronic Funds Transfer Report (≥ CAD 10,000)", deadline: "15 calendar days", threshold: "CAD 10,000", legalBasis: "PCMLTFR s.12", exportKey: "fintrac" },
     { id: "tpr", name: "TPR", regulator: "FINTRAC", description: "Terrorist Property Report", deadline: "Immediately", legalBasis: "PCMLTFA s.7.1 / Criminal Code s.83.08", exportKey: "fintrac" },
@@ -99,8 +99,13 @@ const FINTRAC_FIELD_MAP: FieldMapping[] = [
   { fintracPart: "C", fintracField: "Counterparty Name", description: "Person or entity on the other side", sourceTable: "suite_transactions", sourceColumn: "counterparty", required: true },
   { fintracPart: "C", fintracField: "Counterparty Country", description: "Country of the counterparty", sourceTable: "suite_transactions", sourceColumn: "counterparty_country", required: true },
   { fintracPart: "C", fintracField: "Transaction Description", description: "Purpose or nature of the transaction", sourceTable: "suite_transactions", sourceColumn: "description", required: false },
+  { fintracPart: "C", fintracField: "Transaction Status", description: "Completed or attempted", sourceTable: "suite_transactions", sourceColumn: "transaction_status", required: true },
+  { fintracPart: "C", fintracField: "Transaction Location", description: "Branch, office, or location where the transaction occurred", sourceTable: "suite_transactions", sourceColumn: "transaction_location", required: false },
+  { fintracPart: "C", fintracField: "Transaction Purpose", description: "Purpose of the transaction", sourceTable: "suite_transactions", sourceColumn: "transaction_purpose", required: false },
   { fintracPart: "C", fintracField: "Monitoring Status", description: "Whether flagged by monitoring rules", sourceTable: "suite_transactions", sourceColumn: "monitoring_status", required: false },
   { fintracPart: "C", fintracField: "Risk Flag", description: "Whether the transaction was risk-flagged", sourceTable: "suite_transactions", sourceColumn: "risk_flag", required: false },
+  // Part C — Attempted Transaction Reasonable Measures
+  { fintracPart: "C-AM", fintracField: "Reasonable Measures Taken", description: "Why the attempted transaction was not completed and what measures were taken", sourceTable: "suite_transactions", sourceColumn: "reasonable_measures_taken", required: false },
   // Part C — Starting Action (missing from DB)
   { fintracPart: "C-SA", fintracField: "Method of Transaction", description: "In-person, online, telephone, mail, etc.", sourceTable: "suite_transactions", sourceColumn: null, required: true },
   { fintracPart: "C-SA", fintracField: "Source of Funds", description: "How the conductor obtained the funds", sourceTable: "suite_transactions", sourceColumn: null, required: true },
@@ -109,6 +114,9 @@ const FINTRAC_FIELD_MAP: FieldMapping[] = [
   // Part C — Completing Action (missing from DB)
   { fintracPart: "C-CA", fintracField: "Disposition Details", description: "How the funds were ultimately used", sourceTable: "suite_transactions", sourceColumn: null, required: true },
   { fintracPart: "C-CA", fintracField: "Beneficiary Name", description: "Person or entity who benefited from the transaction", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  { fintracPart: "C-VC", fintracField: "Virtual Currency Details", description: "VC type, addresses, transaction hash, wallet provider", sourceTable: "manual", sourceColumn: null, required: false },
+  { fintracPart: "C-EMT", fintracField: "EMT / EFT Details", description: "EMT reference, institutions, accounts, message", sourceTable: "manual", sourceColumn: null, required: false },
+  { fintracPart: "C-PPP", fintracField: "Prepaid Payment Product Details", description: "PPP type, provider, number, holder, load/unload method", sourceTable: "manual", sourceColumn: null, required: false },
   // Part D — Grounds for Suspicion
   { fintracPart: "D", fintracField: "Suspicion Type", description: "ML, TF, or sanctions evasion", sourceTable: "manual", sourceColumn: null, required: true },
   { fintracPart: "D", fintracField: "ML/TF Indicators", description: "Checkboxes from FINTRAC indicator guidance", sourceTable: "system", sourceColumn: "indicators_checklist", required: true },
@@ -151,6 +159,10 @@ const PART_LABELS: Record<string, string> = {
   "C": "Part C — Transaction Details",
   "C-SA": "Part C — Starting Action (Conductor)",
   "C-CA": "Part C — Completing Action (Beneficiary)",
+  "C-AM": "Part C — Attempted Transaction Reasonable Measures",
+  "C-VC": "Part C — Virtual Currency",
+  "C-EMT": "Part C — EMT / EFT",
+  "C-PPP": "Part C — Prepaid Payment Product",
   "D": "Part D — Grounds for Suspicion",
   "E": "Part E — Investigation Narrative",
   "F": "Part F — Declaration & Action Taken",
@@ -506,6 +518,19 @@ export default function SuiteCases() {
       if (!mf.camloName) errors.push("camloName");
       if (!mf.actionTaken) errors.push("actionTaken");
       if (notes.length === 0) errors.push("notes");
+      // PPP validation
+      if (mf.isPpp && !mf.ppp?.pppType) errors.push("pppType");
+      // Selected transactions must have a status; attempted transactions require reason & reasonable measures
+      const selectedTxs = caseTransactions.filter(t => selectedTxIds.has(t.id));
+      if (selectedTxs.length === 0) errors.push("selectedTransactions");
+      selectedTxs.forEach(tx => {
+        const d = mf.transactionDetails?.[tx.id];
+        if (!d?.transactionStatus) errors.push(`transactionStatus_${tx.id}`);
+        if (d?.transactionStatus === "attempted") {
+          if (!d.attemptedReason?.trim()) errors.push(`attemptedReason_${tx.id}`);
+          if (!d.reasonableMeasuresTaken?.trim()) errors.push(`reasonableMeasuresTaken_${tx.id}`);
+        }
+      });
     }
     return errors;
   };
@@ -535,6 +560,8 @@ export default function SuiteCases() {
         tprPropertyValue: "Property Value",
         tprPropertyDescription: "Property Description",
         tprDispositionAction: "Disposition Action",
+        pppType: "PPP Type",
+        selectedTransactions: "At least one transaction",
       };
       const missing = errors.map(e => labels[e] || e).join(", ");
       toast.error(`Missing mandatory fields: ${missing}`, { duration: 6000 });
@@ -1394,29 +1421,69 @@ export default function SuiteCases() {
                     <span className="text-[10px] font-semibold text-red-700">{selectedTxIds.size}/{caseTransactions.length} selected</span>
                   </div>
                 </div>
-                <div className="max-h-[200px] overflow-y-auto border border-red-100 rounded-lg divide-y divide-red-50">
-                  {caseTransactions.map(tx => (
-                    <label key={tx.id} className="flex items-center gap-3 px-3 py-2 hover:bg-red-50/50 cursor-pointer">
-                      <input type="checkbox" checked={selectedTxIds.has(tx.id)}
-                        onChange={e => {
-                          const next = new Set(selectedTxIds);
-                          e.target.checked ? next.add(tx.id) : next.delete(tx.id);
-                          setSelectedTxIds(next);
-                        }}
-                        className="rounded border-red-300 text-red-600 focus:ring-red-300" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-semibold",
-                            tx.direction === "inbound" ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"
-                          )}>{tx.direction}</span>
-                          <span className="text-xs font-semibold text-foreground">{tx.currency} {Number(tx.amount).toLocaleString()}</span>
-                          {tx.counterparty && <span className="text-[11px] text-muted-foreground">→ {tx.counterparty}</span>}
-                          {tx.risk_flag && <span className="text-[9px] bg-red-100 text-red-700 px-1 rounded font-bold">FLAGGED</span>}
+                <div className="max-h-[280px] overflow-y-auto border border-red-100 rounded-lg divide-y divide-red-50">
+                  {caseTransactions.map(tx => {
+                    const txDetails = mf.transactionDetails?.[tx.id] || {};
+                    const isAttempted = txDetails.transactionStatus === "attempted";
+                    return (
+                      <div key={tx.id} className="px-3 py-2 hover:bg-red-50/50">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input type="checkbox" checked={selectedTxIds.has(tx.id)}
+                            onChange={e => {
+                              const next = new Set(selectedTxIds);
+                              e.target.checked ? next.add(tx.id) : next.delete(tx.id);
+                              setSelectedTxIds(next);
+                            }}
+                            className="rounded border-red-300 text-red-600 focus:ring-red-300" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-semibold",
+                                tx.direction === "inbound" ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"
+                              )}>{tx.direction}</span>
+                              <span className="text-xs font-semibold text-foreground">{tx.currency} {Number(tx.amount).toLocaleString()}</span>
+                              {tx.counterparty && <span className="text-[11px] text-muted-foreground">→ {tx.counterparty}</span>}
+                              {tx.risk_flag && <span className="text-[9px] bg-red-100 text-red-700 px-1 rounded font-bold">FLAGGED</span>}
+                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-semibold border",
+                                isAttempted ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              )}>{isAttempted ? "Attempted" : "Completed"}</span>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground">{new Date(tx.created_at).toLocaleDateString()}{tx.description ? ` · ${tx.description}` : ''}</span>
+                          </div>
+                        </label>
+                        <div className="mt-2 pl-7 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <select value={txDetails.transactionStatus || "completed"}
+                            onChange={e => {
+                              const val = e.target.value as "completed" | "attempted";
+                              setMF({ transactionDetails: { ...mf.transactionDetails, [tx.id]: { ...txDetails, transactionStatus: val } } });
+                            }}
+                            className="border border-red-200 rounded-lg px-2 py-1 text-[11px] bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                            <option value="completed">Completed</option>
+                            <option value="attempted">Attempted</option>
+                          </select>
+                          <input type="text" placeholder="Transaction location / branch"
+                            value={txDetails.transactionLocation || ""}
+                            onChange={e => setMF({ transactionDetails: { ...mf.transactionDetails, [tx.id]: { ...txDetails, transactionLocation: e.target.value } } })}
+                            className="border border-red-200 rounded-lg px-2 py-1 text-[11px] focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                          <input type="text" placeholder="Purpose of transaction"
+                            value={txDetails.transactionPurpose || ""}
+                            onChange={e => setMF({ transactionDetails: { ...mf.transactionDetails, [tx.id]: { ...txDetails, transactionPurpose: e.target.value } } })}
+                            className="border border-red-200 rounded-lg px-2 py-1 text-[11px] focus:ring-1 focus:ring-red-300 focus:outline-none sm:col-span-2" />
+                          {isAttempted && (
+                            <>
+                              <textarea placeholder="Why was the transaction not completed?"
+                                value={txDetails.attemptedReason || ""}
+                                onChange={e => setMF({ transactionDetails: { ...mf.transactionDetails, [tx.id]: { ...txDetails, attemptedReason: e.target.value } } })}
+                                className="border border-red-200 rounded-lg px-2 py-1 text-[11px] focus:ring-1 focus:ring-red-300 focus:outline-none sm:col-span-2" rows={2} />
+                              <textarea placeholder="What reasonable measures were taken?"
+                                value={txDetails.reasonableMeasuresTaken || ""}
+                                onChange={e => setMF({ transactionDetails: { ...mf.transactionDetails, [tx.id]: { ...txDetails, reasonableMeasuresTaken: e.target.value } } })}
+                                className="border border-red-200 rounded-lg px-2 py-1 text-[11px] focus:ring-1 focus:ring-red-300 focus:outline-none sm:col-span-2" rows={2} />
+                            </>
+                          )}
                         </div>
-                        <span className="text-[10px] text-muted-foreground">{new Date(tx.created_at).toLocaleDateString()}{tx.description ? ` · ${tx.description}` : ''}</span>
                       </div>
-                    </label>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1806,6 +1873,33 @@ export default function SuiteCases() {
                       <textarea value={mf.emt.emtMessage || ""} onChange={e => setMF({ emt: { ...mf.emt, emtMessage: e.target.value } })}
                         placeholder="EMT message / memo (full text as sent)" rows={2}
                         className="col-span-2 border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Section 2g: Prepaid Payment Product (PPP) */}
+              <div className="bg-white border border-red-200 rounded-xl p-4">
+                <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                  <input type="checkbox" checked={mf.isPpp} onChange={e => setMF({ isPpp: e.target.checked })} className="accent-red-700" />
+                  <h3 className="text-xs font-bold text-red-900">Transaction involves a Prepaid Payment Product (PPP)</h3>
+                </label>
+                {mf.isPpp && (
+                  <>
+                    <p className="text-[10px] text-red-600 mb-3">PCMLTFR s.7.1 — Required for suspicious activity involving prepaid cards, digital wallets, or stored-value products.</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input value={mf.ppp.pppType || ""} onChange={e => setMF({ ppp: { ...mf.ppp, pppType: e.target.value } })}
+                        placeholder="PPP type (prepaid card, digital wallet, voucher…) *" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.ppp.pppProvider || ""} onChange={e => setMF({ ppp: { ...mf.ppp, pppProvider: e.target.value } })}
+                        placeholder="Issuer / program manager" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.ppp.pppNumber || ""} onChange={e => setMF({ ppp: { ...mf.ppp, pppNumber: e.target.value } })}
+                        placeholder="Card / account number (masked if required)" className="border border-red-200 rounded px-2 py-1 text-xs font-mono bg-white text-foreground" />
+                      <input value={mf.ppp.pppHolderName || ""} onChange={e => setMF({ ppp: { ...mf.ppp, pppHolderName: e.target.value } })}
+                        placeholder="PPP holder / user name" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.ppp.loadMethod || ""} onChange={e => setMF({ ppp: { ...mf.ppp, loadMethod: e.target.value } })}
+                        placeholder="How the product was loaded / funded" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                      <input value={mf.ppp.unloadMethod || ""} onChange={e => setMF({ ppp: { ...mf.ppp, unloadMethod: e.target.value } })}
+                        placeholder="How funds were redeemed / transferred out" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
                     </div>
                   </>
                 )}

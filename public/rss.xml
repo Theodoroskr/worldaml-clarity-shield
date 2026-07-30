@@ -6,9 +6,44 @@
   <atom:link href="https://worldaml.com/rss.xml" rel="self" type="application/rss+xml" />
   <description>Practical AML, KYC/KYB, sanctions and regulatory compliance analysis from the WorldAML team.</description>
   <language>en</language>
-  <lastBuildDate>Mon, 27 Jul 2026 08:48:55 GMT</lastBuildDate>
-  <pubDate>Mon, 27 Jul 2026 00:00:00 GMT</pubDate>
+  <lastBuildDate>Thu, 30 Jul 2026 13:20:46 GMT</lastBuildDate>
+  <pubDate>Wed, 29 Jul 2026 00:00:00 GMT</pubDate>
   <generator>WorldAML RSS Generator</generator>
+  <item>
+    <title>LexisNexis WorldCompliance vs LSEG World-Check: A 2026 Comparison</title>
+    <link>https://worldaml.com/blog/worldcompliance-vs-world-check</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/worldcompliance-vs-world-check</guid>
+    <pubDate>Wed, 29 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[Side-by-side comparison of LexisNexis WorldCompliance and LSEG World-Check across coverage, refresh frequency, PEP depth, adverse media, integration and pricing — and how WorldAML packages WorldCompliance for live, API-first screening.]]></description>
+    <author>info@worldaml.com (WorldAML Research Team)</author>
+    <dc:creator><![CDATA[WorldAML Research Team]]></dc:creator>
+    <category>Sanctions</category>
+    <category>WorldCompliance</category>
+    <category>World-Check</category>
+    <category>sanctions screening</category>
+    <category>PEP</category>
+    <category>adverse media</category>
+    <category>LexisNexis</category>
+    <category>LSEG</category>
+    <category>Refinitiv</category>
+  </item>
+  <item>
+    <title>DORA Regulation: What Financial Institutions Need to Know About Digital Operational Resilience</title>
+    <link>https://worldaml.com/blog/dora-regulation-compliance-financial-institutions</link>
+    <guid isPermaLink="true">https://worldaml.com/blog/dora-regulation-compliance-financial-institutions</guid>
+    <pubDate>Tue, 28 Jul 2026 00:00:00 GMT</pubDate>
+    <description><![CDATA[The EU's Digital Operational Resilience Act (DORA) came into force in January 2025. This guide explains DORA's requirements for financial institutions, the intersection with AML and cybersecurity, and how to build a compliant ICT risk management framework.]]></description>
+    <author>info@worldaml.com (WorldAML Compliance Team)</author>
+    <dc:creator><![CDATA[WorldAML Compliance Team]]></dc:creator>
+    <category>Regulatory Updates</category>
+    <category>DORA</category>
+    <category>digital operational resilience</category>
+    <category>ICT risk</category>
+    <category>EU regulation</category>
+    <category>financial institutions</category>
+    <category>cyber resilience</category>
+    <category>third-party risk</category>
+  </item>
   <item>
     <title>PSD2 and Open Banking: AML Obligations for Third-Party Providers</title>
     <link>https://worldaml.com/blog/psd2-open-banking-aml-obligations</link>

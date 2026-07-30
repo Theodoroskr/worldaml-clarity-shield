@@ -22,6 +22,12 @@ export interface FINTRACTransaction {
   description?: string | null;
   monitoring_status?: string | null;
   risk_flag?: boolean;
+  // FINTRAC FWR transaction status (completed / attempted)
+  transaction_status?: "completed" | "attempted" | null;
+  attempted_reason?: string | null;
+  reasonable_measures_taken?: string | null;
+  transaction_location?: string | null;
+  transaction_purpose?: string | null;
 }
 
 export interface FINTRACCase {
@@ -86,6 +92,15 @@ export interface FINTRACEmtDetails {
   emtType?: string;             // e-Transfer, SWIFT MT103, ACH, Interac, etc.
 }
 
+export interface FINTRACPppDetails {
+  pppType: string;              // Prepaid card, digital wallet, etc.
+  pppNumber?: string;           // Card / account number (masked if required)
+  pppProvider?: string;         // Issuer / program manager
+  pppHolderName?: string;       // Person who loaded / used the product
+  loadMethod?: string;          // How the product was loaded / funded
+  unloadMethod?: string;        // How funds were redeemed / transferred out
+}
+
 export interface FINTRACManualFields {
   // Starting Action (legacy single-conductor — kept for backward compat)
   methodOfTransaction: string;
@@ -121,14 +136,18 @@ export interface FINTRACManualFields {
   conductors: FINTRACPartyConductor[];
   beneficialOwners: FINTRACPartyBeneficialOwner[];
   thirdParties: FINTRACPartyThirdParty[];
-  // ── Virtual currency / EMT ──
+  // ── Virtual currency / EMT / PPP ──
   isVirtualCurrency: boolean;
   virtualCurrency: FINTRACVirtualCurrencyDetails;
   isEmt: boolean;
   emt: FINTRACEmtDetails;
+  isPpp: boolean;
+  ppp: FINTRACPppDetails;
   // ── FWR multi-action: per-transaction starting + completing actions ──
   // Keyed by transaction.id. When present, overrides the legacy aggregate fields above.
   transactionActions?: Record<string, FINTRACTransactionAction>;
+  // ── FINTRAC transaction status / location / purpose / attempted-transaction details ──
+  transactionDetails?: Record<string, FINTRACTransactionDetails>;
 }
 
 // One starting+completing action pair per transaction (FWR multi-action support)
@@ -152,6 +171,15 @@ export interface FINTRACTransactionAction {
     accountTo?: string;
     institutionTo?: string;
   };
+}
+
+// Per-transaction details (status, location, purpose, attempted-transaction reasonable measures)
+export interface FINTRACTransactionDetails {
+  transactionStatus?: "completed" | "attempted";
+  transactionLocation?: string;
+  transactionPurpose?: string;
+  attemptedReason?: string;
+  reasonableMeasuresTaken?: string;
 }
 
 export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
@@ -187,6 +215,9 @@ export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
   virtualCurrency: { vcType: "", senderAddress: "", receiverAddress: "", transactionHash: "", exchangeRateToCad: "", walletProvider: "" },
   isEmt: false,
   emt: { emtReference: "", emtMessage: "", senderInstitution: "", receiverInstitution: "", senderAccount: "", receiverAccount: "", emtType: "" },
+  isPpp: false,
+  ppp: { pppType: "", pppNumber: "", pppProvider: "", pppHolderName: "", loadMethod: "", unloadMethod: "" },
+  transactionDetails: {},
 };
 
 export interface FINTRACSTRExportOptions {
@@ -417,16 +448,19 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     doc.setFontSize(7.5); doc.setFont("helvetica", "bold");
     doc.setFillColor(245, 245, 245);
     doc.rect(MARGIN, y, CONTENT_W, 7, "F");
-    const cols = [MARGIN + 2, MARGIN + 22, MARGIN + 47, MARGIN + 67, MARGIN + 87, MARGIN + 112, MARGIN + 140];
-    const cellHeaders = ["Date", "Amount", "Currency", "Direction", "Counterparty", "Country", "Status"];
+    const cols = [MARGIN + 2, MARGIN + 22, MARGIN + 47, MARGIN + 67, MARGIN + 87, MARGIN + 112, MARGIN + 140, MARGIN + 168];
+    const cellHeaders = ["Date", "Amount", "Currency", "Direction", "Counterparty", "Country", "Status", "Outcome"];
     cellHeaders.forEach((h, i) => doc.text(h, cols[i], y + 5));
     y += 9;
     doc.setFont("helvetica", "normal"); doc.setFontSize(8);
 
     for (const tx of transactions.slice(0, 30)) {
-      y = checkPage(doc, y, 8);
+      y = checkPage(doc, y, 12);
+      const txDetails = mf.transactionDetails?.[tx.id];
       const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
       const amt = tx.amount.toLocaleString("en-CA", { minimumFractionDigits: 2 });
+      const status = txDetails?.transactionStatus ?? tx.transaction_status ?? null;
+      const outcome = status === "attempted" ? "Attempted" : status === "completed" ? "Completed" : "—";
       doc.text(txDate, cols[0], y + 4);
       doc.text(amt, cols[1], y + 4);
       doc.text(tx.currency, cols[2], y + 4);
@@ -434,6 +468,7 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
       doc.text((tx.counterparty ?? "—").slice(0, 16), cols[4], y + 4);
       doc.text(tx.counterparty_country ?? "—", cols[5], y + 4);
       doc.text(tx.monitoring_status ?? "—", cols[6], y + 4);
+      doc.text(outcome, cols[7], y + 4);
       doc.setDrawColor(230, 230, 230);
       doc.line(MARGIN, y + 6, MARGIN + CONTENT_W, y + 6);
       y += 8;
@@ -473,6 +508,38 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = fieldPair(doc, "Sender Institution", emt.senderInstitution || "—", "Receiver Institution", emt.receiverInstitution || "—", y);
     y = fieldPair(doc, "Sender Account", emt.senderAccount || "—", "Receiver Account", emt.receiverAccount || "—", y);
     y = field(doc, "EMT Message / Memo", emt.emtMessage || "—", y);
+    y += 2;
+  }
+
+  if (mf.isPpp) {
+    const ppp = mf.ppp;
+    y = checkPage(doc, y, 50);
+    subHeader("2.3 — PREPAID PAYMENT PRODUCT DETAILS (PCMLTFR s.7.1)");
+    y = fieldPair(doc, "PPP Type", ppp.pppType || "—", "PPP Provider / Issuer", ppp.pppProvider || "—", y);
+    y = fieldPair(doc, "PPP Number / Identifier", ppp.pppNumber || "—", "PPP Holder Name", ppp.pppHolderName || "—", y);
+    y = fieldPair(doc, "Load / Funding Method", ppp.loadMethod || "—", "Unload / Redemption Method", ppp.unloadMethod || "—", y);
+    y += 2;
+  }
+
+  // Attempted transactions addendum
+  const attemptedTxs = transactions.filter((t) => {
+    const d = mf.transactionDetails?.[t.id];
+    return (d?.transactionStatus ?? t.transaction_status) === "attempted";
+  });
+  if (attemptedTxs.length > 0) {
+    y = checkPage(doc, y, 30 + attemptedTxs.length * 14);
+    y = header(doc, "Attempted Transactions — Reasonable Measures", y);
+    doc.setFontSize(7.5); doc.setFont("helvetica", "italic"); doc.setTextColor(100, 100, 100);
+    doc.text("PCMLTFR s.9 — For attempted transactions, explain why completion was prevented and the reasonable measures taken.", MARGIN, y);
+    doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal");
+    y += 6;
+    attemptedTxs.forEach((tx, idx) => {
+      y = checkPage(doc, y, 28);
+      const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
+      const d = mf.transactionDetails?.[tx.id];
+      y = field(doc, `Attempted Transaction ${idx + 1} — ${tx.id.slice(0, 8)} · ${txDate} · ${tx.amount.toLocaleString("en-CA")} ${tx.currency}`, d?.attemptedReason ?? tx.attempted_reason ?? "Reason not specified", y);
+      y = field(doc, "Reasonable Measures Taken", d?.reasonableMeasuresTaken ?? tx.reasonable_measures_taken ?? "Reasonable measures not recorded", y);
+    });
     y += 2;
   }
 
