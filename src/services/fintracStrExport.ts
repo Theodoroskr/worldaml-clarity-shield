@@ -92,6 +92,15 @@ export interface FINTRACEmtDetails {
   emtType?: string;             // e-Transfer, SWIFT MT103, ACH, Interac, etc.
 }
 
+export interface FINTRACPppDetails {
+  pppType: string;              // Prepaid card, digital wallet, etc.
+  pppNumber?: string;           // Card / account number (masked if required)
+  pppProvider?: string;         // Issuer / program manager
+  pppHolderName?: string;       // Person who loaded / used the product
+  loadMethod?: string;          // How the product was loaded / funded
+  unloadMethod?: string;        // How funds were redeemed / transferred out
+}
+
 export interface FINTRACManualFields {
   // Starting Action (legacy single-conductor — kept for backward compat)
   methodOfTransaction: string;
