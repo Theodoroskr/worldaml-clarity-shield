@@ -456,9 +456,11 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
 
     for (const tx of transactions.slice(0, 30)) {
       y = checkPage(doc, y, 12);
+      const txDetails = mf.transactionDetails?.[tx.id];
       const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
       const amt = tx.amount.toLocaleString("en-CA", { minimumFractionDigits: 2 });
-      const outcome = tx.transaction_status === "attempted" ? "Attempted" : tx.transaction_status === "completed" ? "Completed" : "—";
+      const status = txDetails?.transactionStatus ?? tx.transaction_status ?? null;
+      const outcome = status === "attempted" ? "Attempted" : status === "completed" ? "Completed" : "—";
       doc.text(txDate, cols[0], y + 4);
       doc.text(amt, cols[1], y + 4);
       doc.text(tx.currency, cols[2], y + 4);
