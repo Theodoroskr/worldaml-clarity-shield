@@ -1406,29 +1406,69 @@ export default function SuiteCases() {
                     <span className="text-[10px] font-semibold text-red-700">{selectedTxIds.size}/{caseTransactions.length} selected</span>
                   </div>
                 </div>
-                <div className="max-h-[200px] overflow-y-auto border border-red-100 rounded-lg divide-y divide-red-50">
-                  {caseTransactions.map(tx => (
-                    <label key={tx.id} className="flex items-center gap-3 px-3 py-2 hover:bg-red-50/50 cursor-pointer">
-                      <input type="checkbox" checked={selectedTxIds.has(tx.id)}
-                        onChange={e => {
-                          const next = new Set(selectedTxIds);
-                          e.target.checked ? next.add(tx.id) : next.delete(tx.id);
-                          setSelectedTxIds(next);
-                        }}
-                        className="rounded border-red-300 text-red-600 focus:ring-red-300" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-semibold",
-                            tx.direction === "inbound" ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"
-                          )}>{tx.direction}</span>
-                          <span className="text-xs font-semibold text-foreground">{tx.currency} {Number(tx.amount).toLocaleString()}</span>
-                          {tx.counterparty && <span className="text-[11px] text-muted-foreground">→ {tx.counterparty}</span>}
-                          {tx.risk_flag && <span className="text-[9px] bg-red-100 text-red-700 px-1 rounded font-bold">FLAGGED</span>}
+                <div className="max-h-[280px] overflow-y-auto border border-red-100 rounded-lg divide-y divide-red-50">
+                  {caseTransactions.map(tx => {
+                    const txDetails = mf.transactionDetails?.[tx.id] || {};
+                    const isAttempted = txDetails.transactionStatus === "attempted";
+                    return (
+                      <div key={tx.id} className="px-3 py-2 hover:bg-red-50/50">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input type="checkbox" checked={selectedTxIds.has(tx.id)}
+                            onChange={e => {
+                              const next = new Set(selectedTxIds);
+                              e.target.checked ? next.add(tx.id) : next.delete(tx.id);
+                              setSelectedTxIds(next);
+                            }}
+                            className="rounded border-red-300 text-red-600 focus:ring-red-300" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-semibold",
+                                tx.direction === "inbound" ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"
+                              )}>{tx.direction}</span>
+                              <span className="text-xs font-semibold text-foreground">{tx.currency} {Number(tx.amount).toLocaleString()}</span>
+                              {tx.counterparty && <span className="text-[11px] text-muted-foreground">→ {tx.counterparty}</span>}
+                              {tx.risk_flag && <span className="text-[9px] bg-red-100 text-red-700 px-1 rounded font-bold">FLAGGED</span>}
+                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-semibold border",
+                                isAttempted ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              )}>{isAttempted ? "Attempted" : "Completed"}</span>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground">{new Date(tx.created_at).toLocaleDateString()}{tx.description ? ` · ${tx.description}` : ''}</span>
+                          </div>
+                        </label>
+                        <div className="mt-2 pl-7 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <select value={txDetails.transactionStatus || "completed"}
+                            onChange={e => {
+                              const val = e.target.value as "completed" | "attempted";
+                              setMF({ transactionDetails: { ...mf.transactionDetails, [tx.id]: { ...txDetails, transactionStatus: val } } });
+                            }}
+                            className="border border-red-200 rounded-lg px-2 py-1 text-[11px] bg-white text-foreground focus:ring-1 focus:ring-red-300 focus:outline-none">
+                            <option value="completed">Completed</option>
+                            <option value="attempted">Attempted</option>
+                          </select>
+                          <input type="text" placeholder="Transaction location / branch"
+                            value={txDetails.transactionLocation || ""}
+                            onChange={e => setMF({ transactionDetails: { ...mf.transactionDetails, [tx.id]: { ...txDetails, transactionLocation: e.target.value } } })}
+                            className="border border-red-200 rounded-lg px-2 py-1 text-[11px] focus:ring-1 focus:ring-red-300 focus:outline-none" />
+                          <input type="text" placeholder="Purpose of transaction"
+                            value={txDetails.transactionPurpose || ""}
+                            onChange={e => setMF({ transactionDetails: { ...mf.transactionDetails, [tx.id]: { ...txDetails, transactionPurpose: e.target.value } } })}
+                            className="border border-red-200 rounded-lg px-2 py-1 text-[11px] focus:ring-1 focus:ring-red-300 focus:outline-none sm:col-span-2" />
+                          {isAttempted && (
+                            <>
+                              <textarea placeholder="Why was the transaction not completed?"
+                                value={txDetails.attemptedReason || ""}
+                                onChange={e => setMF({ transactionDetails: { ...mf.transactionDetails, [tx.id]: { ...txDetails, attemptedReason: e.target.value } } })}
+                                className="border border-red-200 rounded-lg px-2 py-1 text-[11px] focus:ring-1 focus:ring-red-300 focus:outline-none sm:col-span-2" rows={2} />
+                              <textarea placeholder="What reasonable measures were taken?"
+                                value={txDetails.reasonableMeasuresTaken || ""}
+                                onChange={e => setMF({ transactionDetails: { ...mf.transactionDetails, [tx.id]: { ...txDetails, reasonableMeasuresTaken: e.target.value } } })}
+                                className="border border-red-200 rounded-lg px-2 py-1 text-[11px] focus:ring-1 focus:ring-red-300 focus:outline-none sm:col-span-2" rows={2} />
+                            </>
+                          )}
                         </div>
-                        <span className="text-[10px] text-muted-foreground">{new Date(tx.created_at).toLocaleDateString()}{tx.description ? ` · ${tx.description}` : ''}</span>
                       </div>
-                    </label>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
