@@ -436,16 +436,17 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     doc.setFontSize(7.5); doc.setFont("helvetica", "bold");
     doc.setFillColor(245, 245, 245);
     doc.rect(MARGIN, y, CONTENT_W, 7, "F");
-    const cols = [MARGIN + 2, MARGIN + 22, MARGIN + 47, MARGIN + 67, MARGIN + 87, MARGIN + 112, MARGIN + 140];
-    const cellHeaders = ["Date", "Amount", "Currency", "Direction", "Counterparty", "Country", "Status"];
+    const cols = [MARGIN + 2, MARGIN + 22, MARGIN + 47, MARGIN + 67, MARGIN + 87, MARGIN + 112, MARGIN + 140, MARGIN + 168];
+    const cellHeaders = ["Date", "Amount", "Currency", "Direction", "Counterparty", "Country", "Status", "Outcome"];
     cellHeaders.forEach((h, i) => doc.text(h, cols[i], y + 5));
     y += 9;
     doc.setFont("helvetica", "normal"); doc.setFontSize(8);
 
     for (const tx of transactions.slice(0, 30)) {
-      y = checkPage(doc, y, 8);
+      y = checkPage(doc, y, 12);
       const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
       const amt = tx.amount.toLocaleString("en-CA", { minimumFractionDigits: 2 });
+      const outcome = tx.transaction_status === "attempted" ? "Attempted" : tx.transaction_status === "completed" ? "Completed" : "—";
       doc.text(txDate, cols[0], y + 4);
       doc.text(amt, cols[1], y + 4);
       doc.text(tx.currency, cols[2], y + 4);
@@ -453,6 +454,7 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
       doc.text((tx.counterparty ?? "—").slice(0, 16), cols[4], y + 4);
       doc.text(tx.counterparty_country ?? "—", cols[5], y + 4);
       doc.text(tx.monitoring_status ?? "—", cols[6], y + 4);
+      doc.text(outcome, cols[7], y + 4);
       doc.setDrawColor(230, 230, 230);
       doc.line(MARGIN, y + 6, MARGIN + CONTENT_W, y + 6);
       y += 8;
