@@ -114,6 +114,9 @@ const FINTRAC_FIELD_MAP: FieldMapping[] = [
   // Part C — Completing Action (missing from DB)
   { fintracPart: "C-CA", fintracField: "Disposition Details", description: "How the funds were ultimately used", sourceTable: "suite_transactions", sourceColumn: null, required: true },
   { fintracPart: "C-CA", fintracField: "Beneficiary Name", description: "Person or entity who benefited from the transaction", sourceTable: "suite_transactions", sourceColumn: null, required: true },
+  { fintracPart: "C-VC", fintracField: "Virtual Currency Details", description: "VC type, addresses, transaction hash, wallet provider", sourceTable: "manual", sourceColumn: null, required: false },
+  { fintracPart: "C-EMT", fintracField: "EMT / EFT Details", description: "EMT reference, institutions, accounts, message", sourceTable: "manual", sourceColumn: null, required: false },
+  { fintracPart: "C-PPP", fintracField: "Prepaid Payment Product Details", description: "PPP type, provider, number, holder, load/unload method", sourceTable: "manual", sourceColumn: null, required: false },
   // Part D — Grounds for Suspicion
   { fintracPart: "D", fintracField: "Suspicion Type", description: "ML, TF, or sanctions evasion", sourceTable: "manual", sourceColumn: null, required: true },
   { fintracPart: "D", fintracField: "ML/TF Indicators", description: "Checkboxes from FINTRAC indicator guidance", sourceTable: "system", sourceColumn: "indicators_checklist", required: true },
