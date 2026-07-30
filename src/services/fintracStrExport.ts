@@ -217,6 +217,7 @@ export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
   emt: { emtReference: "", emtMessage: "", senderInstitution: "", receiverInstitution: "", senderAccount: "", receiverAccount: "", emtType: "" },
   isPpp: false,
   ppp: { pppType: "", pppNumber: "", pppProvider: "", pppHolderName: "", loadMethod: "", unloadMethod: "" },
+  transactionDetails: {},
 };
 
 export interface FINTRACSTRExportOptions {
