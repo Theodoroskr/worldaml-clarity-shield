@@ -22,6 +22,12 @@ export interface FINTRACTransaction {
   description?: string | null;
   monitoring_status?: string | null;
   risk_flag?: boolean;
+  // FINTRAC FWR transaction status (completed / attempted)
+  transaction_status?: "completed" | "attempted" | null;
+  attempted_reason?: string | null;
+  reasonable_measures_taken?: string | null;
+  transaction_location?: string | null;
+  transaction_purpose?: string | null;
 }
 
 export interface FINTRACCase {
