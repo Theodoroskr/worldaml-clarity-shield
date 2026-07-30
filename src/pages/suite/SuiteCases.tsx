@@ -518,6 +518,19 @@ export default function SuiteCases() {
       if (!mf.camloName) errors.push("camloName");
       if (!mf.actionTaken) errors.push("actionTaken");
       if (notes.length === 0) errors.push("notes");
+      // PPP validation
+      if (mf.isPpp && !mf.ppp?.pppType) errors.push("pppType");
+      // Selected transactions must have a status; attempted transactions require reason & reasonable measures
+      const selectedTxs = caseTransactions.filter(t => selectedTxIds.has(t.id));
+      if (selectedTxs.length === 0) errors.push("selectedTransactions");
+      selectedTxs.forEach(tx => {
+        const d = mf.transactionDetails?.[tx.id];
+        if (!d?.transactionStatus) errors.push(`transactionStatus_${tx.id}`);
+        if (d?.transactionStatus === "attempted") {
+          if (!d.attemptedReason?.trim()) errors.push(`attemptedReason_${tx.id}`);
+          if (!d.reasonableMeasuresTaken?.trim()) errors.push(`reasonableMeasuresTaken_${tx.id}`);
+        }
+      });
     }
     return errors;
   };
