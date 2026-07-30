@@ -224,55 +224,58 @@ export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
     },
 
     transactionInformation: {
-      transactions: opts.transactions.map((tx) => ({
-        internalId: tx.id,
-        dateTime: tx.created_at,
-        amount: tx.amount,
-        currency: tx.currency,
-        direction: tx.direction,
-        description: tx.description,
-        counterparty: tx.counterparty,
-        counterpartyCountry: tx.counterparty_country,
-        isVirtualCurrency: mf.isVirtualCurrency,
-        virtualCurrency: mf.isVirtualCurrency
-          ? {
-              type: mf.virtualCurrency.vcType,
-              senderAddress: mf.virtualCurrency.senderAddress,
-              receiverAddress: mf.virtualCurrency.receiverAddress,
-              transactionHash: mf.virtualCurrency.transactionHash,
-              exchangeRateToCad: mf.virtualCurrency.exchangeRateToCad,
-              walletProvider: mf.virtualCurrency.walletProvider,
-            }
-          : undefined,
-        isEmt: mf.isEmt,
-        emt: mf.isEmt
-          ? {
-              reference: mf.emt.emtReference,
-              message: mf.emt.emtMessage,
-              type: mf.emt.emtType,
-              senderInstitution: mf.emt.senderInstitution,
-              receiverInstitution: mf.emt.receiverInstitution,
-              senderAccount: mf.emt.senderAccount,
-              receiverAccount: mf.emt.receiverAccount,
-            }
-          : undefined,
-        isPpp: mf.isPpp,
-        ppp: mf.isPpp
-          ? {
-              pppType: mf.ppp.pppType,
-              pppNumber: mf.ppp.pppNumber,
-              pppProvider: mf.ppp.pppProvider,
-              pppHolderName: mf.ppp.pppHolderName,
-              loadMethod: mf.ppp.loadMethod,
-              unloadMethod: mf.ppp.unloadMethod,
-            }
-          : undefined,
-        transactionStatus: txDetails?.transactionStatus ?? tx.transaction_status ?? undefined,
-        attemptedReason: txDetails?.attemptedReason ?? tx.attempted_reason ?? undefined,
-        reasonableMeasuresTaken: txDetails?.reasonableMeasuresTaken ?? tx.reasonable_measures_taken ?? undefined,
-        transactionLocation: txDetails?.transactionLocation ?? tx.transaction_location ?? undefined,
-        transactionPurpose: txDetails?.transactionPurpose ?? tx.transaction_purpose ?? undefined,
-      })),
+      transactions: opts.transactions.map((tx) => {
+        const txDetails = mf.transactionDetails?.[tx.id];
+        return {
+          internalId: tx.id,
+          dateTime: tx.created_at,
+          amount: tx.amount,
+          currency: tx.currency,
+          direction: tx.direction,
+          description: tx.description,
+          counterparty: tx.counterparty,
+          counterpartyCountry: tx.counterparty_country,
+          isVirtualCurrency: mf.isVirtualCurrency,
+          virtualCurrency: mf.isVirtualCurrency
+            ? {
+                type: mf.virtualCurrency.vcType,
+                senderAddress: mf.virtualCurrency.senderAddress,
+                receiverAddress: mf.virtualCurrency.receiverAddress,
+                transactionHash: mf.virtualCurrency.transactionHash,
+                exchangeRateToCad: mf.virtualCurrency.exchangeRateToCad,
+                walletProvider: mf.virtualCurrency.walletProvider,
+              }
+            : undefined,
+          isEmt: mf.isEmt,
+          emt: mf.isEmt
+            ? {
+                reference: mf.emt.emtReference,
+                message: mf.emt.emtMessage,
+                type: mf.emt.emtType,
+                senderInstitution: mf.emt.senderInstitution,
+                receiverInstitution: mf.emt.receiverInstitution,
+                senderAccount: mf.emt.senderAccount,
+                receiverAccount: mf.emt.receiverAccount,
+              }
+            : undefined,
+          isPpp: mf.isPpp,
+          ppp: mf.isPpp
+            ? {
+                pppType: mf.ppp.pppType,
+                pppNumber: mf.ppp.pppNumber,
+                pppProvider: mf.ppp.pppProvider,
+                pppHolderName: mf.ppp.pppHolderName,
+                loadMethod: mf.ppp.loadMethod,
+                unloadMethod: mf.ppp.unloadMethod,
+              }
+            : undefined,
+          transactionStatus: txDetails?.transactionStatus ?? tx.transaction_status ?? undefined,
+          attemptedReason: txDetails?.attemptedReason ?? tx.attempted_reason ?? undefined,
+          reasonableMeasuresTaken: txDetails?.reasonableMeasuresTaken ?? tx.reasonable_measures_taken ?? undefined,
+          transactionLocation: txDetails?.transactionLocation ?? tx.transaction_location ?? undefined,
+          transactionPurpose: txDetails?.transactionPurpose ?? tx.transaction_purpose ?? undefined,
+        };
+      }),
     },
 
     startingActions: opts.transactions.map((tx) => {
