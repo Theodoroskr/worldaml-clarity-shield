@@ -522,7 +522,10 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
   }
 
   // Attempted transactions addendum
-  const attemptedTxs = transactions.filter(t => t.transaction_status === "attempted");
+  const attemptedTxs = transactions.filter((t) => {
+    const d = mf.transactionDetails?.[t.id];
+    return (d?.transactionStatus ?? t.transaction_status) === "attempted";
+  });
   if (attemptedTxs.length > 0) {
     y = checkPage(doc, y, 30 + attemptedTxs.length * 14);
     y = header(doc, "Attempted Transactions — Reasonable Measures", y);
@@ -533,8 +536,9 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     attemptedTxs.forEach((tx, idx) => {
       y = checkPage(doc, y, 28);
       const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
-      y = field(doc, `Attempted Transaction ${idx + 1} — ${tx.id.slice(0, 8)} · ${txDate} · ${tx.amount.toLocaleString("en-CA")} ${tx.currency}`, tx.attempted_reason || "Reason not specified", y);
-      y = field(doc, "Reasonable Measures Taken", tx.reasonable_measures_taken || "Reasonable measures not recorded", y);
+      const d = mf.transactionDetails?.[tx.id];
+      y = field(doc, `Attempted Transaction ${idx + 1} — ${tx.id.slice(0, 8)} · ${txDate} · ${tx.amount.toLocaleString("en-CA")} ${tx.currency}`, d?.attemptedReason ?? tx.attempted_reason ?? "Reason not specified", y);
+      y = field(doc, "Reasonable Measures Taken", d?.reasonableMeasuresTaken ?? tx.reasonable_measures_taken ?? "Reasonable measures not recorded", y);
     });
     y += 2;
   }
