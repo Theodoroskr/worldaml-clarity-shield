@@ -204,6 +204,8 @@ export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
   virtualCurrency: { vcType: "", senderAddress: "", receiverAddress: "", transactionHash: "", exchangeRateToCad: "", walletProvider: "" },
   isEmt: false,
   emt: { emtReference: "", emtMessage: "", senderInstitution: "", receiverInstitution: "", senderAccount: "", receiverAccount: "", emtType: "" },
+  isPpp: false,
+  ppp: { pppType: "", pppNumber: "", pppProvider: "", pppHolderName: "", loadMethod: "", unloadMethod: "" },
 };
 
 export interface FINTRACSTRExportOptions {
