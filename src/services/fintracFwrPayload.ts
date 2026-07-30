@@ -267,11 +267,11 @@ export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
               unloadMethod: mf.ppp.unloadMethod,
             }
           : undefined,
-        transactionStatus: tx.transaction_status ?? undefined,
-        attemptedReason: tx.attempted_reason ?? undefined,
-        reasonableMeasuresTaken: tx.reasonable_measures_taken ?? undefined,
-        transactionLocation: tx.transaction_location ?? undefined,
-        transactionPurpose: tx.transaction_purpose ?? undefined,
+        transactionStatus: txDetails?.transactionStatus ?? tx.transaction_status ?? undefined,
+        attemptedReason: txDetails?.attemptedReason ?? tx.attempted_reason ?? undefined,
+        reasonableMeasuresTaken: txDetails?.reasonableMeasuresTaken ?? tx.reasonable_measures_taken ?? undefined,
+        transactionLocation: txDetails?.transactionLocation ?? tx.transaction_location ?? undefined,
+        transactionPurpose: txDetails?.transactionPurpose ?? tx.transaction_purpose ?? undefined,
       })),
     },
 
