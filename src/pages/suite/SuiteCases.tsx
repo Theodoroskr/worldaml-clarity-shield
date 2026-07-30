@@ -99,8 +99,13 @@ const FINTRAC_FIELD_MAP: FieldMapping[] = [
   { fintracPart: "C", fintracField: "Counterparty Name", description: "Person or entity on the other side", sourceTable: "suite_transactions", sourceColumn: "counterparty", required: true },
   { fintracPart: "C", fintracField: "Counterparty Country", description: "Country of the counterparty", sourceTable: "suite_transactions", sourceColumn: "counterparty_country", required: true },
   { fintracPart: "C", fintracField: "Transaction Description", description: "Purpose or nature of the transaction", sourceTable: "suite_transactions", sourceColumn: "description", required: false },
+  { fintracPart: "C", fintracField: "Transaction Status", description: "Completed or attempted", sourceTable: "suite_transactions", sourceColumn: "transaction_status", required: true },
+  { fintracPart: "C", fintracField: "Transaction Location", description: "Branch, office, or location where the transaction occurred", sourceTable: "suite_transactions", sourceColumn: "transaction_location", required: false },
+  { fintracPart: "C", fintracField: "Transaction Purpose", description: "Purpose of the transaction", sourceTable: "suite_transactions", sourceColumn: "transaction_purpose", required: false },
   { fintracPart: "C", fintracField: "Monitoring Status", description: "Whether flagged by monitoring rules", sourceTable: "suite_transactions", sourceColumn: "monitoring_status", required: false },
   { fintracPart: "C", fintracField: "Risk Flag", description: "Whether the transaction was risk-flagged", sourceTable: "suite_transactions", sourceColumn: "risk_flag", required: false },
+  // Part C — Attempted Transaction Reasonable Measures
+  { fintracPart: "C-AM", fintracField: "Reasonable Measures Taken", description: "Why the attempted transaction was not completed and what measures were taken", sourceTable: "suite_transactions", sourceColumn: "reasonable_measures_taken", required: false },
   // Part C — Starting Action (missing from DB)
   { fintracPart: "C-SA", fintracField: "Method of Transaction", description: "In-person, online, telephone, mail, etc.", sourceTable: "suite_transactions", sourceColumn: null, required: true },
   { fintracPart: "C-SA", fintracField: "Source of Funds", description: "How the conductor obtained the funds", sourceTable: "suite_transactions", sourceColumn: null, required: true },
