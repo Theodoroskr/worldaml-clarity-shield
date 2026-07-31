@@ -1811,7 +1811,84 @@ export default function SuiteCases() {
               })()}
 
 
+              {/* Companion report detection + related report references */}
+              {(() => {
+                const selectedTxs = caseTransactions.filter(t => selectedTxIds.has(t.id));
+                const hits = detectCompanionReports(
+                  selectedTxs as never,
+                  { isVirtualCurrency: mf.isVirtualCurrency, relatedReports: mf.relatedReports, tprTerroristEntityName: mf.tprTerroristEntityName },
+                  fintracStrType,
+                );
+                const related = mf.relatedReports ?? [];
+                const setRelated = (arr: typeof related) => setMF({ relatedReports: arr });
+                const inputCls = "border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground";
+                return (
+                  <div className="bg-white border border-red-200 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="text-xs font-bold text-red-900 flex items-center gap-1.5">
+                        <Flag className="w-3.5 h-3.5" /> Companion &amp; Related Reports ({related.length})
+                      </h3>
+                      <button type="button" onClick={() => setRelated([...related, { reportType: "LCTR", reference: "", filedOn: "", note: "" }])}
+                        className="text-[10px] font-semibold text-white bg-red-700 hover:bg-red-800 rounded-md px-2 py-1 flex items-center gap-1">
+                        <Plus className="w-3 h-3" /> Add reference
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-red-600 mb-3">
+                      The same activity often triggers more than one FINTRAC report. Record each companion report reference so FINTRAC can link them.
+                    </p>
+
+                    {hits.length > 0 && (
+                      <div className="space-y-2 mb-3">
+                        {hits.map(h => (
+                          <div key={h.reportType} className="flex items-start gap-2 border border-amber-300 bg-amber-50 rounded-lg p-2">
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
+                            <div className="flex-1">
+                              <p className="text-[11px] font-bold text-amber-900">
+                                {h.reportType} likely required — {h.label}
+                                {h.confidence === "review" && <span className="ml-1 font-normal">(verify)</span>}
+                              </p>
+                              <p className="text-[10px] text-amber-800">{h.reason}</p>
+                              <p className="text-[10px] text-amber-700 italic">Threshold: {h.threshold}</p>
+                            </div>
+                            <button type="button" onClick={() => setRelated([...related, relatedReportFromHit(h)])}
+                              className="text-[10px] font-semibold text-amber-900 underline shrink-0">Record it</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {hits.length === 0 && (
+                      <p className="text-[10px] text-gray-500 italic mb-3">No additional companion reports detected for the selected transactions.</p>
+                    )}
+
+                    <div className="space-y-2">
+                      {related.map((r, idx) => (
+                        <div key={idx} className="border border-red-100 rounded-lg p-2 bg-red-50/30">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] font-bold text-red-900">Related report #{idx + 1}</span>
+                            <button type="button" onClick={() => setRelated(related.filter((_, i) => i !== idx))}
+                              className="text-[10px] text-red-600 hover:text-red-800 flex items-center gap-1"><X className="w-3 h-3" /> Remove</button>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <select value={r.reportType} onChange={e => { const arr = [...related]; arr[idx] = { ...r, reportType: e.target.value }; setRelated(arr); }}
+                              className={inputCls}>
+                              {FINTRAC_REPORT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                            <input value={r.reference || ""} onChange={e => { const arr = [...related]; arr[idx] = { ...r, reference: e.target.value }; setRelated(arr); }}
+                              placeholder="FINTRAC / internal reference" className={inputCls} />
+                            <input type="date" value={r.filedOn || ""} onChange={e => { const arr = [...related]; arr[idx] = { ...r, filedOn: e.target.value }; setRelated(arr); }}
+                              className={inputCls} />
+                            <input value={r.note || ""} onChange={e => { const arr = [...related]; arr[idx] = { ...r, note: e.target.value }; setRelated(arr); }}
+                              placeholder="Note" className={cn(inputCls, "col-span-3")} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Section 2b: Conductors (multi-entry) */}
+
               <div className="bg-white border border-red-200 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-xs font-bold text-red-900 flex items-center gap-1.5">
