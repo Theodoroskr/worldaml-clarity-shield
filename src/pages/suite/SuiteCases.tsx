@@ -1837,10 +1837,27 @@ export default function SuiteCases() {
                       <div className="grid grid-cols-2 gap-2">
                         <input value={c.fullName} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, fullName: e.target.value }; setMF({ conductors: arr }); }}
                           placeholder="Full legal name *" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <select value={c.role || "Conductor"} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, role: e.target.value }; setMF({ conductors: arr }); }}
+                          className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground">
+                          {FINTRAC_PARTY_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                        </select>
+                        <input value={c.name?.firstName || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, name: { ...c.name, firstName: e.target.value } }; setMF({ conductors: arr }); }}
+                          placeholder="Given name" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={c.name?.lastName || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, name: { ...c.name, lastName: e.target.value } }; setMF({ conductors: arr }); }}
+                          placeholder="Surname" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
                         <input type="date" value={c.dateOfBirth || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, dateOfBirth: e.target.value }; setMF({ conductors: arr }); }}
                           placeholder="Date of birth" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
-                        <input value={c.address || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, address: e.target.value }; setMF({ conductors: arr }); }}
-                          placeholder="Address" className="col-span-2 border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={c.addressDetail?.street || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, addressDetail: { ...c.addressDetail, street: e.target.value } }; setMF({ conductors: arr }); }}
+                          placeholder="Street address" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={c.addressDetail?.city || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, addressDetail: { ...c.addressDetail, city: e.target.value } }; setMF({ conductors: arr }); }}
+                          placeholder="City" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={c.addressDetail?.provinceState || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, addressDetail: { ...c.addressDetail, provinceState: e.target.value } }; setMF({ conductors: arr }); }}
+                          placeholder="Province / State" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={c.addressDetail?.postalCode || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, addressDetail: { ...c.addressDetail, postalCode: e.target.value } }; setMF({ conductors: arr }); }}
+                          placeholder="Postal code" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={c.addressDetail?.country || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, addressDetail: { ...c.addressDetail, country: e.target.value } }; setMF({ conductors: arr }); }}
+                          placeholder="Country" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+
                         <input value={c.occupation || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, occupation: e.target.value }; setMF({ conductors: arr }); }}
                           placeholder="Occupation" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
                         <input value={c.idType || ""} onChange={e => { const arr = [...mf.conductors]; arr[idx] = { ...c, idType: e.target.value }; setMF({ conductors: arr }); }}
