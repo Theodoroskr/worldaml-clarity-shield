@@ -254,6 +254,9 @@ export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
     generatedAt: new Date().toISOString(),
     reportType,
     reportReference: ref,
+    relatedReports: (mf.relatedReports || []).filter((r) => (r.reportType || "").trim()),
+
+
 
     generalInformation: {
       reportingEntity: {
