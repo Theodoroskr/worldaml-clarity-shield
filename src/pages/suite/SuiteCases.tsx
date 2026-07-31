@@ -34,7 +34,7 @@ const REGULATOR_REPORTS: Record<string, ReportObligation[]> = {
     { id: "str", name: "STR", regulator: "FINTRAC", description: "Suspicious Transaction Report", deadline: "As soon as practicable", legalBasis: "PCMLTFA s.7", exportKey: "fintrac" },
     { id: "lctr", name: "LCTR", regulator: "FINTRAC", description: "Large Cash Transaction Report (≥ CAD 10,000)", deadline: "15 calendar days", threshold: "CAD 10,000", legalBasis: "PCMLTFR s.132", exportKey: "fintrac" },
     { id: "eftr", name: "EFTR", regulator: "FINTRAC", description: "Electronic Funds Transfer Report (≥ CAD 10,000)", deadline: "15 calendar days", threshold: "CAD 10,000", legalBasis: "PCMLTFR s.12", exportKey: "fintrac" },
-    { id: "tpr", name: "TPR", regulator: "FINTRAC", description: "Terrorist Property Report", deadline: "Immediately", legalBasis: "PCMLTFA s.7.1 / Criminal Code s.83.08", exportKey: "fintrac" },
+    { id: "tpr", name: "LPEPR", regulator: "FINTRAC", description: "Listed Person or Entity Property Report", deadline: "Immediately", legalBasis: "PCMLTFA s.7.1 / Criminal Code s.83.08", exportKey: "fintrac" },
   ],
   FCA: [
     { id: "sar_uk", name: "SAR (NCA)", regulator: "FCA", description: "Suspicious Activity Report to NCA", deadline: "As soon as practicable", legalBasis: "POCA 2002 s.330-332", exportKey: "sar" },
@@ -81,7 +81,7 @@ const FINTRAC_FIELD_MAP: FieldMapping[] = [
   { fintracPart: "A", fintracField: "Reporting Entity Name", description: "Legal name of the reporting entity", sourceTable: "profiles", sourceColumn: "company_name", required: true },
   { fintracPart: "A", fintracField: "CAMLO / Reporting Officer", description: "Name of the compliance officer filing", sourceTable: "auth.users", sourceColumn: "email", required: true },
   { fintracPart: "A", fintracField: "Report Date", description: "Date the report is generated", sourceTable: "system", sourceColumn: "now()", required: true },
-  { fintracPart: "A", fintracField: "Filing Deadline", description: "3 business days (STR) or 15 calendar days (LCTR/EFTR)", sourceTable: "system", sourceColumn: "computed", required: true },
+  { fintracPart: "A", fintracField: "Filing Deadline", description: "As soon as practicable (STR) or 15 calendar days (LCTR/EFTR)", sourceTable: "system", sourceColumn: "computed", required: true },
   // Part B — Subject Information
   { fintracPart: "B", fintracField: "Subject Full Legal Name", description: "Individual or entity name", sourceTable: "suite_customers", sourceColumn: "name", required: true },
   { fintracPart: "B", fintracField: "Subject Type", description: "Individual or legal entity", sourceTable: "suite_customers", sourceColumn: "type", required: true },
@@ -494,7 +494,7 @@ export default function SuiteCases() {
   const validateFintracFields = (): string[] => {
     const errors: string[] = [];
     if (fintracStrType === "tpr") {
-      // TPR-specific validation
+      // LPEPR-specific validation
       if (!mf.tprTerroristEntityName) errors.push("tprTerroristEntityName");
       if (!mf.tprListedUnder) errors.push("tprListedUnder");
       if (!mf.tprDateDiscovered) errors.push("tprDateDiscovered");
@@ -553,7 +553,7 @@ export default function SuiteCases() {
         camloName: "CAMLO Name",
         actionTaken: "Action Taken",
         notes: "Investigation Narrative (add case notes)",
-        tprTerroristEntityName: "Listed Entity Name",
+        tprTerroristEntityName: "Listed Person or Entity Name",
         tprListedUnder: "Listed Under (Regulation)",
         tprDateDiscovered: "Date Property Discovered",
         tprPropertyType: "Property Type",
@@ -1380,14 +1380,14 @@ export default function SuiteCases() {
               <h2 className="font-semibold text-red-900">FINTRAC — Canadian Regulatory Report</h2>
             </div>
             <p className="text-xs text-red-700 mb-4">
-              Select the report type per PCMLTFA/PCMLTFR requirements. STR must be filed within 3 business days of determination. LCTR/EFTR within 15 calendar days.
+              Select the report type per PCMLTFA/PCMLTFR requirements. STR must be filed as soon as practicable after suspicion is determined. LCTR/EFTR within 15 calendar days.
             </p>
             <div className="grid grid-cols-4 gap-3 mb-4">
               {([
-                { value: "str" as const, label: "STR", desc: "Suspicious Transaction Report", icon: AlertTriangle, deadline: "3 business days" },
+                { value: "str" as const, label: "STR", desc: "Suspicious Transaction Report", icon: AlertTriangle, deadline: "As soon as practicable" },
                 { value: "lctr" as const, label: "LCTR", desc: "Large Cash Transaction (≥ CAD 10,000)", icon: FileText, deadline: "15 calendar days" },
                 { value: "eftr" as const, label: "EFTR", desc: "Electronic Funds Transfer (≥ CAD 10,000)", icon: Shield, deadline: "15 calendar days" },
-                { value: "tpr" as const, label: "TPR", desc: "Terrorist Property Report (s.7.1)", icon: Flag, deadline: "Immediately" },
+                { value: "tpr" as const, label: "LPEPR", desc: "Listed Person or Entity Property Report (s.7.1)", icon: Flag, deadline: "Immediately" },
               ]).map(t => (
                 <button key={t.value} onClick={() => setFintracStrType(t.value)}
                   className={cn(
@@ -2000,13 +2000,13 @@ export default function SuiteCases() {
               </div>
             </div>
 
-            {/* TPR-Specific Fields */}
+            {/* LPEPR-Specific Fields */}
             {fintracStrType === "tpr" && (
               <div className="space-y-4 mt-4">
                 {/* Terrorist Entity */}
                 <div className="bg-white border border-red-200 rounded-xl p-4">
                   <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
-                    <Flag className="w-3.5 h-3.5" /> Terrorist Entity / Listed Person
+                    <Flag className="w-3.5 h-3.5" /> Listed Person or Entity
                   </h3>
                   <p className="text-[10px] text-red-600 mb-3">Criminal Code s.83.05 — Identify the listed entity or person whose property has been identified.</p>
                   <div className="grid grid-cols-2 gap-3">
@@ -2979,7 +2979,7 @@ export default function SuiteCases() {
           <p className="text-xs text-muted-foreground mt-0.5">
             {userRegulator
               ? `${userRegulator} · ${(REGULATOR_REPORTS[userRegulator] || []).map(r => r.name).join(" · ")} · Auto-detected from profile`
-              : "FinCEN SAR · FINTRAC STR/LCTR/EFTR/TPR · MOKAS STR (Cyprus) · Multi-jurisdiction reporting"
+              : "FinCEN SAR · FINTRAC STR/LCTR/EFTR/LPEPR · MOKAS STR (Cyprus) · Multi-jurisdiction reporting"
             }
           </p>
         </div>
