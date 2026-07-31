@@ -102,9 +102,10 @@ export interface FwrPayload {
     }>;
   };
 
-  // C. Starting Action(s) — per-transaction
+  // C. Starting Action(s) — one or more per transaction
   startingActions: Array<{
     transactionId: string;
+    sequence: number;
     methodOfTransaction?: string;
     sourceOfFunds?: string;
     conductorName?: string;
@@ -112,18 +113,30 @@ export interface FwrPayload {
     thirdPartyName?: string;
     accountFrom?: string;
     institutionFrom?: string;
+    direction?: string;
+    location?: string;
+    purpose?: string;
+    amount?: string;
+    currency?: string;
   }>;
 
-  // D. Completing Action(s) — per-transaction
+  // D. Completing Action(s) — one or more per transaction
   completingActions: Array<{
     transactionId: string;
+    sequence: number;
     dispositionOfFunds?: string;
     beneficiaryName?: string;
     beneficiaryAccount?: string;
     beneficiaryCountry?: string;
     accountTo?: string;
     institutionTo?: string;
+    direction?: string;
+    location?: string;
+    purpose?: string;
+    amount?: string;
+    currency?: string;
   }>;
+
 
   // Parties (multi-entry, FWR-aligned)
   parties: {
