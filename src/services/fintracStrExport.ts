@@ -224,29 +224,51 @@ export interface FINTRACManualFields {
   transactionActions?: Record<string, FINTRACTransactionAction>;
   // ── FINTRAC transaction status / location / purpose / attempted-transaction details ──
   transactionDetails?: Record<string, FINTRACTransactionDetails>;
+  // ── Related / companion report references (LCTR, EFTR, LVCTR, CDR, LPEPR…) ──
+  relatedReports?: FINTRACRelatedReport[];
 }
 
-// One starting+completing action pair per transaction (FWR multi-action support)
+// A single starting action (funds entering the transaction)
+export interface FINTRACStartingAction {
+  methodOfTransaction?: string;     // in-person, online, ATM, wire…
+  sourceOfFunds?: string;           // salary, business revenue, savings…
+  conductorName?: string;
+  thirdPartyIndicator?: "own_behalf" | "third_party";
+  thirdPartyName?: string;
+  accountFrom?: string;
+  institutionFrom?: string;
+  // FWR per-action attributes
+  direction?: string;               // in / out / domestic / international
+  location?: string;                // branch, ATM, online channel, address
+  purpose?: string;                 // stated purpose of the action
+  amount?: string;
+  currency?: string;
+}
+
+// A single completing action (funds leaving / disposition)
+export interface FINTRACCompletingAction {
+  dispositionOfFunds?: string;
+  beneficiaryName?: string;
+  beneficiaryAccount?: string;
+  beneficiaryCountry?: string;
+  accountTo?: string;
+  institutionTo?: string;
+  // FWR per-action attributes
+  direction?: string;
+  location?: string;
+  purpose?: string;
+  amount?: string;
+  currency?: string;
+}
+
+// Per-transaction actions (FWR multi-action support).
+// `starting` / `completing` remain the primary (first) action for backward compat;
+// `startingActions` / `completingActions` hold the full FWR arrays.
 export interface FINTRACTransactionAction {
-  // Starting Action — how the funds entered the transaction
-  starting: {
-    methodOfTransaction?: string;     // in-person, online, ATM, wire…
-    sourceOfFunds?: string;           // salary, business revenue, savings…
-    conductorName?: string;
-    thirdPartyIndicator?: "own_behalf" | "third_party";
-    thirdPartyName?: string;
-    accountFrom?: string;
-    institutionFrom?: string;
-  };
-  // Completing Action — how the funds left / were disposed
-  completing: {
-    dispositionOfFunds?: string;
-    beneficiaryName?: string;
-    beneficiaryAccount?: string;
-    beneficiaryCountry?: string;
-    accountTo?: string;
-    institutionTo?: string;
-  };
+  starting: FINTRACStartingAction;
+  completing: FINTRACCompletingAction;
+  startingActions?: FINTRACStartingAction[];
+  completingActions?: FINTRACCompletingAction[];
 }
 
 // Per-transaction details (status, location, purpose, attempted-transaction reasonable measures)
@@ -257,6 +279,19 @@ export interface FINTRACTransactionDetails {
   attemptedReason?: string;
   reasonableMeasuresTaken?: string;
 }
+
+/** All starting actions for a transaction, newest model first, legacy single as fallback. */
+export function startingActionsFor(a?: FINTRACTransactionAction): FINTRACStartingAction[] {
+  if (a?.startingActions && a.startingActions.length > 0) return a.startingActions;
+  return a?.starting ? [a.starting] : [];
+}
+
+/** All completing actions for a transaction, newest model first, legacy single as fallback. */
+export function completingActionsFor(a?: FINTRACTransactionAction): FINTRACCompletingAction[] {
+  if (a?.completingActions && a.completingActions.length > 0) return a.completingActions;
+  return a?.completing ? [a.completing] : [];
+}
+
 
 export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
   methodOfTransaction: "",
