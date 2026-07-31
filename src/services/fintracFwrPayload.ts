@@ -428,8 +428,41 @@ export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
     };
   }
 
-  return payload;
+  return stripPlaceholders(payload) as FwrPayload;
 }
+
+/** UI placeholders that must never reach FINTRAC. */
+const PLACEHOLDER_VALUES = new Set(["", "—", "-", "--", "n/a", "na", "none", "null", "undefined", "tbd", "unknown"]);
+
+/**
+ * Recursively remove empty strings, em-dash/"N/A" placeholders, empty objects and
+ * empty arrays so the FWR payload only carries real reported values.
+ */
+export function stripPlaceholders<T>(value: T): T | undefined {
+  if (value === null || value === undefined) return undefined;
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return PLACEHOLDER_VALUES.has(trimmed.toLowerCase()) ? undefined : (trimmed as unknown as T);
+  }
+
+  if (Array.isArray(value)) {
+    const cleaned = value.map((v) => stripPlaceholders(v)).filter((v) => v !== undefined);
+    return (cleaned.length > 0 ? cleaned : undefined) as unknown as T;
+  }
+
+  if (typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      const cleaned = stripPlaceholders(v);
+      if (cleaned !== undefined) out[k] = cleaned;
+    }
+    return (Object.keys(out).length > 0 ? out : undefined) as unknown as T;
+  }
+
+  return value;
+}
+
 
 export function downloadFwrPayload(payload: FwrPayload): { blobUrl: string; fileName: string } {
   const json = JSON.stringify(payload, null, 2);
