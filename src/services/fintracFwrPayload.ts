@@ -18,18 +18,27 @@
 // exact XML/JSON wire format used by FINTRAC's secure channel should be done
 // at the submission edge function layer once the entity has API credentials.
 
-import type {
-  FINTRACSTRExportOptions,
-  FINTRACManualFields,
-  FINTRACTransaction,
-  FINTRACTransactionAction,
+import {
+  startingActionsFor,
+  completingActionsFor,
+  formatAddress,
+  formatName,
+  type FINTRACSTRExportOptions,
+  type FINTRACManualFields,
+  type FINTRACTransaction,
+  type FINTRACStartingAction,
+  type FINTRACCompletingAction,
+  type FINTRACRelatedReport,
 } from "./fintracStrExport";
 
 export interface FwrPayload {
   schemaVersion: "1.0";
   generatedAt: string;
-  reportType: "STR" | "LCTR" | "EFTR" | "TPR";
+  reportType: "STR" | "LCTR" | "EFTR" | "LVCTR" | "CDR" | "LPEPR";
   reportReference: string;
+  /** Companion / related FINTRAC reports covering the same activity. */
+  relatedReports?: FINTRACRelatedReport[];
+
 
   // A. General Information
   generalInformation: {
