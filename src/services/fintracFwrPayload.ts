@@ -318,39 +318,62 @@ export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
       }),
     },
 
-    startingActions: opts.transactions.map((tx) => {
-      const a = resolveAction(tx, mf);
-      return {
+    startingActions: opts.transactions.flatMap((tx) =>
+      resolveStartingActions(tx, mf).map((a, i) => ({
         transactionId: tx.id,
-        methodOfTransaction: a.starting.methodOfTransaction,
-        sourceOfFunds: a.starting.sourceOfFunds,
-        conductorName: a.starting.conductorName,
-        onBehalfOf: (a.starting.thirdPartyIndicator || "own_behalf") as
-          | "own_behalf"
-          | "third_party",
-        thirdPartyName: a.starting.thirdPartyName,
-        accountFrom: a.starting.accountFrom,
-        institutionFrom: a.starting.institutionFrom,
-      };
-    }),
+        sequence: i + 1,
+        methodOfTransaction: a.methodOfTransaction,
+        sourceOfFunds: a.sourceOfFunds,
+        conductorName: a.conductorName,
+        onBehalfOf: (a.thirdPartyIndicator || "own_behalf") as "own_behalf" | "third_party",
+        thirdPartyName: a.thirdPartyName,
+        accountFrom: a.accountFrom,
+        institutionFrom: a.institutionFrom,
+        direction: a.direction,
+        location: a.location,
+        purpose: a.purpose,
+        amount: a.amount,
+        currency: a.currency,
+      })),
+    ),
 
-    completingActions: opts.transactions.map((tx) => {
-      const a = resolveAction(tx, mf);
-      return {
+    completingActions: opts.transactions.flatMap((tx) =>
+      resolveCompletingActions(tx, mf).map((a, i) => ({
         transactionId: tx.id,
-        dispositionOfFunds: a.completing.dispositionOfFunds,
-        beneficiaryName: a.completing.beneficiaryName,
-        beneficiaryAccount: a.completing.beneficiaryAccount,
-        beneficiaryCountry: a.completing.beneficiaryCountry,
-        accountTo: a.completing.accountTo,
-        institutionTo: a.completing.institutionTo,
-      };
-    }),
+        sequence: i + 1,
+        dispositionOfFunds: a.dispositionOfFunds,
+        beneficiaryName: a.beneficiaryName,
+        beneficiaryAccount: a.beneficiaryAccount,
+        beneficiaryCountry: a.beneficiaryCountry,
+        accountTo: a.accountTo,
+        institutionTo: a.institutionTo,
+        direction: a.direction,
+        location: a.location,
+        purpose: a.purpose,
+        amount: a.amount,
+        currency: a.currency,
+      })),
+    ),
 
     parties: {
-      conductors: mf.conductors,
-      beneficialOwners: mf.beneficialOwners,
-      thirdParties: mf.thirdParties,
+      conductors: (mf.conductors || []).map((c) => ({
+        ...c,
+        fullName: formatName(c.name, c.fullName),
+        address: formatAddress(c.addressDetail, c.address),
+        role: c.role || "Conductor",
+      })),
+      beneficialOwners: (mf.beneficialOwners || []).map((b) => ({
+        ...b,
+        fullName: formatName(b.name, b.fullName),
+        address: formatAddress(b.addressDetail, b.address),
+        role: b.role || "Beneficial owner",
+      })),
+      thirdParties: (mf.thirdParties || []).map((t) => ({
+        ...t,
+        fullName: formatName(t.name, t.fullName),
+        address: formatAddress(t.addressDetail, t.address),
+        role: t.role || "Third party (on whose behalf)",
+      })),
       customerOnFile: opts.customer
         ? {
             name: opts.customer.name,
@@ -362,6 +385,7 @@ export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
           }
         : undefined,
     },
+
 
     detailsOfSuspicion: {
       suspicionType: mf.suspicionType,
