@@ -516,14 +516,21 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = checkPage(doc, y, 30);
     subHeader(`1.2 — CONDUCTORS (${mf.conductors.length})`);
     mf.conductors.forEach((c, idx) => {
-      y = checkPage(doc, y, 30);
+      y = checkPage(doc, y, 34);
       doc.setFontSize(8); doc.setFont("helvetica", "bold");
       doc.text(`Conductor ${idx + 1}`, MARGIN, y);
       doc.setFont("helvetica", "normal"); y += 4;
-      y = fieldPair(doc, "Full Legal Name", c.fullName || "—", "Date of Birth", c.dateOfBirth || "—", y);
-      y = field(doc, "Address", c.address || "—", y);
-      y = fieldPair(doc, "Occupation", c.occupation || "—", "ID Type", c.idType || "—", y);
-      y = fieldPair(doc, "ID Number", c.idNumber || "—", "ID Issuing Jurisdiction", c.idJurisdiction || "—", y);
+      y = fieldPair(doc, "Full Legal Name", formatName(c.name, c.fullName) || "—", "Role", c.role || "Conductor", y);
+      y = fieldPair(doc, "Surname", c.name?.lastName || "—", "Given Name(s)", [c.name?.firstName, c.name?.middleName].filter(Boolean).join(" ") || "—", y);
+      y = fieldPair(doc, "Date of Birth", c.dateOfBirth || "—", "Occupation", c.occupation || "—", y);
+      y = field(doc, "Address", formatAddress(c.addressDetail, c.address) || "—", y);
+      y = fieldPair(doc, "City / Province", [c.addressDetail?.city, c.addressDetail?.provinceState].filter(Boolean).join(", ") || "—",
+        "Postal Code / Country", [c.addressDetail?.postalCode, c.addressDetail?.country].filter(Boolean).join(", ") || "—", y);
+      y = fieldPair(doc, "ID Type", c.idType || "—", "ID Number", c.idNumber || "—", y);
+      y = fieldPair(doc, "ID Issuing Jurisdiction", c.idJurisdiction || "—", "ID Expiry", c.idExpiry || "—", y);
+      if (c.employerName || c.phone || c.email) {
+        y = fieldPair(doc, "Employer", c.employerName || "—", "Contact", [c.phone, c.email].filter(Boolean).join(" · ") || "—", y);
+      }
     });
     y += 2;
   }
@@ -532,13 +539,16 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = checkPage(doc, y, 30);
     subHeader(`1.3 — THIRD PARTIES (${mf.thirdParties.length})`);
     mf.thirdParties.forEach((t, idx) => {
-      y = checkPage(doc, y, 30);
+      y = checkPage(doc, y, 34);
       doc.setFontSize(8); doc.setFont("helvetica", "bold");
       doc.text(`Third Party ${idx + 1}`, MARGIN, y);
       doc.setFont("helvetica", "normal"); y += 4;
-      y = fieldPair(doc, "Full Legal Name", t.fullName || "—", "Date of Birth", t.dateOfBirth || "—", y);
-      y = field(doc, "Address", t.address || "—", y);
-      y = fieldPair(doc, "Relationship to Conductor", t.relationshipToConductor || "—", "On Behalf Of", t.onBehalfOfIndicator || "—", y);
+      y = fieldPair(doc, "Full Legal Name", formatName(t.name, t.fullName) || "—", "Role", t.role || "Third party (on whose behalf)", y);
+      y = fieldPair(doc, "Date of Birth", t.dateOfBirth || "—", "Relationship to Conductor", t.relationshipToConductor || "—", y);
+      y = field(doc, "Address", formatAddress(t.addressDetail, t.address) || "—", y);
+      y = fieldPair(doc, "On Behalf Of", t.onBehalfOfIndicator || "—", "ID Type / Number",
+        [t.idType, t.idNumber].filter(Boolean).join(" · ") || "—", y);
+      if (t.idJurisdiction) y = field(doc, "ID Issuing Jurisdiction", t.idJurisdiction, y);
     });
     y += 2;
   }
@@ -547,13 +557,17 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = checkPage(doc, y, 30);
     subHeader(`1.4 — BENEFICIAL OWNERS (${mf.beneficialOwners.length})`);
     mf.beneficialOwners.forEach((b, idx) => {
-      y = checkPage(doc, y, 30);
+      y = checkPage(doc, y, 34);
       doc.setFontSize(8); doc.setFont("helvetica", "bold");
       doc.text(`Beneficial Owner ${idx + 1}`, MARGIN, y);
       doc.setFont("helvetica", "normal"); y += 4;
-      y = fieldPair(doc, "Full Legal Name", b.fullName || "—", "Date of Birth", b.dateOfBirth || "—", y);
-      y = field(doc, "Address", b.address || "—", y);
-      y = fieldPair(doc, "Ownership %", b.ownershipPercent || "—", "Nature of Control", b.controlNature || "—", y);
+      y = fieldPair(doc, "Full Legal Name", formatName(b.name, b.fullName) || "—", "Role", b.role || "Beneficial owner", y);
+      y = fieldPair(doc, "Date of Birth", b.dateOfBirth || "—", "Ownership %", b.ownershipPercent || "—", y);
+      y = field(doc, "Address", formatAddress(b.addressDetail, b.address) || "—", y);
+      y = fieldPair(doc, "Nature of Control", b.controlNature || "—", "ID Type / Number",
+        [b.idType, b.idNumber].filter(Boolean).join(" · ") || "—", y);
+      if (b.idJurisdiction) y = field(doc, "ID Issuing Jurisdiction", b.idJurisdiction, y);
+
     });
     y += 2;
   }
