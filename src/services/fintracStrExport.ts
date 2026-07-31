@@ -727,23 +727,32 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = field(doc, "Beneficiary Country", mf.beneficiaryCountry || "—", y);
   } else {
     transactions.forEach((tx, idx) => {
-      const c = getCompleting(tx.id);
-      y = checkPage(doc, y, 38);
-      doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(120, 20, 20);
+      const list = getCompletingList(tx.id);
       const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
       const amt = tx.amount.toLocaleString("en-CA", { minimumFractionDigits: 2 });
-      doc.text(`Completing Action ${idx + 1} — Tx ${tx.id.slice(0, 8)} · ${txDate} · ${amt} ${tx.currency}`, MARGIN, y);
-      doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal"); y += 4;
-      y = fieldPair(doc,
-        "Disposition of Funds", fallback(c.dispositionOfFunds, mf.dispositionOfFunds || "Not specified"),
-        "Beneficiary Name", fallback(c.beneficiaryName, mf.beneficiaryName || "Not specified"), y);
-      y = fieldPair(doc,
-        "Beneficiary Account", fallback(c.beneficiaryAccount, mf.beneficiaryAccount || "—"),
-        "Beneficiary Country", fallback(c.beneficiaryCountry, mf.beneficiaryCountry || "—"), y);
-      if (c.accountTo || c.institutionTo) {
-        y = fieldPair(doc, "Account To", c.accountTo || "—", "Institution To", c.institutionTo || "—", y);
-      }
+      list.forEach((c, aIdx) => {
+        y = checkPage(doc, y, 44);
+        doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(120, 20, 20);
+        const suffix = list.length > 1 ? `.${aIdx + 1}` : "";
+        doc.text(`Completing Action ${idx + 1}${suffix} — Tx ${tx.id.slice(0, 8)} · ${txDate} · ${amt} ${tx.currency}`, MARGIN, y);
+        doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal"); y += 4;
+        y = fieldPair(doc,
+          "Disposition of Funds", fallback(c.dispositionOfFunds, mf.dispositionOfFunds || "Not specified"),
+          "Beneficiary Name", fallback(c.beneficiaryName, mf.beneficiaryName || "Not specified"), y);
+        y = fieldPair(doc,
+          "Beneficiary Account", fallback(c.beneficiaryAccount, mf.beneficiaryAccount || "—"),
+          "Beneficiary Country", fallback(c.beneficiaryCountry, mf.beneficiaryCountry || "—"), y);
+        y = fieldPair(doc, "Direction", c.direction || tx.direction || "—", "Location of Action", c.location || "—", y);
+        if (c.purpose || c.amount) {
+          y = fieldPair(doc, "Purpose of Action", c.purpose || "—",
+            "Action Amount", c.amount ? `${c.amount} ${c.currency || tx.currency}` : "—", y);
+        }
+        if (c.accountTo || c.institutionTo) {
+          y = fieldPair(doc, "Account To", c.accountTo || "—", "Institution To", c.institutionTo || "—", y);
+        }
+      });
     });
+
   }
   y += 2;
 
