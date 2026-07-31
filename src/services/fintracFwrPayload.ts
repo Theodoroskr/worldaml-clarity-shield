@@ -236,7 +236,11 @@ function resolveCompletingActions(
 
 export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
   const mf = opts.manualFields!;
-  const reportType = opts.strType.toUpperCase() as FwrPayload["reportType"];
+  // `tpr` is the legacy internal code for the Listed Person or Entity Property Report
+  const reportType = (opts.strType === "tpr"
+    ? "LPEPR"
+    : opts.strType.toUpperCase()) as FwrPayload["reportType"];
+
   const ref =
     opts.reportingEntityRef ||
     `FINTRAC-${reportType}-${opts.caseItem.id.slice(0, 8).toUpperCase()}`;
