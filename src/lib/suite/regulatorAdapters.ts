@@ -87,6 +87,85 @@ const fintracStub: RegulatorAdapter = {
   },
 };
 
+/** Minimum structural checks before anything is sent to FINTRAC. */
+function validateFwrPayload(p: Record<string, unknown>): string[] {
+  const errs: string[] = [];
+  if (p.schemaVersion !== "1.0") errs.push("Payload is not an FWR v1.0 package.");
+  const allowed = ["STR", "LCTR", "EFTR", "LVCTR", "CDR", "LPEPR"];
+  if (!allowed.includes(String(p.reportType))) errs.push(`Unsupported reportType "${p.reportType}".`);
+  if (!p.reportReference) errs.push("Missing report reference.");
+  const gi = p.generalInformation as { reportingEntity?: { name?: string } } | undefined;
+  if (!gi?.reportingEntity?.name) errs.push("Missing reporting entity name.");
+  const details = p.detailsOfSuspicion as { narrative?: string } | undefined;
+  if (p.reportType === "STR" && !details?.narrative) {
+    errs.push("STR requires a details-of-suspicion narrative (Part G).");
+  }
+  return errs;
+}
+
+/**
+ * FINTRAC FINTRAC Web Reporting (FWR) API adapter.
+ *
+ * Validates the generated FWR JSON package, then hands it to the
+ * `fintrac-fwr-submit` edge function which holds the API credentials.
+ * When credentials are not configured the submission stays queued with a
+ * clear instruction to file through the FWR portal manually.
+ */
+const fintracFwrApi: RegulatorAdapter = {
+  key: "fintrac_fwr_api",
+  label: "FINTRAC FWR API",
+  isLive: true,
+  async submit({ submissionId, reportKind, requestPayload }) {
+    const errors = validateFwrPayload(requestPayload);
+    if (errors.length > 0) {
+      return {
+        status: "failed",
+        error: `FWR validation failed: ${errors.join(" ")}`,
+        responsePayload: { validationErrors: errors },
+      };
+    }
+
+    const { data, error } = await supabase.functions.invoke("fintrac-fwr-submit", {
+      body: { submissionId, reportKind, payload: requestPayload },
+    });
+
+    if (error) {
+      return {
+        status: "failed",
+        error: error.message,
+        responsePayload: { channel: "fintrac_fwr_api" },
+      };
+    }
+
+    const res = (data ?? {}) as {
+      configured?: boolean;
+      accepted?: boolean;
+      reference?: string;
+      message?: string;
+    };
+
+    if (res.configured === false) {
+      return {
+        status: "queued",
+        responsePayload: {
+          channel: "fintrac_fwr_api",
+          note:
+            res.message ||
+            "FINTRAC FWR API credentials are not configured. The validated FWR package is ready — upload it through the FWR portal and record the reference.",
+        },
+      };
+    }
+
+    return {
+      status: res.accepted ? "submitted" : "failed",
+      externalReference: res.reference,
+      error: res.accepted ? undefined : res.message,
+      responsePayload: { channel: "fintrac_fwr_api", ...res },
+    };
+  },
+};
+
+
 const fincenStub: RegulatorAdapter = {
   key: "fincen_bsa",
   label: "FinCEN BSA E-Filing",
