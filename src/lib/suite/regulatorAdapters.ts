@@ -209,7 +209,7 @@ export function listAdapterKeys(): string[] {
 }
 
 // Seed built-ins
-[manualUpload, goAmlStub, fintracStub, fincenStub, mokasStub].forEach(registerAdapter);
+[manualUpload, goAmlStub, fintracStub, fintracFwrApi, fincenStub, mokasStub].forEach(registerAdapter);
 
 /* ------------------------------------------------------------------ */
 /* Runner: dispatch + persist the outcome                             */
