@@ -45,32 +45,108 @@ export interface FINTRACNote {
   created_at: string;
 }
 
+// Structured (FWR-aligned) address block
+export interface FINTRACStructuredAddress {
+  street?: string;
+  unit?: string;
+  city?: string;
+  provinceState?: string;
+  postalCode?: string;
+  country?: string;
+}
+
+// Structured (FWR-aligned) name block
+export interface FINTRACStructuredName {
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+}
+
+// FINTRAC FWR party roles (Part B/C — person or entity involvement)
+export const FINTRAC_PARTY_ROLES = [
+  "Conductor",
+  "Authorized person",
+  "Account holder",
+  "Beneficiary",
+  "Beneficial owner",
+  "Third party (on whose behalf)",
+  "Person/entity involved (other)",
+  "Director / senior officer",
+  "Signatory",
+  "Agent / power of attorney",
+] as const;
+export type FINTRACPartyRole = typeof FINTRAC_PARTY_ROLES[number];
+
 // FINTRAC FWR-aligned party records (multi-entry)
 export interface FINTRACPartyConductor {
   fullName: string;
+  name?: FINTRACStructuredName;
+  role?: string;
   dateOfBirth?: string;
   address?: string;
+  addressDetail?: FINTRACStructuredAddress;
   occupation?: string;
+  employerName?: string;
+  phone?: string;
+  email?: string;
+  idType?: string;
+  idNumber?: string;
+  idJurisdiction?: string;
+  idExpiry?: string;
+}
+
+export interface FINTRACPartyBeneficialOwner {
+  fullName: string;
+  name?: FINTRACStructuredName;
+  role?: string;
+  dateOfBirth?: string;
+  address?: string;
+  addressDetail?: FINTRACStructuredAddress;
+  ownershipPercent?: string;
+  controlNature?: string; // e.g. director, signatory, ultimate beneficial owner
   idType?: string;
   idNumber?: string;
   idJurisdiction?: string;
 }
 
-export interface FINTRACPartyBeneficialOwner {
-  fullName: string;
-  dateOfBirth?: string;
-  address?: string;
-  ownershipPercent?: string;
-  controlNature?: string; // e.g. director, signatory, ultimate beneficial owner
-}
-
 export interface FINTRACPartyThirdParty {
   fullName: string;
+  name?: FINTRACStructuredName;
+  role?: string;
   dateOfBirth?: string;
   address?: string;
+  addressDetail?: FINTRACStructuredAddress;
   relationshipToConductor?: string; // e.g. employer, spouse, agent
   onBehalfOfIndicator?: string; // who they are acting for
+  idType?: string;
+  idNumber?: string;
+  idJurisdiction?: string;
 }
+
+// Reference to a companion / related FINTRAC report already filed or being filed
+export interface FINTRACRelatedReport {
+  reportType: string;   // LCTR, EFTR, LVCTR, CDR, LPEPR, STR…
+  reference?: string;   // FINTRAC or internal report reference
+  filedOn?: string;     // ISO date
+  note?: string;
+}
+
+// Format a structured address into a single display line
+export function formatAddress(a?: FINTRACStructuredAddress, legacy?: string): string {
+  const parts = [a?.unit, a?.street, a?.city, a?.provinceState, a?.postalCode, a?.country]
+    .map(p => (p || "").trim())
+    .filter(Boolean);
+  if (parts.length > 0) return parts.join(", ");
+  return (legacy || "").trim();
+}
+
+// Format a structured name, falling back to the legacy free-text full name
+export function formatName(n?: FINTRACStructuredName, legacy?: string): string {
+  const parts = [n?.firstName, n?.middleName, n?.lastName].map(p => (p || "").trim()).filter(Boolean);
+  if (parts.length > 0) return parts.join(" ");
+  return (legacy || "").trim();
+}
+
 
 // Virtual currency / EMT (Electronic Funds Transfer / Electronic Money Transfer) details
 export interface FINTRACVirtualCurrencyDetails {
