@@ -172,7 +172,7 @@ export interface FwrPayload {
     };
   };
 
-  // TPR-specific block (omitted for non-TPR reports)
+  // LPEPR-specific block (omitted for non-LPEPR reports)
   terroristProperty?: {
     entityName: string;
     entityType: string;
@@ -188,33 +188,51 @@ export interface FwrPayload {
   };
 }
 
-function resolveAction(
+/** Starting actions for a transaction, with report-level defaults applied to the first action. */
+function resolveStartingActions(
   tx: FINTRACTransaction,
   mf: FINTRACManualFields,
-): FINTRACTransactionAction {
+): FINTRACStartingAction[] {
   const override = mf.transactionActions?.[tx.id];
-  return {
-    starting: {
-      methodOfTransaction: override?.starting?.methodOfTransaction || mf.methodOfTransaction,
-      sourceOfFunds: override?.starting?.sourceOfFunds || mf.sourceOfFunds,
-      conductorName: override?.starting?.conductorName || mf.conductorName,
-      thirdPartyIndicator:
-        (override?.starting?.thirdPartyIndicator as "own_behalf" | "third_party") ||
-        (mf.thirdPartyIndicator as "own_behalf" | "third_party"),
-      thirdPartyName: override?.starting?.thirdPartyName || mf.thirdPartyName,
-      accountFrom: override?.starting?.accountFrom,
-      institutionFrom: override?.starting?.institutionFrom,
-    },
-    completing: {
-      dispositionOfFunds: override?.completing?.dispositionOfFunds || mf.dispositionOfFunds,
-      beneficiaryName: override?.completing?.beneficiaryName || mf.beneficiaryName,
-      beneficiaryAccount: override?.completing?.beneficiaryAccount || mf.beneficiaryAccount,
-      beneficiaryCountry: override?.completing?.beneficiaryCountry || mf.beneficiaryCountry,
-      accountTo: override?.completing?.accountTo,
-      institutionTo: override?.completing?.institutionTo,
-    },
-  };
+  const list = startingActionsFor(override);
+  const base = list.length > 0 ? list : [{}];
+  return base.map((a, i) =>
+    i > 0
+      ? a
+      : {
+          ...a,
+          methodOfTransaction: a.methodOfTransaction || mf.methodOfTransaction,
+          sourceOfFunds: a.sourceOfFunds || mf.sourceOfFunds,
+          conductorName: a.conductorName || mf.conductorName,
+          thirdPartyIndicator:
+            (a.thirdPartyIndicator as "own_behalf" | "third_party") ||
+            (mf.thirdPartyIndicator as "own_behalf" | "third_party"),
+          thirdPartyName: a.thirdPartyName || mf.thirdPartyName,
+        },
+  );
 }
+
+/** Completing actions for a transaction, with report-level defaults applied to the first action. */
+function resolveCompletingActions(
+  tx: FINTRACTransaction,
+  mf: FINTRACManualFields,
+): FINTRACCompletingAction[] {
+  const override = mf.transactionActions?.[tx.id];
+  const list = completingActionsFor(override);
+  const base = list.length > 0 ? list : [{}];
+  return base.map((a, i) =>
+    i > 0
+      ? a
+      : {
+          ...a,
+          dispositionOfFunds: a.dispositionOfFunds || mf.dispositionOfFunds,
+          beneficiaryName: a.beneficiaryName || mf.beneficiaryName,
+          beneficiaryAccount: a.beneficiaryAccount || mf.beneficiaryAccount,
+          beneficiaryCountry: a.beneficiaryCountry || mf.beneficiaryCountry,
+        },
+  );
+}
+
 
 export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
   const mf = opts.manualFields!;
