@@ -1614,29 +1614,71 @@ export default function SuiteCases() {
                 </div>
               </div>
 
-              {/* Section 2a: Per-Transaction Action Overrides (FWR multi-action) */}
+              {/* Section 2a: Per-Transaction Actions (FWR multi-action) */}
               {(() => {
                 const selectedTxs = caseTransactions.filter(t => selectedTxIds.has(t.id));
                 if (selectedTxs.length === 0) return null;
                 const txActions = mf.transactionActions ?? {};
-                const setTxAction = (txId: string, kind: "starting" | "completing", patch: Record<string, string>) => {
-                  const current = txActions[txId] ?? { starting: {}, completing: {} };
-                  const updated = { ...txActions, [txId]: { ...current, [kind]: { ...current[kind], ...patch } } };
-                  setMF({ transactionActions: updated });
+
+                const listOf = (txId: string, kind: "starting" | "completing") => {
+                  const a = txActions[txId];
+                  if (kind === "starting") return startingActionsFor(a);
+                  return completingActionsFor(a);
                 };
+
+                const writeList = (
+                  txId: string,
+                  kind: "starting" | "completing",
+                  list: Array<Record<string, string | undefined>>,
+                ) => {
+                  const current = txActions[txId] ?? { starting: {}, completing: {} };
+                  const next = {
+                    ...current,
+                    [kind]: list[0] ?? {},
+                    [kind === "starting" ? "startingActions" : "completingActions"]: list,
+                  };
+                  setMF({ transactionActions: { ...txActions, [txId]: next } });
+                };
+
+                const patchAction = (
+                  txId: string,
+                  kind: "starting" | "completing",
+                  idx: number,
+                  patch: Record<string, string>,
+                ) => {
+                  const list = [...listOf(txId, kind)];
+                  if (list.length === 0) list.push({});
+                  list[idx] = { ...list[idx], ...patch };
+                  writeList(txId, kind, list as Array<Record<string, string | undefined>>);
+                };
+
+                const addAction = (txId: string, kind: "starting" | "completing") => {
+                  const list = [...listOf(txId, kind), {}];
+                  writeList(txId, kind, list as Array<Record<string, string | undefined>>);
+                };
+
+                const removeAction = (txId: string, kind: "starting" | "completing", idx: number) => {
+                  const list = listOf(txId, kind).filter((_, i) => i !== idx);
+                  writeList(txId, kind, (list.length > 0 ? list : [{}]) as Array<Record<string, string | undefined>>);
+                };
+
+                const inputCls = "border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground";
+
                 return (
                   <div className="bg-white border border-red-200 rounded-xl p-4">
                     <h3 className="text-xs font-bold text-red-900 mb-1 flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5" /> Per-Transaction Action Overrides ({selectedTxs.length})
+                      <FileText className="w-3.5 h-3.5" /> Per-Transaction Actions ({selectedTxs.length})
                     </h3>
                     <p className="text-[10px] text-red-600 mb-3">
-                      Optional. FWR multi-action support — provide a separate Starting + Completing Action per transaction.
-                      Empty fields fall back to the aggregate values entered above.
+                      FWR multi-action support — a transaction may have several starting and completing actions,
+                      each with its own direction, location and purpose. Empty fields fall back to the aggregate values above.
                     </p>
-                    <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                    <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
                       {selectedTxs.map((tx, idx) => {
-                        const actions = txActions[tx.id] ?? { starting: {}, completing: {} };
-                        const s = actions.starting; const c = actions.completing;
+                        const starting = listOf(tx.id, "starting");
+                        const completing = listOf(tx.id, "completing");
+                        const startList = starting.length > 0 ? starting : [{}];
+                        const compList = completing.length > 0 ? completing : [{}];
                         const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
                         const amt = Number(tx.amount).toLocaleString("en-CA", { minimumFractionDigits: 2 });
                         return (
@@ -1645,48 +1687,110 @@ export default function SuiteCases() {
                               <span>Tx {idx + 1} · {tx.id.slice(0, 8)} · {txDate} · {amt} {tx.currency} · {tx.direction}</span>
                               <ChevronRight className="w-3.5 h-3.5 group-open:rotate-90 transition-transform" />
                             </summary>
-                            <div className="px-3 pb-3 space-y-2">
+                            <div className="px-3 pb-3 space-y-3">
                               <div>
-                                <p className="text-[10px] font-bold text-red-800 mt-1 mb-1">Starting Action</p>
-                                <div className="grid grid-cols-2 gap-2">
-                                  <input value={s.methodOfTransaction || ""} onChange={e => setTxAction(tx.id, "starting", { methodOfTransaction: e.target.value })}
-                                    placeholder="Method (override)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
-                                  <input value={s.sourceOfFunds || ""} onChange={e => setTxAction(tx.id, "starting", { sourceOfFunds: e.target.value })}
-                                    placeholder="Source of funds (override)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
-                                  <input value={s.conductorName || ""} onChange={e => setTxAction(tx.id, "starting", { conductorName: e.target.value })}
-                                    placeholder="Conductor (override)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
-                                  <select value={s.thirdPartyIndicator || ""} onChange={e => setTxAction(tx.id, "starting", { thirdPartyIndicator: e.target.value })}
-                                    className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground">
-                                    <option value="">3rd-party (use default)</option>
-                                    <option value="own_behalf">On own behalf</option>
-                                    <option value="third_party">On behalf of 3rd party</option>
-                                  </select>
-                                  {s.thirdPartyIndicator === "third_party" && (
-                                    <input value={s.thirdPartyName || ""} onChange={e => setTxAction(tx.id, "starting", { thirdPartyName: e.target.value })}
-                                      placeholder="Third party name" className="col-span-2 border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
-                                  )}
-                                  <input value={s.accountFrom || ""} onChange={e => setTxAction(tx.id, "starting", { accountFrom: e.target.value })}
-                                    placeholder="Account from" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
-                                  <input value={s.institutionFrom || ""} onChange={e => setTxAction(tx.id, "starting", { institutionFrom: e.target.value })}
-                                    placeholder="Institution from" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                <div className="flex items-center justify-between mt-1 mb-1">
+                                  <p className="text-[10px] font-bold text-red-800">Starting Actions ({startList.length})</p>
+                                  <button type="button" onClick={() => addAction(tx.id, "starting")}
+                                    className="text-[10px] font-semibold text-red-700 hover:text-red-900">+ Add starting action</button>
                                 </div>
+                                {startList.map((s, si) => (
+                                  <div key={si} className="border border-red-100 rounded-md p-2 mb-2 bg-white">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-[10px] font-semibold text-red-700">Action {si + 1}</span>
+                                      {startList.length > 1 && (
+                                        <button type="button" onClick={() => removeAction(tx.id, "starting", si)}
+                                          className="text-[10px] text-red-500 hover:text-red-700">Remove</button>
+                                      )}
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <input value={s.methodOfTransaction || ""} onChange={e => patchAction(tx.id, "starting", si, { methodOfTransaction: e.target.value })}
+                                        placeholder="Method of transaction" className={inputCls} />
+                                      <input value={s.sourceOfFunds || ""} onChange={e => patchAction(tx.id, "starting", si, { sourceOfFunds: e.target.value })}
+                                        placeholder="Source of funds" className={inputCls} />
+                                      <input value={s.conductorName || ""} onChange={e => patchAction(tx.id, "starting", si, { conductorName: e.target.value })}
+                                        placeholder="Conductor" className={inputCls} />
+                                      <select value={s.thirdPartyIndicator || ""} onChange={e => patchAction(tx.id, "starting", si, { thirdPartyIndicator: e.target.value })}
+                                        className={inputCls}>
+                                        <option value="">3rd-party (use default)</option>
+                                        <option value="own_behalf">On own behalf</option>
+                                        <option value="third_party">On behalf of 3rd party</option>
+                                      </select>
+                                      {s.thirdPartyIndicator === "third_party" && (
+                                        <input value={s.thirdPartyName || ""} onChange={e => patchAction(tx.id, "starting", si, { thirdPartyName: e.target.value })}
+                                          placeholder="Third party name" className={cn(inputCls, "col-span-2")} />
+                                      )}
+                                      <input value={s.accountFrom || ""} onChange={e => patchAction(tx.id, "starting", si, { accountFrom: e.target.value })}
+                                        placeholder="Account from" className={inputCls} />
+                                      <input value={s.institutionFrom || ""} onChange={e => patchAction(tx.id, "starting", si, { institutionFrom: e.target.value })}
+                                        placeholder="Institution from" className={inputCls} />
+                                      <select value={s.direction || ""} onChange={e => patchAction(tx.id, "starting", si, { direction: e.target.value })}
+                                        className={inputCls}>
+                                        <option value="">Direction…</option>
+                                        <option value="in">In (received)</option>
+                                        <option value="out">Out (sent)</option>
+                                        <option value="domestic">Domestic</option>
+                                        <option value="international">International</option>
+                                      </select>
+                                      <input value={s.location || ""} onChange={e => patchAction(tx.id, "starting", si, { location: e.target.value })}
+                                        placeholder="Location (branch / ATM / online)" className={inputCls} />
+                                      <input value={s.purpose || ""} onChange={e => patchAction(tx.id, "starting", si, { purpose: e.target.value })}
+                                        placeholder="Purpose of action" className={cn(inputCls, "col-span-2")} />
+                                      <input value={s.amount || ""} onChange={e => patchAction(tx.id, "starting", si, { amount: e.target.value })}
+                                        placeholder="Amount" className={inputCls} />
+                                      <input value={s.currency || ""} onChange={e => patchAction(tx.id, "starting", si, { currency: e.target.value })}
+                                        placeholder="Currency" className={inputCls} />
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                               <div>
-                                <p className="text-[10px] font-bold text-red-800 mt-2 mb-1">Completing Action</p>
-                                <div className="grid grid-cols-2 gap-2">
-                                  <input value={c.dispositionOfFunds || ""} onChange={e => setTxAction(tx.id, "completing", { dispositionOfFunds: e.target.value })}
-                                    placeholder="Disposition (override)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
-                                  <input value={c.beneficiaryName || ""} onChange={e => setTxAction(tx.id, "completing", { beneficiaryName: e.target.value })}
-                                    placeholder="Beneficiary name (override)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
-                                  <input value={c.beneficiaryAccount || ""} onChange={e => setTxAction(tx.id, "completing", { beneficiaryAccount: e.target.value })}
-                                    placeholder="Beneficiary account" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
-                                  <input value={c.beneficiaryCountry || ""} onChange={e => setTxAction(tx.id, "completing", { beneficiaryCountry: e.target.value })}
-                                    placeholder="Beneficiary country" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
-                                  <input value={c.accountTo || ""} onChange={e => setTxAction(tx.id, "completing", { accountTo: e.target.value })}
-                                    placeholder="Account to" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
-                                  <input value={c.institutionTo || ""} onChange={e => setTxAction(tx.id, "completing", { institutionTo: e.target.value })}
-                                    placeholder="Institution to" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                                <div className="flex items-center justify-between mt-1 mb-1">
+                                  <p className="text-[10px] font-bold text-red-800">Completing Actions ({compList.length})</p>
+                                  <button type="button" onClick={() => addAction(tx.id, "completing")}
+                                    className="text-[10px] font-semibold text-red-700 hover:text-red-900">+ Add completing action</button>
                                 </div>
+                                {compList.map((c, ci) => (
+                                  <div key={ci} className="border border-red-100 rounded-md p-2 mb-2 bg-white">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-[10px] font-semibold text-red-700">Action {ci + 1}</span>
+                                      {compList.length > 1 && (
+                                        <button type="button" onClick={() => removeAction(tx.id, "completing", ci)}
+                                          className="text-[10px] text-red-500 hover:text-red-700">Remove</button>
+                                      )}
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <input value={c.dispositionOfFunds || ""} onChange={e => patchAction(tx.id, "completing", ci, { dispositionOfFunds: e.target.value })}
+                                        placeholder="Disposition of funds" className={inputCls} />
+                                      <input value={c.beneficiaryName || ""} onChange={e => patchAction(tx.id, "completing", ci, { beneficiaryName: e.target.value })}
+                                        placeholder="Beneficiary name" className={inputCls} />
+                                      <input value={c.beneficiaryAccount || ""} onChange={e => patchAction(tx.id, "completing", ci, { beneficiaryAccount: e.target.value })}
+                                        placeholder="Beneficiary account" className={inputCls} />
+                                      <input value={c.beneficiaryCountry || ""} onChange={e => patchAction(tx.id, "completing", ci, { beneficiaryCountry: e.target.value })}
+                                        placeholder="Beneficiary country" className={inputCls} />
+                                      <input value={c.accountTo || ""} onChange={e => patchAction(tx.id, "completing", ci, { accountTo: e.target.value })}
+                                        placeholder="Account to" className={inputCls} />
+                                      <input value={c.institutionTo || ""} onChange={e => patchAction(tx.id, "completing", ci, { institutionTo: e.target.value })}
+                                        placeholder="Institution to" className={inputCls} />
+                                      <select value={c.direction || ""} onChange={e => patchAction(tx.id, "completing", ci, { direction: e.target.value })}
+                                        className={inputCls}>
+                                        <option value="">Direction…</option>
+                                        <option value="in">In (received)</option>
+                                        <option value="out">Out (sent)</option>
+                                        <option value="domestic">Domestic</option>
+                                        <option value="international">International</option>
+                                      </select>
+                                      <input value={c.location || ""} onChange={e => patchAction(tx.id, "completing", ci, { location: e.target.value })}
+                                        placeholder="Location (branch / ATM / online)" className={inputCls} />
+                                      <input value={c.purpose || ""} onChange={e => patchAction(tx.id, "completing", ci, { purpose: e.target.value })}
+                                        placeholder="Purpose of action" className={cn(inputCls, "col-span-2")} />
+                                      <input value={c.amount || ""} onChange={e => patchAction(tx.id, "completing", ci, { amount: e.target.value })}
+                                        placeholder="Amount" className={inputCls} />
+                                      <input value={c.currency || ""} onChange={e => patchAction(tx.id, "completing", ci, { currency: e.target.value })}
+                                        placeholder="Currency" className={inputCls} />
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
                           </details>
@@ -1696,6 +1800,7 @@ export default function SuiteCases() {
                   </div>
                 );
               })()}
+
 
               {/* Section 2b: Conductors (multi-entry) */}
               <div className="bg-white border border-red-200 rounded-xl p-4">
