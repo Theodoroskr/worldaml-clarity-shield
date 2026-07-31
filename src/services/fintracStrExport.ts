@@ -354,7 +354,7 @@ const STR_TYPE_LABELS: Record<string, string> = {
   str: "Suspicious Transaction Report (STR)",
   lctr: "Large Cash Transaction Report (LCTR)",
   eftr: "Electronic Funds Transfer Report (EFTR)",
-  tpr: "Terrorist Property Report (TPR)",
+  tpr: "Listed Person or Entity Property Report (LPEPR)",
 };
 
 function header(doc: jsPDF, title: string, y: number): number {
