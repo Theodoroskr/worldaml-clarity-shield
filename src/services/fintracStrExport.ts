@@ -759,7 +759,7 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
   // TPR addendum (after the 4 transactional sections, before suspicion)
   if (strType === "tpr") {
     y = checkPage(doc, y, 60);
-    y = header(doc, "TPR Addendum — Terrorist Entity / Listed Person", y);
+    y = header(doc, "LPEPR Addendum — Listed Person or Entity", y);
     y = fieldPair(doc, "Listed Entity / Person Name", mf.tprTerroristEntityName || "Not specified",
       "Entity Type", mf.tprTerroristEntityType === "entity" ? "Entity / Organisation" : "Individual", y);
     y = field(doc, "Listed Under (Regulation)", mf.tprListedUnder || "Not specified — e.g., Criminal Code s.83.05, UN Regulations (UNAQTR)", y);
@@ -767,7 +767,7 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = field(doc, "Date Property Identified / Discovered", mf.tprDateDiscovered || "Not specified", y);
 
     y = checkPage(doc, y, 60);
-    y = header(doc, "TPR Addendum — Property Details (PCMLTFA s.7.1)", y);
+    y = header(doc, "LPEPR Addendum — Property Details (PCMLTFA s.7.1)", y);
     const propTypes: Record<string, string> = {
       bank_account: "Bank Account / Deposit", investment: "Investment / Securities",
       real_estate: "Real Estate / Property", vehicle: "Vehicle / Vessel / Aircraft",
@@ -780,7 +780,7 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = field(doc, "Location of Property", mf.tprPropertyLocation || "Not specified", y);
 
     y = checkPage(doc, y, 30);
-    y = header(doc, "TPR Addendum — Disposition (Criminal Code s.83.08)", y);
+    y = header(doc, "LPEPR Addendum — Disposition (Criminal Code s.83.08)", y);
     const dispActions: Record<string, string> = {
       frozen: "Property Frozen / Account Blocked", seized: "Property Seized by Law Enforcement",
       reported_rcmp: "Reported to RCMP / CSIS", retained: "Property Retained — Awaiting Direction",
