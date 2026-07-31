@@ -18,18 +18,27 @@
 // exact XML/JSON wire format used by FINTRAC's secure channel should be done
 // at the submission edge function layer once the entity has API credentials.
 
-import type {
-  FINTRACSTRExportOptions,
-  FINTRACManualFields,
-  FINTRACTransaction,
-  FINTRACTransactionAction,
+import {
+  startingActionsFor,
+  completingActionsFor,
+  formatAddress,
+  formatName,
+  type FINTRACSTRExportOptions,
+  type FINTRACManualFields,
+  type FINTRACTransaction,
+  type FINTRACStartingAction,
+  type FINTRACCompletingAction,
+  type FINTRACRelatedReport,
 } from "./fintracStrExport";
 
 export interface FwrPayload {
   schemaVersion: "1.0";
   generatedAt: string;
-  reportType: "STR" | "LCTR" | "EFTR" | "TPR";
+  reportType: "STR" | "LCTR" | "EFTR" | "LVCTR" | "CDR" | "LPEPR";
   reportReference: string;
+  /** Companion / related FINTRAC reports covering the same activity. */
+  relatedReports?: FINTRACRelatedReport[];
+
 
   // A. General Information
   generalInformation: {
@@ -93,9 +102,10 @@ export interface FwrPayload {
     }>;
   };
 
-  // C. Starting Action(s) — per-transaction
+  // C. Starting Action(s) — one or more per transaction
   startingActions: Array<{
     transactionId: string;
+    sequence: number;
     methodOfTransaction?: string;
     sourceOfFunds?: string;
     conductorName?: string;
@@ -103,18 +113,30 @@ export interface FwrPayload {
     thirdPartyName?: string;
     accountFrom?: string;
     institutionFrom?: string;
+    direction?: string;
+    location?: string;
+    purpose?: string;
+    amount?: string;
+    currency?: string;
   }>;
 
-  // D. Completing Action(s) — per-transaction
+  // D. Completing Action(s) — one or more per transaction
   completingActions: Array<{
     transactionId: string;
+    sequence: number;
     dispositionOfFunds?: string;
     beneficiaryName?: string;
     beneficiaryAccount?: string;
     beneficiaryCountry?: string;
     accountTo?: string;
     institutionTo?: string;
+    direction?: string;
+    location?: string;
+    purpose?: string;
+    amount?: string;
+    currency?: string;
   }>;
+
 
   // Parties (multi-entry, FWR-aligned)
   parties: {
@@ -150,7 +172,7 @@ export interface FwrPayload {
     };
   };
 
-  // TPR-specific block (omitted for non-TPR reports)
+  // LPEPR-specific block (omitted for non-LPEPR reports)
   terroristProperty?: {
     entityName: string;
     entityType: string;
@@ -166,37 +188,59 @@ export interface FwrPayload {
   };
 }
 
-function resolveAction(
+/** Starting actions for a transaction, with report-level defaults applied to the first action. */
+function resolveStartingActions(
   tx: FINTRACTransaction,
   mf: FINTRACManualFields,
-): FINTRACTransactionAction {
+): FINTRACStartingAction[] {
   const override = mf.transactionActions?.[tx.id];
-  return {
-    starting: {
-      methodOfTransaction: override?.starting?.methodOfTransaction || mf.methodOfTransaction,
-      sourceOfFunds: override?.starting?.sourceOfFunds || mf.sourceOfFunds,
-      conductorName: override?.starting?.conductorName || mf.conductorName,
-      thirdPartyIndicator:
-        (override?.starting?.thirdPartyIndicator as "own_behalf" | "third_party") ||
-        (mf.thirdPartyIndicator as "own_behalf" | "third_party"),
-      thirdPartyName: override?.starting?.thirdPartyName || mf.thirdPartyName,
-      accountFrom: override?.starting?.accountFrom,
-      institutionFrom: override?.starting?.institutionFrom,
-    },
-    completing: {
-      dispositionOfFunds: override?.completing?.dispositionOfFunds || mf.dispositionOfFunds,
-      beneficiaryName: override?.completing?.beneficiaryName || mf.beneficiaryName,
-      beneficiaryAccount: override?.completing?.beneficiaryAccount || mf.beneficiaryAccount,
-      beneficiaryCountry: override?.completing?.beneficiaryCountry || mf.beneficiaryCountry,
-      accountTo: override?.completing?.accountTo,
-      institutionTo: override?.completing?.institutionTo,
-    },
-  };
+  const list = startingActionsFor(override);
+  const base = list.length > 0 ? list : [{}];
+  return base.map((a, i) =>
+    i > 0
+      ? a
+      : {
+          ...a,
+          methodOfTransaction: a.methodOfTransaction || mf.methodOfTransaction,
+          sourceOfFunds: a.sourceOfFunds || mf.sourceOfFunds,
+          conductorName: a.conductorName || mf.conductorName,
+          thirdPartyIndicator:
+            (a.thirdPartyIndicator as "own_behalf" | "third_party") ||
+            (mf.thirdPartyIndicator as "own_behalf" | "third_party"),
+          thirdPartyName: a.thirdPartyName || mf.thirdPartyName,
+        },
+  );
 }
+
+/** Completing actions for a transaction, with report-level defaults applied to the first action. */
+function resolveCompletingActions(
+  tx: FINTRACTransaction,
+  mf: FINTRACManualFields,
+): FINTRACCompletingAction[] {
+  const override = mf.transactionActions?.[tx.id];
+  const list = completingActionsFor(override);
+  const base = list.length > 0 ? list : [{}];
+  return base.map((a, i) =>
+    i > 0
+      ? a
+      : {
+          ...a,
+          dispositionOfFunds: a.dispositionOfFunds || mf.dispositionOfFunds,
+          beneficiaryName: a.beneficiaryName || mf.beneficiaryName,
+          beneficiaryAccount: a.beneficiaryAccount || mf.beneficiaryAccount,
+          beneficiaryCountry: a.beneficiaryCountry || mf.beneficiaryCountry,
+        },
+  );
+}
+
 
 export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
   const mf = opts.manualFields!;
-  const reportType = opts.strType.toUpperCase() as FwrPayload["reportType"];
+  // `tpr` is the legacy internal code for the Listed Person or Entity Property Report
+  const reportType = (opts.strType === "tpr"
+    ? "LPEPR"
+    : opts.strType.toUpperCase()) as FwrPayload["reportType"];
+
   const ref =
     opts.reportingEntityRef ||
     `FINTRAC-${reportType}-${opts.caseItem.id.slice(0, 8).toUpperCase()}`;
@@ -210,6 +254,9 @@ export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
     generatedAt: new Date().toISOString(),
     reportType,
     reportReference: ref,
+    relatedReports: (mf.relatedReports || []).filter((r) => (r.reportType || "").trim()),
+
+
 
     generalInformation: {
       reportingEntity: {
@@ -278,39 +325,62 @@ export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
       }),
     },
 
-    startingActions: opts.transactions.map((tx) => {
-      const a = resolveAction(tx, mf);
-      return {
+    startingActions: opts.transactions.flatMap((tx) =>
+      resolveStartingActions(tx, mf).map((a, i) => ({
         transactionId: tx.id,
-        methodOfTransaction: a.starting.methodOfTransaction,
-        sourceOfFunds: a.starting.sourceOfFunds,
-        conductorName: a.starting.conductorName,
-        onBehalfOf: (a.starting.thirdPartyIndicator || "own_behalf") as
-          | "own_behalf"
-          | "third_party",
-        thirdPartyName: a.starting.thirdPartyName,
-        accountFrom: a.starting.accountFrom,
-        institutionFrom: a.starting.institutionFrom,
-      };
-    }),
+        sequence: i + 1,
+        methodOfTransaction: a.methodOfTransaction,
+        sourceOfFunds: a.sourceOfFunds,
+        conductorName: a.conductorName,
+        onBehalfOf: (a.thirdPartyIndicator || "own_behalf") as "own_behalf" | "third_party",
+        thirdPartyName: a.thirdPartyName,
+        accountFrom: a.accountFrom,
+        institutionFrom: a.institutionFrom,
+        direction: a.direction,
+        location: a.location,
+        purpose: a.purpose,
+        amount: a.amount,
+        currency: a.currency,
+      })),
+    ),
 
-    completingActions: opts.transactions.map((tx) => {
-      const a = resolveAction(tx, mf);
-      return {
+    completingActions: opts.transactions.flatMap((tx) =>
+      resolveCompletingActions(tx, mf).map((a, i) => ({
         transactionId: tx.id,
-        dispositionOfFunds: a.completing.dispositionOfFunds,
-        beneficiaryName: a.completing.beneficiaryName,
-        beneficiaryAccount: a.completing.beneficiaryAccount,
-        beneficiaryCountry: a.completing.beneficiaryCountry,
-        accountTo: a.completing.accountTo,
-        institutionTo: a.completing.institutionTo,
-      };
-    }),
+        sequence: i + 1,
+        dispositionOfFunds: a.dispositionOfFunds,
+        beneficiaryName: a.beneficiaryName,
+        beneficiaryAccount: a.beneficiaryAccount,
+        beneficiaryCountry: a.beneficiaryCountry,
+        accountTo: a.accountTo,
+        institutionTo: a.institutionTo,
+        direction: a.direction,
+        location: a.location,
+        purpose: a.purpose,
+        amount: a.amount,
+        currency: a.currency,
+      })),
+    ),
 
     parties: {
-      conductors: mf.conductors,
-      beneficialOwners: mf.beneficialOwners,
-      thirdParties: mf.thirdParties,
+      conductors: (mf.conductors || []).map((c) => ({
+        ...c,
+        fullName: formatName(c.name, c.fullName),
+        address: formatAddress(c.addressDetail, c.address),
+        role: c.role || "Conductor",
+      })),
+      beneficialOwners: (mf.beneficialOwners || []).map((b) => ({
+        ...b,
+        fullName: formatName(b.name, b.fullName),
+        address: formatAddress(b.addressDetail, b.address),
+        role: b.role || "Beneficial owner",
+      })),
+      thirdParties: (mf.thirdParties || []).map((t) => ({
+        ...t,
+        fullName: formatName(t.name, t.fullName),
+        address: formatAddress(t.addressDetail, t.address),
+        role: t.role || "Third party (on whose behalf)",
+      })),
       customerOnFile: opts.customer
         ? {
             name: opts.customer.name,
@@ -322,6 +392,7 @@ export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
           }
         : undefined,
     },
+
 
     detailsOfSuspicion: {
       suspicionType: mf.suspicionType,
@@ -357,8 +428,41 @@ export function buildFwrPayload(opts: FINTRACSTRExportOptions): FwrPayload {
     };
   }
 
-  return payload;
+  return stripPlaceholders(payload) as FwrPayload;
 }
+
+/** UI placeholders that must never reach FINTRAC. */
+const PLACEHOLDER_VALUES = new Set(["", "—", "-", "--", "n/a", "na", "none", "null", "undefined", "tbd", "unknown"]);
+
+/**
+ * Recursively remove empty strings, em-dash/"N/A" placeholders, empty objects and
+ * empty arrays so the FWR payload only carries real reported values.
+ */
+export function stripPlaceholders<T>(value: T): T | undefined {
+  if (value === null || value === undefined) return undefined;
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return PLACEHOLDER_VALUES.has(trimmed.toLowerCase()) ? undefined : (trimmed as unknown as T);
+  }
+
+  if (Array.isArray(value)) {
+    const cleaned = value.map((v) => stripPlaceholders(v)).filter((v) => v !== undefined);
+    return (cleaned.length > 0 ? cleaned : undefined) as unknown as T;
+  }
+
+  if (typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      const cleaned = stripPlaceholders(v);
+      if (cleaned !== undefined) out[k] = cleaned;
+    }
+    return (Object.keys(out).length > 0 ? out : undefined) as unknown as T;
+  }
+
+  return value;
+}
+
 
 export function downloadFwrPayload(payload: FwrPayload): { blobUrl: string; fileName: string } {
   const json = JSON.stringify(payload, null, 2);

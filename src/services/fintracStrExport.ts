@@ -45,32 +45,108 @@ export interface FINTRACNote {
   created_at: string;
 }
 
+// Structured (FWR-aligned) address block
+export interface FINTRACStructuredAddress {
+  street?: string;
+  unit?: string;
+  city?: string;
+  provinceState?: string;
+  postalCode?: string;
+  country?: string;
+}
+
+// Structured (FWR-aligned) name block
+export interface FINTRACStructuredName {
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+}
+
+// FINTRAC FWR party roles (Part B/C — person or entity involvement)
+export const FINTRAC_PARTY_ROLES = [
+  "Conductor",
+  "Authorized person",
+  "Account holder",
+  "Beneficiary",
+  "Beneficial owner",
+  "Third party (on whose behalf)",
+  "Person/entity involved (other)",
+  "Director / senior officer",
+  "Signatory",
+  "Agent / power of attorney",
+] as const;
+export type FINTRACPartyRole = typeof FINTRAC_PARTY_ROLES[number];
+
 // FINTRAC FWR-aligned party records (multi-entry)
 export interface FINTRACPartyConductor {
   fullName: string;
+  name?: FINTRACStructuredName;
+  role?: string;
   dateOfBirth?: string;
   address?: string;
+  addressDetail?: FINTRACStructuredAddress;
   occupation?: string;
+  employerName?: string;
+  phone?: string;
+  email?: string;
+  idType?: string;
+  idNumber?: string;
+  idJurisdiction?: string;
+  idExpiry?: string;
+}
+
+export interface FINTRACPartyBeneficialOwner {
+  fullName: string;
+  name?: FINTRACStructuredName;
+  role?: string;
+  dateOfBirth?: string;
+  address?: string;
+  addressDetail?: FINTRACStructuredAddress;
+  ownershipPercent?: string;
+  controlNature?: string; // e.g. director, signatory, ultimate beneficial owner
   idType?: string;
   idNumber?: string;
   idJurisdiction?: string;
 }
 
-export interface FINTRACPartyBeneficialOwner {
-  fullName: string;
-  dateOfBirth?: string;
-  address?: string;
-  ownershipPercent?: string;
-  controlNature?: string; // e.g. director, signatory, ultimate beneficial owner
-}
-
 export interface FINTRACPartyThirdParty {
   fullName: string;
+  name?: FINTRACStructuredName;
+  role?: string;
   dateOfBirth?: string;
   address?: string;
+  addressDetail?: FINTRACStructuredAddress;
   relationshipToConductor?: string; // e.g. employer, spouse, agent
   onBehalfOfIndicator?: string; // who they are acting for
+  idType?: string;
+  idNumber?: string;
+  idJurisdiction?: string;
 }
+
+// Reference to a companion / related FINTRAC report already filed or being filed
+export interface FINTRACRelatedReport {
+  reportType: string;   // LCTR, EFTR, LVCTR, CDR, LPEPR, STR…
+  reference?: string;   // FINTRAC or internal report reference
+  filedOn?: string;     // ISO date
+  note?: string;
+}
+
+// Format a structured address into a single display line
+export function formatAddress(a?: FINTRACStructuredAddress, legacy?: string): string {
+  const parts = [a?.unit, a?.street, a?.city, a?.provinceState, a?.postalCode, a?.country]
+    .map(p => (p || "").trim())
+    .filter(Boolean);
+  if (parts.length > 0) return parts.join(", ");
+  return (legacy || "").trim();
+}
+
+// Format a structured name, falling back to the legacy free-text full name
+export function formatName(n?: FINTRACStructuredName, legacy?: string): string {
+  const parts = [n?.firstName, n?.middleName, n?.lastName].map(p => (p || "").trim()).filter(Boolean);
+  if (parts.length > 0) return parts.join(" ");
+  return (legacy || "").trim();
+}
+
 
 // Virtual currency / EMT (Electronic Funds Transfer / Electronic Money Transfer) details
 export interface FINTRACVirtualCurrencyDetails {
@@ -148,29 +224,51 @@ export interface FINTRACManualFields {
   transactionActions?: Record<string, FINTRACTransactionAction>;
   // ── FINTRAC transaction status / location / purpose / attempted-transaction details ──
   transactionDetails?: Record<string, FINTRACTransactionDetails>;
+  // ── Related / companion report references (LCTR, EFTR, LVCTR, CDR, LPEPR…) ──
+  relatedReports?: FINTRACRelatedReport[];
 }
 
-// One starting+completing action pair per transaction (FWR multi-action support)
+// A single starting action (funds entering the transaction)
+export interface FINTRACStartingAction {
+  methodOfTransaction?: string;     // in-person, online, ATM, wire…
+  sourceOfFunds?: string;           // salary, business revenue, savings…
+  conductorName?: string;
+  thirdPartyIndicator?: "own_behalf" | "third_party";
+  thirdPartyName?: string;
+  accountFrom?: string;
+  institutionFrom?: string;
+  // FWR per-action attributes
+  direction?: string;               // in / out / domestic / international
+  location?: string;                // branch, ATM, online channel, address
+  purpose?: string;                 // stated purpose of the action
+  amount?: string;
+  currency?: string;
+}
+
+// A single completing action (funds leaving / disposition)
+export interface FINTRACCompletingAction {
+  dispositionOfFunds?: string;
+  beneficiaryName?: string;
+  beneficiaryAccount?: string;
+  beneficiaryCountry?: string;
+  accountTo?: string;
+  institutionTo?: string;
+  // FWR per-action attributes
+  direction?: string;
+  location?: string;
+  purpose?: string;
+  amount?: string;
+  currency?: string;
+}
+
+// Per-transaction actions (FWR multi-action support).
+// `starting` / `completing` remain the primary (first) action for backward compat;
+// `startingActions` / `completingActions` hold the full FWR arrays.
 export interface FINTRACTransactionAction {
-  // Starting Action — how the funds entered the transaction
-  starting: {
-    methodOfTransaction?: string;     // in-person, online, ATM, wire…
-    sourceOfFunds?: string;           // salary, business revenue, savings…
-    conductorName?: string;
-    thirdPartyIndicator?: "own_behalf" | "third_party";
-    thirdPartyName?: string;
-    accountFrom?: string;
-    institutionFrom?: string;
-  };
-  // Completing Action — how the funds left / were disposed
-  completing: {
-    dispositionOfFunds?: string;
-    beneficiaryName?: string;
-    beneficiaryAccount?: string;
-    beneficiaryCountry?: string;
-    accountTo?: string;
-    institutionTo?: string;
-  };
+  starting: FINTRACStartingAction;
+  completing: FINTRACCompletingAction;
+  startingActions?: FINTRACStartingAction[];
+  completingActions?: FINTRACCompletingAction[];
 }
 
 // Per-transaction details (status, location, purpose, attempted-transaction reasonable measures)
@@ -181,6 +279,19 @@ export interface FINTRACTransactionDetails {
   attemptedReason?: string;
   reasonableMeasuresTaken?: string;
 }
+
+/** All starting actions for a transaction, newest model first, legacy single as fallback. */
+export function startingActionsFor(a?: FINTRACTransactionAction): FINTRACStartingAction[] {
+  if (a?.startingActions && a.startingActions.length > 0) return a.startingActions;
+  return a?.starting ? [a.starting] : [];
+}
+
+/** All completing actions for a transaction, newest model first, legacy single as fallback. */
+export function completingActionsFor(a?: FINTRACTransactionAction): FINTRACCompletingAction[] {
+  if (a?.completingActions && a.completingActions.length > 0) return a.completingActions;
+  return a?.completing ? [a.completing] : [];
+}
+
 
 export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
   methodOfTransaction: "",
@@ -218,6 +329,8 @@ export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
   isPpp: false,
   ppp: { pppType: "", pppNumber: "", pppProvider: "", pppHolderName: "", loadMethod: "", unloadMethod: "" },
   transactionDetails: {},
+  relatedReports: [],
+
 };
 
 export interface FINTRACSTRExportOptions {
@@ -241,7 +354,7 @@ const STR_TYPE_LABELS: Record<string, string> = {
   str: "Suspicious Transaction Report (STR)",
   lctr: "Large Cash Transaction Report (LCTR)",
   eftr: "Electronic Funds Transfer Report (EFTR)",
-  tpr: "Terrorist Property Report (TPR)",
+  tpr: "Listed Person or Entity Property Report (LPEPR)",
 };
 
 function header(doc: jsPDF, title: string, y: number): number {
@@ -348,9 +461,16 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
   // ════════════════════════════════════════════════════════════════════
 
   const txActions = mf.transactionActions ?? {};
-  const getStarting = (txId: string) => txActions[txId]?.starting ?? {};
-  const getCompleting = (txId: string) => txActions[txId]?.completing ?? {};
+  const getStartingList = (txId: string): FINTRACStartingAction[] => {
+    const list = startingActionsFor(txActions[txId]);
+    return list.length > 0 ? list : [{}];
+  };
+  const getCompletingList = (txId: string): FINTRACCompletingAction[] => {
+    const list = completingActionsFor(txActions[txId]);
+    return list.length > 0 ? list : [{}];
+  };
   const fallback = (perTx: string | undefined, legacy: string) => (perTx && perTx.trim() ? perTx : legacy);
+
 
   const subHeader = (label: string) => {
     doc.setFillColor(255, 240, 240);
@@ -396,14 +516,21 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = checkPage(doc, y, 30);
     subHeader(`1.2 — CONDUCTORS (${mf.conductors.length})`);
     mf.conductors.forEach((c, idx) => {
-      y = checkPage(doc, y, 30);
+      y = checkPage(doc, y, 34);
       doc.setFontSize(8); doc.setFont("helvetica", "bold");
       doc.text(`Conductor ${idx + 1}`, MARGIN, y);
       doc.setFont("helvetica", "normal"); y += 4;
-      y = fieldPair(doc, "Full Legal Name", c.fullName || "—", "Date of Birth", c.dateOfBirth || "—", y);
-      y = field(doc, "Address", c.address || "—", y);
-      y = fieldPair(doc, "Occupation", c.occupation || "—", "ID Type", c.idType || "—", y);
-      y = fieldPair(doc, "ID Number", c.idNumber || "—", "ID Issuing Jurisdiction", c.idJurisdiction || "—", y);
+      y = fieldPair(doc, "Full Legal Name", formatName(c.name, c.fullName) || "—", "Role", c.role || "Conductor", y);
+      y = fieldPair(doc, "Surname", c.name?.lastName || "—", "Given Name(s)", [c.name?.firstName, c.name?.middleName].filter(Boolean).join(" ") || "—", y);
+      y = fieldPair(doc, "Date of Birth", c.dateOfBirth || "—", "Occupation", c.occupation || "—", y);
+      y = field(doc, "Address", formatAddress(c.addressDetail, c.address) || "—", y);
+      y = fieldPair(doc, "City / Province", [c.addressDetail?.city, c.addressDetail?.provinceState].filter(Boolean).join(", ") || "—",
+        "Postal Code / Country", [c.addressDetail?.postalCode, c.addressDetail?.country].filter(Boolean).join(", ") || "—", y);
+      y = fieldPair(doc, "ID Type", c.idType || "—", "ID Number", c.idNumber || "—", y);
+      y = fieldPair(doc, "ID Issuing Jurisdiction", c.idJurisdiction || "—", "ID Expiry", c.idExpiry || "—", y);
+      if (c.employerName || c.phone || c.email) {
+        y = fieldPair(doc, "Employer", c.employerName || "—", "Contact", [c.phone, c.email].filter(Boolean).join(" · ") || "—", y);
+      }
     });
     y += 2;
   }
@@ -412,13 +539,16 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = checkPage(doc, y, 30);
     subHeader(`1.3 — THIRD PARTIES (${mf.thirdParties.length})`);
     mf.thirdParties.forEach((t, idx) => {
-      y = checkPage(doc, y, 30);
+      y = checkPage(doc, y, 34);
       doc.setFontSize(8); doc.setFont("helvetica", "bold");
       doc.text(`Third Party ${idx + 1}`, MARGIN, y);
       doc.setFont("helvetica", "normal"); y += 4;
-      y = fieldPair(doc, "Full Legal Name", t.fullName || "—", "Date of Birth", t.dateOfBirth || "—", y);
-      y = field(doc, "Address", t.address || "—", y);
-      y = fieldPair(doc, "Relationship to Conductor", t.relationshipToConductor || "—", "On Behalf Of", t.onBehalfOfIndicator || "—", y);
+      y = fieldPair(doc, "Full Legal Name", formatName(t.name, t.fullName) || "—", "Role", t.role || "Third party (on whose behalf)", y);
+      y = fieldPair(doc, "Date of Birth", t.dateOfBirth || "—", "Relationship to Conductor", t.relationshipToConductor || "—", y);
+      y = field(doc, "Address", formatAddress(t.addressDetail, t.address) || "—", y);
+      y = fieldPair(doc, "On Behalf Of", t.onBehalfOfIndicator || "—", "ID Type / Number",
+        [t.idType, t.idNumber].filter(Boolean).join(" · ") || "—", y);
+      if (t.idJurisdiction) y = field(doc, "ID Issuing Jurisdiction", t.idJurisdiction, y);
     });
     y += 2;
   }
@@ -427,16 +557,34 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = checkPage(doc, y, 30);
     subHeader(`1.4 — BENEFICIAL OWNERS (${mf.beneficialOwners.length})`);
     mf.beneficialOwners.forEach((b, idx) => {
-      y = checkPage(doc, y, 30);
+      y = checkPage(doc, y, 34);
       doc.setFontSize(8); doc.setFont("helvetica", "bold");
       doc.text(`Beneficial Owner ${idx + 1}`, MARGIN, y);
       doc.setFont("helvetica", "normal"); y += 4;
-      y = fieldPair(doc, "Full Legal Name", b.fullName || "—", "Date of Birth", b.dateOfBirth || "—", y);
-      y = field(doc, "Address", b.address || "—", y);
-      y = fieldPair(doc, "Ownership %", b.ownershipPercent || "—", "Nature of Control", b.controlNature || "—", y);
+      y = fieldPair(doc, "Full Legal Name", formatName(b.name, b.fullName) || "—", "Role", b.role || "Beneficial owner", y);
+      y = fieldPair(doc, "Date of Birth", b.dateOfBirth || "—", "Ownership %", b.ownershipPercent || "—", y);
+      y = field(doc, "Address", formatAddress(b.addressDetail, b.address) || "—", y);
+      y = fieldPair(doc, "Nature of Control", b.controlNature || "—", "ID Type / Number",
+        [b.idType, b.idNumber].filter(Boolean).join(" · ") || "—", y);
+      if (b.idJurisdiction) y = field(doc, "ID Issuing Jurisdiction", b.idJurisdiction, y);
+
     });
     y += 2;
   }
+
+  if (mf.relatedReports && mf.relatedReports.length > 0) {
+    y = checkPage(doc, y, 30);
+    subHeader(`1.5 — RELATED / COMPANION REPORT REFERENCES (${mf.relatedReports.length})`);
+    mf.relatedReports.forEach((r, idx) => {
+      y = checkPage(doc, y, 16);
+      y = fieldPair(doc, `Related Report ${idx + 1} — Type`, r.reportType || "—", "Report Reference", r.reference || "—", y);
+      if (r.filedOn || r.note) {
+        y = fieldPair(doc, "Filed On", r.filedOn || "—", "Note", r.note || "—", y);
+      }
+    });
+    y += 2;
+  }
+
 
   // ── SECTION 2 — Transaction Information (multi-transaction) ──
   y = checkPage(doc, y, 40);
@@ -559,27 +707,36 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
       mf.thirdPartyIndicator === "third_party" ? `On behalf of third party: ${mf.thirdPartyName || "—"}` : "Transaction conducted on own behalf", y);
   } else {
     transactions.forEach((tx, idx) => {
-      const s = getStarting(tx.id);
-      y = checkPage(doc, y, 38);
-      doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(120, 20, 20);
+      const list = getStartingList(tx.id);
       const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
       const amt = tx.amount.toLocaleString("en-CA", { minimumFractionDigits: 2 });
-      doc.text(`Starting Action ${idx + 1} — Tx ${tx.id.slice(0, 8)} · ${txDate} · ${amt} ${tx.currency}`, MARGIN, y);
-      doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal"); y += 4;
-      y = fieldPair(doc,
-        "Method of Transaction", fallback(s.methodOfTransaction, mf.methodOfTransaction || "Not specified"),
-        "Source of Funds", fallback(s.sourceOfFunds, mf.sourceOfFunds || "Not specified"), y);
-      y = fieldPair(doc,
-        "Conductor Name", fallback(s.conductorName, mf.conductorName || (customer?.name ?? "Not specified")),
-        "Third Party Determination",
-        (s.thirdPartyIndicator ?? mf.thirdPartyIndicator) === "third_party"
-          ? `On behalf of: ${fallback(s.thirdPartyName, mf.thirdPartyName || "—")}`
-          : "Conducted on own behalf",
-        y);
-      if (s.accountFrom || s.institutionFrom) {
-        y = fieldPair(doc, "Account From", s.accountFrom || "—", "Institution From", s.institutionFrom || "—", y);
-      }
+      list.forEach((s, aIdx) => {
+        y = checkPage(doc, y, 44);
+        doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(120, 20, 20);
+        const suffix = list.length > 1 ? `.${aIdx + 1}` : "";
+        doc.text(`Starting Action ${idx + 1}${suffix} — Tx ${tx.id.slice(0, 8)} · ${txDate} · ${amt} ${tx.currency}`, MARGIN, y);
+        doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal"); y += 4;
+        y = fieldPair(doc,
+          "Method of Transaction", fallback(s.methodOfTransaction, mf.methodOfTransaction || "Not specified"),
+          "Source of Funds", fallback(s.sourceOfFunds, mf.sourceOfFunds || "Not specified"), y);
+        y = fieldPair(doc,
+          "Conductor Name", fallback(s.conductorName, mf.conductorName || (customer?.name ?? "Not specified")),
+          "Third Party Determination",
+          (s.thirdPartyIndicator ?? mf.thirdPartyIndicator) === "third_party"
+            ? `On behalf of: ${fallback(s.thirdPartyName, mf.thirdPartyName || "—")}`
+            : "Conducted on own behalf",
+          y);
+        y = fieldPair(doc, "Direction", s.direction || tx.direction || "—", "Location of Action", s.location || "—", y);
+        if (s.purpose || s.amount) {
+          y = fieldPair(doc, "Purpose of Action", s.purpose || "—",
+            "Action Amount", s.amount ? `${s.amount} ${s.currency || tx.currency}` : "—", y);
+        }
+        if (s.accountFrom || s.institutionFrom) {
+          y = fieldPair(doc, "Account From", s.accountFrom || "—", "Institution From", s.institutionFrom || "—", y);
+        }
+      });
     });
+
   }
   y += 2;
 
@@ -598,30 +755,39 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = field(doc, "Beneficiary Country", mf.beneficiaryCountry || "—", y);
   } else {
     transactions.forEach((tx, idx) => {
-      const c = getCompleting(tx.id);
-      y = checkPage(doc, y, 38);
-      doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(120, 20, 20);
+      const list = getCompletingList(tx.id);
       const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
       const amt = tx.amount.toLocaleString("en-CA", { minimumFractionDigits: 2 });
-      doc.text(`Completing Action ${idx + 1} — Tx ${tx.id.slice(0, 8)} · ${txDate} · ${amt} ${tx.currency}`, MARGIN, y);
-      doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal"); y += 4;
-      y = fieldPair(doc,
-        "Disposition of Funds", fallback(c.dispositionOfFunds, mf.dispositionOfFunds || "Not specified"),
-        "Beneficiary Name", fallback(c.beneficiaryName, mf.beneficiaryName || "Not specified"), y);
-      y = fieldPair(doc,
-        "Beneficiary Account", fallback(c.beneficiaryAccount, mf.beneficiaryAccount || "—"),
-        "Beneficiary Country", fallback(c.beneficiaryCountry, mf.beneficiaryCountry || "—"), y);
-      if (c.accountTo || c.institutionTo) {
-        y = fieldPair(doc, "Account To", c.accountTo || "—", "Institution To", c.institutionTo || "—", y);
-      }
+      list.forEach((c, aIdx) => {
+        y = checkPage(doc, y, 44);
+        doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(120, 20, 20);
+        const suffix = list.length > 1 ? `.${aIdx + 1}` : "";
+        doc.text(`Completing Action ${idx + 1}${suffix} — Tx ${tx.id.slice(0, 8)} · ${txDate} · ${amt} ${tx.currency}`, MARGIN, y);
+        doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal"); y += 4;
+        y = fieldPair(doc,
+          "Disposition of Funds", fallback(c.dispositionOfFunds, mf.dispositionOfFunds || "Not specified"),
+          "Beneficiary Name", fallback(c.beneficiaryName, mf.beneficiaryName || "Not specified"), y);
+        y = fieldPair(doc,
+          "Beneficiary Account", fallback(c.beneficiaryAccount, mf.beneficiaryAccount || "—"),
+          "Beneficiary Country", fallback(c.beneficiaryCountry, mf.beneficiaryCountry || "—"), y);
+        y = fieldPair(doc, "Direction", c.direction || tx.direction || "—", "Location of Action", c.location || "—", y);
+        if (c.purpose || c.amount) {
+          y = fieldPair(doc, "Purpose of Action", c.purpose || "—",
+            "Action Amount", c.amount ? `${c.amount} ${c.currency || tx.currency}` : "—", y);
+        }
+        if (c.accountTo || c.institutionTo) {
+          y = fieldPair(doc, "Account To", c.accountTo || "—", "Institution To", c.institutionTo || "—", y);
+        }
+      });
     });
+
   }
   y += 2;
 
   // TPR addendum (after the 4 transactional sections, before suspicion)
   if (strType === "tpr") {
     y = checkPage(doc, y, 60);
-    y = header(doc, "TPR Addendum — Terrorist Entity / Listed Person", y);
+    y = header(doc, "LPEPR Addendum — Listed Person or Entity", y);
     y = fieldPair(doc, "Listed Entity / Person Name", mf.tprTerroristEntityName || "Not specified",
       "Entity Type", mf.tprTerroristEntityType === "entity" ? "Entity / Organisation" : "Individual", y);
     y = field(doc, "Listed Under (Regulation)", mf.tprListedUnder || "Not specified — e.g., Criminal Code s.83.05, UN Regulations (UNAQTR)", y);
@@ -629,7 +795,7 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = field(doc, "Date Property Identified / Discovered", mf.tprDateDiscovered || "Not specified", y);
 
     y = checkPage(doc, y, 60);
-    y = header(doc, "TPR Addendum — Property Details (PCMLTFA s.7.1)", y);
+    y = header(doc, "LPEPR Addendum — Property Details (PCMLTFA s.7.1)", y);
     const propTypes: Record<string, string> = {
       bank_account: "Bank Account / Deposit", investment: "Investment / Securities",
       real_estate: "Real Estate / Property", vehicle: "Vehicle / Vessel / Aircraft",
@@ -642,7 +808,7 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y = field(doc, "Location of Property", mf.tprPropertyLocation || "Not specified", y);
 
     y = checkPage(doc, y, 30);
-    y = header(doc, "TPR Addendum — Disposition (Criminal Code s.83.08)", y);
+    y = header(doc, "LPEPR Addendum — Disposition (Criminal Code s.83.08)", y);
     const dispActions: Record<string, string> = {
       frozen: "Property Frozen / Account Blocked", seized: "Property Seized by Law Enforcement",
       reported_rcmp: "Reported to RCMP / CSIS", retained: "Property Retained — Awaiting Direction",
