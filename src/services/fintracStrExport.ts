@@ -572,6 +572,20 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
     y += 2;
   }
 
+  if (mf.relatedReports && mf.relatedReports.length > 0) {
+    y = checkPage(doc, y, 30);
+    subHeader(`1.5 — RELATED / COMPANION REPORT REFERENCES (${mf.relatedReports.length})`);
+    mf.relatedReports.forEach((r, idx) => {
+      y = checkPage(doc, y, 16);
+      y = fieldPair(doc, `Related Report ${idx + 1} — Type`, r.reportType || "—", "Report Reference", r.reference || "—", y);
+      if (r.filedOn || r.note) {
+        y = fieldPair(doc, "Filed On", r.filedOn || "—", "Note", r.note || "—", y);
+      }
+    });
+    y += 2;
+  }
+
+
   // ── SECTION 2 — Transaction Information (multi-transaction) ──
   y = checkPage(doc, y, 40);
   y = header(doc, `Section 2 — Transaction Information (${transactions.length} transaction${transactions.length === 1 ? "" : "s"})`, y);
