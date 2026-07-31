@@ -679,27 +679,36 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
       mf.thirdPartyIndicator === "third_party" ? `On behalf of third party: ${mf.thirdPartyName || "—"}` : "Transaction conducted on own behalf", y);
   } else {
     transactions.forEach((tx, idx) => {
-      const s = getStarting(tx.id);
-      y = checkPage(doc, y, 38);
-      doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(120, 20, 20);
+      const list = getStartingList(tx.id);
       const txDate = new Date(tx.created_at).toLocaleDateString("en-CA");
       const amt = tx.amount.toLocaleString("en-CA", { minimumFractionDigits: 2 });
-      doc.text(`Starting Action ${idx + 1} — Tx ${tx.id.slice(0, 8)} · ${txDate} · ${amt} ${tx.currency}`, MARGIN, y);
-      doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal"); y += 4;
-      y = fieldPair(doc,
-        "Method of Transaction", fallback(s.methodOfTransaction, mf.methodOfTransaction || "Not specified"),
-        "Source of Funds", fallback(s.sourceOfFunds, mf.sourceOfFunds || "Not specified"), y);
-      y = fieldPair(doc,
-        "Conductor Name", fallback(s.conductorName, mf.conductorName || (customer?.name ?? "Not specified")),
-        "Third Party Determination",
-        (s.thirdPartyIndicator ?? mf.thirdPartyIndicator) === "third_party"
-          ? `On behalf of: ${fallback(s.thirdPartyName, mf.thirdPartyName || "—")}`
-          : "Conducted on own behalf",
-        y);
-      if (s.accountFrom || s.institutionFrom) {
-        y = fieldPair(doc, "Account From", s.accountFrom || "—", "Institution From", s.institutionFrom || "—", y);
-      }
+      list.forEach((s, aIdx) => {
+        y = checkPage(doc, y, 44);
+        doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(120, 20, 20);
+        const suffix = list.length > 1 ? `.${aIdx + 1}` : "";
+        doc.text(`Starting Action ${idx + 1}${suffix} — Tx ${tx.id.slice(0, 8)} · ${txDate} · ${amt} ${tx.currency}`, MARGIN, y);
+        doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal"); y += 4;
+        y = fieldPair(doc,
+          "Method of Transaction", fallback(s.methodOfTransaction, mf.methodOfTransaction || "Not specified"),
+          "Source of Funds", fallback(s.sourceOfFunds, mf.sourceOfFunds || "Not specified"), y);
+        y = fieldPair(doc,
+          "Conductor Name", fallback(s.conductorName, mf.conductorName || (customer?.name ?? "Not specified")),
+          "Third Party Determination",
+          (s.thirdPartyIndicator ?? mf.thirdPartyIndicator) === "third_party"
+            ? `On behalf of: ${fallback(s.thirdPartyName, mf.thirdPartyName || "—")}`
+            : "Conducted on own behalf",
+          y);
+        y = fieldPair(doc, "Direction", s.direction || tx.direction || "—", "Location of Action", s.location || "—", y);
+        if (s.purpose || s.amount) {
+          y = fieldPair(doc, "Purpose of Action", s.purpose || "—",
+            "Action Amount", s.amount ? `${s.amount} ${s.currency || tx.currency}` : "—", y);
+        }
+        if (s.accountFrom || s.institutionFrom) {
+          y = fieldPair(doc, "Account From", s.accountFrom || "—", "Institution From", s.institutionFrom || "—", y);
+        }
+      });
     });
+
   }
   y += 2;
 
