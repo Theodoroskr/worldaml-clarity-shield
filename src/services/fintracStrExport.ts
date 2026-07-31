@@ -461,9 +461,16 @@ export async function exportFINTRACStr(opts: FINTRACSTRExportOptions): Promise<{
   // ════════════════════════════════════════════════════════════════════
 
   const txActions = mf.transactionActions ?? {};
-  const getStarting = (txId: string) => txActions[txId]?.starting ?? {};
-  const getCompleting = (txId: string) => txActions[txId]?.completing ?? {};
+  const getStartingList = (txId: string): FINTRACStartingAction[] => {
+    const list = startingActionsFor(txActions[txId]);
+    return list.length > 0 ? list : [{}];
+  };
+  const getCompletingList = (txId: string): FINTRACCompletingAction[] => {
+    const list = completingActionsFor(txActions[txId]);
+    return list.length > 0 ? list : [{}];
+  };
   const fallback = (perTx: string | undefined, legacy: string) => (perTx && perTx.trim() ? perTx : legacy);
+
 
   const subHeader = (label: string) => {
     doc.setFillColor(255, 240, 240);
