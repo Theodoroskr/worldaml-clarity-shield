@@ -329,6 +329,8 @@ export const DEFAULT_MANUAL_FIELDS: FINTRACManualFields = {
   isPpp: false,
   ppp: { pppType: "", pppNumber: "", pppProvider: "", pppHolderName: "", loadMethod: "", unloadMethod: "" },
   transactionDetails: {},
+  relatedReports: [],
+
 };
 
 export interface FINTRACSTRExportOptions {
