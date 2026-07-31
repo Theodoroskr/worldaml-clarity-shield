@@ -1906,6 +1906,16 @@ export default function SuiteCases() {
                           placeholder="Relationship to conductor" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
                         <input value={t.onBehalfOfIndicator || ""} onChange={e => { const arr = [...mf.thirdParties]; arr[idx] = { ...t, onBehalfOfIndicator: e.target.value }; setMF({ thirdParties: arr }); }}
                           placeholder="Acting on behalf of" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <select value={t.role || "Third party (on whose behalf)"} onChange={e => { const arr = [...mf.thirdParties]; arr[idx] = { ...t, role: e.target.value }; setMF({ thirdParties: arr }); }}
+                          className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground">
+                          {FINTRAC_PARTY_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                        </select>
+                        <input value={t.idType || ""} onChange={e => { const arr = [...mf.thirdParties]; arr[idx] = { ...t, idType: e.target.value }; setMF({ thirdParties: arr }); }}
+                          placeholder="ID type" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={t.idNumber || ""} onChange={e => { const arr = [...mf.thirdParties]; arr[idx] = { ...t, idNumber: e.target.value }; setMF({ thirdParties: arr }); }}
+                          placeholder="ID number" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={t.idJurisdiction || ""} onChange={e => { const arr = [...mf.thirdParties]; arr[idx] = { ...t, idJurisdiction: e.target.value }; setMF({ thirdParties: arr }); }}
+                          placeholder="ID issuing jurisdiction" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
                       </div>
                     </div>
                   ))}
@@ -1946,6 +1956,16 @@ export default function SuiteCases() {
                           placeholder="Ownership % (e.g. 30)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
                         <input value={b.controlNature || ""} onChange={e => { const arr = [...mf.beneficialOwners]; arr[idx] = { ...b, controlNature: e.target.value }; setMF({ beneficialOwners: arr }); }}
                           placeholder="Nature of control (director, signatory…)" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <select value={b.role || "Beneficial owner"} onChange={e => { const arr = [...mf.beneficialOwners]; arr[idx] = { ...b, role: e.target.value }; setMF({ beneficialOwners: arr }); }}
+                          className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground">
+                          {FINTRAC_PARTY_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                        </select>
+                        <input value={b.idType || ""} onChange={e => { const arr = [...mf.beneficialOwners]; arr[idx] = { ...b, idType: e.target.value }; setMF({ beneficialOwners: arr }); }}
+                          placeholder="ID type" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={b.idNumber || ""} onChange={e => { const arr = [...mf.beneficialOwners]; arr[idx] = { ...b, idNumber: e.target.value }; setMF({ beneficialOwners: arr }); }}
+                          placeholder="ID number" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
+                        <input value={b.idJurisdiction || ""} onChange={e => { const arr = [...mf.beneficialOwners]; arr[idx] = { ...b, idJurisdiction: e.target.value }; setMF({ beneficialOwners: arr }); }}
+                          placeholder="ID issuing jurisdiction" className="border border-red-200 rounded px-2 py-1 text-xs bg-white text-foreground" />
                       </div>
                     </div>
                   ))}
