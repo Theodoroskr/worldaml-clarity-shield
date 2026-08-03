@@ -215,7 +215,7 @@ const config: USIndustryLandingConfig = {
     GUIDE_LINKS.fintechUS,
     GUIDE_LINKS.bankUS,
     GUIDE_LINKS.casinoUS,
-    GUIDE_LINKS.travelRule,
+    GUIDE_LINKS.sanctionsLists,
     GUIDE_LINKS.sanctionsSoftware,
     GUIDE_LINKS.compareProviders,
   ],
