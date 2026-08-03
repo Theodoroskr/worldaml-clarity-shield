@@ -373,6 +373,7 @@ const ComplianceSoftwareUS = () => {
           intro="Go deeper into US regulator context, screening tooling, and comparable country landing pages."
           links={[
             GUIDE_LINKS.usGuide,
+            GUIDE_LINKS.casinoUS,
             GUIDE_LINKS.sanctionsSoftware,
             GUIDE_LINKS.whatIsSanctions,
             GUIDE_LINKS.sanctionsLists,

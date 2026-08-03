@@ -44,6 +44,27 @@ function setCookie(name: string, value: string, days: number = 365) {
   document.cookie = `${name}=${value}; expires=${expires}; path=/`;
 }
 
+/**
+ * Fallback region inference when IP lookup is unavailable or blocked.
+ * Uses the browser timezone first (most reliable for US visitors), then locale.
+ */
+function inferRegionFromBrowser(): Region | null {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (/^America\/(New_York|Chicago|Denver|Phoenix|Los_Angeles|Anchorage|Detroit|Toronto|Vancouver|Edmonton|Winnipeg|Halifax|Mexico_City|Boise|Indiana|Kentucky|North_Dakota|Puerto_Rico|Juneau|Sitka|Nome|Adak)/.test(tz) ||
+        tz === 'Pacific/Honolulu') {
+      return 'na';
+    }
+    const locale = (navigator.language || '').toUpperCase();
+    if (locale.endsWith('-US') || locale.endsWith('-CA') || locale.endsWith('-MX')) return 'na';
+    if (locale.endsWith('-GB') || locale.endsWith('-IE')) return 'uk-ie';
+    if (locale.endsWith('-IN') || locale.endsWith('-PK') || locale.endsWith('-BD') || locale.endsWith('-LK')) return 'in';
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 export function RegionProvider({ children }: { children: ReactNode }) {
   const [region, setRegionState] = useState<Region>('eu-me');
   const [isLoading, setIsLoading] = useState(true);
@@ -60,18 +81,22 @@ export function RegionProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      const browserRegion = inferRegionFromBrowser();
+
       // Try IP-based detection
       try {
         const response = await fetch('https://ipapi.co/json/');
         const data = await response.json();
         const countryCode = data.country_code;
-        const detectedRegion = countryToRegion[countryCode] || 'eu-me';
+        const detectedRegion = countryToRegion[countryCode] || browserRegion || 'eu-me';
         setRegionState(detectedRegion);
         setCookie(REGION_COOKIE_KEY, detectedRegion);
         setWasAutoDetected(true);
       } catch (error) {
         console.error('Failed to detect region:', error);
-        setRegionState('eu-me'); // Default to EU & ME
+        const fallback = browserRegion || 'eu-me';
+        setRegionState(fallback);
+        setCookie(REGION_COOKIE_KEY, fallback);
         setWasAutoDetected(true);
       }
       setIsLoading(false);

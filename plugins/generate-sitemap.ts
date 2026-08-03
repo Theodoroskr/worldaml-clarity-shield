@@ -55,6 +55,7 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/aml-screening/eu", changefreq: "monthly", priority: 0.9 },
   { path: "/aml-screening/uk", changefreq: "monthly", priority: 0.9 },
   { path: "/compliance-software/us", changefreq: "monthly", priority: 0.9 },
+  { path: "/compliance-software/us/casinos", changefreq: "monthly", priority: 0.9 },
   { path: "/compliance-software/uk", changefreq: "monthly", priority: 0.9 },
   { path: "/compliance-software/nl", changefreq: "monthly", priority: 0.85 },
   { path: "/compliance-software/ch", changefreq: "monthly", priority: 0.85 },
