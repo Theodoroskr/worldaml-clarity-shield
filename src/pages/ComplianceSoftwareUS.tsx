@@ -427,6 +427,10 @@ const ComplianceSoftwareUS = () => {
           links={[
             GUIDE_LINKS.usGuide,
             GUIDE_LINKS.casinoUS,
+            GUIDE_LINKS.bankUS,
+            GUIDE_LINKS.fintechUS,
+            GUIDE_LINKS.cryptoUS,
+            GUIDE_LINKS.legalUS,
             GUIDE_LINKS.sanctionsSoftware,
             GUIDE_LINKS.whatIsSanctions,
             GUIDE_LINKS.sanctionsLists,
