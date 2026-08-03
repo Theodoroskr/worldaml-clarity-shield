@@ -210,7 +210,28 @@ Deno.serve(async (req) => {
         ]
           .filter(Boolean)
           .join("\n");
-        const descriptionValue = trimmedMessage || fallbackDesc || undefined;
+        // Extra qualification details captured by industry-specific demo forms
+        // (operator type, jurisdiction/segment) plus the explicit email
+        // follow-up consent record. Appended to the Note so nothing entered on
+        // the website is lost, even where no dedicated Zoho field exists.
+        const md = (metadata as any) ?? {};
+        const detailLines = [
+          md.operator_type ? `Operator type: ${md.operator_type}` : null,
+          md.segment ? `Segment: ${md.segment}` : null,
+          md.jurisdiction ? `Primary jurisdiction: ${md.jurisdiction}` : null,
+          md.page ? `Source page: ${md.page}` : null,
+          md.email_follow_up_consent === true
+            ? `Email follow-up consent: YES at ${md.consent_timestamp || "unknown time"}${
+                md.consent_text ? `\nConsent wording: ${md.consent_text}` : ""
+              }`
+            : null,
+        ].filter(Boolean);
+
+        const descriptionValue =
+          [trimmedMessage || fallbackDesc, detailLines.join("\n")]
+            .filter(Boolean)
+            .join("\n\n")
+            .slice(0, 32000) || undefined;
 
         const leadRecord: Record<string, unknown> = {
           First_Name: first_name?.trim().slice(0, 40) || undefined,
