@@ -3,7 +3,7 @@ import { ArrowRight, CheckCircle2, type LucideIcon } from "lucide-react";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import RelatedGuidesSection, { type GuideLink } from "@/components/RelatedGuidesSection";
+import RelatedGuidesSection, { type RelatedGuideLink } from "@/components/RelatedGuidesSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import USIndustryDemoRequestForm from "@/components/forms/USIndustryDemoRequestForm";
@@ -48,7 +48,7 @@ export interface USIndustryLandingConfig {
   ctaBody: string;
   secondaryCta: { to: string; label: string };
   relatedIntro: string;
-  relatedLinks: GuideLink[];
+  relatedLinks: RelatedGuideLink[];
 }
 
 const USIndustryLanding = ({ config }: { config: USIndustryLandingConfig }) => {
