@@ -17,6 +17,8 @@ import Footer from "@/components/Footer";
 import RelatedGuidesSection, { GUIDE_LINKS } from "@/components/RelatedGuidesSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import CasinoDemoRequestForm from "@/components/forms/CasinoDemoRequestForm";
+
 
 /**
  * US casino & gaming AML landing page.
@@ -224,8 +226,9 @@ const CasinoAMLComplianceUS = () => {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button variant="accent" size="lg" asChild>
-                  <Link to="/contact-sales">Talk to a gaming compliance specialist</Link>
+                  <a href="#request-demo">Talk to a gaming compliance specialist</a>
                 </Button>
+
                 <Button variant="outline" size="lg" asChild>
                   <Link to="/free-aml-check">
                     Run a free OFAC patron check <ArrowRight className="ml-2 h-4 w-4" />
@@ -348,6 +351,35 @@ const CasinoAMLComplianceUS = () => {
           </div>
         </section>
 
+        {/* Demo request form */}
+        <section id="request-demo" className="section-padding bg-surface-subtle scroll-mt-24">
+          <div className="container-enterprise grid lg:grid-cols-2 gap-10 items-start">
+            <div>
+              <h2 className="text-2xl text-navy mb-4">
+                Book a walkthrough with a gaming compliance specialist
+              </h2>
+              <p className="text-text-secondary mb-6">
+                We&apos;ll show WorldAML configured for your properties, licence types and patron
+                mix — multiple transaction logs, CTRC and SARC filing, OFAC and PEP screening, and
+                the audit trail an IRS Title 31 examiner expects.
+              </p>
+              <ul className="space-y-3 text-text-secondary">
+                {[
+                  "30-minute session tailored to your jurisdictions",
+                  "Title 31 exam-readiness checklist review",
+                  "USD pricing and rollout timeline",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <CasinoDemoRequestForm />
+          </div>
+        </section>
+
         {/* CTA */}
         <section className="section-padding bg-navy">
           <div className="container-enterprise text-center">
@@ -358,8 +390,9 @@ const CasinoAMLComplianceUS = () => {
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Button variant="accent" size="lg" asChild>
-                <Link to="/contact-sales">Request a demo</Link>
+                <a href="#request-demo">Request a demo</a>
               </Button>
+
               <Button
                 variant="outline"
                 size="lg"
