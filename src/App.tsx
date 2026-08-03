@@ -425,6 +425,10 @@ const App = () => (
                 <Route path="/aml-screening/uk" element={<AMLScreeningUK />} />
                 <Route path="/compliance-software/us" element={<ComplianceSoftwareUS />} />
                 <Route path="/compliance-software/us/casinos" element={<CasinoAMLComplianceUS />} />
+                <Route path="/compliance-software/us/banks" element={<BankAMLComplianceUS />} />
+                <Route path="/compliance-software/us/fintechs" element={<FintechAMLComplianceUS />} />
+                <Route path="/compliance-software/us/crypto" element={<CryptoAMLComplianceUS />} />
+                <Route path="/compliance-software/us/legal" element={<LegalAMLComplianceUS />} />
                 <Route path="/compliance-software/uk" element={<ComplianceSoftwareUK />} />
                 <Route path="/compliance-software/nl" element={<ComplianceSoftwareNL />} />
                 <Route path="/compliance-software/ch" element={<ComplianceSoftwareCH />} />
