@@ -271,6 +271,12 @@ Deno.serve(async (req) => {
               "education": "Education",
               "shipping": "Shipping",
               "telecom": "Telecommunications",
+              "gaming & gambling": "Betting, Gaming and Casino",
+              "gaming and gambling": "Betting, Gaming and Casino",
+              "betting": "Betting, Gaming and Casino",
+              "financial services": "Financial Institutions",
+              "cryptocurrency": "Financial Institutions",
+              "law firms": "Law firms",
               "other": "Other",
             };
             const mapped = INDUSTRY_MAP[raw.toLowerCase()];
