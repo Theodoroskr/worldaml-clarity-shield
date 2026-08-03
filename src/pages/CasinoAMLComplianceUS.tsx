@@ -224,8 +224,9 @@ const CasinoAMLComplianceUS = () => {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button variant="accent" size="lg" asChild>
-                  <Link to="/contact-sales">Talk to a gaming compliance specialist</Link>
+                  <a href="#request-demo">Talk to a gaming compliance specialist</a>
                 </Button>
+
                 <Button variant="outline" size="lg" asChild>
                   <Link to="/free-aml-check">
                     Run a free OFAC patron check <ArrowRight className="ml-2 h-4 w-4" />
