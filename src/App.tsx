@@ -113,6 +113,7 @@ const EUSanctionsCountry = lazyWithRetry(() => import("./pages/EUSanctionsCountr
 const AMLScreeningEU = lazyWithRetry(() => import("./pages/AMLScreeningEU"));
 const AMLScreeningUK = lazyWithRetry(() => import("./pages/AMLScreeningUK"));
 const ComplianceSoftwareUS = lazyWithRetry(() => import("./pages/ComplianceSoftwareUS"));
+const CasinoAMLComplianceUS = lazyWithRetry(() => import("./pages/CasinoAMLComplianceUS"));
 const ComplianceSoftwareUK = lazyWithRetry(() => import("./pages/ComplianceSoftwareUK"));
 const ComplianceSoftwareNL = lazyWithRetry(() => import("./pages/ComplianceSoftwareNL"));
 const ComplianceSoftwareCH = lazyWithRetry(() => import("./pages/ComplianceSoftwareCH"));
