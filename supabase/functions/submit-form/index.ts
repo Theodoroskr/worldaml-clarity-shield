@@ -354,8 +354,28 @@ Deno.serve(async (req) => {
               "partner-application": "Partner Request",
               "newsletter": "Newsletter",
             };
+            const ALLOWED = new Set([
+              "Contact Sales",
+              "Book Demo",
+              "Newsletter",
+              "Webinar",
+              "Event Registration",
+              "Partner Request",
+              "General Contact",
+            ]);
             const key = String(form_type ?? "").trim().toLowerCase();
-            return map[key] || (form_type ? String(form_type) : undefined);
+            if (map[key]) return map[key];
+            // Industry demo forms (e.g. "casino-aml-demo-us",
+            // "fintech-aml-demo-us") are demo requests.
+            if (key.includes("demo")) return "Book Demo";
+            if (key.includes("webinar")) return "Webinar";
+            if (key.includes("event")) return "Event Registration";
+            if (key.includes("partner")) return "Partner Request";
+            // Never send an unmapped value — Zoho rejects picklist values that
+            // are not defined on the field.
+            if (!key) return undefined;
+            const asIs = String(form_type);
+            return ALLOWED.has(asIs) ? asIs : "General Contact";
           })(),
           // Product_Demo (picklist on Leads) — identifies which product-specific
           // demo funnel the lead came from. Set to "free_aml_check" for the
