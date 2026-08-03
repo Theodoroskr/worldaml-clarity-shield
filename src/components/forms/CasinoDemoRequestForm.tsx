@@ -372,7 +372,7 @@ export const CasinoDemoRequestForm = () => {
               id="casino-consent"
               checked={!!consent}
               onCheckedChange={(checked) =>
-                setValue("consent", checked === true, { shouldValidate: true })
+                setValue("consent", (checked === true) as true, { shouldValidate: true })
               }
               aria-invalid={!!errors.consent}
             />
