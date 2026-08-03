@@ -210,7 +210,28 @@ Deno.serve(async (req) => {
         ]
           .filter(Boolean)
           .join("\n");
-        const descriptionValue = trimmedMessage || fallbackDesc || undefined;
+        // Extra qualification details captured by industry-specific demo forms
+        // (operator type, jurisdiction/segment) plus the explicit email
+        // follow-up consent record. Appended to the Note so nothing entered on
+        // the website is lost, even where no dedicated Zoho field exists.
+        const md = (metadata as any) ?? {};
+        const detailLines = [
+          md.operator_type ? `Operator type: ${md.operator_type}` : null,
+          md.segment ? `Segment: ${md.segment}` : null,
+          md.jurisdiction ? `Primary jurisdiction: ${md.jurisdiction}` : null,
+          md.page ? `Source page: ${md.page}` : null,
+          md.email_follow_up_consent === true
+            ? `Email follow-up consent: YES at ${md.consent_timestamp || "unknown time"}${
+                md.consent_text ? `\nConsent wording: ${md.consent_text}` : ""
+              }`
+            : null,
+        ].filter(Boolean);
+
+        const descriptionValue =
+          [trimmedMessage || fallbackDesc, detailLines.join("\n")]
+            .filter(Boolean)
+            .join("\n\n")
+            .slice(0, 32000) || undefined;
 
         const leadRecord: Record<string, unknown> = {
           First_Name: first_name?.trim().slice(0, 40) || undefined,
@@ -250,6 +271,12 @@ Deno.serve(async (req) => {
               "education": "Education",
               "shipping": "Shipping",
               "telecom": "Telecommunications",
+              "gaming & gambling": "Betting, Gaming and Casino",
+              "gaming and gambling": "Betting, Gaming and Casino",
+              "betting": "Betting, Gaming and Casino",
+              "financial services": "Financial Institutions",
+              "cryptocurrency": "Financial Institutions",
+              "law firms": "Law firms",
               "other": "Other",
             };
             const mapped = INDUSTRY_MAP[raw.toLowerCase()];
@@ -327,8 +354,28 @@ Deno.serve(async (req) => {
               "partner-application": "Partner Request",
               "newsletter": "Newsletter",
             };
+            const ALLOWED = new Set([
+              "Contact Sales",
+              "Book Demo",
+              "Newsletter",
+              "Webinar",
+              "Event Registration",
+              "Partner Request",
+              "General Contact",
+            ]);
             const key = String(form_type ?? "").trim().toLowerCase();
-            return map[key] || (form_type ? String(form_type) : undefined);
+            if (map[key]) return map[key];
+            // Industry demo forms (e.g. "casino-aml-demo-us",
+            // "fintech-aml-demo-us") are demo requests.
+            if (key.includes("demo")) return "Book Demo";
+            if (key.includes("webinar")) return "Webinar";
+            if (key.includes("event")) return "Event Registration";
+            if (key.includes("partner")) return "Partner Request";
+            // Never send an unmapped value — Zoho rejects picklist values that
+            // are not defined on the field.
+            if (!key) return undefined;
+            const asIs = String(form_type);
+            return ALLOWED.has(asIs) ? asIs : "General Contact";
           })(),
           // Product_Demo (picklist on Leads) — identifies which product-specific
           // demo funnel the lead came from. Set to "free_aml_check" for the
@@ -513,8 +560,13 @@ Deno.serve(async (req) => {
           // Marketing Communication Consent (boolean) — set true when the
           // visitor explicitly opts in via metadata.marketing_consent; leave
           // unset otherwise so Zoho does not record a false consent.
+          // Also set by the industry demo forms' explicit email follow-up
+          // consent checkbox (metadata.email_follow_up_consent), whose exact
+          // timestamp and wording are recorded in the Note.
           Marketing_Communication_Consent:
-            (metadata as any)?.marketing_consent === true ? true : undefined,
+            md.marketing_consent === true || md.email_follow_up_consent === true
+              ? true
+              : undefined,
 
           // Attendance — only applies to webinar / event registrations.
           Attendance: (() => {
