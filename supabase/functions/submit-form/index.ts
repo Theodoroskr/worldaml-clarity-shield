@@ -560,8 +560,13 @@ Deno.serve(async (req) => {
           // Marketing Communication Consent (boolean) — set true when the
           // visitor explicitly opts in via metadata.marketing_consent; leave
           // unset otherwise so Zoho does not record a false consent.
+          // Also set by the industry demo forms' explicit email follow-up
+          // consent checkbox (metadata.email_follow_up_consent), whose exact
+          // timestamp and wording are recorded in the Note.
           Marketing_Communication_Consent:
-            (metadata as any)?.marketing_consent === true ? true : undefined,
+            md.marketing_consent === true || md.email_follow_up_consent === true
+              ? true
+              : undefined,
 
           // Attendance — only applies to webinar / event registrations.
           Attendance: (() => {
