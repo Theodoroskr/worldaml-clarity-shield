@@ -347,6 +347,59 @@ const ComplianceSoftwareUS = () => {
           </div>
         </section>
 
+        {/* Industry landing pages */}
+        <section className="section-padding border-t border-divider">
+          <div className="container-enterprise">
+            <h2 className="text-headline text-foreground mb-3">
+              Compliance software by US industry
+            </h2>
+            <p className="text-body text-muted-foreground mb-8 max-w-3xl">
+              Regulator, filing and typology coverage tailored to your sector — each page covers the
+              obligations, controls and evidence your examiner expects.
+            </p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                {
+                  to: "/compliance-software/us/banks",
+                  title: "Banks & credit unions",
+                  desc: "FFIEC-aligned BSA program: CTR and SAR filing, CIP/CDD, OFAC and exam evidence.",
+                },
+                {
+                  to: "/compliance-software/us/fintechs",
+                  title: "Fintechs, payments & MSBs",
+                  desc: "FinCEN MSB registration, onboarding APIs, Travel Rule and sponsor-bank reporting.",
+                },
+                {
+                  to: "/compliance-software/us/crypto",
+                  title: "Crypto & digital assets",
+                  desc: "Wallet and address screening, Travel Rule data exchange and NYDFS Part 504 evidence.",
+                },
+                {
+                  to: "/compliance-software/us/casinos",
+                  title: "Casinos & gaming",
+                  desc: "Title 31 program: MTL, CTRC and SARC filing, patron screening and gaming typologies.",
+                },
+                {
+                  to: "/compliance-software/us/legal",
+                  title: "Law firms & legal services",
+                  desc: "Client due diligence, OFAC screening, beneficial ownership and matter-level audit trails.",
+                },
+              ].map((i) => (
+                <Link
+                  key={i.to}
+                  to={i.to}
+                  className="group rounded-xl border border-border bg-card p-5 hover:border-primary/40 hover:shadow-sm transition-all"
+                >
+                  <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary">
+                    {i.title}
+                  </h3>
+                  <p className="text-body-sm text-muted-foreground">{i.desc}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* CTA */}
         <section className="section-padding bg-navy">
           <div className="container-enterprise text-center">
@@ -374,6 +427,10 @@ const ComplianceSoftwareUS = () => {
           links={[
             GUIDE_LINKS.usGuide,
             GUIDE_LINKS.casinoUS,
+            GUIDE_LINKS.bankUS,
+            GUIDE_LINKS.fintechUS,
+            GUIDE_LINKS.cryptoUS,
+            GUIDE_LINKS.legalUS,
             GUIDE_LINKS.sanctionsSoftware,
             GUIDE_LINKS.whatIsSanctions,
             GUIDE_LINKS.sanctionsLists,

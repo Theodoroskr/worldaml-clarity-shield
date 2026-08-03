@@ -114,6 +114,10 @@ const AMLScreeningEU = lazyWithRetry(() => import("./pages/AMLScreeningEU"));
 const AMLScreeningUK = lazyWithRetry(() => import("./pages/AMLScreeningUK"));
 const ComplianceSoftwareUS = lazyWithRetry(() => import("./pages/ComplianceSoftwareUS"));
 const CasinoAMLComplianceUS = lazyWithRetry(() => import("./pages/CasinoAMLComplianceUS"));
+const BankAMLComplianceUS = lazyWithRetry(() => import("./pages/BankAMLComplianceUS"));
+const FintechAMLComplianceUS = lazyWithRetry(() => import("./pages/FintechAMLComplianceUS"));
+const CryptoAMLComplianceUS = lazyWithRetry(() => import("./pages/CryptoAMLComplianceUS"));
+const LegalAMLComplianceUS = lazyWithRetry(() => import("./pages/LegalAMLComplianceUS"));
 const ComplianceSoftwareUK = lazyWithRetry(() => import("./pages/ComplianceSoftwareUK"));
 const ComplianceSoftwareNL = lazyWithRetry(() => import("./pages/ComplianceSoftwareNL"));
 const ComplianceSoftwareCH = lazyWithRetry(() => import("./pages/ComplianceSoftwareCH"));
@@ -421,6 +425,10 @@ const App = () => (
                 <Route path="/aml-screening/uk" element={<AMLScreeningUK />} />
                 <Route path="/compliance-software/us" element={<ComplianceSoftwareUS />} />
                 <Route path="/compliance-software/us/casinos" element={<CasinoAMLComplianceUS />} />
+                <Route path="/compliance-software/us/banks" element={<BankAMLComplianceUS />} />
+                <Route path="/compliance-software/us/fintechs" element={<FintechAMLComplianceUS />} />
+                <Route path="/compliance-software/us/crypto" element={<CryptoAMLComplianceUS />} />
+                <Route path="/compliance-software/us/legal" element={<LegalAMLComplianceUS />} />
                 <Route path="/compliance-software/uk" element={<ComplianceSoftwareUK />} />
                 <Route path="/compliance-software/nl" element={<ComplianceSoftwareNL />} />
                 <Route path="/compliance-software/ch" element={<ComplianceSoftwareCH />} />

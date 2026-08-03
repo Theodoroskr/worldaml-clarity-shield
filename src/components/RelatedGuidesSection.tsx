@@ -115,6 +115,26 @@ export const GUIDE_LINKS: Record<string, RelatedGuideLink> = {
     title: "Casino AML Software — United States",
     description: "Title 31 program tooling: MTL, CTRC and SARC filing, patron screening and gaming rules.",
   },
+  bankUS: {
+    to: "/compliance-software/us/banks",
+    title: "Bank AML Software — United States",
+    description: "FFIEC-aligned BSA program tooling for banks and credit unions: CTR, SAR, CDD and OFAC.",
+  },
+  fintechUS: {
+    to: "/compliance-software/us/fintechs",
+    title: "Fintech & MSB AML Software — United States",
+    description: "FinCEN MSB-ready onboarding, screening, monitoring and sponsor-bank reporting.",
+  },
+  cryptoUS: {
+    to: "/compliance-software/us/crypto",
+    title: "Crypto & VASP AML Software — United States",
+    description: "Travel Rule, wallet screening and on-chain monitoring for US exchanges and custodians.",
+  },
+  legalUS: {
+    to: "/compliance-software/us/legal",
+    title: "Law Firm CDD Software — United States",
+    description: "Client due diligence, OFAC screening and beneficial ownership for US law firms.",
+  },
   csUK: {
     to: "/compliance-software/uk",
     title: "Compliance Software — United Kingdom",
