@@ -17,6 +17,8 @@ import Footer from "@/components/Footer";
 import RelatedGuidesSection, { GUIDE_LINKS } from "@/components/RelatedGuidesSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import CasinoDemoRequestForm from "@/components/forms/CasinoDemoRequestForm";
+
 
 /**
  * US casino & gaming AML landing page.
