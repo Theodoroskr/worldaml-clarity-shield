@@ -110,6 +110,11 @@ export const GUIDE_LINKS: Record<string, RelatedGuideLink> = {
     title: "Compliance Software — United States",
     description: "US-focused platform overview for FinCEN, OFAC, and FFIEC-regulated firms.",
   },
+  casinoUS: {
+    to: "/compliance-software/us/casinos",
+    title: "Casino AML Software — United States",
+    description: "Title 31 program tooling: MTL, CTRC and SARC filing, patron screening and gaming rules.",
+  },
   csUK: {
     to: "/compliance-software/uk",
     title: "Compliance Software — United Kingdom",
