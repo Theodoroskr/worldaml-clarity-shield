@@ -252,8 +252,10 @@ Deno.serve(async (req) => {
       }
       feedRow = data;
     } else if (feed_url) {
-      try { new URL(feed_url); } catch {
-        return new Response(JSON.stringify({ error: "Invalid URL" }), {
+      try {
+        await assertSafeFeedUrl(String(feed_url));
+      } catch (e) {
+        return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Invalid URL" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -268,15 +270,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch the feed
+    // Fetch the feed (SSRF-guarded, timeout + size capped)
     let xml = "";
     try {
-      const res = await fetch(feedRow!.feed_url, {
-        headers: { "User-Agent": "WorldAML-RSS/1.0", Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml, */*" },
-        redirect: "follow",
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      xml = await res.text();
+      xml = await fetchFeedText(feedRow!.feed_url);
+
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       await supabase.from("rss_feeds").update({
