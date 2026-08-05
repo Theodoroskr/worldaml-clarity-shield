@@ -104,6 +104,112 @@ function parseFeed(xml: string): ParsedFeed {
   return { title: channelTitle, description: channelDesc, site_url: channelLink, items };
 }
 
+// ---- SSRF protection -------------------------------------------------------
+const MAX_FEED_BYTES = 5 * 1024 * 1024; // 5 MB
+const FETCH_TIMEOUT_MS = 10_000;
+
+function isPrivateIp(host: string): boolean {
+  // IPv4
+  const v4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (v4) {
+    const [a, b] = [Number(v4[1]), Number(v4[2])];
+    if (a === 0 || a === 10 || a === 127) return true;
+    if (a === 169 && b === 254) return true; // link-local / cloud metadata
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+    if (a >= 224) return true; // multicast / reserved
+    return false;
+  }
+  // IPv6
+  const h = host.replace(/^\[|\]$/g, "").toLowerCase();
+  if (h === "::1" || h === "::" ) return true;
+  if (/^(fc|fd|fe8|fe9|fea|feb)/.test(h)) return true; // ULA + link-local
+  if (h.startsWith("::ffff:")) return isPrivateIp(h.slice(7));
+  return false;
+}
+
+async function assertSafeFeedUrl(raw: string): Promise<URL> {
+  let u: URL;
+  try { u = new URL(raw); } catch { throw new Error("Invalid URL"); }
+  if (u.protocol !== "http:" && u.protocol !== "https:") {
+    throw new Error("Only http(s) feed URLs are allowed");
+  }
+  const host = u.hostname.toLowerCase().replace(/\.$/, "");
+  if (
+    host === "localhost" ||
+    host === "metadata" ||
+    host.endsWith(".localhost") ||
+    host.endsWith(".internal") ||
+    host.endsWith(".local") ||
+    host === "metadata.google.internal"
+  ) {
+    throw new Error("Feed host is not permitted");
+  }
+  if (isPrivateIp(host)) throw new Error("Feed host is not permitted");
+
+  // Resolve DNS where available and reject private/loopback targets.
+  if (!/^[\d.]+$/.test(host) && !host.includes(":")) {
+    try {
+      const addrs: string[] = [];
+      for (const rt of ["A", "AAAA"] as const) {
+        try {
+          const r = await (Deno as any).resolveDns?.(host, rt);
+          if (Array.isArray(r)) addrs.push(...r);
+        } catch { /* record type missing */ }
+      }
+      if (addrs.length && addrs.every((ip) => isPrivateIp(ip))) {
+        throw new Error("Feed host resolves to a private address");
+      }
+      if (addrs.some((ip) => isPrivateIp(ip))) {
+        throw new Error("Feed host resolves to a private address");
+      }
+    } catch (e) {
+      if (e instanceof Error && e.message.startsWith("Feed host")) throw e;
+      // DNS lookup unavailable in this runtime — rely on literal checks above.
+    }
+  }
+  return u;
+}
+
+async function fetchFeedText(rawUrl: string): Promise<string> {
+  const url = await assertSafeFeedUrl(rawUrl);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(url.toString(), {
+      headers: {
+        "User-Agent": "WorldAML-RSS/1.0",
+        Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml, */*",
+      },
+      redirect: "manual",
+      signal: ctrl.signal,
+    });
+    if (res.status >= 300 && res.status < 400) {
+      const loc = res.headers.get("location");
+      if (!loc) throw new Error("Redirect without location");
+      // Re-validate the redirect target once, then fetch it without following further.
+      const next = await assertSafeFeedUrl(new URL(loc, url).toString());
+      const res2 = await fetch(next.toString(), {
+        headers: { "User-Agent": "WorldAML-RSS/1.0" },
+        redirect: "manual",
+        signal: ctrl.signal,
+      });
+      if (!res2.ok) throw new Error(`HTTP ${res2.status}`);
+      const t2 = await res2.text();
+      return t2.slice(0, MAX_FEED_BYTES);
+    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const len = Number(res.headers.get("content-length") ?? 0);
+    if (len > MAX_FEED_BYTES) throw new Error("Feed too large");
+    const text = await res.text();
+    if (text.length > MAX_FEED_BYTES) throw new Error("Feed too large");
+    return text;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
