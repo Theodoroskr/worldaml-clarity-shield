@@ -70,7 +70,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { normalizeLegacyForm } from "@/lib/normalizeLegacyForm";
+import { normalizeLegacyForm, denormalizeToLegacy } from "@/lib/normalizeLegacyForm";
 
 // ---------- Types ----------
 type FieldType =
