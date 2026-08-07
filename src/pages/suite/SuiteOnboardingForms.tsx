@@ -814,6 +814,41 @@ export default function SuiteOnboardingForms() {
             <FileUp className="w-3.5 h-3.5 mr-1" /> Sample KYC
           </Button>
         )}
+        <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
+          <FileUp className="w-3.5 h-3.5 mr-1" /> Import JSON
+        </Button>
+        <Dialog open={importOpen} onOpenChange={setImportOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Import & normalise table definition</DialogTitle>
+              <DialogDescription>
+                Paste a legacy table-definition payload (tableName, fields[], typeOptions).
+                It is normalised into builder fields — ID/primary keys are dropped, lookups
+                become dropdowns, and legacy metadata is preserved.
+              </DialogDescription>
+            </DialogHeader>
+            <Textarea
+              value={importJson}
+              onChange={(e) => setImportJson(e.target.value)}
+              rows={14}
+              className="font-mono text-xs"
+              placeholder='{"tableName":"MainRegulations","primaryField":"RegulationID","fields":[...]}'
+            />
+            {importWarnings.length > 0 && (
+              <div className="rounded-md border border-border bg-muted/40 p-3 text-xs space-y-1 max-h-40 overflow-auto">
+                <p className="font-medium">Notes</p>
+                {importWarnings.map((w, i) => (
+                  <p key={i} className="text-muted-foreground">• {w}</p>
+                ))}
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setImportOpen(false)}>Close</Button>
+              <Button onClick={runImport} disabled={!importJson.trim()}>Normalise & load</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <Button
           size="sm"
           variant="outline"
