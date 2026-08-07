@@ -866,6 +866,17 @@ export default function SuiteOnboardingForms() {
             <FileUp className="w-3.5 h-3.5 mr-1" /> Sample KYC
           </Button>
         )}
+        {(editingId === "new" || fields.length === 0) && (
+          <Button size="sm" variant="outline" onClick={loadIndividualTemplate}>
+            <FileUp className="w-3.5 h-3.5 mr-1" /> Individual (full CDD)
+          </Button>
+        )}
+        {false && (
+          <Button size="sm" variant="outline" onClick={loadSampleKyc}>
+            <FileUp className="w-3.5 h-3.5 mr-1" /> Sample KYC
+          </Button>
+
+        )}
         <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
           <FileUp className="w-3.5 h-3.5 mr-1" /> Import JSON
         </Button>
