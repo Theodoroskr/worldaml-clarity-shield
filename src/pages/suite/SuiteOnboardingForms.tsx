@@ -71,6 +71,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { normalizeLegacyForm, denormalizeToLegacy } from "@/lib/normalizeLegacyForm";
+import { exportFormHtml } from "@/lib/exportFormHtml";
 import { individualOnboardingTemplate } from "@/lib/individualOnboardingTemplate";
 
 // ---------- Types ----------
