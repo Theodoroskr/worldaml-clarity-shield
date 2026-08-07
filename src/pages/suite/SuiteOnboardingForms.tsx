@@ -486,6 +486,9 @@ export default function SuiteOnboardingForms() {
   const [importJson, setImportJson] = useState("");
   const [importWarnings, setImportWarnings] = useState<string[]>([]);
 
+  // ---------- JSON export ----------
+  const [exportOpen, setExportOpen] = useState(false);
+
   const runImport = () => {
     try {
       const result = normalizeLegacyForm(importJson);
@@ -510,6 +513,42 @@ export default function SuiteOnboardingForms() {
     } catch (e: any) {
       toast.error(e?.message || "Could not parse that JSON.");
     }
+  };
+
+  const downloadJson = (payload: unknown, filename: string) => {
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportBuilderSchema = () => {
+    const payload = {
+      name,
+      slug,
+      description,
+      fields,
+      required_checks: checks,
+      branding,
+      redirect_url: redirectUrl,
+      is_active: isActive,
+    };
+    downloadJson(payload, `${slug || slugify(name) || "form"}-schema.json`);
+    toast.success("Builder schema exported");
+    setExportOpen(false);
+  };
+
+  const exportLegacyTable = () => {
+    import { denormalizeToLegacy } from "@/lib/normalizeLegacyForm";
+    const legacy = denormalizeToLegacy({ name, fields }, { tableName: name });
+    downloadJson(legacy, `${slug || slugify(name) || "form"}-legacy-table.json`);
+    toast.success("Legacy table definition exported");
+    setExportOpen(false);
   };
 
 
