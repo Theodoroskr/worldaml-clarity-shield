@@ -463,14 +463,16 @@ export default function SuiteOnboardingForms() {
     loadVersions(f.id);
   };
 
-  const loadSampleKyc = () => {
-    const sample = sampleKycForm();
+  const applyTemplate = (
+    sample: ReturnType<typeof sampleKycForm> | ReturnType<typeof individualOnboardingTemplate>,
+    message: string
+  ) => {
     setName(sample.name);
     setSlug(sample.slug);
     setDescription(sample.description);
-    setFields(sample.fields);
-    setChecks(sample.checks);
-    setBranding(sample.branding);
+    setFields(sample.fields as FormField[]);
+    setChecks(sample.checks as RequiredChecks);
+    setBranding(sample.branding as Branding);
     setRedirectUrl(sample.redirectUrl);
     setIsActive(sample.isActive);
     setPublishedVersionId(null);
@@ -479,8 +481,18 @@ export default function SuiteOnboardingForms() {
     setHasUnsavedChanges(true);
     setSelectedFieldId(null);
     setVersions([]);
-    toast.success("Sample KYC form loaded. Save it as a draft when ready.");
+    toast.success(message);
   };
+
+  const loadSampleKyc = () =>
+    applyTemplate(sampleKycForm(), "Sample KYC form loaded. Save it as a draft when ready.");
+
+  const loadIndividualTemplate = () =>
+    applyTemplate(
+      individualOnboardingTemplate(),
+      "Individual Onboarding (full CDD) loaded. Save as draft, then Export JSON if needed."
+    );
+
 
   // ---------- Legacy JSON import (normalisation) ----------
   const [importOpen, setImportOpen] = useState(false);
