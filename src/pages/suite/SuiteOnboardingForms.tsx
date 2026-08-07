@@ -71,6 +71,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { normalizeLegacyForm, denormalizeToLegacy } from "@/lib/normalizeLegacyForm";
+import { exportFormHtml } from "@/lib/exportFormHtml";
 import { individualOnboardingTemplate } from "@/lib/individualOnboardingTemplate";
 
 // ---------- Types ----------
@@ -556,6 +557,30 @@ export default function SuiteOnboardingForms() {
     setExportOpen(false);
   };
 
+  const exportStandaloneHtml = () => {
+    const html = exportFormHtml({
+      name,
+      description,
+      fields,
+      accentColor: branding.primary_color,
+      companyName: branding.company_name,
+      logoUrl: branding.logo_url,
+      supportEmail: branding.support_email,
+      showPoweredBy: branding.show_powered_by,
+    });
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${slug || slugify(name) || "form"}.html`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast.success("Standalone HTML questionnaire exported");
+    setExportOpen(false);
+  };
+
   const exportLegacyTable = () => {
     const legacy = denormalizeToLegacy({ name, fields }, { tableName: name });
     downloadJson(legacy, `${slug || slugify(name) || "form"}-legacy-table.json`);
@@ -922,6 +947,12 @@ export default function SuiteOnboardingForms() {
                 <div className="text-left">
                   <div className="font-medium">Builder schema</div>
                   <div className="text-xs text-muted-foreground">Full Lovable form JSON — name, fields, checks, branding.</div>
+                </div>
+              </Button>
+              <Button variant="outline" className="justify-start h-auto py-3 px-4" onClick={exportStandaloneHtml}>
+                <div className="text-left">
+                  <div className="font-medium">Standalone HTML questionnaire</div>
+                  <div className="text-xs text-muted-foreground">Self-contained page styled like the Individual Onboarding sample — sections, nav, progress, print to PDF.</div>
                 </div>
               </Button>
               <Button variant="outline" className="justify-start h-auto py-3 px-4" onClick={exportLegacyTable}>
