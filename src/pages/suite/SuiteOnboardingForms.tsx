@@ -949,6 +949,12 @@ export default function SuiteOnboardingForms() {
                   <div className="text-xs text-muted-foreground">Full Lovable form JSON — name, fields, checks, branding.</div>
                 </div>
               </Button>
+              <Button variant="outline" className="justify-start h-auto py-3 px-4" onClick={exportStandaloneHtml}>
+                <div className="text-left">
+                  <div className="font-medium">Standalone HTML questionnaire</div>
+                  <div className="text-xs text-muted-foreground">Self-contained page styled like the Individual Onboarding sample — sections, nav, progress, print to PDF.</div>
+                </div>
+              </Button>
               <Button variant="outline" className="justify-start h-auto py-3 px-4" onClick={exportLegacyTable}>
                 <div className="text-left">
                   <div className="font-medium">Legacy table definition</div>
