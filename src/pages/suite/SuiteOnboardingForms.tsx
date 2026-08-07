@@ -71,6 +71,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { normalizeLegacyForm, denormalizeToLegacy } from "@/lib/normalizeLegacyForm";
+import { individualOnboardingTemplate } from "@/lib/individualOnboardingTemplate";
 
 // ---------- Types ----------
 type FieldType =
@@ -462,14 +463,16 @@ export default function SuiteOnboardingForms() {
     loadVersions(f.id);
   };
 
-  const loadSampleKyc = () => {
-    const sample = sampleKycForm();
+  const applyTemplate = (
+    sample: ReturnType<typeof sampleKycForm> | ReturnType<typeof individualOnboardingTemplate>,
+    message: string
+  ) => {
     setName(sample.name);
     setSlug(sample.slug);
     setDescription(sample.description);
-    setFields(sample.fields);
-    setChecks(sample.checks);
-    setBranding(sample.branding);
+    setFields(sample.fields as FormField[]);
+    setChecks(sample.checks as RequiredChecks);
+    setBranding(sample.branding as Branding);
     setRedirectUrl(sample.redirectUrl);
     setIsActive(sample.isActive);
     setPublishedVersionId(null);
@@ -478,8 +481,18 @@ export default function SuiteOnboardingForms() {
     setHasUnsavedChanges(true);
     setSelectedFieldId(null);
     setVersions([]);
-    toast.success("Sample KYC form loaded. Save it as a draft when ready.");
+    toast.success(message);
   };
+
+  const loadSampleKyc = () =>
+    applyTemplate(sampleKycForm(), "Sample KYC form loaded. Save it as a draft when ready.");
+
+  const loadIndividualTemplate = () =>
+    applyTemplate(
+      individualOnboardingTemplate(),
+      "Individual Onboarding (full CDD) loaded. Save as draft, then Export JSON if needed."
+    );
+
 
   // ---------- Legacy JSON import (normalisation) ----------
   const [importOpen, setImportOpen] = useState(false);
@@ -851,6 +864,11 @@ export default function SuiteOnboardingForms() {
         {(editingId === "new" || fields.length === 0) && (
           <Button size="sm" variant="outline" onClick={loadSampleKyc}>
             <FileUp className="w-3.5 h-3.5 mr-1" /> Sample KYC
+          </Button>
+        )}
+        {(editingId === "new" || fields.length === 0) && (
+          <Button size="sm" variant="outline" onClick={loadIndividualTemplate}>
+            <FileUp className="w-3.5 h-3.5 mr-1" /> Individual (full CDD)
           </Button>
         )}
         <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
@@ -1266,9 +1284,14 @@ export default function SuiteOnboardingForms() {
             {fields.length === 0 ? (
               <div className="border-2 border-dashed border-border rounded-lg py-16 text-center space-y-3">
                 <p className="text-sm text-muted-foreground">Add fields from the left library to build your form</p>
-                <Button size="sm" variant="outline" onClick={loadSampleKyc}>
-                  <FileUp className="w-3.5 h-3.5 mr-1" /> Start from sample KYC
-                </Button>
+                <div className="flex items-center justify-center gap-2">
+                  <Button size="sm" variant="outline" onClick={loadSampleKyc}>
+                    <FileUp className="w-3.5 h-3.5 mr-1" /> Start from sample KYC
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={loadIndividualTemplate}>
+                    <FileUp className="w-3.5 h-3.5 mr-1" /> Individual (full CDD)
+                  </Button>
+                </div>
               </div>
             ) : (
               <DndContext
