@@ -106,6 +106,7 @@ interface FormField {
   helpText?: string;
   options?: string[]; // for select
   validation?: FieldValidation;
+  meta?: Record<string, unknown>;
 }
 
 interface RequiredChecks {
