@@ -46,6 +46,7 @@ import {
   ExternalLink,
   Share2,
   Check,
+  FileDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,7 +70,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { normalizeLegacyForm } from "@/lib/normalizeLegacyForm";
+import { normalizeLegacyForm, denormalizeToLegacy } from "@/lib/normalizeLegacyForm";
 
 // ---------- Types ----------
 type FieldType =
@@ -485,6 +486,9 @@ export default function SuiteOnboardingForms() {
   const [importJson, setImportJson] = useState("");
   const [importWarnings, setImportWarnings] = useState<string[]>([]);
 
+  // ---------- JSON export ----------
+  const [exportOpen, setExportOpen] = useState(false);
+
   const runImport = () => {
     try {
       const result = normalizeLegacyForm(importJson);
@@ -509,6 +513,41 @@ export default function SuiteOnboardingForms() {
     } catch (e: any) {
       toast.error(e?.message || "Could not parse that JSON.");
     }
+  };
+
+  const downloadJson = (payload: unknown, filename: string) => {
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportBuilderSchema = () => {
+    const payload = {
+      name,
+      slug,
+      description,
+      fields,
+      required_checks: checks,
+      branding,
+      redirect_url: redirectUrl,
+      is_active: isActive,
+    };
+    downloadJson(payload, `${slug || slugify(name) || "form"}-schema.json`);
+    toast.success("Builder schema exported");
+    setExportOpen(false);
+  };
+
+  const exportLegacyTable = () => {
+    const legacy = denormalizeToLegacy({ name, fields }, { tableName: name });
+    downloadJson(legacy, `${slug || slugify(name) || "form"}-legacy-table.json`);
+    toast.success("Legacy table definition exported");
+    setExportOpen(false);
   };
 
 
@@ -845,6 +884,37 @@ export default function SuiteOnboardingForms() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setImportOpen(false)}>Close</Button>
               <Button onClick={runImport} disabled={!importJson.trim()}>Normalise & load</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Button size="sm" variant="outline" onClick={() => setExportOpen(true)}>
+          <FileDown className="w-3.5 h-3.5 mr-1" /> Export JSON
+        </Button>
+        <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Export form schema</DialogTitle>
+              <DialogDescription>
+                Download the current form in the format you need.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-3 py-2">
+              <Button variant="outline" className="justify-start h-auto py-3 px-4" onClick={exportBuilderSchema}>
+                <div className="text-left">
+                  <div className="font-medium">Builder schema</div>
+                  <div className="text-xs text-muted-foreground">Full Lovable form JSON — name, fields, checks, branding.</div>
+                </div>
+              </Button>
+              <Button variant="outline" className="justify-start h-auto py-3 px-4" onClick={exportLegacyTable}>
+                <div className="text-left">
+                  <div className="font-medium">Legacy table definition</div>
+                  <div className="text-xs text-muted-foreground">Normalised back to the MainRegulations-style payload.</div>
+                </div>
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setExportOpen(false)}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
