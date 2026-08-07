@@ -480,6 +480,39 @@ export default function SuiteOnboardingForms() {
     toast.success("Sample KYC form loaded. Save it as a draft when ready.");
   };
 
+  // ---------- Legacy JSON import (normalisation) ----------
+  const [importOpen, setImportOpen] = useState(false);
+  const [importJson, setImportJson] = useState("");
+  const [importWarnings, setImportWarnings] = useState<string[]>([]);
+
+  const runImport = () => {
+    try {
+      const result = normalizeLegacyForm(importJson);
+      if (!result.fields.length) {
+        toast.error("No importable fields found in that payload.");
+        setImportWarnings(result.warnings);
+        return;
+      }
+      setName(result.name);
+      setSlug(result.slug);
+      setDescription(result.description);
+      setFields(result.fields as FormField[]);
+      setPublishedVersionId(null);
+      setCurrentDraftId(null);
+      setLatestVersionNumber(0);
+      setHasUnsavedChanges(true);
+      setSelectedFieldId(null);
+      setVersions([]);
+      setImportWarnings(result.warnings);
+      toast.success(`Imported ${result.fields.length} field(s) from "${result.source.tableName ?? "payload"}".`);
+      if (!result.warnings.length) setImportOpen(false);
+    } catch (e: any) {
+      toast.error(e?.message || "Could not parse that JSON.");
+    }
+  };
+
+
+
   const handleDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
