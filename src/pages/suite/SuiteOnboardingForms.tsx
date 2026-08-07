@@ -888,6 +888,37 @@ export default function SuiteOnboardingForms() {
           </DialogContent>
         </Dialog>
 
+        <Button size="sm" variant="outline" onClick={() => setExportOpen(true)}>
+          <FileDown className="w-3.5 h-3.5 mr-1" /> Export JSON
+        </Button>
+        <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Export form schema</DialogTitle>
+              <DialogDescription>
+                Download the current form in the format you need.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-3 py-2">
+              <Button variant="outline" className="justify-start h-auto py-3 px-4" onClick={exportBuilderSchema}>
+                <div className="text-left">
+                  <div className="font-medium">Builder schema</div>
+                  <div className="text-xs text-muted-foreground">Full Lovable form JSON — name, fields, checks, branding.</div>
+                </div>
+              </Button>
+              <Button variant="outline" className="justify-start h-auto py-3 px-4" onClick={exportLegacyTable}>
+                <div className="text-left">
+                  <div className="font-medium">Legacy table definition</div>
+                  <div className="text-xs text-muted-foreground">Normalised back to the MainRegulations-style payload.</div>
+                </div>
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setExportOpen(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <Button
           size="sm"
           variant="outline"
