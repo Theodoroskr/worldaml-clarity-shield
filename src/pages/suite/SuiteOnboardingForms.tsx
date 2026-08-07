@@ -544,7 +544,6 @@ export default function SuiteOnboardingForms() {
   };
 
   const exportLegacyTable = () => {
-    import { denormalizeToLegacy } from "@/lib/normalizeLegacyForm";
     const legacy = denormalizeToLegacy({ name, fields }, { tableName: name });
     downloadJson(legacy, `${slug || slugify(name) || "form"}-legacy-table.json`);
     toast.success("Legacy table definition exported");
