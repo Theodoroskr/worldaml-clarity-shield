@@ -25,7 +25,7 @@ import { AcademyCartDrawerMount } from "@/components/academy/AcademyCartDrawer";
 
 const PASS_THRESHOLD = 70;
 
-const AcademyCourse = () => {
+const AcademyCourse = ({ embedded = false }: { embedded?: boolean } = {}) => {
   const { slug } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -457,11 +457,11 @@ const AcademyCourse = () => {
   if (!course || gate.loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
+        {!embedded && <Header />}
         <main className="flex-1 flex items-center justify-center">
           <p className="text-muted-foreground">Loading course...</p>
         </main>
-        <Footer />
+        {!embedded && <Footer />}
       </div>
     );
   }
@@ -478,7 +478,7 @@ const AcademyCourse = () => {
           canonical={`/academy/${slug}`}
           noindex
         />
-        <Header />
+        {!embedded && <Header />}
         <main className="flex-1 bg-background">
           <div className="container-enterprise py-16">
             <div className="max-w-lg mx-auto rounded-xl border border-border bg-card p-8 text-center">
@@ -509,7 +509,7 @@ const AcademyCourse = () => {
             </div>
           </div>
         </main>
-        <Footer />
+        {!embedded && <Footer />}
       </div>
     );
   }
@@ -536,7 +536,7 @@ const AcademyCourse = () => {
           canonical={`/academy/${slug}`}
           noindex
         />
-        <Header />
+        {!embedded && <Header />}
         <main className="flex-1 bg-background">
           <div className="container-enterprise py-16">
             <div className="max-w-lg mx-auto rounded-xl border border-border bg-card p-8 text-center">
@@ -645,7 +645,7 @@ const AcademyCourse = () => {
             </div>
           </div>
         </main>
-        <Footer />
+        {!embedded && <Footer />}
         <AcademyCartDrawerMount />
       </div>
     );
@@ -698,7 +698,7 @@ const AcademyCourse = () => {
           },
         }}
       />
-      <Header />
+      {!embedded && <Header />}
       <main className="flex-1">
         {/* Course Header — editorial */}
         <section className="relative bg-navy overflow-hidden border-b border-white/5">
@@ -1381,7 +1381,7 @@ const AcademyCourse = () => {
           </div>
         </section>
       </main>
-      <Footer />
+      {!embedded && <Footer />}
     </div>
   );
 };
