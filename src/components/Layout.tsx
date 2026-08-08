@@ -14,7 +14,13 @@ export const Layout = ({ children }: LayoutProps) => {
   const academyHost = isAcademyHost();
   // Academy subdomain renders an Academy-only experience — suppress
   // the marketing announcement bar and sticky CTA, keep the chatbot.
-  const isAppShell = pathname.startsWith("/rcm") || pathname.startsWith("/suite");
+  const isAppShell =
+    pathname.startsWith("/rcm") ||
+    pathname.startsWith("/suite") ||
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/my-learning") ||
+    pathname.startsWith("/certificates") ||
+    pathname.startsWith("/account");
   const isOnboard = pathname.startsWith("/onboard/");
   return (
     <>
