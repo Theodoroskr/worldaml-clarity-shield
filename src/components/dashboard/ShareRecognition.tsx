@@ -60,16 +60,18 @@ export default function ShareRecognition({
 }) {
   const live = useRecognition();
   const r = data ?? live;
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   const memberName = useMemo(() => {
     const m = (user?.user_metadata ?? {}) as Record<string, string | undefined>;
-    const full = m.full_name || m.name || [m.first_name, m.last_name].filter(Boolean).join(" ");
+    const full =
+      profile?.full_name || m.full_name || m.name || [m.first_name, m.last_name].filter(Boolean).join(" ");
     return (full || "").trim();
-  }, [user]);
+  }, [user, profile]);
+
 
   const message = useMemo(() => (r ? buildShareMessage(r, "linkedin") : ""), [r]);
   const [draft, setDraft] = useState<string | null>(null);
