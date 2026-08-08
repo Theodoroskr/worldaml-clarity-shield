@@ -82,6 +82,17 @@ function stripHtml(html: string): string {
   return doc.body.textContent || "";
 }
 
+// Feeds often repeat the headline at the start of the description — drop it so the
+// summary adds information instead of restating the title.
+function stripTitlePrefix(description: string, title: string): string {
+  const clean = stripHtml(description).replace(/\s+/g, " ").trim();
+  if (!title) return clean;
+  if (clean.toLowerCase().startsWith(title.toLowerCase())) {
+    return clean.slice(title.length).replace(/^[\s\-–—:.]+/, "").trim() || clean;
+  }
+  return clean;
+}
+
 // Trim text to a readable length WITHOUT leaving a half-finished sentence.
 // Prefers cutting at the last full sentence; otherwise falls back to a word boundary.
 function truncate(text: string, maxLength: number = 320): string {
