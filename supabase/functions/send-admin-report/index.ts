@@ -171,11 +171,14 @@ Deno.serve(async (req) => {
     const admin = createClient(supabaseUrl, serviceKey);
 
     const token = (req.headers.get("Authorization") ?? "").replace("Bearer ", "").trim();
-    if (!token) return json({ error: "Unauthorized" }, 401);
 
-    // Scheduled invocations authenticate with the service-role key; humans with an admin JWT.
-    const isCron = token === serviceKey;
+    // Scheduled invocations present the shared scheduler secret; humans an admin JWT.
+    const cronSecret = Deno.env.get("ADMIN_REPORT_CRON_SECRET");
+    const isCron =
+      (!!cronSecret && req.headers.get("x-cron-secret") === cronSecret) || (!!token && token === serviceKey);
+
     if (!isCron) {
+      if (!token) return json({ error: "Unauthorized" }, 401);
       const { data: { user }, error } = await admin.auth.getUser(token);
       if (error || !user) return json({ error: "Unauthorized" }, 401);
       const { data: role } = await admin
