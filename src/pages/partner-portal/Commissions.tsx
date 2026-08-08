@@ -88,9 +88,59 @@ export default function PartnerCommissions() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Payout history</CardTitle>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Commission ledger</CardTitle>
         </CardHeader>
         <CardContent>
+          {commissions.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No commission lines yet. A line is created for each won deal or converted referral.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-xs text-muted-foreground border-b border-border">
+                  <tr>
+                    <th className="pb-2 font-medium">Earned</th>
+                    <th className="pb-2 font-medium">Description</th>
+                    <th className="pb-2 font-medium text-right">Deal value</th>
+                    <th className="pb-2 font-medium text-right">Rate</th>
+                    <th className="pb-2 font-medium">Status</th>
+                    <th className="pb-2 font-medium text-right">Commission</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {commissions.map((c) => (
+                    <tr key={c.id}>
+                      <td className="py-2.5 text-xs">{new Date(c.earned_on).toLocaleDateString()}</td>
+                      <td className="py-2.5 text-xs">{c.description || "—"}</td>
+                      <td className="py-2.5 text-right font-mono text-xs">
+                        {eur(Number(c.deal_value_cents) / 100)}
+                      </td>
+                      <td className="py-2.5 text-right text-xs">{Number(c.commission_rate)}%</td>
+                      <td className="py-2.5">
+                        <Badge variant="outline" className={STATUS_COLOR[c.status] || ""}>
+                          {c.status}
+                        </Badge>
+                      </td>
+                      <td className="py-2.5 text-right font-mono">
+                        {eur(Number(c.amount_cents) / 100)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Payout history</CardTitle>
+        </CardHeader>
+
           {payouts.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
               No payouts on file yet. Pending balance is paid out monthly once minimum threshold is met.
