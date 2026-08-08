@@ -46,6 +46,8 @@ const readStorage = (): string[] => {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<string[]>(() => readStorage());
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+  const lastSynced = useRef<string | null>(null);
 
   useEffect(() => {
     try {
@@ -54,6 +56,42 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // ignore quota / privacy-mode errors
     }
   }, [items]);
+
+  /**
+   * Mirror the basket server-side so we can send the 3-day and 30-day
+   * "you left courses in your basket" reminders. Best-effort only —
+   * the local basket always remains the source of truth in the UI.
+   */
+  useEffect(() => {
+    if (!user?.id) return;
+    const signature = items.slice().sort().join("|");
+    if (lastSynced.current === signature) return;
+    const t = setTimeout(async () => {
+      lastSynced.current = signature;
+      try {
+        await supabase.from("academy_basket_snapshots").upsert(
+          {
+            user_id: user.id,
+            email: user.email ?? null,
+            full_name:
+              (user.user_metadata as any)?.full_name ??
+              (user.user_metadata as any)?.name ??
+              null,
+            items,
+            updated_at: new Date().toISOString(),
+            // A changed basket restarts the reminder cycle.
+            reminder_3d_sent_at: null,
+            reminder_30d_sent_at: null,
+          },
+          { onConflict: "user_id" },
+        );
+      } catch {
+        // non-fatal
+      }
+    }, 1200);
+    return () => clearTimeout(t);
+  }, [items, user?.id]);
+
 
   const has = useCallback((slug: string) => items.includes(slug), [items]);
 
