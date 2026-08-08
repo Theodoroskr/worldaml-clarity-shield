@@ -284,12 +284,12 @@ Preferred start date and number of seats below.`,
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Request a Demo"
+        title="Request a Demo or Advisory"
         description="Request a demo of WorldAML — AML screening, KYC/KYB, transaction monitoring and identity verification. Tell us your requirements and our team will be in touch."
         canonical="/contact-sales"
         breadcrumbs={[
           { name: "Home", url: "/" },
-          { name: "Request a Demo", url: "/contact-sales" },
+          { name: "Request a Demo or Advisory", url: "/contact-sales" },
         ]}
       />
       <Header />
@@ -298,11 +298,11 @@ Preferred start date and number of seats below.`,
           <div className="container-enterprise">
             <div className="max-w-3xl mx-auto">
               <h1 className="text-display text-navy mb-4 text-center">
-                Request a Demo
+                Request a Demo or Advisory
               </h1>
               <p className="text-body-lg text-text-secondary text-center mb-12">
                 Tell us about your requirements and our team will get back to you
-                with a tailored demo of the products and services that best fit your needs.
+                with a tailored demo or advisory conversation about the products and services that best fit your needs.
               </p>
 
 
@@ -514,7 +514,7 @@ Preferred start date and number of seats below.`,
                     "Submitting..."
                   ) : (
                     <>
-                      Request a Demo
+                      Request a Demo or Advisory
                       <Send className="ml-2 h-4 w-4" />
                     </>
                   )}
