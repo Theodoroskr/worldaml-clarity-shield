@@ -251,37 +251,17 @@ Deno.serve(async (req) => {
         ].filter(Boolean);
 
 
-        // Visit summary — mapped to Zoho's Visit Summary fields on the Lead
-        // (see the Visit Summary block below). Also repeated in an attached
-        // Note record so the data survives even where SalesIQ owns the field.
         const att = attribution ?? {};
-        const visitLines = [
-          att.first_visited_at ? `First Visit: ${att.first_visited_at}` : null,
-          att.referrer ? `Referrer: ${att.referrer}` : null,
-          att.last_visited_at ? `Most Recent Visit: ${att.last_visited_at}` : null,
-          typeof att.number_of_chats === "number" ? `Number Of Chats: ${att.number_of_chats}` : null,
-          typeof att.visitor_score === "number" ? `Visitor Score: ${att.visitor_score}` : null,
-          typeof att.average_time_spent_minutes === "number"
-            ? `Average Time Spent (Minutes): ${att.average_time_spent_minutes}`
-            : null,
-          att.first_page_visited || att.landing_page
-            ? `First Page Visited: ${att.first_page_visited || att.landing_page}`
-            : null,
-          typeof att.days_visited === "number" ? `Days Visited: ${att.days_visited}` : null,
-        ].filter(Boolean);
-        const visitBlock = visitLines.length
-          ? `Visit Summary:\n${visitLines.join("\n")}`
-          : "";
 
         // The Note field carries the visitor's message ONLY (per CRM policy).
-        // Everything else lives in Zoho fields and the attached Note record.
+        // Everything else lives in dedicated Zoho fields / the related Note.
         const descriptionValue = (trimmedMessage || fallbackDesc || "").slice(0, 32000) || undefined;
 
-        // Extra context attached as a related Note record on the Lead.
-        const contextNote = [detailLines.join("\n"), visitBlock]
-          .filter(Boolean)
-          .join("\n\n")
-          .slice(0, 32000);
+        // Extra context (consent record, qualification details) attached as a
+        // related Note record on the Lead. Visit-summary metrics are NOT sent —
+        // those Zoho fields are SalesIQ-owned and must stay empty.
+        const contextNote = detailLines.join("\n").slice(0, 32000);
+
 
 
         // ── Demo-request detection ────────────────────────────────────────
