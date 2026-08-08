@@ -225,6 +225,11 @@ serve(async (req) => {
     }
 
     const origin = req.headers.get("origin") ?? "https://www.worldaml.com";
+    // Optional in-portal return path (dashboard checkout). Only same-origin
+    // /dashboard paths are honoured to avoid open-redirects.
+    const rawReturn = typeof body?.returnPath === "string" ? body.returnPath : "";
+    const returnPath = /^\/dashboard(\/[A-Za-z0-9\-_/?=&]*)?$/.test(rawReturn) ? rawReturn : "";
+
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -232,11 +237,14 @@ serve(async (req) => {
       customer_email: customerId ? undefined : userEmail,
       line_items: lineItems,
       discounts,
-      success_url:
-        slugsToBuy.length === 1
+      success_url: returnPath
+        ? `${origin}${returnPath}${returnPath.includes("?") ? "&" : "?"}purchase=success`
+        : slugsToBuy.length === 1
           ? `${origin}/academy/${slugsToBuy[0]}?purchase=success`
           : `${origin}/academy?purchase=success`,
-      cancel_url: `${origin}/academy?purchase=cancelled`,
+      cancel_url: returnPath
+        ? `${origin}${returnPath}${returnPath.includes("?") ? "&" : "?"}purchase=cancelled`
+        : `${origin}/academy?purchase=cancelled`,
       metadata: {
         user_id: userId,
         course_slugs: slugsToBuy.join(","),

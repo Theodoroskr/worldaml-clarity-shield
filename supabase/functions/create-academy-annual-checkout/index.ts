@@ -128,6 +128,11 @@ serve(async (req) => {
     const unitAmount = convert(ANNUAL_EUR_CENTS, currency);
     const origin = req.headers.get("origin") ?? "https://www.worldaml.com";
 
+    // Optional in-portal return path (dashboard checkout). Only same-origin
+    // /dashboard paths are honoured to avoid open-redirects.
+    const rawReturn = typeof body?.returnPath === "string" ? body.returnPath : "";
+    const returnPath = /^\/dashboard(\/[A-Za-z0-9\-_/?=&]*)?$/.test(rawReturn) ? rawReturn : "";
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer: customerId,
@@ -145,8 +150,12 @@ serve(async (req) => {
           },
         },
       ],
-      success_url: `${origin}/academy/annual-pass-active?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/academy?purchase=cancelled`,
+      success_url: returnPath
+        ? `${origin}${returnPath}${returnPath.includes("?") ? "&" : "?"}pass=active`
+        : `${origin}/academy/annual-pass-active?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: returnPath
+        ? `${origin}${returnPath}${returnPath.includes("?") ? "&" : "?"}purchase=cancelled`
+        : `${origin}/academy?purchase=cancelled`,
       metadata: {
         user_id: userId,
         kind: "annual_pass",
