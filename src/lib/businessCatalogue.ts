@@ -195,6 +195,8 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
         period: "/year",
         summary: "Hosted screening data with unlimited searches.",
         features: ["2.5M+ profiles, 50+ risk categories", "Unlimited searches", "Multi-user discounts"],
+        configureUrl: "/data-sources/worldcompliance/pricing",
+        configureLabel: "Configure & Buy",
       },
       {
         key: "bridger",
