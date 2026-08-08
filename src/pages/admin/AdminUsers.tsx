@@ -337,6 +337,9 @@ export default function AdminUsers() {
     }
   };
 
+  /** Users included in an export: all platform users (partner applicants excluded). */
+  const getExportList = () => nonPartnerProfiles;
+
   const runExport = (format: "csv" | "xlsx") => {
     const range = resolveRange();
     if (!range) { toast.error("Select a valid export timeline first."); return; }
