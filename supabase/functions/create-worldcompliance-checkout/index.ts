@@ -73,7 +73,13 @@ serve(async (req) => {
       return errorResponse("Invalid request");
     }
 
-    if (typeof region !== "string" || !REGION_PATTERN.test(region)) {
+    if (typeof region !== "string" || !VALID_REGIONS.includes(region as ValidRegion)) {
+      return errorResponse("Invalid request");
+    }
+
+    // Price must match the region + currency combination shown in the UI.
+    const basePrice = BASE_PRICES[region as ValidRegion][currencyUpper as ValidCurrency];
+    if (!basePrice) {
       return errorResponse("Invalid request");
     }
 
@@ -87,13 +93,7 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
-    const basePrices: Record<ValidCurrency, number> = {
-      EUR: 3000,
-      GBP: 2700,
-      USD: 4900,
-    };
 
-    const basePrice = basePrices[currencyUpper as ValidCurrency];
     let totalPrice = 0;
     for (let i = 1; i <= userCountNum; i++) {
       let userPrice = basePrice;
