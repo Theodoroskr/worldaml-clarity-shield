@@ -4,8 +4,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, ArrowUpDown, CalendarRange, RefreshCw } from "lucide-react";
+import { Loader2, Search, ArrowUpDown, CalendarRange, RefreshCw, Download, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { KpiCard, DefinitionsButton, MetricInfo } from "@/components/admin/AcademyMetricUI";
+import { money, pct, useCourseTitles } from "@/lib/academyAdmin";
+
 
 type PurchaseRow = {
   id: string;
@@ -36,6 +39,7 @@ export default function AdminPurchaseStatus() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const prevStatusRef = useRef<Record<string, string>>({});
+  const { titleOf } = useCourseTitles();
 
   const [createdFrom, setCreatedFrom] = useState("");
   const [createdTo, setCreatedTo] = useState("");
@@ -164,12 +168,53 @@ export default function AdminPurchaseStatus() {
   }, [rows, statusFilter, search, sortKey, sortDir, createdFrom, createdTo, paidFrom, paidTo]);
 
   const totals = useMemo(() => {
-    const pending = rows.filter((r) => r.status === "pending").length;
-    const paid = rows.filter((r) => r.status === "paid").length;
-    const failed = rows.filter((r) => r.status === "failed").length;
-    const refunded = rows.filter((r) => r.status === "refunded").length;
-    return { pending, paid, failed, refunded, total: rows.length };
+    const sum = (list: PurchaseRow[]) => list.reduce((s, r) => s + (r.amount_cents || 0), 0);
+    const paidRows = rows.filter((r) => r.status === "paid");
+    const pendingRows = rows.filter((r) => r.status === "pending");
+    const failedRows = rows.filter((r) => r.status === "failed");
+    const refundedRows = rows.filter((r) => r.status === "refunded");
+
+    const now = Date.now();
+    const ageDays = (r: PurchaseRow) => (now - new Date(r.created_at).getTime()) / 86_400_000;
+    const aging = {
+      under1: pendingRows.filter((r) => ageDays(r) < 1).length,
+      d1to7: pendingRows.filter((r) => ageDays(r) >= 1 && ageDays(r) < 7).length,
+      d7to30: pendingRows.filter((r) => ageDays(r) >= 7 && ageDays(r) < 30).length,
+      over30: pendingRows.filter((r) => ageDays(r) >= 30).length,
+    };
+
+    // Data-quality checks that matter for finance sign-off
+    const sessionCounts = new Map<string, number>();
+    rows.forEach((r) => {
+      if (!r.stripe_session_id) return;
+      sessionCounts.set(r.stripe_session_id, (sessionCounts.get(r.stripe_session_id) || 0) + 1);
+    });
+    const duplicateSessions = Array.from(sessionCounts.values()).filter((c) => c > 1).length;
+    const paidWithoutTimestamp = paidRows.filter((r) => !r.paid_at).length;
+    const paidWithoutIntent = paidRows.filter((r) => !r.stripe_payment_intent_id).length;
+
+    const settled = paidRows.length + failedRows.length;
+    return {
+      total: rows.length,
+      pending: pendingRows.length,
+      paid: paidRows.length,
+      failed: failedRows.length,
+      refunded: refundedRows.length,
+      grossRevenue: sum(paidRows),
+      netRevenue: sum(paidRows) - sum(refundedRows),
+      pendingValue: sum(pendingRows),
+      refundedValue: sum(refundedRows),
+      failedValue: sum(failedRows),
+      aov: paidRows.length ? sum(paidRows) / paidRows.length : 0,
+      successRate: pct(paidRows.length, settled),
+      refundRate: pct(refundedRows.length, paidRows.length),
+      aging,
+      duplicateSessions,
+      paidWithoutTimestamp,
+      paidWithoutIntent,
+    };
   }, [rows]);
+
 
   const statusBadge = (status: string) => {
     switch (status) {
@@ -196,23 +241,118 @@ export default function AdminPurchaseStatus() {
     </button>
   );
 
+  const exportCsv = () => {
+    const csv = [
+      ["status", "buyer_email", "buyer_name", "course", "course_slug", "amount", "currency", "stripe_session_id", "stripe_payment_intent_id", "created_at", "paid_at", "expires_at"],
+      ...filtered.map((r) => [
+        r.status,
+        profiles[r.user_id]?.email || "",
+        profiles[r.user_id]?.full_name || "",
+        titleOf(r.course_slug),
+        r.course_slug,
+        (r.amount_cents / 100).toFixed(2),
+        r.currency.toUpperCase(),
+        r.stripe_session_id || "",
+        r.stripe_payment_intent_id || "",
+        r.created_at,
+        r.paid_at || "",
+        r.expires_at || "",
+      ]),
+    ]
+      .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `academy-purchases-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="p-6 max-w-6xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Academy Purchase Status</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          All academy course purchase rows with checkout session ID and payment timestamps.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Academy Purchase Status</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Every Academy checkout row with its Stripe session, payment state and financial value.
+          </p>
+          <DefinitionsButton />
+        </div>
+        <Button variant="outline" size="sm" onClick={exportCsv} disabled={!filtered.length}>
+          <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
+        </Button>
       </div>
 
-      {/* Stats */}
+      {/* Financial KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <KpiCard
+          label="Net revenue" value={money(totals.netRevenue)} accent="emerald" scope="Lifetime"
+          sub={`Gross ${money(totals.grossRevenue)} · refunds ${money(totals.refundedValue)}`}
+          info="Gross paid purchases minus refunded purchases, across all time. Currency is the stored currency on each row (EUR unless otherwise noted)."
+        />
+        <KpiCard
+          label="Payment success rate" value={`${totals.successRate}%`} accent="blue"
+          sub={`${totals.paid} paid vs ${totals.failed} failed`}
+          info="Paid ÷ (paid + failed). Pending checkouts are excluded because they have not reached a final state yet."
+        />
+        <KpiCard
+          label="Value in pending" value={money(totals.pendingValue)} accent="amber"
+          sub={`${totals.pending} unresolved checkouts`}
+          info="Total value of checkout rows still in 'pending'. Some are abandoned baskets; some are paid in Stripe but not yet reconciled."
+        />
+        <KpiCard
+          label="Average order value" value={money(totals.aov)} accent="violet"
+          sub={`Refund rate ${totals.refundRate}%`}
+          info="Gross paid revenue ÷ number of paid purchase rows. Refund rate is refunded rows ÷ paid rows."
+        />
+      </div>
+
+      {/* Pending aging + data quality */}
+      <div className="grid gap-3 md:grid-cols-2">
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xs font-semibold uppercase text-muted-foreground">Pending aging</span>
+            <MetricInfo text="How long checkouts have sat in 'pending'. Anything older than 7 days is very unlikely to convert on its own and should be reconciled or written off." />
+          </div>
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <AgeBucket label="< 1 day" value={totals.aging.under1} tone="text-muted-foreground" />
+            <AgeBucket label="1–7 days" value={totals.aging.d1to7} tone="text-amber-500" />
+            <AgeBucket label="7–30 days" value={totals.aging.d7to30} tone="text-orange-500" />
+            <AgeBucket label="30+ days" value={totals.aging.over30} tone="text-rose-500" />
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-3 pt-3 border-t border-border">
+            Run Reconcile Academy Purchases to settle pending rows against Stripe before reporting revenue.
+          </p>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-xs font-semibold uppercase text-muted-foreground">Data quality</span>
+            <MetricInfo text="Known gaps that affect financial reporting accuracy. Investigate before using these numbers externally." />
+          </div>
+          <div className="space-y-2 text-sm">
+            <QualityRow label="Duplicate Stripe sessions" value={totals.duplicateSessions} />
+            <QualityRow label="Paid rows without paid_at" value={totals.paidWithoutTimestamp} />
+            <QualityRow label="Paid rows without payment intent" value={totals.paidWithoutIntent} />
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-3 pt-3 border-t border-border">
+            Refund amounts are not stored separately — a refunded row is treated as a full reversal of its purchase amount.
+          </p>
+        </Card>
+      </div>
+
+      {/* Status counts */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <StatCard label="Total" value={totals.total} />
+        <StatCard label="Total rows" value={totals.total} />
         <StatCard label="Pending" value={totals.pending} accent="amber" />
         <StatCard label="Paid" value={totals.paid} accent="emerald" />
         <StatCard label="Failed" value={totals.failed} accent="rose" />
         <StatCard label="Refunded" value={totals.refunded} accent="slate" />
       </div>
+
 
       {/* Filters */}
       <div className="space-y-3">
@@ -361,7 +501,10 @@ export default function AdminPurchaseStatus() {
                         <div className="text-muted-foreground text-xs truncate max-w-[220px]">{prof.full_name}</div>
                       )}
                     </td>
-                    <td className="py-3 px-4 font-medium">{row.course_slug}</td>
+                    <td className="py-3 px-4 font-medium">
+                      <div className="text-foreground">{titleOf(row.course_slug)}</div>
+                      <div className="text-[11px] text-muted-foreground font-mono">{row.course_slug}</div>
+                    </td>
                     <td className="py-3 px-4 text-right tabular-nums">
                       {(row.amount_cents / 100).toFixed(2)} {row.currency.toUpperCase()}
                     </td>
@@ -435,4 +578,22 @@ function fmtDate(ts: string | null) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function AgeBucket({ label, value, tone }: { label: string; value: number; tone: string }) {
+  return (
+    <div>
+      <div className={`text-xl font-semibold tabular-nums ${tone}`}>{value}</div>
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+function QualityRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-muted-foreground text-xs">{label}</span>
+      <span className={`tabular-nums font-medium ${value > 0 ? "text-amber-500" : "text-emerald-600"}`}>{value}</span>
+    </div>
+  );
 }
