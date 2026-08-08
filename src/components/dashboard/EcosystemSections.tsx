@@ -136,14 +136,14 @@ export function WorldAMLTools() {
       <h2 className="text-sm font-semibold text-foreground mb-2">WorldAML Tools</h2>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
         {TOOLS.map((t) => (
-          <a
+          <Link
             key={t.href}
-            href={t.href}
+            to={t.href}
             className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-foreground hover:border-accent/50 hover:bg-accent/5 transition-colors"
           >
             <t.icon className="h-4 w-4 text-muted-foreground shrink-0" />
             <span className="truncate">{t.label}</span>
-          </a>
+          </Link>
         ))}
       </div>
     </div>
