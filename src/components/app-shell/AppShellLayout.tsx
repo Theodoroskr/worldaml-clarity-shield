@@ -132,9 +132,20 @@ export default function AppShellLayout() {
           <Badge variant="outline" className="hidden sm:inline-flex text-[10px] font-medium">{planLabel}</Badge>
 
           <div className="ml-auto flex items-center gap-1">
+            <Button variant="ghost" size="icon" asChild aria-label={`Basket (${cart.count} items)`} className="relative">
+              <Link to="/dashboard/cart">
+                <ShoppingCart className="h-4 w-4" />
+                {cart.count > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 rounded-full bg-accent text-accent-foreground text-[10px] font-semibold flex items-center justify-center">
+                    {cart.count}
+                  </span>
+                )}
+              </Link>
+            </Button>
             <Button variant="ghost" size="icon" asChild aria-label="Help and support">
               <a href="/support"><LifeBuoy className="h-4 w-4" /></a>
             </Button>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
