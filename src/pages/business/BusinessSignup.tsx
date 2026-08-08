@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Building2, Check } from "lucide-react";
 import { ensureAuthAccount, isWorkEmail } from "@/lib/portalAccounts";
+import { useBusinessAccount } from "@/hooks/useBusinessAccount";
 
 export const PENDING_BUSINESS_KEY = "worldaml_pending_business_account";
 
@@ -32,12 +33,89 @@ export default function BusinessSignup() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const { signUp } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const { account, isLoading: accountLoading, refetch } = useBusinessAccount();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   const next = searchParams.get("next") || "/business/dashboard";
+
+  /**
+   * Someone who is already signed in (Academy/Partner identity, or a buyer whose
+   * company record never got created) only needs the company details — not a new
+   * password. We show a short "activate" form instead of bouncing them around.
+   */
+  const activateMode = !authLoading && !!user && !accountLoading && !account;
+
+  // Prefill from the signed-in identity.
+  useEffect(() => {
+    if (!user) return;
+    setEmail((v) => v || user.email || "");
+    const meta = (user.user_metadata || {}) as Record<string, string>;
+    setContactName((v) => v || meta.full_name || "");
+    setCompanyName((v) => v || meta.company_name || "");
+  }, [user]);
+
+  // Already has a workspace — never show a sign-up form to them.
+  useEffect(() => {
+    if (account) navigate(next, { replace: true });
+  }, [account, navigate, next]);
+
+  const pendingRestore = useMemo(() => {
+    try {
+      const raw = localStorage.getItem(PENDING_BUSINESS_KEY);
+      return raw ? (JSON.parse(raw) as Record<string, string | null>) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!pendingRestore) return;
+    setCompanyName((v) => v || pendingRestore.company_name || "");
+    setContactName((v) => v || pendingRestore.contact_name || "");
+    setCountry((v) => v || pendingRestore.country || "");
+    setPhone((v) => v || pendingRestore.phone || "");
+    setIndustry((v) => v || pendingRestore.industry || "");
+  }, [pendingRestore]);
+
+  /** Create the company record for an identity that is already authenticated. */
+  const handleActivate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    if (!companyName.trim()) {
+      toast({ title: "Company name is required", variant: "destructive" });
+      return;
+    }
+    setIsLoading(true);
+    const { error } = await supabase.from("business_accounts").insert({
+      user_id: user.id,
+      company_name: companyName.trim(),
+      work_email: (email || user.email || "").trim(),
+      contact_name: contactName.trim() || null,
+      country: country.trim() || null,
+      industry: industry || null,
+      phone: phone.trim() || null,
+    });
+    if (error) {
+      setIsLoading(false);
+      toast({ title: "Could not create your business workspace", description: error.message, variant: "destructive" });
+      return;
+    }
+    try {
+      await supabase.functions.invoke("send-business-welcome", {
+        body: { company_name: companyName.trim(), contact_name: contactName.trim() || null },
+      });
+    } catch (mailErr) {
+      console.warn("Welcome email failed (non-blocking):", mailErr);
+    }
+    localStorage.removeItem(PENDING_BUSINESS_KEY);
+    await refetch();
+    setIsLoading(false);
+    toast({ title: "Business workspace ready", description: "Welcome to WorldAML Business." });
+    navigate(next, { replace: true });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
