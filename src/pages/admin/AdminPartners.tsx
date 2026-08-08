@@ -490,7 +490,9 @@ export default function AdminPartners() {
                         <th className="pb-3 pr-4 font-semibold text-navy">Partner</th>
                         <th className="pb-3 pr-4 font-semibold text-navy">Referral code</th>
                         <th className="pb-3 pr-4 font-semibold text-navy">Type</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Commission</th>
                         <th className="pb-3 pr-4 font-semibold text-navy">Certification</th>
+
                         <th className="pb-3 pr-4 font-semibold text-navy">Verticals</th>
                         <th className="pb-3 pr-4 font-semibold text-navy text-center">Featured</th>
                         <th className="pb-3 pr-4 font-semibold text-navy text-center">Active</th>
