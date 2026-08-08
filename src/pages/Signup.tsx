@@ -187,8 +187,14 @@ const Signup = () => {
                 Create Account
               </Button>
               <p className="text-xs text-text-secondary text-center">
+                By creating an account you accept our <Link to="/terms" className="underline">Terms &amp; Conditions</Link> and{" "}
+                <Link to="/privacy" className="underline">Privacy Notice</Link> (GDPR), and consent to receive marketing
+                and product communications. You can unsubscribe any time in Dashboard → Security &amp; privacy.
+              </p>
+              <p className="text-xs text-text-secondary text-center">
                 You can add your company, job title and country later in Dashboard → Profile.
               </p>
+
             </form>
             <div className="mt-6 text-center text-sm text-text-secondary">
               Already have an account?{" "}
