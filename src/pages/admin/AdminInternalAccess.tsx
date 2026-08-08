@@ -540,9 +540,13 @@ export default function AdminInternalAccess() {
               <div className="space-y-2 text-sm">
                 <Detail label="Name" value={viewRow.full_name || "—"} />
                 <Detail label="Email" value={viewRow.email} />
+                <Detail label="Company" value={viewRow.company_name || "—"} />
+                <Detail label="Phone" value={viewRow.phone || "—"} />
                 <Detail label="Access profile" value={ACCESS_ROLES[viewRow.access_role] || viewRow.access_role} />
                 <Detail label="Department" value={viewRow.department || "—"} />
                 <Detail label="Status" value={STATUS_LABELS[viewRow.status] || viewRow.status} />
+                <Detail label="WorldAML account created" value={viewRow.account_created_at ? format(new Date(viewRow.account_created_at), "dd MMM yyyy · HH:mm") : "No account yet"} />
+                <Detail label="Admin since" value={viewRow.admin_since ? format(new Date(viewRow.admin_since), "dd MMM yyyy · HH:mm") : "—"} />
                 <Detail label="Invited" value={viewRow.invited_at ? format(new Date(viewRow.invited_at), "dd MMM yyyy · HH:mm") : "Pre-existing admin"} />
                 <Detail label="Access granted" value={viewRow.accepted_at ? format(new Date(viewRow.accepted_at), "dd MMM yyyy · HH:mm") : "Not yet"} />
                 <Detail label="Last admin login" value={
