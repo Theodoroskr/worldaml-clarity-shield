@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { isAcademyHost } from "@/lib/academyHost";
 import AcademyHeader from "@/components/academy/AcademyHeader";
+import { AcademyCartButton } from "@/components/academy/AcademyCartDrawer";
+
 
 
 type NavChild = { href: string; label: string };
