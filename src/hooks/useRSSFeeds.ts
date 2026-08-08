@@ -41,7 +41,9 @@ async function fetchStoredUpdates(): Promise<NewsItem[]> {
         publishedAt: row.published_at,
         category: row.category as NewsCategory,
         tags: row.tags ?? [],
-        summary: summary || title,
+        // A summary that only repeats the headline adds nothing — leave it blank.
+        summary: summary.toLowerCase() === title.toLowerCase() ? "" : summary,
+
         fullSummary: full || undefined,
         trustTier: (row.trust_tier as TrustTier) ?? "A",
       };
