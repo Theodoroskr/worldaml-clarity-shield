@@ -1666,23 +1666,46 @@ const Academy = () => {
                             );
                           }
                           if (requiresPurchase) {
-                            // Guest-friendly Buy now — adds to cart and opens drawer (no login required).
+                            // Two CTAs: add to basket (bundle several courses) or buy now.
+                            const busy = buyNowSlug === course.slug;
                             return (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  if (!inCart) cart.add(course.slug);
-                                  cart.open();
-                                }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-body-sm font-semibold hover:bg-primary/90 transition-colors"
-                              >
-                                <ShoppingBag className="h-4 w-4" />
-                                {inCart ? "View basket" : "Buy now"}
-                              </button>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (inCart) {
+                                      cart.open();
+                                    } else {
+                                      cart.add(course.slug);
+                                      toast.success("Added to basket", {
+                                        description: "Add more courses to unlock bundle discounts.",
+                                      });
+                                    }
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-primary/40 text-primary text-body-sm font-semibold hover:bg-primary/10 transition-colors"
+                                >
+                                  <ShoppingBag className="h-4 w-4" />
+                                  {inCart ? "In basket" : "Add to basket"}
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={busy}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    void startBuyNow(course.slug);
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-body-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
+                                >
+                                  {busy ? "Opening…" : "Buy now"}
+                                  {!busy && <ArrowRight className="h-4 w-4" />}
+                                </button>
+                              </div>
                             );
                           }
+
                           if (!user) {
                             // Free course, not signed in — still needs an account to track progress.
                             return (
