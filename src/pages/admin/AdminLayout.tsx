@@ -10,6 +10,8 @@ type NavItem = { label: string; path: string; icon: any; section?: string };
 const NAV: NavItem[] = [
   // Platform-wide
   { label: "Dashboard", path: "/admin/dashboard", icon: Shield, section: "Platform" },
+  { label: "Analytics", path: "/admin/analytics", icon: TrendingUp, section: "Platform" },
+  { label: "Reports", path: "/admin/reports", icon: BarChart3, section: "Platform" },
   { label: "Users", path: "/admin/users", icon: Users, section: "Platform" },
   { label: "Identities & Profiles", path: "/admin/identities", icon: GitBranch, section: "Platform" },
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Platform" },
