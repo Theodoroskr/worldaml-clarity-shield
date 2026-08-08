@@ -170,6 +170,50 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
           </div>
         </div>
 
+        {options.length > 0 && (
+          <div className="rounded-lg border border-border p-3 space-y-3">
+            <p className="text-sm font-semibold flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-teal-600" />
+              {isBusiness ? "Company upsell options — products, services & courses" : "Academy upsell options — suggested courses"}
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              {options.map((o) => (
+                <div key={o.id} className="rounded-lg border border-border p-3 space-y-2 bg-muted/20">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{o.title}</p>
+                      <p className="text-[11px] text-muted-foreground">{o.rationale}</p>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] capitalize shrink-0">{o.audience}</Badge>
+                  </div>
+                  <ul className="text-xs text-muted-foreground space-y-0.5">
+                    {o.items.slice(0, 5).map((i) => (
+                      <li key={i.name}>• {i.name}{i.meta ? ` — ${i.meta}` : ""}</li>
+                    ))}
+                    {o.items.length > 5 && <li>• +{o.items.length - 5} more</li>}
+                  </ul>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={optedOut}
+                    onClick={() =>
+                      onSendUpsell(o.template, {
+                        headline: o.headline,
+                        intro: o.intro,
+                        items: o.items,
+                      })
+                    }
+                  >
+                    <Send className="w-3.5 h-3.5 mr-1" /> Send this email
+                  </Button>
+                </div>
+              ))}
+            </div>
+            {optedOut && <p className="text-xs text-red-700">User has opted out of marketing communications.</p>}
+          </div>
+        )}
+
+
         <Tabs defaultValue="profile" className="mt-2">
           <TabsList>
             <TabsTrigger value="profile">Profile</TabsTrigger>
