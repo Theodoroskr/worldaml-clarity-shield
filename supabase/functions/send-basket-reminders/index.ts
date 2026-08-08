@@ -106,9 +106,9 @@ serve(async (req) => {
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
-  // Service-role only: reject anything that isn't the scheduled job.
-  const auth = req.headers.get("authorization") ?? "";
-  if (!SERVICE_KEY || auth !== `Bearer ${SERVICE_KEY}`) {
+  // Scheduled job only: requires the shared cron secret.
+  const CRON_SECRET = Deno.env.get("BASKET_REMINDER_CRON_SECRET");
+  if (!CRON_SECRET || req.headers.get("x-cron-secret") !== CRON_SECRET) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
