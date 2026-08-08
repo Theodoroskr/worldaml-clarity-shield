@@ -40,9 +40,9 @@ export function ProductDiscoveryCard({
           size="sm"
           className="mt-2 -ml-2 h-auto px-2 py-1 text-xs text-accent hover:text-accent"
         >
-          <a href={href} onClick={() => trackEcosystemClick(product.id, surface)}>
+          <Link to={href} onClick={() => trackEcosystemClick(product.id, surface)}>
             {label} <ArrowRight className="h-3.5 w-3.5 ml-1" />
-          </a>
+          </Link>
         </Button>
       </div>
     </div>
