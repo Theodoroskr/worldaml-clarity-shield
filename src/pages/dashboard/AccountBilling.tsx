@@ -12,7 +12,7 @@ import { useAcademyPurchases } from "@/hooks/useAcademyPurchases";
 import { academyHref } from "@/lib/academyHost";
 
 export default function AccountBilling() {
-  const { planLabel, hasSuite, subscriptionTier } = useEntitlements();
+  const { planLabel } = useEntitlements();
   const { purchasedSlugs, hasAnnualPass, isLoading } = useAcademyPurchases();
   const { toast } = useToast();
   const [opening, setOpening] = useState(false);
@@ -25,7 +25,15 @@ export default function AccountBilling() {
       if (data?.url) window.open(data.url, "_blank");
       else throw new Error("No billing portal URL returned");
     } catch (e: any) {
-      toast({ title: "Could not open billing portal", description: e.message, variant: "destructive" });
+      const msg = String(e?.message ?? "");
+      const noSub = msg.toLowerCase().includes("no active subscription") || msg.includes("404");
+      toast({
+        title: noSub ? "No active subscription" : "Could not open billing portal",
+        description: noSub
+          ? "You don't have a recurring subscription yet. Individual course purchases are listed below."
+          : msg,
+        variant: noSub ? "default" : "destructive",
+      });
     } finally {
       setOpening(false);
     }
@@ -45,16 +53,18 @@ export default function AccountBilling() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
-            {hasSuite ? (
-              <p>You have access to WorldAML Suite ({subscriptionTier}).</p>
-            ) : (
-              <p>You're on the {planLabel.toLowerCase()}. Upgrade any time to unlock Suite compliance tooling.</p>
-            )}
+            <p>
+              {hasAnnualPass
+                ? "Academy Annual Pass — all courses unlocked while your pass is active."
+                : purchasedSlugs.size > 0
+                  ? "You own individual Academy courses. They stay available in My Courses."
+                  : "No Academy subscription or course purchase yet."}
+            </p>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={openPortal} disabled={opening}>
                 {opening && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Manage Subscription
               </Button>
-              {!hasSuite && <Button asChild size="sm" variant="outline"><a href="/pricing">View Plans</a></Button>}
+              <Button asChild size="sm" variant="outline"><a href={academyHref("/academy")}>View Academy Plans</a></Button>
             </div>
           </CardContent>
         </Card>

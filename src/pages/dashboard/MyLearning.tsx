@@ -16,9 +16,9 @@ export default function MyLearning() {
 
   return (
     <>
-      <Helmet><title>My Learning | WorldAML</title><meta name="robots" content="noindex" /></Helmet>
+      <Helmet><title>My Courses | WorldAML Academy</title><meta name="robots" content="noindex" /></Helmet>
       <AppPageHeader
-        title="My Learning"
+        title="My Courses"
         description="Every course you've started, with progress and next steps."
         actions={<Button asChild variant="outline" size="sm"><a href={academyHref("/academy")}>Browse Courses</a></Button>}
       />

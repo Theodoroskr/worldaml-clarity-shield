@@ -3,25 +3,15 @@ import { Loader2 } from "lucide-react";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { useAcademyOverview } from "@/hooks/useAcademyOverview";
 import {
-  QuickActions, ContinueLearning, LearningOverview, MyCourses,
-  CertificatesSection, RecommendedNext, ResourcesSection, ExploreWorldAML,
+  ContinueLearning, LearningOverview, MyCourses,
+  CertificatesSection, RecommendedNext, ResourcesSection, QuickCheckLink,
 } from "@/components/dashboard/DashboardSections";
-import { WorkspaceSection } from "@/components/dashboard/WorkspaceSection";
-import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
-import { SearchHistoryPanel } from "@/components/sanctions/SearchHistoryPanel";
 
 export default function Dashboard() {
-  const ent = useEntitlements();
+  const { firstName } = useEntitlements();
   const academy = useAcademyOverview();
 
-  const greeting = (() => {
-    const h = new Date().getHours();
-    if (h < 12) return "Good morning";
-    if (h < 18) return "Good afternoon";
-    return "Good evening";
-  })();
-
-  if (academy.isLoading && ent.isLoading) {
+  if (academy.isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -29,27 +19,19 @@ export default function Dashboard() {
     );
   }
 
+  const otherActive = academy.inProgress.filter((c) => c.course.id !== academy.current?.course.id);
+
   return (
     <>
-      <Helmet><title>My WorldAML | Dashboard</title><meta name="robots" content="noindex" /></Helmet>
+      <Helmet><title>My Academy Dashboard | WorldAML</title><meta name="robots" content="noindex" /></Helmet>
 
       <div className="mb-5">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          {greeting}, {ent.firstName}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Here's where you left off across your WorldAML account.
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Welcome back, {firstName}</h1>
+        <p className="text-sm text-muted-foreground mt-1">Continue building your compliance expertise.</p>
       </div>
 
-      <QuickActions current={academy.current} />
-
       <div className="space-y-6">
-        <ContinueLearning current={academy.current} />
-
-        {(ent.hasSuite || ent.hasRcm || ent.hasPartnerPortal) && (
-          <WorkspaceSection hasSuite={ent.hasSuite} hasRcm={ent.hasRcm} hasPartner={ent.hasPartnerPortal} />
-        )}
+        <ContinueLearning current={academy.current} others={otherActive} />
 
         <LearningOverview data={academy} />
 
@@ -58,15 +40,11 @@ export default function Dashboard() {
           <CertificatesSection certificates={academy.certificates} />
         </div>
 
-        <RecommendedNext course={academy.recommended} />
-
-        <div id="quick-check" className="grid lg:grid-cols-2 gap-4 scroll-mt-20">
-          <DashboardSanctionsWidget />
-          <SearchHistoryPanel />
-        </div>
+        <RecommendedNext courses={academy.recommendedList} />
 
         <ResourcesSection />
-        <ExploreWorldAML hasSuite={ent.hasSuite} hasRcm={ent.hasRcm} />
+
+        <QuickCheckLink />
       </div>
     </>
   );
