@@ -10,6 +10,8 @@ import Layout from "@/components/Layout";
 import ScrollToTop from "@/components/ScrollToTop";
 import PartnerOnlyRouteGuard from "@/components/PartnerOnlyRouteGuard";
 import AuthQueryInvalidator from "@/components/AuthQueryInvalidator";
+import PortalGuard from "@/components/auth/PortalGuard";
+
 import { Suspense } from "react";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { isAcademyHost } from "@/lib/academyHost";
