@@ -176,6 +176,29 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // ── Partner referral attribution ────────────────────────────────────
+    // A referral code entered on the form is validated against active
+    // partners. When valid it is stored on the lead (admin visibility) AND a
+    // referral row is created (partner-portal visibility).
+    const rawReferralCode = referral_code ?? (metadata as any)?.referral_code;
+    const referralPartner = rawReferralCode
+      ? await resolvePartnerByCode(supabase, rawReferralCode)
+      : null;
+    const referralInvalid = !!normaliseCode(rawReferralCode) && !referralPartner;
+
+    const enrichedMetadata = {
+      ...(metadata || {}),
+      ...(referralPartner
+        ? {
+            referral_code: referralPartner.referral_code,
+            referral_partner_id: referralPartner.partner_id,
+            referral_partner_name: referralPartner.display_name,
+          }
+        : rawReferralCode
+          ? { referral_code_submitted: String(rawReferralCode).slice(0, 40), referral_code_valid: false }
+          : {}),
+    };
+
     const { error: dbError } = dryRun
       ? { error: null }
       : await supabase.from("form_submissions").insert({
@@ -192,8 +215,18 @@ Deno.serve(async (req) => {
       products: products || null,
       account_type: account_type?.trim().slice(0, 50) || null,
       region: region?.trim().slice(0, 50) || null,
-      metadata: metadata || {},
+      metadata: enrichedMetadata,
     });
+
+    if (!dryRun && referralPartner) {
+      await recordReferral(supabase, {
+        partner: referralPartner,
+        email,
+        source: `lead:${form_type}`,
+        status: "signed_up",
+      });
+    }
+
 
     if (dbError) {
       console.error("Database insert error:", dbError);
