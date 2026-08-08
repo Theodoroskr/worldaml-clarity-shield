@@ -81,13 +81,13 @@ export const NewsCard = ({ item }: NewsCardProps) => {
         </div>
       </div>
 
-      {/* Title */}
-      <h3 className="text-body font-semibold text-navy mb-2 line-clamp-2">
+      {/* Title — shown in full, never clipped */}
+      <h3 className="text-body font-semibold text-navy mb-2">
         {item.title}
       </h3>
 
-      {/* Summary */}
-      <p className="text-body-sm text-text-secondary mb-4 line-clamp-2">
+      {/* Summary — shown in full, never clipped */}
+      <p className="text-body-sm text-text-secondary mb-4 flex-1">
         {item.summary}
       </p>
 
@@ -106,16 +106,20 @@ export const NewsCard = ({ item }: NewsCardProps) => {
       </div>
 
       {/* Related Links */}
-      <div className="pt-4 border-t border-divider">
+      <div className="pt-4 border-t border-divider mt-auto">
         <span className="text-caption text-text-tertiary">Related: </span>
         {relatedLinks.map((link, index) => (
-          <span key={link.href}>
-            <Link
-              to={link.href}
-              className="text-caption text-primary hover:text-primary/80 transition-colors"
-            >
-              {link.label}
-            </Link>
+          <span key={link.label}>
+            {link.href ? (
+              <Link
+                to={link.href}
+                className="text-caption text-primary hover:text-primary/80 transition-colors"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <span className="text-caption text-text-secondary">{link.label}</span>
+            )}
             {index < relatedLinks.length - 1 && (
               <span className="text-text-tertiary"> • </span>
             )}
