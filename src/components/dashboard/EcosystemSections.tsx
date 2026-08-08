@@ -1,8 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Building2, Scale, Search, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEntitlements } from "@/hooks/useEntitlements";
-import { useRcmOrg } from "@/hooks/useRcmOrg";
 import {
   ECOSYSTEM_PRODUCTS,
   productForCourse,
@@ -49,9 +47,6 @@ export function ProductDiscoveryCard({
 
 /* ── Explore WorldAML (dashboard home, lower section) ────────── */
 export function ExploreWorldAML() {
-  const { hasSuite } = useEntitlements();
-  const { membership } = useRcmOrg();
-
   return (
     <div>
       <h2 className="text-sm font-semibold text-foreground">Explore WorldAML</h2>
@@ -69,9 +64,6 @@ export function ExploreWorldAML() {
 
 /* ── Compliance in Practice (course-context bridge) ──────────── */
 export function ComplianceInPractice({ data }: { data: AcademyOverview }) {
-  const { hasSuite } = useEntitlements();
-  const { membership } = useRcmOrg();
-
   const source =
     data.current?.course ??
     data.completed[0]?.course ??
@@ -79,7 +71,6 @@ export function ComplianceInPractice({ data }: { data: AcademyOverview }) {
     null;
 
   const product = productForCourse(source) ?? ECOSYSTEM_PRODUCTS.quickcheck;
-  const hasAccess = product.id === "suite" ? hasSuite : product.id === "rcm" ? !!membership : false;
 
   const context = source
     ? `Based on your work in “${source.title}”.`
