@@ -15,16 +15,28 @@ export interface WebAttribution {
   last_visited_at?: string;
   days_visited?: number;
   visit_count?: number;
+  /** First page the visitor ever landed on (first touch). */
+  first_page_visited?: string;
+  /** Average minutes per visit, rounded to 2 decimals. */
+  average_time_spent_minutes?: number;
+  /** Chat conversations started by this visitor (0 when no chat was used). */
+  number_of_chats?: number;
+  /** Simple engagement score derived from visits, days and time on site. */
+  visitor_score?: number;
 }
 
 // ── Visit summary tracking (feeds Zoho's Visit Summary fields) ──────────────
 const VISIT_KEY = "waml_visits_v1";
+const CHAT_KEY = "waml_chats_v1";
 
 interface VisitStats {
   first_visited_at: string;
   last_visited_at: string;
   days: string[]; // ISO dates (YYYY-MM-DD)
   visit_count: number;
+  first_page_visited?: string;
+  /** Cumulative time on site in seconds (best-effort). */
+  total_seconds?: number;
 }
 
 function readVisits(): VisitStats | null {
@@ -36,21 +48,57 @@ function readVisits(): VisitStats | null {
   }
 }
 
+/** Increment the visitor's chat counter (call when a chat conversation starts). */
+export function recordChatStarted() {
+  if (typeof window === "undefined") return;
+  try {
+    const n = Number(localStorage.getItem(CHAT_KEY) || "0") || 0;
+    localStorage.setItem(CHAT_KEY, String(n + 1));
+  } catch {}
+}
+
+function readChats(): number {
+  try {
+    return Number(localStorage.getItem(CHAT_KEY) || "0") || 0;
+  } catch {
+    return 0;
+  }
+}
+
 /** Call once per page load to maintain first/last visit and days-visited counts. */
 export function recordVisit() {
   if (typeof window === "undefined") return;
   try {
     const now = new Date().toISOString();
     const today = now.slice(0, 10);
+    const here = window.location.href.slice(0, 500);
     const prev = readVisits();
+
+    // Best-effort time-on-site: count the gap since the previous page view when
+    // it looks like the same browsing session (under 30 minutes).
+    let addSeconds = 0;
+    if (prev?.last_visited_at) {
+      const gap = (Date.now() - new Date(prev.last_visited_at).getTime()) / 1000;
+      if (gap > 0 && gap < 1800) addSeconds = gap;
+    }
+
     const stats: VisitStats = prev
       ? {
           first_visited_at: prev.first_visited_at || now,
           last_visited_at: now,
           days: prev.days?.includes(today) ? prev.days : [...(prev.days || []), today].slice(-365),
           visit_count: (prev.visit_count || 0) + 1,
+          first_page_visited: prev.first_page_visited || here,
+          total_seconds: Math.round((prev.total_seconds || 0) + addSeconds),
         }
-      : { first_visited_at: now, last_visited_at: now, days: [today], visit_count: 1 };
+      : {
+          first_visited_at: now,
+          last_visited_at: now,
+          days: [today],
+          visit_count: 1,
+          first_page_visited: here,
+          total_seconds: 0,
+        };
     localStorage.setItem(VISIT_KEY, JSON.stringify(stats));
   } catch {}
 }
@@ -97,11 +145,23 @@ export function getWebAttribution(): WebAttribution {
       out.last_visited_at = v.last_visited_at;
       out.days_visited = Array.isArray(v.days) ? v.days.length : undefined;
       out.visit_count = v.visit_count;
+      out.first_page_visited = v.first_page_visited || out.landing_page;
+      const visits = Math.max(1, v.visit_count || 1);
+      out.average_time_spent_minutes =
+        Math.round(((v.total_seconds || 0) / 60 / visits) * 100) / 100;
     }
+    out.number_of_chats = readChats();
     if (!out.first_visited_at) {
       const first = getAttribution();
       if (first.captured_at) out.first_visited_at = first.captured_at;
     }
+    // Engagement score (0-100): page views + distinct days + time on site.
+    const score =
+      Math.min(40, (out.visit_count || 0) * 4) +
+      Math.min(30, (out.days_visited || 0) * 6) +
+      Math.min(20, Math.round((out.average_time_spent_minutes || 0) * 4)) +
+      Math.min(10, (out.number_of_chats || 0) * 10);
+    out.visitor_score = Math.min(100, score);
   } catch {}
 
   return out;

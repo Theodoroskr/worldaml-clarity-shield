@@ -251,26 +251,37 @@ Deno.serve(async (req) => {
         ].filter(Boolean);
 
 
-        // Visit summary — Zoho's native Visit Summary fields are SalesIQ-owned
-        // and silently discard API writes, so the browser-tracked first/last
-        // touch data is recorded here where it is guaranteed to persist.
+        // Visit summary — mapped to Zoho's Visit Summary fields on the Lead
+        // (see the Visit Summary block below). Also repeated in an attached
+        // Note record so the data survives even where SalesIQ owns the field.
         const att = attribution ?? {};
         const visitLines = [
-          att.landing_page ? `First page visited: ${att.landing_page}` : null,
+          att.first_visited_at ? `First Visit: ${att.first_visited_at}` : null,
           att.referrer ? `Referrer: ${att.referrer}` : null,
-          att.first_visited_at ? `First visit: ${att.first_visited_at}` : null,
-          att.last_visited_at ? `Most recent visit: ${att.last_visited_at}` : null,
-          typeof att.days_visited === "number" ? `Days visited: ${att.days_visited}` : null,
+          att.last_visited_at ? `Most Recent Visit: ${att.last_visited_at}` : null,
+          typeof att.number_of_chats === "number" ? `Number Of Chats: ${att.number_of_chats}` : null,
+          typeof att.visitor_score === "number" ? `Visitor Score: ${att.visitor_score}` : null,
+          typeof att.average_time_spent_minutes === "number"
+            ? `Average Time Spent (Minutes): ${att.average_time_spent_minutes}`
+            : null,
+          att.first_page_visited || att.landing_page
+            ? `First Page Visited: ${att.first_page_visited || att.landing_page}`
+            : null,
+          typeof att.days_visited === "number" ? `Days Visited: ${att.days_visited}` : null,
         ].filter(Boolean);
         const visitBlock = visitLines.length
-          ? `Visit summary:\n${visitLines.join("\n")}`
+          ? `Visit Summary:\n${visitLines.join("\n")}`
           : "";
 
-        const descriptionValue =
-          [trimmedMessage || fallbackDesc, detailLines.join("\n"), visitBlock]
-            .filter(Boolean)
-            .join("\n\n")
-            .slice(0, 32000) || undefined;
+        // The Note field carries the visitor's message ONLY (per CRM policy).
+        // Everything else lives in Zoho fields and the attached Note record.
+        const descriptionValue = (trimmedMessage || fallbackDesc || "").slice(0, 32000) || undefined;
+
+        // Extra context attached as a related Note record on the Lead.
+        const contextNote = [detailLines.join("\n"), visitBlock]
+          .filter(Boolean)
+          .join("\n\n")
+          .slice(0, 32000);
 
 
         const leadRecord: Record<string, unknown> = {
@@ -639,12 +650,25 @@ Deno.serve(async (req) => {
           })(),
 
           // ── Visit Summary ─────────────────────────────────────────────────
-          // NOTE: Zoho's native Visit Summary fields (First_Visited_URL,
-          // First_Visited_Time, Last_Visited_Time, Referrer, Days_Visited) are
-          // owned by SalesIQ/PageSense. The API accepts writes to them but
-          // silently discards the values (verified: they read back as null).
-          // The same data is therefore written to the custom Landing_Page_URL
-          // and Referrer_URL fields (above) and summarised in the Note.
+          // Mapped to Zoho's Visit Summary block. These fields are SalesIQ-owned
+          // and may be ignored by the API on tenants where SalesIQ owns them, so
+          // the same values are also written to Landing_Page_URL / Referrer_URL
+          // and attached as a related Note record after the Lead is created.
+          First_Visited_Time: att.first_visited_at || undefined,
+          Last_Visited_Time: att.last_visited_at || undefined,
+          Referrer: att.referrer || undefined,
+          First_Visited_URL: att.first_page_visited || att.landing_page || undefined,
+          Days_Visited:
+            typeof att.days_visited === "number" ? att.days_visited : undefined,
+          Number_Of_Chats:
+            typeof att.number_of_chats === "number" ? att.number_of_chats : undefined,
+          Visitor_Score:
+            typeof att.visitor_score === "number" ? att.visitor_score : undefined,
+          Average_Time_Spent_Minutes:
+            typeof att.average_time_spent_minutes === "number"
+              ? att.average_time_spent_minutes
+              : undefined,
+
 
 
 
@@ -874,7 +898,43 @@ Deno.serve(async (req) => {
           if (record?.status && record.status !== "success") {
             console.error("Zoho CRM lead rejected:", JSON.stringify(record));
           } else {
-            console.log("Zoho CRM lead created:", record?.details?.id ?? "ok");
+            const leadId = record?.details?.id;
+            console.log("Zoho CRM lead created:", leadId ?? "ok");
+
+            // Attach qualification details + visit summary as a related Note
+            // record, keeping the Lead's Note field to the visitor's message.
+            if (leadId && contextNote) {
+              try {
+                const noteRes = await fetch(
+                  "https://connector-gateway.lovable.dev/zoho_crm/Notes",
+                  {
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${lovableKey}`,
+                      "X-Connection-Api-Key": zohoKey,
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      data: [
+                        {
+                          Note_Title: "Website visit summary & submission details",
+                          Note_Content: contextNote,
+                          Parent_Id: { id: leadId },
+                          se_module: "Leads",
+                        },
+                      ],
+                    }),
+                  },
+                );
+                if (!noteRes.ok) {
+                  console.error(
+                    `Zoho note attach failed [${noteRes.status}]: ${await noteRes.text()}`,
+                  );
+                }
+              } catch (noteErr) {
+                console.error("Zoho note attach error:", noteErr);
+              }
+            }
           }
         }
 
