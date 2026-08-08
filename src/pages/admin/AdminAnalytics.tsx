@@ -81,7 +81,12 @@ export default function AdminAnalytics() {
             custom={custom}
             onCustom={setCustom}
             portal={portal}
-            onPortal={setPortal}
+            onPortal={(p) => {
+              setPortal(p);
+              const next = PORTAL_TABS[p];
+              setTab(next.includes(tab) ? tab : (next[1] ?? next[0]));
+            }}
+
             onRefresh={() => refetch()}
             refreshing={isFetching}
             lastUpdated={a?.generated_at ?? null}
