@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Share2, Linkedin, Twitter, Facebook, Copy, Check, Mail } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Share2, Linkedin, Twitter, Facebook, Copy, Check, Mail, Download, ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useRecognition, trackRecognition, type RecognitionStatus } from "@/hooks/useRecognition";
+import { renderRecognitionCard, downloadBlob } from "@/lib/recognitionShareImage";
 
 const ACADEMY_URL = "https://worldaml.com/academy";
 const LINKEDIN_PAGE = "https://www.linkedin.com/company/worldaml";
