@@ -64,6 +64,13 @@ export default function BusinessLayout() {
         const payload = JSON.parse(pending);
         await supabase.from("business_accounts").insert({ ...payload, user_id: user.id });
         localStorage.removeItem(PENDING_BUSINESS_KEY);
+        try {
+          await supabase.functions.invoke("send-business-welcome", {
+            body: { company_name: payload.company_name, contact_name: payload.contact_name },
+          });
+        } catch (e) {
+          console.warn("Welcome email failed (non-blocking):", e);
+        }
         await refetch();
       } finally {
         setClaiming(false);
