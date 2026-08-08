@@ -161,12 +161,18 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Dry-run mode: build and return the Zoho Lead payload only — nothing is
+    // stored, emailed, or pushed to the CRM.
+    const dryRun = body?.dry_run === true;
+
     // Store in database
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { error: dbError } = await supabase.from("form_submissions").insert({
+    const { error: dbError } = dryRun
+      ? { error: null }
+      : await supabase.from("form_submissions").insert({
       form_type,
       first_name: first_name.trim().slice(0, 100),
       last_name: last_name.trim().slice(0, 100),
@@ -195,7 +201,8 @@ Deno.serve(async (req) => {
     try {
       const lovableKey = Deno.env.get("LOVABLE_API_KEY");
       const zohoKey = Deno.env.get("ZOHO_CRM_API_KEY");
-      if (lovableKey && zohoKey) {
+      if (dryRun || (lovableKey && zohoKey)) {
+
         const attribution = (metadata as any)?.attribution ?? {};
 
         // Description = visitor's message exactly as submitted. If no message,
