@@ -191,6 +191,9 @@ Preferred start date and number of seats below.`,
     }
 
     if (!termsAccepted) {
+      setTermsError(
+        "You must accept the Terms & Conditions and Privacy Policy before submitting your request.",
+      );
       toast({
         title: "Acceptance Required",
         description:
@@ -199,6 +202,8 @@ Preferred start date and number of seats below.`,
       });
       return;
     }
+    setTermsError(null);
+
 
     setIsSubmitting(true);
 
