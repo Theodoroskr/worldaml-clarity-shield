@@ -743,13 +743,11 @@ export default function AdminUsers() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => runExport(nonPartnerProfiles, "csv")}>
-            <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => runExport(nonPartnerProfiles, "xlsx")}>
-            <Table2 className="w-3.5 h-3.5 mr-1" /> Export Excel
+          <Button variant="outline" size="sm" onClick={() => setExportOpen(true)}>
+            <Download className="w-3.5 h-3.5 mr-1" /> Export users
           </Button>
         </div>
+
       </div>
 
 
