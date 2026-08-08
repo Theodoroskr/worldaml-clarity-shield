@@ -15,8 +15,9 @@ export default function PartnerPortalLayout() {
   const location = useLocation();
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/login?next=/partner-portal");
+    if (!authLoading && !user) navigate("/partner/login?next=/partner/dashboard");
   }, [user, authLoading, navigate]);
+
 
   // First-login setup: active partner who hasn't finished onboarding gets routed to welcome wizard
   useEffect(() => {
