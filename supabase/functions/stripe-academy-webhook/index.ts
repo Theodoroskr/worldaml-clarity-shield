@@ -227,7 +227,101 @@ serve(async (req) => {
   try {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      // ---- Non-Academy product purchases (Suite / WorldAML / WorldID / WorldCompliance)
+      // Notify compliance@infocreditgroup.com and send the buyer a branded thank-you.
+      const productKey = (session.metadata?.product ?? "").toLowerCase();
+      const NON_ACADEMY_PRODUCTS: Record<string, string> = {
+        worldaml: "WorldAML Screening & Monitoring",
+        suite: "WorldAML Compliance Suite",
+        worldid: "WorldID — Identity Verification",
+        worldcompliance: "LexisNexis WorldCompliance® Online",
+      };
+      if (productKey && NON_ACADEMY_PRODUCTS[productKey]) {
+        const customerEmail =
+          session.customer_details?.email ?? session.customer_email ?? null;
+        const amountLabel =
+          session.amount_total != null
+            ? `${(session.amount_total / 100).toFixed(2)} ${(session.currency ?? "eur").toUpperCase()}`
+            : null;
+
+        // Idempotency: unique stripe_session_id — a duplicate delivery is a no-op.
+        const { data: notifRow, error: notifErr } = await supabase
+          .from("product_purchase_notifications")
+          .insert({
+            stripe_session_id: session.id,
+            product: NON_ACADEMY_PRODUCTS[productKey],
+            plan: session.metadata?.plan ?? null,
+            customer_email: customerEmail,
+            customer_name: session.customer_details?.name ?? null,
+            amount_cents: session.amount_total ?? null,
+            currency: session.currency ?? null,
+            mode: session.mode ?? null,
+          })
+          .select("id")
+          .maybeSingle();
+
+        if (notifErr) {
+          console.log("Purchase notification already recorded / insert skipped:", notifErr.message);
+        } else if (customerEmail) {
+          try {
+            const res = await fetch(
+              `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-purchase-emails`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+                },
+                body: JSON.stringify({
+                  customer_email: customerEmail,
+                  customer_name: session.customer_details?.name ?? null,
+                  company: session.metadata?.company ?? null,
+                  country: session.customer_details?.address?.country ?? null,
+                  product: NON_ACADEMY_PRODUCTS[productKey],
+                  plan: session.metadata?.plan ?? null,
+                  amount_label: amountLabel,
+                  billing:
+                    session.mode === "subscription"
+                      ? `${amountLabel ?? ""} (recurring)`.trim()
+                      : amountLabel,
+                  order_ref: session.id,
+                  stripe_customer:
+                    typeof session.customer === "string" ? session.customer : session.customer?.id ?? null,
+                  stripe_session: session.id,
+                  purchased_at: new Date().toISOString(),
+                  attribution: session.metadata?.referral_code
+                    ? `Partner referral code ${session.metadata.referral_code}`
+                    : null,
+                  admin_url: "https://worldaml.com/admin/dashboard",
+                }),
+              },
+            );
+            const ok = res.ok;
+            const detail = ok ? null : await res.text();
+            await supabase
+              .from("product_purchase_notifications")
+              .update({
+                emails_sent_at: ok ? new Date().toISOString() : null,
+                email_error: detail ? detail.slice(0, 500) : null,
+              })
+              .eq("id", notifRow?.id ?? "");
+            if (!ok) console.error("send-purchase-emails failed:", detail);
+          } catch (mailErr) {
+            console.error("send-purchase-emails invoke error:", mailErr);
+          }
+        } else {
+          console.warn("No customer email on non-academy session", session.id);
+        }
+
+        return new Response(JSON.stringify({ received: true, product: productKey }), {
+          status: 200,
+          headers: corsHeaders,
+        });
+      }
+
       const sessionId = session.id;
+
       const paymentIntentId =
         typeof session.payment_intent === "string"
           ? session.payment_intent

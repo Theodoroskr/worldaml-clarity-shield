@@ -2430,6 +2430,51 @@ export type Database = {
           },
         ]
       }
+      product_purchase_notifications: {
+        Row: {
+          amount_cents: number | null
+          created_at: string
+          currency: string | null
+          customer_email: string | null
+          customer_name: string | null
+          email_error: string | null
+          emails_sent_at: string | null
+          id: string
+          mode: string | null
+          plan: string | null
+          product: string
+          stripe_session_id: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          created_at?: string
+          currency?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          email_error?: string | null
+          emails_sent_at?: string | null
+          id?: string
+          mode?: string | null
+          plan?: string | null
+          product: string
+          stripe_session_id: string
+        }
+        Update: {
+          amount_cents?: number | null
+          created_at?: string
+          currency?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          email_error?: string | null
+          emails_sent_at?: string | null
+          id?: string
+          mode?: string | null
+          plan?: string | null
+          product?: string
+          stripe_session_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           billing_address: string | null
