@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Building2, Check } from "lucide-react";
+import { ensureAuthAccount, isWorkEmail } from "@/lib/portalAccounts";
 
 export const PENDING_BUSINESS_KEY = "worldaml_pending_business_account";
 
