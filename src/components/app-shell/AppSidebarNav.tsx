@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, GraduationCap, BookOpen, Award, Library,
-  User, CreditCard, LifeBuoy, Sparkles, ShieldCheck,
+  User, CreditCard, LifeBuoy, Sparkles, ShieldCheck, Medal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
@@ -33,6 +33,7 @@ export function useAppNav(): NavGroup[] {
         { label: "My Courses", to: "/dashboard/my-courses", icon: GraduationCap },
         { label: "All Courses", to: "/dashboard/courses", icon: BookOpen },
         { label: "Certificates", to: "/dashboard/certificates", icon: Award },
+        { label: "My Recognition", to: "/dashboard/recognition", icon: Medal },
         { label: "Plans & Pricing", to: "/dashboard/plans", icon: Sparkles },
       ],
     },

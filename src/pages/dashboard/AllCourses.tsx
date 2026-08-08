@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAcademyCatalogue, CatalogueCourse, categoryLabel } from "@/hooks/useAcademyCatalogue";
 import CourseMarketCard from "@/components/dashboard/CourseMarketCard";
+import { useRecognition } from "@/hooks/useRecognition";
 import { useCart } from "@/contexts/CartContext";
 import { useRegion } from "@/contexts/RegionContext";
 import { AcademyCurrency, REGION_TO_CURRENCY } from "@/lib/academyFx";
@@ -35,6 +36,14 @@ export default function AllCourses() {
   const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const { buyNow, buyingSlug } = useAcademyCheckout();
 
+  const recognition = useRecognition();
+  const badgeMap = useMemo(() => {
+    const m: Record<string, string[]> = {};
+    for (const b of recognition.badges) {
+      for (const c of b.qualifying_courses) (m[c.slug] ??= []).push(b.name);
+    }
+    return m;
+  }, [recognition.badges]);
   const [q, setQ] = useState("");
   const [cats, setCats] = useState<string[]>([]);
   const [levels, setLevels] = useState<string[]>([]);
@@ -236,6 +245,7 @@ export default function AllCourses() {
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {filtered.map((c) => (
                     <CourseMarketCard
+                      badgeNames={badgeMap[c.slug] ?? []}
                       key={c.id}
                       course={c}
                       currency={currency}

@@ -72,6 +72,7 @@ const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"));
 const AppShellLayout = lazyWithRetry(() => import("./components/app-shell/AppShellLayout"));
 const MyLearning = lazyWithRetry(() => import("./pages/dashboard/MyLearning"));
 const MyCertificates = lazyWithRetry(() => import("./pages/dashboard/MyCertificates"));
+const Recognition = lazyWithRetry(() => import("./pages/dashboard/Recognition"));
 const AccountProfile = lazyWithRetry(() => import("./pages/dashboard/AccountProfile"));
 const AccountBilling = lazyWithRetry(() => import("./pages/dashboard/AccountBilling"));
 const AccountSecurity = lazyWithRetry(() => import("./pages/dashboard/AccountSecurity"));
@@ -162,6 +163,7 @@ const AdminAcademyUsers = lazyWithRetry(() => import("./pages/admin/AdminAcademy
 const AdminAcademyFunnel = lazyWithRetry(() => import("./pages/admin/AdminAcademyFunnel"));
 const AdminOutreachQueue = lazyWithRetry(() => import("./pages/admin/AdminOutreachQueue"));
 const AdminPartnerAssets = lazyWithRetry(() => import("./pages/admin/AdminPartnerAssets"));
+const AdminRecognition = lazyWithRetry(() => import("./pages/admin/AdminRecognition"));
 
 const PartnerPortalLayout = lazyWithRetry(() => import("./pages/partner-portal/PartnerPortalLayout"));
 const PartnerOverview = lazyWithRetry(() => import("./pages/partner-portal/Overview"));
@@ -285,6 +287,7 @@ const App = () => (
                   <Route path="/dashboard/cart" element={<CartPage />} />
                   <Route path="/dashboard/plans" element={<Plans />} />
                   <Route path="/dashboard/certificates" element={<MyCertificates />} />
+                  <Route path="/dashboard/recognition" element={<Recognition />} />
                   <Route path="/certificates" element={<MyCertificates />} />
                   <Route path="/account" element={<Navigate to="/account/profile" replace />} />
                   <Route path="/account/profile" element={<AccountProfile />} />
@@ -314,6 +317,7 @@ const App = () => (
                   <Route path="academy-users" element={<AdminAcademyUsers />} />
                   <Route path="academy-funnel" element={<AdminAcademyFunnel />} />
                   <Route path="outreach-queue" element={<AdminOutreachQueue />} />
+                  <Route path="recognition" element={<AdminRecognition />} />
                 </Route>
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />

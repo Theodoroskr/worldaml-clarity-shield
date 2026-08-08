@@ -33,9 +33,11 @@ interface Props {
   onToggleCart: (slug: string) => void;
   onBuyNow: (slug: string) => void;
   buying?: boolean;
+  /** Names of specialisation badges this course counts toward. */
+  badgeNames?: string[];
 }
 
-export default function CourseMarketCard({ course, currency, inCart, onToggleCart, onBuyNow, buying }: Props) {
+export default function CourseMarketCard({ course, currency, inCart, onToggleCart, onBuyNow, buying, badgeNames = [] }: Props) {
   const badge = statusBadge(course);
   const cta = primaryCta(course);
   const canAddToCart = !course.owned && !course.isFree && isPaidCourse(course.slug);
@@ -68,6 +70,12 @@ export default function CourseMarketCard({ course, currency, inCart, onToggleCar
           ) : null}
           <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Certificate</span>
         </div>
+
+        {badgeNames.length > 0 && (
+          <p className="text-[11px] text-muted-foreground">
+            Counts toward <span className="text-foreground">{badgeNames.join(", ")}</span>
+          </p>
+        )}
 
         {course.owned && course.totalModules > 0 && course.status !== "not-started" && (
           <div className="space-y-1">
