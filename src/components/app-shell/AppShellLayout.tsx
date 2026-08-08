@@ -58,7 +58,7 @@ export default function AppShellLayout() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/login");
+    navigate("/academy/login");
   };
 
   const UserFooter = ({ mini }: { mini?: boolean }) => (
