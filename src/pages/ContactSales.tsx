@@ -232,6 +232,8 @@ Preferred start date and number of seats below.`,
             country: formData.country,
             message: formData.message,
             products: selectedProducts,
+            referral_code: referralCode.trim().toLowerCase() || null,
+
             metadata: {
               attribution: getWebAttribution(),
               terms_accepted: true,
