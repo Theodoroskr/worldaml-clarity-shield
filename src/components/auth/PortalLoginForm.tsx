@@ -119,7 +119,7 @@ export default function PortalLoginForm({ portal, title, subtitle, icon, footer,
 
     const allowed = await resolveAccess(portal, uid);
     if (!allowed) {
-      setDenied(NO_ACCESS_COPY[portal]);
+      setDenied(portal === "partner" ? await partnerDenialCopy(uid) : NO_ACCESS_COPY[portal]);
       setIsLoading(false);
       return;
     }
