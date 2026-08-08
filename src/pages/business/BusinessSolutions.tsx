@@ -45,7 +45,7 @@ export default function BusinessSolutions() {
           <SolutionCard
             key={s.key}
             solution={s}
-            status={ownedKeys.includes(s.key) ? "Active" : s.plans.some((p) => p.checkout || p.configureUrl) ? "Available" : "Contact Sales"}
+            status={ownedKeys.includes(s.key) ? "Active" : s.plans.some((p) => p.checkout || p.configureUrl || p.checkoutDialog) ? "Available" : "Contact Sales"}
             onView={() => track("product_viewed", s.key)}
           />
         ))}

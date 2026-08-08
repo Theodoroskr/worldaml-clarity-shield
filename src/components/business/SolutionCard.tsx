@@ -15,7 +15,7 @@ export function SolutionCard({
   onView?: () => void;
 }) {
   const entry = solution.plans.find((p) => p.price);
-  const buyable = solution.plans.some((p) => p.checkout || p.configureUrl);
+  const buyable = solution.plans.some((p) => p.checkout || p.configureUrl || p.checkoutDialog);
   const Icon = solution.icon;
 
   const statusStyle =
