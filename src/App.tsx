@@ -185,6 +185,10 @@ const PartnerProfilePage = lazyWithRetry(() => import("./pages/partner-portal/Pr
 const PartnerSettingsPage = lazyWithRetry(() => import("./pages/partner-portal/Settings"));
 const PartnerContactsPage = lazyWithRetry(() => import("./pages/partner-portal/Contacts"));
 const PartnerWelcomePage = lazyWithRetry(() => import("./pages/partner-portal/Welcome"));
+const PartnerRegisterDealPage = lazyWithRetry(() => import("./pages/partner-portal/RegisterDeal"));
+const PartnerPayoutsPage = lazyWithRetry(() => import("./pages/partner-portal/Payouts"));
+const PartnerProductsPage = lazyWithRetry(() => import("./pages/partner-portal/Products"));
+const PartnerManagerPage = lazyWithRetry(() => import("./pages/partner-portal/Manager"));
 
 const SuiteAppLayout = lazyWithRetry(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazyWithRetry(() => import("./pages/suite/SuiteDashboard"));
@@ -430,7 +434,11 @@ const App = () => (
                   <Route path="welcome" element={<PartnerWelcomePage />} />
                   <Route path="referrals" element={<PartnerReferralsPage />} />
                   <Route path="deals" element={<PartnerDealsPage />} />
+                  <Route path="deals/new" element={<PartnerRegisterDealPage />} />
                   <Route path="commissions" element={<PartnerCommissionsPage />} />
+                  <Route path="payouts" element={<PartnerPayoutsPage />} />
+                  <Route path="products" element={<PartnerProductsPage />} />
+                  <Route path="manager" element={<PartnerManagerPage />} />
                   <Route path="assets" element={<PartnerAssetsPage />} />
                   <Route path="contacts" element={<PartnerContactsPage />} />
                   <Route path="profile" element={<PartnerProfilePage />} />
