@@ -359,8 +359,10 @@ Deno.serve(async (req) => {
               "free-aml-check": "Book Demo",
               "free_aml_check": "Book Demo",
               "partner-application": "Partner Request",
+              "partner-contact": "Partner Request",
+              "advisory-consultation": "Contact Sales",
               "newsletter": "Newsletter",
-            };
+
             const ALLOWED = new Set([
               "Contact Sales",
               "Book Demo",
