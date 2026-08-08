@@ -118,10 +118,13 @@ export default function BusinessSolutionDetail() {
                       {loading === p.key && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       {owned ? "Upgrade" : "Buy Now"}
                     </Button>
+                  ) : p.checkoutDialog === "worldcompliance" ? (
+                    <WorldComplianceBuyDialog label={p.configureLabel ?? "Configure & Buy"} />
                   ) : p.configureUrl ? (
                     <Button asChild className="w-full" variant="accent">
                       <Link to={p.configureUrl}>{p.configureLabel ?? "Configure & Buy"}</Link>
                     </Button>
+
                   ) : (
                     <Button asChild className="w-full" variant="outline">
                       <Link to={`/business/quotes?product=${encodeURIComponent(solution.name)}&plan=${encodeURIComponent(p.name)}`}>
