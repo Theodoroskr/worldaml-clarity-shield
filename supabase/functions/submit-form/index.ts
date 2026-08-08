@@ -619,15 +619,32 @@ Deno.serve(async (req) => {
           })(),
 
           // ── Visit Summary ─────────────────────────────────────────────────
-          // Intentionally NOT written from website forms. Zoho's Visit Summary
-          // block (First Visit, Most Recent Visit, Referrer, First Page
-          // Visited, Days Visited, Number Of Chats, Visitor Score, Average Time
-          // Spent) is SalesIQ-owned and read-only via the API — those fields
-          // stay empty and SalesIQ populates them.
+          // Website analytics mapped 1:1 onto Zoho's Visit Summary block.
+          // NOTE: these fields are flagged field_read_only in Zoho (SalesIQ
+          // owns them), so Zoho may silently drop them — the same values are
+          // always written to the "Website visit summary" Note as a fallback.
+          First_Visited_Time: attribution.first_visited_at || undefined,
+          Last_Visited_Time: attribution.last_visited_at || undefined,
+          Referrer: attribution.referrer || undefined,
+          First_Visited_URL:
+            attribution.first_page_visited || attribution.landing_page || undefined,
+          Days_Visited:
+            typeof attribution.days_visited === "number" ? attribution.days_visited : undefined,
+          Number_Of_Chats:
+            typeof attribution.number_of_chats === "number"
+              ? attribution.number_of_chats
+              : undefined,
+          Visitor_Score:
+            typeof attribution.visitor_score === "number" ? attribution.visitor_score : undefined,
+          Average_Time_Spent_Minutes:
+            typeof attribution.average_time_spent_minutes === "number"
+              ? attribution.average_time_spent_minutes
+              : undefined,
 
-          // Sales Organisation Unit — all WorldAML website leads belong to the
-          // ICG parent sales unit.
-          Sales_Organisation_Unit: "Infocredit Group (ICG)",
+          // Sales Organisation Unit — WorldAML website leads belong to the
+          // WorldAML sales unit.
+          Sales_Organisation_Unit: "WorldAML",
+
 
           // Qualification level, Readiness Score, Buying Timeline, Budget,
           // Attendance and Account Party ID are owned by sales/marketing inside
