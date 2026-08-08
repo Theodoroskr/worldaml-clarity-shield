@@ -190,7 +190,19 @@ Preferred start date and number of seats below.`,
       return;
     }
 
+    if (!termsAccepted) {
+      toast({
+        title: "Acceptance Required",
+        description:
+          "Please accept the Terms & Conditions and Privacy Policy to submit your request.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
+
+    const consentTimestamp = new Date().toISOString();
 
     try {
       const response = await fetch(
@@ -208,9 +220,22 @@ Preferred start date and number of seats below.`,
             email: formData.email,
             company: formData.company,
             job_title: formData.jobTitle,
+            country: formData.country,
             message: formData.message,
             products: selectedProducts,
-            metadata: { attribution: getWebAttribution() },
+            metadata: {
+              attribution: getWebAttribution(),
+              terms_accepted: true,
+              terms_accepted_at: consentTimestamp,
+              marketing_consent: marketingConsent,
+              marketing_consent_at: marketingConsent ? consentTimestamp : null,
+              consent_timestamp: consentTimestamp,
+              consent_text:
+                "I accept the Terms & Conditions and the Privacy Policy." +
+                (marketingConsent
+                  ? " I'd like to receive marketing communications about WorldAML products, events and regulatory updates."
+                  : ""),
+            },
           }),
         }
       );
@@ -231,9 +256,13 @@ Preferred start date and number of seats below.`,
         email: "",
         company: "",
         jobTitle: "",
+        country: "",
         message: "",
       });
       setSelectedProducts([]);
+      setTermsAccepted(false);
+      setMarketingConsent(false);
+
     } catch (error) {
       toast({
         title: "Error",
