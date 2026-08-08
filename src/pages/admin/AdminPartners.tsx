@@ -567,10 +567,24 @@ export default function AdminPartners() {
                               <Switch checked={p.is_active} onCheckedChange={(v) => togglePartner(p, "is_active", v)} />
                             </td>
                             <td className="py-3 text-right">
-                              <Button size="sm" variant="outline" onClick={() => openEdit(p)}>
-                                <Pencil className="h-3 w-3 mr-1" /> Edit
-                              </Button>
+                              <div className="flex justify-end gap-1">
+                                <Button size="sm" variant="outline" onClick={() => setDetailPartner(p)}>
+                                  <Eye className="h-3 w-3 mr-1" /> View
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={() => openEdit(p)}>
+                                  <Pencil className="h-3 w-3 mr-1" /> Edit
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-red-700 border-red-300 hover:bg-red-50"
+                                  onClick={() => setRemoveTarget(p)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" /> Remove
+                                </Button>
+                              </div>
                             </td>
+
                           </tr>
                         );
                       })}
