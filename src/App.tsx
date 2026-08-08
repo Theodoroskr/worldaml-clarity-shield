@@ -153,6 +153,8 @@ const AdminWorkflows = lazyWithRetry(() => import("./pages/admin/AdminWorkflows"
 const AdminPricing = lazyWithRetry(() => import("./pages/admin/AdminPricing"));
 const AdminOrganizations = lazyWithRetry(() => import("./pages/admin/AdminOrganizations"));
 const AdminDashboard = lazyWithRetry(() => import("./pages/admin/AdminDashboard"));
+const AdminAnalytics = lazyWithRetry(() => import("./pages/admin/AdminAnalytics"));
+const AdminReports = lazyWithRetry(() => import("./pages/admin/AdminReports"));
 const AdminAuditLog = lazyWithRetry(() => import("./pages/admin/AdminAuditLog"));
 const AdminRegulatoryHub = lazyWithRetry(() => import("./pages/admin/AdminRegulatoryHub"));
 const AdminSecurityAudit = lazyWithRetry(() => import("./pages/admin/AdminSecurityAudit"));
