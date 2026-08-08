@@ -173,6 +173,22 @@ const fallbackItems: NewsItem[] = [
   },
 ];
 
+const normaliseTitle = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+/**
+ * Live feeds don't cover every category evenly (Sanctions & Enforcement and GCC in
+ * particular are often empty), so the curated baseline is always merged in and
+ * de-duplicated against live headlines. Newest first.
+ */
+function mergeWithBaseline(liveItems: NewsItem[]): NewsItem[] {
+  const seen = new Set(liveItems.map((i) => normaliseTitle(i.title)));
+  const merged = [...liveItems];
+  for (const item of fallbackItems) {
+    if (!seen.has(normaliseTitle(item.title))) merged.push(item);
+  }
+  return merged.sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
+}
+
 interface UseRSSFeedsResult {
   items: NewsItem[];
   isLoading: boolean;
@@ -193,19 +209,12 @@ export function useRSSFeeds(): UseRSSFeedsResult {
 
     try {
       const liveItems = await fetchAllFeeds();
-
-      if (liveItems.length > 0) {
-        setItems(liveItems);
-        setIsLive(true);
-      } else {
-        // Use fallback if no live items
-        setItems(fallbackItems);
-        setIsLive(false);
-      }
+      setItems(mergeWithBaseline(liveItems));
+      setIsLive(liveItems.length > 0);
     } catch (err) {
       console.error("Failed to fetch RSS feeds:", err);
       setError("Unable to load live updates");
-      setItems(fallbackItems);
+      setItems(mergeWithBaseline([]));
       setIsLive(false);
     } finally {
       setIsLoading(false);
