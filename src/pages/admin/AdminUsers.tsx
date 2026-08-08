@@ -910,24 +910,36 @@ export default function AdminUsers() {
                 <p className="text-xs text-muted-foreground">{upsellDialog.profile.company_name}</p>
               )}
             </div>
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Email Template</label>
-              <Select value={upsellTemplate} onValueChange={(v: any) => setUpsellTemplate(v)}>
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="suite-upsell">
-                    <span className="font-medium">WorldAML Suite</span>
-                    <span className="text-muted-foreground ml-1.5">— Full platform upsell</span>
-                  </SelectItem>
-                  <SelectItem value="screening-upsell">
-                    <span className="font-medium">AML Screening</span>
-                    <span className="text-muted-foreground ml-1.5">— 1,900+ watchlists</span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {upsellData ? (
+              <div className="p-3 rounded-lg border border-teal-200 bg-teal-50/50 space-y-1.5">
+                <p className="text-sm font-semibold text-teal-800">{upsellData.headline}</p>
+                <p className="text-xs text-teal-900/80">{upsellData.intro}</p>
+                <ul className="text-xs text-teal-900/80 list-disc pl-4 space-y-0.5">
+                  {(upsellData.items || []).map((i: any) => (
+                    <li key={i.name}>{i.name}{i.meta ? ` — ${i.meta}` : ""}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Email Template</label>
+                <Select value={upsellTemplate} onValueChange={(v: any) => setUpsellTemplate(v)}>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="suite-upsell">
+                      <span className="font-medium">WorldAML Suite</span>
+                      <span className="text-muted-foreground ml-1.5">— Full platform upsell</span>
+                    </SelectItem>
+                    <SelectItem value="screening-upsell">
+                      <span className="font-medium">AML Screening</span>
+                      <span className="text-muted-foreground ml-1.5">— 1,900+ watchlists</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {upsellDialog.profile && (() => {
               const el = evaluateEligibility(upsellDialog.profile);
               return el.eligible ? (
