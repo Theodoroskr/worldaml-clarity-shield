@@ -378,8 +378,16 @@ Deno.serve(async (req) => {
             console.warn(`Unknown industry value from website form: "${raw}" — leaving Zoho Industry unset`);
             return undefined;
           })(),
-          // Topic — always the WorldAML brand topic for website leads.
-          Topic: "WorldAML",
+          // Topic — partner-programme submissions use the partnership topic,
+          // every other website form uses the WorldAML brand topic.
+          Topic: (() => {
+            const key = String(form_type ?? "").trim().toLowerCase();
+            const isPartner =
+              key.includes("partner") ||
+              (Array.isArray(products) &&
+                products.some((p) => String(p ?? "").toLowerCase().includes("partner")));
+            return isPartner ? "WorldAML Partnership" : "WorldAML";
+          })(),
 
           // This Zoho tenant uses "Note" (textarea) as the long-text field on
           // Leads — there is no "Description" field on the layout. The
