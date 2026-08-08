@@ -237,6 +237,7 @@ const SanctionsLists = () => {
         ]}
         structuredData={[jsonLd, faqLd]}
       />
+      <Header />
 
       {/* ── Hero ────────────────────────────────────────────────────────────── */}
       <section className="bg-gradient-to-b from-surface-subtle to-background border-b border-divider">

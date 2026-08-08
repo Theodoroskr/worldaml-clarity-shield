@@ -65,6 +65,7 @@ const EUSanctionsMap = () => {
         breadcrumbs={breadcrumbs}
         structuredData={structuredData}
       />
+      <Header />
 
       {/* Breadcrumbs */}
       <nav className="bg-muted/50 border-b border-border" aria-label="Breadcrumb">

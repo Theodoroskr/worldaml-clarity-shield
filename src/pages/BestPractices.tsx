@@ -42,6 +42,7 @@ const BestPractices = () => {
           { name: "Best Practices", url: "/resources/best-practices" },
         ]}
       />
+      <Header />
 
       {/* Hero */}
       <section className="bg-gradient-to-b from-surface-subtle to-background border-b border-divider">
