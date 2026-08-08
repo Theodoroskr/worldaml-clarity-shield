@@ -5,6 +5,8 @@ import AcademyCourse from "@/pages/AcademyCourse";
 import { Button } from "@/components/ui/button";
 import { useAcademyOverview } from "@/hooks/useAcademyOverview";
 import { CourseCrossSell } from "@/components/dashboard/EcosystemSections";
+import { CompletionRecognition } from "@/components/dashboard/RecognitionSections";
+
 
 /**
  * In-portal course player. Reuses the canonical AcademyCourse experience
