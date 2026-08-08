@@ -76,7 +76,8 @@ serve(async (req) => {
       customer: customerId,
       // If signed in without an existing customer, pre-fill; otherwise let Stripe collect.
       customer_email: !customerId && userEmail ? userEmail : undefined,
-      customer_creation: customerId ? undefined : "always",
+      // NOTE: `customer_creation` is only valid in `payment` mode. In subscription
+      // mode Stripe always creates/attaches a Customer automatically.
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       allow_promotion_codes: true,
