@@ -84,8 +84,9 @@ export default function AdminAnalytics() {
             onPortal={(p) => {
               setPortal(p);
               const next = PORTAL_TABS[p];
-              setTab(next.includes(tab) ? tab : (next[1] ?? next[0]));
+              setTab(p === "all" ? (next.includes(tab) ? tab : "overview") : (next[1] ?? next[0]));
             }}
+
 
             onRefresh={() => refetch()}
             refreshing={isFetching}
