@@ -19,6 +19,12 @@ const COPY: Record<PortalKey, { title: string; body: string; primary?: { label: 
     primary: { label: "Learn About Our Partner Programme", to: "/partners" },
     secondary: { label: "Return to Academy", to: "/dashboard" },
   },
+  business: {
+    title: "No Business account",
+    body: "You don't currently have a WorldAML business account.",
+    primary: { label: "Create a business account", to: "/business/signup" },
+    secondary: { label: "Return to WorldAML", to: "/" },
+  },
   admin: {
     title: "Access denied",
     body: "This area is restricted to authorised WorldAML staff.",

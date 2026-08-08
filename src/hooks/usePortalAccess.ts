@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type PortalKey = "academy" | "partner" | "admin";
+export type PortalKey = "academy" | "partner" | "business" | "admin";
 
 export interface PortalAccess {
   isLoading: boolean;
@@ -11,6 +11,8 @@ export interface PortalAccess {
   academyAccess: boolean;
   /** Approved + activated partner record required. */
   partnerAccess: boolean;
+  /** Business buyer — an owned or member business account. */
+  businessAccess: boolean;
   /** Internal WorldAML staff (user_roles.role = 'admin'). */
   adminAccess: boolean;
   /** Number of non-admin workspaces the user can enter. */
@@ -43,16 +45,33 @@ export function usePortalAccess(): PortalAccess {
     },
   });
 
+  const businessQuery = useQuery({
+    queryKey: ["portal-access", "business", user?.id],
+    enabled: !!user,
+    staleTime: 60_000,
+    queryFn: async (): Promise<boolean> => {
+      const { data, error } = await supabase
+        .from("business_accounts")
+        .select("id")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (error) return false;
+      return !!data;
+    },
+  });
+
   const signedIn = !!user;
-  const isLoading = authLoading || (signedIn && (profileLoading || partnerQuery.isLoading));
+  const isLoading = authLoading || (signedIn && (profileLoading || partnerQuery.isLoading || businessQuery.isLoading));
 
   const academyAccess = signedIn && profile?.status !== "rejected";
   const partnerAccess = signedIn && partnerQuery.data === true;
+  const businessAccess = signedIn && businessQuery.data === true;
   const adminAccess = signedIn && isAdmin;
 
   const portals: PortalKey[] = [];
   if (academyAccess) portals.push("academy");
   if (partnerAccess) portals.push("partner");
+  if (businessAccess) portals.push("business");
   if (adminAccess) portals.push("admin");
 
   return {
@@ -60,21 +79,27 @@ export function usePortalAccess(): PortalAccess {
     signedIn,
     academyAccess,
     partnerAccess,
+    businessAccess,
     adminAccess,
     portals,
     has: (portal) =>
-      portal === "academy" ? academyAccess : portal === "partner" ? partnerAccess : adminAccess,
+      portal === "academy" ? academyAccess
+        : portal === "partner" ? partnerAccess
+          : portal === "business" ? businessAccess
+            : adminAccess,
   };
 }
 
 export const PORTAL_HOME: Record<PortalKey, string> = {
   academy: "/dashboard",
   partner: "/partner/dashboard",
+  business: "/business/dashboard",
   admin: "/admin/dashboard",
 };
 
 export const PORTAL_LOGIN: Record<PortalKey, string> = {
   academy: "/academy/login",
   partner: "/partner/login",
+  business: "/business/login",
   admin: "/admin/login",
 };

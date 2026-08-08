@@ -33,6 +33,11 @@ async function resolveAccess(portal: PortalKey, userId: string): Promise<boolean
       .from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
     return !!data;
   }
+  if (portal === "business") {
+    const { data } = await supabase
+      .from("business_accounts").select("id").eq("user_id", userId).maybeSingle();
+    return !!data;
+  }
   if (portal === "partner") {
     await flushPendingPartnerApplication(userId);
     const { data } = await supabase
@@ -63,6 +68,7 @@ async function partnerDenialCopy(userId: string): Promise<string> {
 const NO_ACCESS_COPY: Record<PortalKey, string> = {
   academy: "Your account does not currently have Academy access.",
   partner: "Your account does not currently have access to the WorldAML Partner Portal.",
+  business: "This sign-in is not linked to a WorldAML business account yet.",
   admin: "This account is not authorised for internal access.",
 };
 

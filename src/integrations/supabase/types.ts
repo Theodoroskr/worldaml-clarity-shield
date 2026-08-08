@@ -869,6 +869,9 @@ export type Database = {
       }
       business_accounts: {
         Row: {
+          address_line1: string | null
+          address_line2: string | null
+          city: string | null
           company_name: string
           company_size: string | null
           contact_name: string | null
@@ -877,13 +880,20 @@ export type Database = {
           id: string
           industry: string | null
           phone: string | null
+          postal_code: string | null
           products_of_interest: string[]
+          registration_number: string | null
           status: string
           updated_at: string
           user_id: string
+          vat_number: string | null
+          website: string | null
           work_email: string
         }
         Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
           company_name: string
           company_size?: string | null
           contact_name?: string | null
@@ -892,13 +902,20 @@ export type Database = {
           id?: string
           industry?: string | null
           phone?: string | null
+          postal_code?: string | null
           products_of_interest?: string[]
+          registration_number?: string | null
           status?: string
           updated_at?: string
           user_id: string
+          vat_number?: string | null
+          website?: string | null
           work_email: string
         }
         Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
           company_name?: string
           company_size?: string | null
           contact_name?: string | null
@@ -907,13 +924,173 @@ export type Database = {
           id?: string
           industry?: string | null
           phone?: string | null
+          postal_code?: string | null
           products_of_interest?: string[]
+          registration_number?: string | null
           status?: string
           updated_at?: string
           user_id?: string
+          vat_number?: string | null
+          website?: string | null
           work_email?: string
         }
         Relationships: []
+      }
+      business_entitlements: {
+        Row: {
+          activated_at: string | null
+          business_account_id: string
+          created_at: string
+          id: string
+          plan: string | null
+          product_key: string
+          renews_at: string | null
+          seats: number | null
+          setup_complete: boolean
+          status: string
+          stripe_subscription_id: string | null
+          updated_at: string
+          usage_limit: number | null
+          usage_unit: string | null
+          usage_used: number | null
+        }
+        Insert: {
+          activated_at?: string | null
+          business_account_id: string
+          created_at?: string
+          id?: string
+          plan?: string | null
+          product_key: string
+          renews_at?: string | null
+          seats?: number | null
+          setup_complete?: boolean
+          status?: string
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          usage_limit?: number | null
+          usage_unit?: string | null
+          usage_used?: number | null
+        }
+        Update: {
+          activated_at?: string | null
+          business_account_id?: string
+          created_at?: string
+          id?: string
+          plan?: string | null
+          product_key?: string
+          renews_at?: string | null
+          seats?: number | null
+          setup_complete?: boolean
+          status?: string
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          usage_limit?: number | null
+          usage_unit?: string | null
+          usage_used?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_entitlements_business_account_id_fkey"
+            columns: ["business_account_id"]
+            isOneToOne: false
+            referencedRelation: "business_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_events: {
+        Row: {
+          business_account_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          product_key: string | null
+          user_id: string | null
+        }
+        Insert: {
+          business_account_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          product_key?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          business_account_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          product_key?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_events_business_account_id_fkey"
+            columns: ["business_account_id"]
+            isOneToOne: false
+            referencedRelation: "business_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_members: {
+        Row: {
+          academy_seat: boolean
+          business_account_id: string
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          invited_by: string | null
+          job_title: string | null
+          products: string[]
+          role: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          academy_seat?: boolean
+          business_account_id: string
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          invited_by?: string | null
+          job_title?: string | null
+          products?: string[]
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          academy_seat?: boolean
+          business_account_id?: string
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          invited_by?: string | null
+          job_title?: string | null
+          products?: string[]
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_members_business_account_id_fkey"
+            columns: ["business_account_id"]
+            isOneToOne: false
+            referencedRelation: "business_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       business_quote_requests: {
         Row: {
@@ -6628,6 +6805,7 @@ export type Database = {
         Args: { target_email: string }
         Returns: undefined
       }
+      business_account_ids: { Args: { _user_id: string }; Returns: string[] }
       calculate_customer_risk_score: {
         Args: { p_customer_id: string }
         Returns: Json
@@ -6696,6 +6874,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_business_admin: { Args: { _account: string }; Returns: boolean }
+      is_business_member: { Args: { _account: string }; Returns: boolean }
       is_eligible_for_sales_outreach: {
         Args: { _user_id: string }
         Returns: Json
