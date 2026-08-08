@@ -275,7 +275,7 @@ const Advisory = () => {
                     className="group relative bg-accent text-accent-foreground shadow-[0_0_20px_hsl(var(--accent)/0.2)] transition-all hover:bg-accent/90 hover:shadow-[0_0_30px_hsl(var(--accent)/0.4)]"
                   >
                     <Link to="/contact-sales?topic=advisory-consultation">
-                      Request a Demo
+                      Request Advisory
                       <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </Button>
@@ -583,7 +583,7 @@ const Advisory = () => {
                 className="mt-6 bg-accent text-accent-foreground shadow-lg hover:bg-accent/90"
               >
                 <Link to="/contact-sales?topic=advisory-consultation">
-                  Request a Demo
+                  Request Advisory
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -601,7 +601,7 @@ const Advisory = () => {
         >
           <Link to="/contact-sales?topic=advisory-consultation">
             <ArrowRight className="h-5 w-5" />
-            <span className="hidden sm:inline">Request a Demo</span>
+            <span className="hidden sm:inline">Request Advisory</span>
             <span className="sm:hidden">Request Demo</span>
           </Link>
         </Button>
