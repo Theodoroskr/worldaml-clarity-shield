@@ -44,6 +44,8 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
   const [business, setBusiness] = useState<any[]>([]);
   const [partner, setPartner] = useState<any | null>(null);
   const [upsellLog, setUpsellLog] = useState<any[]>([]);
+  const [courses, setCourses] = useState<CourseRow[]>([]);
+  const [purchases, setPurchases] = useState<any[]>([]);
 
   useEffect(() => {
     if (!profile) return;
@@ -52,7 +54,7 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
       setLoading(true);
       const uid = profile.user_id;
       const email = (profile.email || "").toLowerCase();
-      const [pg, ce, bm, pt, ul] = await Promise.all([
+      const [pg, ce, bm, pt, ul, co, pu] = await Promise.all([
         uid ? supabase.from("academy_progress").select("*").eq("user_id", uid) : Promise.resolve({ data: [] } as any),
         uid ? supabase.from("academy_certificates").select("*").eq("user_id", uid) : Promise.resolve({ data: [] } as any),
         email ? supabase.from("business_members").select("id, business_account_id, role, status, academy_seat, products").eq("email", email) : Promise.resolve({ data: [] } as any),
@@ -60,6 +62,8 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
         supabase.from("admin_upsell_email_log").select("id, template_id, created_at").or(
           uid ? `recipient_user_id.eq.${uid},recipient_email.eq.${email}` : `recipient_email.eq.${email}`,
         ).order("created_at", { ascending: false }),
+        supabase.from("academy_courses").select("id, slug, title, description, category, difficulty, cpd_hours, price_eur_cents, is_published").eq("is_published", true).order("sort_order"),
+        uid ? supabase.from("academy_course_purchases").select("course_id, status").eq("user_id", uid) : Promise.resolve({ data: [] } as any),
       ]);
       if (!active) return;
       setProgress((pg as any).data || []);
@@ -67,6 +71,8 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
       setBusiness((bm as any).data || []);
       setPartner((pt as any).data || null);
       setUpsellLog((ul as any).data || []);
+      setCourses(((co as any).data || []) as CourseRow[]);
+      setPurchases((pu as any).data || []);
       setLoading(false);
     })();
     return () => { active = false; };
