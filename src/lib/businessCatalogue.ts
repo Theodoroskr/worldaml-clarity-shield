@@ -14,8 +14,12 @@ export interface BusinessPlan {
   summary: string;
   features: string[];
   /** Present only where genuine self-service checkout exists. */
-  checkout?: { fn: string; plan: string };
+  checkout?: { fn: string; plan: string; body?: Record<string, unknown> };
+  /** Real in-app purchase path where the plan needs configuring before payment. */
+  configureUrl?: string;
+  configureLabel?: string;
 }
+
 
 export interface BusinessSolution {
   key: string;
@@ -191,6 +195,8 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
         period: "/year",
         summary: "Hosted screening data with unlimited searches.",
         features: ["2.5M+ profiles, 50+ risk categories", "Unlimited searches", "Multi-user discounts"],
+        configureUrl: "/data-sources/worldcompliance/pricing",
+        configureLabel: "Configure & Buy",
       },
       {
         key: "bridger",
@@ -234,13 +240,17 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
         price: "From €29",
         summary: "Buy specific courses for named team members.",
         features: ["Per-course purchase", "Certificate on completion", "CPD hours recorded"],
+        configureUrl: "/academy",
+        configureLabel: "Browse & Buy Courses",
       },
       {
         key: "annual",
         name: "Annual Academy access",
-        price: null,
+        price: "€199",
+        period: "/year per learner",
         summary: "Full library access for a learner for 12 months.",
         features: ["Full course library", "All certificates included", "Renews annually"],
+        checkout: { fn: "create-academy-annual-checkout", plan: "annual", body: { currency: "eur" } },
       },
       {
         key: "team",
@@ -253,6 +263,64 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
     pairsWith: ["worldaml", "worldid"],
     publicUrl: "/academy",
   },
+  {
+    key: "suite",
+    name: "WorldAML Compliance Suite",
+    lane: "WorldAML Platform",
+    icon: ShieldCheck,
+    tagline: "The full compliance workspace: onboarding, screening, monitoring, cases and reporting.",
+    outcome: "Run your entire compliance programme in one regulator-ready workspace.",
+    solves: [
+      "Compliance work spread across spreadsheets and email",
+      "No single audit trail across onboarding, screening and reporting",
+      "Manual regulatory reporting and case handling",
+    ],
+    capabilities: [
+      "KYC/KYB onboarding forms and customer records",
+      "Sanctions, PEP and adverse media screening with alerts",
+      "Transaction monitoring rules and case management",
+      "Risk scoring, periodic reviews and audit logs",
+      "Regulatory reporting and exports",
+    ],
+    idealFor: "Compliance teams that need a full workspace, not just an API.",
+    included: ["Suite workspace access", "Case and alert management", "Audit-ready evidence", "Standard support"],
+    addOns: ["Additional users", "Regulator-specific reporting adapters"],
+    faq: [
+      { q: "How does the Suite relate to the API?", a: "The Suite is the workspace interface powered by the same WorldAML engine as the API. You can start with either." },
+      { q: "Can we buy it online?", a: "Suite plans start with the Screening & Monitoring subscription; larger deployments are scoped with our team." },
+    ],
+    plans: [
+      {
+        key: "starter",
+        name: "Suite Starter",
+        price: "€99",
+        period: "/month",
+        summary: "Suite workspace with screening and monitoring for smaller teams.",
+        features: ["Up to 2,000 monitored entities", "Case and alert management", "Email support"],
+        checkout: { fn: "create-worldaml-checkout", plan: "starter" },
+      },
+      {
+        key: "compliance",
+        name: "Suite Compliance",
+        price: "€495",
+        period: "/month",
+        summary: "Full workspace for established compliance programmes.",
+        features: ["Up to 10,000 monitored entities", "Enhanced monitoring", "Priority support"],
+        checkout: { fn: "create-worldaml-checkout", plan: "compliance" },
+      },
+      {
+        key: "enterprise",
+        name: "Suite Enterprise",
+        price: null,
+        summary: "Multi-entity groups with bespoke reporting requirements.",
+        features: ["Unlimited entities and users", "Dedicated account manager", "SLA guarantees"],
+      },
+    ],
+    pairsWith: ["worldid", "lexisnexis", "academy"],
+    usageUnit: "monitored entities",
+    openUrl: "/suite/dashboard",
+    publicUrl: "/platform/suite",
+  },
 ];
 
 export const SOLUTION_BY_KEY = Object.fromEntries(
@@ -264,6 +332,7 @@ export const CROSS_SELL_COPY: Record<string, string> = {
   worldid: "Add identity verification so you know who you are onboarding.",
   lexisnexis: "Licence enterprise risk data for group-wide screening.",
   academy: "Train your team on the controls you have just put in place.",
+  suite: "Run onboarding, screening, cases and reporting in one compliance workspace.",
 };
 
 /** Deterministic recommendations — no AI, no invented logic. */

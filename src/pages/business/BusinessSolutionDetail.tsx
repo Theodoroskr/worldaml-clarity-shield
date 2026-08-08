@@ -23,11 +23,11 @@ export default function BusinessSolutionDetail() {
 
   const owned = ownedKeys.includes(solution.key);
 
-  const buy = async (planKey: string, fn: string, plan: string) => {
+  const buy = async (planKey: string, fn: string, plan: string, extra?: Record<string, unknown>) => {
     setLoading(planKey);
     track("checkout_started", solution.key, { plan });
     try {
-      const { data, error } = await supabase.functions.invoke(fn, { body: { plan } });
+      const { data, error } = await supabase.functions.invoke(fn, { body: { plan, ...(extra ?? {}) } });
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");
     } catch (e) {
@@ -114,9 +114,13 @@ export default function BusinessSolutionDetail() {
                 <div className="mt-auto pt-2">
                   {p.checkout ? (
                     <Button className="w-full" variant="accent" disabled={loading === p.key}
-                      onClick={() => buy(p.key, p.checkout!.fn, p.checkout!.plan)}>
+                      onClick={() => buy(p.key, p.checkout!.fn, p.checkout!.plan, p.checkout!.body)}>
                       {loading === p.key && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       {owned ? "Upgrade" : "Buy Now"}
+                    </Button>
+                  ) : p.configureUrl ? (
+                    <Button asChild className="w-full" variant="accent">
+                      <Link to={p.configureUrl}>{p.configureLabel ?? "Configure & Buy"}</Link>
                     </Button>
                   ) : (
                     <Button asChild className="w-full" variant="outline">

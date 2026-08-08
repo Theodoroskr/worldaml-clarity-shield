@@ -159,7 +159,7 @@ export default function BusinessDashboard() {
                 <SolutionCard
                   key={s.key}
                   solution={s}
-                  status={s.plans.some((p) => p.checkout) ? "Available" : "Contact Sales"}
+                  status={s.plans.some((p) => p.checkout || p.configureUrl) ? "Available" : "Contact Sales"}
                   onView={() => track("product_viewed", s.key)}
                 />
               ))}
@@ -204,6 +204,30 @@ export default function BusinessDashboard() {
           </div>
         </section>
       )}
+
+      {/* WORLDAML SUITE */}
+      <section>
+        <Card className="border-teal/30 bg-teal/[0.04]">
+          <CardContent className="py-6 flex flex-wrap items-center justify-between gap-5">
+            <div className="flex items-start gap-3 max-w-2xl">
+              <ShieldCheck className="w-6 h-6 text-teal mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">WorldAML Compliance Suite</p>
+                <p className="font-semibold text-foreground mt-0.5">One workspace for onboarding, screening, cases and reporting</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  See every Suite module, plans and pricing — then buy online or talk to our team.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button asChild variant="accent"><Link to="/business/solutions/suite">View Suite & Plans</Link></Button>
+              <Button asChild variant="outline">
+                <Link to="/platform/suite">Suite Overview <ExternalLink className="ml-2 h-3.5 w-3.5" /></Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
 
       {/* ACADEMY FOR BUSINESS */}
       <section>
