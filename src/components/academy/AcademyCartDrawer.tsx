@@ -111,6 +111,10 @@ function AcademyCartDrawerContent() {
   const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [loading, setLoading] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
+  const [referralCode, setReferralCode] = useState(() => {
+    try { return window.localStorage.getItem("worldaml_referral_code") || ""; } catch { return ""; }
+  });
+
 
   const { data: courseTitles } = useQuery({
     queryKey: ["academy-cart-titles", items.join(",")],
