@@ -60,9 +60,16 @@ export default function ShareRecognition({
 }) {
   const live = useRecognition();
   const r = data ?? live;
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+
+  const memberName = useMemo(() => {
+    const m = (user?.user_metadata ?? {}) as Record<string, string | undefined>;
+    const full = m.full_name || m.name || [m.first_name, m.last_name].filter(Boolean).join(" ");
+    return (full || "").trim();
+  }, [user]);
 
   const message = useMemo(() => (r ? buildShareMessage(r, "linkedin") : ""), [r]);
   const [draft, setDraft] = useState<string | null>(null);
@@ -77,7 +84,7 @@ export default function ShareRecognition({
     if (!open || !r?.level || imageUrl) return;
     let cancelled = false;
     setImageBusy(true);
-    renderRecognitionCard(r)
+    renderRecognitionCard(r, memberName)
       .then((blob) => {
         if (cancelled || !blob) return;
         setImageBlob(blob);
@@ -85,7 +92,8 @@ export default function ShareRecognition({
       })
       .finally(() => !cancelled && setImageBusy(false));
     return () => { cancelled = true; };
-  }, [open, r, imageUrl]);
+  }, [open, r, imageUrl, memberName]);
+
 
   useEffect(() => () => { if (imageUrl) URL.revokeObjectURL(imageUrl); }, [imageUrl]);
 
