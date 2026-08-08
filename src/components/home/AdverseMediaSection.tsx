@@ -58,7 +58,7 @@ export const AdverseMediaSection = () => {
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/get-started">Get Started</Link>
+                <Link to="/contact-sales">Get Started</Link>
               </Button>
             </div>
           </div>

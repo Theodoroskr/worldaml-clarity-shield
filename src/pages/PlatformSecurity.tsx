@@ -279,7 +279,7 @@ const PlatformSecurity = () => {
               arrange a security assessment call with our team.
             </p>
             <Button variant="accent" size="lg" asChild>
-              <Link to="/get-started">Request Security Pack</Link>
+              <Link to="/contact-sales">Request Security Pack</Link>
             </Button>
           </div>
         </section>

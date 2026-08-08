@@ -77,7 +77,7 @@ const BridgerXGUKIE = () => {
 
               <div className="flex flex-wrap gap-4">
                 <Button asChild size="lg">
-                  <Link to="/get-started">
+                  <Link to="/contact-sales">
                     Request Demo
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
@@ -229,7 +229,7 @@ const BridgerXGUKIE = () => {
               account and payment screening in action.
             </p>
             <Button variant="accent" size="lg" asChild>
-              <Link to="/get-started">Request Demo</Link>
+              <Link to="/contact-sales">Request Demo</Link>
             </Button>
           </div>
         </section>

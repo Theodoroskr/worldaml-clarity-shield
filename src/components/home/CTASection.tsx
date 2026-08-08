@@ -30,7 +30,7 @@ export const CTASection = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Button size="lg" variant="accent" asChild>
-              <Link to="/get-started">
+              <Link to="/contact-sales">
                 Start Free Trial
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

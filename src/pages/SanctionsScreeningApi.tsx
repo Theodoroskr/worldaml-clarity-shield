@@ -49,7 +49,7 @@ const softwareStructuredData = {
   offers: {
     "@type": "Offer",
     category: "API Access",
-    url: "https://www.worldaml.com/get-started",
+    url: "https://www.worldaml.com/contact-sales",
   },
 };
 

@@ -61,7 +61,7 @@ export const DataSourceCTA = ({
                 Discuss your requirements and get a custom quote tailored to your needs.
               </p>
               <Button variant="outline-light" className="w-full" asChild>
-                <Link to="/get-started">
+                <Link to="/contact-sales">
                   Contact Us
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

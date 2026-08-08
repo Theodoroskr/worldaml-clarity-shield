@@ -27,7 +27,7 @@ const plans = [
     annualTotal: "€1,188",
     monthlySavings: "€20",
     cta: "Get API Access",
-    ctaLink: "/get-started",
+    ctaLink: "/contact-sales",
     highlighted: false,
   },
   {
@@ -40,7 +40,7 @@ const plans = [
     annualTotal: "€5,940",
     monthlySavings: "€100",
     cta: "Get API Access",
-    ctaLink: "/get-started",
+    ctaLink: "/contact-sales",
     highlighted: true,
   },
   {
@@ -53,7 +53,7 @@ const plans = [
     annualTotal: null,
     monthlySavings: null,
     cta: "Contact Sales",
-    ctaLink: "/get-started",
+    ctaLink: "/contact-sales",
     highlighted: false,
     features: [
       "Custom volumes & jurisdictions",

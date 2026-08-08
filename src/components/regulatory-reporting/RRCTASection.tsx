@@ -14,7 +14,7 @@ const RRCTASection = () => {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" variant="accent" asChild>
-              <Link to="/get-started">
+              <Link to="/contact-sales">
                 Request Access
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

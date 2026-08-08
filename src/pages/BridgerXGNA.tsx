@@ -78,7 +78,7 @@ const BridgerXGNA = () => {
 
               <div className="flex flex-wrap gap-4">
                 <Button asChild size="lg">
-                  <Link to="/get-started">
+                  <Link to="/contact-sales">
                     Contact Sales
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
@@ -254,7 +254,7 @@ const BridgerXGNA = () => {
               and see customized account and payment screening in action.
             </p>
             <Button variant="accent" size="lg" asChild>
-              <Link to="/get-started">Contact Sales</Link>
+              <Link to="/contact-sales">Contact Sales</Link>
             </Button>
           </div>
         </section>
