@@ -111,11 +111,10 @@ const Pricing = () => {
   const handleCheckout = async (planName: string, product: "worldid" | "worldaml") => {
     if (!user) {
       toast({
-        title: "Sign in required",
-        description: "Please sign in to subscribe to a plan.",
-        variant: "destructive",
+        title: "Business account required",
+        description: "Create or sign in to a business account to complete your purchase.",
       });
-      navigate(`/login?redirect=/pricing&plan=${planName.toLowerCase()}`);
+      navigate(`/business/signup?next=/pricing`);
       return;
     }
 
@@ -282,155 +281,7 @@ const Pricing = () => {
                 </a>
               </div>
 
-              {!user ? (
-                /* ==================== PUBLIC VIEW: Starting From ==================== */
-                <>
-                  <h2 className="sr-only">Our Plans</h2>
-                  <div className="grid md:grid-cols-3 gap-6 mb-12">
-
-                    {/* WorldAML Card */}
-                    <div id="worldaml" className="scroll-mt-24">
-                      <Card className="h-full border-divider hover:border-slate-muted transition-all">
-                        <CardHeader>
-                          <div className="mb-3">
-                            <LaneBadge lane="platform" />
-                          </div>
-                          <CardTitle className="text-navy text-xl">WorldAML API</CardTitle>
-                          <CardDescription>AML screening & ongoing monitoring via API</CardDescription>
-                          <div className="mt-4">
-                            <p className="text-xs font-medium text-text-tertiary uppercase tracking-wider mb-1">Starting from</p>
-                            <span className="text-3xl font-bold text-navy">€99</span>
-                            <span className="text-text-secondary">/month</span>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <ul className="space-y-2.5 mb-6">
-                            <li className="flex items-start gap-2">
-                              <Check className="w-4 h-4 text-teal flex-shrink-0 mt-0.5" />
-                              <span className="text-body-sm text-text-secondary">Full API access with monitoring</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <Check className="w-4 h-4 text-teal flex-shrink-0 mt-0.5" />
-                              <span className="text-body-sm text-text-secondary">Suite included for case management</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <Check className="w-4 h-4 text-teal flex-shrink-0 mt-0.5" />
-                              <span className="text-body-sm text-text-secondary">Audit-ready screening reports</span>
-                            </li>
-                          </ul>
-                          <Button asChild className="w-full" variant="outline">
-                            <Link to="/signup?redirect=/pricing">
-                              <Lock className="w-4 h-4 mr-2" />
-                              Sign up to view full pricing
-                            </Link>
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {/* WorldID Card */}
-                    <div id="worldid" className="scroll-mt-24">
-                      <Card className="h-full border-teal border-2 shadow-lg relative">
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                          <span className="bg-teal text-white text-xs font-medium px-3 py-1 rounded-full">
-                            Popular
-                          </span>
-                        </div>
-                        <CardHeader>
-                          <div className="flex items-center gap-2 mb-3 flex-wrap">
-                            <LaneBadge lane="platform" />
-                            <span className="text-xs font-medium px-2 py-1 rounded-full bg-teal/10 text-teal">
-                              Identity Verification
-                            </span>
-                          </div>
-                          <CardTitle className="text-navy text-xl">WorldID</CardTitle>
-                          <CardDescription>KYC & biometric liveness verification</CardDescription>
-                          <div className="mt-4">
-                            <p className="text-xs font-medium text-text-tertiary uppercase tracking-wider mb-1">Starting from</p>
-                            <span className="text-3xl font-bold text-navy">€1.50</span>
-                            <span className="text-text-secondary"> / IDV</span>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <ul className="space-y-2.5 mb-6">
-                            <li className="flex items-start gap-2">
-                              <Check className="w-4 h-4 text-teal flex-shrink-0 mt-0.5" />
-                              <span className="text-body-sm text-text-secondary">Document authentication & OCR</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <Check className="w-4 h-4 text-teal flex-shrink-0 mt-0.5" />
-                              <span className="text-body-sm text-text-secondary">Biometric liveness & face match</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <Check className="w-4 h-4 text-teal flex-shrink-0 mt-0.5" />
-                              <span className="text-body-sm text-text-secondary">Volume-based discounts available</span>
-                            </li>
-                          </ul>
-                          <Button asChild className="w-full" variant="accent">
-                            <Link to="/signup?redirect=/pricing">
-                              <Lock className="w-4 h-4 mr-2" />
-                              Sign up to view full pricing
-                            </Link>
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {/* LexisNexis Card */}
-                    <div id="lexisnexis" className="scroll-mt-24">
-                      <Card className="h-full border-divider hover:border-slate-muted transition-all">
-                        <CardHeader>
-                          <div className="flex items-center gap-2 mb-3 flex-wrap">
-                            <LaneBadge lane="data-source" />
-                          </div>
-                          <CardTitle className="text-navy text-xl">LexisNexis Data</CardTitle>
-                          <CardDescription>WorldCompliance® & Bridger Insight XG®</CardDescription>
-                          <div className="mt-4 flex items-center gap-2">
-                            <Lock className="w-4 h-4 text-text-tertiary" />
-                            <span className="text-sm text-text-tertiary">Sign up to see pricing</span>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <ul className="space-y-2.5 mb-6">
-                            <li className="flex items-start gap-2">
-                              <Check className="w-4 h-4 text-teal flex-shrink-0 mt-0.5" />
-                              <span className="text-body-sm text-text-secondary">2.5M+ profiles, 50+ risk categories</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <Check className="w-4 h-4 text-teal flex-shrink-0 mt-0.5" />
-                              <span className="text-body-sm text-text-secondary">Unlimited searches included</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <Check className="w-4 h-4 text-teal flex-shrink-0 mt-0.5" />
-                              <span className="text-body-sm text-text-secondary">Progressive multi-user discounts</span>
-                            </li>
-                          </ul>
-                          <Button asChild className="w-full" variant="outline">
-                            <Link to="/signup?redirect=/pricing">
-                              <Lock className="w-4 h-4 mr-2" />
-                              Sign up to view full pricing
-                            </Link>
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-
-                  {/* Login prompt */}
-                  <div className="p-6 rounded-xl bg-navy/5 border border-navy/10 text-center">
-                    <p className="text-body text-text-secondary mb-3">
-                      Already have an account?
-                    </p>
-                    <Button asChild variant="default">
-                      <Link to="/login?redirect=/pricing">
-                        Log in to view full pricing
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                /* ==================== AUTHENTICATED VIEW: Full Pricing ==================== */
+              {/* ==================== FULL PRICING (public + authenticated) ==================== */}
                 <>
                   {/* WorldAML Section */}
                   <div id="worldaml" className="mb-12 scroll-mt-24">
@@ -678,7 +529,6 @@ const Pricing = () => {
                     </div>
                   </div>
                 </>
-              )}
 
             </div>
           </div>

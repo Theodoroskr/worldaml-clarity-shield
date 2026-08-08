@@ -165,6 +165,13 @@ const AdminAcademyUsers = lazyWithRetry(() => import("./pages/admin/AdminAcademy
 const AdminAcademyFunnel = lazyWithRetry(() => import("./pages/admin/AdminAcademyFunnel"));
 const AdminOutreachQueue = lazyWithRetry(() => import("./pages/admin/AdminOutreachQueue"));
 const AdminPartnerAssets = lazyWithRetry(() => import("./pages/admin/AdminPartnerAssets"));
+const AdminBusiness = lazyWithRetry(() => import("./pages/admin/AdminBusiness"));
+const BusinessSignup = lazyWithRetry(() => import("./pages/business/BusinessSignup"));
+const BusinessLogin = lazyWithRetry(() => import("./pages/business/BusinessLogin"));
+const BusinessLayout = lazyWithRetry(() => import("./pages/business/BusinessLayout"));
+const BusinessCatalogue = lazyWithRetry(() => import("./pages/business/BusinessCatalogue"));
+const BusinessBilling = lazyWithRetry(() => import("./pages/business/BusinessBilling"));
+const BusinessQuotes = lazyWithRetry(() => import("./pages/business/BusinessQuotes"));
 const AdminRecognition = lazyWithRetry(() => import("./pages/admin/AdminRecognition"));
 
 const AcademyLogin = lazyWithRetry(() => import("./pages/auth/AcademyLogin"));
@@ -299,6 +306,14 @@ const App = () => (
                 <Route path="/academy/login" element={<AcademyLogin />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/business/signup" element={<BusinessSignup />} />
+                <Route path="/business/login" element={<BusinessLogin />} />
+                <Route path="/business" element={<BusinessLayout />}>
+                  <Route index element={<Navigate to="/business/dashboard" replace />} />
+                  <Route path="dashboard" element={<BusinessCatalogue />} />
+                  <Route path="billing" element={<BusinessBilling />} />
+                  <Route path="quotes" element={<BusinessQuotes />} />
+                </Route>
                 {/* WorldAML Academy — authenticated learner shell */}
                 <Route element={<PortalGuard portal="academy"><AppShellLayout /></PortalGuard>}>
 
@@ -337,6 +352,7 @@ const App = () => (
                   <Route path="purchase-status" element={<AdminPurchaseStatus />} />
                   <Route path="partners" element={<AdminPartners />} />
                   <Route path="partner-assets" element={<AdminPartnerAssets />} />
+                  <Route path="business" element={<AdminBusiness />} />
                   <Route path="domains" element={<AdminDomains />} />
                   <Route path="academy-users" element={<AdminAcademyUsers />} />
                   <Route path="academy-funnel" element={<AdminAcademyFunnel />} />

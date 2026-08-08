@@ -867,6 +867,104 @@ export type Database = {
         }
         Relationships: []
       }
+      business_accounts: {
+        Row: {
+          company_name: string
+          company_size: string | null
+          contact_name: string | null
+          country: string | null
+          created_at: string
+          id: string
+          industry: string | null
+          phone: string | null
+          products_of_interest: string[]
+          status: string
+          updated_at: string
+          user_id: string
+          work_email: string
+        }
+        Insert: {
+          company_name: string
+          company_size?: string | null
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          industry?: string | null
+          phone?: string | null
+          products_of_interest?: string[]
+          status?: string
+          updated_at?: string
+          user_id: string
+          work_email: string
+        }
+        Update: {
+          company_name?: string
+          company_size?: string | null
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          industry?: string | null
+          phone?: string | null
+          products_of_interest?: string[]
+          status?: string
+          updated_at?: string
+          user_id?: string
+          work_email?: string
+        }
+        Relationships: []
+      }
+      business_quote_requests: {
+        Row: {
+          admin_notes: string | null
+          business_account_id: string | null
+          created_at: string
+          id: string
+          message: string | null
+          plan: string | null
+          product: string
+          seats: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          business_account_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          plan?: string | null
+          product: string
+          seats?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          business_account_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          plan?: string | null
+          product?: string
+          seats?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_quote_requests_business_account_id_fkey"
+            columns: ["business_account_id"]
+            isOneToOne: false
+            referencedRelation: "business_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_registrations: {
         Row: {
           actual_arr_eur: number | null

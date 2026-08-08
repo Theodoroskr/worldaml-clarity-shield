@@ -86,11 +86,11 @@ const WorldCompliancePricing = () => {
 
   const handleCheckout = async () => {
     if (!user) {
-      toast.error("Please sign in to purchase", {
-        description: "You need to be logged in to complete your purchase.",
+      toast.error("Business account required", {
+        description: "Create or sign in to a business account to complete your purchase.",
         action: {
-          label: "Sign In",
-          onClick: () => navigate("/login"),
+          label: "Continue",
+          onClick: () => navigate("/business/signup?next=/worldcompliance-pricing"),
         },
       });
       return;

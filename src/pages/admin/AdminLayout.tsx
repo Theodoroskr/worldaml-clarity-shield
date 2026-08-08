@@ -26,6 +26,9 @@ const NAV: NavItem[] = [
   { label: "Reconcile Purchases", path: "/admin/reconcile-purchases", icon: RefreshCw, section: "Academy" },
 
   // Partners
+  { label: "Business Buyers", path: "/admin/business", icon: Building2, section: "Business" },
+
+  // Partners
   { label: "Partners", path: "/admin/partners", icon: Handshake, section: "Partners" },
   { label: "Partner Assets", path: "/admin/partner-assets", icon: ImageIcon, section: "Partners" },
 
