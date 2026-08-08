@@ -110,7 +110,8 @@ export default function AdminUsers() {
   const [grantDialog, setGrantDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
   const [selectedRegulator, setSelectedRegulator] = useState("");
   const [upsellDialog, setUpsellDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
-  const [upsellTemplate, setUpsellTemplate] = useState<"suite-upsell" | "screening-upsell">("suite-upsell");
+  const [upsellTemplate, setUpsellTemplate] = useState<UpsellTemplate>("suite-upsell");
+  const [upsellData, setUpsellData] = useState<Record<string, any> | undefined>(undefined);
   const [upsellSending, setUpsellSending] = useState(false);
   const [upsellCounts, setUpsellCounts] = useState<Record<string, number>>({});
   const [historyDialog, setHistoryDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
