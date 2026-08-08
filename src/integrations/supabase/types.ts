@@ -653,6 +653,39 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_user_id: string | null
+          created_at: string
+          email: string
+          id: string
+          invited_by: string | null
+          note: string | null
+          revoked_at: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_user_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          invited_by?: string | null
+          note?: string | null
+          revoked_at?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_user_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+          note?: string | null
+          revoked_at?: string | null
+        }
+        Relationships: []
+      }
       admin_subscription_tiers: {
         Row: {
           created_at: string
@@ -6873,6 +6906,10 @@ export type Database = {
             Args: { target_email: string; target_regulator?: string }
             Returns: undefined
           }
+      admin_invite_internal: {
+        Args: { _email: string; _note?: string }
+        Returns: Json
+      }
       admin_list_courses_with_stripe: {
         Args: never
         Returns: {
@@ -6891,6 +6928,18 @@ export type Database = {
           title: string
         }[]
       }
+      admin_list_internal_access: {
+        Args: never
+        Returns: {
+          accepted_at: string
+          email: string
+          invited_at: string
+          is_admin: boolean
+          note: string
+          user_id: string
+        }[]
+      }
+      admin_revoke_internal: { Args: { _email: string }; Returns: undefined }
       admin_revoke_suite_access: {
         Args: { target_email: string }
         Returns: undefined
