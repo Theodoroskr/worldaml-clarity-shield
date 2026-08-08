@@ -166,6 +166,8 @@ const AdminAcademyFunnel = lazyWithRetry(() => import("./pages/admin/AdminAcadem
 const AdminOutreachQueue = lazyWithRetry(() => import("./pages/admin/AdminOutreachQueue"));
 const AdminPartnerAssets = lazyWithRetry(() => import("./pages/admin/AdminPartnerAssets"));
 const AdminBusiness = lazyWithRetry(() => import("./pages/admin/AdminBusiness"));
+const AdminIdentities = lazyWithRetry(() => import("./pages/admin/AdminIdentities"));
+const PartnerSignup = lazyWithRetry(() => import("./pages/partner/PartnerSignup"));
 const BusinessSignup = lazyWithRetry(() => import("./pages/business/BusinessSignup"));
 const BusinessLogin = lazyWithRetry(() => import("./pages/business/BusinessLogin"));
 const BusinessLayout = lazyWithRetry(() => import("./pages/business/BusinessLayout"));
