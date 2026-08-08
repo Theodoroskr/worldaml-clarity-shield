@@ -61,10 +61,14 @@ interface InternalRow {
   email: string;
   user_id: string | null;
   full_name: string | null;
+  company_name: string | null;
+  phone: string | null;
   is_admin: boolean;
   access_role: string;
   department: string | null;
   status: "active" | "pending" | "suspended";
+  account_created_at: string | null;
+  admin_since: string | null;
   invited_at: string | null;
   accepted_at: string | null;
   suspended_at: string | null;
