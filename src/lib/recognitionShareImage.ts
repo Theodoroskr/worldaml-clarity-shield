@@ -117,12 +117,14 @@ export async function renderRecognitionCard(
   ctx.fillStyle = accent;
   ctx.fillRect(0, 0, W, 8);
 
-  // Logo (constant branding)
+  // Logo (constant branding) — rendered in solid white, no plate behind it
   const logo = await loadImage(LOGO_SRC);
   if (logo) {
     const lw = 230;
     const lh = (logo.height / logo.width) * lw;
-    ctx.drawImage(logo, 72, 58, lw, lh);
+    const white = whitenLogo(logo, lw * 2, lh * 2);
+    if (white) ctx.drawImage(white, 72, 58, lw, lh);
+    else ctx.drawImage(logo, 72, 58, lw, lh);
   } else {
     ctx.fillStyle = WHITE;
     ctx.font = "bold 38px Arial, Helvetica, sans-serif";
