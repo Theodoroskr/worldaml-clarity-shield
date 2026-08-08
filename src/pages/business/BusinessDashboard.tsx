@@ -244,53 +244,51 @@ export default function BusinessDashboard() {
         </section>
       )}
 
-      {/* WORLDAML SUITE */}
-      <section>
-        <Card className="border-teal/30 bg-teal/[0.04]">
-          <CardContent className="py-6 flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-start gap-3 max-w-2xl">
-              <ShieldCheck className="w-6 h-6 text-teal mt-0.5 shrink-0" />
-              <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">WorldAML Compliance Suite</p>
-                <p className="font-semibold text-foreground mt-0.5">One workspace for onboarding, screening, cases and reporting</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  See every Suite module, plans and pricing — then buy online or talk to our team.
-                </p>
-              </div>
+      {/* SUITE + ACADEMY */}
+      <section className="grid lg:grid-cols-2 gap-4">
+        <Card className="border-teal/30 bg-teal/[0.04] flex flex-col">
+          <CardContent className="pt-6 flex-1 flex flex-col gap-3">
+            <span className="w-9 h-9 rounded-lg bg-teal/10 flex items-center justify-center">
+              <ShieldCheck className="w-4.5 h-4.5 text-teal" />
+            </span>
+            <div className="flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">WorldAML Compliance Suite</p>
+              <p className="font-semibold text-foreground mt-1">One workspace for onboarding, screening, cases and reporting</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                See every Suite module, plans and pricing — then buy online or talk to our team.
+              </p>
             </div>
-            <div className="flex gap-2">
-              <Button asChild variant="accent"><Link to="/business/solutions/suite">View Suite & Plans</Link></Button>
-              <Button asChild variant="outline">
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button asChild variant="accent" size="sm"><Link to="/business/solutions/suite">View Suite &amp; Plans</Link></Button>
+              <Button asChild variant="outline" size="sm">
                 <Link to="/platform/suite">Suite Overview <ExternalLink className="ml-2 h-3.5 w-3.5" /></Link>
               </Button>
             </div>
           </CardContent>
         </Card>
-      </section>
 
-      {/* ACADEMY FOR BUSINESS */}
-      <section>
-        <Card className="border-navy/20 bg-navy/[0.03]">
-          <CardContent className="py-6 flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-start gap-3 max-w-2xl">
-              <GraduationCap className="w-6 h-6 text-teal mt-0.5 shrink-0" />
-              <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">WorldAML Academy for Business</p>
-                <p className="font-semibold text-foreground mt-0.5">Build compliance knowledge across your organisation</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Train employees across AML, sanctions and financial crime compliance. Individual courses from €29.
-                </p>
-              </div>
+        <Card className="border-navy/20 bg-navy/[0.03] flex flex-col">
+          <CardContent className="pt-6 flex-1 flex flex-col gap-3">
+            <span className="w-9 h-9 rounded-lg bg-navy/5 flex items-center justify-center">
+              <GraduationCap className="w-4.5 h-4.5 text-teal" />
+            </span>
+            <div className="flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">WorldAML Academy for Business</p>
+              <p className="font-semibold text-foreground mt-1">Build compliance knowledge across your organisation</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Train employees across AML, sanctions and financial crime compliance. Individual courses from €29.
+              </p>
             </div>
-            <div className="flex gap-2">
-              <Button asChild variant="accent"><Link to="/business/training">Explore Business Training</Link></Button>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button asChild variant="accent" size="sm"><Link to="/business/training">Explore Business Training</Link></Button>
               {academyAccess && (
-                <Button asChild variant="outline"><Link to="/dashboard">Go to My Learning <ExternalLink className="ml-2 h-3.5 w-3.5" /></Link></Button>
+                <Button asChild variant="outline" size="sm"><Link to="/dashboard">My Learning <ExternalLink className="ml-2 h-3.5 w-3.5" /></Link></Button>
               )}
             </div>
           </CardContent>
         </Card>
       </section>
+
 
       <TalkToExpert />
     </div>
