@@ -12,10 +12,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, CheckCircle, XCircle, Handshake, Pencil, FileSignature, Bell, History, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Loader2, CheckCircle, XCircle, Handshake, Pencil, FileSignature, Bell, History, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { logPartnerAdminAction } from "@/lib/partnerAudit";
 import PartnerProgramAnalytics from "@/components/admin/PartnerProgramAnalytics";
+import PartnerDetailDialog from "@/components/admin/PartnerDetailDialog";
+
 
 
 const VERTICALS = ["banking", "fintech", "crypto", "igaming", "payments", "legal"];
