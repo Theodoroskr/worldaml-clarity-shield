@@ -31,7 +31,7 @@ export const APICTASection = () => {
           <CrossSellCard
             variant="inline"
             domain="duediligenceworld.com"
-            destPath="/request"
+            destPath="/"
             utmSource="worldaml.com"
             utmMedium="api-page-cta"
             utmCampaign="edd-escalation"
