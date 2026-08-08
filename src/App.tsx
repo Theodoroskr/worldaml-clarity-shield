@@ -180,6 +180,8 @@ const PartnerOverview = lazyWithRetry(() => import("./pages/partner-portal/Overv
 const PartnerReferralsPage = lazyWithRetry(() => import("./pages/partner-portal/Referrals"));
 const PartnerDealsPage = lazyWithRetry(() => import("./pages/partner-portal/Deals"));
 const PartnerCommissionsPage = lazyWithRetry(() => import("./pages/partner-portal/Commissions"));
+const PartnerCertificationPage = lazyWithRetry(() => import("./pages/partner-portal/Certification"));
+
 const PartnerAssetsPage = lazyWithRetry(() => import("./pages/partner-portal/Assets"));
 const PartnerProfilePage = lazyWithRetry(() => import("./pages/partner-portal/Profile"));
 const PartnerSettingsPage = lazyWithRetry(() => import("./pages/partner-portal/Settings"));
