@@ -898,7 +898,43 @@ Deno.serve(async (req) => {
           if (record?.status && record.status !== "success") {
             console.error("Zoho CRM lead rejected:", JSON.stringify(record));
           } else {
-            console.log("Zoho CRM lead created:", record?.details?.id ?? "ok");
+            const leadId = record?.details?.id;
+            console.log("Zoho CRM lead created:", leadId ?? "ok");
+
+            // Attach qualification details + visit summary as a related Note
+            // record, keeping the Lead's Note field to the visitor's message.
+            if (leadId && contextNote) {
+              try {
+                const noteRes = await fetch(
+                  "https://connector-gateway.lovable.dev/zoho_crm/Notes",
+                  {
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${lovableKey}`,
+                      "X-Connection-Api-Key": zohoKey,
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      data: [
+                        {
+                          Note_Title: "Website visit summary & submission details",
+                          Note_Content: contextNote,
+                          Parent_Id: { id: leadId },
+                          se_module: "Leads",
+                        },
+                      ],
+                    }),
+                  },
+                );
+                if (!noteRes.ok) {
+                  console.error(
+                    `Zoho note attach failed [${noteRes.status}]: ${await noteRes.text()}`,
+                  );
+                }
+              } catch (noteErr) {
+                console.error("Zoho note attach error:", noteErr);
+              }
+            }
           }
         }
 
