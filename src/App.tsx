@@ -56,7 +56,7 @@ const IndustryLegal = lazyWithRetry(() => import("./pages/IndustryLegal"));
 const IndustryPayments = lazyWithRetry(() => import("./pages/IndustryPayments"));
 const Support = lazyWithRetry(() => import("./pages/Support"));
 const About = lazyWithRetry(() => import("./pages/About"));
-const GetStarted = lazyWithRetry(() => import("./pages/GetStarted"));
+
 const ContactSales = lazyWithRetry(() => import("./pages/ContactSales"));
 const BookDemo = lazyWithRetry(() => import("./pages/BookDemo"));
 const FAQ = lazyWithRetry(() => import("./pages/FAQ"));
