@@ -271,6 +271,8 @@ Preferred start date and number of seats below.`,
         message: "",
       });
       setSelectedProducts([]);
+      setReferralCode("");
+
       setTermsAccepted(false);
       setMarketingConsent(false);
 
