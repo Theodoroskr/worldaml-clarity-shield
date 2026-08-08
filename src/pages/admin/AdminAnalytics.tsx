@@ -30,10 +30,30 @@ function KeyValues({ data }: { data: Record<string, number | string> }) {
   );
 }
 
+const PORTAL_TABS: Record<PortalKey, string[]> = {
+  all: ["overview", "academy", "business", "partners", "marketing"],
+  academy: ["overview", "academy"],
+  business: ["overview", "business"],
+  partners: ["overview", "partners"],
+  marketing: ["overview", "marketing"],
+  platform: ["overview"],
+};
+
+const TAB_LABELS: Record<string, string> = {
+  overview: "Overview",
+  academy: "Academy",
+  business: "Business",
+  partners: "Partners",
+  marketing: "Marketing",
+};
+
 export default function AdminAnalytics() {
   const [rangeKey, setRangeKey] = useState<RangeKey>("last_30_days");
   const [custom, setCustom] = useState<DateRange>(resolveRange("last_30_days"));
   const [portal, setPortal] = useState<PortalKey>("all");
+  const [tab, setTab] = useState<string>("overview");
+
+  const tabs = PORTAL_TABS[portal];
 
   const range = useMemo(() => resolveRange(rangeKey, custom), [rangeKey, custom]);
   const rangeLabel = rangeKey === "custom"
@@ -43,6 +63,7 @@ export default function AdminAnalytics() {
   const { data: a, isLoading, isFetching, refetch } = useAdminAnalytics(range);
 
   const series = a?.series.map((p) => ({ ...p, bucket: format(new Date(p.date), "d MMM") })) ?? [];
+
 
   return (
     <div className="p-6 space-y-6">
