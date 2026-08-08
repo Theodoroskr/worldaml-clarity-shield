@@ -145,11 +145,23 @@ export function getWebAttribution(): WebAttribution {
       out.last_visited_at = v.last_visited_at;
       out.days_visited = Array.isArray(v.days) ? v.days.length : undefined;
       out.visit_count = v.visit_count;
+      out.first_page_visited = v.first_page_visited || out.landing_page;
+      const visits = Math.max(1, v.visit_count || 1);
+      out.average_time_spent_minutes =
+        Math.round(((v.total_seconds || 0) / 60 / visits) * 100) / 100;
     }
+    out.number_of_chats = readChats();
     if (!out.first_visited_at) {
       const first = getAttribution();
       if (first.captured_at) out.first_visited_at = first.captured_at;
     }
+    // Engagement score (0-100): page views + distinct days + time on site.
+    const score =
+      Math.min(40, (out.visit_count || 0) * 4) +
+      Math.min(30, (out.days_visited || 0) * 6) +
+      Math.min(20, Math.round((out.average_time_spent_minutes || 0) * 4)) +
+      Math.min(10, (out.number_of_chats || 0) * 10);
+    out.visitor_score = Math.min(100, score);
   } catch {}
 
   return out;
