@@ -619,11 +619,47 @@ Deno.serve(async (req) => {
               : undefined,
 
           // Attendance — only applies to webinar / event registrations.
+          // Zoho picklist allows only 'Yes' / 'No'.
           Attendance: (() => {
             const ft = String(form_type ?? "").toLowerCase();
-            if (ft.includes("webinar") || ft.includes("event")) return "Attending";
+            if (ft.includes("webinar") || ft.includes("event")) return "Yes";
             return undefined;
           })(),
+
+          // Licence Type (picklist) — only when the form captured it.
+          Licence_Type: (() => {
+            const raw = String((metadata as any)?.licence_type ?? "").trim();
+            if (!raw) return undefined;
+            const ALLOWED = new Set([
+              "EMI",
+              "Payment Institution",
+              "PSP",
+              "E-Wallet Provider",
+              "Other",
+            ]);
+            return ALLOWED.has(raw) ? raw : "Other";
+          })(),
+
+          // Buying Timeline (picklist) — only when the form captured it.
+          Buying_Timeline: (() => {
+            const raw = String((metadata as any)?.buying_timeline ?? "").trim();
+            const ALLOWED = new Set([
+              "Immediately",
+              "1 Month",
+              "3 Months",
+              "6 Months",
+              "12+ Months",
+              "24+ Months",
+            ]);
+            return ALLOWED.has(raw) ? raw : undefined;
+          })(),
+
+          // Readiness Score (integer) — website lead score, when calculated.
+          Readiness_Score: (() => {
+            const n = Number((metadata as any)?.lead_score);
+            return Number.isFinite(n) && n > 0 ? Math.round(n) : undefined;
+          })(),
+
 
           // Old_CRM_lead_ID and Account_Party_ID are legacy identifiers from
           // Infocredit's previous CRM — populated only when the website sends
