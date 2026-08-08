@@ -14,7 +14,7 @@ function Metric({ value, label }: { value: number | string; label: string }) {
 }
 
 function SuiteCard() {
-  const { orgId, organisation } = useOrganisation();
+  const { orgId, org } = useOrganisation();
 
   const { data } = useQuery({
     queryKey: ["dashboard-suite-metrics", orgId],
@@ -43,7 +43,7 @@ function SuiteCard() {
           <div className="flex items-center gap-2 min-w-0">
             <Building2 className="h-4 w-4 text-accent shrink-0" />
             <span className="text-sm font-semibold text-foreground truncate">
-              {organisation?.name ? `${organisation.name} · Suite` : "WorldAML Suite"}
+              {org?.name ? `${org.name} · Suite` : "WorldAML Suite"}
             </span>
           </div>
           <a href="/suite" className="text-xs font-medium text-accent hover:underline inline-flex items-center gap-1 shrink-0">
