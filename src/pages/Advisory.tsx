@@ -221,14 +221,6 @@ const services: Service[] = [
 ];
 
 const Advisory = () => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [defaultService, setDefaultService] = useState<string | undefined>();
-
-  const openWith = (svc?: string) => {
-    setDefaultService(svc);
-    setDialogOpen(true);
-  };
-
   const scrollToService = (slug: string) => {
     const el = document.getElementById(`service-${slug}`);
     if (el) {
