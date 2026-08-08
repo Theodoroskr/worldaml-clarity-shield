@@ -227,19 +227,19 @@ Deno.serve(async (req) => {
   const perFeed: Record<string, number | string> = {};
   let stored = 0;
 
-  for (const config of FEEDS) {
+  const ingest = async (config: FeedConfig, retries: number) => {
     try {
       let items = await parseFeed(config).catch(() => null);
-      // Public mirrors rate-limit rapid calls; back off and try twice more.
-      for (let attempt = 0; !items && attempt < 2; attempt++) {
-        await new Promise((resolve) => setTimeout(resolve, 6_000));
-        items = attempt === 1 ? await parseFeed(config) : await parseFeed(config).catch(() => null);
+      // Public mirrors rate-limit rapid calls; back off and retry.
+      for (let attempt = 0; !items && attempt < retries; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 4_000));
+        items = await parseFeed(config).catch(() => null);
       }
       if (!items) throw new Error("feed unavailable");
 
       if (items.length === 0) {
         perFeed[config.url] = 0;
-        continue;
+        return;
       }
       const { error } = await supabase
         .from("news_updates")
@@ -251,7 +251,15 @@ Deno.serve(async (req) => {
       perFeed[config.url] = `error: ${err instanceof Error ? err.message : String(err)}`;
       console.error(`Feed failed ${config.url}`, err);
     }
-  }
+  };
+
+  // Direct regulator feeds are reliable — fetch them together.
+  const directFeeds = FEEDS.filter((feed) => feed.source);
+  const searchFeeds = FEEDS.filter((feed) => !feed.source);
+  await Promise.all(directFeeds.map((config) => ingest(config, 0)));
+  // Search mirrors are rate-limited — fetch them one at a time.
+  for (const config of searchFeeds) await ingest(config, 1);
+
 
   // Keep the table lean: drop anything older than 18 months.
   const cutoff = new Date();
