@@ -89,6 +89,21 @@ const ContactSales = () => {
     const seatsParam = searchParams.get("seats");
     const domainParam = searchParams.get("domain");
 
+    // Partner referral code: ?ref= wins, otherwise reuse a previously stored one.
+    const refParam = searchParams.get("ref") || searchParams.get("referral");
+    if (refParam) {
+      const clean = refParam.trim().toLowerCase().slice(0, 40);
+      setReferralCode(clean);
+      try { window.localStorage.setItem("worldaml_referral_code", clean); } catch { /* noop */ }
+    } else {
+      try {
+        const stored = window.localStorage.getItem("worldaml_referral_code");
+        if (stored) setReferralCode((prev) => prev || stored);
+      } catch { /* noop */ }
+    }
+
+
+
     if (topicParam === "academy-team-quote") {
       // Procurement-friendly Academy team quote flow
       setSelectedProducts((prev) => (prev.includes("academy-team") ? prev : [...prev, "academy-team"]));
