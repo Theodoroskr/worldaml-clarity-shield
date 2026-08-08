@@ -262,8 +262,10 @@ export function RecommendedNext({ courses }: { courses: AcademyOverview["recomme
             <Button asChild variant="outline" size="sm" className="mt-3 self-start">
               <a href={courseUrl(course.slug)}>View Course</a>
             </Button>
+            </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
