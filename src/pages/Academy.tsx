@@ -164,6 +164,8 @@ const Academy = () => {
       annualInFlightRef.current = false;
       setAnnualLoading(false);
     }
+  };
+
 
   // --- Single-course "Buy now" quick checkout ---
   const [buyNowSlug, setBuyNowSlug] = useState<string | null>(null);
