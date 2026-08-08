@@ -350,6 +350,73 @@ serve(async (req) => {
           console.error("Guest claim-account email failed:", err);
         }
       }
+
+      // Signed-in buyers: send a thank-you email linking straight to their courses.
+      if (!isGuest) {
+        try {
+          const apiKey = Deno.env.get("RESEND_API_KEY");
+          const { data: purchasedRows } = await supabase
+            .from("academy_course_purchases")
+            .select("course_slug,user_id")
+            .eq("stripe_session_id", sessionId);
+
+          const slugs = (purchasedRows ?? [])
+            .map((r: any) => r.course_slug as string)
+            .filter((s: string) => !!s && s !== "__annual_pass__");
+          const buyerId = (purchasedRows ?? [])[0]?.user_id ?? session.metadata?.user_id ?? null;
+
+          let buyerEmail: string | null =
+            session.customer_details?.email ?? session.customer_email ?? null;
+          if (!buyerEmail && buyerId) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("email")
+              .eq("id", buyerId)
+              .maybeSingle();
+            buyerEmail = (profile as any)?.email ?? null;
+          }
+
+          if (apiKey && buyerEmail) {
+            const primary = isAnnualPass
+              ? "https://worldaml.com/academy"
+              : slugs.length === 1
+                ? `https://worldaml.com/academy/${slugs[0]}`
+                : "https://worldaml.com/academy";
+            const list = isAnnualPass
+              ? `<li style="margin:0 0 6px;">Annual All-Access Pass — every Academy course for 12 months</li>`
+              : slugs
+                  .map(
+                    (s) =>
+                      `<li style="margin:0 0 6px;"><a href="https://worldaml.com/academy/${s}" style="color:#0d9488;">${s.replace(/-/g, " ")}</a></li>`,
+                  )
+                  .join("");
+            const resend = new Resend(apiKey);
+            await resend.emails.send({
+              from: FROM_EMAIL,
+              to: [buyerEmail],
+              subject: "Thank you for your purchase — your Academy course is ready",
+              html: `
+              <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a;background:#ffffff;">
+                <h2 style="margin:0 0 12px;">Thank you for your purchase</h2>
+                <p style="margin:0 0 16px;line-height:1.55;">Your access is active. You can start straight away:</p>
+                <ul style="margin:0 0 20px;padding-left:18px;line-height:1.55;">${list}</ul>
+                <p style="margin:0 0 24px;">
+                  <a href="${primary}" style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:6px;">Go to my course</a>
+                </p>
+                <p style="margin:0 0 8px;font-size:13px;color:#475569;line-height:1.55;">
+                  Complete all modules and pass the final quiz (80%) to unlock your CPD certificate. Certificates are yours to keep permanently.
+                </p>
+                <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+                <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
+                  Questions? Reply to this email or contact WORLDAMLINFOCREDIT@infocreditgroup.com.
+                </p>
+              </div>`,
+            });
+          }
+        } catch (err) {
+          console.error("Purchase thank-you email failed:", err);
+        }
+      }
     }
 
     if (event.type === "charge.refunded") {

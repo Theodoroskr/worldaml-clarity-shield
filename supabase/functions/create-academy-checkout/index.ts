@@ -232,7 +232,10 @@ serve(async (req) => {
       customer_email: customerId ? undefined : userEmail,
       line_items: lineItems,
       discounts,
-      success_url: `${origin}/academy?purchase=success`,
+      success_url:
+        slugsToBuy.length === 1
+          ? `${origin}/academy/${slugsToBuy[0]}?purchase=success`
+          : `${origin}/academy?purchase=success`,
       cancel_url: `${origin}/academy?purchase=cancelled`,
       metadata: {
         user_id: userId,

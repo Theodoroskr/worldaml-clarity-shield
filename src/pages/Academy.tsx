@@ -166,6 +166,39 @@ const Academy = () => {
     }
   };
 
+
+  // --- Single-course "Buy now" quick checkout ---
+  const [buyNowSlug, setBuyNowSlug] = useState<string | null>(null);
+  const buyNowInFlight = useRef(false);
+
+  const startBuyNow = async (slug: string) => {
+    if (buyNowInFlight.current) return;
+    // Guests need to supply an email — the basket drawer collects it.
+    if (!user) {
+      if (!cart.has(slug)) cart.add(slug);
+      cart.open();
+      return;
+    }
+    buyNowInFlight.current = true;
+    setBuyNowSlug(slug);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-academy-checkout", {
+        body: { courseSlugs: [slug], currency },
+      });
+      if (error) throw error;
+      if (!data?.url || typeof data.url !== "string" || !data.url.startsWith("https://checkout.stripe.com/")) {
+        throw new Error("Invalid checkout URL returned");
+      }
+      window.location.href = data.url;
+    } catch (err) {
+      console.error("Buy now checkout failed:", err);
+      toast.error(err instanceof Error ? err.message : "Could not start checkout. Please try again.");
+      buyNowInFlight.current = false;
+      setBuyNowSlug(null);
+    }
+  };
+
+
   // Post-checkout success toast (Stripe redirects back with ?purchase=success).
   // Intentionally runs once on mount only — the URL param is stripped via
   // setSearchParams below, so re-running on every searchParams change would
@@ -1633,23 +1666,46 @@ const Academy = () => {
                             );
                           }
                           if (requiresPurchase) {
-                            // Guest-friendly Buy now — adds to cart and opens drawer (no login required).
+                            // Two CTAs: add to basket (bundle several courses) or buy now.
+                            const busy = buyNowSlug === course.slug;
                             return (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  if (!inCart) cart.add(course.slug);
-                                  cart.open();
-                                }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-body-sm font-semibold hover:bg-primary/90 transition-colors"
-                              >
-                                <ShoppingBag className="h-4 w-4" />
-                                {inCart ? "View basket" : "Buy now"}
-                              </button>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (inCart) {
+                                      cart.open();
+                                    } else {
+                                      cart.add(course.slug);
+                                      toast.success("Added to basket", {
+                                        description: "Add more courses to unlock bundle discounts.",
+                                      });
+                                    }
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-primary/40 text-primary text-body-sm font-semibold hover:bg-primary/10 transition-colors"
+                                >
+                                  <ShoppingBag className="h-4 w-4" />
+                                  {inCart ? "In basket" : "Add to basket"}
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={busy}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    void startBuyNow(course.slug);
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-body-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
+                                >
+                                  {busy ? "Opening…" : "Buy now"}
+                                  {!busy && <ArrowRight className="h-4 w-4" />}
+                                </button>
+                              </div>
                             );
                           }
+
                           if (!user) {
                             // Free course, not signed in — still needs an account to track progress.
                             return (

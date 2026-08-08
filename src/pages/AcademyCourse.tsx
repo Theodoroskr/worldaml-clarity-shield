@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import SEO from "@/components/SEO";
@@ -31,6 +31,7 @@ const AcademyCourse = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const queryClient = useQueryClient();
   const gate = useCourseGate(slug);
   const { region } = useRegion();
   const cart = useCart();
@@ -107,6 +108,29 @@ const AcademyCourse = () => {
       navigate(`/academy/${slug}${qs ? `?${qs}` : ""}`, { replace: true });
     }
   }, [user, slug, gate.loading, gate.requiresPurchase, searchParams]);
+
+  // Returning from Stripe on this course — confirm access and clear the basket item.
+  useEffect(() => {
+    if (searchParams.get("purchase") !== "success" || !slug) return;
+    cart.remove(slug);
+    toast({
+      title: "Payment received — your course is unlocked",
+      description: "A confirmation email is on its way. Complete all modules and pass the quiz to earn your certificate.",
+    });
+    const refresh = () => {
+      void queryClient.invalidateQueries({ queryKey: ["academy-purchases-gate"] });
+      void queryClient.invalidateQueries({ queryKey: ["academy-purchases-all"] });
+    };
+    refresh();
+    const t1 = setTimeout(refresh, 1500);
+    const t2 = setTimeout(refresh, 4000);
+    const next = new URLSearchParams(searchParams);
+    next.delete("purchase");
+    const qs = next.toString();
+    navigate(`/academy/${slug}${qs ? `?${qs}` : ""}`, { replace: true });
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
 
   const { data: course } = useQuery({
     queryKey: ["academy-course", slug],
