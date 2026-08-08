@@ -732,10 +732,9 @@ Deno.serve(async (req) => {
             return undefined;
           })(),
 
-          // Communication Consents (multiselectpicklist) — WorldAML leads
-          // consent to regulatory/compliance communications by submitting a
-          // demo request. Exact Zoho picklist value.
-          Communication_Consents: ["Regulatory Compliance & Corp Governance"],
+          // Communication Preferences / Communication Consents are intentionally
+          // NOT written from website forms — the CRM owns those preferences.
+
 
           // Marketing Communication Consent (boolean) — set true when the
           // visitor explicitly opts in via metadata.marketing_consent; leave
