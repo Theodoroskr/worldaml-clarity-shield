@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAcademyOverview } from "@/hooks/useAcademyOverview";
 import { CourseCrossSell } from "@/components/dashboard/EcosystemSections";
 import { CompletionRecognition } from "@/components/dashboard/RecognitionSections";
+import { recordCourseView } from "@/lib/interestSignals";
 
 
 /**
@@ -17,6 +19,7 @@ export default function CoursePlayer() {
   const { slug } = useParams();
   const { all } = useAcademyOverview();
   const learning = all.find((c) => c.course.slug === slug);
+  useEffect(() => { if (slug) recordCourseView(slug); }, [slug]);
   // Only after completion — the active lesson experience stays distraction-free.
   const showCrossSell = !!learning?.quizPassed;
 
