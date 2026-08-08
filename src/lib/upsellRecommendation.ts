@@ -1,4 +1,8 @@
-export type UpsellTemplate = "suite-upsell" | "screening-upsell";
+export type UpsellTemplate =
+  | "suite-upsell"
+  | "screening-upsell"
+  | "academy-course-upsell"
+  | "business-solutions-upsell";
 
 export interface UpsellSignals {
   subscription_tier: string;
