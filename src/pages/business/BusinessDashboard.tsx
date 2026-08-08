@@ -12,6 +12,9 @@ import { useBusinessWorkspace } from "@/hooks/useBusinessWorkspace";
 import { usePortalAccess } from "@/hooks/usePortalAccess";
 import { BUSINESS_SOLUTIONS, SOLUTION_BY_KEY, recommendSolutions, CROSS_SELL_COPY } from "@/lib/businessCatalogue";
 import { SolutionCard, TalkToExpert } from "@/components/business/SolutionCard";
+import { BusinessNewsFeed } from "@/components/business/BusinessNewsFeed";
+import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
+
 
 const fmtDate = (d?: string | null) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
