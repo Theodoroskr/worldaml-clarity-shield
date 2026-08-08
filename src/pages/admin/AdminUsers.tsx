@@ -165,11 +165,13 @@ export default function AdminUsers() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [{ data: p }, { data: r }, { data: logs }, { data: pa }] = await Promise.all([
+    const [{ data: p }, { data: r }, { data: logs }, { data: pa }, { data: acad }, { data: prod }] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("*"),
       supabase.from("admin_upsell_email_log").select("recipient_user_id, recipient_email"),
       supabase.from("partner_applications").select("user_id, email, status, partner_type, company_name, created_at").order("created_at", { ascending: false }),
+      supabase.from("academy_course_purchases").select("user_id, course_slug, amount_cents, currency, status, paid_at, created_at"),
+      supabase.from("product_purchase_notifications").select("customer_email, product, plan, amount_cents, currency, created_at"),
     ]);
     setProfiles((p || []) as Profile[]);
     const roleMap: Record<string, string[]> = {};
@@ -178,6 +180,44 @@ export default function AdminUsers() {
       roleMap[row.user_id].push(row.role);
     });
     setUserRoles(roleMap);
+
+    // ---- Revenue aggregation (Academy purchases + product purchases) ----
+    const rev: Record<string, RevenueEntry> = {};
+    const bucket = (key: string | null | undefined): RevenueEntry | null => {
+      if (!key) return null;
+      if (!rev[key]) rev[key] = { total: 0, currency: "EUR", items: [] };
+      return rev[key];
+    };
+    (acad || []).forEach((row: any) => {
+      const b = bucket(row.user_id);
+      if (!b) return;
+      const paid = row.status === "paid";
+      b.items.push({
+        source: "academy",
+        label: row.course_slug,
+        amountCents: row.amount_cents || 0,
+        currency: (row.currency || "EUR").toUpperCase(),
+        status: row.status,
+        date: row.paid_at || row.created_at,
+      });
+      if (paid) { b.total += row.amount_cents || 0; b.currency = (row.currency || "EUR").toUpperCase(); }
+    });
+    (prod || []).forEach((row: any) => {
+      const b = bucket(String(row.customer_email || "").toLowerCase());
+      if (!b) return;
+      b.items.push({
+        source: "product",
+        label: [row.product, row.plan].filter(Boolean).join(" · "),
+        amountCents: row.amount_cents || 0,
+        currency: (row.currency || "EUR").toUpperCase(),
+        status: "paid",
+        date: row.created_at,
+      });
+      b.total += row.amount_cents || 0;
+      b.currency = (row.currency || "EUR").toUpperCase();
+    });
+    setRevenue(rev);
+
     const counts: Record<string, number> = {};
     (logs || []).forEach((row: any) => {
       const key = row.recipient_user_id || row.recipient_email;
@@ -199,6 +239,73 @@ export default function AdminUsers() {
     setPartnerAppMeta(meta);
     setLoading(false);
   };
+
+  /** Combined revenue for a profile: academy (by user_id) + product purchases (by email). */
+  const revenueFor = (p: Profile): RevenueEntry => {
+    const a = revenue[p.user_id];
+    const b = revenue[(p.email || "").toLowerCase()];
+    if (!a && !b) return EMPTY_REVENUE;
+    return {
+      total: (a?.total || 0) + (b?.total || 0),
+      currency: a?.currency || b?.currency || "EUR",
+      items: [...(a?.items || []), ...(b?.items || [])].sort(
+        (x, y) => new Date(y.date || 0).getTime() - new Date(x.date || 0).getTime(),
+      ),
+    };
+  };
+
+  const exportRows = (list: Profile[]) =>
+    applyFilters(list).map((p) => {
+      const rv = revenueFor(p);
+      return {
+        full_name: p.full_name || "",
+        email: p.email || "",
+        phone: p.phone || "",
+        company_name: p.company_name || "",
+        job_title: p.job_title || "",
+        department: p.department || "",
+        industry: p.industry || "",
+        company_size: p.company_size || "",
+        seniority: p.seniority || "",
+        interest_area: p.interest_area || "",
+        country: p.country || "",
+        city: p.city || "",
+        billing_address: p.billing_address || "",
+        postal_code: p.postal_code || "",
+        vat_number: p.vat_number || "",
+        status: p.status,
+        subscription_tier: p.subscription_tier,
+        regulator: p.regulator || "",
+        roles: (userRoles[p.user_id] || []).join("|") || "user",
+        lifetime_revenue: (rv.total / 100).toFixed(2),
+        revenue_currency: rv.currency,
+        transactions: rv.items.length,
+        marketing_consent: p.marketing_consent ? "yes" : "no",
+        marketing_consent_at: p.marketing_consent_at || "",
+        marketing_opted_out: p.marketing_opt_out_at ? "yes" : "no",
+        marketing_opt_out_at: p.marketing_opt_out_at || "",
+        terms_accepted_at: p.terms_accepted_at || "",
+        gdpr_consent_at: p.gdpr_consent_at || "",
+        signup_source: p.signup_source || "",
+        signup_landing_path: p.signup_landing_path || "",
+        signup_referrer: p.signup_referrer || "",
+        signup_utm: p.signup_utm ? JSON.stringify(p.signup_utm) : "",
+        suite_access_granted_at: p.suite_access_granted_at || "",
+        registered_at: p.created_at,
+        user_id: p.user_id || "",
+      };
+    });
+
+  const runExport = (list: Profile[], format: "csv" | "xlsx") => {
+    const rows = exportRows(list);
+    if (!rows.length) { toast.error("No users match the current filters."); return; }
+    const name = `worldaml-users-${new Date().toISOString().slice(0, 10)}`;
+    if (format === "csv") exportRowsAsCsv(rows, name);
+    else exportRowsAsXlsx(rows, name);
+    toast.success(`Exported ${rows.length} users`);
+  };
+
+
 
   useEffect(() => { fetchData(); }, []);
 
