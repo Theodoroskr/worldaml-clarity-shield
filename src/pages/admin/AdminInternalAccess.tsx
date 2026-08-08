@@ -256,6 +256,9 @@ export default function AdminInternalAccess() {
     setEditDept(r.department || "none");
   };
 
+  const dateLabel = (v: string | null) =>
+    v ? format(new Date(v), "dd MMM yyyy") : "—";
+
   const lastLoginLabel = (r: InternalRow) => {
     if (!r.last_sign_in_at) return "Never";
     return `${format(new Date(r.last_sign_in_at), "dd MMM yyyy · HH:mm")}`;
