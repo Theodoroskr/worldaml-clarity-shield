@@ -270,16 +270,19 @@ const Advisory = () => {
 
                 <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:gap-6">
                   <Button
+                    asChild
                     size="lg"
                     className="group relative bg-accent text-accent-foreground shadow-[0_0_20px_hsl(var(--accent)/0.2)] transition-all hover:bg-accent/90 hover:shadow-[0_0_30px_hsl(var(--accent)/0.4)]"
-                    onClick={() => openWith()}
                   >
-                    Request a Consultation Quote
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    <Link to="/contact-sales?topic=advisory-consultation">
+                      Request a Demo
+                      <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
                   </Button>
                   <button
                     onClick={() => scrollToService("ewra")}
                     className="group flex items-center gap-2 text-sm font-semibold text-slate-muted transition-colors hover:text-white"
+                  >
                   >
                     View service scope
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -401,12 +404,12 @@ const Advisory = () => {
                         <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
                       </button>
                       <span className="text-muted-foreground" aria-hidden="true">•</span>
-                      <button
-                        onClick={() => openWith(s.title)}
+                      <Link
+                        to={`/contact-sales?topic=advisory-consultation&service=${encodeURIComponent(s.title)}`}
                         className="text-sm font-medium text-muted-foreground hover:text-foreground"
                       >
-                        Request quote
-                      </button>
+                        Request demo
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>
@@ -491,11 +494,13 @@ const Advisory = () => {
 
                         <div className="mt-8 flex flex-wrap gap-3">
                           <Button
-                            onClick={() => openWith(s.title)}
+                            asChild
                             className="bg-accent text-accent-foreground hover:bg-accent/90"
                           >
-                            Request quote for {s.shortLabel}
-                            <ArrowRight className="ml-2 h-4 w-4" />
+                            <Link to={`/contact-sales?topic=advisory-consultation&service=${encodeURIComponent(s.title)}`}>
+                              Request demo for {s.shortLabel}
+                              <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
                           </Button>
                           {s.slug === "ewra" && (
                             <Button asChild variant="outline">
@@ -570,16 +575,18 @@ const Advisory = () => {
                 Need help turning frameworks into board-approved policies?
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                Request a consultation quote and our MLROs will tailor the engagement to
+                Request a demo and our MLROs will tailor the engagement to
                 your business, jurisdiction, and regulator — ready for sign-off.
               </p>
               <Button
+                asChild
                 size="lg"
                 className="mt-6 bg-accent text-accent-foreground shadow-lg hover:bg-accent/90"
-                onClick={() => openWith()}
               >
-                Request a Consultation Quote
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <Link to="/contact-sales?topic=advisory-consultation">
+                  Request a Demo
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>
@@ -589,21 +596,17 @@ const Advisory = () => {
       {/* Persistent floating CTA */}
       <div className="fixed bottom-6 right-6 z-40 print:hidden">
         <Button
+          asChild
           size="lg"
-          onClick={() => openWith()}
           className="group gap-2 rounded-full bg-accent px-5 py-6 text-accent-foreground shadow-2xl ring-1 ring-accent/40 hover:bg-accent/90"
         >
-          <MessageSquarePlus className="h-5 w-5" />
-          <span className="hidden sm:inline">Request a Consultation Quote</span>
-          <span className="sm:hidden">Consultation Quote</span>
+          <Link to="/contact-sales?topic=advisory-consultation">
+            <ArrowRight className="h-5 w-5" />
+            <span className="hidden sm:inline">Request a Demo</span>
+            <span className="sm:hidden">Request Demo</span>
+          </Link>
         </Button>
       </div>
-
-      <AdvisoryConsultationDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        defaultService={defaultService}
-      />
 
       <Footer />
     </div>
