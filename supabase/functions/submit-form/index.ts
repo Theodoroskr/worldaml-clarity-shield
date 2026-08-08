@@ -277,8 +277,22 @@ Deno.serve(async (req) => {
               "financial services": "Financial Institutions",
               "cryptocurrency": "Financial Institutions",
               "law firms": "Law firms",
+              "real estate": "Real Estate Agents",
+              "retail": "Retail Trading Companies",
+              "technology": "Systems Integrator",
+              "professional services": "Consultants",
+              "consulting": "Consultants",
+              "healthcare services": "Healthcare Services",
+              "hospitality": "Hospitality Services",
+              "logistics": "Transportation and Logistics",
+              "transportation": "Transportation and Logistics",
+              "investment": "Investment Companies",
+              "corporate services": "Corporate Services & Fiduciaries",
+              "audit": "Auditors",
+              "auditors": "Auditors",
               "other": "Other",
             };
+
             const mapped = INDUSTRY_MAP[raw.toLowerCase()];
             if (mapped) return mapped;
             console.warn(`Unknown industry value from website form: "${raw}" — leaving Zoho Industry unset`);
