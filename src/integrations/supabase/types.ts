@@ -7114,6 +7114,9 @@ export type Database = {
         Returns: {
           accepted_at: string
           access_role: string
+          account_created_at: string
+          admin_since: string
+          company_name: string
           department: string
           email: string
           full_name: string
@@ -7122,6 +7125,7 @@ export type Database = {
           is_admin: boolean
           last_sign_in_at: string
           note: string
+          phone: string
           status: string
           suspended_at: string
           user_id: string

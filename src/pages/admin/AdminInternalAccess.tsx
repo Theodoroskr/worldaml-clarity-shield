@@ -61,10 +61,14 @@ interface InternalRow {
   email: string;
   user_id: string | null;
   full_name: string | null;
+  company_name: string | null;
+  phone: string | null;
   is_admin: boolean;
   access_role: string;
   department: string | null;
   status: "active" | "pending" | "suspended";
+  account_created_at: string | null;
+  admin_since: string | null;
   invited_at: string | null;
   accepted_at: string | null;
   suspended_at: string | null;
@@ -232,6 +236,7 @@ export default function AdminInternalAccess() {
       return (
         r.email.toLowerCase().includes(q) ||
         (r.full_name || "").toLowerCase().includes(q) ||
+        (r.company_name || "").toLowerCase().includes(q) ||
         (r.department || "").toLowerCase().includes(q)
       );
     });
@@ -251,6 +256,9 @@ export default function AdminInternalAccess() {
     setEditRole(r.access_role || "full_admin");
     setEditDept(r.department || "none");
   };
+
+  const dateLabel = (v: string | null) =>
+    v ? format(new Date(v), "dd MMM yyyy") : "—";
 
   const lastLoginLabel = (r: InternalRow) => {
     if (!r.last_sign_in_at) return "Never";
@@ -404,6 +412,7 @@ export default function AdminInternalAccess() {
                         <th className="text-left py-2 pr-3">Access profile</th>
                         <th className="text-left py-2 pr-3">Department</th>
                         <th className="text-left py-2 pr-3">Status</th>
+                        <th className="text-left py-2 pr-3">Admin since</th>
                         <th className="text-left py-2 pr-3">Last admin login</th>
                         <th className="text-left py-2 pr-3">Granted by</th>
                         <th className="text-right py-2">Actions</th>
@@ -415,6 +424,11 @@ export default function AdminInternalAccess() {
                           <td className="py-2.5 pr-3">
                             <div className="font-medium text-foreground">{r.full_name || "—"}</div>
                             <div className="text-xs text-muted-foreground">{r.email}</div>
+                            {(r.company_name || r.phone) && (
+                              <div className="text-[11px] text-muted-foreground">
+                                {[r.company_name, r.phone].filter(Boolean).join(" · ")}
+                              </div>
+                            )}
                           </td>
                           <td className="py-2.5 pr-3">
                             <Badge variant="outline" className="text-[10px]">{ACCESS_ROLES[r.access_role] || r.access_role}</Badge>
@@ -425,6 +439,7 @@ export default function AdminInternalAccess() {
                               {STATUS_LABELS[r.status] || r.status}
                             </Badge>
                           </td>
+                          <td className="py-2.5 pr-3 text-xs text-muted-foreground">{dateLabel(r.admin_since)}</td>
                           <td className="py-2.5 pr-3 text-xs text-muted-foreground">{lastLoginLabel(r)}</td>
                           <td className="py-2.5 pr-3 text-xs text-muted-foreground truncate max-w-[180px]">
                             {r.granted_by_email || "—"}
@@ -525,9 +540,13 @@ export default function AdminInternalAccess() {
               <div className="space-y-2 text-sm">
                 <Detail label="Name" value={viewRow.full_name || "—"} />
                 <Detail label="Email" value={viewRow.email} />
+                <Detail label="Company" value={viewRow.company_name || "—"} />
+                <Detail label="Phone" value={viewRow.phone || "—"} />
                 <Detail label="Access profile" value={ACCESS_ROLES[viewRow.access_role] || viewRow.access_role} />
                 <Detail label="Department" value={viewRow.department || "—"} />
                 <Detail label="Status" value={STATUS_LABELS[viewRow.status] || viewRow.status} />
+                <Detail label="WorldAML account created" value={viewRow.account_created_at ? format(new Date(viewRow.account_created_at), "dd MMM yyyy · HH:mm") : "No account yet"} />
+                <Detail label="Admin since" value={viewRow.admin_since ? format(new Date(viewRow.admin_since), "dd MMM yyyy · HH:mm") : "—"} />
                 <Detail label="Invited" value={viewRow.invited_at ? format(new Date(viewRow.invited_at), "dd MMM yyyy · HH:mm") : "Pre-existing admin"} />
                 <Detail label="Access granted" value={viewRow.accepted_at ? format(new Date(viewRow.accepted_at), "dd MMM yyyy · HH:mm") : "Not yet"} />
                 <Detail label="Last admin login" value={
