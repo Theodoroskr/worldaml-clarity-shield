@@ -95,6 +95,8 @@ export default function AdminUsers() {
   const [sourceFilter, setSourceFilter] = useState("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
+  const [revenue, setRevenue] = useState<Record<string, RevenueEntry>>({});
+  const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [partnerApplicantIds, setPartnerApplicantIds] = useState<Set<string>>(new Set());
   const [partnerApplicantEmails, setPartnerApplicantEmails] = useState<Set<string>>(new Set());
   const [partnerAppMeta, setPartnerAppMeta] = useState<Record<string, { status: string; partner_type: string | null; company_name: string | null; created_at: string }>>({});
