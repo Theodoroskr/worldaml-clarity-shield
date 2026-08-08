@@ -17,6 +17,8 @@ export interface WebAttribution {
   visit_count?: number;
   /** First page the visitor ever landed on (first touch). */
   first_page_visited?: string;
+  /** The in-app page the visitor was on before reaching this form (CTA page). */
+  cta_referrer?: string;
   /** Average minutes per visit, rounded to 2 decimals. */
   average_time_spent_minutes?: number;
   /** Chat conversations started by this visitor (0 when no chat was used). */
@@ -35,9 +37,14 @@ interface VisitStats {
   days: string[]; // ISO dates (YYYY-MM-DD)
   visit_count: number;
   first_page_visited?: string;
+  /** Most recent page view URL. */
+  last_page?: string;
+  /** The page viewed immediately before `last_page` (CTA origin page). */
+  previous_page?: string;
   /** Cumulative time on site in seconds (best-effort). */
   total_seconds?: number;
 }
+
 
 function readVisits(): VisitStats | null {
   try {
