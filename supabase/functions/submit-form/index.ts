@@ -251,7 +251,7 @@ Deno.serve(async (req) => {
         ].filter(Boolean);
 
 
-        const att = attribution ?? {};
+        
 
         // The Note field carries the visitor's message ONLY (per CRM policy).
         // Everything else lives in dedicated Zoho fields / the related Note.
