@@ -332,6 +332,7 @@ export const CROSS_SELL_COPY: Record<string, string> = {
   worldid: "Add identity verification so you know who you are onboarding.",
   lexisnexis: "Licence enterprise risk data for group-wide screening.",
   academy: "Train your team on the controls you have just put in place.",
+  suite: "Run onboarding, screening, cases and reporting in one compliance workspace.",
 };
 
 /** Deterministic recommendations — no AI, no invented logic. */
