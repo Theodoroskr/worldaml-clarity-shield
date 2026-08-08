@@ -1,15 +1,28 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { usePartner } from "@/hooks/usePartner";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, PlusCircle, Briefcase, ArrowUpDown } from "lucide-react";
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Pending Review",
+  approved: "Approved",
+  won: "Won",
+  lost: "Lost",
+  rejected: "Rejected",
+  expired: "Expired",
+};
 
 const STATUS_COLOR: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800 border-amber-200",
@@ -20,132 +33,247 @@ const STATUS_COLOR: Record<string, string> = {
   expired: "bg-slate-100 text-slate-800 border-slate-200",
 };
 
-const EMPTY = {
-  prospect_company: "",
-  prospect_contact_name: "",
-  prospect_email: "",
-  prospect_country: "",
-  estimated_arr_eur: "",
-  notes: "",
-};
+const eur = (n: number) =>
+  new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+
+function protection(d: any) {
+  if (!d.protection_expires_at) return { label: "—", tone: "text-muted-foreground" };
+  const exp = new Date(d.protection_expires_at);
+  const days = Math.ceil((exp.getTime() - Date.now()) / 86400000);
+  if (days < 0) return { label: "Expired", tone: "text-red-600" };
+  if (days <= 30) return { label: `${days}d left`, tone: "text-amber-600" };
+  return { label: `Until ${exp.toLocaleDateString()}`, tone: "text-muted-foreground" };
+}
 
 export default function PartnerDeals() {
-  const { partner, deals, refetch } = usePartner();
-  const { user } = useAuth();
-  const [form, setForm] = useState(EMPTY);
-  const [submitting, setSubmitting] = useState(false);
+  const { partner, deals } = usePartner();
+  const [q, setQ] = useState("");
+  const [status, setStatus] = useState("all");
+  const [product, setProduct] = useState("all");
+  const [country, setCountry] = useState("all");
+  const [sortDesc, setSortDesc] = useState(true);
+  const [open, setOpen] = useState<any | null>(null);
+
+  const products = useMemo(
+    () => Array.from(new Set((deals as any[]).flatMap((d) => d.product_interest ?? []))).sort(),
+    [deals],
+  );
+  const countries = useMemo(
+    () => Array.from(new Set((deals as any[]).map((d) => d.prospect_country).filter(Boolean))).sort(),
+    [deals],
+  );
+
+  const rows = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return (deals as any[])
+      .filter((d) => {
+        if (status !== "all" && d.status !== status) return false;
+        if (product !== "all" && !(d.product_interest ?? []).includes(product)) return false;
+        if (country !== "all" && d.prospect_country !== country) return false;
+        if (!term) return true;
+        return [d.prospect_company, d.prospect_contact_name, d.prospect_email, d.prospect_country]
+          .filter(Boolean)
+          .some((v: string) => v.toLowerCase().includes(term));
+      })
+      .sort((a, b) => {
+        const av = new Date(a.created_at).getTime();
+        const bv = new Date(b.created_at).getTime();
+        return sortDesc ? bv - av : av - bv;
+      });
+  }, [deals, q, status, product, country, sortDesc]);
 
   if (!partner) return null;
 
-  const submit = async () => {
-    if (!user) return;
-    if (!form.prospect_company || !form.prospect_email) {
-      toast.error("Company name and email are required");
-      return;
-    }
-    setSubmitting(true);
-    const { error } = await supabase.from("deal_registrations").insert({
-      partner_id: partner.id,
-      submitted_by: user.id,
-      prospect_company: form.prospect_company,
-      prospect_contact_name: form.prospect_contact_name || null,
-      prospect_email: form.prospect_email,
-      prospect_country: form.prospect_country || null,
-      estimated_arr_eur: form.estimated_arr_eur ? Number(form.estimated_arr_eur) : null,
-      notes: form.notes || null,
-      status: "pending",
-    } as any);
-    setSubmitting(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Deal registered — our team will review shortly");
-    setForm(EMPTY);
-    await refetch();
-  };
-
   return (
-    <div className="max-w-5xl mx-auto grid lg:grid-cols-[1fr_1.3fr] gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Register a new deal</CardTitle>
-          <CardDescription>Lock deal protection & priority commission.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Field label="Prospect company *">
-            <Input value={form.prospect_company} onChange={(e) => setForm({ ...form, prospect_company: e.target.value })} />
-          </Field>
-          <Field label="Contact name">
-            <Input value={form.prospect_contact_name} onChange={(e) => setForm({ ...form, prospect_contact_name: e.target.value })} />
-          </Field>
-          <Field label="Contact email *">
-            <Input type="email" value={form.prospect_email} onChange={(e) => setForm({ ...form, prospect_email: e.target.value })} />
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Country">
-              <Input value={form.prospect_country} onChange={(e) => setForm({ ...form, prospect_country: e.target.value })} />
-            </Field>
-            <Field label="Est. ARR (EUR)">
-              <Input type="number" value={form.estimated_arr_eur} onChange={(e) => setForm({ ...form, estimated_arr_eur: e.target.value })} />
-            </Field>
-          </div>
-          <Field label="Notes">
-            <Textarea rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-          </Field>
-          <Button onClick={submit} disabled={submitting} className="w-full">
-            {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-            Register deal
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="max-w-6xl mx-auto space-y-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-foreground">My deals</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Registered opportunities, protection status and progress.
+          </p>
+        </div>
+        <Button asChild size="sm">
+          <Link to="/partner/deals/new"><PlusCircle className="mr-1.5 w-4 h-4" /> Register deal</Link>
+        </Button>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Your registered deals</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {deals.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">No deals yet.</p>
-          ) : (
-            <ul className="divide-y divide-border">
-              {deals.map((d: any) => (
-                <li key={d.id} className="py-3 flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="font-medium text-sm truncate">{d.prospect_company}</div>
-                    <div className="text-xs text-muted-foreground truncate">
-                      {d.prospect_contact_name || d.prospect_email}
-                      {d.prospect_country ? ` · ${d.prospect_country}` : ""}
-                    </div>
-                    {d.estimated_arr_eur ? (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Est. ARR: €{Number(d.estimated_arr_eur).toLocaleString()}
-                      </div>
-                    ) : null}
-                    {d.protection_expires_at ? (
-                      <div className="text-xs text-muted-foreground">
-                        Protected until {new Date(d.protection_expires_at).toLocaleDateString()}
-                      </div>
-                    ) : null}
-                  </div>
-                  <Badge variant="outline" className={STATUS_COLOR[d.status] || ""}>
-                    {d.status}
+      {deals.length === 0 ? (
+        <Card>
+          <CardContent className="p-10 text-center">
+            <Briefcase className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm font-medium text-foreground">Register your first WorldAML opportunity.</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Registering a deal locks in protection and commission eligibility.
+            </p>
+            <Button asChild size="sm" className="mt-4">
+              <Link to="/partner/deals/new">Register deal</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Search company, contact, email…"
+                  className="pl-8 h-9"
+                />
+              </div>
+              <FilterSelect value={status} onChange={setStatus} placeholder="Status"
+                options={Object.keys(STATUS_LABEL).map((s) => ({ value: s, label: STATUS_LABEL[s] }))} />
+              <FilterSelect value={product} onChange={setProduct} placeholder="Product"
+                options={products.map((p) => ({ value: p, label: p }))} />
+              <FilterSelect value={country} onChange={setCountry} placeholder="Country"
+                options={countries.map((c) => ({ value: c, label: c }))} />
+              <Button variant="outline" size="sm" className="h-9" onClick={() => setSortDesc((s) => !s)}>
+                <ArrowUpDown className="w-3.5 h-3.5 mr-1.5" /> {sortDesc ? "Newest" : "Oldest"}
+              </Button>
+            </div>
+
+            {rows.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-10">
+                No deals match these filters. Try adjusting your filters.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-left text-xs text-muted-foreground border-b border-border">
+                    <tr>
+                      <th className="py-2 font-medium">Company</th>
+                      <th className="py-2 font-medium">Product</th>
+                      <th className="py-2 font-medium text-right">Deal value</th>
+                      <th className="py-2 font-medium">Stage</th>
+                      <th className="py-2 font-medium">Registered</th>
+                      <th className="py-2 font-medium">Protection</th>
+                      <th className="py-2 font-medium">Last update</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {rows.map((d) => {
+                      const p = protection(d);
+                      return (
+                        <tr
+                          key={d.id}
+                          onClick={() => setOpen(d)}
+                          className="cursor-pointer hover:bg-muted/40 transition-colors"
+                        >
+                          <td className="py-2.5">
+                            <div className="font-medium text-foreground">{d.prospect_company}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {d.prospect_contact_name || d.prospect_email || "—"}
+                              {d.prospect_country ? ` · ${d.prospect_country}` : ""}
+                            </div>
+                          </td>
+                          <td className="py-2.5 text-xs text-muted-foreground">
+                            {(d.product_interest ?? []).join(", ") || "—"}
+                          </td>
+                          <td className="py-2.5 text-right font-mono text-xs">
+                            {d.estimated_arr_eur ? eur(Number(d.estimated_arr_eur)) : "—"}
+                          </td>
+                          <td className="py-2.5">
+                            <Badge variant="outline" className={STATUS_COLOR[d.status] || ""}>
+                              {STATUS_LABEL[d.status] ?? d.status}
+                            </Badge>
+                          </td>
+                          <td className="py-2.5 text-xs text-muted-foreground">
+                            {new Date(d.created_at).toLocaleDateString()}
+                          </td>
+                          <td className={`py-2.5 text-xs ${p.tone}`}>{p.label}</td>
+                          <td className="py-2.5 text-xs text-muted-foreground">
+                            {new Date(d.updated_at ?? d.created_at).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <Dialog open={!!open} onOpenChange={(o) => !o && setOpen(null)}>
+        <DialogContent className="max-w-lg">
+          {open && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-base">{open.prospect_company}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className={STATUS_COLOR[open.status] || ""}>
+                    {STATUS_LABEL[open.status] ?? open.status}
                   </Badge>
-                </li>
-              ))}
-            </ul>
+                  <span className="text-xs text-muted-foreground">
+                    Registered {new Date(open.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <Row label="Contact" value={open.prospect_contact_name || "—"} />
+                <Row label="Email" value={open.prospect_email || "—"} />
+                <Row label="Country" value={open.prospect_country || "—"} />
+                <Row label="Product" value={(open.product_interest ?? []).join(", ") || "—"} />
+                <Row
+                  label="Estimated value"
+                  value={open.estimated_arr_eur ? eur(Number(open.estimated_arr_eur)) : "—"}
+                />
+                {open.actual_arr_eur ? (
+                  <Row label="Closed value" value={eur(Number(open.actual_arr_eur))} />
+                ) : null}
+                <Row label="Protection" value={protection(open).label} />
+                {open.notes ? (
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1">Notes</div>
+                    <pre className="whitespace-pre-wrap text-xs bg-muted/40 border border-border rounded p-3">
+                      {open.notes}
+                    </pre>
+                  </div>
+                ) : null}
+              </div>
+            </>
           )}
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="space-y-1">
-      <Label className="text-xs text-muted-foreground">{label}</Label>
-      {children}
+    <div className="flex justify-between gap-4">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-sm text-foreground text-right">{value}</span>
     </div>
+  );
+}
+
+function FilterSelect({
+  value,
+  onChange,
+  placeholder,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="h-9 w-[150px] text-xs">
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">All {placeholder.toLowerCase()}</SelectItem>
+        {options.map((o) => (
+          <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
