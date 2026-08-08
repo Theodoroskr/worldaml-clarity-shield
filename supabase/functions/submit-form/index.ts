@@ -370,9 +370,7 @@ Deno.serve(async (req) => {
           // ['Contact Sales', 'Book Demo', 'Newsletter', 'Webinar',
           //  'Event Registration', 'Partner Request', 'General Contact']
           Form_Type: (() => {
-            // "Request a Demo" (contact-sales) with a demo-able product
-            // selected is a Book Demo lead.
-            if (isDemoRequest) return "Book Demo";
+
             const map: Record<string, string> = {
               "contact-sales": "Contact Sales",
               "contact_sales": "Contact Sales",
