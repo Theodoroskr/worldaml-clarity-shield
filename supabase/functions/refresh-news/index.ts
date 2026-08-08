@@ -256,17 +256,33 @@ Deno.serve(async (req) => {
   // Direct regulator feeds are reliable — fetch them together.
   const directFeeds = FEEDS.filter((feed) => feed.source);
   const searchFeeds = FEEDS.filter((feed) => !feed.source);
-  await Promise.all(directFeeds.map((config) => ingest(config, 0)));
-  // Search mirrors are rate-limited — fetch them one at a time.
-  for (const config of searchFeeds) await ingest(config, 1);
 
+  const run = async () => {
+    await Promise.all(directFeeds.map((config) => ingest(config, 0)));
+    // Search mirrors are rate-limited — fetch them one at a time.
+    for (const config of searchFeeds) await ingest(config, 1);
 
-  // Keep the table lean: drop anything older than 18 months.
-  const cutoff = new Date();
-  cutoff.setMonth(cutoff.getMonth() - 18);
-  await supabase.from("news_updates").delete().lt("published_at", cutoff.toISOString().slice(0, 10));
+    // Keep the table lean: drop anything older than 18 months.
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - 18);
+    await supabase.from("news_updates").delete().lt("published_at", cutoff.toISOString().slice(0, 10));
+    console.log("news refresh complete", stored, JSON.stringify(perFeed));
+  };
 
-  return new Response(JSON.stringify({ success: true, stored, perFeed }), {
+  const url = new URL(req.url);
+  if (url.searchParams.get("wait") === "1") {
+    await run();
+    return new Response(JSON.stringify({ success: true, stored, perFeed }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Default: run in the background so the monthly cron call returns instantly.
+  // @ts-ignore EdgeRuntime is provided by the Supabase runtime.
+  EdgeRuntime.waitUntil(run());
+  return new Response(JSON.stringify({ success: true, queued: true }), {
+    status: 202,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+
 });
