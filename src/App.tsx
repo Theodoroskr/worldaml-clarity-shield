@@ -438,6 +438,8 @@ const App = () => (
                   <Route path="deals" element={<PartnerDealsPage />} />
                   <Route path="deals/new" element={<PartnerRegisterDealPage />} />
                   <Route path="commissions" element={<PartnerCommissionsPage />} />
+                  <Route path="certification" element={<PartnerCertificationPage />} />
+
                   <Route path="payouts" element={<PartnerPayoutsPage />} />
                   <Route path="products" element={<PartnerProductsPage />} />
                   <Route path="manager" element={<PartnerManagerPage />} />
