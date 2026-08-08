@@ -255,7 +255,9 @@ export const Header = () => {
           {/* Desktop CTA & Region */}
           <div className="hidden xl:flex items-center gap-2 shrink-0">
             <RegionSelector />
+            <AcademyCartButton iconOnly />
             {user ? (
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-1.5">
