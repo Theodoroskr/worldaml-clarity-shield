@@ -252,8 +252,26 @@ serve(async (req) => {
         course_slugs: slugsToBuy.join(","),
         discount_pct: String(discountPct),
         is_guest: isGuest ? "1" : "0",
+        ...(referralPartner
+          ? {
+              referral_code: referralPartner.referral_code,
+              referral_partner_id: referralPartner.partner_id,
+            }
+          : {}),
       },
     });
+
+    // Attribute the basket to the partner immediately so it appears in both
+    // the partner portal and the admin referral view, even if payment fails.
+    if (referralPartner) {
+      await recordReferral(serviceClient, {
+        partner: referralPartner,
+        email: userEmail,
+        source: "academy-checkout",
+        status: "signed_up",
+      });
+    }
+
 
     // Insert pending rows (one per course) sharing the session id
     const subtotalCents = slugsToBuy.reduce(
