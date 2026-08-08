@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Outlet, Link, Navigate, useNavigate } from "react-router-dom";
-import { Menu, PanelLeftClose, PanelLeft, LifeBuoy, LogOut, User, CreditCard, ShieldCheck, Loader2 } from "lucide-react";
+import { Menu, PanelLeftClose, PanelLeft, LifeBuoy, LogOut, User, CreditCard, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import AppSidebarNav, { SidebarBrand } from "./AppSidebarNav";
@@ -25,8 +25,12 @@ export function AppPageHeader({ title, description, actions }: { title: string; 
   );
 }
 
+/**
+ * AcademyUserLayout — the authenticated WorldAML Academy learner shell.
+ * Deliberately contains no admin, Suite or RCM navigation.
+ */
 export default function AppShellLayout() {
-  const { user, profile, isLoading, isAdmin, signOut } = useAuth();
+  const { user, profile, isLoading, signOut } = useAuth();
   const { planLabel } = useEntitlements();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -54,6 +58,41 @@ export default function AppShellLayout() {
     navigate("/login");
   };
 
+  const UserFooter = ({ mini }: { mini?: boolean }) => (
+    <div className="border-t border-border p-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className={cn(
+            "w-full flex items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-muted transition-colors",
+            mini && "justify-center px-0",
+          )}>
+            <span className="h-7 w-7 shrink-0 rounded-full bg-primary/10 text-primary text-[11px] font-semibold flex items-center justify-center">
+              {initials || "U"}
+            </span>
+            {!mini && (
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs font-medium text-foreground truncate">{displayName}</span>
+                <span className="block text-[11px] text-muted-foreground truncate">{user.email}</span>
+              </span>
+            )}
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" side="top" className="w-56 bg-popover z-50">
+          <DropdownMenuLabel className="font-normal">
+            <div className="text-sm font-medium truncate">{displayName}</div>
+            <div className="text-xs text-muted-foreground truncate">{user.email}</div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild><Link to="/account/profile"><User className="h-4 w-4 mr-2" /> Profile</Link></DropdownMenuItem>
+          <DropdownMenuItem asChild><Link to="/account/billing"><CreditCard className="h-4 w-4 mr-2" /> Subscription & Billing</Link></DropdownMenuItem>
+          <DropdownMenuItem asChild><a href="/support"><LifeBuoy className="h-4 w-4 mr-2" /> Help & Support</a></DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleSignOut}><LogOut className="h-4 w-4 mr-2" /> Sign Out</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+
   return (
     <div className="min-h-screen flex bg-muted/20">
       {/* Desktop sidebar */}
@@ -65,14 +104,13 @@ export default function AppShellLayout() {
       >
         <SidebarBrand collapsed={collapsed} />
         <AppSidebarNav collapsed={collapsed} />
-        <div className="border-t border-border p-2">
-          <button
-            onClick={() => setCollapsed((c) => !c)}
-            className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-          >
-            {collapsed ? <PanelLeft className="h-4 w-4" /> : <><PanelLeftClose className="h-4 w-4" /> Collapse</>}
-          </button>
-        </div>
+        <button
+          onClick={() => setCollapsed((c) => !c)}
+          className="mx-2 mb-1 flex items-center gap-2 rounded-md px-3 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        >
+          {collapsed ? <PanelLeft className="h-4 w-4 mx-auto" /> : <><PanelLeftClose className="h-4 w-4" /> Collapse</>}
+        </button>
+        <UserFooter mini={collapsed} />
       </aside>
 
       {/* Mobile drawer */}
@@ -80,6 +118,7 @@ export default function AppShellLayout() {
         <SheetContent side="left" className="p-0 w-64 flex flex-col">
           <SidebarBrand />
           <AppSidebarNav onNavigate={() => setMobileOpen(false)} />
+          <UserFooter />
         </SheetContent>
       </Sheet>
 
@@ -89,9 +128,8 @@ export default function AppShellLayout() {
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation">
             <Menu className="h-5 w-5" />
           </Button>
-          <span className="text-sm font-semibold text-foreground">My WorldAML</span>
+          <span className="text-sm font-semibold text-foreground">WorldAML Academy</span>
           <Badge variant="outline" className="hidden sm:inline-flex text-[10px] font-medium">{planLabel}</Badge>
-          {isAdmin && <Badge className="hidden sm:inline-flex text-[10px] bg-accent text-accent-foreground">Admin</Badge>}
 
           <div className="ml-auto flex items-center gap-1">
             <Button variant="ghost" size="icon" asChild aria-label="Help and support">
@@ -112,12 +150,9 @@ export default function AppShellLayout() {
                   <div className="text-xs text-muted-foreground truncate">{user.email}</div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild><Link to="/account/profile"><User className="h-4 w-4 mr-2" /> My Profile</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/account/profile"><User className="h-4 w-4 mr-2" /> Profile</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/account/billing"><CreditCard className="h-4 w-4 mr-2" /> Subscription & Billing</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><a href="/support"><LifeBuoy className="h-4 w-4 mr-2" /> Help & Support</a></DropdownMenuItem>
-                {isAdmin && (
-                  <DropdownMenuItem asChild><a href="/admin/dashboard"><ShieldCheck className="h-4 w-4 mr-2" /> Admin Panel</a></DropdownMenuItem>
-                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}><LogOut className="h-4 w-4 mr-2" /> Sign Out</DropdownMenuItem>
               </DropdownMenuContent>
@@ -126,7 +161,7 @@ export default function AppShellLayout() {
         </header>
 
         <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 py-6">
+          <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 py-6">
             <Outlet />
           </div>
         </main>
