@@ -97,6 +97,10 @@ export default function AdminUsers() {
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
   const [revenue, setRevenue] = useState<Record<string, RevenueEntry>>({});
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportPreset, setExportPreset] = useState<"30d" | "90d" | "12m" | "ytd" | "all" | "custom">("30d");
+  const [exportFrom, setExportFrom] = useState("");
+  const [exportTo, setExportTo] = useState("");
   const [partnerApplicantIds, setPartnerApplicantIds] = useState<Set<string>>(new Set());
   const [partnerApplicantEmails, setPartnerApplicantEmails] = useState<Set<string>>(new Set());
   const [partnerAppMeta, setPartnerAppMeta] = useState<Record<string, { status: string; partner_type: string | null; company_name: string | null; created_at: string }>>({});
@@ -336,7 +340,7 @@ export default function AdminUsers() {
   const runExport = (format: "csv" | "xlsx") => {
     const range = resolveRange();
     if (!range) { toast.error("Select a valid export timeline first."); return; }
-    const rows = exportRows(exportList, range.from, range.to);
+    const rows = exportRows(getExportList(), range.from, range.to);
     if (!rows.length) { toast.error("No users registered in the selected timeline match the current filters."); return; }
     const name = `worldaml-users-${range.from.toISOString().slice(0, 10)}_to_${range.to.toISOString().slice(0, 10)}`;
     if (format === "csv") exportRowsAsCsv(rows, name);
@@ -345,11 +349,11 @@ export default function AdminUsers() {
     setExportOpen(false);
   };
 
-  const previewCount = (() => {
+  const previewCount = () => {
     const range = resolveRange();
     if (!range) return null;
-    return exportRows(exportList, range.from, range.to).length;
-  })();
+    return exportRows(getExportList(), range.from, range.to).length;
+  };
 
 
 
