@@ -64,6 +64,15 @@ export default function AdminAnalytics() {
 
   const series = a?.series.map((p) => ({ ...p, bucket: format(new Date(p.date), "d MMM") })) ?? [];
 
+  const LINE_PORTALS: Record<string, PortalKey[]> = {
+    users: ["academy", "business", "platform"],
+    leads: ["marketing", "business"],
+    starts: ["academy"],
+    searches: ["platform", "business"],
+  };
+  const showLine = (key: string) => portal === "all" || LINE_PORTALS[key].includes(portal);
+
+
 
   return (
     <div className="p-6 space-y-6">
