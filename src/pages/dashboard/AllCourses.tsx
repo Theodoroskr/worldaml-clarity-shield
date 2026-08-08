@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Loader2, Search, SlidersHorizontal, X, ShoppingCart } from "lucide-react";
 import { AppPageHeader } from "@/components/app-shell/AppShellLayout";
 import { Input } from "@/components/ui/input";
@@ -47,7 +47,11 @@ export default function AllCourses() {
   const [q, setQ] = useState("");
   const [cats, setCats] = useState<string[]>([]);
   const [levels, setLevels] = useState<string[]>([]);
-  const [price, setPrice] = useState<"all" | "free" | "paid">("all");
+  const [searchParams] = useSearchParams();
+  const priceParam = searchParams.get("price");
+  const [price, setPrice] = useState<"all" | "free" | "paid">(
+    priceParam === "free" || priceParam === "paid" ? priceParam : "all"
+  );
   const [statuses, setStatuses] = useState<string[]>([]);
   const [maxDuration, setMaxDuration] = useState<"all" | "15" | "30" | "60">("all");
   const [cpdOnly, setCpdOnly] = useState(false);
