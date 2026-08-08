@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Calendar } from "lucide-react";
+import { ExternalLink, Calendar, ChevronDown, ChevronUp } from "lucide-react";
 
 export type NewsCategory = 
   | "Regulatory Updates" 
@@ -19,6 +20,8 @@ export interface NewsItem {
   category: NewsCategory;
   tags: string[];
   summary: string;
+  /** Untruncated update text, revealed by the "Show more" control when longer than the summary. */
+  fullSummary?: string;
   trustTier: TrustTier;
 }
 
@@ -54,7 +57,19 @@ interface NewsCardProps {
   item: NewsItem;
 }
 
+const PREVIEW_LENGTH = 220;
+
+/** Cut at a word boundary so the preview never ends mid-word. */
+function previewOf(text: string): string {
+  if (text.length <= PREVIEW_LENGTH) return text;
+  const window = text.slice(0, PREVIEW_LENGTH);
+  const wordEnd = window.lastIndexOf(" ");
+  return `${(wordEnd > 0 ? window.slice(0, wordEnd) : window).replace(/[,;:.\-–—]+$/, "").trim()}…`;
+}
+
 export const NewsCard = ({ item }: NewsCardProps) => {
+  const [expanded, setExpanded] = useState(false);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-GB", {
       day: "numeric",
@@ -64,6 +79,12 @@ export const NewsCard = ({ item }: NewsCardProps) => {
   };
 
   const relatedLinks = categoryLinks[item.category];
+
+  const fullText = item.fullSummary && item.fullSummary.length > item.summary.length
+    ? item.fullSummary
+    : item.summary;
+  const preview = previewOf(fullText);
+  const isLong = fullText.length > preview.length;
 
   return (
     <article className="bg-card border border-divider rounded-lg p-6 hover:border-primary/30 transition-colors flex flex-col h-full">
@@ -86,10 +107,24 @@ export const NewsCard = ({ item }: NewsCardProps) => {
         {item.title}
       </h3>
 
-      {/* Summary — shown in full, never clipped */}
-      <p className="text-body-sm text-text-secondary mb-4 flex-1">
-        {item.summary}
-      </p>
+      {/* Summary — long updates collapse behind a "Show more" control */}
+      <div className="mb-4 flex-1">
+        <p className="text-body-sm text-text-secondary whitespace-pre-line">
+          {expanded ? fullText : preview}
+        </p>
+        {isLong && (
+          <button
+            type="button"
+            onClick={() => setExpanded((value) => !value)}
+            aria-expanded={expanded}
+            className="mt-2 inline-flex items-center gap-1 text-caption font-medium text-primary hover:text-primary/80 transition-colors"
+          >
+            {expanded ? "Show less" : "Show more"}
+            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </button>
+        )}
+      </div>
+
 
       {/* Source */}
       <div className="flex items-center gap-2 mb-4">
