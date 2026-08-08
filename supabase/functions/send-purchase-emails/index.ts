@@ -135,8 +135,11 @@ serve(async (req) => {
 
   try {
     const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const hookSecret = Deno.env.get("PURCHASE_EMAIL_HOOK_SECRET") ?? "";
     const auth = req.headers.get("Authorization")?.replace("Bearer ", "") ?? "";
-    if (!serviceRole || auth !== serviceRole) {
+    const authorized =
+      (!!serviceRole && auth === serviceRole) || (!!hookSecret && auth === hookSecret);
+    if (!authorized) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
