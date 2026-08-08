@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
+import WorkspaceSwitcher from "@/components/auth/WorkspaceSwitcher";
 
 export function AppPageHeader({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
   return (
@@ -89,6 +90,7 @@ export default function AppShellLayout() {
           <DropdownMenuItem asChild><Link to="/account/billing"><CreditCard className="h-4 w-4 mr-2" /> Purchases & Billing</Link></DropdownMenuItem>
           <DropdownMenuItem asChild><Link to="/account/security"><ShieldCheck className="h-4 w-4 mr-2" /> Security</Link></DropdownMenuItem>
           <DropdownMenuItem asChild><a href="/support"><LifeBuoy className="h-4 w-4 mr-2" /> Help & Support</a></DropdownMenuItem>
+          <WorkspaceSwitcher current="academy" />
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}><LogOut className="h-4 w-4 mr-2" /> Sign Out</DropdownMenuItem>
         </DropdownMenuContent>
@@ -168,6 +170,7 @@ export default function AppShellLayout() {
                 <DropdownMenuItem asChild><Link to="/account/billing"><CreditCard className="h-4 w-4 mr-2" /> Purchases & Billing</Link></DropdownMenuItem>
           <DropdownMenuItem asChild><Link to="/account/security"><ShieldCheck className="h-4 w-4 mr-2" /> Security</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><a href="/support"><LifeBuoy className="h-4 w-4 mr-2" /> Help & Support</a></DropdownMenuItem>
+          <WorkspaceSwitcher current="academy" />
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}><LogOut className="h-4 w-4 mr-2" /> Sign Out</DropdownMenuItem>
               </DropdownMenuContent>
