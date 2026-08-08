@@ -39,6 +39,7 @@ export default function AdminPurchaseStatus() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const prevStatusRef = useRef<Record<string, string>>({});
+  const { titleOf } = useCourseTitles();
 
   const [createdFrom, setCreatedFrom] = useState("");
   const [createdTo, setCreatedTo] = useState("");
@@ -500,7 +501,10 @@ export default function AdminPurchaseStatus() {
                         <div className="text-muted-foreground text-xs truncate max-w-[220px]">{prof.full_name}</div>
                       )}
                     </td>
-                    <td className="py-3 px-4 font-medium">{row.course_slug}</td>
+                    <td className="py-3 px-4 font-medium">
+                      <div className="text-foreground">{titleOf(row.course_slug)}</div>
+                      <div className="text-[11px] text-muted-foreground font-mono">{row.course_slug}</div>
+                    </td>
                     <td className="py-3 px-4 text-right tabular-nums">
                       {(row.amount_cents / 100).toFixed(2)} {row.currency.toUpperCase()}
                     </td>
@@ -574,4 +578,22 @@ function fmtDate(ts: string | null) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function AgeBucket({ label, value, tone }: { label: string; value: number; tone: string }) {
+  return (
+    <div>
+      <div className={`text-xl font-semibold tabular-nums ${tone}`}>{value}</div>
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+function QualityRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-muted-foreground text-xs">{label}</span>
+      <span className={`tabular-nums font-medium ${value > 0 ? "text-amber-500" : "text-emerald-600"}`}>{value}</span>
+    </div>
+  );
 }
