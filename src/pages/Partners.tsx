@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -78,7 +79,16 @@ const Partners = () => (
     <Header />
     <main className="flex-1">
       <PartnerHeroSection />
+      <div className="border-y border-border bg-muted/30">
+        <div className="container mx-auto px-4 py-3 flex flex-wrap items-center justify-center gap-2 text-sm">
+          <span className="text-text-secondary">Already a WorldAML partner?</span>
+          <Link to="/partner/login" className="font-medium text-teal hover:underline">
+            Partner Login
+          </Link>
+        </div>
+      </div>
       <PartnerSocialProofSection />
+
       <PartnerBenefitsSection />
       <PartnerFAQSection />
       <PartnerContactSection />

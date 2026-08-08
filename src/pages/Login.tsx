@@ -53,7 +53,7 @@ const Login = () => {
           const tier = (prof as any)?.subscription_tier;
           const hasSuite = tier === "suite" || tier === "enterprise";
           if (!adminRole && !hasSuite && (partnerRow as any)?.is_active) {
-            redirectTo = "/partner-portal";
+            redirectTo = "/partner/dashboard";
           }
         }
       }

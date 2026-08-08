@@ -15,15 +15,16 @@ export default function PartnerPortalLayout() {
   const location = useLocation();
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/login?next=/partner-portal");
+    if (!authLoading && !user) navigate("/partner/login?next=/partner/dashboard");
   }, [user, authLoading, navigate]);
+
 
   // First-login setup: active partner who hasn't finished onboarding gets routed to welcome wizard
   useEffect(() => {
     if (!partner?.is_active) return;
     if (partner.onboarding_completed_at) return;
-    if (location.pathname.startsWith("/partner-portal/welcome")) return;
-    navigate("/partner-portal/welcome", { replace: true });
+    if (location.pathname.startsWith("/partner/welcome")) return;
+    navigate("/partner/welcome", { replace: true });
   }, [partner?.is_active, partner?.onboarding_completed_at, location.pathname, navigate]);
 
   if (authLoading || isLoading) {

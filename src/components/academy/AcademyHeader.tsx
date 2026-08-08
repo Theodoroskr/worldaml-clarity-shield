@@ -107,8 +107,8 @@ export const AcademyHeader = () => {
               </DropdownMenu>
             ) : (
               <>
-                <Link to="/login">
-                  <Button variant="ghost" size="sm">Sign in</Button>
+                <Link to="/academy/login">
+                  <Button variant="ghost" size="sm">Academy Sign In</Button>
                 </Link>
                 <Link to="/signup">
                   <Button size="sm">Create account</Button>
@@ -146,8 +146,8 @@ export const AcademyHeader = () => {
                 </Button>
               ) : (
                 <>
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full">Sign in</Button>
+                  <Link to="/academy/login" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" size="sm" className="w-full">Academy Sign In</Button>
                   </Link>
                   <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>
                     <Button size="sm" className="w-full">Create account</Button>

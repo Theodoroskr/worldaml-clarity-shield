@@ -1930,7 +1930,7 @@ const Academy = () => {
             </Button>
             <p className="text-caption text-muted-foreground text-center">
               Already have an account?{" "}
-              <Link to="/login" className="underline">Sign in</Link> first for an even faster checkout.
+              <Link to="/academy/login" className="underline">Sign in</Link> first for an even faster checkout.
             </p>
           </form>
         </DialogContent>

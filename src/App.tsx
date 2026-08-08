@@ -10,6 +10,8 @@ import Layout from "@/components/Layout";
 import ScrollToTop from "@/components/ScrollToTop";
 import PartnerOnlyRouteGuard from "@/components/PartnerOnlyRouteGuard";
 import AuthQueryInvalidator from "@/components/AuthQueryInvalidator";
+import PortalGuard from "@/components/auth/PortalGuard";
+
 import { Suspense } from "react";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { isAcademyHost } from "@/lib/academyHost";
@@ -165,7 +167,15 @@ const AdminOutreachQueue = lazyWithRetry(() => import("./pages/admin/AdminOutrea
 const AdminPartnerAssets = lazyWithRetry(() => import("./pages/admin/AdminPartnerAssets"));
 const AdminRecognition = lazyWithRetry(() => import("./pages/admin/AdminRecognition"));
 
+const AcademyLogin = lazyWithRetry(() => import("./pages/auth/AcademyLogin"));
+const PartnerLogin = lazyWithRetry(() => import("./pages/auth/PartnerLogin"));
+const AdminLogin = lazyWithRetry(() => import("./pages/auth/AdminLogin"));
+const PartnerOnboardingPage = lazyWithRetry(() => import("./pages/partner-portal/Onboarding"));
+const LegacyPartnerPortalRedirect = lazyWithRetry(() => import("./components/partner-portal/LegacyPartnerPortalRedirect"));
+
+
 const PartnerPortalLayout = lazyWithRetry(() => import("./pages/partner-portal/PartnerPortalLayout"));
+
 const PartnerOverview = lazyWithRetry(() => import("./pages/partner-portal/Overview"));
 const PartnerReferralsPage = lazyWithRetry(() => import("./pages/partner-portal/Referrals"));
 const PartnerDealsPage = lazyWithRetry(() => import("./pages/partner-portal/Deals"));
@@ -257,8 +267,12 @@ const App = () => (
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/pending-approval" element={<PendingApproval />} />
 
+                  {/* Portal-specific sign-in */}
+                  <Route path="/academy/login" element={<AcademyLogin />} />
+
                   {/* Legacy /academy/* links → clean subdomain URLs */}
                   <Route path="/academy" element={<AcademyRootRedirect />} />
+
                   <Route path="/academy/templates" element={<AcademyRootRedirect />} />
                   <Route path="/academy/annual-pass-active" element={<AcademyRootRedirect />} />
                   <Route path="/academy/certificate/:token" element={<AcademyCertificateRedirect />} />
@@ -274,11 +288,14 @@ const App = () => (
                 <Route path="/pricing" element={<Pricing />} />
 
                 
-{/* Auth Routes */}
+{/* Auth Routes — one backend, three distinct portal experiences */}
                 <Route path="/login" element={<Login />} />
+                <Route path="/academy/login" element={<AcademyLogin />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/signup" element={<Signup />} />
-                {/* My WorldAML — authenticated app shell */}
-                <Route element={<AppShellLayout />}>
+                {/* WorldAML Academy — authenticated learner shell */}
+                <Route element={<PortalGuard portal="academy"><AppShellLayout /></PortalGuard>}>
+
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/my-learning" element={<MyLearning />} />
                   <Route path="/dashboard/my-courses" element={<MyLearning />} />
@@ -297,7 +314,8 @@ const App = () => (
                 </Route>
                 <Route path="/pending-approval" element={<PendingApproval />} />
                 <Route path="/admin" element={<Admin />} />
-                <Route path="/admin" element={<AdminLayout />}>
+                <Route path="/admin" element={<PortalGuard portal="admin"><AdminLayout /></PortalGuard>}>
+
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
                   <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="users" element={<AdminUsers />} />
@@ -400,11 +418,15 @@ const App = () => (
                 <Route path="/partners" element={<Partners />} />
                 <Route path="/partners/directory" element={<PartnersDirectory />} />
                 <Route path="/partners/apply" element={<PartnerApply />} />
-                <Route path="/partners/dashboard" element={<Navigate to="/partner-portal" replace />} />
+                <Route path="/partners/dashboard" element={<Navigate to="/partner/dashboard" replace />} />
 
-                {/* Channel Partner Portal */}
-                <Route path="/partner-portal" element={<PartnerPortalLayout />}>
-                  <Route index element={<PartnerOverview />} />
+                {/* Partner Portal — approved partners only */}
+                <Route path="/partner/login" element={<PartnerLogin />} />
+                <Route path="/partner/apply" element={<Navigate to="/partners/apply" replace />} />
+                <Route path="/partner/onboarding" element={<PartnerOnboardingPage />} />
+                <Route path="/partner" element={<PortalGuard portal="partner"><PartnerPortalLayout /></PortalGuard>}>
+                  <Route index element={<Navigate to="/partner/dashboard" replace />} />
+                  <Route path="dashboard" element={<PartnerOverview />} />
                   <Route path="welcome" element={<PartnerWelcomePage />} />
                   <Route path="referrals" element={<PartnerReferralsPage />} />
                   <Route path="deals" element={<PartnerDealsPage />} />
@@ -414,6 +436,11 @@ const App = () => (
                   <Route path="profile" element={<PartnerProfilePage />} />
                   <Route path="settings" element={<PartnerSettingsPage />} />
                 </Route>
+
+                {/* Legacy partner portal URLs */}
+                <Route path="/partner-portal" element={<Navigate to="/partner/dashboard" replace />} />
+                <Route path="/partner-portal/:section" element={<LegacyPartnerPortalRedirect />} />
+
 
                 {/* Academy */}
                 <Route path="/academy" element={<Academy />} />

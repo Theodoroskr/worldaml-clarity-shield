@@ -18,6 +18,8 @@ import {
 import { isAcademyHost } from "@/lib/academyHost";
 import AcademyHeader from "@/components/academy/AcademyHeader";
 import { AcademyCartButton } from "@/components/academy/AcademyCartDrawer";
+import SignInSelector from "@/components/auth/SignInSelector";
+
 
 
 
@@ -285,7 +287,7 @@ export const Header = () => {
                   </DropdownMenuItem>
                   {isActivePartner && (
                     <DropdownMenuItem asChild>
-                      <Link to="/partner-portal">Partner Portal</Link>
+                      <Link to="/partner/dashboard">Partner Portal</Link>
                     </DropdownMenuItem>
                   )}
                   {isAdmin && (
@@ -302,14 +304,17 @@ export const Header = () => {
               </DropdownMenu>
             ) : (
               <>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/login">Log In</Link>
-                </Button>
+                <SignInSelector
+                  trigger={(open) => (
+                    <Button variant="ghost" size="sm" onClick={open}>Sign In</Button>
+                  )}
+                />
                 <Button size="sm" asChild>
                   <Link to="/signup">Sign Up</Link>
                 </Button>
               </>
             )}
+
           </div>
 
           {/* Mobile Menu Button */}
@@ -412,7 +417,7 @@ export const Header = () => {
                     </Button>
                     {isActivePartner && (
                       <Button variant="outline" asChild className="border-teal/40 text-teal">
-                        <Link to="/partner-portal" onClick={() => setMobileMenuOpen(false)}>Partner Portal</Link>
+                        <Link to="/partner/dashboard" onClick={() => setMobileMenuOpen(false)}>Partner Portal</Link>
                       </Button>
                     )}
                     {isAdmin && (
@@ -427,11 +432,12 @@ export const Header = () => {
                   </>
                 ) : (
                   <>
-                    <Button variant="outline" asChild>
-                      <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                        Log In
-                      </Link>
-                    </Button>
+                    <SignInSelector
+                      onNavigate={() => setMobileMenuOpen(false)}
+                      trigger={(open) => (
+                        <Button variant="outline" onClick={open}>Sign In</Button>
+                      )}
+                    />
                     <Button asChild>
                       <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>
                         Sign Up
@@ -439,6 +445,7 @@ export const Header = () => {
                     </Button>
                   </>
                 )}
+
               </div>
             </nav>
           </div>

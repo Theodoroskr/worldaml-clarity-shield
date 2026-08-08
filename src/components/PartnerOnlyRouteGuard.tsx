@@ -34,7 +34,7 @@ export default function PartnerOnlyRouteGuard() {
       (p) => path === p || path.startsWith(`${p}/`)
     );
     if (isRestricted) {
-      navigate("/partner-portal", { replace: true });
+      navigate("/partner/dashboard", { replace: true });
     }
   }, [
     authLoading,

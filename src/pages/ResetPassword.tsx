@@ -140,7 +140,11 @@ const ResetPassword = () => {
     } else {
       setPageState("success");
       toast({ title: "Password updated", description: "Your password has been successfully reset." });
-      setTimeout(() => navigate("/dashboard"), 2000);
+      setTimeout(() => {
+        let portal = "academy";
+        try { portal = localStorage.getItem("worldaml_portal_context") || "academy"; } catch { /* ignore */ }
+        navigate(portal === "partner" ? "/partner/dashboard" : portal === "admin" ? "/admin/dashboard" : "/dashboard");
+      }, 2000);
     }
     setIsLoading(false);
   };
@@ -298,7 +302,7 @@ const ResetPassword = () => {
             {renderContent()}
             {(pageState === "invalid" || pageState === "resent") && (
               <div className="mt-6 text-center">
-                <Link to="/login" className="text-sm text-teal hover:underline font-medium inline-flex items-center gap-1">
+                <Link to="/academy/login" className="text-sm text-teal hover:underline font-medium inline-flex items-center gap-1">
                   <ArrowLeft className="h-4 w-4" />
                   Back to Sign In
                 </Link>

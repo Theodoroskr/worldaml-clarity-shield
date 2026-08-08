@@ -14,14 +14,14 @@ import {
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { label: "Overview", path: "/partner-portal", icon: LayoutDashboard, end: true },
-  { label: "Referrals", path: "/partner-portal/referrals", icon: Users },
-  { label: "Deals", path: "/partner-portal/deals", icon: Briefcase },
-  { label: "Commissions", path: "/partner-portal/commissions", icon: DollarSign },
-  { label: "Marketing Assets", path: "/partner-portal/assets", icon: ImageIcon },
-  { label: "Contacts", path: "/partner-portal/contacts", icon: ContactIcon },
-  { label: "Profile", path: "/partner-portal/profile", icon: UserCircle },
-  { label: "Settings", path: "/partner-portal/settings", icon: Settings },
+  { label: "Overview", path: "/partner/dashboard", icon: LayoutDashboard, end: true },
+  { label: "Referrals", path: "/partner/referrals", icon: Users },
+  { label: "Deals", path: "/partner/deals", icon: Briefcase },
+  { label: "Commissions", path: "/partner/commissions", icon: DollarSign },
+  { label: "Marketing Assets", path: "/partner/assets", icon: ImageIcon },
+  { label: "Contacts", path: "/partner/contacts", icon: ContactIcon },
+  { label: "Profile", path: "/partner/profile", icon: UserCircle },
+  { label: "Settings", path: "/partner/settings", icon: Settings },
 ];
 
 export default function PortalSidebar() {

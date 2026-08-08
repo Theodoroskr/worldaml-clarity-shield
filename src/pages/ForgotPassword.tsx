@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
@@ -16,6 +16,17 @@ const ForgotPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  // Preserve portal context across the reset round-trip.
+  const portal = (() => {
+    const p = searchParams.get("portal");
+    if (p === "partner" || p === "academy" || p === "admin") return p;
+    try { return localStorage.getItem("worldaml_portal_context") || "academy"; } catch { return "academy"; }
+  })();
+  const backToLogin = portal === "partner" ? "/partner/login" : portal === "admin" ? "/admin/login" : "/academy/login";
+  useEffect(() => {
+    try { localStorage.setItem("worldaml_portal_context", portal); } catch { /* ignore */ }
+  }, [portal]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,7 +104,7 @@ const ForgotPassword = () => {
               </form>
             )}
             <div className="mt-6 text-center">
-              <Link to="/login" className="text-sm text-teal hover:underline font-medium inline-flex items-center gap-1">
+              <Link to={backToLogin} className="text-sm text-teal hover:underline font-medium inline-flex items-center gap-1">
                 <ArrowLeft className="h-4 w-4" />
                 Back to Sign In
               </Link>

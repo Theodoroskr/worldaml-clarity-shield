@@ -6,6 +6,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import type { PartnerRow } from "@/hooks/usePartner";
+import { usePortalAccess } from "@/hooks/usePortalAccess";
+
+/** Only shown to users who also hold Academy access. */
+function PortalWorkspaceSwitch() {
+  const { academyAccess } = usePortalAccess();
+  const navigate = useNavigate();
+  if (!academyAccess) return null;
+  return (
+    <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
+      WorldAML Academy <ExternalLink className="ml-1 w-3.5 h-3.5" />
+    </Button>
+  );
+}
 
 const CERT_LABEL: Record<string, string> = {
   bronze: "Bronze",
@@ -58,9 +71,7 @@ export default function PortalTopbar({ partner }: { partner: PartnerRow }) {
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
-          Dashboard <ExternalLink className="ml-1 w-3.5 h-3.5" />
-        </Button>
+        <PortalWorkspaceSwitch />
         <Button
           variant="outline"
           size="sm"
