@@ -1228,6 +1228,18 @@ export default function AdminPartners() {
               </div>
             </div>
             <div>
+              <Label>Commission rate (%)</Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                step="0.5"
+                value={Math.round(Number(editForm.commission_rate ?? 0) * 1000) / 10}
+                onChange={(e) => setEditForm({ ...editForm, commission_rate: Number(e.target.value) / 100 })}
+              />
+              <p className="text-[11px] text-text-secondary mt-1">Shown on the partner record and used for commission calculations.</p>
+            </div>
+            <div>
               <Label>Commission lifetime (months)</Label>
               <Input type="number" min="1" value={editForm.commission_lifetime_months} onChange={(e) => setEditForm({ ...editForm, commission_lifetime_months: Number(e.target.value) })} />
             </div>
@@ -1238,6 +1250,38 @@ export default function AdminPartners() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Partner 360 detail */}
+      <PartnerDetailDialog
+        partner={detailPartner}
+        application={detailPartner ? partnerApps.find((a: any) => a.user_id === detailPartner.user_id) ?? null : null}
+        open={!!detailPartner}
+        onOpenChange={(o) => !o && setDetailPartner(null)}
+      />
+
+      {/* Remove partner confirmation */}
+      <AlertDialog open={!!removeTarget} onOpenChange={(o) => !o && setRemoveTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove partner?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes <strong>{removeTarget?.display_name || removeTarget?.referral_code}</strong> from
+              the Partner Program, along with their referrals, deal registrations, commissions, payouts, seats and asset
+              activity. To keep the history instead, switch the partner to inactive.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={(e) => { e.preventDefault(); removePartner(); }}
+            >
+              {actionLoading === removeTarget?.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Remove partner"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+
   );
 }
