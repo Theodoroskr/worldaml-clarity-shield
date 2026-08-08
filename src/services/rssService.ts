@@ -159,17 +159,20 @@ export async function fetchRssFeed(config: FeedConfig): Promise<NewsItem[]> {
       return [];
     }
 
-    const items: NewsItem[] = data.items.map((item) => ({
-      id: generateId(item, config.url),
-      title: item.title,
-      source: config.source,
-      sourceUrl: item.link,
-      publishedAt: parsePubDate(item.pubDate),
-      category: config.category,
-      tags: extractTags(item.title, item.description),
-      summary: truncate(item.description),
-      trustTier: config.trustTier,
-    }));
+    const items: NewsItem[] = data.items.map((item) => {
+      const title = stripHtml(item.title).replace(/\s+/g, " ").trim();
+      return {
+        id: generateId(item, config.url),
+        title,
+        source: config.source,
+        sourceUrl: item.link,
+        publishedAt: parsePubDate(item.pubDate),
+        category: config.category,
+        tags: extractTags(item.title, item.description),
+        summary: truncate(stripTitlePrefix(item.description, title)),
+        trustTier: config.trustTier,
+      };
+    });
 
     // Update cache
     cache.set(cacheKey, { data: items, timestamp: Date.now() });
