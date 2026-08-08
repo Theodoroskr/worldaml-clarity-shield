@@ -285,7 +285,7 @@ export const Header = () => {
                   </DropdownMenuItem>
                   {isActivePartner && (
                     <DropdownMenuItem asChild>
-                      <Link to="/partner">Partner Portal</Link>
+                      <Link to="/partner/dashboard">Partner Portal</Link>
                     </DropdownMenuItem>
                   )}
                   {isAdmin && (
@@ -412,7 +412,7 @@ export const Header = () => {
                     </Button>
                     {isActivePartner && (
                       <Button variant="outline" asChild className="border-teal/40 text-teal">
-                        <Link to="/partner" onClick={() => setMobileMenuOpen(false)}>Partner Portal</Link>
+                        <Link to="/partner/dashboard" onClick={() => setMobileMenuOpen(false)}>Partner Portal</Link>
                       </Button>
                     )}
                     {isAdmin && (
