@@ -49,12 +49,14 @@ export default function Dashboard() {
 
         {!isNewLearner && <LearningOverview data={academy} />}
 
-        <MemberLevelCard />
+        {!isNewLearner && <MemberLevelCard />}
 
-        <div className="grid lg:grid-cols-2 gap-4">
-          <MyCourses courses={[...academy.inProgress, ...academy.completed]} />
-          <CertificatesSection certificates={academy.certificates} />
-        </div>
+        {!isNewLearner && (
+          <div className="grid lg:grid-cols-2 gap-4">
+            <MyCourses courses={[...academy.inProgress, ...academy.completed]} />
+            <CertificatesSection certificates={academy.certificates} />
+          </div>
+        )}
 
         <RecommendedNext courses={academy.recommendedList} />
 
