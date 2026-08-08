@@ -1087,6 +1087,60 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_academy_seats: {
+        Row: {
+          assigned_at: string | null
+          assigned_email: string | null
+          assigned_name: string | null
+          assigned_user_id: string | null
+          created_at: string
+          id: string
+          partner_id: string
+          revoked_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_email?: string | null
+          assigned_name?: string | null
+          assigned_user_id?: string | null
+          created_at?: string
+          id?: string
+          partner_id: string
+          revoked_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_email?: string | null
+          assigned_name?: string | null
+          assigned_user_id?: string | null
+          created_at?: string
+          id?: string
+          partner_id?: string
+          revoked_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_academy_seats_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "featured_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_academy_seats_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_admin_audit_log: {
         Row: {
           action: string
@@ -1287,6 +1341,220 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_certification_requirements: {
+        Row: {
+          benefits: Json
+          commission_rate: number
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          label: string
+          level: string
+          required_closed_deals: number
+          required_courses: number
+          required_revenue_cents: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          benefits?: Json
+          commission_rate?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          level: string
+          required_closed_deals?: number
+          required_courses?: number
+          required_revenue_cents?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          benefits?: Json
+          commission_rate?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          level?: string
+          required_closed_deals?: number
+          required_courses?: number
+          required_revenue_cents?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      partner_cobrand_requests: {
+        Row: {
+          asset_id: string | null
+          created_at: string
+          details: string | null
+          file_path: string | null
+          id: string
+          partner_id: string
+          request_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string
+          details?: string | null
+          file_path?: string | null
+          id?: string
+          partner_id: string
+          request_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string
+          details?: string | null
+          file_path?: string | null
+          id?: string
+          partner_id?: string
+          request_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_cobrand_requests_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "partner_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_cobrand_requests_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "featured_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_cobrand_requests_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_commissions: {
+        Row: {
+          amount_cents: number
+          approved_at: string | null
+          commission_rate: number
+          created_at: string
+          currency: string
+          deal_id: string | null
+          deal_value_cents: number
+          description: string | null
+          earned_on: string
+          id: string
+          notes: string | null
+          paid_at: string | null
+          partner_id: string
+          payout_id: string | null
+          referral_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number
+          approved_at?: string | null
+          commission_rate?: number
+          created_at?: string
+          currency?: string
+          deal_id?: string | null
+          deal_value_cents?: number
+          description?: string | null
+          earned_on?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          partner_id: string
+          payout_id?: string | null
+          referral_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          approved_at?: string | null
+          commission_rate?: number
+          created_at?: string
+          currency?: string
+          deal_id?: string | null
+          deal_value_cents?: number
+          description?: string | null
+          earned_on?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          partner_id?: string
+          payout_id?: string | null
+          referral_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_commissions_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deal_registrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_commissions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "featured_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_commissions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_commissions_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "partner_payouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_commissions_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_contacts: {
         Row: {
           created_at: string
@@ -1361,6 +1629,100 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      partner_deal_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          deal_id: string
+          description: string | null
+          event_type: string
+          id: string
+          metadata: Json
+          partner_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          deal_id: string
+          description?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json
+          partner_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          deal_id?: string
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json
+          partner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_deal_events_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deal_registrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_deal_events_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "featured_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_deal_events_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_managers: {
+        Row: {
+          avatar_url: string | null
+          calendar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          name: string
+          phone: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          calendar_url?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          calendar_url?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       partner_notification_settings: {
         Row: {
@@ -1461,6 +1823,60 @@ export type Database = {
           },
         ]
       }
+      partner_specialisations: {
+        Row: {
+          awarded_at: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          label: string
+          partner_id: string
+          progress_percent: number
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          awarded_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          label: string
+          partner_id: string
+          progress_percent?: number
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          awarded_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          label?: string
+          partner_id?: string
+          progress_percent?: number
+          slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_specialisations_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "featured_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_specialisations_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partners: {
         Row: {
           academy_seats_granted: number
@@ -1476,6 +1892,7 @@ export type Database = {
           logo_url: string | null
           notification_prefs: Json
           onboarding_completed_at: string | null
+          partner_manager_id: string | null
           partner_type: Database["public"]["Enums"]["partner_type"]
           payout_details_encrypted: string | null
           payout_method: string | null
@@ -1501,6 +1918,7 @@ export type Database = {
           logo_url?: string | null
           notification_prefs?: Json
           onboarding_completed_at?: string | null
+          partner_manager_id?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
           payout_details_encrypted?: string | null
           payout_method?: string | null
@@ -1526,6 +1944,7 @@ export type Database = {
           logo_url?: string | null
           notification_prefs?: Json
           onboarding_completed_at?: string | null
+          partner_manager_id?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
           payout_details_encrypted?: string | null
           payout_method?: string | null
@@ -1537,7 +1956,15 @@ export type Database = {
           verticals?: string[]
           website_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "partners_partner_manager_id_fkey"
+            columns: ["partner_manager_id"]
+            isOneToOne: false
+            referencedRelation: "partner_managers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       periodic_reports: {
         Row: {

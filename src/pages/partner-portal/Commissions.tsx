@@ -1,4 +1,5 @@
 import { usePartner } from "@/hooks/usePartner";
+import { usePartnerProgramme } from "@/hooks/usePartnerProgramme";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -9,14 +10,19 @@ const eur = (n: number) =>
 
 const STATUS_COLOR: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800 border-amber-200",
+  approved: "bg-blue-100 text-blue-800 border-blue-200",
   processing: "bg-blue-100 text-blue-800 border-blue-200",
   paid: "bg-green-100 text-green-800 border-green-200",
   failed: "bg-red-100 text-red-800 border-red-200",
+  rejected: "bg-red-100 text-red-800 border-red-200",
+  clawback: "bg-red-100 text-red-800 border-red-200",
   cancelled: "bg-slate-100 text-slate-800 border-slate-200",
 };
 
 export default function PartnerCommissions() {
   const { summary, payouts, referrals } = usePartner();
+  const { commissions } = usePartnerProgramme();
+
 
   const monthly = useMemo(() => {
     const map = new Map<string, number>();
@@ -82,9 +88,60 @@ export default function PartnerCommissions() {
 
       <Card>
         <CardHeader>
+
+          <CardTitle className="text-base">Commission ledger</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {commissions.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No commission lines yet. A line is created for each won deal or converted referral.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-xs text-muted-foreground border-b border-border">
+                  <tr>
+                    <th className="pb-2 font-medium">Earned</th>
+                    <th className="pb-2 font-medium">Description</th>
+                    <th className="pb-2 font-medium text-right">Deal value</th>
+                    <th className="pb-2 font-medium text-right">Rate</th>
+                    <th className="pb-2 font-medium">Status</th>
+                    <th className="pb-2 font-medium text-right">Commission</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {commissions.map((c) => (
+                    <tr key={c.id}>
+                      <td className="py-2.5 text-xs">{new Date(c.earned_on).toLocaleDateString()}</td>
+                      <td className="py-2.5 text-xs">{c.description || "—"}</td>
+                      <td className="py-2.5 text-right font-mono text-xs">
+                        {eur(Number(c.deal_value_cents) / 100)}
+                      </td>
+                      <td className="py-2.5 text-right text-xs">{Number(c.commission_rate)}%</td>
+                      <td className="py-2.5">
+                        <Badge variant="outline" className={STATUS_COLOR[c.status] || ""}>
+                          {c.status}
+                        </Badge>
+                      </td>
+                      <td className="py-2.5 text-right font-mono">
+                        {eur(Number(c.amount_cents) / 100)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle className="text-base">Payout history</CardTitle>
         </CardHeader>
         <CardContent>
+
+
           {payouts.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
               No payouts on file yet. Pending balance is paid out monthly once minimum threshold is met.
