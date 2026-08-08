@@ -286,9 +286,7 @@ export default function BusinessDashboard() {
           </CardContent>
         </Card>
 
-            </div>
-          </CardContent>
-        </Card>
+
 
         <Card className="border-navy/20 bg-navy/[0.03] flex flex-col">
           <CardContent className="pt-6 flex-1 flex flex-col gap-3">
