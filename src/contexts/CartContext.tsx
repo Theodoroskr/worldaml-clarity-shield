@@ -1,7 +1,9 @@
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode, useMemo } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useCallback, ReactNode, useMemo } from "react";
 import { ACADEMY_PRICING, isPaidCourse } from "@/data/academyPricing";
 import { AcademyCurrency, convertEurCents } from "@/lib/academyFx";
 import { applyDiscount, computeDiscount } from "@/lib/academyDiscount";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const STORAGE_KEY = "academy-cart";
 
