@@ -53,6 +53,16 @@
 
     --radius: 0.5rem;
 
+    /* Member recognition tiers — restrained metallic accents */
+    --tier-member: 215 20% 45%;
+    --tier-bronze: 25 45% 42%;
+    --tier-silver: 215 12% 52%;
+    --tier-gold: 42 55% 42%;
+    --tier-platinum: 200 22% 45%;
+    --tier-expert: 184 40% 32%;
+
+
+
     /* Enterprise-specific tokens */
     --surface-elevated: 0 0% 99%;
     --surface-subtle: 215 20% 98%;
