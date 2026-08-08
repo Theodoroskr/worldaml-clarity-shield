@@ -46,7 +46,7 @@ export default function AppShellLayout() {
       </div>
     );
   }
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/academy/login" replace />;
 
   const displayName = profile?.full_name || user.email || "";
   const initials = displayName
