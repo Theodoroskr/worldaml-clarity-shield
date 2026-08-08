@@ -147,6 +147,7 @@ export default function AdminUsers() {
           recipientEmail,
           recipientName: upsellDialog.profile.full_name || "",
           templateId: upsellTemplate,
+          templateData: upsellData,
         },
       });
       if (error) {
