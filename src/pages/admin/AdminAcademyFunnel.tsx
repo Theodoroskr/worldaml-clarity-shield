@@ -590,7 +590,51 @@ export default function AdminAcademyFunnel() {
                 </div>
               </Card>
             </TabsContent>
+
+            <TabsContent value="sources" className="space-y-3">
+              <div className="flex justify-end">
+                <Button variant="outline" size="sm" onClick={exportSources} disabled={!data.sourceRows.length}>
+                  <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
+                </Button>
+              </div>
+              <Card className="overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="sticky top-0">
+                      <tr className="border-b border-border bg-muted text-xs uppercase text-muted-foreground">
+                        <th className="px-3 py-2 text-left">Source</th>
+                        <th className="px-3 py-2 text-right">Signups</th>
+                        <th className="px-3 py-2 text-right">Started checkout</th>
+                        <th className="px-3 py-2 text-right">Paid</th>
+                        <th className="px-3 py-2 text-right">Signup → Paid</th>
+                        <th className="px-3 py-2 text-right">Revenue</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {data.sourceRows.map(r => (
+                        <tr key={r.source} className="hover:bg-muted/30">
+                          <td className="px-3 py-2 font-medium">{r.source}</td>
+                          <td className="px-3 py-2 text-right tabular-nums">{r.signups}</td>
+                          <td className="px-3 py-2 text-right tabular-nums">{r.started}</td>
+                          <td className="px-3 py-2 text-right tabular-nums text-emerald-600 font-medium">{r.paid}</td>
+                          <td className="px-3 py-2 text-right tabular-nums"><ConvBadge value={r.conversion} /></td>
+                          <td className="px-3 py-2 text-right tabular-nums">{money(r.revenue)}</td>
+                        </tr>
+                      ))}
+                      {data.sourceRows.length === 0 && (
+                        <tr><td colSpan={6} className="text-center py-8 text-sm text-muted-foreground">No attribution data in this range.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+              <p className="text-[11px] text-muted-foreground">
+                Attribution comes from <code>profiles.signup_utm.utm_source</code> (falling back to <code>signup_source</code>).
+                Only a minority of historical profiles carry this data, so "Direct / unknown" is expected to dominate for older cohorts.
+              </p>
+            </TabsContent>
           </Tabs>
+
 
           <p className="text-[11px] text-muted-foreground">
             Signups counted by <code>profiles.created_at</code> in range. Checkout = any purchase row created in range (paid/pending/failed/refunded). Paid = at least one <code>paid</code> purchase in range. Users are deduplicated; revenue sums all paid purchases in range.
