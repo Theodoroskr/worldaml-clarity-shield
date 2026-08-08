@@ -362,6 +362,8 @@ Deno.serve(async (req) => {
               "partner-contact": "Partner Request",
               "advisory-consultation": "Contact Sales",
               "newsletter": "Newsletter",
+            };
+
 
             const ALLOWED = new Set([
               "Contact Sales",
