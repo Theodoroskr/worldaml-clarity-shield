@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { CatalogueCourse, categoryLabel, difficultyLabel } from "@/hooks/useAcademyCatalogue";
 import { AcademyCurrency, convertEurCents, formatPrice } from "@/lib/academyFx";
 import { isPaidCourse } from "@/data/academyPricing";
+import { getCourseCover } from "@/assets/academy";
 
 export function statusBadge(c: CatalogueCourse) {
   if (c.status === "completed") return { label: "Completed", cls: "bg-accent/10 text-accent border-accent/20" };
