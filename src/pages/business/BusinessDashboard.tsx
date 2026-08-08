@@ -244,6 +244,23 @@ export default function BusinessDashboard() {
         </section>
       )}
 
+      {/* SANCTIONS QUICK CHECK */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Sanctions quick check</h2>
+            <p className="text-sm text-muted-foreground">Run an instant screening against global sanctions lists.</p>
+          </div>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/business/solutions/worldaml#plans">Upgrade screening <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link>
+          </Button>
+        </div>
+        <DashboardSanctionsWidget />
+      </section>
+
+      {/* NEWS + INSIGHTS */}
+      <BusinessNewsFeed />
+
       {/* SUITE + ACADEMY */}
       <section className="grid lg:grid-cols-2 gap-4">
         <Card className="border-teal/30 bg-teal/[0.04] flex flex-col">
@@ -259,10 +276,16 @@ export default function BusinessDashboard() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2 pt-1">
-              <Button asChild variant="accent" size="sm"><Link to="/business/solutions/suite">View Suite &amp; Plans</Link></Button>
+              <Button asChild variant="accent" size="sm"><Link to="/business/solutions/suite">View Suite plans &amp; buy</Link></Button>
               <Button asChild variant="outline" size="sm">
-                <Link to="/platform/suite">Suite Overview <ExternalLink className="ml-2 h-3.5 w-3.5" /></Link>
+                <a href="/platform/suite" target="_blank" rel="noopener noreferrer">
+                  Suite Overview <ExternalLink className="ml-2 h-3.5 w-3.5" />
+                </a>
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+
             </div>
           </CardContent>
         </Card>
