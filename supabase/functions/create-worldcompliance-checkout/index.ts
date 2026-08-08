@@ -124,6 +124,8 @@ serve(async (req) => {
       success_url: `${req.headers.get("origin")}/dashboard?subscription=success`,
       cancel_url: `${req.headers.get("origin")}/data-sources/worldcompliance/pricing?canceled=true`,
       metadata: {
+        product: "worldcompliance",
+        plan: `${userCountNum} user${userCountNum > 1 ? "s" : ""} — ${region}`,
         user_count: userCountNum.toString(),
         region,
         currency: currencyUpper,
