@@ -123,7 +123,7 @@ const navLinks: NavLink[] = [
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut, isAdmin, profile } = useAuth();
+  const { user, signOut, profile } = useAuth();
   const { has } = usePortalAccess();
   const headerRef = useRef<HTMLElement>(null);
   const academyHost = isAcademyHost();
