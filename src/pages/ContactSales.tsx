@@ -284,12 +284,12 @@ Preferred start date and number of seats below.`,
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Contact Sales"
-        description="Contact the WorldAML sales team for pricing, demos, and product information on AML screening, KYC, KYB and identity verification solutions."
+        title="Request a Demo"
+        description="Request a demo of WorldAML — AML screening, KYC/KYB, transaction monitoring and identity verification. Tell us your requirements and our team will be in touch."
         canonical="/contact-sales"
         breadcrumbs={[
           { name: "Home", url: "/" },
-          { name: "Contact Sales", url: "/contact-sales" },
+          { name: "Request a Demo", url: "/contact-sales" },
         ]}
       />
       <Header />
@@ -298,12 +298,13 @@ Preferred start date and number of seats below.`,
           <div className="container-enterprise">
             <div className="max-w-3xl mx-auto">
               <h1 className="text-display text-navy mb-4 text-center">
-                Contact Sales
+                Request a Demo
               </h1>
               <p className="text-body-lg text-text-secondary text-center mb-12">
-                Tell us about your requirements and our team will get back to you 
-                with information about the products and services that best fit your needs.
+                Tell us about your requirements and our team will get back to you
+                with a tailored demo of the products and services that best fit your needs.
               </p>
+
 
               <form onSubmit={handleSubmit} className="space-y-8">
                 {/* Product Selection */}
