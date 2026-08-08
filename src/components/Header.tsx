@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { isAcademyHost } from "@/lib/academyHost";
 import AcademyHeader from "@/components/academy/AcademyHeader";
+import { AcademyCartButton } from "@/components/academy/AcademyCartDrawer";
+
 
 
 type NavChild = { href: string; label: string };
@@ -255,7 +257,9 @@ export const Header = () => {
           {/* Desktop CTA & Region */}
           <div className="hidden xl:flex items-center gap-2 shrink-0">
             <RegionSelector />
+            <AcademyCartButton iconOnly />
             {user ? (
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-1.5">
@@ -394,7 +398,11 @@ export const Header = () => {
                 )
               )}
               <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-divider">
+                <div className="flex" onClick={() => setMobileMenuOpen(false)}>
+                  <AcademyCartButton />
+                </div>
                 {user ? (
+
                   <>
                     <Button variant="outline" asChild>
                       <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
