@@ -176,7 +176,42 @@ const PartnerApplicationForm = () => {
             <Label htmlFor="description">How do you plan to refer clients?</Label>
             <Textarea id="description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} maxLength={2000} />
           </div>
+          <div className="space-y-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <Checkbox
+                checked={termsAccepted}
+                onCheckedChange={(v) => {
+                  setTermsAccepted(v === true);
+                  if (v === true) setTermsError(null);
+                }}
+                aria-invalid={!!termsError}
+                className="mt-0.5"
+              />
+              <span className="text-body-sm text-text-secondary">
+                I accept the{" "}
+                <Link to="/terms" className="text-teal hover:underline" target="_blank">Terms &amp; Conditions</Link>{" "}
+                and the{" "}
+                <Link to="/privacy" className="text-teal hover:underline" target="_blank">Privacy Policy</Link>
+                . <span className="text-red-500">*</span>
+              </span>
+            </label>
+            {termsError && (
+              <p role="alert" className="text-body-sm text-destructive">{termsError}</p>
+            )}
+            <label className="flex items-start gap-3 cursor-pointer">
+              <Checkbox
+                checked={marketingConsent}
+                onCheckedChange={(v) => setMarketingConsent(v === true)}
+                className="mt-0.5"
+              />
+              <span className="text-body-sm text-text-secondary">
+                I'd like to receive marketing communications about WorldAML products,
+                events and regulatory updates. (Optional.)
+              </span>
+            </label>
+          </div>
           <Button type="submit" className="w-full" disabled={loading}>
+
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             Submit Application
           </Button>
