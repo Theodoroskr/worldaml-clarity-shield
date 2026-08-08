@@ -107,8 +107,12 @@ Deno.serve(async (req) => {
     req.headers.get("x-real-ip") ||
     "unknown";
 
-  // Rate limit check
-  const { allowed, remaining } = checkRateLimit(ip);
+  // Rate limit check. Dry-run verification requests (no writes, no email, no
+  // CRM call) are exempt so mappings can be validated in bulk.
+  const isDryRunRequest = req.headers.get("x-dry-run") === "true";
+  const { allowed, remaining } = isDryRunRequest
+    ? { allowed: true, remaining: RATE_LIMIT_MAX }
+    : checkRateLimit(ip);
   if (!allowed) {
     return new Response(
       JSON.stringify({ error: "Too many requests. Please try again later." }),
