@@ -148,9 +148,10 @@ function AcademyCartDrawerContent() {
           courseSlugs: items,
           currency,
           ...(user ? {} : { guestEmail: emailTrimmed }),
+          ...(referralCode.trim() ? { referralCode: referralCode.trim().toLowerCase() } : {}),
         },
       });
-      if (error) throw error;
+
       if (!data?.url) throw new Error("No checkout URL returned");
       // Remember the email so returning guests get one-click express checkout next time.
       if (!user && typeof window !== "undefined") {
