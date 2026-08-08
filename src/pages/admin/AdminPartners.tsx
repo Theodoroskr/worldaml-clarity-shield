@@ -175,8 +175,32 @@ export default function AdminPartners() {
       certification_level: p.certification_level ?? "none",
       academy_seats_granted: p.academy_seats_granted ?? 0,
       commission_lifetime_months: p.commission_lifetime_months ?? 24,
+      commission_rate: Number(p.commission_rate ?? 0),
     });
   };
+
+  const removePartner = async () => {
+    if (!removeTarget) return;
+    setActionLoading(removeTarget.id);
+    const { error } = await supabase.from("partners").delete().eq("id", removeTarget.id);
+    if (error) {
+      toast.error("Failed to remove partner");
+      console.error(error);
+    } else {
+      toast.success("Partner removed");
+      await logPartnerAdminAction({
+        action: "remove_partner",
+        entity_type: "partner",
+        entity_id: removeTarget.id,
+        entity_label: removeTarget.display_name ?? removeTarget.referral_code,
+        changes: { removed: true, partner_type: removeTarget.partner_type },
+      });
+      setRemoveTarget(null);
+      fetchAll();
+    }
+    setActionLoading(null);
+  };
+
 
   const saveEdit = async () => {
     if (!editing) return;
