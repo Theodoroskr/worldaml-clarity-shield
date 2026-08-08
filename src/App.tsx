@@ -267,8 +267,12 @@ const App = () => (
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/pending-approval" element={<PendingApproval />} />
 
+                  {/* Portal-specific sign-in */}
+                  <Route path="/academy/login" element={<AcademyLogin />} />
+
                   {/* Legacy /academy/* links → clean subdomain URLs */}
                   <Route path="/academy" element={<AcademyRootRedirect />} />
+
                   <Route path="/academy/templates" element={<AcademyRootRedirect />} />
                   <Route path="/academy/annual-pass-active" element={<AcademyRootRedirect />} />
                   <Route path="/academy/certificate/:token" element={<AcademyCertificateRedirect />} />
