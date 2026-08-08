@@ -178,12 +178,14 @@ const EwraAdvisory = () => {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button
+                  asChild
                   size="lg"
                   className="bg-accent text-accent-foreground shadow-lg hover:bg-accent/90"
-                  onClick={open}
                 >
-                  Request an EWRA Quote
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <Link to="/contact-sales?topic=ewra">
+                    Request an EWRA Demo
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline">
                   <Link to="/templates">Browse EWRA Templates</Link>
@@ -386,12 +388,14 @@ const EwraAdvisory = () => {
                 and timeline.
               </p>
               <Button
+                asChild
                 size="lg"
                 className="mt-6 bg-accent text-accent-foreground shadow-lg hover:bg-accent/90"
-                onClick={open}
               >
-                Request an EWRA Quote
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <Link to="/contact-sales?topic=ewra">
+                  Request an EWRA Demo
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>
@@ -401,21 +405,17 @@ const EwraAdvisory = () => {
       {/* Persistent floating CTA */}
       <div className="fixed bottom-6 right-6 z-40 print:hidden">
         <Button
+          asChild
           size="lg"
-          onClick={open}
           className="group gap-2 rounded-full bg-accent px-5 py-6 text-accent-foreground shadow-2xl ring-1 ring-accent/40 hover:bg-accent/90"
         >
-          <MessageSquarePlus className="h-5 w-5" />
-          <span className="hidden sm:inline">Request an EWRA Quote</span>
-          <span className="sm:hidden">EWRA Quote</span>
+          <Link to="/contact-sales?topic=ewra">
+            <ArrowRight className="h-5 w-5" />
+            <span className="hidden sm:inline">Request an EWRA Demo</span>
+            <span className="sm:hidden">EWRA Demo</span>
+          </Link>
         </Button>
       </div>
-
-      <AdvisoryConsultationDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        defaultService={SERVICE}
-      />
 
       <Footer />
     </div>
