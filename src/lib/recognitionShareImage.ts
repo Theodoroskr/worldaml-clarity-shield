@@ -24,6 +24,37 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
   });
 }
 
+/**
+ * Recolours the logo to solid white so it sits directly on the navy card
+ * (no white plate behind it). Transparency is preserved.
+ */
+function whitenLogo(img: HTMLImageElement, w: number, h: number): HTMLCanvasElement | null {
+  const off = document.createElement("canvas");
+  off.width = Math.max(1, Math.round(w));
+  off.height = Math.max(1, Math.round(h));
+  const octx = off.getContext("2d");
+  if (!octx) return null;
+  octx.drawImage(img, 0, 0, off.width, off.height);
+  // Drop any near-white/near-navy plate pixels, then paint remaining art white.
+  try {
+    const data = octx.getImageData(0, 0, off.width, off.height);
+    const px = data.data;
+    for (let i = 0; i < px.length; i += 4) {
+      const r = px[i], g = px[i + 1], b = px[i + 2];
+      if (px[i + 3] > 0 && r > 235 && g > 235 && b > 235) px[i + 3] = 0;
+    }
+    octx.putImageData(data, 0, 0);
+  } catch {
+    // Canvas tainted (shouldn't happen for same-origin assets) — keep as-is.
+  }
+  octx.globalCompositeOperation = "source-in";
+  octx.fillStyle = WHITE;
+  octx.fillRect(0, 0, off.width, off.height);
+  octx.globalCompositeOperation = "source-over";
+  return off;
+}
+
+
 function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
