@@ -462,7 +462,11 @@ Preferred start date and number of seats below.`,
                     <label className="flex items-start gap-3 cursor-pointer">
                       <Checkbox
                         checked={termsAccepted}
-                        onCheckedChange={(v) => setTermsAccepted(v === true)}
+                        onCheckedChange={(v) => {
+                          setTermsAccepted(v === true);
+                          if (v === true) setTermsError(null);
+                        }}
+                        aria-invalid={!!termsError}
                         className="mt-0.5"
                       />
                       <span className="text-body-sm text-text-secondary">
@@ -477,6 +481,12 @@ Preferred start date and number of seats below.`,
                         . <span className="text-red-500">*</span>
                       </span>
                     </label>
+                    {termsError && (
+                      <p role="alert" className="text-body-sm text-destructive">
+                        {termsError}
+                      </p>
+                    )}
+
 
                     <label className="flex items-start gap-3 cursor-pointer">
                       <Checkbox
