@@ -66,8 +66,22 @@ const PartnerContactSection = () => {
       toast({ title: "Missing information", description: "Please enter your company name.", variant: "destructive" });
       return;
     }
+    if (!termsAccepted) {
+      setTermsError(
+        "You must accept the Terms & Conditions and Privacy Policy before submitting your enquiry.",
+      );
+      toast({
+        title: "Acceptance required",
+        description:
+          "Please accept the Terms & Conditions and Privacy Policy to submit your enquiry.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setTermsError(null);
 
     setSubmitting(true);
+    const consentTimestamp = new Date().toISOString();
     try {
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-form`,
@@ -84,12 +98,23 @@ const PartnerContactSection = () => {
             email: form.email,
             company: form.company,
             job_title: form.jobTitle,
+            country: form.country,
             message: form.message,
             products: ["partnership"],
             metadata: {
               partner_type: form.partnerType,
               website: form.website,
               attribution: getWebAttribution(),
+              terms_accepted: true,
+              terms_accepted_at: consentTimestamp,
+              marketing_consent: marketingConsent,
+              marketing_consent_at: marketingConsent ? consentTimestamp : null,
+              consent_timestamp: consentTimestamp,
+              consent_text:
+                "I accept the Terms & Conditions and the Privacy Policy." +
+                (marketingConsent
+                  ? " I'd like to receive marketing communications about WorldAML products, events and regulatory updates."
+                  : ""),
             },
           }),
         },
@@ -113,9 +138,13 @@ const PartnerContactSection = () => {
         company: "",
         website: "",
         jobTitle: "",
+        country: "",
         partnerType: "referral",
         message: "",
       });
+      setTermsAccepted(false);
+      setMarketingConsent(false);
+
     } catch {
       toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
     } finally {
