@@ -55,7 +55,7 @@ export function SolutionCard({
           {entry?.price && (
             <p className="text-sm">
               <span className="text-muted-foreground">From </span>
-              <span className="text-lg font-bold text-foreground">{entry.price}</span>
+              <span className="text-lg font-bold text-foreground">{entry.price.replace(/^From\s+/i, "")}</span>
               <span className="text-muted-foreground">{entry.period ?? ""}</span>
             </p>
           )}

@@ -40,23 +40,39 @@ export default function BusinessDashboard() {
     actions.push({ icon: Users, text: "You have pending team invitations.", to: "/business/team", cta: "Manage team" });
   }
 
+  const nextRenewal = activeEntitlements
+    .filter((e) => e.renews_at)
+    .sort((a, b) => new Date(a.renews_at!).getTime() - new Date(b.renews_at!).getTime())[0];
+  const academySeats = members.filter((m) => m.academy_seat).length;
+
+  const stats = [
+    { label: "Active solutions", value: String(activeEntitlements.length), icon: Boxes, to: "/business/products" },
+    { label: "Team members", value: String(members.length || 1), icon: Users, to: "/business/team" },
+    { label: "Academy seats", value: String(academySeats), icon: GraduationCap, to: "/business/training" },
+    { label: "Next renewal", value: nextRenewal ? fmtDate(nextRenewal.renews_at) : "—", icon: CreditCard, to: "/business/billing" },
+  ];
+
   return (
-    <div className="space-y-8 max-w-6xl">
+    <div className="space-y-6 max-w-6xl">
       {/* WELCOME */}
-      <section className="rounded-xl bg-navy text-primary-foreground px-6 py-7">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+      <section className="relative overflow-hidden rounded-2xl bg-navy text-primary-foreground px-6 py-6 md:px-8 md:py-7">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-teal/20 blur-3xl"
+        />
+        <div className="relative flex flex-wrap items-end justify-between gap-5">
           <div>
-            <p className="text-xs uppercase tracking-wider text-teal">{account?.company_name}</p>
-            <h1 className="mt-1 text-2xl md:text-3xl font-bold">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-teal">{account?.company_name}</p>
+            <h1 className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-primary-foreground">
               {hasProducts ? `Welcome back, ${firstName}` : `Welcome to WorldAML, ${firstName}`}
             </h1>
             <p className="mt-1.5 text-sm text-primary-foreground/70 max-w-xl">
               {hasProducts
-                ? "Manage your WorldAML solutions, team and account."
-                : "Build the compliance stack your business needs."}
+                ? "Your compliance stack at a glance — products, team, training and billing in one place."
+                : "Build the compliance stack your business needs — screening, identity verification and training."}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {hasProducts ? (
               <Button asChild variant="accent"><Link to="/business/products">Open your products <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
             ) : (
@@ -69,17 +85,40 @@ export default function BusinessDashboard() {
         </div>
       </section>
 
+      {/* AT A GLANCE */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {stats.map((s) => (
+          <Link
+            key={s.label}
+            to={s.to}
+            className="group rounded-xl border border-border bg-card px-4 py-3.5 hover:border-teal/50 hover:shadow-sm transition-all"
+          >
+            <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <s.icon className="w-3.5 h-3.5 text-teal" />{s.label}
+            </div>
+            <p className="mt-1.5 text-xl font-bold text-foreground group-hover:text-teal transition-colors">{s.value}</p>
+          </Link>
+        ))}
+      </section>
+
       {/* ACTION CENTRE */}
       {actions.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">Action Centre</CardTitle></CardHeader>
-          <CardContent className="divide-y divide-border">
+        <Card className="border-amber-500/30 bg-amber-500/[0.04]">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> Action Centre
+              <Badge variant="outline" className="ml-1 h-5 border-amber-500/40 bg-amber-500/10 text-[10px] text-amber-700">
+                {actions.length}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="divide-y divide-border/70">
             {actions.slice(0, 5).map((a, i) => (
               <div key={i} className="flex items-center justify-between gap-4 py-2.5 first:pt-0 last:pb-0">
                 <div className="flex items-center gap-2.5 text-sm text-foreground/90">
                   <a.icon className="w-4 h-4 text-teal shrink-0" />{a.text}
                 </div>
-                <Button asChild size="sm" variant="ghost"><Link to={a.to}>{a.cta}</Link></Button>
+                <Button asChild size="sm" variant="outline" className="shrink-0"><Link to={a.to}>{a.cta}</Link></Button>
               </div>
             ))}
           </CardContent>
@@ -205,53 +244,51 @@ export default function BusinessDashboard() {
         </section>
       )}
 
-      {/* WORLDAML SUITE */}
-      <section>
-        <Card className="border-teal/30 bg-teal/[0.04]">
-          <CardContent className="py-6 flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-start gap-3 max-w-2xl">
-              <ShieldCheck className="w-6 h-6 text-teal mt-0.5 shrink-0" />
-              <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">WorldAML Compliance Suite</p>
-                <p className="font-semibold text-foreground mt-0.5">One workspace for onboarding, screening, cases and reporting</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  See every Suite module, plans and pricing — then buy online or talk to our team.
-                </p>
-              </div>
+      {/* SUITE + ACADEMY */}
+      <section className="grid lg:grid-cols-2 gap-4">
+        <Card className="border-teal/30 bg-teal/[0.04] flex flex-col">
+          <CardContent className="pt-6 flex-1 flex flex-col gap-3">
+            <span className="w-9 h-9 rounded-lg bg-teal/10 flex items-center justify-center">
+              <ShieldCheck className="w-4.5 h-4.5 text-teal" />
+            </span>
+            <div className="flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">WorldAML Compliance Suite</p>
+              <p className="font-semibold text-foreground mt-1">One workspace for onboarding, screening, cases and reporting</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                See every Suite module, plans and pricing — then buy online or talk to our team.
+              </p>
             </div>
-            <div className="flex gap-2">
-              <Button asChild variant="accent"><Link to="/business/solutions/suite">View Suite & Plans</Link></Button>
-              <Button asChild variant="outline">
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button asChild variant="accent" size="sm"><Link to="/business/solutions/suite">View Suite &amp; Plans</Link></Button>
+              <Button asChild variant="outline" size="sm">
                 <Link to="/platform/suite">Suite Overview <ExternalLink className="ml-2 h-3.5 w-3.5" /></Link>
               </Button>
             </div>
           </CardContent>
         </Card>
-      </section>
 
-      {/* ACADEMY FOR BUSINESS */}
-      <section>
-        <Card className="border-navy/20 bg-navy/[0.03]">
-          <CardContent className="py-6 flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-start gap-3 max-w-2xl">
-              <GraduationCap className="w-6 h-6 text-teal mt-0.5 shrink-0" />
-              <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">WorldAML Academy for Business</p>
-                <p className="font-semibold text-foreground mt-0.5">Build compliance knowledge across your organisation</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Train employees across AML, sanctions and financial crime compliance. Individual courses from €29.
-                </p>
-              </div>
+        <Card className="border-navy/20 bg-navy/[0.03] flex flex-col">
+          <CardContent className="pt-6 flex-1 flex flex-col gap-3">
+            <span className="w-9 h-9 rounded-lg bg-navy/5 flex items-center justify-center">
+              <GraduationCap className="w-4.5 h-4.5 text-teal" />
+            </span>
+            <div className="flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">WorldAML Academy for Business</p>
+              <p className="font-semibold text-foreground mt-1">Build compliance knowledge across your organisation</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Train employees across AML, sanctions and financial crime compliance. Individual courses from €29.
+              </p>
             </div>
-            <div className="flex gap-2">
-              <Button asChild variant="accent"><Link to="/business/training">Explore Business Training</Link></Button>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button asChild variant="accent" size="sm"><Link to="/business/training">Explore Business Training</Link></Button>
               {academyAccess && (
-                <Button asChild variant="outline"><Link to="/dashboard">Go to My Learning <ExternalLink className="ml-2 h-3.5 w-3.5" /></Link></Button>
+                <Button asChild variant="outline" size="sm"><Link to="/dashboard">My Learning <ExternalLink className="ml-2 h-3.5 w-3.5" /></Link></Button>
               )}
             </div>
           </CardContent>
         </Card>
       </section>
+
 
       <TalkToExpert />
     </div>
