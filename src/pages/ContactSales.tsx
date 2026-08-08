@@ -514,7 +514,7 @@ Preferred start date and number of seats below.`,
                     "Submitting..."
                   ) : (
                     <>
-                      Submit Request
+                      Request a Demo
                       <Send className="ml-2 h-4 w-4" />
                     </>
                   )}
