@@ -115,6 +115,7 @@ export function MemberLevelCard({ data }: { data?: RecognitionStatus }) {
               <Button asChild size="sm" variant="outline" onClick={() => trackRecognition("view_progress")}>
                 <Link to="/dashboard/recognition">View Progress</Link>
               </Button>
+              <ShareRecognition data={r} />
               <Button asChild size="sm" variant="ghost" className="text-muted-foreground">
                 <Link to="/dashboard/courses">Explore Courses</Link>
               </Button>
