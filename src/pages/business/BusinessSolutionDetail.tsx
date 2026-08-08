@@ -23,11 +23,11 @@ export default function BusinessSolutionDetail() {
 
   const owned = ownedKeys.includes(solution.key);
 
-  const buy = async (planKey: string, fn: string, plan: string) => {
+  const buy = async (planKey: string, fn: string, plan: string, extra?: Record<string, unknown>) => {
     setLoading(planKey);
     track("checkout_started", solution.key, { plan });
     try {
-      const { data, error } = await supabase.functions.invoke(fn, { body: { plan } });
+      const { data, error } = await supabase.functions.invoke(fn, { body: { plan, ...(extra ?? {}) } });
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");
     } catch (e) {
