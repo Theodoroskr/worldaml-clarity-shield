@@ -301,6 +301,44 @@ serve(async (req) => {
         }
       }
 
+      // Partner referral conversion: mark the referral converted and record
+      // the order value so both the partner portal and admin see the outcome.
+      const refPartnerId = session.metadata?.referral_partner_id ?? null;
+      const refCode = session.metadata?.referral_code ?? null;
+      if (refPartnerId && refCode) {
+        const buyerEmail = (
+          session.customer_details?.email ?? session.customer_email ?? ""
+        ).toLowerCase() || null;
+        const conversionValue = (session.amount_total ?? 0) / 100;
+        try {
+          let q = supabase
+            .from("referrals")
+            .update({
+              status: "converted",
+              converted_at: now.toISOString(),
+              conversion_value: conversionValue,
+            })
+            .eq("partner_id", refPartnerId)
+            .eq("source", "academy-checkout");
+          if (buyerEmail) q = q.eq("referred_email", buyerEmail);
+          const { data: convRows } = await q.select("id");
+          if (!convRows || convRows.length === 0) {
+            await supabase.from("referrals").insert({
+              partner_id: refPartnerId,
+              referral_code_used: refCode,
+              referred_email: buyerEmail,
+              status: "converted",
+              converted_at: now.toISOString(),
+              conversion_value: conversionValue,
+              source: "academy-checkout",
+            });
+          }
+        } catch (refErr) {
+          console.error("Referral conversion update failed:", refErr);
+        }
+      }
+
+
       // Guest checkout: send a magic link so the buyer can claim their account
       // and access the courses they just paid for.
       const isGuest = session.metadata?.is_guest === "1";

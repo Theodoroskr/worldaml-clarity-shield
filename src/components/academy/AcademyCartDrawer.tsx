@@ -111,6 +111,10 @@ function AcademyCartDrawerContent() {
   const currency: AcademyCurrency = REGION_TO_CURRENCY[region] ?? "eur";
   const [loading, setLoading] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
+  const [referralCode, setReferralCode] = useState(() => {
+    try { return window.localStorage.getItem("worldaml_referral_code") || ""; } catch { return ""; }
+  });
+
 
   const { data: courseTitles } = useQuery({
     queryKey: ["academy-cart-titles", items.join(",")],
@@ -144,10 +148,12 @@ function AcademyCartDrawerContent() {
           courseSlugs: items,
           currency,
           ...(user ? {} : { guestEmail: emailTrimmed }),
+          ...(referralCode.trim() ? { referralCode: referralCode.trim().toLowerCase() } : {}),
         },
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL returned");
+
       // Remember the email so returning guests get one-click express checkout next time.
       if (!user && typeof window !== "undefined") {
         try { window.localStorage.setItem("academy_last_email", emailTrimmed); } catch { /* noop */ }
@@ -300,6 +306,23 @@ function AcademyCartDrawerContent() {
               </p>
             </div>
           )}
+          <div className="space-y-1.5">
+            <label htmlFor="cart-referral-code" className="text-caption font-medium text-foreground">
+              Partner referral code (optional)
+            </label>
+            <input
+              id="cart-referral-code"
+              type="text"
+              autoComplete="off"
+              maxLength={40}
+              placeholder="e.g. a1b2c3d4"
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value)}
+              disabled={loading}
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-body-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+
           <div className="flex gap-2">
             <Button
               variant="outline"

@@ -66,6 +66,8 @@ const ContactSales = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState<string | null>(null);
   const [marketingConsent, setMarketingConsent] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
+
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -86,6 +88,21 @@ const ContactSales = () => {
     const topicParam = searchParams.get("topic");
     const seatsParam = searchParams.get("seats");
     const domainParam = searchParams.get("domain");
+
+    // Partner referral code: ?ref= wins, otherwise reuse a previously stored one.
+    const refParam = searchParams.get("ref") || searchParams.get("referral");
+    if (refParam) {
+      const clean = refParam.trim().toLowerCase().slice(0, 40);
+      setReferralCode(clean);
+      try { window.localStorage.setItem("worldaml_referral_code", clean); } catch { /* noop */ }
+    } else {
+      try {
+        const stored = window.localStorage.getItem("worldaml_referral_code");
+        if (stored) setReferralCode((prev) => prev || stored);
+      } catch { /* noop */ }
+    }
+
+
 
     if (topicParam === "academy-team-quote") {
       // Procurement-friendly Academy team quote flow
@@ -230,6 +247,8 @@ Preferred start date and number of seats below.`,
             country: formData.country,
             message: formData.message,
             products: selectedProducts,
+            referral_code: referralCode.trim().toLowerCase() || null,
+
             metadata: {
               attribution: getWebAttribution(),
               terms_accepted: true,
@@ -267,6 +286,8 @@ Preferred start date and number of seats below.`,
         message: "",
       });
       setSelectedProducts([]);
+      setReferralCode("");
+
       setTermsAccepted(false);
       setMarketingConsent(false);
 
@@ -441,6 +462,23 @@ Preferred start date and number of seats below.`,
                       maxLength={100}
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="referralCode">Partner referral code (Optional)</Label>
+                    <Input
+                      id="referralCode"
+                      name="referralCode"
+                      value={referralCode}
+                      onChange={(e) => setReferralCode(e.target.value)}
+                      placeholder="e.g. a1b2c3d4"
+                      maxLength={40}
+                      autoComplete="off"
+                    />
+                    <p className="text-caption text-text-tertiary">
+                      Referred by a WorldAML partner? Enter their referral code so they are credited.
+                    </p>
+                  </div>
+
 
                   <div className="space-y-2">
                     <Label htmlFor="message">Message (Optional)</Label>

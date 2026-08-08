@@ -47,7 +47,9 @@ interface LeadRow {
   region: string | null;
   message: string | null;
   lead_status: string;
+  metadata: Record<string, any> | null;
   created_at: string;
+
 }
 
 const LEAD_STATUSES = ["new", "contacted", "qualified", "closed"] as const;
@@ -661,8 +663,10 @@ const Admin = () => {
                             <th className="pb-3 pr-4 font-semibold text-navy">Type</th>
                             <th className="pb-3 pr-4 font-semibold text-navy">Products</th>
                             <th className="pb-3 pr-4 font-semibold text-navy">Region</th>
+                            <th className="pb-3 pr-4 font-semibold text-navy">Partner</th>
                             <th className="pb-3 pr-4 font-semibold text-navy">Date</th>
                             <th className="pb-3 pr-4 font-semibold text-navy">Status</th>
+
                           </tr>
                         </thead>
                         <tbody>
@@ -685,7 +689,24 @@ const Admin = () => {
                               <td className="py-3 pr-4 text-text-secondary text-xs">
                                 {l.region || l.country || "—"}
                               </td>
+                              <td className="py-3 pr-4 text-xs">
+                                {l.metadata?.referral_code ? (
+                                  <span className="inline-flex flex-col">
+                                    <Badge variant="secondary" className="text-xs w-fit">
+                                      {l.metadata.referral_partner_name || l.metadata.referral_code}
+                                    </Badge>
+                                    <span className="text-text-secondary mt-0.5">{l.metadata.referral_code}</span>
+                                  </span>
+                                ) : l.metadata?.referral_code_submitted ? (
+                                  <span className="text-destructive">
+                                    invalid: {l.metadata.referral_code_submitted}
+                                  </span>
+                                ) : (
+                                  <span className="text-text-secondary">—</span>
+                                )}
+                              </td>
                               <td className="py-3 pr-4 text-text-secondary">
+
                                 {new Date(l.created_at).toLocaleDateString("en-GB", {
                                   day: "2-digit", month: "short", year: "numeric",
                                 })}

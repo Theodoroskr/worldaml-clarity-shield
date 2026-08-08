@@ -1,5 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend";
+import { normaliseCode, recordReferral, resolvePartnerByCode } from "../_shared/referral.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -146,6 +148,8 @@ Deno.serve(async (req) => {
       account_type,
       region,
       metadata,
+      referral_code,
+
     } = body;
 
     // Validate required fields
@@ -174,6 +178,29 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // ── Partner referral attribution ────────────────────────────────────
+    // A referral code entered on the form is validated against active
+    // partners. When valid it is stored on the lead (admin visibility) AND a
+    // referral row is created (partner-portal visibility).
+    const rawReferralCode = referral_code ?? (metadata as any)?.referral_code;
+    const referralPartner = rawReferralCode
+      ? await resolvePartnerByCode(supabase, rawReferralCode)
+      : null;
+    const referralInvalid = !!normaliseCode(rawReferralCode) && !referralPartner;
+
+    const enrichedMetadata = {
+      ...(metadata || {}),
+      ...(referralPartner
+        ? {
+            referral_code: referralPartner.referral_code,
+            referral_partner_id: referralPartner.partner_id,
+            referral_partner_name: referralPartner.display_name,
+          }
+        : rawReferralCode
+          ? { referral_code_submitted: String(rawReferralCode).slice(0, 40), referral_code_valid: false }
+          : {}),
+    };
+
     const { error: dbError } = dryRun
       ? { error: null }
       : await supabase.from("form_submissions").insert({
@@ -190,8 +217,18 @@ Deno.serve(async (req) => {
       products: products || null,
       account_type: account_type?.trim().slice(0, 50) || null,
       region: region?.trim().slice(0, 50) || null,
-      metadata: metadata || {},
+      metadata: enrichedMetadata,
     });
+
+    if (!dryRun && referralPartner) {
+      await recordReferral(supabase, {
+        partner: referralPartner,
+        email,
+        source: `lead:${form_type}`,
+        status: "signed_up",
+      });
+    }
+
 
     if (dbError) {
       console.error("Database insert error:", dbError);
@@ -227,7 +264,15 @@ Deno.serve(async (req) => {
         // the website is lost, even where no dedicated Zoho field exists.
         const md = (metadata as any) ?? {};
         const detailLines = [
+          referralPartner
+            ? `Partner referral code: ${referralPartner.referral_code}${
+                referralPartner.display_name ? ` (${referralPartner.display_name})` : ""
+              }`
+            : referralInvalid
+              ? `Partner referral code submitted but not recognised: ${String(rawReferralCode).slice(0, 40)}`
+              : null,
           md.operator_type ? `Operator type: ${md.operator_type}` : null,
+
           md.segment ? `Segment: ${md.segment}` : null,
           md.jurisdiction ? `Primary jurisdiction: ${md.jurisdiction}` : null,
           md.page ? `Source page: ${md.page}` : null,

@@ -2,6 +2,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { recordReferral, resolvePartnerByCode } from "../_shared/referral.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -67,6 +69,8 @@ serve(async (req) => {
     const currency: string = (body?.currency ?? "eur").toLowerCase();
     const guestEmailRaw: string | undefined =
       typeof body?.guestEmail === "string" ? body.guestEmail.trim().toLowerCase() : undefined;
+    const referralPartner = await resolvePartnerByCode(serviceClient, body?.referralCode);
+
 
     if (courseSlugs.length === 0) return json({ error: "No courses provided" }, 400);
     if (!RATES[currency]) return json({ error: "Unsupported currency" }, 400);
@@ -250,8 +254,26 @@ serve(async (req) => {
         course_slugs: slugsToBuy.join(","),
         discount_pct: String(discountPct),
         is_guest: isGuest ? "1" : "0",
+        ...(referralPartner
+          ? {
+              referral_code: referralPartner.referral_code,
+              referral_partner_id: referralPartner.partner_id,
+            }
+          : {}),
       },
     });
+
+    // Attribute the basket to the partner immediately so it appears in both
+    // the partner portal and the admin referral view, even if payment fails.
+    if (referralPartner) {
+      await recordReferral(serviceClient, {
+        partner: referralPartner,
+        email: userEmail,
+        source: "academy-checkout",
+        status: "signed_up",
+      });
+    }
+
 
     // Insert pending rows (one per course) sharing the session id
     const subtotalCents = slugsToBuy.reduce(
