@@ -669,6 +669,17 @@ Deno.serve(async (req) => {
           (k) => leadRecord[k] === undefined && delete leadRecord[k],
         );
 
+        // Dry-run: return the exact Zoho Lead payload without creating the
+        // lead, sending email, or persisting anything. Used to verify field
+        // mappings against the CRM layout.
+        if (dryRun) {
+          return new Response(
+            JSON.stringify({ success: true, dry_run: true, lead_record: leadRecord }),
+            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+
+
         // Resolve the Zoho Lead Assignment Rule ID so ownership is decided by
         // Zoho CRM (via the configured Assignment Rule) rather than set here.
         // Prefer an explicit env override; otherwise auto-discover the first
