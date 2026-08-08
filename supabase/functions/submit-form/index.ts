@@ -537,6 +537,49 @@ Deno.serve(async (req) => {
           $utm_term: attribution.utm_term || undefined,
           $utm_content: attribution.utm_content || undefined,
 
+          // ── Lead Source 2 (channel picklist) ──────────────────────────────
+          // Derived from UTM / referrer so the CRM's Lead Source block is
+          // populated alongside Lead_Source ("Website - WorldAML").
+          Lead_Source_2: (() => {
+            const key = String(form_type ?? "").trim().toLowerCase();
+            const isPartner =
+              key.includes("partner") ||
+              (Array.isArray(products) &&
+                products.some((p) => String(p ?? "").toLowerCase().includes("partner")));
+            if (isPartner) return "Partner";
+            const src = String(attribution.utm_source ?? "").toLowerCase();
+            const med = String(attribution.utm_medium ?? "").toLowerCase();
+            const ref = String(attribution.referrer ?? "").toLowerCase();
+            const paid = med.includes("cpc") || med.includes("paid") || med.includes("ppc");
+            if (src.includes("google") || ref.includes("google.")) {
+              return paid ? "Google Ads" : "Google Organic";
+            }
+            if (src.includes("linkedin") || ref.includes("linkedin.")) {
+              return paid ? "LinkedIn Paid" : "LinkedIn Organic";
+            }
+            if (src.includes("facebook") || src.includes("meta") || src.includes("instagram")) {
+              return "Meta Ads";
+            }
+            if (med.includes("email") || src.includes("newsletter")) return "Email Campaign";
+            if (key.includes("webinar")) return "Webinar";
+            if (key.includes("event")) return "Event";
+            if (key.includes("demo")) return "Website Demo";
+            if (key.includes("contact")) return "Website Contact Form";
+            return "Website";
+          })(),
+
+          // ── Visit Summary block ───────────────────────────────────────────
+          // Populated from the browser's first/last-touch tracking so the
+          // CRM's Visit Summary fields are linked to the submitted lead.
+          First_Visited_URL: attribution.landing_page || undefined,
+          Referrer: attribution.referrer || undefined,
+          First_Visited_Time: attribution.first_visited_at || undefined,
+          Last_Visited_Time: attribution.last_visited_at || undefined,
+          Days_Visited:
+            typeof attribution.days_visited === "number" ? attribution.days_visited : undefined,
+
+
+
           // ── Additional WorldAML Book Demo mappings ────────────────────────
           // Sales Organisation Unit — WorldAML leads belong to the ICG parent
           // sales unit, EXCEPT partnership enquiries which route to the
