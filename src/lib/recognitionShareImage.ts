@@ -85,6 +85,7 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): st
 export async function renderRecognitionCard(
   r: RecognitionStatus,
   memberName?: string,
+  cpdHours = 0,
 ): Promise<Blob | null> {
   const W = 1200;
   const H = 630;
