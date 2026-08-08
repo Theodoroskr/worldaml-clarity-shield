@@ -47,7 +47,9 @@ interface LeadRow {
   region: string | null;
   message: string | null;
   lead_status: string;
+  metadata: Record<string, any> | null;
   created_at: string;
+
 }
 
 const LEAD_STATUSES = ["new", "contacted", "qualified", "closed"] as const;
