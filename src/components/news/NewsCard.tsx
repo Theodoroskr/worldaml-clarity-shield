@@ -66,7 +66,7 @@ export const NewsCard = ({ item }: NewsCardProps) => {
   const relatedLinks = categoryLinks[item.category];
 
   return (
-    <article className="bg-card border border-divider rounded-lg p-6 hover:border-primary/30 transition-colors">
+    <article className="bg-card border border-divider rounded-lg p-6 hover:border-primary/30 transition-colors flex flex-col h-full">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-3">
         <Badge 
