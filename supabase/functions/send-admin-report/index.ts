@@ -39,77 +39,152 @@ function resolveRange(key: string): { from: Date; to: Date } {
   }
 }
 
-function isDue(frequency: string, lastRunAt: string | null): boolean {
-  if (frequency === "none") return false;
-  if (!lastRunAt) return true;
-  const elapsed = Date.now() - new Date(lastRunAt).getTime();
+/** Schedule check: honours frequency plus optional day-of-week / day-of-month / send hour (UTC). */
+function isDue(r: any): boolean {
+  const frequency = r.frequency;
+  if (!frequency || frequency === "none") return false;
+
+  const now = new Date();
+  const sendHour = Number.isFinite(Number(r.send_hour_utc)) ? Number(r.send_hour_utc) : 7;
+  if (now.getUTCHours() < sendHour) return false;
+
+  if (frequency === "weekly" && r.day_of_week !== null && r.day_of_week !== undefined) {
+    if (now.getUTCDay() !== Number(r.day_of_week)) return false;
+  }
+  if (frequency === "monthly" && r.day_of_month !== null && r.day_of_month !== undefined) {
+    if (now.getUTCDate() !== Number(r.day_of_month)) return false;
+  }
+
+  if (!r.last_run_at) return true;
+  const elapsed = Date.now() - new Date(r.last_run_at).getTime();
   const day = 86_400_000;
   if (frequency === "daily") return elapsed >= 0.9 * day;
-  if (frequency === "weekly") return elapsed >= 6.9 * day;
-  if (frequency === "monthly") return elapsed >= 27.9 * day;
+  if (frequency === "weekly") return elapsed >= 6.5 * day;
+  if (frequency === "monthly") return elapsed >= 27.5 * day;
   return false;
 }
 
-interface Section { title: string; rows: [string, string][] }
+interface Row { label: string; value: string; delta?: string; up?: boolean }
+interface Section { title: string; note?: string; rows: Row[] }
+
+const r = (label: string, value: string, delta?: string, up?: boolean): Row => ({ label, value, delta, up });
+
+function pctDelta(current: unknown, previous: unknown): { delta?: string; up?: boolean } {
+  const c = Number(current ?? 0);
+  const p = Number(previous ?? NaN);
+  if (!Number.isFinite(p)) return {};
+  if (p === 0) return c > 0 ? { delta: "new", up: true } : {};
+  const change = ((c - p) / Math.abs(p)) * 100;
+  if (!Number.isFinite(change)) return {};
+  return { delta: `${change >= 0 ? "+" : ""}${change.toFixed(0)}%`, up: change >= 0 };
+}
 
 function buildSections(a: any, reportType: string): Section[] {
+  const prev = a.previous ?? null;
+  const cmp = (key: string) => (prev ? pctDelta(a.current?.[key], prev?.[key]) : {});
+
+  const mk = (label: string, key: string, fmt: (v: unknown) => string = num): Row => {
+    const d = cmp(key);
+    return r(label, fmt(a.current?.[key]), d.delta, d.up);
+  };
+
   const executive: Section = {
     title: "Headline",
+    note: prev ? "Change shown against the previous equivalent period." : undefined,
     rows: [
-      ["New users", num(a.current.new_users)],
-      ["Active users", num(a.current.active_users)],
-      ["New leads", num(a.current.new_leads)],
-      ["Paid orders", num(a.current.paid_orders)],
-      ["Revenue", eur(a.current.revenue_cents)],
-      ["Total users (lifetime)", num(a.lifetime.total_users)],
-      ["Lifetime revenue", eur(a.lifetime.revenue_cents)],
+      mk("New users", "new_users"),
+      mk("Active users", "active_users"),
+      mk("New leads", "new_leads"),
+      mk("Paid orders", "paid_orders"),
+      mk("Revenue", "revenue_cents", (v) => eur(Number(v))),
+      r("Total users (lifetime)", num(a.lifetime?.total_users)),
+      r("Lifetime revenue", eur(a.lifetime?.revenue_cents)),
     ],
   };
+
+  const finance: Section = {
+    title: "Finance",
+    rows: [
+      mk("Revenue in period", "revenue_cents", (v) => eur(Number(v))),
+      mk("Paid orders", "paid_orders"),
+      r("Average order value", (() => {
+        const orders = Number(a.current?.paid_orders ?? 0);
+        return orders ? eur(Number(a.current?.revenue_cents ?? 0) / orders) : "—";
+      })()),
+      r("Lifetime revenue", eur(a.lifetime?.revenue_cents)),
+      r("Partner commission earned", eur(a.partners?.commission_earned_cents)),
+      r("Partner pipeline", `€${num(a.partners?.pipeline_eur)}`),
+      r("Partner won", `€${num(a.partners?.won_eur)}`),
+    ],
+  };
+
+  const sales: Section = {
+    title: "Sales pipeline",
+    rows: [
+      mk("New leads", "new_leads"),
+      mk("New business accounts", "new_business_accounts"),
+      mk("New deals registered", "new_deals"),
+      r("Checkouts started", num(a.business?.funnel?.checkout_started)),
+      r("Purchases", num(a.business?.funnel?.purchased)),
+      r("Lead → order conversion", (() => {
+        const leads = Number(a.current?.new_leads ?? 0);
+        const orders = Number(a.current?.paid_orders ?? 0);
+        return leads ? `${((orders / leads) * 100).toFixed(1)}%` : "—";
+      })()),
+      ...(a.marketing?.by_form_type ?? []).slice(0, 5).map((x: any) => r(`Enquiries · ${x.label}`, num(x.n))),
+    ],
+  };
+
   const academy: Section = {
     title: "Academy",
     rows: [
-      ["Courses started", num(a.current.courses_started)],
-      ["Courses completed", num(a.current.courses_completed)],
-      ["Certificates issued", num(a.current.certificates)],
-      ["Completion rate", `${a.academy.completion_rate}%`],
-      ["Paying learners", num(a.academy.paying_users)],
-      ...a.academy.top_courses.slice(0, 5).map((c: any) => [`Top course · ${c.title}`, `${c.enrolments} enrolments`] as [string, string]),
+      mk("Courses started", "courses_started"),
+      mk("Courses completed", "courses_completed"),
+      mk("Certificates issued", "certificates"),
+      r("Completion rate", `${a.academy?.completion_rate ?? 0}%`),
+      r("Paying learners", num(a.academy?.paying_users)),
+      ...(a.academy?.top_courses ?? []).slice(0, 5).map((c: any) => r(`Top course · ${c.title}`, `${c.enrolments} enrolments`)),
     ],
   };
+
   const business: Section = {
     title: "Business",
     rows: [
-      ["New business accounts", num(a.current.new_business_accounts)],
-      ["Total accounts", num(a.business.total)],
-      ["Active product entitlements", num(a.business.active_entitlements)],
-      ["Checkouts started", num(a.business.funnel.checkout_started)],
-      ["Purchases", num(a.business.funnel.purchased)],
+      mk("New business accounts", "new_business_accounts"),
+      r("Total accounts", num(a.business?.total)),
+      r("Active product entitlements", num(a.business?.active_entitlements)),
+      r("Checkouts started", num(a.business?.funnel?.checkout_started)),
+      r("Purchases", num(a.business?.funnel?.purchased)),
     ],
   };
+
   const partners: Section = {
     title: "Partners",
     rows: [
-      ["Active partners", num(a.partners.active)],
-      ["New deals registered", num(a.current.new_deals)],
-      ["Pipeline", `€${num(a.partners.pipeline_eur)}`],
-      ["Won", `€${num(a.partners.won_eur)}`],
-      ["Commission earned", eur(a.partners.commission_earned_cents)],
-      ...a.partners.top_partners.slice(0, 5).map((p: any) => [`Top partner · ${p.name}`, `${p.deals} deals`] as [string, string]),
+      r("Active partners", num(a.partners?.active)),
+      mk("New deals registered", "new_deals"),
+      r("Pipeline", `€${num(a.partners?.pipeline_eur)}`),
+      r("Won", `€${num(a.partners?.won_eur)}`),
+      r("Commission earned", eur(a.partners?.commission_earned_cents)),
+      ...(a.partners?.top_partners ?? []).slice(0, 5).map((p: any) => r(`Top partner · ${p.name}`, `${p.deals} deals`)),
     ],
   };
+
   const marketing: Section = {
     title: "Marketing",
     rows: [
-      ["New leads", num(a.current.new_leads)],
-      ...a.marketing.by_form_type.slice(0, 6).map((r: any) => [`Form · ${r.label}`, num(r.n)] as [string, string]),
-      ...a.marketing.by_referrer.slice(0, 5).map((r: any) => [`Source · ${r.label}`, num(r.n)] as [string, string]),
+      mk("New leads", "new_leads"),
+      ...(a.marketing?.by_form_type ?? []).slice(0, 6).map((x: any) => r(`Form · ${x.label}`, num(x.n))),
+      ...(a.marketing?.by_referrer ?? []).slice(0, 5).map((x: any) => r(`Source · ${x.label}`, num(x.n))),
     ],
   };
+
   const actions: Section = {
     title: "Requires attention",
-    rows: Object.entries(a.actions)
+    note: "Items waiting on the team.",
+    rows: Object.entries(a.actions ?? {})
       .filter(([, v]) => Number(v) > 0)
-      .map(([k, v]) => [k.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()), num(v)] as [string, string]),
+      .map(([k, v]) => r(k.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()), num(v))),
   };
 
   switch (reportType) {
@@ -117,23 +192,28 @@ function buildSections(a: any, reportType: string): Section[] {
     case "business": return [business, actions];
     case "partners": return [partners, actions];
     case "marketing": return [marketing, actions];
-    case "full": return [executive, academy, business, partners, marketing, actions];
-    default: return [executive, academy, business, partners, marketing, actions].slice(0, 4).concat([actions]);
+    case "finance": return [finance, actions];
+    case "sales": return [sales, actions];
+    case "full": return [executive, finance, sales, academy, business, partners, marketing, actions];
+    default: return [executive, academy, business, partners, actions];
   }
 }
 
-function renderHtml(name: string, periodLabel: string, sections: Section[]): string {
+function renderHtml(name: string, periodLabel: string, sections: Section[], opts: { isTest?: boolean; description?: string } = {}): string {
   const body = sections
     .filter((s) => s.rows.length)
     .map(
       (s) => `
-      <h2 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin:26px 0 8px;">${esc(s.title)}</h2>
+      <h2 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin:26px 0 4px;">${esc(s.title)}</h2>
+      ${s.note ? `<p style="margin:0 0 8px;font-size:12px;color:#94a3b8;">${esc(s.note)}</p>` : ""}
       <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:14px;">
         ${s.rows
           .map(
-            ([l, v]) => `<tr>
-              <td style="padding:7px 0;border-bottom:1px solid #eef2f7;color:#334155;">${esc(l)}</td>
-              <td align="right" style="padding:7px 0;border-bottom:1px solid #eef2f7;color:#0f172a;font-weight:600;">${esc(v)}</td>
+            (row) => `<tr>
+              <td style="padding:7px 0;border-bottom:1px solid #eef2f7;color:#334155;">${esc(row.label)}</td>
+              <td align="right" style="padding:7px 0;border-bottom:1px solid #eef2f7;color:#0f172a;font-weight:600;">
+                ${esc(row.value)}${row.delta ? `<span style="margin-left:8px;font-weight:600;font-size:12px;color:${row.up ? "#0d9488" : "#dc2626"};">${esc(row.delta)}</span>` : ""}
+              </td>
             </tr>`,
           )
           .join("")}
@@ -143,12 +223,14 @@ function renderHtml(name: string, periodLabel: string, sections: Section[]): str
 
   return `
   <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;background:#fff;">
+    ${opts.isTest ? `<div style="background:#fef3c7;color:#92400e;padding:10px 32px;font-size:13px;font-weight:600;">TEST SEND — this is a preview of a scheduled WorldAML report.</div>` : ""}
     <div style="background:#1e3a5f;padding:26px 32px;">
       <h1 style="color:#fff;margin:0;font-size:19px;font-weight:700;">WorldAML — ${esc(name)}</h1>
       <p style="color:#a5b4c6;margin:6px 0 0;font-size:13px;">${esc(periodLabel)}</p>
+      ${opts.description ? `<p style="color:#a5b4c6;margin:6px 0 0;font-size:12px;">${esc(opts.description)}</p>` : ""}
     </div>
     <div style="padding:8px 32px 28px;">
-      ${body}
+      ${body || `<p style="font-size:14px;color:#64748b;">No activity recorded for this period.</p>`}
       <a href="${ADMIN_URL}" style="display:inline-block;margin-top:26px;background:#0d9488;color:#fff;text-decoration:none;padding:11px 24px;border-radius:6px;font-weight:600;font-size:14px;">Open admin dashboard →</a>
     </div>
     <div style="padding:16px 32px;border-top:1px solid #e5e7eb;">
@@ -177,6 +259,7 @@ Deno.serve(async (req) => {
     const isCron =
       (!!cronSecret && req.headers.get("x-cron-secret") === cronSecret) || (!!token && token === serviceKey);
 
+    let actorEmail: string | null = null;
     if (!isCron) {
       if (!token) return json({ error: "Unauthorized" }, 401);
       const { data: { user }, error } = await admin.auth.getUser(token);
@@ -184,10 +267,16 @@ Deno.serve(async (req) => {
       const { data: role } = await admin
         .from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
       if (!role) return json({ error: "Admin access required" }, 403);
+      actorEmail = user.email ?? null;
     }
 
     const payload = req.method === "POST" ? await req.json().catch(() => ({})) : {};
     const reportId: string | undefined = payload?.report_id;
+    const mode: "send" | "preview" | "test" = payload?.mode === "preview" || payload?.mode === "test" ? payload.mode : "send";
+
+    if ((mode === "preview" || mode === "test") && isCron) {
+      return json({ error: "Preview and test sends require an admin session" }, 403);
+    }
 
     let reports: any[] = [];
     if (reportId) {
@@ -196,18 +285,20 @@ Deno.serve(async (req) => {
       reports = [data];
     } else {
       const { data } = await admin.from("admin_reports").select("*").eq("is_active", true).neq("frequency", "none");
-      reports = (data ?? []).filter((r) => isDue(r.frequency, r.last_run_at));
+      reports = (data ?? []).filter((row) => isDue(row));
     }
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const resend = resendApiKey ? new Resend(resendApiKey) : null;
     const results: { report: string; status: string; error?: string }[] = [];
 
-    for (const r of reports) {
-      const { from, to } = resolveRange(r.range_key);
+    for (const rep of reports) {
+      const startedAt = Date.now();
+      const { from, to } = resolveRange(rep.range_key);
       let status = "sent";
       let errorMessage: string | null = null;
       let summary: unknown = null;
+      const periodLabel = `${from.toISOString().slice(0, 10)} → ${new Date(to.getTime() - 1).toISOString().slice(0, 10)}`;
 
       try {
         const { data: analytics, error: rpcError } = await admin.rpc("admin_analytics", {
@@ -216,41 +307,66 @@ Deno.serve(async (req) => {
         });
         if (rpcError) throw new Error(rpcError.message);
 
-        const sections = buildSections(analytics, r.report_type);
-        summary = { headline: sections[0]?.rows ?? [] };
-        const periodLabel = `${from.toISOString().slice(0, 10)} → ${new Date(to.getTime() - 1).toISOString().slice(0, 10)}`;
+        const sections = buildSections(analytics, rep.report_type);
+        summary = { headline: (sections[0]?.rows ?? []).map((x) => [x.label, x.value]) };
 
-        const recipients: string[] = (r.recipients ?? []).filter((e: string) => /.+@.+\..+/.test(e));
-        if (!recipients.length) throw new Error("No valid recipients configured");
+        // Preview: return the rendered HTML without sending or logging.
+        if (mode === "preview") {
+          return json({
+            success: true,
+            preview: true,
+            report: rep.name,
+            period: periodLabel,
+            html: renderHtml(rep.name, periodLabel, sections, { description: rep.description ?? undefined }),
+          });
+        }
+
+        const recipients: string[] =
+          mode === "test"
+            ? [String(payload?.test_email || actorEmail || "")].filter((e) => /.+@.+\..+/.test(e))
+            : (rep.recipients ?? []).filter((e: string) => /.+@.+\..+/.test(e));
+
+        if (!recipients.length) {
+          throw new Error(mode === "test" ? "No test recipient available" : "No valid recipients configured");
+        }
         if (!resend) throw new Error("Email sending is not configured");
 
         const { error: sendError } = await resend.emails.send({
           from: FROM_EMAIL,
           to: recipients,
-          subject: `${r.name} — ${periodLabel}`,
-          html: renderHtml(r.name, periodLabel, sections),
+          subject: `${mode === "test" ? "[TEST] " : ""}${rep.name} — ${periodLabel}`,
+          html: renderHtml(rep.name, periodLabel, sections, {
+            isTest: mode === "test",
+            description: rep.description ?? undefined,
+          }),
         });
         if (sendError) throw new Error((sendError as any)?.message ?? "Email delivery failed");
 
-        await admin.from("admin_reports").update({ last_run_at: new Date().toISOString() }).eq("id", r.id);
+        if (mode === "send") {
+          await admin.from("admin_reports").update({ last_run_at: new Date().toISOString() }).eq("id", rep.id);
+        } else {
+          await admin.from("admin_reports").update({ last_test_at: new Date().toISOString() }).eq("id", rep.id);
+        }
       } catch (err) {
         status = "failed";
         errorMessage = err instanceof Error ? err.message : String(err);
       }
 
       await admin.from("admin_report_runs").insert({
-        report_id: r.id,
-        report_name: r.name,
-        report_type: r.report_type,
+        report_id: rep.id,
+        report_name: rep.name,
+        report_type: rep.report_type,
         period_start: from.toISOString(),
         period_end: to.toISOString(),
-        recipients: r.recipients ?? [],
+        recipients: mode === "test" ? [payload?.test_email || actorEmail].filter(Boolean) : (rep.recipients ?? []),
         status,
         error_message: errorMessage,
         summary,
+        trigger_type: mode === "test" ? "test" : isCron ? "scheduled" : "manual",
+        duration_ms: Date.now() - startedAt,
       });
 
-      results.push({ report: r.name, status, error: errorMessage ?? undefined });
+      results.push({ report: rep.name, status, error: errorMessage ?? undefined });
     }
 
     return json({ success: true, processed: results.length, results });
