@@ -7,8 +7,8 @@ import {
   CertificatesSection, RecommendedNext, ResourcesSection, ExploreWorldAML,
 } from "@/components/dashboard/DashboardSections";
 import { WorkspaceSection } from "@/components/dashboard/WorkspaceSection";
-import DashboardSanctionsWidget from "@/components/sanctions/DashboardSanctionsWidget";
-import SearchHistoryPanel from "@/components/sanctions/SearchHistoryPanel";
+import { DashboardSanctionsWidget } from "@/components/sanctions/DashboardSanctionsWidget";
+import { SearchHistoryPanel } from "@/components/sanctions/SearchHistoryPanel";
 
 export default function Dashboard() {
   const ent = useEntitlements();
