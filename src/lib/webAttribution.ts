@@ -11,6 +11,48 @@ export interface WebAttribution {
   utm_content?: string;
   landing_page?: string;
   referrer?: string;
+  first_visited_at?: string;
+  last_visited_at?: string;
+  days_visited?: number;
+  visit_count?: number;
+}
+
+// ── Visit summary tracking (feeds Zoho's Visit Summary fields) ──────────────
+const VISIT_KEY = "waml_visits_v1";
+
+interface VisitStats {
+  first_visited_at: string;
+  last_visited_at: string;
+  days: string[]; // ISO dates (YYYY-MM-DD)
+  visit_count: number;
+}
+
+function readVisits(): VisitStats | null {
+  try {
+    const raw = localStorage.getItem(VISIT_KEY);
+    return raw ? (JSON.parse(raw) as VisitStats) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Call once per page load to maintain first/last visit and days-visited counts. */
+export function recordVisit() {
+  if (typeof window === "undefined") return;
+  try {
+    const now = new Date().toISOString();
+    const today = now.slice(0, 10);
+    const prev = readVisits();
+    const stats: VisitStats = prev
+      ? {
+          first_visited_at: prev.first_visited_at || now,
+          last_visited_at: now,
+          days: prev.days?.includes(today) ? prev.days : [...(prev.days || []), today].slice(-365),
+          visit_count: (prev.visit_count || 0) + 1,
+        }
+      : { first_visited_at: now, last_visited_at: now, days: [today], visit_count: 1 };
+    localStorage.setItem(VISIT_KEY, JSON.stringify(stats));
+  } catch {}
 }
 
 const UTM_KEYS = [
