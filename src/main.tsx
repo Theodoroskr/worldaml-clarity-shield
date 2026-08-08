@@ -14,6 +14,7 @@ if (typeof window !== "undefined" && window.location.hostname.toLowerCase() === 
 }
 
 captureAttribution();
+recordVisit();
 
 
 createRoot(document.getElementById("root")!).render(

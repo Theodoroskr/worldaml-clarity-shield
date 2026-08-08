@@ -284,9 +284,16 @@ Deno.serve(async (req) => {
             console.warn(`Unknown industry value from website form: "${raw}" — leaving Zoho Industry unset`);
             return undefined;
           })(),
-          // Topic — fixed value for every WorldAML lead so CRM workflows can
-          // segment by source brand.
-          Topic: "WorldAML",
+          // Topic — "Partnership" for partner-program enquiries (WorldAML
+          // Partnership funnel), otherwise the default WorldAML brand topic.
+          Topic: (() => {
+            const key = String(form_type ?? "").trim().toLowerCase();
+            const isPartner =
+              key.includes("partner") ||
+              (Array.isArray(products) &&
+                products.some((p) => String(p ?? "").toLowerCase().includes("partner")));
+            return isPartner ? "Partnership" : "WorldAML";
+          })(),
           // Business Use Cases (multiselectpicklist) — mapped from the
           // website's use-case codes to Zoho's exact allowed values.
           Business_Use_Cases: (() => {
