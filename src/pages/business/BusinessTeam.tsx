@@ -48,7 +48,7 @@ export default function BusinessTeam() {
     }
   };
 
-  const update = async (id: string, patch: Record<string, unknown>) => {
+  const update = async (id: string, patch: { role?: string; academy_seat?: boolean; products?: string[]; status?: string }) => {
     const { error } = await supabase.from("business_members").update(patch).eq("id", id);
     if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
     else refresh();
