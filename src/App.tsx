@@ -185,6 +185,10 @@ const PartnerProfilePage = lazyWithRetry(() => import("./pages/partner-portal/Pr
 const PartnerSettingsPage = lazyWithRetry(() => import("./pages/partner-portal/Settings"));
 const PartnerContactsPage = lazyWithRetry(() => import("./pages/partner-portal/Contacts"));
 const PartnerWelcomePage = lazyWithRetry(() => import("./pages/partner-portal/Welcome"));
+const PartnerRegisterDealPage = lazyWithRetry(() => import("./pages/partner-portal/RegisterDeal"));
+const PartnerPayoutsPage = lazyWithRetry(() => import("./pages/partner-portal/Payouts"));
+const PartnerProductsPage = lazyWithRetry(() => import("./pages/partner-portal/Products"));
+const PartnerManagerPage = lazyWithRetry(() => import("./pages/partner-portal/Manager"));
 
 const SuiteAppLayout = lazyWithRetry(() => import("./pages/suite/SuiteAppLayout"));
 const SuiteDashboard = lazyWithRetry(() => import("./pages/suite/SuiteDashboard"));
