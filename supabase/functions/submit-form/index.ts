@@ -146,6 +146,8 @@ Deno.serve(async (req) => {
       account_type,
       region,
       metadata,
+      referral_code,
+
     } = body;
 
     // Validate required fields
