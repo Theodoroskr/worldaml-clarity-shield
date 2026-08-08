@@ -223,7 +223,11 @@ export default function BusinessSignup() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {emailSent ? (
+            {user && accountLoading ? (
+              <div className="py-10 flex justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : emailSent ? (
               <div className="text-center space-y-4 py-4">
                 <div className="mx-auto h-11 w-11 rounded-full bg-teal/10 text-teal flex items-center justify-center">
                   <Check className="h-5 w-5" />
