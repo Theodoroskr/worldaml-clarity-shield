@@ -308,6 +308,7 @@ const App = () => (
                 <Route path="/academy/login" element={<AcademyLogin />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/partner/signup" element={<PartnerSignup />} />
                 <Route path="/business/signup" element={<BusinessSignup />} />
                 <Route path="/business/login" element={<BusinessLogin />} />
                 <Route path="/business" element={<BusinessLayout />}>
