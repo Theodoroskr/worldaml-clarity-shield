@@ -164,7 +164,38 @@ const Academy = () => {
       annualInFlightRef.current = false;
       setAnnualLoading(false);
     }
+
+  // --- Single-course "Buy now" quick checkout ---
+  const [buyNowSlug, setBuyNowSlug] = useState<string | null>(null);
+  const buyNowInFlight = useRef(false);
+
+  const startBuyNow = async (slug: string) => {
+    if (buyNowInFlight.current) return;
+    // Guests need to supply an email — the basket drawer collects it.
+    if (!user) {
+      if (!cart.has(slug)) cart.add(slug);
+      cart.open();
+      return;
+    }
+    buyNowInFlight.current = true;
+    setBuyNowSlug(slug);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-academy-checkout", {
+        body: { courseSlugs: [slug], currency },
+      });
+      if (error) throw error;
+      if (!data?.url || typeof data.url !== "string" || !data.url.startsWith("https://checkout.stripe.com/")) {
+        throw new Error("Invalid checkout URL returned");
+      }
+      window.location.href = data.url;
+    } catch (err) {
+      console.error("Buy now checkout failed:", err);
+      toast.error(err instanceof Error ? err.message : "Could not start checkout. Please try again.");
+      buyNowInFlight.current = false;
+      setBuyNowSlug(null);
+    }
   };
+
 
   // Post-checkout success toast (Stripe redirects back with ?purchase=success).
   // Intentionally runs once on mount only — the URL param is stripped via
