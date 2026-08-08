@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ExternalLink, CheckCircle2, Search, Shield, Globe } from "lucide-react";
 import SEO from "@/components/SEO";
+import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -236,6 +237,7 @@ const SanctionsLists = () => {
         ]}
         structuredData={[jsonLd, faqLd]}
       />
+      <Header />
 
       {/* ── Hero ────────────────────────────────────────────────────────────── */}
       <section className="bg-gradient-to-b from-surface-subtle to-background border-b border-divider">

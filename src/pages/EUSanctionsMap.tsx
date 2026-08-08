@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
+import Header from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { allEUSanctionsRegimes, regionLabels } from "@/data/euSanctionsRegimes";
 import { Shield, Globe, Search, ExternalLink, ChevronRight, Filter, Map, ArrowLeft } from "lucide-react";
@@ -64,6 +65,7 @@ const EUSanctionsMap = () => {
         breadcrumbs={breadcrumbs}
         structuredData={structuredData}
       />
+      <Header />
 
       {/* Breadcrumbs */}
       <nav className="bg-muted/50 border-b border-border" aria-label="Breadcrumb">

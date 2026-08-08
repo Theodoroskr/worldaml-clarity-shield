@@ -1,5 +1,6 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import SEO from "@/components/SEO";
+import Header from "@/components/Header";
 import { allEUSanctionsRegimes, regionLabels } from "@/data/euSanctionsRegimes";
 import { Shield, ChevronRight, ExternalLink, ArrowLeft, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -92,6 +93,7 @@ const EUSanctionsCountry = () => {
         breadcrumbs={breadcrumbs}
         structuredData={structuredData}
       />
+      <Header />
 
       {/* Breadcrumbs */}
       <nav className="bg-muted/50 border-b border-border" aria-label="Breadcrumb">
