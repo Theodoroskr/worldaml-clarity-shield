@@ -14,6 +14,7 @@ import {
   useRecognition, trackRecognition,
   type RecognitionBadge, type RecognitionLevel, type RecognitionStatus,
 } from "@/hooks/useRecognition";
+import ShareRecognition from "@/components/dashboard/ShareRecognition";
 
 /* ── Visual language ─────────────────────────────────────────── */
 
