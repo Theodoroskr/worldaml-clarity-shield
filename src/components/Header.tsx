@@ -398,7 +398,11 @@ export const Header = () => {
                 )
               )}
               <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-divider">
+                <div className="flex" onClick={() => setMobileMenuOpen(false)}>
+                  <AcademyCartButton />
+                </div>
                 {user ? (
+
                   <>
                     <Button variant="outline" asChild>
                       <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
