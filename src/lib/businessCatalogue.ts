@@ -240,13 +240,17 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
         price: "From €29",
         summary: "Buy specific courses for named team members.",
         features: ["Per-course purchase", "Certificate on completion", "CPD hours recorded"],
+        configureUrl: "/academy",
+        configureLabel: "Browse & Buy Courses",
       },
       {
         key: "annual",
         name: "Annual Academy access",
-        price: null,
+        price: "€199",
+        period: "/year per learner",
         summary: "Full library access for a learner for 12 months.",
         features: ["Full course library", "All certificates included", "Renews annually"],
+        checkout: { fn: "create-academy-annual-checkout", plan: "annual", body: { currency: "eur" } },
       },
       {
         key: "team",
