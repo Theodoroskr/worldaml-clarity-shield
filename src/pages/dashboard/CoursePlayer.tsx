@@ -28,7 +28,8 @@ export default function CoursePlayer() {
         <AcademyCourse key={slug} embedded />
       </div>
       {showCrossSell && (
-        <div className="mt-6">
+        <div className="mt-6 grid lg:grid-cols-2 gap-4">
+          <CompletionRecognition courseSlug={slug} />
           <CourseCrossSell
             category={learning?.course.category}
             title={learning?.course.title}
@@ -36,6 +37,7 @@ export default function CoursePlayer() {
           />
         </div>
       )}
+
     </>
   );
 }
