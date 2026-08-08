@@ -165,7 +165,13 @@ const AdminOutreachQueue = lazyWithRetry(() => import("./pages/admin/AdminOutrea
 const AdminPartnerAssets = lazyWithRetry(() => import("./pages/admin/AdminPartnerAssets"));
 const AdminRecognition = lazyWithRetry(() => import("./pages/admin/AdminRecognition"));
 
+const AcademyLogin = lazyWithRetry(() => import("./pages/auth/AcademyLogin"));
+const PartnerLogin = lazyWithRetry(() => import("./pages/auth/PartnerLogin"));
+const AdminLogin = lazyWithRetry(() => import("./pages/auth/AdminLogin"));
+const PartnerOnboardingPage = lazyWithRetry(() => import("./pages/partner-portal/Onboarding"));
+
 const PartnerPortalLayout = lazyWithRetry(() => import("./pages/partner-portal/PartnerPortalLayout"));
+
 const PartnerOverview = lazyWithRetry(() => import("./pages/partner-portal/Overview"));
 const PartnerReferralsPage = lazyWithRetry(() => import("./pages/partner-portal/Referrals"));
 const PartnerDealsPage = lazyWithRetry(() => import("./pages/partner-portal/Deals"));
