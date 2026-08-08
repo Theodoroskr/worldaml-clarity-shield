@@ -10,6 +10,23 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { PortalKey, PORTAL_HOME } from "@/hooks/usePortalAccess";
 
+import { PENDING_PARTNER_KEY } from "@/pages/partner/PartnerSignup";
+
+/** Applies a partner application captured before e-mail confirmation. */
+async function flushPendingPartnerApplication(userId: string) {
+  const pending = localStorage.getItem(PENDING_PARTNER_KEY);
+  if (!pending) return;
+  try {
+    const application = JSON.parse(pending);
+    const { data: existing } = await supabase
+      .from("partner_applications").select("id").eq("user_id", userId).maybeSingle();
+    if (!existing) {
+      await supabase.from("partner_applications").insert({ ...application, user_id: userId });
+    }
+    localStorage.removeItem(PENDING_PARTNER_KEY);
+  } catch { /* ignore */ }
+}
+
 async function resolveAccess(portal: PortalKey, userId: string): Promise<boolean> {
   if (portal === "admin") {
     const { data } = await supabase
@@ -17,6 +34,7 @@ async function resolveAccess(portal: PortalKey, userId: string): Promise<boolean
     return !!data;
   }
   if (portal === "partner") {
+    await flushPendingPartnerApplication(userId);
     const { data } = await supabase
       .from("partners").select("is_active").eq("user_id", userId).maybeSingle();
     return !!data?.is_active;
@@ -25,6 +43,22 @@ async function resolveAccess(portal: PortalKey, userId: string): Promise<boolean
     .from("profiles").select("status").eq("user_id", userId).maybeSingle();
   return (data as { status?: string } | null)?.status !== "rejected";
 }
+
+/** Partner-specific denial copy based on where the application stands. */
+async function partnerDenialCopy(userId: string): Promise<string> {
+  const { data } = await supabase
+    .from("partner_applications").select("status").eq("user_id", userId)
+    .order("created_at", { ascending: false }).limit(1).maybeSingle();
+  const status = (data as { status?: string } | null)?.status;
+  if (status === "pending") {
+    return "Your partner application is awaiting approval from the WorldAML team. You'll be emailed as soon as your Partner Portal access is activated.";
+  }
+  if (status === "rejected") {
+    return "Your partner application was not approved. Contact partners@worldaml.com if you'd like this reviewed again.";
+  }
+  return "You don't have a partner profile yet. Apply for the Partner Programme to get access — your Academy or business sign-in stays unchanged.";
+}
+
 
 const NO_ACCESS_COPY: Record<PortalKey, string> = {
   academy: "Your account does not currently have Academy access.",
