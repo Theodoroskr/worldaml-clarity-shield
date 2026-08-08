@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useRecognition } from "@/hooks/useRecognition";
 import { BadgeCard, TierMark, tierStyle } from "@/components/dashboard/RecognitionSections";
+import ShareRecognition from "@/components/dashboard/ShareRecognition";
 
 function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: number }) {
   return (
