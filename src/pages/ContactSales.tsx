@@ -64,7 +64,9 @@ const ContactSales = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
   const [marketingConsent, setMarketingConsent] = useState(false);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
