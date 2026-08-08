@@ -88,8 +88,7 @@ export default function PartnerCommissions() {
 
       <Card>
         <CardHeader>
-      <Card>
-        <CardHeader>
+
           <CardTitle className="text-base">Commission ledger</CardTitle>
         </CardHeader>
         <CardContent>
