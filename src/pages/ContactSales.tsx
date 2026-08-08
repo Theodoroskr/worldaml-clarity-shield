@@ -63,14 +63,18 @@ const ContactSales = () => {
   const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     company: "",
     jobTitle: "",
+    country: "",
     message: "",
   });
+
 
   // Pre-select product based on URL params
   useEffect(() => {
@@ -186,7 +190,19 @@ Preferred start date and number of seats below.`,
       return;
     }
 
+    if (!termsAccepted) {
+      toast({
+        title: "Acceptance Required",
+        description:
+          "Please accept the Terms & Conditions and Privacy Policy to submit your request.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
+
+    const consentTimestamp = new Date().toISOString();
 
     try {
       const response = await fetch(
@@ -204,9 +220,22 @@ Preferred start date and number of seats below.`,
             email: formData.email,
             company: formData.company,
             job_title: formData.jobTitle,
+            country: formData.country,
             message: formData.message,
             products: selectedProducts,
-            metadata: { attribution: getWebAttribution() },
+            metadata: {
+              attribution: getWebAttribution(),
+              terms_accepted: true,
+              terms_accepted_at: consentTimestamp,
+              marketing_consent: marketingConsent,
+              marketing_consent_at: marketingConsent ? consentTimestamp : null,
+              consent_timestamp: consentTimestamp,
+              consent_text:
+                "I accept the Terms & Conditions and the Privacy Policy." +
+                (marketingConsent
+                  ? " I'd like to receive marketing communications about WorldAML products, events and regulatory updates."
+                  : ""),
+            },
           }),
         }
       );
@@ -227,9 +256,13 @@ Preferred start date and number of seats below.`,
         email: "",
         company: "",
         jobTitle: "",
+        country: "",
         message: "",
       });
       setSelectedProducts([]);
+      setTermsAccepted(false);
+      setMarketingConsent(false);
+
     } catch (error) {
       toast({
         title: "Error",
@@ -389,6 +422,19 @@ Preferred start date and number of seats below.`,
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="country">Country</Label>
+                    <Input
+                      id="country"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleInputChange}
+                      placeholder="Cyprus"
+                      autoComplete="country-name"
+                      maxLength={100}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="message">Message (Optional)</Label>
                     <Textarea
                       id="message"
@@ -403,7 +449,42 @@ Preferred start date and number of seats below.`,
                       {formData.message.length}/1000 characters
                     </p>
                   </div>
+
+                  <div className="space-y-3 pt-2">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <Checkbox
+                        checked={termsAccepted}
+                        onCheckedChange={(v) => setTermsAccepted(v === true)}
+                        className="mt-0.5"
+                      />
+                      <span className="text-body-sm text-text-secondary">
+                        I accept the{" "}
+                        <Link to="/terms" className="text-teal hover:underline" target="_blank">
+                          Terms &amp; Conditions
+                        </Link>{" "}
+                        and the{" "}
+                        <Link to="/privacy" className="text-teal hover:underline" target="_blank">
+                          Privacy Policy
+                        </Link>
+                        . <span className="text-red-500">*</span>
+                      </span>
+                    </label>
+
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <Checkbox
+                        checked={marketingConsent}
+                        onCheckedChange={(v) => setMarketingConsent(v === true)}
+                        className="mt-0.5"
+                      />
+                      <span className="text-body-sm text-text-secondary">
+                        I'd like to receive marketing communications about WorldAML
+                        products, events and regulatory updates. (Optional — you can
+                        unsubscribe at any time.)
+                      </span>
+                    </label>
+                  </div>
                 </div>
+
 
                 <Button 
                   type="submit" 

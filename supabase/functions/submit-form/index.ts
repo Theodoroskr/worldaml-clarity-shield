@@ -236,7 +236,20 @@ Deno.serve(async (req) => {
                 md.consent_text ? `\nConsent wording: ${md.consent_text}` : ""
               }`
             : null,
+          md.terms_accepted === true
+            ? `Terms & Conditions and Privacy Policy accepted: YES at ${
+                md.terms_accepted_at || md.consent_timestamp || "unknown time"
+              }`
+            : null,
+          md.marketing_consent === true
+            ? `Marketing communication consent: YES at ${
+                md.marketing_consent_at || md.consent_timestamp || "unknown time"
+              }`
+            : md.marketing_consent === false
+              ? "Marketing communication consent: NO"
+              : null,
         ].filter(Boolean);
+
 
         // Visit summary — Zoho's native Visit Summary fields are SalesIQ-owned
         // and silently discard API writes, so the browser-tracked first/last
