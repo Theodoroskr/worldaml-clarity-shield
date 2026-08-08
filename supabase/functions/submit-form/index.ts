@@ -619,55 +619,22 @@ Deno.serve(async (req) => {
           })(),
 
           // ── Visit Summary ─────────────────────────────────────────────────
-          // Mapped to Zoho's Visit Summary block. These fields are SalesIQ-owned
-          // and may be ignored by the API on tenants where SalesIQ owns them, so
-          // the same values are also written to Landing_Page_URL / Referrer_URL
-          // and attached as a related Note record after the Lead is created.
-          First_Visited_Time: att.first_visited_at || undefined,
-          Last_Visited_Time: att.last_visited_at || undefined,
-          Referrer: att.referrer || undefined,
-          First_Visited_URL: att.first_page_visited || att.landing_page || undefined,
-          Days_Visited:
-            typeof att.days_visited === "number" ? att.days_visited : undefined,
-          Number_Of_Chats:
-            typeof att.number_of_chats === "number" ? att.number_of_chats : undefined,
-          Visitor_Score:
-            typeof att.visitor_score === "number" ? att.visitor_score : undefined,
-          Average_Time_Spent_Minutes:
-            typeof att.average_time_spent_minutes === "number"
-              ? att.average_time_spent_minutes
-              : undefined,
+          // Intentionally NOT written from website forms. Zoho's Visit Summary
+          // block (First Visit, Most Recent Visit, Referrer, First Page
+          // Visited, Days Visited, Number Of Chats, Visitor Score, Average Time
+          // Spent) is SalesIQ-owned and read-only via the API — those fields
+          // stay empty and SalesIQ populates them.
 
+          // Sales Organisation Unit — all WorldAML website leads belong to the
+          // ICG parent sales unit.
+          Sales_Organisation_Unit: "Infocredit Group (ICG)",
 
-
-
-
-
-          // ── Additional WorldAML Book Demo mappings ────────────────────────
-          // Sales Organisation Unit — WorldAML leads belong to the ICG parent
-          // sales unit, EXCEPT partnership enquiries which route to the
-          // WorldAML Partnership sales unit for the partner team to own.
-          Sales_Organisation_Unit: (() => {
-            const isPartnership = Array.isArray(products) && products.some((p) => {
-              const k = String(p ?? "").trim().toLowerCase();
-              return k === "partnership" || k === "partner" || k === "partner-program" || k === "partner_program";
-            });
-            return isPartnership ? "WorldAML Partnership" : "Infocredit Group (ICG)";
-          })(),
-
-          // Qualification level — derived from lead-scoring tier:
-          //   hot → Hot, qualified → Warm, low → Cold.
-          Qualification_level: (() => {
-            const tier = String((metadata as any)?.lead_tier ?? "").toLowerCase();
-            if (tier === "hot") return "Hot";
-            if (tier === "qualified") return "Warm";
-            if (tier === "low") return "Cold";
-            return undefined;
-          })(),
+          // Qualification level, Readiness Score, Buying Timeline, Budget,
+          // Attendance and Account Party ID are owned by sales/marketing inside
+          // the CRM — website forms never write them.
 
           // Communication Preferences / Communication Consents are intentionally
           // NOT written from website forms — the CRM owns those preferences.
-
 
           // Marketing Communication Consent (boolean) — set true when the
           // visitor explicitly opts in via metadata.marketing_consent; leave
@@ -679,14 +646,6 @@ Deno.serve(async (req) => {
             md.marketing_consent === true || md.email_follow_up_consent === true
               ? true
               : undefined,
-
-          // Attendance — only applies to webinar / event registrations.
-          // Zoho picklist allows only 'Yes' / 'No'.
-          Attendance: (() => {
-            const ft = String(form_type ?? "").toLowerCase();
-            if (ft.includes("webinar") || ft.includes("event")) return "Yes";
-            return undefined;
-          })(),
 
           // Licence Type (picklist) — only when the form captured it.
           Licence_Type: (() => {
@@ -702,36 +661,12 @@ Deno.serve(async (req) => {
             return ALLOWED.has(raw) ? raw : "Other";
           })(),
 
-          // Buying Timeline (picklist) — only when the form captured it.
-          Buying_Timeline: (() => {
-            const raw = String((metadata as any)?.buying_timeline ?? "").trim();
-            const ALLOWED = new Set([
-              "Immediately",
-              "1 Month",
-              "3 Months",
-              "6 Months",
-              "12+ Months",
-              "24+ Months",
-            ]);
-            return ALLOWED.has(raw) ? raw : undefined;
-          })(),
-
-          // Readiness Score (integer) — website lead score, when calculated.
-          Readiness_Score: (() => {
-            const n = Number((metadata as any)?.lead_score);
-            return Number.isFinite(n) && n > 0 ? Math.round(n) : undefined;
-          })(),
-
-
-          // Old_CRM_lead_ID and Account_Party_ID are legacy identifiers from
-          // Infocredit's previous CRM — populated only when the website sends
-          // an explicit value via metadata (never fabricated).
+          // Old CRM lead ID is a legacy identifier from Infocredit's previous
+          // CRM — populated only when the website sends an explicit value.
           Old_CRM_lead_ID: (metadata as any)?.old_crm_lead_id
             ? String((metadata as any).old_crm_lead_id).slice(0, 100)
             : undefined,
-          Account_Party_ID: (metadata as any)?.account_party_id
-            ? String((metadata as any).account_party_id).slice(0, 100)
-            : undefined,
+
 
           // Partner Type (picklist on Leads) — mapped from the Partner
           // contact form's partner_type value. Zoho picklist values must
