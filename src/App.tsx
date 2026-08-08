@@ -434,7 +434,11 @@ const App = () => (
                   <Route path="welcome" element={<PartnerWelcomePage />} />
                   <Route path="referrals" element={<PartnerReferralsPage />} />
                   <Route path="deals" element={<PartnerDealsPage />} />
+                  <Route path="deals/new" element={<PartnerRegisterDealPage />} />
                   <Route path="commissions" element={<PartnerCommissionsPage />} />
+                  <Route path="payouts" element={<PartnerPayoutsPage />} />
+                  <Route path="products" element={<PartnerProductsPage />} />
+                  <Route path="manager" element={<PartnerManagerPage />} />
                   <Route path="assets" element={<PartnerAssetsPage />} />
                   <Route path="contacts" element={<PartnerContactsPage />} />
                   <Route path="profile" element={<PartnerProfilePage />} />
