@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import { getWebAttribution } from "@/lib/webAttribution";
 
 const PartnerApplicationForm = () => {
   const { user } = useAuth();
@@ -59,6 +60,30 @@ const PartnerApplicationForm = () => {
           .invoke("notify-partner-application", { body: { application_id: inserted.id } })
           .catch((e) => console.error("notify-partner-application failed:", e));
       }
+      // Fire-and-forget CRM lead creation (Zoho: Form Type = Partner Request,
+      // Topic = Partnership, plus lead-source & visit-summary attribution).
+      const nameParts = form.contact_name.trim().split(/\s+/);
+      supabase.functions
+        .invoke("submit-form", {
+          body: {
+            form_type: "partner-application",
+            first_name: nameParts[0] || form.company_name.trim(),
+            last_name: nameParts.slice(1).join(" ") || "-",
+            email: form.contact_email.trim().toLowerCase(),
+            phone: form.contact_phone.trim() || undefined,
+            company: form.company_name.trim(),
+            country: form.country.trim() || undefined,
+            message: form.description.trim() || undefined,
+            products: ["partnership"],
+            metadata: {
+              partner_type: form.partner_type,
+              website: form.website.trim() || undefined,
+              application_id: inserted?.id,
+              attribution: getWebAttribution(),
+            },
+          },
+        })
+        .catch((e) => console.error("submit-form (partner) failed:", e));
     }
     setLoading(false);
   };

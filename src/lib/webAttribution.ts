@@ -11,6 +11,48 @@ export interface WebAttribution {
   utm_content?: string;
   landing_page?: string;
   referrer?: string;
+  first_visited_at?: string;
+  last_visited_at?: string;
+  days_visited?: number;
+  visit_count?: number;
+}
+
+// ── Visit summary tracking (feeds Zoho's Visit Summary fields) ──────────────
+const VISIT_KEY = "waml_visits_v1";
+
+interface VisitStats {
+  first_visited_at: string;
+  last_visited_at: string;
+  days: string[]; // ISO dates (YYYY-MM-DD)
+  visit_count: number;
+}
+
+function readVisits(): VisitStats | null {
+  try {
+    const raw = localStorage.getItem(VISIT_KEY);
+    return raw ? (JSON.parse(raw) as VisitStats) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Call once per page load to maintain first/last visit and days-visited counts. */
+export function recordVisit() {
+  if (typeof window === "undefined") return;
+  try {
+    const now = new Date().toISOString();
+    const today = now.slice(0, 10);
+    const prev = readVisits();
+    const stats: VisitStats = prev
+      ? {
+          first_visited_at: prev.first_visited_at || now,
+          last_visited_at: now,
+          days: prev.days?.includes(today) ? prev.days : [...(prev.days || []), today].slice(-365),
+          visit_count: (prev.visit_count || 0) + 1,
+        }
+      : { first_visited_at: now, last_visited_at: now, days: [today], visit_count: 1 };
+    localStorage.setItem(VISIT_KEY, JSON.stringify(stats));
+  } catch {}
 }
 
 const UTM_KEYS = [
@@ -44,6 +86,21 @@ export function getWebAttribution(): WebAttribution {
     if (!out.referrer && first.signup_referrer) out.referrer = first.signup_referrer;
     if (!out.landing_page && first.signup_landing_path) {
       out.landing_page = first.signup_landing_path;
+    }
+  } catch {}
+
+  // Visit summary (first/last visit, days visited) for Zoho's Visit Summary block.
+  try {
+    const v = readVisits();
+    if (v) {
+      out.first_visited_at = v.first_visited_at;
+      out.last_visited_at = v.last_visited_at;
+      out.days_visited = Array.isArray(v.days) ? v.days.length : undefined;
+      out.visit_count = v.visit_count;
+    }
+    if (!out.first_visited_at) {
+      const first = getAttribution();
+      if (first.captured_at) out.first_visited_at = first.captured_at;
     }
   } catch {}
 
