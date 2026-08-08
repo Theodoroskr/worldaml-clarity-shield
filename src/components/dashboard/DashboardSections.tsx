@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { academyHref } from "@/lib/academyHost";
+import { getCourseCover } from "@/assets/academy";
 import type { AcademyOverview, LearningCourse, CertificateRow } from "@/hooks/useAcademyOverview";
 import { formatDistanceToNow } from "date-fns";
 
