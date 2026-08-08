@@ -1,0 +1,89 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const money = (amount: number | null | undefined, currency: string) =>
+  amount == null ? "—" : new Intl.NumberFormat("en-GB", { style: "currency", currency: currency.toUpperCase() }).format(amount / 100);
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("No authorization header provided");
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+    );
+    const { data: userData, error: userError } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
+    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    const user = userData.user;
+    if (!user?.email) throw new Error("User not authenticated");
+
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+
+    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    if (customers.data.length === 0) {
+      return new Response(JSON.stringify({ subscriptions: [], invoices: [] }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+    const customerId = customers.data[0].id;
+
+    const [subs, invoices] = await Promise.all([
+      stripe.subscriptions.list({ customer: customerId, status: "all", limit: 20, expand: ["data.items.data.price.product"] }),
+      stripe.invoices.list({ customer: customerId, limit: 20 }),
+    ]);
+
+    const subscriptions = subs.data
+      .filter((s) => ["active", "trialing", "past_due", "unpaid"].includes(s.status))
+      .map((s) => {
+        const item = s.items.data[0];
+        const price = item?.price;
+        const product = price?.product;
+        return {
+          id: s.id,
+          product: typeof product === "object" && product && "name" in product ? (product as any).name : "WorldAML plan",
+          status: s.status,
+          amount: money(price?.unit_amount ?? null, price?.currency ?? "eur"),
+          interval: price?.recurring?.interval ?? null,
+          current_period_end: (item as any)?.current_period_end
+            ? new Date((item as any).current_period_end * 1000).toISOString()
+            : (s as any).current_period_end
+              ? new Date((s as any).current_period_end * 1000).toISOString()
+              : null,
+          cancel_at_period_end: !!s.cancel_at_period_end,
+        };
+      });
+
+    const invoiceRows = invoices.data.map((i) => ({
+      id: i.id,
+      number: i.number ?? null,
+      status: i.status ?? "unknown",
+      amount: money(i.amount_paid || i.amount_due, i.currency),
+      created: new Date(i.created * 1000).toISOString(),
+      pdf: i.invoice_pdf ?? null,
+    }));
+
+    return new Response(JSON.stringify({ subscriptions, invoices: invoiceRows }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[BUSINESS-BILLING] error", message);
+    return new Response(JSON.stringify({ error: message }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+    });
+  }
+});

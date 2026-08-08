@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.send-purchase-emails]
 verify_jwt = false
+
+[functions.business-billing]
+verify_jwt = false
