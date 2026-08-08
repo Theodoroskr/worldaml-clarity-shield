@@ -236,6 +236,7 @@ export default function AdminInternalAccess() {
       return (
         r.email.toLowerCase().includes(q) ||
         (r.full_name || "").toLowerCase().includes(q) ||
+        (r.company_name || "").toLowerCase().includes(q) ||
         (r.department || "").toLowerCase().includes(q)
       );
     });
