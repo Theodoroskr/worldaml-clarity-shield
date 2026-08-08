@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      academy_badges: {
+        Row: {
+          category: string | null
+          course_slugs: string[]
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          is_active: boolean
+          key: string
+          name: string
+          required_count: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          course_slugs?: string[]
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          name: string
+          required_count?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          course_slugs?: string[]
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          name?: string
+          required_count?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       academy_certificates: {
         Row: {
           course_id: string
@@ -362,6 +407,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      academy_recognition_levels: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          is_active: boolean
+          key: string
+          min_advanced_courses: number
+          min_categories: number
+          min_certificates: number
+          min_courses: number
+          name: string
+          rank: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          min_advanced_courses?: number
+          min_categories?: number
+          min_certificates?: number
+          min_courses?: number
+          name: string
+          rank: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          min_advanced_courses?: number
+          min_categories?: number
+          min_certificates?: number
+          min_courses?: number
+          name?: string
+          rank?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       academy_reminders_sent: {
         Row: {
@@ -1529,6 +1622,7 @@ export type Database = {
           postal_code: string | null
           regulator: string | null
           seniority: string | null
+          show_recognition_publicly: boolean
           signup_landing_path: string | null
           signup_referrer: string | null
           signup_source: string | null
@@ -1564,6 +1658,7 @@ export type Database = {
           postal_code?: string | null
           regulator?: string | null
           seniority?: string | null
+          show_recognition_publicly?: boolean
           signup_landing_path?: string | null
           signup_referrer?: string | null
           signup_source?: string | null
@@ -1599,6 +1694,7 @@ export type Database = {
           postal_code?: string | null
           regulator?: string | null
           seniority?: string | null
+          show_recognition_publicly?: boolean
           signup_landing_path?: string | null
           signup_referrer?: string | null
           signup_source?: string | null
@@ -5845,6 +5941,7 @@ export type Database = {
           sort_order: number
         }[]
       }
+      academy_recognition_status: { Args: never; Returns: Json }
       admin_grant_suite_access:
         | { Args: { target_email: string }; Returns: undefined }
         | {
