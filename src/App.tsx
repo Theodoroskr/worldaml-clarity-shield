@@ -274,10 +274,18 @@ const App = () => (
                 <Route element={<AppShellLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/my-learning" element={<MyLearning />} />
+                  <Route path="/dashboard/my-courses" element={<MyLearning />} />
+                  <Route path="/dashboard/courses" element={<AllCourses />} />
+                  <Route path="/dashboard/courses/:slug" element={<CoursePlayer />} />
+                  <Route path="/dashboard/cart" element={<CartPage />} />
+                  <Route path="/dashboard/plans" element={<Plans />} />
+                  <Route path="/dashboard/certificates" element={<MyCertificates />} />
                   <Route path="/certificates" element={<MyCertificates />} />
                   <Route path="/account" element={<Navigate to="/account/profile" replace />} />
                   <Route path="/account/profile" element={<AccountProfile />} />
                   <Route path="/account/billing" element={<AccountBilling />} />
+                  <Route path="/account/security" element={<AccountSecurity />} />
+
                 </Route>
                 <Route path="/pending-approval" element={<PendingApproval />} />
                 <Route path="/admin" element={<Admin />} />
