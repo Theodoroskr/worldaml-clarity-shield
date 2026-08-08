@@ -30,10 +30,30 @@ function KeyValues({ data }: { data: Record<string, number | string> }) {
   );
 }
 
+const PORTAL_TABS: Record<PortalKey, string[]> = {
+  all: ["overview", "academy", "business", "partners", "marketing"],
+  academy: ["overview", "academy"],
+  business: ["overview", "business"],
+  partners: ["overview", "partners"],
+  marketing: ["overview", "marketing"],
+  platform: ["overview"],
+};
+
+const TAB_LABELS: Record<string, string> = {
+  overview: "Overview",
+  academy: "Academy",
+  business: "Business",
+  partners: "Partners",
+  marketing: "Marketing",
+};
+
 export default function AdminAnalytics() {
   const [rangeKey, setRangeKey] = useState<RangeKey>("last_30_days");
   const [custom, setCustom] = useState<DateRange>(resolveRange("last_30_days"));
   const [portal, setPortal] = useState<PortalKey>("all");
+  const [tab, setTab] = useState<string>("overview");
+
+  const tabs = PORTAL_TABS[portal];
 
   const range = useMemo(() => resolveRange(rangeKey, custom), [rangeKey, custom]);
   const rangeLabel = rangeKey === "custom"
@@ -43,6 +63,16 @@ export default function AdminAnalytics() {
   const { data: a, isLoading, isFetching, refetch } = useAdminAnalytics(range);
 
   const series = a?.series.map((p) => ({ ...p, bucket: format(new Date(p.date), "d MMM") })) ?? [];
+
+  const LINE_PORTALS: Record<string, PortalKey[]> = {
+    users: ["academy", "business", "platform"],
+    leads: ["marketing", "business"],
+    starts: ["academy"],
+    searches: ["platform", "business"],
+  };
+  const showLine = (key: string) => portal === "all" || LINE_PORTALS[key].includes(portal);
+
+
 
   return (
     <div className="p-6 space-y-6">
@@ -60,7 +90,13 @@ export default function AdminAnalytics() {
             custom={custom}
             onCustom={setCustom}
             portal={portal}
-            onPortal={setPortal}
+            onPortal={(p) => {
+              setPortal(p);
+              const next = PORTAL_TABS[p];
+              setTab(p === "all" ? (next.includes(tab) ? tab : "overview") : (next[1] ?? next[0]));
+            }}
+
+
             onRefresh={() => refetch()}
             refreshing={isFetching}
             lastUpdated={a?.generated_at ?? null}
@@ -77,14 +113,13 @@ export default function AdminAnalytics() {
           ))}
         </div>
       ) : (
-        <Tabs defaultValue="overview">
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="academy">Academy</TabsTrigger>
-            <TabsTrigger value="business">Business</TabsTrigger>
-            <TabsTrigger value="partners">Partners</TabsTrigger>
-            <TabsTrigger value="marketing">Marketing</TabsTrigger>
+            {tabs.map((t) => (
+              <TabsTrigger key={t} value={t}>{TAB_LABELS[t]}</TabsTrigger>
+            ))}
           </TabsList>
+
 
           <TabsContent value="overview" className="space-y-4 pt-4">
             <Panel title="Daily activity">
@@ -96,10 +131,11 @@ export default function AdminAnalytics() {
                     <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
                     <Tooltip contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", fontSize: 12 }} />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Line type="monotone" dataKey="users" name="New users" stroke="hsl(var(--primary))" dot={false} strokeWidth={2} />
-                    <Line type="monotone" dataKey="leads" name="Leads" stroke="hsl(var(--accent))" dot={false} strokeWidth={2} />
-                    <Line type="monotone" dataKey="starts" name="Course starts" stroke="#f59e0b" dot={false} strokeWidth={2} />
-                    <Line type="monotone" dataKey="searches" name="Sanctions searches" stroke="#06b6d4" dot={false} strokeWidth={2} />
+                    {showLine("users") && <Line type="monotone" dataKey="users" name="New users" stroke="hsl(var(--primary))" dot={false} strokeWidth={2} />}
+                    {showLine("leads") && <Line type="monotone" dataKey="leads" name="Leads" stroke="hsl(var(--accent))" dot={false} strokeWidth={2} />}
+                    {showLine("starts") && <Line type="monotone" dataKey="starts" name="Course starts" stroke="#f59e0b" dot={false} strokeWidth={2} />}
+                    {showLine("searches") && <Line type="monotone" dataKey="searches" name="Sanctions searches" stroke="#06b6d4" dot={false} strokeWidth={2} />}
+
                   </LineChart>
                 </ResponsiveContainer>
               </div>
