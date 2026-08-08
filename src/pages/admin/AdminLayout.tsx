@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 
@@ -10,6 +10,8 @@ type NavItem = { label: string; path: string; icon: any; section?: string };
 const NAV: NavItem[] = [
   // Platform-wide
   { label: "Dashboard", path: "/admin/dashboard", icon: Shield, section: "Platform" },
+  { label: "Analytics", path: "/admin/analytics", icon: TrendingUp, section: "Platform" },
+  { label: "Reports", path: "/admin/reports", icon: BarChart3, section: "Platform" },
   { label: "Users", path: "/admin/users", icon: Users, section: "Platform" },
   { label: "Identities & Profiles", path: "/admin/identities", icon: GitBranch, section: "Platform" },
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Platform" },
