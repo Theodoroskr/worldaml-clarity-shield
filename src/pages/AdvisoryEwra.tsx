@@ -138,11 +138,6 @@ const engagementOptions = [
 ];
 
 const EwraAdvisory = () => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const SERVICE = "Enterprise-Wide Risk Assessment";
-
-  const open = () => setDialogOpen(true);
-
   return (
     <div className="min-h-screen bg-background">
       <SEO
