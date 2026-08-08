@@ -238,11 +238,27 @@ Deno.serve(async (req) => {
             : null,
         ].filter(Boolean);
 
+        // Visit summary — Zoho's native Visit Summary fields are SalesIQ-owned
+        // and silently discard API writes, so the browser-tracked first/last
+        // touch data is recorded here where it is guaranteed to persist.
+        const att = attribution ?? {};
+        const visitLines = [
+          att.landing_page ? `First page visited: ${att.landing_page}` : null,
+          att.referrer ? `Referrer: ${att.referrer}` : null,
+          att.first_visited_at ? `First visit: ${att.first_visited_at}` : null,
+          att.last_visited_at ? `Most recent visit: ${att.last_visited_at}` : null,
+          typeof att.days_visited === "number" ? `Days visited: ${att.days_visited}` : null,
+        ].filter(Boolean);
+        const visitBlock = visitLines.length
+          ? `Visit summary:\n${visitLines.join("\n")}`
+          : "";
+
         const descriptionValue =
-          [trimmedMessage || fallbackDesc, detailLines.join("\n")]
+          [trimmedMessage || fallbackDesc, detailLines.join("\n"), visitBlock]
             .filter(Boolean)
             .join("\n\n")
             .slice(0, 32000) || undefined;
+
 
         const leadRecord: Record<string, unknown> = {
           First_Name: first_name?.trim().slice(0, 40) || undefined,
