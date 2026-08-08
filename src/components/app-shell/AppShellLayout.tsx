@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Outlet, Link, Navigate, useNavigate } from "react-router-dom";
-import { Menu, PanelLeftClose, PanelLeft, LifeBuoy, LogOut, User, CreditCard, Loader2 } from "lucide-react";
+import { Menu, PanelLeftClose, PanelLeft, LifeBuoy, LogOut, User, CreditCard, Loader2, ShoppingCart, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import AppSidebarNav, { SidebarBrand } from "./AppSidebarNav";
@@ -12,6 +12,7 @@ import {
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/contexts/CartContext";
 
 export function AppPageHeader({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
   return (
@@ -35,6 +36,7 @@ export default function AppShellLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+  const cart = useCart();
 
   if (isLoading) {
     return (
@@ -84,7 +86,8 @@ export default function AppShellLayout() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild><Link to="/account/profile"><User className="h-4 w-4 mr-2" /> Profile</Link></DropdownMenuItem>
-          <DropdownMenuItem asChild><Link to="/account/billing"><CreditCard className="h-4 w-4 mr-2" /> Subscription & Billing</Link></DropdownMenuItem>
+          <DropdownMenuItem asChild><Link to="/account/billing"><CreditCard className="h-4 w-4 mr-2" /> Purchases & Billing</Link></DropdownMenuItem>
+          <DropdownMenuItem asChild><Link to="/account/security"><ShieldCheck className="h-4 w-4 mr-2" /> Security</Link></DropdownMenuItem>
           <DropdownMenuItem asChild><a href="/support"><LifeBuoy className="h-4 w-4 mr-2" /> Help & Support</a></DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}><LogOut className="h-4 w-4 mr-2" /> Sign Out</DropdownMenuItem>
@@ -132,9 +135,20 @@ export default function AppShellLayout() {
           <Badge variant="outline" className="hidden sm:inline-flex text-[10px] font-medium">{planLabel}</Badge>
 
           <div className="ml-auto flex items-center gap-1">
+            <Button variant="ghost" size="icon" asChild aria-label={`Basket (${cart.count} items)`} className="relative">
+              <Link to="/dashboard/cart">
+                <ShoppingCart className="h-4 w-4" />
+                {cart.count > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 rounded-full bg-accent text-accent-foreground text-[10px] font-semibold flex items-center justify-center">
+                    {cart.count}
+                  </span>
+                )}
+              </Link>
+            </Button>
             <Button variant="ghost" size="icon" asChild aria-label="Help and support">
               <a href="/support"><LifeBuoy className="h-4 w-4" /></a>
             </Button>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -151,7 +165,8 @@ export default function AppShellLayout() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild><Link to="/account/profile"><User className="h-4 w-4 mr-2" /> Profile</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link to="/account/billing"><CreditCard className="h-4 w-4 mr-2" /> Subscription & Billing</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/account/billing"><CreditCard className="h-4 w-4 mr-2" /> Purchases & Billing</Link></DropdownMenuItem>
+          <DropdownMenuItem asChild><Link to="/account/security"><ShieldCheck className="h-4 w-4 mr-2" /> Security</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><a href="/support"><LifeBuoy className="h-4 w-4 mr-2" /> Help & Support</a></DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}><LogOut className="h-4 w-4 mr-2" /> Sign Out</DropdownMenuItem>

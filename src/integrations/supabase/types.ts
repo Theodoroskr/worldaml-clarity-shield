@@ -1507,16 +1507,28 @@ export type Database = {
       }
       profiles: {
         Row: {
+          billing_address: string | null
+          city: string | null
           company_name: string | null
+          company_size: string | null
+          country: string | null
           created_at: string
+          department: string | null
           email: string | null
+          first_name: string | null
           full_name: string | null
           id: string
+          industry: string | null
+          interest_area: string | null
+          job_title: string | null
+          last_name: string | null
           marketing_consent: boolean
           marketing_consent_at: string | null
           marketing_opt_out_at: string | null
           phone: string | null
+          postal_code: string | null
           regulator: string | null
+          seniority: string | null
           signup_landing_path: string | null
           signup_referrer: string | null
           signup_source: string | null
@@ -1527,18 +1539,31 @@ export type Database = {
           suite_access_granted_by: string | null
           updated_at: string
           user_id: string
+          vat_number: string | null
         }
         Insert: {
+          billing_address?: string | null
+          city?: string | null
           company_name?: string | null
+          company_size?: string | null
+          country?: string | null
           created_at?: string
+          department?: string | null
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
           id?: string
+          industry?: string | null
+          interest_area?: string | null
+          job_title?: string | null
+          last_name?: string | null
           marketing_consent?: boolean
           marketing_consent_at?: string | null
           marketing_opt_out_at?: string | null
           phone?: string | null
+          postal_code?: string | null
           regulator?: string | null
+          seniority?: string | null
           signup_landing_path?: string | null
           signup_referrer?: string | null
           signup_source?: string | null
@@ -1549,18 +1574,31 @@ export type Database = {
           suite_access_granted_by?: string | null
           updated_at?: string
           user_id: string
+          vat_number?: string | null
         }
         Update: {
+          billing_address?: string | null
+          city?: string | null
           company_name?: string | null
+          company_size?: string | null
+          country?: string | null
           created_at?: string
+          department?: string | null
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
           id?: string
+          industry?: string | null
+          interest_area?: string | null
+          job_title?: string | null
+          last_name?: string | null
           marketing_consent?: boolean
           marketing_consent_at?: string | null
           marketing_opt_out_at?: string | null
           phone?: string | null
+          postal_code?: string | null
           regulator?: string | null
+          seniority?: string | null
           signup_landing_path?: string | null
           signup_referrer?: string | null
           signup_source?: string | null
@@ -1571,6 +1609,7 @@ export type Database = {
           suite_access_granted_by?: string | null
           updated_at?: string
           user_id?: string
+          vat_number?: string | null
         }
         Relationships: []
       }

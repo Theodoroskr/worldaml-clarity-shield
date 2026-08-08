@@ -74,6 +74,11 @@ const MyLearning = lazyWithRetry(() => import("./pages/dashboard/MyLearning"));
 const MyCertificates = lazyWithRetry(() => import("./pages/dashboard/MyCertificates"));
 const AccountProfile = lazyWithRetry(() => import("./pages/dashboard/AccountProfile"));
 const AccountBilling = lazyWithRetry(() => import("./pages/dashboard/AccountBilling"));
+const AccountSecurity = lazyWithRetry(() => import("./pages/dashboard/AccountSecurity"));
+const AllCourses = lazyWithRetry(() => import("./pages/dashboard/AllCourses"));
+const CoursePlayer = lazyWithRetry(() => import("./pages/dashboard/CoursePlayer"));
+const CartPage = lazyWithRetry(() => import("./pages/dashboard/CartPage"));
+const Plans = lazyWithRetry(() => import("./pages/dashboard/Plans"));
 const PendingApproval = lazyWithRetry(() => import("./pages/PendingApproval"));
 const Admin = lazyWithRetry(() => import("./pages/Admin"));
 const ForgotPassword = lazyWithRetry(() => import("./pages/ForgotPassword"));
@@ -274,10 +279,18 @@ const App = () => (
                 <Route element={<AppShellLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/my-learning" element={<MyLearning />} />
+                  <Route path="/dashboard/my-courses" element={<MyLearning />} />
+                  <Route path="/dashboard/courses" element={<AllCourses />} />
+                  <Route path="/dashboard/courses/:slug" element={<CoursePlayer />} />
+                  <Route path="/dashboard/cart" element={<CartPage />} />
+                  <Route path="/dashboard/plans" element={<Plans />} />
+                  <Route path="/dashboard/certificates" element={<MyCertificates />} />
                   <Route path="/certificates" element={<MyCertificates />} />
                   <Route path="/account" element={<Navigate to="/account/profile" replace />} />
                   <Route path="/account/profile" element={<AccountProfile />} />
                   <Route path="/account/billing" element={<AccountBilling />} />
+                  <Route path="/account/security" element={<AccountSecurity />} />
+
                 </Route>
                 <Route path="/pending-approval" element={<PendingApproval />} />
                 <Route path="/admin" element={<Admin />} />

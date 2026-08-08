@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import { Loader2, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,7 +28,7 @@ export default function MyCertificates() {
           <CardContent className="py-12 text-center space-y-3">
             <Award className="h-8 w-8 mx-auto text-accent" />
             <p className="text-sm text-muted-foreground">Complete a course and pass the final quiz to earn a certificate.</p>
-            <Button asChild size="sm"><a href={academyHref("/academy")}>Browse Courses</a></Button>
+            <Button asChild size="sm"><Link to="/dashboard/courses">Browse Courses</Link></Button>
           </CardContent>
         </Card>
       ) : (
