@@ -9,6 +9,7 @@ import {
 import {
   ComplianceInPractice, ExploreWorldAML, WorldAMLTools,
 } from "@/components/dashboard/EcosystemSections";
+import { MemberLevelCard, LevelUpMoment } from "@/components/dashboard/RecognitionSections";
 
 export default function Dashboard() {
   const { firstName } = useEntitlements();
@@ -33,10 +34,14 @@ export default function Dashboard() {
         <p className="text-sm text-muted-foreground mt-1">Continue building your compliance expertise.</p>
       </div>
 
+      <LevelUpMoment />
+
       <div className="space-y-6">
         <ContinueLearning current={academy.current} others={otherActive} />
 
         <LearningOverview data={academy} />
+
+        <MemberLevelCard />
 
         <div className="grid lg:grid-cols-2 gap-4">
           <MyCourses courses={[...academy.inProgress, ...academy.completed]} />
