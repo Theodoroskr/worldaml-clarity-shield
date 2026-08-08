@@ -968,6 +968,20 @@ export default function AdminUsers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {detailProfile && (
+        <AdminUserDetailDialog
+          profile={detailProfile}
+          revenue={revenueFor(detailProfile)}
+          roles={userRoles[detailProfile.user_id] || []}
+          onClose={() => setDetailProfile(null)}
+          onSendUpsell={(template) => {
+            setUpsellTemplate(template);
+            setUpsellDialog({ open: true, profile: detailProfile });
+          }}
+        />
+      )}
+
     </div>
   );
 }
