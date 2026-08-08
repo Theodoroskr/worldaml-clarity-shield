@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import AcademyCourse from "@/pages/AcademyCourse";
 import { Button } from "@/components/ui/button";
+import { useAcademyOverview } from "@/hooks/useAcademyOverview";
+import { CourseCrossSell } from "@/components/dashboard/EcosystemSections";
 
 /**
  * In-portal course player. Reuses the canonical AcademyCourse experience
@@ -11,6 +13,11 @@ import { Button } from "@/components/ui/button";
  */
 export default function CoursePlayer() {
   const { slug } = useParams();
+  const { all } = useAcademyOverview();
+  const learning = all.find((c) => c.course.slug === slug);
+  // Only after completion — the active lesson experience stays distraction-free.
+  const showCrossSell = !!learning?.quizPassed;
+
   return (
     <>
       <Helmet><meta name="robots" content="noindex" /></Helmet>
@@ -20,6 +27,15 @@ export default function CoursePlayer() {
       <div className="-mx-4 sm:-mx-6">
         <AcademyCourse key={slug} embedded />
       </div>
+      {showCrossSell && (
+        <div className="mt-6">
+          <CourseCrossSell
+            category={learning?.course.category}
+            title={learning?.course.title}
+            surface="course_complete"
+          />
+        </div>
+      )}
     </>
   );
 }
