@@ -10,7 +10,20 @@ const corsHeaders = {
 const VALID_CURRENCIES = ["EUR", "GBP", "USD"] as const;
 type ValidCurrency = typeof VALID_CURRENCIES[number];
 
-const REGION_PATTERN = /^[A-Za-z\s\-]{2,50}$/;
+// Region names sent by the pricing calculator (must match src/data region list).
+const VALID_REGIONS = [
+  "Europe & Middle East",
+  "United Kingdom & Ireland",
+  "North America",
+] as const;
+type ValidRegion = typeof VALID_REGIONS[number];
+
+// Base annual price per user, keyed by region + currency, mirroring the UI.
+const BASE_PRICES: Record<ValidRegion, Partial<Record<ValidCurrency, number>>> = {
+  "Europe & Middle East": { EUR: 3000 },
+  "United Kingdom & Ireland": { GBP: 2700, EUR: 3200 },
+  "North America": { USD: 4900 },
+};
 
 const errorResponse = (message: string, status = 400) =>
   new Response(JSON.stringify({ error: message }), {
@@ -60,7 +73,13 @@ serve(async (req) => {
       return errorResponse("Invalid request");
     }
 
-    if (typeof region !== "string" || !REGION_PATTERN.test(region)) {
+    if (typeof region !== "string" || !VALID_REGIONS.includes(region as ValidRegion)) {
+      return errorResponse("Invalid request");
+    }
+
+    // Price must match the region + currency combination shown in the UI.
+    const basePrice = BASE_PRICES[region as ValidRegion][currencyUpper as ValidCurrency];
+    if (!basePrice) {
       return errorResponse("Invalid request");
     }
 
@@ -74,13 +93,7 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
-    const basePrices: Record<ValidCurrency, number> = {
-      EUR: 3000,
-      GBP: 2700,
-      USD: 4900,
-    };
 
-    const basePrice = basePrices[currencyUpper as ValidCurrency];
     let totalPrice = 0;
     for (let i = 1; i <= userCountNum; i++) {
       let userPrice = basePrice;
