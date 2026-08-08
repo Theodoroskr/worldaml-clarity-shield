@@ -69,6 +69,11 @@ const AccessYourData = lazyWithRetry(() => import("./pages/AccessYourData"));
 const Login = lazyWithRetry(() => import("./pages/Login"));
 const Signup = lazyWithRetry(() => import("./pages/Signup"));
 const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"));
+const AppShellLayout = lazyWithRetry(() => import("./components/app-shell/AppShellLayout"));
+const MyLearning = lazyWithRetry(() => import("./pages/dashboard/MyLearning"));
+const MyCertificates = lazyWithRetry(() => import("./pages/dashboard/MyCertificates"));
+const AccountProfile = lazyWithRetry(() => import("./pages/dashboard/AccountProfile"));
+const AccountBilling = lazyWithRetry(() => import("./pages/dashboard/AccountBilling"));
 const PendingApproval = lazyWithRetry(() => import("./pages/PendingApproval"));
 const Admin = lazyWithRetry(() => import("./pages/Admin"));
 const ForgotPassword = lazyWithRetry(() => import("./pages/ForgotPassword"));
@@ -265,7 +270,15 @@ const App = () => (
 {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                {/* My WorldAML — authenticated app shell */}
+                <Route element={<AppShellLayout />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/my-learning" element={<MyLearning />} />
+                  <Route path="/certificates" element={<MyCertificates />} />
+                  <Route path="/account" element={<Navigate to="/account/profile" replace />} />
+                  <Route path="/account/profile" element={<AccountProfile />} />
+                  <Route path="/account/billing" element={<AccountBilling />} />
+                </Route>
                 <Route path="/pending-approval" element={<PendingApproval />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/admin" element={<AdminLayout />}>
