@@ -1,9 +1,11 @@
 import type { RecognitionStatus } from "@/hooks/useRecognition";
+import { levelPresentation } from "@/lib/recognitionLevels";
 
 /**
- * Renders a branded 1200x630 share card (WorldAML logo + member recognition)
- * that learners can attach to their LinkedIn / X / Facebook post.
- * Same-origin logo keeps the canvas untainted so it can be exported.
+ * Renders a branded 1200x630 share card (WorldAML logo + member recognition).
+ * Layout, navy base and WorldAML branding stay constant across levels; the
+ * level name, recognition title, message, accent, emblem and achievement
+ * counters are all driven by the member's real recognition status.
  */
 const LOGO_SRC = "/email-logo.png";
 
@@ -32,7 +34,27 @@ function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: num
   ctx.closePath();
 }
 
-export async function renderRecognitionCard(r: RecognitionStatus): Promise<Blob | null> {
+function wrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let line = "";
+  for (const w of words) {
+    const test = line ? `${line} ${w}` : w;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = w;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+export async function renderRecognitionCard(
+  r: RecognitionStatus,
+  memberName?: string,
+): Promise<Blob | null> {
   const W = 1200;
   const H = 630;
   const canvas = document.createElement("canvas");
@@ -41,88 +63,157 @@ export async function renderRecognitionCard(r: RecognitionStatus): Promise<Blob 
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 
-  // Background
+  const preset = levelPresentation(r);
+  const levelName = r.level?.name ?? "Member";
+  const accent = preset.accent;
+
+  // Background — navy always dominant
   const bg = ctx.createLinearGradient(0, 0, W, H);
   bg.addColorStop(0, NAVY);
   bg.addColorStop(1, NAVY_2);
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  // Teal glow accent
-  const glow = ctx.createRadialGradient(W - 180, 150, 20, W - 180, 150, 420);
-  glow.addColorStop(0, "rgba(20,184,166,0.28)");
-  glow.addColorStop(1, "rgba(20,184,166,0)");
+  // Level-accent glow behind the emblem
+  const glow = ctx.createRadialGradient(W - 190, 300, 20, W - 190, 300, 380);
+  glow.addColorStop(0, preset.accentSoft);
+  glow.addColorStop(1, "rgba(0,0,0,0)");
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
 
-  // Top rule
-  ctx.fillStyle = TEAL;
+  // Top rule in the level accent
+  ctx.fillStyle = accent;
   ctx.fillRect(0, 0, W, 8);
 
-  // Logo
+  // Logo (constant branding)
   const logo = await loadImage(LOGO_SRC);
   if (logo) {
-    const lw = 260;
+    const lw = 230;
     const lh = (logo.height / logo.width) * lw;
-    ctx.drawImage(logo, 72, 66, lw, lh);
+    ctx.drawImage(logo, 72, 58, lw, lh);
   } else {
     ctx.fillStyle = WHITE;
-    ctx.font = "bold 40px Arial, Helvetica, sans-serif";
-    ctx.fillText("WorldAML", 72, 108);
+    ctx.font = "bold 38px Arial, Helvetica, sans-serif";
+    ctx.fillText("WorldAML", 72, 100);
   }
 
-  // Eyebrow
-  ctx.fillStyle = TEAL;
-  ctx.font = "bold 20px Arial, Helvetica, sans-serif";
-  ctx.fillText("WORLDAML ACADEMY · MEMBER RECOGNITION", 72, 214);
+  const contentRight = 830; // leave room for the emblem
 
-  // Level
-  const level = r.level?.name ?? "Member";
-  ctx.fillStyle = WHITE;
-  ctx.font = "bold 76px Arial, Helvetica, sans-serif";
-  ctx.fillText(level, 72, 300);
+  // Eyebrow: WORLDAML ACADEMY · <level recognition title>
+  ctx.fillStyle = accent;
+  ctx.font = "bold 19px Arial, Helvetica, sans-serif";
+  ctx.fillText(`WORLDAML ACADEMY · ${preset.recognitionTitle.toUpperCase()}`, 72, 186);
 
-  ctx.fillStyle = MUTED;
-  ctx.font = "26px Arial, Helvetica, sans-serif";
-  ctx.fillText("AML · Sanctions · Financial Crime Compliance", 72, 344);
-
-  // Stat tiles
-  const tiles = [
-    { value: String(r.completedCourses ?? 0), label: "Courses completed" },
-    { value: String(r.certificates ?? 0), label: "Certificates earned" },
-    { value: String(r.earnedBadges?.length ?? 0), label: "Specialisations" },
-  ];
-  const tw = 316;
-  const th = 132;
-  tiles.forEach((t, i) => {
-    const x = 72 + i * (tw + 20);
-    const y = 392;
-    ctx.fillStyle = "rgba(255,255,255,0.06)";
-    roundedRect(ctx, x, y, tw, th, 16);
-    ctx.fill();
-    ctx.strokeStyle = "rgba(20,184,166,0.35)";
-    ctx.lineWidth = 2;
-    roundedRect(ctx, x, y, tw, th, 16);
-    ctx.stroke();
-
+  // Member name
+  const name = (memberName ?? "").trim();
+  if (name) {
     ctx.fillStyle = WHITE;
     ctx.font = "bold 46px Arial, Helvetica, sans-serif";
-    ctx.fillText(t.value, x + 24, y + 66);
-    ctx.fillStyle = MUTED;
-    ctx.font = "20px Arial, Helvetica, sans-serif";
-    ctx.fillText(t.label, x + 24, y + 102);
+    ctx.fillText(name, 72, 244);
+  }
+
+  // Level
+  ctx.fillStyle = WHITE;
+  ctx.font = "bold 62px Arial, Helvetica, sans-serif";
+  ctx.fillText(levelName.toUpperCase(), 72, name ? 312 : 280);
+
+  // Recognition message
+  ctx.fillStyle = MUTED;
+  ctx.font = "22px Arial, Helvetica, sans-serif";
+  const msgLines = wrap(ctx, preset.message, contentRight - 72 - 20).slice(0, 3);
+  msgLines.forEach((l, i) => ctx.fillText(l, 72, (name ? 352 : 320) + i * 30));
+
+  // Emblem (right)
+  const cx = W - 190;
+  const cy = 300;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 112, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(255,255,255,0.05)";
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = accent;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx, cy, 96, 0, Math.PI * 2);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "rgba(255,255,255,0.22)";
+  ctx.stroke();
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = accent;
+  ctx.font = "bold 34px Arial, Helvetica, sans-serif";
+  ctx.fillText(preset.emblem, cx, cy - 10);
+  ctx.fillStyle = WHITE;
+  ctx.font = "bold 20px Arial, Helvetica, sans-serif";
+  ctx.fillText("MEMBER", cx, cy + 22);
+  ctx.fillStyle = MUTED;
+  ctx.font = "12px Arial, Helvetica, sans-serif";
+  ctx.fillText("WORLDAML ACADEMY", cx, cy + 52);
+  ctx.textAlign = "left";
+
+  // Achievement data — always the member's real counts
+  const specialisations = r.earnedBadges?.length ?? 0;
+  const tiles = [
+    {
+      value: String(r.completedCourses ?? 0),
+      label: r.completedCourses === 1 ? "Course completed" : "Courses completed",
+      dim: false,
+    },
+    {
+      value: String(r.certificates ?? 0),
+      label: r.certificates === 1 ? "Certificate earned" : "Certificates earned",
+      dim: (r.certificates ?? 0) === 0,
+    },
+    {
+      value: String(specialisations),
+      label: specialisations === 1 ? "Specialisation" : "Specialisations",
+      dim: specialisations === 0,
+    },
+  ];
+
+  const tw = 232;
+  const th = 108;
+  const ty = 424;
+  tiles.forEach((t, i) => {
+    const x = 72 + i * (tw + 18);
+    ctx.fillStyle = t.dim ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.07)";
+    roundedRect(ctx, x, ty, tw, th, 14);
+    ctx.fill();
+    ctx.strokeStyle = t.dim ? "rgba(255,255,255,0.10)" : `${accent}66`;
+    ctx.lineWidth = 2;
+    roundedRect(ctx, x, ty, tw, th, 14);
+    ctx.stroke();
+
+    ctx.fillStyle = t.dim ? "rgba(255,255,255,0.45)" : WHITE;
+    ctx.font = "bold 40px Arial, Helvetica, sans-serif";
+    ctx.fillText(t.value, x + 20, ty + 58);
+    ctx.fillStyle = t.dim ? "rgba(148,163,184,0.65)" : MUTED;
+    ctx.font = "17px Arial, Helvetica, sans-serif";
+    ctx.fillText(t.label, x + 20, ty + 88);
   });
+
+  // Earned specialisation names, elegantly listed (only when actually earned)
+  if (specialisations > 0) {
+    const names = r.earnedBadges.map((b) => b.name).join("  •  ");
+    ctx.fillStyle = accent;
+    ctx.font = "bold 13px Arial, Helvetica, sans-serif";
+    ctx.fillText("SPECIALISATIONS", 782, ty + 46);
+    ctx.fillStyle = WHITE;
+    ctx.font = "18px Arial, Helvetica, sans-serif";
+    const lines = wrap(ctx, names, W - 782 - 72).slice(0, 2);
+    lines.forEach((l, i) => ctx.fillText(l, 782, ty + 74 + i * 24));
+  }
 
   // Footer
   ctx.fillStyle = "rgba(255,255,255,0.14)";
   ctx.fillRect(72, 566, W - 144, 2);
   ctx.fillStyle = MUTED;
-  ctx.font = "22px Arial, Helvetica, sans-serif";
+  ctx.font = "20px Arial, Helvetica, sans-serif";
   ctx.fillText("worldaml.com/academy", 72, 600);
   ctx.fillStyle = TEAL;
-  ctx.font = "bold 22px Arial, Helvetica, sans-serif";
-  const cpd = "CPD-accredited training";
-  ctx.fillText(cpd, W - 72 - ctx.measureText(cpd).width, 600);
+  ctx.font = "bold 20px Arial, Helvetica, sans-serif";
+  const tagline = "WorldAML Academy Member Recognition";
+  ctx.fillText(tagline, W - 72 - ctx.measureText(tagline).width, 600);
 
   return await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
 }
