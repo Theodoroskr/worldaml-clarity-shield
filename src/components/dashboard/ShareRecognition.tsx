@@ -8,35 +8,44 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useRecognition, trackRecognition, type RecognitionStatus } from "@/hooks/useRecognition";
 import { renderRecognitionCard, downloadBlob } from "@/lib/recognitionShareImage";
+import { levelPresentation, plural } from "@/lib/recognitionLevels";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ACADEMY_URL = "https://worldaml.com/academy";
 const LINKEDIN_PAGE = "https://www.linkedin.com/company/worldaml";
-const HASHTAGS = ["AML", "Compliance", "FinancialCrime", "KYC", "Sanctions", "CPD", "WorldAML"];
+const HASHTAGS = ["AML", "Compliance", "FinancialCrime", "KYC", "Sanctions", "WorldAML"];
 
-/** Suggested post copy — includes hyperlinks, mentions and hashtags. */
+/**
+ * Suggested post copy — level-specific opener plus the member's real
+ * achievement data, hyperlinks, mentions and hashtags. Member Level is a
+ * recognition of continued learning, never a professional qualification.
+ */
 export function buildShareMessage(r: RecognitionStatus, network: "linkedin" | "x" | "facebook" | "email") {
+  const preset = levelPresentation(r);
   const level = r.level?.name ?? "Member";
-  const courses = `${r.completedCourses} CPD-accredited course${r.completedCourses === 1 ? "" : "s"}`;
+  const courses = plural(r.completedCourses, "Academy course", "Academy courses");
   const certs = r.certificates > 0
-    ? ` and ${r.certificates} verified certificate${r.certificates === 1 ? "" : "s"}`
+    ? ` and ${plural(r.certificates, "verified certificate", "verified certificates")} earned`
     : "";
   const badges = r.earnedBadges.length
     ? `\n\nSpecialisations earned: ${r.earnedBadges.map((b) => b.name).join(", ")}.`
     : "";
 
   const mention = network === "x" ? "@WorldAML" : "WorldAML";
+  const opener = preset.caption.replace("WorldAML Academy", `${mention} Academy`);
   const tags = network === "email" ? "" : `\n\n${HASHTAGS.map((h) => `#${h}`).join(" ")}`;
 
   const body =
-    `I've reached ${level} status with ${mention} Academy — ${courses}${certs} completed in anti-money laundering, sanctions screening and financial crime compliance.${badges}` +
+    `${opener}\n\nSo far: ${courses} completed${certs}.${badges}` +
     `\n\nExplore the WorldAML Academy: ${ACADEMY_URL}` +
     (network === "linkedin" ? `\nWorldAML on LinkedIn: ${LINKEDIN_PAGE}` : "") +
     tags;
 
   return network === "x" && body.length > 275
-    ? `I've reached ${level} status with @WorldAML Academy — ${courses} in AML & financial crime compliance.\n\n${ACADEMY_URL}\n\n#AML #Compliance #KYC #CPD`
+    ? `I've reached ${level} status with @WorldAML Academy — ${courses} completed in AML & financial crime compliance.\n\n${ACADEMY_URL}\n\n#AML #Compliance #KYC`
     : body;
 }
+
 
 export default function ShareRecognition({
   data,
