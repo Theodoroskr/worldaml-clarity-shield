@@ -14,12 +14,22 @@ import { WorldComplianceBuyDialog } from "@/components/business/WorldComplianceB
 
 export default function BusinessSolutionDetail() {
   const { key = "" } = useParams();
+  const { hash } = useLocation();
   const solution = SOLUTION_BY_KEY[key];
   const { ownedKeys, track } = useBusinessWorkspace();
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
 
   useEffect(() => { if (solution) track("product_detail_viewed", solution.key); }, [solution, track]);
+
+  // "Buy" cards link to /business/solutions/:key#plans — scroll the plans block into view.
+  useEffect(() => {
+    if (hash !== "#plans") return;
+    const t = window.setTimeout(() => {
+      document.getElementById("plans")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 120);
+    return () => window.clearTimeout(t);
+  }, [hash, key]);
 
   if (!solution) return <Navigate to="/business/solutions" replace />;
 
