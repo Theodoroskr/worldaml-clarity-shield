@@ -59,6 +59,39 @@ export type Database = {
         }
         Relationships: []
       }
+      academy_basket_snapshots: {
+        Row: {
+          currency: string
+          email: string | null
+          full_name: string | null
+          items: string[]
+          reminder_30d_sent_at: string | null
+          reminder_3d_sent_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          currency?: string
+          email?: string | null
+          full_name?: string | null
+          items?: string[]
+          reminder_30d_sent_at?: string | null
+          reminder_3d_sent_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          currency?: string
+          email?: string | null
+          full_name?: string | null
+          items?: string[]
+          reminder_30d_sent_at?: string | null
+          reminder_3d_sent_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       academy_certificates: {
         Row: {
           course_id: string
