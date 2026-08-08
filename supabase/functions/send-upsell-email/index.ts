@@ -443,6 +443,44 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
     buildText: (firstName: string, _resetLink?: string, data?: TemplateData) =>
       `Hi ${firstName || "there"},\n\nCongrats on finishing your free WorldAML course! Here's 30% off any paid Academy course:\n\n  Code: ${data?.promoCode || "ACADEMY30"}\n  Valid 30 days, single use.\n\nBrowse: https://academy.worldaml.com/?promo=${data?.promoCode || "ACADEMY30"}\n\nThe WorldAML Team`,
   },
+
+  "academy-course-upsell": {
+    subject: "Your next WorldAML Academy courses",
+    buildHtml: (firstName: string, _resetLink?: string, data?: TemplateData) =>
+      buildListEmail({
+        firstName,
+        data,
+        brandTitle: "WorldAML Academy",
+        brandSubtitle: "CPD-accredited compliance training",
+        headerBg: "#1e3a5f",
+        accent: "#0d9488",
+        ctaLabel: "Browse the Academy",
+        ctaUrl: "https://academy.worldaml.com/?utm_source=email&utm_medium=upsell&utm_campaign=course-suggestions",
+        defaultHeadline: "Courses picked for your next CPD step",
+        defaultIntro: "Based on your training so far, these CPD-accredited courses are the natural next step.",
+      }),
+    buildText: (firstName: string, _resetLink?: string, data?: TemplateData) =>
+      `Hi ${firstName || "there"},\n\n${data?.intro || "These WorldAML Academy courses are your natural next step."}\n\n${renderItemsText(data?.items)}\n\nBrowse the Academy: https://academy.worldaml.com\n\nThe WorldAML Team`,
+  },
+
+  "business-solutions-upsell": {
+    subject: "WorldAML solutions for your compliance team",
+    buildHtml: (firstName: string, _resetLink?: string, data?: TemplateData) =>
+      buildListEmail({
+        firstName,
+        data,
+        brandTitle: "WorldAML",
+        brandSubtitle: "Products · Services · Training",
+        headerBg: "#0d9488",
+        accent: "#1e3a5f",
+        ctaLabel: "Talk to our team",
+        ctaUrl: "https://worldaml.com/contact-sales?utm_source=email&utm_medium=upsell&utm_campaign=business-solutions",
+        defaultHeadline: "Compliance solutions for your team",
+        defaultIntro: "Here is how WorldAML can support your compliance programme across technology, expert services and team training.",
+      }),
+    buildText: (firstName: string, _resetLink?: string, data?: TemplateData) =>
+      `Hi ${firstName || "there"},\n\n${data?.intro || "Here is how WorldAML can support your compliance programme."}\n\n${renderItemsText(data?.items)}\n\nTalk to our team: https://worldaml.com/contact-sales\n\nThe WorldAML Team`,
+  },
 };
 
 /* ── Handler ── */
