@@ -137,10 +137,31 @@ export default function ShareRecognition({
         <DialogHeader>
           <DialogTitle>Share your {r.level.name} status</DialogTitle>
           <DialogDescription>
-            LinkedIn and X don't accept pre-filled text — copy the suggested post first, then paste it into the
-            share window that opens.
+            LinkedIn and X don't accept pre-filled text or images — download the branded image and copy the
+            suggested post, then attach both in the share window that opens.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Branded recognition image */}
+        <div className="rounded-lg border border-border overflow-hidden bg-muted/30">
+          {imageUrl ? (
+            <img src={imageUrl} alt={`WorldAML ${levelName} member recognition card`} className="w-full block" />
+          ) : (
+            <div className="flex items-center justify-center gap-2 py-10 text-xs text-muted-foreground">
+              {imageBusy && <Loader2 className="h-4 w-4 animate-spin" />} Preparing your branded image…
+            </div>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={downloadImage} disabled={!imageBlob}>
+            <Download className="h-3.5 w-3.5 mr-1.5" /> Download image
+          </Button>
+          <Button variant="ghost" size="sm" onClick={copyImage} disabled={!imageBlob}>
+            <ImageIcon className="h-3.5 w-3.5 mr-1.5" /> Copy image
+          </Button>
+        </div>
+
+
 
         <Textarea
           value={text}
