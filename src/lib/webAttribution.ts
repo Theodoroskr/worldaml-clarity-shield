@@ -168,6 +168,10 @@ export function getWebAttribution(): WebAttribution {
       out.days_visited = Array.isArray(v.days) ? v.days.length : undefined;
       out.visit_count = v.visit_count;
       out.first_page_visited = v.first_page_visited || out.landing_page;
+      // The page the visitor was on before this form — i.e. where they clicked
+      // the CTA. Falls back to the external document.referrer.
+      out.cta_referrer = v.previous_page || out.referrer || undefined;
+
       const visits = Math.max(1, v.visit_count || 1);
       out.average_time_spent_minutes =
         Math.round(((v.total_seconds || 0) / 60 / visits) * 100) / 100;
