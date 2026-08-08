@@ -44,6 +44,7 @@ export interface AcademyOverview {
   /** Best "continue learning" candidate: furthest along, else most recent. */
   current: LearningCourse | null;
   recommended: AcademyCourseRow | null;
+  recommendedList: AcademyCourseRow[];
 }
 
 const EMPTY: AcademyOverview = {
@@ -54,6 +55,7 @@ const EMPTY: AcademyOverview = {
   cpdHours: 0,
   current: null,
   recommended: null,
+  recommendedList: [],
 };
 
 /**
@@ -145,12 +147,15 @@ export function useAcademyOverview() {
       const seen = new Set(all.map((c) => c.course.id));
       const preferredCategory = current?.course.category ?? null;
       const candidates = courses.filter((c) => !seen.has(c.id));
-      const recommended =
-        candidates.find((c) => preferredCategory && c.category === preferredCategory) ??
-        candidates[0] ??
-        null;
+      const ranked = [...candidates].sort((a, b) => {
+        const aMatch = preferredCategory && a.category === preferredCategory ? 0 : 1;
+        const bMatch = preferredCategory && b.category === preferredCategory ? 0 : 1;
+        return aMatch - bMatch || (a.sort_order ?? 999) - (b.sort_order ?? 999);
+      });
+      const recommendedList = ranked.slice(0, 3);
+      const recommended = recommendedList[0] ?? null;
 
-      return { inProgress, completed, all, certificates, cpdHours, current, recommended };
+      return { inProgress, completed, all, certificates, cpdHours, current, recommended, recommendedList };
     },
   });
 
