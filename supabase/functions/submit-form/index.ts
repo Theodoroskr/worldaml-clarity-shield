@@ -440,6 +440,9 @@ Deno.serve(async (req) => {
           // ['Contact Sales', 'Book Demo', 'Newsletter', 'Webinar',
           //  'Event Registration', 'Partner Request', 'General Contact']
           Form_Type: (() => {
+            // "Request a Demo" (contact-sales) with a demo-able product
+            // selected is a Book Demo lead.
+            if (isDemoRequest) return "Book Demo";
             const map: Record<string, string> = {
               "contact-sales": "Contact Sales",
               "contact_sales": "Contact Sales",
@@ -482,6 +485,7 @@ Deno.serve(async (req) => {
           // "Product Demo" on Leads is a TEXT field (api_name: ProductDemo) —
           // records which product-specific demo funnel the lead came from.
           ProductDemo: (() => {
+            if (isDemoRequest) return demoableProducts.join(", ").slice(0, 255);
             const key = String(form_type ?? "").trim().toLowerCase();
             if (key === "free-aml-check" || key === "free_aml_check") return "free_aml_check";
             if (key.includes("demo") || key === "free-trial") return key;
@@ -489,10 +493,12 @@ Deno.serve(async (req) => {
           })(),
           // "Book Demo" boolean — true for any demo / trial request funnel.
           BookDemo: (() => {
+            if (isDemoRequest) return true;
             const key = String(form_type ?? "").trim().toLowerCase();
             return key.includes("demo") || key === "free-trial" || key === "free_aml_check"
               ? true
               : undefined;
+
           })(),
           // Subject — short human-readable summary shown in list views.
           Subject: (() => {
