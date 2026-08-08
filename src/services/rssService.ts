@@ -118,10 +118,17 @@ function truncate(text: string, maxLength: number = 320): string {
   return `${cut}…`;
 }
 
-// Generate unique ID from feed item
+// Generate a stable, collision-free ID from a feed item.
+// (A base64 prefix was previously used, which produced identical IDs for every item
+// of the same feed and made React reuse stale cards when filtering.)
 function generateId(item: Rss2JsonItem, feedUrl: string): string {
-  const base = `${feedUrl}-${item.title}-${item.pubDate}`;
-  return btoa(base).replace(/[^a-zA-Z0-9]/g, "").substring(0, 16);
+  const base = `${feedUrl}|${item.title}|${item.pubDate}|${item.link}`;
+  let hash = 2166136261;
+  for (let i = 0; i < base.length; i++) {
+    hash ^= base.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `rss-${(hash >>> 0).toString(36)}-${base.length.toString(36)}`;
 }
 
 // Extract tags from title/description
