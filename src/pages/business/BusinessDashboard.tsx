@@ -1,0 +1,235 @@
+import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import {
+  ArrowRight, Boxes, CreditCard, Users, LifeBuoy, Compass, GraduationCap,
+  ShieldCheck, Clock, AlertCircle, CheckCircle2, ExternalLink,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { useBusinessWorkspace } from "@/hooks/useBusinessWorkspace";
+import { usePortalAccess } from "@/hooks/usePortalAccess";
+import { BUSINESS_SOLUTIONS, SOLUTION_BY_KEY, recommendSolutions, CROSS_SELL_COPY } from "@/lib/businessCatalogue";
+import { SolutionCard, TalkToExpert } from "@/components/business/SolutionCard";
+
+const fmtDate = (d?: string | null) =>
+  d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+
+export default function BusinessDashboard() {
+  const { account, activeEntitlements, ownedKeys, hasProducts, members, track } = useBusinessWorkspace();
+  const { academyAccess } = usePortalAccess();
+
+  useEffect(() => { track("dashboard_viewed"); }, [track]);
+
+  const firstName = (account?.contact_name || "").split(" ")[0] || "there";
+  const recommended = recommendSolutions(ownedKeys, hasProducts ? 2 : 3);
+
+  // Action centre — only real, checkable states.
+  const actions: { icon: typeof Clock; text: string; to: string; cta: string }[] = [];
+  if (account && (!account.country || !account.industry || !account.company_size)) {
+    actions.push({ icon: AlertCircle, text: "Complete your company profile to speed up checkout and quotes.", to: "/business/company", cta: "Complete" });
+  }
+  activeEntitlements.filter((e) => !e.setup_complete).forEach((e) => {
+    actions.push({ icon: Clock, text: `${SOLUTION_BY_KEY[e.product_key]?.name ?? e.product_key}: setup not finished.`, to: "/business/products", cta: "Continue setup" });
+  });
+  activeEntitlements.filter((e) => e.renews_at && new Date(e.renews_at).getTime() - Date.now() < 30 * 864e5).forEach((e) => {
+    actions.push({ icon: CreditCard, text: `${SOLUTION_BY_KEY[e.product_key]?.name ?? e.product_key} renews on ${fmtDate(e.renews_at)}.`, to: "/business/billing", cta: "Review" });
+  });
+  if (members.some((m) => m.status === "invited")) {
+    actions.push({ icon: Users, text: "You have pending team invitations.", to: "/business/team", cta: "Manage team" });
+  }
+
+  return (
+    <div className="space-y-8 max-w-6xl">
+      {/* WELCOME */}
+      <section className="rounded-xl bg-navy text-primary-foreground px-6 py-7">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-teal">{account?.company_name}</p>
+            <h1 className="mt-1 text-2xl md:text-3xl font-bold">
+              {hasProducts ? `Welcome back, ${firstName}` : `Welcome to WorldAML, ${firstName}`}
+            </h1>
+            <p className="mt-1.5 text-sm text-primary-foreground/70 max-w-xl">
+              {hasProducts
+                ? "Manage your WorldAML solutions, team and account."
+                : "Build the compliance stack your business needs."}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {hasProducts ? (
+              <Button asChild variant="accent"><Link to="/business/products">Open your products <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+            ) : (
+              <Button asChild variant="accent"><Link to="/business/solutions">Explore Solutions <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+            )}
+            <Button asChild variant="outline" className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+              <Link to="/business/quotes">Talk to an Expert</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* ACTION CENTRE */}
+      {actions.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">Action Centre</CardTitle></CardHeader>
+          <CardContent className="divide-y divide-border">
+            {actions.slice(0, 5).map((a, i) => (
+              <div key={i} className="flex items-center justify-between gap-4 py-2.5 first:pt-0 last:pb-0">
+                <div className="flex items-center gap-2.5 text-sm text-foreground/90">
+                  <a.icon className="w-4 h-4 text-teal shrink-0" />{a.text}
+                </div>
+                <Button asChild size="sm" variant="ghost"><Link to={a.to}>{a.cta}</Link></Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {hasProducts ? (
+        <>
+          {/* MY PRODUCTS */}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground">My WorldAML</h2>
+              <Button asChild variant="ghost" size="sm"><Link to="/business/products">All products <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link></Button>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              {activeEntitlements.map((e) => {
+                const sol = SOLUTION_BY_KEY[e.product_key];
+                const pct = e.usage_limit && e.usage_used != null ? Math.min(100, Math.round((e.usage_used / e.usage_limit) * 100)) : null;
+                return (
+                  <Card key={e.id}>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <CardTitle className="text-base">{sol?.name ?? e.product_key}</CardTitle>
+                        <Badge className="bg-teal/15 text-teal border-teal/30" variant="outline">{e.status.toUpperCase()}</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{e.plan ?? "—"} · Renewal {fmtDate(e.renews_at)}</p>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {pct !== null && (
+                        <div>
+                          <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                            <span>{e.usage_used?.toLocaleString()} / {e.usage_limit?.toLocaleString()} {e.usage_unit ?? sol?.usageUnit ?? ""}</span>
+                            <span>{pct}%</span>
+                          </div>
+                          <Progress value={pct} className="h-1.5" />
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        {!e.setup_complete ? (
+                          <Button asChild variant="accent" size="sm" className="flex-1"><Link to="/business/products">Continue Setup</Link></Button>
+                        ) : sol?.openUrl ? (
+                          <Button asChild variant="accent" size="sm" className="flex-1"><Link to={sol.openUrl}>Open Product</Link></Button>
+                        ) : null}
+                        <Button asChild variant="outline" size="sm" className="flex-1"><Link to="/business/billing">Manage Plan</Link></Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* QUICK ACTIONS */}
+          <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {[
+              { label: "Explore Solutions", to: "/business/solutions", icon: Compass },
+              { label: "Manage Team", to: "/business/team", icon: Users },
+              { label: "View Billing", to: "/business/billing", icon: CreditCard },
+              { label: "Get Support", to: "/business/support", icon: LifeBuoy },
+            ].map((q) => (
+              <Link key={q.to} to={q.to} className="rounded-lg border border-border bg-card px-4 py-3 flex items-center gap-2.5 text-sm font-medium hover:border-teal/50 transition-colors">
+                <q.icon className="w-4 h-4 text-teal" />{q.label}
+              </Link>
+            ))}
+          </section>
+        </>
+      ) : (
+        <>
+          {/* NEW CUSTOMER — DISCOVER */}
+          <section className="space-y-3">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Get started with WorldAML</h2>
+              <p className="text-sm text-muted-foreground">Choose the solutions that match your compliance requirements.</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-4">
+              {recommended.map((s) => (
+                <SolutionCard
+                  key={s.key}
+                  solution={s}
+                  status={s.plans.some((p) => p.checkout) ? "Available" : "Contact Sales"}
+                  onView={() => track("product_viewed", s.key)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* WHY WORLDAML */}
+          <section className="grid sm:grid-cols-3 gap-4">
+            {[
+              { icon: ShieldCheck, title: "Regulator-ready", body: "Audit trails and evidence built into every screening and verification decision." },
+              { icon: Boxes, title: "One compliance stack", body: "Screening, monitoring, identity verification and training from a single supplier." },
+              { icon: CheckCircle2, title: "Fast to activate", body: "Self-service plans go live immediately; enterprise deployments are guided by our team." },
+            ].map((v) => (
+              <Card key={v.title}><CardContent className="pt-6">
+                <v.icon className="w-5 h-5 text-teal" />
+                <p className="mt-2 font-semibold text-foreground">{v.title}</p>
+                <p className="text-sm text-muted-foreground mt-1">{v.body}</p>
+              </CardContent></Card>
+            ))}
+          </section>
+        </>
+      )}
+
+      {/* RECOMMENDED */}
+      {recommended.length > 0 && hasProducts && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold text-foreground">Recommended for your business</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            {recommended.map((s) => (
+              <Card key={s.key} className="border-border/70">
+                <CardContent className="pt-5 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-semibold text-foreground">{s.name}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{CROSS_SELL_COPY[s.key]}</p>
+                  </div>
+                  <Button asChild size="sm" variant="outline" className="shrink-0">
+                    <Link to={`/business/solutions/${s.key}`}>View</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ACADEMY FOR BUSINESS */}
+      <section>
+        <Card className="border-navy/20 bg-navy/[0.03]">
+          <CardContent className="py-6 flex flex-wrap items-center justify-between gap-5">
+            <div className="flex items-start gap-3 max-w-2xl">
+              <GraduationCap className="w-6 h-6 text-teal mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">WorldAML Academy for Business</p>
+                <p className="font-semibold text-foreground mt-0.5">Build compliance knowledge across your organisation</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Train employees across AML, sanctions and financial crime compliance. Individual courses from €29.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button asChild variant="accent"><Link to="/business/training">Explore Business Training</Link></Button>
+              {academyAccess && (
+                <Button asChild variant="outline"><Link to="/dashboard">Go to My Learning <ExternalLink className="ml-2 h-3.5 w-3.5" /></Link></Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <TalkToExpert />
+    </div>
+  );
+}
