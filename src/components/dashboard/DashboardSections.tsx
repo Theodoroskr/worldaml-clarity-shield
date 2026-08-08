@@ -233,12 +233,26 @@ export function RecommendedNext({ courses }: { courses: AcademyOverview["recomme
     <div>
       <h2 className="text-sm font-semibold text-foreground mb-2">Recommended for You</h2>
       <div className="grid sm:grid-cols-3 gap-3">
-        {courses.slice(0, 3).map((course) => (
-          <div key={course.id} className="rounded-lg border border-border bg-card p-4 flex flex-col">
+        {courses.slice(0, 3).map((course) => {
+          const cover = getCourseCover(course.slug);
+          return (
+          <div key={course.id} className="rounded-lg border border-border bg-card flex flex-col overflow-hidden">
+            {cover && (
+              <a href={courseUrl(course.slug)} className="block">
+                <img
+                  src={cover}
+                  alt={`${course.title} course cover`}
+                  loading="lazy"
+                  className="h-28 w-full object-cover"
+                />
+              </a>
+            )}
+            <div className="p-4 flex flex-col flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               {course.category && <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{course.category}</span>}
               {course.difficulty && <Badge variant="secondary" className="text-[10px] capitalize">{course.difficulty}</Badge>}
             </div>
+
             <div className="text-sm font-semibold text-foreground mt-1.5 line-clamp-2">{course.title}</div>
             {course.duration_minutes ? (
               <div className="text-[11px] text-muted-foreground mt-1 inline-flex items-center gap-1">
