@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { REGULATORY_PROFILES, REGULATOR_OPTIONS } from "@/data/regulatoryProfiles";
 import AdminUserDetailDialog, { RevenueItem } from "@/components/admin/AdminUserDetailDialog";
+import type { UpsellTemplate } from "@/lib/upsellRecommendation";
 import { exportRowsAsCsv, exportRowsAsXlsx } from "@/lib/adminUserExport";
 
 interface Profile {
