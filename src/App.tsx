@@ -363,7 +363,10 @@ const App = () => (
 
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
                   <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="analytics" element={<AdminAnalytics />} />
+                  <Route path="reports" element={<AdminReports />} />
                   <Route path="users" element={<AdminUsers />} />
+
                   <Route path="organizations" element={<AdminOrganizations />} />
                   <Route path="alert-rules" element={<AdminAlertRules />} />
                   <Route path="forms" element={<AdminForms />} />
