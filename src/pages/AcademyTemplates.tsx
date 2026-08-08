@@ -330,14 +330,14 @@ const AcademyTemplates = () => {
                     Need help turning templates into board-approved policies?
                   </h3>
                   <p className="text-body text-slate-light max-w-2xl">
-                    Request a consultation quote and our MLROs will tailor these frameworks
+                    Request a demo and our MLROs will tailor these frameworks
                     to your business, jurisdiction, and regulator — ready for sign-off.
                   </p>
                 </div>
               </div>
               <Button asChild size="lg" className="relative flex-shrink-0 bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/30 px-8">
                 <Link to="/contact-sales?topic=policy-consultation">
-                  Request a Consultation Quote <ArrowRight className="h-4 w-4 ml-1" />
+                  Request a Demo <ArrowRight className="h-4 w-4 ml-1" />
                 </Link>
               </Button>
             </div>
