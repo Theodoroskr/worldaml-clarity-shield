@@ -3,6 +3,7 @@ import { NavLink, Navigate, Outlet, useLocation, useNavigate } from "react-route
 import {
   Loader2, Building2, LayoutDashboard, Compass, Boxes, GraduationCap, Users,
   Building, CreditCard, LifeBuoy, UserCircle, ShieldCheck, ArrowLeft, ChevronDown, LogOut,
+  Library, Newspaper, BookOpenCheck, ListChecks, FileText, BookA, Scale, Globe2, Map, HelpCircle,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessAccount } from "@/hooks/useBusinessAccount";
@@ -36,6 +37,21 @@ const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: t
     ],
   },
   { label: "Billing", items: [{ label: "Plans & Billing", path: "/business/billing", icon: CreditCard }] },
+  {
+    label: "Resources",
+    items: [
+      { label: "Resource Hub", path: "/business/resources", icon: Library, end: true },
+      { label: "News", path: "/news", icon: Newspaper },
+      { label: "Best Practices", path: "/resources/best-practices", icon: BookOpenCheck },
+      { label: "Sanctions Lists", path: "/resources/sanctions-lists", icon: ListChecks },
+      { label: "Blog", path: "/blog", icon: FileText },
+      { label: "Compliance Glossary", path: "/resources/glossary", icon: BookA },
+      { label: "AML Regulations", path: "/resources/aml-regulations", icon: Scale },
+      { label: "Data Coverage", path: "/data-coverage", icon: Globe2 },
+      { label: "EU Sanctions Map", path: "/eu-sanctions-map", icon: Map },
+      { label: "FAQ", path: "/faq", icon: HelpCircle },
+    ],
+  },
   { label: "Support", items: [{ label: "Help & Support", path: "/business/support", icon: LifeBuoy }] },
   {
     label: "Account",
