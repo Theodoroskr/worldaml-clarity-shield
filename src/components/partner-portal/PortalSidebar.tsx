@@ -3,25 +3,61 @@ import {
   LayoutDashboard,
   Users,
   Briefcase,
+  PlusCircle,
   DollarSign,
+  Wallet,
   ImageIcon,
+  Boxes,
   UserCircle,
   Settings,
   ArrowLeft,
   Handshake,
+  LifeBuoy,
   Contact as ContactIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const NAV = [
-  { label: "Overview", path: "/partner/dashboard", icon: LayoutDashboard, end: true },
-  { label: "Referrals", path: "/partner/referrals", icon: Users },
-  { label: "Deals", path: "/partner/deals", icon: Briefcase },
-  { label: "Commissions", path: "/partner/commissions", icon: DollarSign },
-  { label: "Marketing Assets", path: "/partner/assets", icon: ImageIcon },
-  { label: "Contacts", path: "/partner/contacts", icon: ContactIcon },
-  { label: "Profile", path: "/partner/profile", icon: UserCircle },
-  { label: "Settings", path: "/partner/settings", icon: Settings },
+type NavItem = { label: string; path: string; icon: any; end?: boolean };
+
+const GROUPS: { group: string; items: NavItem[] }[] = [
+  {
+    group: "Overview",
+    items: [{ label: "Dashboard", path: "/partner/dashboard", icon: LayoutDashboard, end: true }],
+  },
+  {
+    group: "Opportunities",
+    items: [
+      { label: "My Deals", path: "/partner/deals", icon: Briefcase, end: true },
+      { label: "Register a Deal", path: "/partner/deals/new", icon: PlusCircle },
+      { label: "Referrals", path: "/partner/referrals", icon: Users },
+    ],
+  },
+  {
+    group: "Partner Enablement",
+    items: [
+      { label: "Products & Solutions", path: "/partner/products", icon: Boxes },
+      { label: "Resources & Materials", path: "/partner/assets", icon: ImageIcon },
+    ],
+  },
+  {
+    group: "Earnings",
+    items: [
+      { label: "Commissions", path: "/partner/commissions", icon: DollarSign, end: true },
+      { label: "Payouts", path: "/partner/payouts", icon: Wallet },
+    ],
+  },
+  {
+    group: "Support",
+    items: [{ label: "Partner Manager", path: "/partner/manager", icon: LifeBuoy }],
+  },
+  {
+    group: "Account",
+    items: [
+      { label: "Company Profile", path: "/partner/profile", icon: UserCircle },
+      { label: "Team Contacts", path: "/partner/contacts", icon: ContactIcon },
+      { label: "Settings", path: "/partner/settings", icon: Settings },
+    ],
+  },
 ];
 
 export default function PortalSidebar() {
@@ -42,28 +78,37 @@ export default function PortalSidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
-        {NAV.map((n) => {
-          const active = n.end
-            ? location.pathname === n.path
-            : location.pathname.startsWith(n.path);
-          return (
-            <NavLink
-              key={n.path}
-              to={n.path}
-              end={n.end}
-              className={cn(
-                "w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors",
-                active
-                  ? "bg-teal/10 text-teal font-medium"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
-              )}
-            >
-              <n.icon className="w-4 h-4" />
-              {n.label}
-            </NavLink>
-          );
-        })}
+      <nav className="flex-1 p-2 space-y-3 overflow-y-auto">
+        {GROUPS.map((g) => (
+          <div key={g.group}>
+            <div className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+              {g.group}
+            </div>
+            <div className="space-y-0.5">
+              {g.items.map((n) => {
+                const active = n.end
+                  ? location.pathname === n.path
+                  : location.pathname.startsWith(n.path);
+                return (
+                  <NavLink
+                    key={n.path}
+                    to={n.path}
+                    end={n.end}
+                    className={cn(
+                      "w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] transition-colors",
+                      active
+                        ? "bg-teal/10 text-teal font-medium"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                  >
+                    <n.icon className="w-4 h-4 shrink-0" />
+                    {n.label}
+                  </NavLink>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       <div className="p-2 border-t border-border">
@@ -71,7 +116,7 @@ export default function PortalSidebar() {
           onClick={() => navigate("/dashboard")}
           className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
+          <ArrowLeft className="w-3.5 h-3.5" /> WorldAML Academy
         </button>
       </div>
     </aside>
