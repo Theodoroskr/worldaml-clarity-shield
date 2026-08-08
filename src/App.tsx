@@ -265,7 +265,15 @@ const App = () => (
 {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                {/* My WorldAML — authenticated app shell */}
+                <Route element={<AppShellLayout />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/my-learning" element={<MyLearning />} />
+                  <Route path="/certificates" element={<MyCertificates />} />
+                  <Route path="/account" element={<Navigate to="/account/profile" replace />} />
+                  <Route path="/account/profile" element={<AccountProfile />} />
+                  <Route path="/account/billing" element={<AccountBilling />} />
+                </Route>
                 <Route path="/pending-approval" element={<PendingApproval />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/admin" element={<AdminLayout />}>
