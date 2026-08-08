@@ -264,7 +264,15 @@ Deno.serve(async (req) => {
         // the website is lost, even where no dedicated Zoho field exists.
         const md = (metadata as any) ?? {};
         const detailLines = [
+          referralPartner
+            ? `Partner referral code: ${referralPartner.referral_code}${
+                referralPartner.display_name ? ` (${referralPartner.display_name})` : ""
+              }`
+            : referralInvalid
+              ? `Partner referral code submitted but not recognised: ${String(rawReferralCode).slice(0, 40)}`
+              : null,
           md.operator_type ? `Operator type: ${md.operator_type}` : null,
+
           md.segment ? `Segment: ${md.segment}` : null,
           md.jurisdiction ? `Primary jurisdiction: ${md.jurisdiction}` : null,
           md.page ? `Source page: ${md.page}` : null,
