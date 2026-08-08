@@ -98,11 +98,8 @@ export function CourseCrossSell({
   title?: string | null;
   surface?: string;
 }) {
-  const { hasSuite } = useEntitlements();
-  const { membership } = useRcmOrg();
   const product = productForCourse({ category, title });
   if (!product) return null;
-  const hasAccess = product.id === "suite" ? hasSuite : product.id === "rcm" ? !!membership : false;
 
   return (
     <div className="rounded-lg border border-border bg-muted/30 p-4">
