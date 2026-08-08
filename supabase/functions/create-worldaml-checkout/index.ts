@@ -72,7 +72,8 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: !customerId && userEmail ? userEmail : undefined,
-      customer_creation: customerId ? undefined : "always",
+      // NOTE: `customer_creation` is only valid in `payment` mode. In subscription
+      // mode Stripe always creates/attaches a Customer automatically.
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       allow_promotion_codes: true,
