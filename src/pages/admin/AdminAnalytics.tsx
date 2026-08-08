@@ -122,10 +122,11 @@ export default function AdminAnalytics() {
                     <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
                     <Tooltip contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", fontSize: 12 }} />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Line type="monotone" dataKey="users" name="New users" stroke="hsl(var(--primary))" dot={false} strokeWidth={2} />
-                    <Line type="monotone" dataKey="leads" name="Leads" stroke="hsl(var(--accent))" dot={false} strokeWidth={2} />
-                    <Line type="monotone" dataKey="starts" name="Course starts" stroke="#f59e0b" dot={false} strokeWidth={2} />
-                    <Line type="monotone" dataKey="searches" name="Sanctions searches" stroke="#06b6d4" dot={false} strokeWidth={2} />
+                    {showLine("users") && <Line type="monotone" dataKey="users" name="New users" stroke="hsl(var(--primary))" dot={false} strokeWidth={2} />}
+                    {showLine("leads") && <Line type="monotone" dataKey="leads" name="Leads" stroke="hsl(var(--accent))" dot={false} strokeWidth={2} />}
+                    {showLine("starts") && <Line type="monotone" dataKey="starts" name="Course starts" stroke="#f59e0b" dot={false} strokeWidth={2} />}
+                    {showLine("searches") && <Line type="monotone" dataKey="searches" name="Sanctions searches" stroke="#06b6d4" dot={false} strokeWidth={2} />}
+
                   </LineChart>
                 </ResponsiveContainer>
               </div>
