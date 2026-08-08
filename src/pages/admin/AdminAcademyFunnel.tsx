@@ -889,3 +889,13 @@ function ConvBadge({ value }: { value: number }) {
   const color = value >= 25 ? "text-emerald-600" : value >= 10 ? "text-amber-600" : "text-muted-foreground";
   return <span className={`font-medium ${color}`}>{value}%</span>;
 }
+
+function ConvStat({ label, value }: { label: string; value: number }) {
+  const color = value >= 25 ? "text-emerald-600" : value >= 10 ? "text-amber-600" : "text-muted-foreground";
+  return (
+    <div className="text-center">
+      <div className={`text-lg font-semibold tabular-nums ${color}`}>{value}%</div>
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
+    </div>
+  );
+}
