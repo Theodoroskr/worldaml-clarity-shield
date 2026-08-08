@@ -51,6 +51,9 @@ export default function AdminPartners() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [editForm, setEditForm] = useState<any>({});
+  const [detailPartner, setDetailPartner] = useState<any | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<any | null>(null);
+
   const [auditLog, setAuditLog] = useState<any[]>([]);
   const [auditEntity, setAuditEntity] = useState<string>("all");
   const [notifSettings, setNotifSettings] = useState<any[]>([]);
