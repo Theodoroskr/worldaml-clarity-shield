@@ -642,8 +642,12 @@ Deno.serve(async (req) => {
           // Marketing / attribution custom fields (Zoho CRM API names)
           Website_Name: "WorldAML",
           Landing_Page_URL: attribution.landing_page || undefined,
-          // Custom writable URL field on Leads for document.referrer.
-          Referrer_URL: attribution.referrer || undefined,
+          // Custom writable URL field on Leads — the page the visitor was on
+          // when they clicked the CTA that led to this form (falls back to the
+          // external document.referrer).
+          Referrer_URL:
+            attribution.cta_referrer || attribution.referrer || undefined,
+
 
           Source_UTM: attribution.utm_source || undefined,
           Medium_UTM: attribution.utm_medium || undefined,
