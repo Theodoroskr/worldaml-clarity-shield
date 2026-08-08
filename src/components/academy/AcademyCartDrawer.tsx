@@ -306,6 +306,23 @@ function AcademyCartDrawerContent() {
               </p>
             </div>
           )}
+          <div className="space-y-1.5">
+            <label htmlFor="cart-referral-code" className="text-caption font-medium text-foreground">
+              Partner referral code (optional)
+            </label>
+            <input
+              id="cart-referral-code"
+              type="text"
+              autoComplete="off"
+              maxLength={40}
+              placeholder="e.g. a1b2c3d4"
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value)}
+              disabled={loading}
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-body-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+
           <div className="flex gap-2">
             <Button
               variant="outline"
