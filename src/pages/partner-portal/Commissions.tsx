@@ -139,6 +139,8 @@ export default function PartnerCommissions() {
         <CardHeader>
           <CardTitle className="text-base">Payout history</CardTitle>
         </CardHeader>
+        <CardContent>
+
 
           {payouts.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
