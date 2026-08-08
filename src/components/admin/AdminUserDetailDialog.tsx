@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Send, Sparkles, Euro, GraduationCap, Building2, Handshake, ShieldAlert } from "lucide-react";
 import { recommendUpsell, UpsellTemplate } from "@/lib/upsellRecommendation";
+import { buildUpsellOptions, type UpsellOption, type CourseRow } from "@/lib/upsellCatalog";
 
 export interface RevenueItem {
   source: "academy" | "product";
@@ -21,7 +22,7 @@ interface Props {
   revenue: { total: number; currency: string; items: RevenueItem[] };
   roles: string[];
   onClose: () => void;
-  onSendUpsell: (template: UpsellTemplate) => void;
+  onSendUpsell: (template: UpsellTemplate, templateData?: Record<string, any>) => void;
 }
 
 const money = (cents: number, currency = "EUR") =>
