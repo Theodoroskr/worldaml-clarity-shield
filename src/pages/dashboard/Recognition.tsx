@@ -57,6 +57,7 @@ export default function Recognition() {
               {r.level?.description && (
                 <p className="text-sm text-muted-foreground mt-1 max-w-xl">{r.level.description}</p>
               )}
+              <div className="mt-3"><ShareRecognition data={r} /></div>
             </div>
             {r.nextLevel && (
               <div className="w-full sm:w-64 space-y-1.5">
