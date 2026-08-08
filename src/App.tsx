@@ -356,6 +356,7 @@ const App = () => (
                   <Route path="partners" element={<AdminPartners />} />
                   <Route path="partner-assets" element={<AdminPartnerAssets />} />
                   <Route path="business" element={<AdminBusiness />} />
+                  <Route path="identities" element={<AdminIdentities />} />
                   <Route path="domains" element={<AdminDomains />} />
                   <Route path="academy-users" element={<AdminAcademyUsers />} />
                   <Route path="academy-funnel" element={<AdminAcademyFunnel />} />
