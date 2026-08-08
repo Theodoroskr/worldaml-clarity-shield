@@ -66,26 +66,36 @@ export default function RegisterDeal() {
       form.notes ? `\nRequirements:\n${form.notes}` : null,
     ].filter(Boolean);
 
-    const { error } = await supabase.from("deal_registrations").insert({
-      partner_id: partner.id,
-      submitted_by: user.id,
-      prospect_company: form.prospect_company,
-      prospect_contact_name: [form.first_name, form.last_name].filter(Boolean).join(" ") || null,
-      prospect_email: form.prospect_email || null,
-      prospect_country: form.prospect_country,
-      product_interest: form.product ? [form.product] : null,
-      estimated_arr_eur: form.estimated_arr_eur ? Number(form.estimated_arr_eur) : null,
-      notes: contextLines.join("\n") || null,
-      status: "pending",
-    } as any);
+    const { data: inserted, error } = await supabase
+      .from("deal_registrations")
+      .insert({
+        partner_id: partner.id,
+        submitted_by: user.id,
+        prospect_company: form.prospect_company,
+        prospect_contact_name: [form.first_name, form.last_name].filter(Boolean).join(" ") || null,
+        prospect_email: form.prospect_email || null,
+        prospect_country: form.prospect_country,
+        product_interest: form.product ? [form.product] : null,
+        estimated_arr_eur: form.estimated_arr_eur ? Number(form.estimated_arr_eur) : null,
+        notes: contextLines.join("\n") || null,
+        status: "pending",
+      } as any)
+      .select("id")
+      .maybeSingle();
     setSubmitting(false);
     if (error) {
       toast.error(error.message);
       return;
     }
+    if (inserted?.id) {
+      supabase.functions
+        .invoke("notify-deal-registration", { body: { deal_id: inserted.id } })
+        .catch((e) => console.error("deal notification failed:", e));
+    }
     setDone(true);
     await refetch();
   };
+
 
   if (done) {
     return (
