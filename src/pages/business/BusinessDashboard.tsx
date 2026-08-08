@@ -63,7 +63,7 @@ export default function BusinessDashboard() {
         <div className="relative flex flex-wrap items-end justify-between gap-5">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-teal">{account?.company_name}</p>
-            <h1 className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight">
+            <h1 className="mt-1.5 text-2xl md:text-3xl font-bold tracking-tight text-primary-foreground">
               {hasProducts ? `Welcome back, ${firstName}` : `Welcome to WorldAML, ${firstName}`}
             </h1>
             <p className="mt-1.5 text-sm text-primary-foreground/70 max-w-xl">
