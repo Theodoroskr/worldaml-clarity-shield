@@ -19,7 +19,7 @@ export default function PartnerLogin() {
           footer={
             <>
               <div className="font-medium text-navy">Interested in becoming a WorldAML Partner?</div>
-              <Link to="/partners/apply" className="mt-2 inline-block text-teal hover:underline font-medium">
+              <Link to="/partner/signup" className="mt-2 inline-block text-teal hover:underline font-medium">
                 Apply to Become a Partner
               </Link>
               <p className="mt-2 text-xs text-muted-foreground">

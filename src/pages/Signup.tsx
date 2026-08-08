@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, GraduationCap } from "lucide-react";
 import { getAttribution, clearAttribution } from "@/lib/signupAttribution";
+import { ensureAuthAccount } from "@/lib/portalAccounts";
 
 const Signup = () => {
   const [firstName, setFirstName] = useState("");
@@ -43,7 +44,7 @@ const Signup = () => {
 
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
     const attribution = getAttribution();
-    const { error } = await signUp(email, password, {
+    const result = await ensureAuthAccount(email, password, {
       full_name: fullName,
       first_name: firstName.trim(),
       last_name: lastName.trim(),
@@ -52,6 +53,7 @@ const Signup = () => {
       signup_referrer: attribution.signup_referrer,
       signup_utm: attribution.signup_utm || {},
     });
+    const error = result.error ? { message: result.error } : null;
 
     if (error) {
       toast({

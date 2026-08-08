@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
@@ -8,36 +7,42 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Building2, Check } from "lucide-react";
-import { ensureAuthAccount, isWorkEmail } from "@/lib/portalAccounts";
+import { Loader2, Handshake, Clock } from "lucide-react";
+import { ensureAuthAccount } from "@/lib/portalAccounts";
 
-export const PENDING_BUSINESS_KEY = "worldaml_pending_business_account";
+export const PENDING_PARTNER_KEY = "worldaml_pending_partner_application";
 
-const INDUSTRIES = [
-  "Banking", "Payments / Fintech", "Crypto / VASP", "iGaming", "Insurance",
-  "Corporate Services / TCSP", "Legal", "Accounting / Audit", "Real Estate", "Other",
+type PartnerType = "referral" | "affiliate" | "reseller" | "technology";
+
+const PARTNER_TYPES: { value: PartnerType; label: string }[] = [
+  { value: "referral", label: "Referral Partner" },
+  { value: "affiliate", label: "Affiliate Partner" },
+  { value: "reseller", label: "Reseller" },
+  { value: "technology", label: "Technology Partner" },
 ];
 
-export default function BusinessSignup() {
+export default function PartnerSignup() {
   const [companyName, setCompanyName] = useState("");
   const [contactName, setContactName] = useState("");
   const [email, setEmail] = useState("");
-  const [country, setCountry] = useState("");
-  const [industry, setIndustry] = useState("");
   const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("");
+  const [website, setWebsite] = useState("");
+  const [partnerType, setPartnerType] = useState<PartnerType>("referral");
+  const [description, setDescription] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const { signUp } = useAuth();
-  const navigate = useNavigate();
+  const [submitted, setSubmitted] = useState<null | "pending-review" | "confirm-email">(null);
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
-  const next = searchParams.get("next") || "/business/dashboard";
+  const prefillEmail = searchParams.get("email");
+  if (prefillEmail && !email) setEmail(prefillEmail);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,32 +51,26 @@ export default function BusinessSignup() {
       return;
     }
     if (!companyName.trim() || !email.trim()) {
-      toast({ title: "Company name and work email are required", variant: "destructive" });
-      return;
-    }
-    if (!isWorkEmail(email)) {
-      toast({
-        title: "Use a company email address",
-        description: "Business accounts require a work email — free or disposable providers aren't accepted.",
-        variant: "destructive",
-      });
+      toast({ title: "Company name and email are required", variant: "destructive" });
       return;
     }
 
     setIsLoading(true);
-    const payload = {
+    const application = {
       company_name: companyName.trim(),
-      work_email: email.trim(),
       contact_name: contactName.trim() || null,
+      contact_email: email.trim(),
+      contact_phone: phone.trim() || null,
       country: country.trim() || null,
-      industry: industry || null,
-      phone: phone.trim() || null,
+      website: website.trim() || null,
+      partner_type: partnerType,
+      description: description.trim() || null,
     };
 
     const result = await ensureAuthAccount(email, password, {
       full_name: contactName.trim() || companyName.trim(),
       company_name: companyName.trim(),
-      account_type: "business",
+      account_type: "partner",
     });
 
     if (result.error) {
@@ -80,65 +79,60 @@ export default function BusinessSignup() {
       return;
     }
 
-    const uid = result.userId;
-
-    if (uid) {
-      const { data: existing } = await supabase
-        .from("business_accounts").select("id").eq("user_id", uid).maybeSingle();
-      if (!existing) {
-        const { error: insertError } = await supabase
-          .from("business_accounts")
-          .insert({ ...payload, user_id: uid });
-        if (insertError) {
-          setIsLoading(false);
-          toast({ title: "Could not save company details", description: insertError.message, variant: "destructive" });
-          return;
-        }
-      }
+    if (!result.userId) {
+      // Confirmation pending — the application is applied at first sign-in.
+      localStorage.setItem(PENDING_PARTNER_KEY, JSON.stringify(application));
       setIsLoading(false);
-      localStorage.removeItem(PENDING_BUSINESS_KEY);
-      toast({
-        title: result.existingIdentity ? "Business profile added" : "Business account created",
-        description: result.existingIdentity
-          ? "Your existing WorldAML sign-in now also opens the business portal."
-          : "Welcome to WorldAML.",
-      });
-      navigate(next);
+      setSubmitted("confirm-email");
       return;
     }
 
+    const { error } = await supabase
+      .from("partner_applications")
+      .insert({ ...application, user_id: result.userId });
 
-    // Email confirmation pending — finish account creation on first sign-in.
-    localStorage.setItem(PENDING_BUSINESS_KEY, JSON.stringify(payload));
     setIsLoading(false);
-    setEmailSent(true);
+
+    if (error) {
+      toast({ title: "Could not submit application", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    localStorage.removeItem(PENDING_PARTNER_KEY);
+    // Partner access is only granted once an administrator approves the record.
+    await supabase.auth.signOut();
+    setSubmitted("pending-review");
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO title="Create a Business Account" description="Create a WorldAML business account to buy WorldAML API, WorldID and LexisNexis screening data." noindex />
+      <SEO title="Partner Sign Up" description="Apply for a WorldAML Partner Portal account. Partner access is activated after review by the WorldAML partner team." noindex />
       <Header />
       <main className="flex-1 flex items-center justify-center px-4 py-16 bg-muted/20">
         <Card className="w-full max-w-xl">
           <CardHeader>
-            <div className="mx-auto mb-3 h-11 w-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <Building2 className="h-5 w-5" />
+            <div className="mx-auto mb-3 h-11 w-11 rounded-xl bg-navy/10 text-navy flex items-center justify-center">
+              <Handshake className="h-5 w-5" />
             </div>
-            <CardTitle className="text-2xl text-center">Create a business account</CardTitle>
+            <CardTitle className="text-2xl text-center">Create a partner account</CardTitle>
             <CardDescription className="text-center">
-              For companies and individuals buying WorldAML products. Academy learners and partners have their own portals.
+              Anyone can apply. Partner Portal access is unlocked once the WorldAML team approves your application.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {emailSent ? (
+            {submitted ? (
               <div className="text-center space-y-4 py-4">
                 <div className="mx-auto h-11 w-11 rounded-full bg-teal/10 text-teal flex items-center justify-center">
-                  <Check className="h-5 w-5" />
+                  <Clock className="h-5 w-5" />
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Check your inbox to confirm <strong>{email}</strong>. Your company details will be applied when you sign in.
+                  {submitted === "pending-review" ? (
+                    <>Thanks — your partner application for <strong>{companyName}</strong> is pending approval. We'll email <strong>{email}</strong> as soon as an administrator activates your Partner Portal access.</>
+                  ) : (
+                    <>Confirm your email <strong>{email}</strong> first. Your partner application is submitted the first time you sign in, and then goes to the WorldAML team for approval.</>
+                  )}
                 </p>
-                <Button asChild variant="outline"><Link to="/business/login">Go to business sign-in</Link></Button>
+                <Button asChild variant="outline"><Link to="/partner/login">Go to partner sign-in</Link></Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -153,27 +147,40 @@ export default function BusinessSignup() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Work email *</Label>
+                  <Label htmlFor="email">Email *</Label>
                   <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} required />
+                  <p className="text-xs text-muted-foreground">
+                    Already have a WorldAML Academy or business account? Use the same email and password to add a partner profile.
+                  </p>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={40} />
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="country">Country</Label>
                     <Input id="country" value={country} onChange={(e) => setCountry(e.target.value)} maxLength={80} />
                   </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="industry">Industry</Label>
-                    <Select value={industry} onValueChange={setIndustry}>
-                      <SelectTrigger id="industry"><SelectValue placeholder="Select industry" /></SelectTrigger>
+                    <Label htmlFor="website">Website</Label>
+                    <Input id="website" value={website} onChange={(e) => setWebsite(e.target.value)} maxLength={200} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="type">Partnership type</Label>
+                    <Select value={partnerType} onValueChange={(v) => setPartnerType(v as PartnerType)}>
+                      <SelectTrigger id="type"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {INDUSTRIES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                        {PARTNER_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={40} />
+                  <Label htmlFor="description">Tell us about your business</Label>
+                  <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} rows={3} />
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -187,10 +194,10 @@ export default function BusinessSignup() {
                 </div>
                 <Button type="submit" className="w-full" variant="accent" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create business account
+                  Submit partner application
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
-                  Already have one? <Link to="/business/login" className="text-teal hover:underline">Sign in</Link>
+                  Already approved? <Link to="/partner/login" className="text-teal hover:underline">Partner sign in</Link>
                 </p>
               </form>
             )}

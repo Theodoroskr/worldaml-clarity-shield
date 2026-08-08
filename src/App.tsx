@@ -166,6 +166,8 @@ const AdminAcademyFunnel = lazyWithRetry(() => import("./pages/admin/AdminAcadem
 const AdminOutreachQueue = lazyWithRetry(() => import("./pages/admin/AdminOutreachQueue"));
 const AdminPartnerAssets = lazyWithRetry(() => import("./pages/admin/AdminPartnerAssets"));
 const AdminBusiness = lazyWithRetry(() => import("./pages/admin/AdminBusiness"));
+const AdminIdentities = lazyWithRetry(() => import("./pages/admin/AdminIdentities"));
+const PartnerSignup = lazyWithRetry(() => import("./pages/partner/PartnerSignup"));
 const BusinessSignup = lazyWithRetry(() => import("./pages/business/BusinessSignup"));
 const BusinessLogin = lazyWithRetry(() => import("./pages/business/BusinessLogin"));
 const BusinessLayout = lazyWithRetry(() => import("./pages/business/BusinessLayout"));
@@ -306,6 +308,7 @@ const App = () => (
                 <Route path="/academy/login" element={<AcademyLogin />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/partner/signup" element={<PartnerSignup />} />
                 <Route path="/business/signup" element={<BusinessSignup />} />
                 <Route path="/business/login" element={<BusinessLogin />} />
                 <Route path="/business" element={<BusinessLayout />}>
@@ -353,6 +356,7 @@ const App = () => (
                   <Route path="partners" element={<AdminPartners />} />
                   <Route path="partner-assets" element={<AdminPartnerAssets />} />
                   <Route path="business" element={<AdminBusiness />} />
+                  <Route path="identities" element={<AdminIdentities />} />
                   <Route path="domains" element={<AdminDomains />} />
                   <Route path="academy-users" element={<AdminAcademyUsers />} />
                   <Route path="academy-funnel" element={<AdminAcademyFunnel />} />

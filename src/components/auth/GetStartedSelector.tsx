@@ -38,7 +38,7 @@ const options: Option[] = [
     title: "Partner Programme",
     body: "Refer or resell WorldAML and earn commission.",
     cta: "Apply as a Partner",
-    to: "/partners/apply",
+    to: "/partner/signup",
   },
 ];
 
