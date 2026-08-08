@@ -685,6 +685,21 @@ Deno.serve(async (req) => {
               ? attribution.average_time_spent_minutes
               : undefined,
 
+          // Writable mirrors of the read-only Visit Summary block (custom text
+          // fields created on the Leads layout).
+          Web_First_Visit: attribution.first_visited_at || undefined,
+          Web_Most_Recent_Visit: attribution.last_visited_at || undefined,
+          Web_Visitor_Score:
+            typeof attribution.visitor_score === "number"
+              ? String(attribution.visitor_score)
+              : undefined,
+          Web_Average_Time_Spend:
+            typeof attribution.average_time_spent_minutes === "number"
+              ? String(attribution.average_time_spent_minutes)
+              : undefined,
+
+
+
           // Sales Organisation Unit — WorldAML website leads belong to the
           // WorldAML sales unit.
           Sales_Organisation_Unit: "WorldAML",
