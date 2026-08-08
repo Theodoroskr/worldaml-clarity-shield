@@ -384,16 +384,33 @@ Deno.serve(async (req) => {
             const asIs = String(form_type);
             return ALLOWED.has(asIs) ? asIs : "General Contact";
           })(),
-          // Product_Demo (picklist on Leads) — identifies which product-specific
-          // demo funnel the lead came from. Set to "free_aml_check" for the
-          // /free-aml-check#lead-form walkthrough demo page.
-          Product_Demo: (() => {
+          // "Product Demo" on Leads is a TEXT field (api_name: ProductDemo) —
+          // records which product-specific demo funnel the lead came from.
+          ProductDemo: (() => {
             const key = String(form_type ?? "").trim().toLowerCase();
-            if (key === "free-aml-check" || key === "free_aml_check") {
-              return "free_aml_check";
-            }
+            if (key === "free-aml-check" || key === "free_aml_check") return "free_aml_check";
+            if (key.includes("demo") || key === "free-trial") return key;
             return undefined;
           })(),
+          // "Book Demo" boolean — true for any demo / trial request funnel.
+          BookDemo: (() => {
+            const key = String(form_type ?? "").trim().toLowerCase();
+            return key.includes("demo") || key === "free-trial" || key === "free_aml_check"
+              ? true
+              : undefined;
+          })(),
+          // Subject — short human-readable summary shown in list views.
+          Subject: (() => {
+            const products_ = Array.isArray(products) && products.length
+              ? formatProducts(products)
+              : "";
+            const base = `${String(form_type ?? "enquiry")}${products_ ? ` — ${products_}` : ""}`;
+            return base.slice(0, 255);
+          })(),
+          // Contact Phone mirrors the submitted phone number so both the
+          // standard Phone field and the layout's Contact Phone are populated.
+          Contact_Phone: phone?.trim().slice(0, 30) || undefined,
+
           // Detailed multi-select picklist "Products Multi Selection" (api_name:
           // Products_Multi_Selection) — the specific WorldAML products the lead
           // selected on the website. Values must exactly match the Zoho picklist.
