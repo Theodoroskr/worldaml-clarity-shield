@@ -22,8 +22,9 @@ export interface NewsItem {
   trustTier: TrustTier;
 }
 
-// Internal linking strategy based on category
-const categoryLinks: Record<NewsCategory, { label: string; href: string }[]> = {
+// Internal linking strategy based on category.
+// `href: null` renders the label as plain, unclickable text.
+const categoryLinks: Record<NewsCategory, { label: string; href: string | null }[]> = {
   "Regulatory Updates": [
     { label: "WorldAML API", href: "/api" },
     { label: "Industries", href: "/industries" },
@@ -33,7 +34,7 @@ const categoryLinks: Record<NewsCategory, { label: string; href: string }[]> = {
     { label: "Industries", href: "/industries" },
   ],
   "AML & Financial Crime": [
-    { label: "Ongoing Monitoring", href: "/api" },
+    { label: "Ongoing Monitoring", href: null },
     { label: "Industries", href: "/industries" },
   ],
   "GCC Regulatory Updates": [
