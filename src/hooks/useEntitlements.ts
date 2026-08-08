@@ -1,7 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccess } from "@/hooks/useAccess";
-import { useRcmOrg } from "@/hooks/useRcmOrg";
-import { usePartner } from "@/hooks/usePartner";
 import { useAcademyPurchases } from "@/hooks/useAcademyPurchases";
 
 export interface Entitlements {
@@ -10,10 +8,6 @@ export interface Entitlements {
   isAdmin: boolean;
   /** Full WorldAML Suite access (existing useAccess logic). */
   hasSuite: boolean;
-  /** Membership of an RCM organisation, or admin (RCM is admin-beta today). */
-  hasRcm: boolean;
-  /** Active partner record. */
-  hasPartnerPortal: boolean;
   /** Any Academy entitlement beyond the free tier. */
   hasPaidAcademy: boolean;
   subscriptionTier: string;
@@ -29,8 +23,6 @@ export interface Entitlements {
 export function useEntitlements(): Entitlements {
   const { user, profile, isLoading: authLoading, isAdmin } = useAuth();
   const { isLoading: accessLoading, hasSuiteAccess, subscriptionTier } = useAccess();
-  const { membership: rcm, loading: rcmLoading } = useRcmOrg();
-  const { partner } = usePartner();
   const { purchasedSlugs, hasAnnualPass } = useAcademyPurchases();
 
   const hasPaidAcademy = hasAnnualPass || purchasedSlugs.size > 0;
@@ -50,12 +42,10 @@ export function useEntitlements(): Entitlements {
   const firstName = (fullName as string).trim().split(" ")[0] || (user?.email?.split("@")[0] ?? "there");
 
   return {
-    isLoading: authLoading || accessLoading || rcmLoading,
+    isLoading: authLoading || accessLoading,
     isAuthenticated: !!user,
     isAdmin,
     hasSuite: hasSuiteAccess,
-    hasRcm: !!rcm || isAdmin,
-    hasPartnerPortal: !!partner?.is_active,
     hasPaidAcademy,
     subscriptionTier: tier,
     planLabel,

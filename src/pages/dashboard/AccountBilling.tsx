@@ -25,7 +25,15 @@ export default function AccountBilling() {
       if (data?.url) window.open(data.url, "_blank");
       else throw new Error("No billing portal URL returned");
     } catch (e: any) {
-      toast({ title: "Could not open billing portal", description: e.message, variant: "destructive" });
+      const msg = String(e?.message ?? "");
+      const noSub = msg.toLowerCase().includes("no active subscription") || msg.includes("404");
+      toast({
+        title: noSub ? "No active subscription" : "Could not open billing portal",
+        description: noSub
+          ? "You don't have a recurring subscription yet. Individual course purchases are listed below."
+          : msg,
+        variant: noSub ? "default" : "destructive",
+      });
     } finally {
       setOpening(false);
     }
