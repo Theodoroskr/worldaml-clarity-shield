@@ -439,12 +439,9 @@ export const Header = () => {
                         <Button variant="outline" onClick={open}>Sign In</Button>
                       )}
                     />
-                    <GetStartedSelector
-                      onNavigate={() => setMobileMenuOpen(false)}
-                      trigger={(open) => (
-                        <Button onClick={open}>Get Started</Button>
-                      )}
-                    />
+                    <Button asChild onClick={() => setMobileMenuOpen(false)}>
+                      <Link to="/signup">Get Started</Link>
+                    </Button>
                   </>
                 )}
 
