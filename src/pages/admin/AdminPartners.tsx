@@ -12,10 +12,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, CheckCircle, XCircle, Handshake, Pencil, FileSignature, Bell, History, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Loader2, CheckCircle, XCircle, Handshake, Pencil, FileSignature, Bell, History, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { logPartnerAdminAction } from "@/lib/partnerAudit";
 import PartnerProgramAnalytics from "@/components/admin/PartnerProgramAnalytics";
+import PartnerDetailDialog from "@/components/admin/PartnerDetailDialog";
+
 
 
 const VERTICALS = ["banking", "fintech", "crypto", "igaming", "payments", "legal"];
@@ -45,6 +51,9 @@ export default function AdminPartners() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [editForm, setEditForm] = useState<any>({});
+  const [detailPartner, setDetailPartner] = useState<any | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<any | null>(null);
+
   const [auditLog, setAuditLog] = useState<any[]>([]);
   const [auditEntity, setAuditEntity] = useState<string>("all");
   const [notifSettings, setNotifSettings] = useState<any[]>([]);
@@ -166,8 +175,32 @@ export default function AdminPartners() {
       certification_level: p.certification_level ?? "none",
       academy_seats_granted: p.academy_seats_granted ?? 0,
       commission_lifetime_months: p.commission_lifetime_months ?? 24,
+      commission_rate: Number(p.commission_rate ?? 0),
     });
   };
+
+  const removePartner = async () => {
+    if (!removeTarget) return;
+    setActionLoading(removeTarget.id);
+    const { error } = await supabase.from("partners").delete().eq("id", removeTarget.id);
+    if (error) {
+      toast.error("Failed to remove partner");
+      console.error(error);
+    } else {
+      toast.success("Partner removed");
+      await logPartnerAdminAction({
+        action: "remove_partner",
+        entity_type: "partner",
+        entity_id: removeTarget.id,
+        entity_label: removeTarget.display_name ?? removeTarget.referral_code,
+        changes: { removed: true, partner_type: removeTarget.partner_type },
+      });
+      setRemoveTarget(null);
+      fetchAll();
+    }
+    setActionLoading(null);
+  };
+
 
   const saveEdit = async () => {
     if (!editing) return;
@@ -457,7 +490,9 @@ export default function AdminPartners() {
                         <th className="pb-3 pr-4 font-semibold text-navy">Partner</th>
                         <th className="pb-3 pr-4 font-semibold text-navy">Referral code</th>
                         <th className="pb-3 pr-4 font-semibold text-navy">Type</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Commission</th>
                         <th className="pb-3 pr-4 font-semibold text-navy">Certification</th>
+
                         <th className="pb-3 pr-4 font-semibold text-navy">Verticals</th>
                         <th className="pb-3 pr-4 font-semibold text-navy text-center">Featured</th>
                         <th className="pb-3 pr-4 font-semibold text-navy text-center">Active</th>
@@ -499,6 +534,12 @@ export default function AdminPartners() {
                               </Badge>
                             </td>
                             <td className="py-3 pr-4">
+                              <Badge className="bg-teal-100 text-teal-800 border-teal-200">
+                                {(() => { const r = Number(p.commission_rate || 0); return `${Math.round((r <= 1 ? r * 100 : r) * 10) / 10}%`; })()}
+                              </Badge>
+                            </td>
+                            <td className="py-3 pr-4">
+
                               <Badge variant="outline" className={`capitalize ${certStyle(cert)}`}>
                                 {certLabel}
                               </Badge>
@@ -526,10 +567,24 @@ export default function AdminPartners() {
                               <Switch checked={p.is_active} onCheckedChange={(v) => togglePartner(p, "is_active", v)} />
                             </td>
                             <td className="py-3 text-right">
-                              <Button size="sm" variant="outline" onClick={() => openEdit(p)}>
-                                <Pencil className="h-3 w-3 mr-1" /> Edit
-                              </Button>
+                              <div className="flex justify-end gap-1">
+                                <Button size="sm" variant="outline" onClick={() => setDetailPartner(p)}>
+                                  <Eye className="h-3 w-3 mr-1" /> View
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={() => openEdit(p)}>
+                                  <Pencil className="h-3 w-3 mr-1" /> Edit
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-red-700 border-red-300 hover:bg-red-50"
+                                  onClick={() => setRemoveTarget(p)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" /> Remove
+                                </Button>
+                              </div>
                             </td>
+
                           </tr>
                         );
                       })}
@@ -1173,6 +1228,18 @@ export default function AdminPartners() {
               </div>
             </div>
             <div>
+              <Label>Commission rate (%)</Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                step="0.5"
+                value={Math.round(Number(editForm.commission_rate ?? 0) * 1000) / 10}
+                onChange={(e) => setEditForm({ ...editForm, commission_rate: Number(e.target.value) / 100 })}
+              />
+              <p className="text-[11px] text-text-secondary mt-1">Shown on the partner record and used for commission calculations.</p>
+            </div>
+            <div>
               <Label>Commission lifetime (months)</Label>
               <Input type="number" min="1" value={editForm.commission_lifetime_months} onChange={(e) => setEditForm({ ...editForm, commission_lifetime_months: Number(e.target.value) })} />
             </div>
@@ -1183,6 +1250,38 @@ export default function AdminPartners() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Partner 360 detail */}
+      <PartnerDetailDialog
+        partner={detailPartner}
+        application={detailPartner ? partnerApps.find((a: any) => a.user_id === detailPartner.user_id) ?? null : null}
+        open={!!detailPartner}
+        onOpenChange={(o) => !o && setDetailPartner(null)}
+      />
+
+      {/* Remove partner confirmation */}
+      <AlertDialog open={!!removeTarget} onOpenChange={(o) => !o && setRemoveTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove partner?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes <strong>{removeTarget?.display_name || removeTarget?.referral_code}</strong> from
+              the Partner Program, along with their referrals, deal registrations, commissions, payouts, seats and asset
+              activity. To keep the history instead, switch the partner to inactive.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={(e) => { e.preventDefault(); removePartner(); }}
+            >
+              {actionLoading === removeTarget?.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Remove partner"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+
   );
 }

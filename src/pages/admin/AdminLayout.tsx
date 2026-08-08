@@ -1,8 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 
 type NavItem = { label: string; path: string; icon: any; section?: string };
@@ -50,10 +52,36 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [pendingPartners, setPendingPartners] = useState(0);
+
   useEffect(() => {
     if (!isLoading && !user) navigate("/login");
     if (!isLoading && user && !isAdmin) navigate("/dashboard");
   }, [user, isLoading, isAdmin, navigate]);
+
+  // Live notification: new partner sign-ups awaiting review.
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+    let active = true;
+    const load = async () => {
+      const { count } = await supabase
+        .from("partner_applications")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      if (active) setPendingPartners(count ?? 0);
+    };
+    load();
+    const timer = setInterval(load, 60000);
+    const channel = supabase
+      .channel("admin-partner-applications")
+      .on("postgres_changes", { event: "*", schema: "public", table: "partner_applications" }, load)
+      .subscribe();
+    return () => {
+      active = false;
+      clearInterval(timer);
+      supabase.removeChannel(channel);
+    };
+  }, [user, isAdmin]);
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   // Hard route-level block: non-admins never render any admin chrome or child route.
@@ -86,9 +114,18 @@ export default function AdminLayout() {
                   )}
                 >
                   <n.icon className="w-4 h-4" />
-                  {n.label}
+                  <span className="flex-1 text-left">{n.label}</span>
+                  {n.path === "/admin/partners" && pendingPartners > 0 && (
+                    <span
+                      className="min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-white text-[10px] font-semibold flex items-center justify-center"
+                      title={`${pendingPartners} partner sign-up${pendingPartners === 1 ? "" : "s"} awaiting review`}
+                    >
+                      {pendingPartners}
+                    </span>
+                  )}
                 </button>
               ))}
+
             </div>
           ))}
         </nav>
