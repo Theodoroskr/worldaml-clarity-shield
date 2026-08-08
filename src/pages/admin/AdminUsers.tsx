@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, FileText, Send, History, Handshake, ExternalLink } from "lucide-react";
+import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, FileText, Send, History, Handshake, ExternalLink, Download, Table2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { REGULATORY_PROFILES, REGULATOR_OPTIONS } from "@/data/regulatoryProfiles";
+import AdminUserDetailDialog, { RevenueItem } from "@/components/admin/AdminUserDetailDialog";
+import { exportRowsAsCsv, exportRowsAsXlsx } from "@/lib/adminUserExport";
 
 interface Profile {
   id: string;
@@ -29,7 +31,15 @@ interface Profile {
   marketing_consent: boolean | null;
   marketing_consent_at: string | null;
   marketing_opt_out_at: string | null;
+  [key: string]: any;
 }
+
+interface RevenueEntry { total: number; currency: string; items: RevenueItem[] }
+const EMPTY_REVENUE: RevenueEntry = { total: 0, currency: "EUR", items: [] };
+
+const formatMoney = (cents: number, currency = "EUR") =>
+  new Intl.NumberFormat("en-IE", { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
+
 
 type EligibilityReason =
   | "explicit_consent"
