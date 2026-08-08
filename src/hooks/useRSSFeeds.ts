@@ -1,6 +1,46 @@
 import { useState, useEffect, useCallback } from "react";
-import type { NewsItem } from "@/components/news/NewsCard";
+import type { NewsItem, NewsCategory, TrustTier } from "@/components/news/NewsCard";
 import { fetchAllFeeds } from "@/services/rssService";
+import { supabase } from "@/integrations/supabase/client";
+
+const VALID_CATEGORIES: NewsCategory[] = [
+  "Regulatory Updates",
+  "Sanctions & Enforcement",
+  "AML & Financial Crime",
+  "GCC Regulatory Updates",
+];
+
+/**
+ * Updates collected by the monthly `refresh-news` job, stored in the backend so the
+ * News page always has fresh, category-aligned content even if a live feed is down.
+ */
+async function fetchStoredUpdates(): Promise<NewsItem[]> {
+  const { data, error } = await supabase
+    .from("news_updates")
+    .select("id, title, summary, full_summary, source, source_url, category, published_at, tags, trust_tier")
+    .order("published_at", { ascending: false })
+    .limit(120);
+
+  if (error) {
+    console.warn("Stored news updates unavailable:", error.message);
+    return [];
+  }
+
+  return (data ?? [])
+    .filter((row) => VALID_CATEGORIES.includes(row.category as NewsCategory))
+    .map((row) => ({
+      id: `db-${row.id}`,
+      title: row.title,
+      source: row.source,
+      sourceUrl: row.source_url,
+      publishedAt: row.published_at,
+      category: row.category as NewsCategory,
+      tags: row.tags ?? [],
+      summary: row.summary,
+      fullSummary: row.full_summary ?? undefined,
+      trustTier: (row.trust_tier as TrustTier) ?? "A",
+    }));
+}
 
 // Curated baseline updates, shown when live feeds are unavailable.
 const fallbackItems: NewsItem[] = [
@@ -177,14 +217,19 @@ const normaliseTitle = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " "
 
 /**
  * Live feeds don't cover every category evenly (Sanctions & Enforcement and GCC in
- * particular are often empty), so the curated baseline is always merged in and
- * de-duplicated against live headlines. Newest first.
+ * particular are often empty), so the monthly stored updates and the curated baseline
+ * are always merged in and de-duplicated against live headlines. Newest first.
  */
-function mergeWithBaseline(liveItems: NewsItem[]): NewsItem[] {
-  const seen = new Set(liveItems.map((i) => normaliseTitle(i.title)));
-  const merged = [...liveItems];
-  for (const item of fallbackItems) {
-    if (!seen.has(normaliseTitle(item.title))) merged.push(item);
+function mergeSources(...sources: NewsItem[][]): NewsItem[] {
+  const seen = new Set<string>();
+  const merged: NewsItem[] = [];
+  for (const source of [...sources, fallbackItems]) {
+    for (const item of source) {
+      const key = normaliseTitle(item.title);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push(item);
+    }
   }
   return merged.sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
 }
@@ -207,18 +252,22 @@ export function useRSSFeeds(): UseRSSFeedsResult {
     setIsLoading(true);
     setError(null);
 
-    try {
-      const liveItems = await fetchAllFeeds();
-      setItems(mergeWithBaseline(liveItems));
-      setIsLive(liveItems.length > 0);
-    } catch (err) {
-      console.error("Failed to fetch RSS feeds:", err);
-      setError("Unable to load live updates");
-      setItems(mergeWithBaseline([]));
-      setIsLive(false);
-    } finally {
-      setIsLoading(false);
+    const [liveResult, storedResult] = await Promise.allSettled([
+      fetchAllFeeds(),
+      fetchStoredUpdates(),
+    ]);
+
+    const liveItems = liveResult.status === "fulfilled" ? liveResult.value : [];
+    const storedItems = storedResult.status === "fulfilled" ? storedResult.value : [];
+
+    if (liveResult.status === "rejected") {
+      console.error("Failed to fetch RSS feeds:", liveResult.reason);
+      if (storedItems.length === 0) setError("Unable to load live updates");
     }
+
+    setItems(mergeSources(liveItems, storedItems));
+    setIsLive(liveItems.length > 0 || storedItems.length > 0);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {

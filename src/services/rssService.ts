@@ -179,6 +179,7 @@ export async function fetchRssFeed(config: FeedConfig): Promise<NewsItem[]> {
 
     const items: NewsItem[] = data.items.map((item) => {
       const title = stripHtml(item.title).replace(/\s+/g, " ").trim();
+      const body = stripTitlePrefix(item.description, title);
       return {
         id: generateId(item, config.url),
         title,
@@ -187,7 +188,8 @@ export async function fetchRssFeed(config: FeedConfig): Promise<NewsItem[]> {
         publishedAt: parsePubDate(item.pubDate),
         category: config.category,
         tags: extractTags(item.title, item.description),
-        summary: truncate(stripTitlePrefix(item.description, title)),
+        summary: truncate(body),
+        fullSummary: body,
         trustTier: config.trustTier,
       };
     });

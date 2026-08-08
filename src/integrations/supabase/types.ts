@@ -1311,6 +1311,51 @@ export type Database = {
         }
         Relationships: []
       }
+      news_updates: {
+        Row: {
+          category: string
+          created_at: string
+          full_summary: string | null
+          id: string
+          published_at: string
+          source: string
+          source_url: string
+          summary: string
+          tags: string[]
+          title: string
+          trust_tier: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          full_summary?: string | null
+          id?: string
+          published_at?: string
+          source: string
+          source_url: string
+          summary: string
+          tags?: string[]
+          title: string
+          trust_tier?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          full_summary?: string | null
+          id?: string
+          published_at?: string
+          source?: string
+          source_url?: string
+          summary?: string
+          tags?: string[]
+          title?: string
+          trust_tier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       outreach_events: {
         Row: {
           created_at: string
