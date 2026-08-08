@@ -10,6 +10,7 @@ import { useRecognition, trackRecognition, type RecognitionStatus } from "@/hook
 import { renderRecognitionCard, downloadBlob } from "@/lib/recognitionShareImage";
 import { levelPresentation, plural } from "@/lib/recognitionLevels";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAcademyOverview } from "@/hooks/useAcademyOverview";
 
 const ACADEMY_URL = "https://worldaml.com/academy";
 const LINKEDIN_PAGE = "https://www.linkedin.com/company/worldaml";
@@ -66,6 +67,8 @@ export default function ShareRecognition({
   const live = useRecognition();
   const r = data ?? live;
   const { user, profile } = useAuth();
+  const { data: overview } = useAcademyOverview();
+  const cpdHours = overview?.cpdHours ?? 0;
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -78,7 +81,7 @@ export default function ShareRecognition({
   }, [user, profile]);
 
 
-  const message = useMemo(() => (r ? buildShareMessage(r, "linkedin") : ""), [r]);
+  const message = useMemo(() => (r ? buildShareMessage(r, "linkedin", cpdHours) : ""), [r, cpdHours]);
   const [draft, setDraft] = useState<string | null>(null);
   const text = draft ?? message;
 
@@ -91,7 +94,7 @@ export default function ShareRecognition({
     if (!open || !r?.level || imageUrl) return;
     let cancelled = false;
     setImageBusy(true);
-    renderRecognitionCard(r, memberName)
+    renderRecognitionCard(r, memberName, cpdHours)
       .then((blob) => {
         if (cancelled || !blob) return;
         setImageBlob(blob);
@@ -99,7 +102,7 @@ export default function ShareRecognition({
       })
       .finally(() => !cancelled && setImageBusy(false));
     return () => { cancelled = true; };
-  }, [open, r, imageUrl, memberName]);
+  }, [open, r, imageUrl, memberName, cpdHours]);
 
 
   useEffect(() => () => { if (imageUrl) URL.revokeObjectURL(imageUrl); }, [imageUrl]);
@@ -133,8 +136,8 @@ export default function ShareRecognition({
       network === "linkedin"
         ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(ACADEMY_URL)}`
         : network === "x"
-          ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(buildShareMessage(r, "x"))}&url=${encodeURIComponent(ACADEMY_URL)}`
-          : `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ACADEMY_URL)}&quote=${encodeURIComponent(buildShareMessage(r, "facebook"))}`;
+          ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(buildShareMessage(r, "x", cpdHours))}&url=${encodeURIComponent(ACADEMY_URL)}`
+          : `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ACADEMY_URL)}&quote=${encodeURIComponent(buildShareMessage(r, "facebook", cpdHours))}`;
     window.open(url, "_blank", "noopener,noreferrer,width=680,height=640");
   };
 
@@ -211,7 +214,7 @@ export default function ShareRecognition({
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <a
-              href={`mailto:?subject=${encodeURIComponent(`My WorldAML Academy ${r.level.name} status`)}&body=${encodeURIComponent(buildShareMessage(r, "email"))}`}
+              href={`mailto:?subject=${encodeURIComponent(`My WorldAML Academy ${r.level.name} status`)}&body=${encodeURIComponent(buildShareMessage(r, "email", cpdHours))}`}
             >
               <Mail className="h-3.5 w-3.5 mr-1.5" /> Email
             </a>
