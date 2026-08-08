@@ -1231,6 +1231,61 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_asset_events: {
+        Row: {
+          asset_id: string | null
+          asset_title: string | null
+          created_at: string
+          event_type: string
+          id: string
+          partner_id: string
+          product: string | null
+          user_id: string | null
+        }
+        Insert: {
+          asset_id?: string | null
+          asset_title?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          partner_id: string
+          product?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          asset_id?: string | null
+          asset_title?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          partner_id?: string
+          product?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_asset_events_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "partner_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_asset_events_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "featured_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_asset_events_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_asset_versions: {
         Row: {
           asset_id: string
@@ -1283,61 +1338,91 @@ export type Database = {
       }
       partner_assets: {
         Row: {
+          asset_type: string
           category: string
           certification_min: string
+          content: Json | null
           content_type: string | null
           created_at: string
           created_by: string | null
+          cta_url: string | null
           current_version: number
           description: string | null
           file_path: string | null
           file_size_bytes: number | null
           file_url: string | null
           id: string
+          industry: string | null
           is_active: boolean
+          is_cobrandable: boolean
+          language: string
           preview_url: string | null
+          product: string | null
+          published_at: string | null
           sort_order: number
+          status: string
           thumbnail_url: string | null
           title: string
           updated_at: string
+          version_label: string | null
         }
         Insert: {
+          asset_type?: string
           category?: string
           certification_min?: string
+          content?: Json | null
           content_type?: string | null
           created_at?: string
           created_by?: string | null
+          cta_url?: string | null
           current_version?: number
           description?: string | null
           file_path?: string | null
           file_size_bytes?: number | null
           file_url?: string | null
           id?: string
+          industry?: string | null
           is_active?: boolean
+          is_cobrandable?: boolean
+          language?: string
           preview_url?: string | null
+          product?: string | null
+          published_at?: string | null
           sort_order?: number
+          status?: string
           thumbnail_url?: string | null
           title: string
           updated_at?: string
+          version_label?: string | null
         }
         Update: {
+          asset_type?: string
           category?: string
           certification_min?: string
+          content?: Json | null
           content_type?: string | null
           created_at?: string
           created_by?: string | null
+          cta_url?: string | null
           current_version?: number
           description?: string | null
           file_path?: string | null
           file_size_bytes?: number | null
           file_url?: string | null
           id?: string
+          industry?: string | null
           is_active?: boolean
+          is_cobrandable?: boolean
+          language?: string
           preview_url?: string | null
+          product?: string | null
+          published_at?: string | null
           sort_order?: number
+          status?: string
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
+          version_label?: string | null
         }
         Relationships: []
       }
@@ -1392,10 +1477,14 @@ export type Database = {
       partner_cobrand_requests: {
         Row: {
           asset_id: string | null
+          contact_email: string | null
+          contact_name: string | null
           created_at: string
           details: string | null
           file_path: string | null
           id: string
+          logo_path: string | null
+          market: string | null
           partner_id: string
           request_type: string
           reviewed_at: string | null
@@ -1407,10 +1496,14 @@ export type Database = {
         }
         Insert: {
           asset_id?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
           created_at?: string
           details?: string | null
           file_path?: string | null
           id?: string
+          logo_path?: string | null
+          market?: string | null
           partner_id: string
           request_type?: string
           reviewed_at?: string | null
@@ -1422,10 +1515,14 @@ export type Database = {
         }
         Update: {
           asset_id?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
           created_at?: string
           details?: string | null
           file_path?: string | null
           id?: string
+          logo_path?: string | null
+          market?: string | null
           partner_id?: string
           request_type?: string
           reviewed_at?: string | null
