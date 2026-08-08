@@ -67,7 +67,7 @@ export default function ShareRecognition({
   const live = useRecognition();
   const r = data ?? live;
   const { user, profile } = useAuth();
-  const { data: overview } = useAcademyOverview();
+  const overview = useAcademyOverview();
   const cpdHours = overview?.cpdHours ?? 0;
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
