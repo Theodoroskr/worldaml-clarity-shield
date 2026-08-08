@@ -6972,6 +6972,7 @@ export type Database = {
       }
       is_portal_user_of: { Args: { _customer_id: string }; Returns: boolean }
       mark_overdue_periodic_reviews: { Args: never; Returns: number }
+      news_clean_text: { Args: { _raw: string }; Returns: string }
       onboarding_form_publish: {
         Args: { _form_id: string; _notes?: string }
         Returns: string

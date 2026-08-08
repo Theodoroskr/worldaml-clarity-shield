@@ -59,15 +59,38 @@ const ENTITIES: Record<string, string> = {
   "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'", "&apos;": "'", "&nbsp;": " ",
 };
 
+const BOILERPLATE: RegExp[] = [
+  /\b(read|find out|learn)\s+(more|the full (story|article|release))\b[^.]*\.?/gi,
+  /\bcontinue reading\b[^.]*\.?/gi,
+  /\bclick here\b[^.]*\.?/gi,
+  /\bthe post .*? appeared first on .*?\.?$/gi,
+  /\bshare (this|on) (article|story|linkedin|facebook|twitter|x)\b[^.]*\.?/gi,
+  /\b(subscribe|sign up) (to|for) [^.]*\.?/gi,
+  /\bview (the )?(original|full) (article|press release)\b[^.]*\.?/gi,
+  /\ball rights reserved\b\.?/gi,
+];
+
 function decode(text: string): string {
-  return text
+  let out = text
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
     .replace(/<[^>]*>/g, " ")
     .replace(/&#(\d+);/g, (_m, code) => String.fromCharCode(Number(code)))
     .replace(/&[a-z]+;|&#39;/gi, (m) => ENTITIES[m.toLowerCase()] ?? m)
+    // Entity-escaped markup only becomes tags after decoding, so strip again.
+    .replace(/<[^>]*>/g, " ")
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/\S+@\S+\.\S+/g, " ");
+
+  for (const pattern of BOILERPLATE) out = out.replace(pattern, " ");
+
+  return out
     .replace(/\s+/g, " ")
+    .replace(/^[\s\-–—:•|]+/, "")
     .trim();
 }
+
 
 function tag(block: string, name: string): string {
   const match = block.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`, "i"));

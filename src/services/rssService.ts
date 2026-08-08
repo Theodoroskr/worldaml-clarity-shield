@@ -151,7 +151,7 @@ export async function fetchRssFeed(config: FeedConfig): Promise<NewsItem[]> {
         publishedAt: parsePubDate(item.pubDate),
         category: config.category,
         tags: extractTags(item.title, item.description),
-        summary: truncateSummary(body) || title,
+        summary: truncateSummary(body),
         fullSummary: body || undefined,
         trustTier: config.trustTier,
       };
