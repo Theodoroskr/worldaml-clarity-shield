@@ -109,9 +109,12 @@ export function LearningOverview({ data }: { data: AcademyOverview }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {stats.map((s) => (
-        <div key={s.label} className="rounded-lg border border-border bg-card px-4 py-3">
-          <div className="text-2xl font-bold text-foreground tabular-nums">{s.value}</div>
-          <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
+        <div
+          key={s.label}
+          className="rounded-xl border border-border bg-card px-4 py-3.5 transition-colors hover:border-accent/40"
+        >
+          <div className="text-2xl font-bold text-foreground tabular-nums leading-none">{s.value}</div>
+          <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mt-1.5">{s.label}</div>
         </div>
       ))}
     </div>
