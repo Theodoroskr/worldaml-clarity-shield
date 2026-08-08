@@ -18,6 +18,9 @@ export interface BusinessPlan {
   /** Real in-app purchase path where the plan needs configuring before payment. */
   configureUrl?: string;
   configureLabel?: string;
+  /** In-portal configure-then-pay dialog (keeps the buyer inside the business portal). */
+  checkoutDialog?: "worldcompliance";
+
 }
 
 
