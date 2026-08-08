@@ -64,14 +64,19 @@ const CartItemRow = ({ slug, title, currency, onRemove }: CartItemRowProps) => {
   );
 };
 
-export function AcademyCartButton() {
+export function AcademyCartButton({ iconOnly = false }: { iconOnly?: boolean } = {}) {
   const { count, isOpen, open, close } = useCart();
   return (
     <Sheet open={isOpen} onOpenChange={(v) => (v ? open() : close())}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="relative gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className={iconOnly ? "relative px-2" : "relative gap-2"}
+          aria-label={`Basket${count > 0 ? ` (${count} item${count === 1 ? "" : "s"})` : ""}`}
+        >
           <ShoppingBag className="h-4 w-4" />
-          <span>Basket</span>
+          {!iconOnly && <span>Basket</span>}
           {count > 0 && (
             <Badge className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold flex items-center justify-center">
               {count}
@@ -83,6 +88,7 @@ export function AcademyCartButton() {
     </Sheet>
   );
 }
+
 
 /**
  * Headless mount for the basket drawer. Use on pages that don't render the
