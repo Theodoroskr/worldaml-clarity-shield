@@ -25,22 +25,29 @@ export default function Dashboard() {
   }
 
   const otherActive = academy.inProgress.filter((c) => c.course.id !== academy.current?.course.id);
+  const isNewLearner = academy.all.length === 0;
 
   return (
     <>
       <Helmet><title>My Academy Dashboard | WorldAML</title><meta name="robots" content="noindex" /></Helmet>
 
       <div className="mb-5">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Welcome back, {firstName}</h1>
-        <p className="text-sm text-muted-foreground mt-1">Continue building your compliance expertise.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          {isNewLearner ? `Welcome, ${firstName}` : `Welcome back, ${firstName}`}
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {isNewLearner
+            ? "Your WorldAML Academy account is ready."
+            : "Continue building your compliance expertise."}
+        </p>
       </div>
 
       <LevelUpMoment />
 
       <div className="space-y-6">
-        <ContinueLearning current={academy.current} others={otherActive} />
+        {isNewLearner ? <NewLearnerWelcome /> : <ContinueLearning current={academy.current} others={otherActive} />}
 
-        <LearningOverview data={academy} />
+        {!isNewLearner && <LearningOverview data={academy} />}
 
         <MemberLevelCard />
 
