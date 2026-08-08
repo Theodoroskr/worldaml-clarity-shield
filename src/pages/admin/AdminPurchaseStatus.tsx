@@ -4,8 +4,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, ArrowUpDown, CalendarRange, RefreshCw } from "lucide-react";
+import { Loader2, Search, ArrowUpDown, CalendarRange, RefreshCw, Download, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { KpiCard, DefinitionsButton, MetricInfo } from "@/components/admin/AcademyMetricUI";
+import { money, pct, useCourseTitles } from "@/lib/academyAdmin";
+
 
 type PurchaseRow = {
   id: string;
