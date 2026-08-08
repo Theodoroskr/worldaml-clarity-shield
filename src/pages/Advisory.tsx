@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
@@ -20,10 +19,8 @@ import {
   Gavel,
   Users,
   Building2,
-  MessageSquarePlus,
   CheckCircle2,
 } from "lucide-react";
-import AdvisoryConsultationDialog from "@/components/advisory/AdvisoryConsultationDialog";
 import advisorPortrait from "@/assets/advisory-mlro-advisor.jpg";
 
 type Service = {
