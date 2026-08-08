@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Share2, Linkedin, Twitter, Facebook, Copy, Check, Mail } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Share2, Linkedin, Twitter, Facebook, Copy, Check, Mail, Download, ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useRecognition, trackRecognition, type RecognitionStatus } from "@/hooks/useRecognition";
+import { renderRecognitionCard, downloadBlob } from "@/lib/recognitionShareImage";
 
 const ACADEMY_URL = "https://worldaml.com/academy";
 const LINKEDIN_PAGE = "https://www.linkedin.com/company/worldaml";
@@ -58,7 +59,49 @@ export default function ShareRecognition({
   const [draft, setDraft] = useState<string | null>(null);
   const text = draft ?? message;
 
+  // Branded share image (WorldAML logo + recognition level) generated on open.
+  const [imageBlob, setImageBlob] = useState<Blob | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageBusy, setImageBusy] = useState(false);
+
+  useEffect(() => {
+    if (!open || !r?.level || imageUrl) return;
+    let cancelled = false;
+    setImageBusy(true);
+    renderRecognitionCard(r)
+      .then((blob) => {
+        if (cancelled || !blob) return;
+        setImageBlob(blob);
+        setImageUrl(URL.createObjectURL(blob));
+      })
+      .finally(() => !cancelled && setImageBusy(false));
+    return () => { cancelled = true; };
+  }, [open, r, imageUrl]);
+
+  useEffect(() => () => { if (imageUrl) URL.revokeObjectURL(imageUrl); }, [imageUrl]);
+
   if (!r?.authenticated || !r.level) return null;
+
+  const levelName = r.level.name;
+
+  const downloadImage = () => {
+    if (!imageBlob) return;
+    trackRecognition("share_image_download");
+    downloadBlob(imageBlob, `worldaml-${levelName.toLowerCase().replace(/\s+/g, "-")}-recognition.png`);
+    toast({ title: "Image downloaded", description: "Attach it to your social post for maximum reach." });
+  };
+
+  const copyImage = async () => {
+    if (!imageBlob) return;
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": imageBlob })]);
+      trackRecognition("share_image_copy");
+      toast({ title: "Image copied", description: "Paste it directly into your post." });
+    } catch {
+      downloadImage();
+    }
+  };
+
 
   const share = (network: "linkedin" | "x" | "facebook") => {
     trackRecognition(`share_${network}`);
@@ -94,10 +137,31 @@ export default function ShareRecognition({
         <DialogHeader>
           <DialogTitle>Share your {r.level.name} status</DialogTitle>
           <DialogDescription>
-            LinkedIn and X don't accept pre-filled text — copy the suggested post first, then paste it into the
-            share window that opens.
+            LinkedIn and X don't accept pre-filled text or images — download the branded image and copy the
+            suggested post, then attach both in the share window that opens.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Branded recognition image */}
+        <div className="rounded-lg border border-border overflow-hidden bg-muted/30">
+          {imageUrl ? (
+            <img src={imageUrl} alt={`WorldAML ${levelName} member recognition card`} className="w-full block" />
+          ) : (
+            <div className="flex items-center justify-center gap-2 py-10 text-xs text-muted-foreground">
+              {imageBusy && <Loader2 className="h-4 w-4 animate-spin" />} Preparing your branded image…
+            </div>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={downloadImage} disabled={!imageBlob}>
+            <Download className="h-3.5 w-3.5 mr-1.5" /> Download image
+          </Button>
+          <Button variant="ghost" size="sm" onClick={copyImage} disabled={!imageBlob}>
+            <ImageIcon className="h-3.5 w-3.5 mr-1.5" /> Copy image
+          </Button>
+        </div>
+
+
 
         <Textarea
           value={text}

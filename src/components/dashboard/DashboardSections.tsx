@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { academyHref } from "@/lib/academyHost";
+import { getCourseCover } from "@/assets/academy";
 import type { AcademyOverview, LearningCourse, CertificateRow } from "@/hooks/useAcademyOverview";
 import { formatDistanceToNow } from "date-fns";
 
@@ -51,13 +52,25 @@ export function ContinueLearning({ current, others }: { current: LearningCourse 
   }
 
   const cta = courseCta(current);
+  const cover = getCourseCover(current.course.slug);
   return (
     <div className="space-y-2">
       <Card className="border-border overflow-hidden">
         <div className="h-1 bg-accent" />
         <CardContent className="p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
+            {cover && (
+              <a href={cta.href} className="shrink-0 hidden sm:block">
+                <img
+                  src={cover}
+                  alt={`${current.course.title} course cover`}
+                  loading="lazy"
+                  className="h-24 w-40 rounded-lg object-cover border border-border"
+                />
+              </a>
+            )}
             <div className="min-w-0 flex-1">
+
               <div className="text-[11px] font-semibold uppercase tracking-wider text-accent mb-1">
                 {current.quizPassed ? "Recently completed" : "Continue learning"}
               </div>
@@ -125,9 +138,19 @@ export function LearningOverview({ data }: { data: AcademyOverview }) {
 export function CourseRow({ c }: { c: LearningCourse }) {
   const cta = courseCta(c);
   const status = courseStatus(c);
+  const cover = getCourseCover(c.course.slug);
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3">
+      {cover && (
+        <img
+          src={cover}
+          alt={`${c.course.title} course cover`}
+          loading="lazy"
+          className="h-11 w-16 rounded-md object-cover border border-border shrink-0 hidden sm:block"
+        />
+      )}
       <div className="min-w-0 flex-1">
+
         <div className="flex items-center gap-2">
           <span className="font-medium text-sm text-foreground truncate">{c.course.title}</span>
           {status === "Completed" && (
@@ -210,12 +233,26 @@ export function RecommendedNext({ courses }: { courses: AcademyOverview["recomme
     <div>
       <h2 className="text-sm font-semibold text-foreground mb-2">Recommended for You</h2>
       <div className="grid sm:grid-cols-3 gap-3">
-        {courses.slice(0, 3).map((course) => (
-          <div key={course.id} className="rounded-lg border border-border bg-card p-4 flex flex-col">
+        {courses.slice(0, 3).map((course) => {
+          const cover = getCourseCover(course.slug);
+          return (
+          <div key={course.id} className="rounded-lg border border-border bg-card flex flex-col overflow-hidden">
+            {cover && (
+              <a href={courseUrl(course.slug)} className="block">
+                <img
+                  src={cover}
+                  alt={`${course.title} course cover`}
+                  loading="lazy"
+                  className="h-28 w-full object-cover"
+                />
+              </a>
+            )}
+            <div className="p-4 flex flex-col flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               {course.category && <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{course.category}</span>}
               {course.difficulty && <Badge variant="secondary" className="text-[10px] capitalize">{course.difficulty}</Badge>}
             </div>
+
             <div className="text-sm font-semibold text-foreground mt-1.5 line-clamp-2">{course.title}</div>
             {course.duration_minutes ? (
               <div className="text-[11px] text-muted-foreground mt-1 inline-flex items-center gap-1">
@@ -225,8 +262,10 @@ export function RecommendedNext({ courses }: { courses: AcademyOverview["recomme
             <Button asChild variant="outline" size="sm" className="mt-3 self-start">
               <a href={courseUrl(course.slug)}>View Course</a>
             </Button>
+            </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { CatalogueCourse, categoryLabel, difficultyLabel } from "@/hooks/useAcademyCatalogue";
 import { AcademyCurrency, convertEurCents, formatPrice } from "@/lib/academyFx";
 import { isPaidCourse } from "@/data/academyPricing";
+import { getCourseCover } from "@/assets/academy";
 
 export function statusBadge(c: CatalogueCourse) {
   if (c.status === "completed") return { label: "Completed", cls: "bg-accent/10 text-accent border-accent/20" };
@@ -41,9 +42,20 @@ export default function CourseMarketCard({ course, currency, inCart, onToggleCar
   const badge = statusBadge(course);
   const cta = primaryCta(course);
   const canAddToCart = !course.owned && !course.isFree && isPaidCourse(course.slug);
+  const cover = getCourseCover(course.slug);
 
   return (
     <Card className="border-border flex flex-col overflow-hidden hover:border-accent/40 transition-colors">
+      {cover && (
+        <Link to={cta.to} className="block">
+          <img
+            src={cover}
+            alt={`${course.title} course cover`}
+            loading="lazy"
+            className="h-32 w-full object-cover"
+          />
+        </Link>
+      )}
       <div className="p-4 flex-1 flex flex-col gap-2.5">
         <div className="flex items-start justify-between gap-2">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
