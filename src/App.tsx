@@ -321,7 +321,7 @@ const App = () => (
                 <Route path="/partner/signup" element={<PartnerSignup />} />
                 <Route path="/business/signup" element={<BusinessSignup />} />
                 <Route path="/business/login" element={<BusinessLogin />} />
-                <Route path="/business" element={<BusinessLayout />}>
+                <Route path="/business" element={<PortalGuard portal="business"><BusinessLayout /></PortalGuard>}>
                   <Route index element={<Navigate to="/business/dashboard" replace />} />
                   <Route path="dashboard" element={<BusinessDashboard />} />
                   <Route path="solutions" element={<BusinessSolutions />} />

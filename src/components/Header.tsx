@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown, LogOut, User } from "lucide-react";
+import { Menu, X, ChevronDown, LogOut, User, Lock } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "./ui/button";
 import { RegionSelector } from "./RegionSelector";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePartner } from "@/hooks/usePartner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +19,8 @@ import AcademyHeader from "@/components/academy/AcademyHeader";
 import { AcademyCartButton } from "@/components/academy/AcademyCartDrawer";
 import SignInSelector from "@/components/auth/SignInSelector";
 import GetStartedSelector from "@/components/auth/GetStartedSelector";
+import AccountMenu, { WORKSPACES } from "@/components/auth/AccountMenu";
+import { usePortalAccess, PORTAL_HOME } from "@/hooks/usePortalAccess";
 
 
 
@@ -122,9 +123,8 @@ const navLinks: NavLink[] = [
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut, isAdmin } = useAuth();
-  const { partner } = usePartner();
-  const isActivePartner = !!partner?.is_active;
+  const { user, signOut, profile } = useAuth();
+  const { has } = usePortalAccess();
   const headerRef = useRef<HTMLElement>(null);
   const academyHost = isAcademyHost();
 
@@ -271,37 +271,7 @@ export const Header = () => {
                     <ChevronDown className="h-3.5 w-3.5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52">
-                  {user.email && (
-                    <>
-                      <DropdownMenuLabel className="text-caption text-text-tertiary font-normal truncate">
-                        {user.email}
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard">
-                      <User className="h-4 w-4 mr-2" />
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  {isActivePartner && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/partner/dashboard">Partner Portal</Link>
-                    </DropdownMenuItem>
-                  )}
-                  {isAdmin && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin">Admin</Link>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
+                <AccountMenu />
               </DropdownMenu>
             ) : (
               <>
@@ -412,22 +382,32 @@ export const Header = () => {
                 {user ? (
 
                   <>
-                    <Button variant="outline" asChild>
-                      <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                        <User className="h-4 w-4 mr-2" />
-                        Dashboard
+                    <div className="px-1 pt-1 pb-2">
+                      <div className="text-sm font-semibold text-navy truncate">{profile?.full_name || "My account"}</div>
+                      <div className="text-xs text-text-tertiary truncate">{user.email}</div>
+                    </div>
+                    <div className="text-[10px] uppercase tracking-wider text-text-tertiary font-semibold px-1">Workspaces</div>
+                    {WORKSPACES.filter((w) => has(w.key)).map(({ key, label, description, icon: Icon }) => (
+                      <Button key={key} variant="outline" asChild className="justify-start h-auto py-2">
+                        <Link to={PORTAL_HOME[key]} onClick={() => setMobileMenuOpen(false)} className="flex items-start gap-2.5">
+                          <Icon className="h-4 w-4 mt-0.5 text-teal shrink-0" />
+                          <span className="text-left">
+                            <span className="block text-sm font-medium">{label}</span>
+                            <span className="block text-[11px] text-text-tertiary font-normal">{description}</span>
+                          </span>
+                        </Link>
+                      </Button>
+                    ))}
+                    <Button variant="ghost" asChild className="justify-start">
+                      <Link to="/account/profile" onClick={() => setMobileMenuOpen(false)}>
+                        <User className="h-4 w-4 mr-2" /> My Profile
                       </Link>
                     </Button>
-                    {isActivePartner && (
-                      <Button variant="outline" asChild className="border-teal/40 text-teal">
-                        <Link to="/partner/dashboard" onClick={() => setMobileMenuOpen(false)}>Partner Portal</Link>
-                      </Button>
-                    )}
-                    {isAdmin && (
-                      <Button variant="outline" asChild className="border-navy/30 text-navy">
-                        <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>Admin</Link>
-                      </Button>
-                    )}
+                    <Button variant="ghost" asChild className="justify-start">
+                      <Link to="/account/security" onClick={() => setMobileMenuOpen(false)}>
+                        <Lock className="h-4 w-4 mr-2" /> Security
+                      </Link>
+                    </Button>
                     <Button onClick={handleSignOut}>
                       <LogOut className="h-4 w-4 mr-2" />
                       Sign Out
