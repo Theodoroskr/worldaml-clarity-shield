@@ -56,7 +56,6 @@ export default function AccountMenu({ onNavigate }: { onNavigate?: () => void })
 
   const available = WORKSPACES.filter((w) => has(w.key));
   const current = available.find((w) => w.match(location.pathname))?.key;
-  const profileBase = current === "business" ? "/business" : current === "partner" ? "/partner" : "";
 
   return (
     <DropdownMenuContent align="end" className="w-72 p-1.5">
@@ -97,7 +96,7 @@ export default function AccountMenu({ onNavigate }: { onNavigate?: () => void })
 
       <DropdownMenuSeparator />
       <DropdownMenuItem asChild className="px-2">
-        <Link to={`${profileBase}/account/profile`} onClick={onNavigate}>
+        <Link to="/account/profile" onClick={onNavigate}>
           <User className="h-4 w-4 mr-2 text-muted-foreground" />
           <span className="text-sm">My Profile</span>
         </Link>
