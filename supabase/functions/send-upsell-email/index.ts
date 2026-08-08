@@ -629,7 +629,9 @@ Deno.serve(async (req) => {
       templateId === "screening-upsell" ||
       templateId === "aml-signal-outreach" ||
       templateId === "seminar-discount-suite" ||
-      templateId === "academy-paid-discount";
+      templateId === "academy-paid-discount" ||
+      templateId === "academy-course-upsell" ||
+      templateId === "business-solutions-upsell";
 
     // Admins performing manual sends bypass the automated eligibility gate;
     // the gate only applies to queue-worker / internal calls.
