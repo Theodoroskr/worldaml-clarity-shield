@@ -59,8 +59,8 @@ export function ExploreWorldAML() {
         Discover more tools to support your compliance work.
       </p>
       <div className="grid gap-2 md:grid-cols-3">
-        <ProductDiscoveryCard product={ECOSYSTEM_PRODUCTS.suite} hasAccess={hasSuite} surface="explore" />
-        <ProductDiscoveryCard product={ECOSYSTEM_PRODUCTS.rcm} hasAccess={!!membership} surface="explore" />
+        <ProductDiscoveryCard product={ECOSYSTEM_PRODUCTS.suite} surface="explore" />
+        <ProductDiscoveryCard product={ECOSYSTEM_PRODUCTS.rcm} surface="explore" />
         <ProductDiscoveryCard product={ECOSYSTEM_PRODUCTS.quickcheck} surface="explore" />
       </div>
     </div>
@@ -91,7 +91,7 @@ export function ComplianceInPractice({ data }: { data: AcademyOverview }) {
       <p className="text-xs text-muted-foreground mt-0.5 mb-2">{context}</p>
       <div className="rounded-lg border border-border bg-accent/5 p-4">
         <div className="text-sm font-medium text-foreground">{promoHeadline(product)}</div>
-        <ProductDiscoveryCard product={product} hasAccess={hasAccess} surface="practice" />
+        <ProductDiscoveryCard product={product} surface="practice" />
       </div>
     </div>
   );
@@ -116,7 +116,7 @@ export function CourseCrossSell({
   return (
     <div className="rounded-lg border border-border bg-muted/30 p-4">
       <div className="text-sm font-medium text-foreground mb-2">{promoHeadline(product)}</div>
-      <ProductDiscoveryCard product={product} hasAccess={hasAccess} surface={surface} />
+      <ProductDiscoveryCard product={product} surface={surface} />
     </div>
   );
 }
