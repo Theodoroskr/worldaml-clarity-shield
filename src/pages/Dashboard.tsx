@@ -45,7 +45,13 @@ export default function Dashboard() {
 
         <RecommendedNext courses={academy.recommendedList} />
 
+        <ComplianceInPractice data={academy} />
+
+        <ExploreWorldAML />
+
         <ResourcesSection />
+
+        <WorldAMLTools />
 
         <QuickCheckLink />
       </div>
