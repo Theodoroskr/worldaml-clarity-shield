@@ -104,14 +104,13 @@ export default function AdminAnalytics() {
           ))}
         </div>
       ) : (
-        <Tabs defaultValue="overview">
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="academy">Academy</TabsTrigger>
-            <TabsTrigger value="business">Business</TabsTrigger>
-            <TabsTrigger value="partners">Partners</TabsTrigger>
-            <TabsTrigger value="marketing">Marketing</TabsTrigger>
+            {tabs.map((t) => (
+              <TabsTrigger key={t} value={t}>{TAB_LABELS[t]}</TabsTrigger>
+            ))}
           </TabsList>
+
 
           <TabsContent value="overview" className="space-y-4 pt-4">
             <Panel title="Daily activity">
