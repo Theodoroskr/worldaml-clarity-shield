@@ -2738,6 +2738,7 @@ export type Database = {
           email: string | null
           first_name: string | null
           full_name: string | null
+          gdpr_consent_at: string | null
           id: string
           industry: string | null
           interest_area: string | null
@@ -2759,6 +2760,7 @@ export type Database = {
           subscription_tier: string
           suite_access_granted_at: string | null
           suite_access_granted_by: string | null
+          terms_accepted_at: string | null
           updated_at: string
           user_id: string
           vat_number: string | null
@@ -2774,6 +2776,7 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           full_name?: string | null
+          gdpr_consent_at?: string | null
           id?: string
           industry?: string | null
           interest_area?: string | null
@@ -2795,6 +2798,7 @@ export type Database = {
           subscription_tier?: string
           suite_access_granted_at?: string | null
           suite_access_granted_by?: string | null
+          terms_accepted_at?: string | null
           updated_at?: string
           user_id: string
           vat_number?: string | null
@@ -2810,6 +2814,7 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           full_name?: string | null
+          gdpr_consent_at?: string | null
           id?: string
           industry?: string | null
           interest_area?: string | null
@@ -2831,6 +2836,7 @@ export type Database = {
           subscription_tier?: string
           suite_access_granted_at?: string | null
           suite_access_granted_by?: string | null
+          terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string
           vat_number?: string | null

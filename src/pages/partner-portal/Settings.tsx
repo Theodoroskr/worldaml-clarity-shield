@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import MarketingPreferences from "@/components/account/MarketingPreferences";
 
 const PREF_KEYS = [
   { key: "deal_updates", label: "Deal status updates" },
@@ -119,6 +120,7 @@ export default function PartnerSettings() {
         </CardContent>
       </Card>
 
+        <MarketingPreferences />
       <Button onClick={save} disabled={saving}>
         {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
         Save settings

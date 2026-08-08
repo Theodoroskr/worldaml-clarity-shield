@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, FileText, Send, History, Handshake, ExternalLink } from "lucide-react";
+import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, FileText, Send, History, Handshake, ExternalLink, Download, Table2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { REGULATORY_PROFILES, REGULATOR_OPTIONS } from "@/data/regulatoryProfiles";
+import AdminUserDetailDialog, { RevenueItem } from "@/components/admin/AdminUserDetailDialog";
+import { exportRowsAsCsv, exportRowsAsXlsx } from "@/lib/adminUserExport";
 
 interface Profile {
   id: string;
@@ -29,7 +31,15 @@ interface Profile {
   marketing_consent: boolean | null;
   marketing_consent_at: string | null;
   marketing_opt_out_at: string | null;
+  [key: string]: any;
 }
+
+interface RevenueEntry { total: number; currency: string; items: RevenueItem[] }
+const EMPTY_REVENUE: RevenueEntry = { total: 0, currency: "EUR", items: [] };
+
+const formatMoney = (cents: number, currency = "EUR") =>
+  new Intl.NumberFormat("en-IE", { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
+
 
 type EligibilityReason =
   | "explicit_consent"
@@ -85,6 +95,8 @@ export default function AdminUsers() {
   const [sourceFilter, setSourceFilter] = useState("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
+  const [revenue, setRevenue] = useState<Record<string, RevenueEntry>>({});
+  const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [partnerApplicantIds, setPartnerApplicantIds] = useState<Set<string>>(new Set());
   const [partnerApplicantEmails, setPartnerApplicantEmails] = useState<Set<string>>(new Set());
   const [partnerAppMeta, setPartnerAppMeta] = useState<Record<string, { status: string; partner_type: string | null; company_name: string | null; created_at: string }>>({});
@@ -155,11 +167,13 @@ export default function AdminUsers() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [{ data: p }, { data: r }, { data: logs }, { data: pa }] = await Promise.all([
+    const [{ data: p }, { data: r }, { data: logs }, { data: pa }, { data: acad }, { data: prod }] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("*"),
       supabase.from("admin_upsell_email_log").select("recipient_user_id, recipient_email"),
       supabase.from("partner_applications").select("user_id, email, status, partner_type, company_name, created_at").order("created_at", { ascending: false }),
+      supabase.from("academy_course_purchases").select("user_id, course_slug, amount_cents, currency, status, paid_at, created_at"),
+      supabase.from("product_purchase_notifications").select("customer_email, product, plan, amount_cents, currency, created_at"),
     ]);
     setProfiles((p || []) as Profile[]);
     const roleMap: Record<string, string[]> = {};
@@ -168,6 +182,44 @@ export default function AdminUsers() {
       roleMap[row.user_id].push(row.role);
     });
     setUserRoles(roleMap);
+
+    // ---- Revenue aggregation (Academy purchases + product purchases) ----
+    const rev: Record<string, RevenueEntry> = {};
+    const bucket = (key: string | null | undefined): RevenueEntry | null => {
+      if (!key) return null;
+      if (!rev[key]) rev[key] = { total: 0, currency: "EUR", items: [] };
+      return rev[key];
+    };
+    (acad || []).forEach((row: any) => {
+      const b = bucket(row.user_id);
+      if (!b) return;
+      const paid = row.status === "paid";
+      b.items.push({
+        source: "academy",
+        label: row.course_slug,
+        amountCents: row.amount_cents || 0,
+        currency: (row.currency || "EUR").toUpperCase(),
+        status: row.status,
+        date: row.paid_at || row.created_at,
+      });
+      if (paid) { b.total += row.amount_cents || 0; b.currency = (row.currency || "EUR").toUpperCase(); }
+    });
+    (prod || []).forEach((row: any) => {
+      const b = bucket(String(row.customer_email || "").toLowerCase());
+      if (!b) return;
+      b.items.push({
+        source: "product",
+        label: [row.product, row.plan].filter(Boolean).join(" · "),
+        amountCents: row.amount_cents || 0,
+        currency: (row.currency || "EUR").toUpperCase(),
+        status: "paid",
+        date: row.created_at,
+      });
+      b.total += row.amount_cents || 0;
+      b.currency = (row.currency || "EUR").toUpperCase();
+    });
+    setRevenue(rev);
+
     const counts: Record<string, number> = {};
     (logs || []).forEach((row: any) => {
       const key = row.recipient_user_id || row.recipient_email;
@@ -189,6 +241,73 @@ export default function AdminUsers() {
     setPartnerAppMeta(meta);
     setLoading(false);
   };
+
+  /** Combined revenue for a profile: academy (by user_id) + product purchases (by email). */
+  const revenueFor = (p: Profile): RevenueEntry => {
+    const a = revenue[p.user_id];
+    const b = revenue[(p.email || "").toLowerCase()];
+    if (!a && !b) return EMPTY_REVENUE;
+    return {
+      total: (a?.total || 0) + (b?.total || 0),
+      currency: a?.currency || b?.currency || "EUR",
+      items: [...(a?.items || []), ...(b?.items || [])].sort(
+        (x, y) => new Date(y.date || 0).getTime() - new Date(x.date || 0).getTime(),
+      ),
+    };
+  };
+
+  const exportRows = (list: Profile[]) =>
+    applyFilters(list).map((p) => {
+      const rv = revenueFor(p);
+      return {
+        full_name: p.full_name || "",
+        email: p.email || "",
+        phone: p.phone || "",
+        company_name: p.company_name || "",
+        job_title: p.job_title || "",
+        department: p.department || "",
+        industry: p.industry || "",
+        company_size: p.company_size || "",
+        seniority: p.seniority || "",
+        interest_area: p.interest_area || "",
+        country: p.country || "",
+        city: p.city || "",
+        billing_address: p.billing_address || "",
+        postal_code: p.postal_code || "",
+        vat_number: p.vat_number || "",
+        status: p.status,
+        subscription_tier: p.subscription_tier,
+        regulator: p.regulator || "",
+        roles: (userRoles[p.user_id] || []).join("|") || "user",
+        lifetime_revenue: (rv.total / 100).toFixed(2),
+        revenue_currency: rv.currency,
+        transactions: rv.items.length,
+        marketing_consent: p.marketing_consent ? "yes" : "no",
+        marketing_consent_at: p.marketing_consent_at || "",
+        marketing_opted_out: p.marketing_opt_out_at ? "yes" : "no",
+        marketing_opt_out_at: p.marketing_opt_out_at || "",
+        terms_accepted_at: p.terms_accepted_at || "",
+        gdpr_consent_at: p.gdpr_consent_at || "",
+        signup_source: p.signup_source || "",
+        signup_landing_path: p.signup_landing_path || "",
+        signup_referrer: p.signup_referrer || "",
+        signup_utm: p.signup_utm ? JSON.stringify(p.signup_utm) : "",
+        suite_access_granted_at: p.suite_access_granted_at || "",
+        registered_at: p.created_at,
+        user_id: p.user_id || "",
+      };
+    });
+
+  const runExport = (list: Profile[], format: "csv" | "xlsx") => {
+    const rows = exportRows(list);
+    if (!rows.length) { toast.error("No users match the current filters."); return; }
+    const name = `worldaml-users-${new Date().toISOString().slice(0, 10)}`;
+    if (format === "csv") exportRowsAsCsv(rows, name);
+    else exportRowsAsXlsx(rows, name);
+    toast.success(`Exported ${rows.length} users`);
+  };
+
+
 
   useEffect(() => { fetchData(); }, []);
 
@@ -369,7 +488,7 @@ export default function AdminUsers() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              {["User", "Company", "Status", "Tier", "Source", "Regulator", "Roles", "Registered", "Actions"].map(h => (
+              {["User", "Company", "Revenue", "Status", "Tier", "Source", "Regulator", "Roles", "Registered", "Actions"].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>
               ))}
             </tr>
@@ -378,10 +497,29 @@ export default function AdminUsers() {
             {filtered.map(p => (
               <tr key={p.id} className="hover:bg-muted/20 transition-colors">
                 <td className="px-4 py-3">
-                  <div className="font-medium text-foreground">{p.full_name || "—"}</div>
-                  <div className="text-xs text-muted-foreground">{p.email}</div>
+                  <button className="text-left" onClick={() => setDetailProfile(p)}>
+                    <div className="font-medium text-foreground hover:text-primary hover:underline">{p.full_name || "—"}</div>
+                    <div className="text-xs text-muted-foreground">{p.email}</div>
+                  </button>
+                  {p.marketing_opt_out_at && (
+                    <Badge variant="outline" className="mt-1 text-[10px] bg-red-50 text-red-700 border-red-200">Marketing opt-out</Badge>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">{p.company_name || "—"}</td>
+                <td className="px-4 py-3">
+                  {(() => {
+                    const rv = revenueFor(p);
+                    return (
+                      <button className="text-left" onClick={() => setDetailProfile(p)}>
+                        <div className={`text-sm font-semibold ${rv.total > 0 ? "text-foreground" : "text-muted-foreground"}`}>
+                          {formatMoney(rv.total, rv.currency)}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">{rv.items.length} txn</div>
+                      </button>
+                    );
+                  })()}
+                </td>
+
                 <td className="px-4 py-3">{statusBadge(p.status)}</td>
                 <td className="px-4 py-3">{tierBadge(p.subscription_tier)}</td>
                 <td className="px-4 py-3">{sourceBadge(p)}</td>
@@ -555,7 +693,16 @@ export default function AdminUsers() {
             {nonPartnerProfiles.length} platform users · {suiteUsers.length} suite users · {partnerApplicants.length} partner applicants (processed in <Link to="/admin/partners" className="text-primary hover:underline">Partner Program</Link>) · {academyUsers.length} academy learners (managed in <a href="/admin/academy-users" className="text-primary hover:underline">Academy Signups</a>)
           </p>
         </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => runExport(nonPartnerProfiles, "csv")}>
+            <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => runExport(nonPartnerProfiles, "xlsx")}>
+            <Table2 className="w-3.5 h-3.5 mr-1" /> Export Excel
+          </Button>
+        </div>
       </div>
+
 
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-xs">
@@ -821,6 +968,20 @@ export default function AdminUsers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {detailProfile && (
+        <AdminUserDetailDialog
+          profile={detailProfile}
+          revenue={revenueFor(detailProfile)}
+          roles={userRoles[detailProfile.user_id] || []}
+          onClose={() => setDetailProfile(null)}
+          onSendUpsell={(template) => {
+            setUpsellTemplate(template);
+            setUpsellDialog({ open: true, profile: detailProfile });
+          }}
+        />
+      )}
+
     </div>
   );
 }

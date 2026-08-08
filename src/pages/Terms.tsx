@@ -79,6 +79,33 @@ const Terms = () => {
                 workspace and may be visible to other authorised users and administrators of that organisation.
               </p>
 
+              <h2 className="text-headline text-navy">Consent at Registration: Data Protection and Marketing</h2>
+              <p className="text-body text-text-secondary">
+                By creating a WorldAML account you confirm that you have read and accept these Terms and our Privacy
+                Notice, and you consent to the processing of your personal data as described in that notice in
+                accordance with the EU General Data Protection Regulation (GDPR) and applicable national data
+                protection law. Your acceptance is recorded against your account with a timestamp at the moment of
+                registration.
+              </p>
+              <p className="text-body text-text-secondary">
+                Registration also includes your consent to receive marketing and commercial communications from
+                WorldAML — product news and releases, WorldAML Academy course updates and offers, event invitations,
+                webinars, regulatory insights and related services. These may be sent by email and, where you have
+                provided a number, by phone or messaging.
+              </p>
+              <p className="text-body text-text-secondary">
+                You may withdraw your marketing consent at any time, free of charge and without affecting the
+                lawfulness of processing carried out before withdrawal. Turn off <em>Marketing communications</em> in
+                your dashboard settings (Academy, Business and Partner portals each expose this control), use the
+                unsubscribe link in any marketing email, or contact us at{" "}
+                <a href="mailto:info@worldaml.com" className="text-teal hover:underline">info@worldaml.com</a>. Opting
+                out is recorded on your account and applied across all WorldAML marketing lists. Essential service,
+                billing, security and other transactional messages relating to your account are not marketing and will
+                continue to be sent for as long as your account remains open.
+              </p>
+
+
+
               <h2 className="text-headline text-navy">Subscriptions, Fees and Refunds</h2>
               <p className="text-body text-text-secondary">
                 Paid plans, Academy courses and add-ons are billed through our payment processor. Prices are shown at
