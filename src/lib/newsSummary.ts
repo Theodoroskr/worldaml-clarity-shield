@@ -82,3 +82,12 @@ export function truncateSummary(text: string, maxLength = 320): string {
   const cut = (wordEnd > 0 ? window.slice(0, wordEnd) : window).replace(/[,;:.\-–—]+$/, "").trim();
   return `${cut}…`;
 }
+
+/** Normalise a headline: no markup, no publisher suffix, single spaces. */
+export function cleanTitle(raw: string | null | undefined): string {
+  if (!raw) return "";
+  return stripMarkup(String(raw))
+    .replace(/\s+/g, " ")
+    .replace(/\s[-–—]\s[A-Z][\w.&' ]{2,40}$/, "")
+    .trim();
+}
