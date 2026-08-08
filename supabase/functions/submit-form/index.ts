@@ -569,6 +569,9 @@ Deno.serve(async (req) => {
 
           // Marketing / attribution custom fields (Zoho CRM API names)
           Website_Name: "WorldAML",
+          // Default reporting currency for WorldAML website leads.
+          Currency: "EUR",
+
           Landing_Page_URL: attribution.landing_page || undefined,
           // Custom writable URL field on Leads — the page the visitor was on
           // when they clicked the CTA that led to this form (falls back to the
