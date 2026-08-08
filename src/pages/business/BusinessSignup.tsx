@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Building2, Check } from "lucide-react";
 import { ensureAuthAccount, isWorkEmail } from "@/lib/portalAccounts";
+import { useBusinessAccount } from "@/hooks/useBusinessAccount";
 
 export const PENDING_BUSINESS_KEY = "worldaml_pending_business_account";
 
@@ -32,12 +33,89 @@ export default function BusinessSignup() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const { signUp } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const { account, isLoading: accountLoading, refetch } = useBusinessAccount();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   const next = searchParams.get("next") || "/business/dashboard";
+
+  /**
+   * Someone who is already signed in (Academy/Partner identity, or a buyer whose
+   * company record never got created) only needs the company details — not a new
+   * password. We show a short "activate" form instead of bouncing them around.
+   */
+  const activateMode = !authLoading && !!user && !accountLoading && !account;
+
+  // Prefill from the signed-in identity.
+  useEffect(() => {
+    if (!user) return;
+    setEmail((v) => v || user.email || "");
+    const meta = (user.user_metadata || {}) as Record<string, string>;
+    setContactName((v) => v || meta.full_name || "");
+    setCompanyName((v) => v || meta.company_name || "");
+  }, [user]);
+
+  // Already has a workspace — never show a sign-up form to them.
+  useEffect(() => {
+    if (account) navigate(next, { replace: true });
+  }, [account, navigate, next]);
+
+  const pendingRestore = useMemo(() => {
+    try {
+      const raw = localStorage.getItem(PENDING_BUSINESS_KEY);
+      return raw ? (JSON.parse(raw) as Record<string, string | null>) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!pendingRestore) return;
+    setCompanyName((v) => v || pendingRestore.company_name || "");
+    setContactName((v) => v || pendingRestore.contact_name || "");
+    setCountry((v) => v || pendingRestore.country || "");
+    setPhone((v) => v || pendingRestore.phone || "");
+    setIndustry((v) => v || pendingRestore.industry || "");
+  }, [pendingRestore]);
+
+  /** Create the company record for an identity that is already authenticated. */
+  const handleActivate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    if (!companyName.trim()) {
+      toast({ title: "Company name is required", variant: "destructive" });
+      return;
+    }
+    setIsLoading(true);
+    const { error } = await supabase.from("business_accounts").insert({
+      user_id: user.id,
+      company_name: companyName.trim(),
+      work_email: (email || user.email || "").trim(),
+      contact_name: contactName.trim() || null,
+      country: country.trim() || null,
+      industry: industry || null,
+      phone: phone.trim() || null,
+    });
+    if (error) {
+      setIsLoading(false);
+      toast({ title: "Could not create your business workspace", description: error.message, variant: "destructive" });
+      return;
+    }
+    try {
+      await supabase.functions.invoke("send-business-welcome", {
+        body: { company_name: companyName.trim(), contact_name: contactName.trim() || null },
+      });
+    } catch (mailErr) {
+      console.warn("Welcome email failed (non-blocking):", mailErr);
+    }
+    localStorage.removeItem(PENDING_BUSINESS_KEY);
+    await refetch();
+    setIsLoading(false);
+    toast({ title: "Business workspace ready", description: "Welcome to WorldAML Business." });
+    navigate(next, { replace: true });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,13 +213,21 @@ export default function BusinessSignup() {
             <div className="mx-auto mb-3 h-11 w-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
               <Building2 className="h-5 w-5" />
             </div>
-            <CardTitle className="text-2xl text-center">Create a business account</CardTitle>
+            <CardTitle className="text-2xl text-center">
+              {activateMode ? "Set up your business workspace" : "Create a business account"}
+            </CardTitle>
             <CardDescription className="text-center">
-              For companies and individuals buying WorldAML products. Academy learners and partners have their own portals.
+              {activateMode
+                ? "You're signed in — just confirm your company details to open the business portal."
+                : "For companies and individuals buying WorldAML products. Academy learners and partners have their own portals."}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {emailSent ? (
+            {user && accountLoading ? (
+              <div className="py-10 flex justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : emailSent ? (
               <div className="text-center space-y-4 py-4">
                 <div className="mx-auto h-11 w-11 rounded-full bg-teal/10 text-teal flex items-center justify-center">
                   <Check className="h-5 w-5" />
@@ -152,7 +238,7 @@ export default function BusinessSignup() {
                 <Button asChild variant="outline"><Link to="/business/login">Go to business sign-in</Link></Button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={activateMode ? handleActivate : handleSubmit} className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="company">Company name *</Label>
@@ -165,7 +251,15 @@ export default function BusinessSignup() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Work email *</Label>
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} required />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    maxLength={255}
+                    required
+                    disabled={activateMode}
+                  />
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -186,6 +280,7 @@ export default function BusinessSignup() {
                   <Label htmlFor="phone">Phone</Label>
                   <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={40} />
                 </div>
+                {!activateMode && (
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="password">Password *</Label>
@@ -196,13 +291,16 @@ export default function BusinessSignup() {
                     <Input id="confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={8} required />
                   </div>
                 </div>
+                )}
                 <Button type="submit" className="w-full" variant="accent" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create business account
+                  {activateMode ? "Open my business portal" : "Create business account"}
                 </Button>
-                <p className="text-center text-sm text-muted-foreground">
-                  Already have one? <Link to="/business/login" className="text-teal hover:underline">Sign in</Link>
-                </p>
+                {!activateMode && (
+                  <p className="text-center text-sm text-muted-foreground">
+                    Already have one? <Link to="/business/login" className="text-teal hover:underline">Sign in</Link>
+                  </p>
+                )}
               </form>
             )}
           </CardContent>
