@@ -4,6 +4,8 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ForOrganisations } from "@/components/dashboard/EcosystemSections";
+import { ProfileRecognition } from "@/components/dashboard/RecognitionSections";
+import { Link } from "react-router-dom";
 import { AppPageHeader } from "@/components/app-shell/AppShellLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,12 +22,14 @@ type Form = {
   company_size: string; seniority: string; interest_area: string;
   country: string; city: string; billing_address: string; postal_code: string; vat_number: string;
   marketing_consent: boolean;
+  show_recognition_publicly: boolean;
 };
 
 const EMPTY: Form = {
   first_name: "", last_name: "", full_name: "", phone: "", job_title: "", department: "",
   company_name: "", industry: "", company_size: "", seniority: "", interest_area: "",
   country: "", city: "", billing_address: "", postal_code: "", vat_number: "", marketing_consent: false,
+  show_recognition_publicly: true,
 };
 
 /** Defined at module scope so inputs keep focus while typing. */
@@ -129,6 +133,25 @@ export default function AccountProfile() {
             </div>
             <Field id="postal_code" label="Postal code" value={form.postal_code} onChange={set("postal_code")} />
             <Field id="vat_number" label="VAT number" value={form.vat_number} onChange={set("vat_number")} />
+          </CardContent>
+        </Card>
+
+        <Card className="border-border">
+          <CardHeader className="pb-3"><CardTitle className="text-base">Academy recognition</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <ProfileRecognition />
+            <div className="flex items-center justify-between gap-4 border-t border-border pt-4">
+              <div>
+                <div className="text-sm font-medium text-foreground">Show my recognition on shared profiles</div>
+                <p className="text-xs text-muted-foreground">
+                  Controls whether your member level and specialisation badges appear outside your own dashboard.
+                </p>
+              </div>
+              <Switch checked={form.show_recognition_publicly} onCheckedChange={set("show_recognition_publicly")} />
+            </div>
+            <Link to="/dashboard/recognition" className="text-xs text-accent hover:underline inline-block">
+              View my recognition progress
+            </Link>
           </CardContent>
         </Card>
 
