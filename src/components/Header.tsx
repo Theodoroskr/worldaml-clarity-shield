@@ -310,11 +310,9 @@ export const Header = () => {
                     <Button variant="ghost" size="sm" onClick={open}>Sign In</Button>
                   )}
                 />
-                <GetStartedSelector
-                  trigger={(open) => (
-                    <Button size="sm" onClick={open}>Get Started</Button>
-                  )}
-                />
+                <Button asChild size="sm">
+                  <Link to="/signup">Get Started</Link>
+                </Button>
               </>
             )}
 
