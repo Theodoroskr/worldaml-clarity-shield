@@ -97,6 +97,10 @@ export default function AdminUsers() {
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
   const [revenue, setRevenue] = useState<Record<string, RevenueEntry>>({});
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportPreset, setExportPreset] = useState<"30d" | "90d" | "12m" | "ytd" | "all" | "custom">("30d");
+  const [exportFrom, setExportFrom] = useState("");
+  const [exportTo, setExportTo] = useState("");
   const [partnerApplicantIds, setPartnerApplicantIds] = useState<Set<string>>(new Set());
   const [partnerApplicantEmails, setPartnerApplicantEmails] = useState<Set<string>>(new Set());
   const [partnerAppMeta, setPartnerAppMeta] = useState<Record<string, { status: string; partner_type: string | null; company_name: string | null; created_at: string }>>({});
@@ -256,56 +260,104 @@ export default function AdminUsers() {
     };
   };
 
-  const exportRows = (list: Profile[]) =>
-    applyFilters(list).map((p) => {
-      const rv = revenueFor(p);
-      return {
-        full_name: p.full_name || "",
-        email: p.email || "",
-        phone: p.phone || "",
-        company_name: p.company_name || "",
-        job_title: p.job_title || "",
-        department: p.department || "",
-        industry: p.industry || "",
-        company_size: p.company_size || "",
-        seniority: p.seniority || "",
-        interest_area: p.interest_area || "",
-        country: p.country || "",
-        city: p.city || "",
-        billing_address: p.billing_address || "",
-        postal_code: p.postal_code || "",
-        vat_number: p.vat_number || "",
-        status: p.status,
-        subscription_tier: p.subscription_tier,
-        regulator: p.regulator || "",
-        roles: (userRoles[p.user_id] || []).join("|") || "user",
-        lifetime_revenue: (rv.total / 100).toFixed(2),
-        revenue_currency: rv.currency,
-        transactions: rv.items.length,
-        marketing_consent: p.marketing_consent ? "yes" : "no",
-        marketing_consent_at: p.marketing_consent_at || "",
-        marketing_opted_out: p.marketing_opt_out_at ? "yes" : "no",
-        marketing_opt_out_at: p.marketing_opt_out_at || "",
-        terms_accepted_at: p.terms_accepted_at || "",
-        gdpr_consent_at: p.gdpr_consent_at || "",
-        signup_source: p.signup_source || "",
-        signup_landing_path: p.signup_landing_path || "",
-        signup_referrer: p.signup_referrer || "",
-        signup_utm: p.signup_utm ? JSON.stringify(p.signup_utm) : "",
-        suite_access_granted_at: p.suite_access_granted_at || "",
-        registered_at: p.created_at,
-        user_id: p.user_id || "",
-      };
-    });
+  const inWindow = (iso: string | null | undefined, from: Date, to: Date) => {
+    if (!iso) return false;
+    const t = new Date(iso).getTime();
+    return t >= from.getTime() && t <= to.getTime();
+  };
 
-  const runExport = (list: Profile[], format: "csv" | "xlsx") => {
-    const rows = exportRows(list);
-    if (!rows.length) { toast.error("No users match the current filters."); return; }
-    const name = `worldaml-users-${new Date().toISOString().slice(0, 10)}`;
+  const exportRows = (list: Profile[], from: Date, to: Date) =>
+    applyFilters(list)
+      .filter((p) => inWindow(p.created_at, from, to))
+      .map((p) => {
+        const rv = revenueFor(p);
+        const periodItems = rv.items.filter((i) => i.status === "paid" && inWindow(i.date, from, to));
+        const periodTotal = periodItems.reduce((s, i) => s + i.amountCents, 0);
+        return {
+          full_name: p.full_name || "",
+          email: p.email || "",
+          phone: p.phone || "",
+          company_name: p.company_name || "",
+          job_title: p.job_title || "",
+          department: p.department || "",
+          industry: p.industry || "",
+          company_size: p.company_size || "",
+          seniority: p.seniority || "",
+          interest_area: p.interest_area || "",
+          country: p.country || "",
+          city: p.city || "",
+          billing_address: p.billing_address || "",
+          postal_code: p.postal_code || "",
+          vat_number: p.vat_number || "",
+          status: p.status,
+          subscription_tier: p.subscription_tier,
+          regulator: p.regulator || "",
+          roles: (userRoles[p.user_id] || []).join("|") || "user",
+          lifetime_revenue: (rv.total / 100).toFixed(2),
+          period_revenue: (periodTotal / 100).toFixed(2),
+          period_transactions: periodItems.length,
+          revenue_currency: rv.currency,
+          transactions: rv.items.length,
+          marketing_consent: p.marketing_consent ? "yes" : "no",
+          marketing_consent_at: p.marketing_consent_at || "",
+          marketing_opted_out: p.marketing_opt_out_at ? "yes" : "no",
+          marketing_opt_out_at: p.marketing_opt_out_at || "",
+          terms_accepted_at: p.terms_accepted_at || "",
+          gdpr_consent_at: p.gdpr_consent_at || "",
+          signup_source: p.signup_source || "",
+          signup_landing_path: p.signup_landing_path || "",
+          signup_referrer: p.signup_referrer || "",
+          signup_utm: p.signup_utm ? JSON.stringify(p.signup_utm) : "",
+          suite_access_granted_at: p.suite_access_granted_at || "",
+          registered_at: p.created_at,
+          export_period_from: from.toISOString().slice(0, 10),
+          export_period_to: to.toISOString().slice(0, 10),
+          user_id: p.user_id || "",
+        };
+      });
+
+  const resolveRange = (): { from: Date; to: Date } | null => {
+    const now = new Date();
+    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    const daysAgo = (d: number) => new Date(now.getFullYear(), now.getMonth(), now.getDate() - d);
+    switch (exportPreset) {
+      case "30d": return { from: daysAgo(30), to: end };
+      case "90d": return { from: daysAgo(90), to: end };
+      case "12m": return { from: new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()), to: end };
+      case "ytd": return { from: new Date(now.getFullYear(), 0, 1), to: end };
+      case "all": return { from: new Date(2000, 0, 1), to: end };
+      case "custom": {
+        if (!exportFrom || !exportTo) return null;
+        const f = new Date(`${exportFrom}T00:00:00`);
+        const t = new Date(`${exportTo}T23:59:59`);
+        if (isNaN(f.getTime()) || isNaN(t.getTime()) || f > t) return null;
+        return { from: f, to: t };
+      }
+      default: return null;
+    }
+  };
+
+  /** Users included in an export: all platform users (partner applicants excluded). */
+  const getExportList = () => nonPartnerProfiles;
+
+  const runExport = (format: "csv" | "xlsx") => {
+    const range = resolveRange();
+    if (!range) { toast.error("Select a valid export timeline first."); return; }
+    const rows = exportRows(getExportList(), range.from, range.to);
+    if (!rows.length) { toast.error("No users registered in the selected timeline match the current filters."); return; }
+    const name = `worldaml-users-${range.from.toISOString().slice(0, 10)}_to_${range.to.toISOString().slice(0, 10)}`;
     if (format === "csv") exportRowsAsCsv(rows, name);
     else exportRowsAsXlsx(rows, name);
-    toast.success(`Exported ${rows.length} users`);
+    toast.success(`Exported ${rows.length} users (${name.replace("worldaml-users-", "")})`);
+    setExportOpen(false);
   };
+
+  const previewCount = () => {
+    const range = resolveRange();
+    if (!range) return null;
+    return exportRows(getExportList(), range.from, range.to).length;
+  };
+
 
 
 
@@ -694,13 +746,11 @@ export default function AdminUsers() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => runExport(nonPartnerProfiles, "csv")}>
-            <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => runExport(nonPartnerProfiles, "xlsx")}>
-            <Table2 className="w-3.5 h-3.5 mr-1" /> Export Excel
+          <Button variant="outline" size="sm" onClick={() => setExportOpen(true)}>
+            <Download className="w-3.5 h-3.5 mr-1" /> Export users
           </Button>
         </div>
+
       </div>
 
 
@@ -981,6 +1031,60 @@ export default function AdminUsers() {
           }}
         />
       )}
+
+      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Export users</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">Timeline (registration date) — required</label>
+              <Select value={exportPreset} onValueChange={(v) => setExportPreset(v as typeof exportPreset)}>
+                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30d">Last 30 days</SelectItem>
+                  <SelectItem value="90d">Last 90 days</SelectItem>
+                  <SelectItem value="12m">Last 12 months</SelectItem>
+                  <SelectItem value="ytd">Year to date</SelectItem>
+                  <SelectItem value="all">All time</SelectItem>
+                  <SelectItem value="custom">Custom range…</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {exportPreset === "custom" && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs text-muted-foreground">From</label>
+                  <input type="date" value={exportFrom} onChange={(e) => setExportFrom(e.target.value)}
+                    className="w-full px-2 py-2 text-sm rounded-md border border-border bg-background" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-muted-foreground">To</label>
+                  <input type="date" value={exportTo} onChange={(e) => setExportTo(e.target.value)}
+                    className="w-full px-2 py-2 text-sm rounded-md border border-border bg-background" />
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs text-muted-foreground">
+              {previewCount() === null
+                ? "Select a valid date range to continue."
+                : `${previewCount()} user(s) match the timeline and the current search/filters. Files include lifetime revenue plus revenue earned inside the selected period.`}
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" size="sm" onClick={() => setExportOpen(false)}>Cancel</Button>
+            <Button variant="outline" size="sm" disabled={!previewCount()} onClick={() => runExport("csv")}>
+              <Download className="w-3.5 h-3.5 mr-1" /> CSV
+            </Button>
+            <Button size="sm" disabled={!previewCount()} onClick={() => runExport("xlsx")}>
+              <Table2 className="w-3.5 h-3.5 mr-1" /> Excel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
