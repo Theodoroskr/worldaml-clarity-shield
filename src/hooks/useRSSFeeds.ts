@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { NewsItem, NewsCategory, TrustTier } from "@/components/news/NewsCard";
 import { fetchAllFeeds } from "@/services/rssService";
 import { supabase } from "@/integrations/supabase/client";
+import { cleanSummary, cleanTitle, truncateSummary } from "@/lib/newsSummary";
 
 const VALID_CATEGORIES: NewsCategory[] = [
   "Regulatory Updates",
