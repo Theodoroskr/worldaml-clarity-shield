@@ -17,6 +17,8 @@ export interface WebAttribution {
   visit_count?: number;
   /** First page the visitor ever landed on (first touch). */
   first_page_visited?: string;
+  /** The in-app page the visitor was on before reaching this form (CTA page). */
+  cta_referrer?: string;
   /** Average minutes per visit, rounded to 2 decimals. */
   average_time_spent_minutes?: number;
   /** Chat conversations started by this visitor (0 when no chat was used). */
@@ -35,9 +37,14 @@ interface VisitStats {
   days: string[]; // ISO dates (YYYY-MM-DD)
   visit_count: number;
   first_page_visited?: string;
+  /** Most recent page view URL. */
+  last_page?: string;
+  /** The page viewed immediately before `last_page` (CTA origin page). */
+  previous_page?: string;
   /** Cumulative time on site in seconds (best-effort). */
   total_seconds?: number;
 }
+
 
 function readVisits(): VisitStats | null {
   try {
@@ -65,7 +72,10 @@ function readChats(): number {
   }
 }
 
-/** Call once per page load to maintain first/last visit and days-visited counts. */
+/**
+ * Call on every page view (initial load and SPA route change) to maintain
+ * first/last visit, days-visited counts and the previous-page (CTA) trail.
+ */
 export function recordVisit() {
   if (typeof window === "undefined") return;
   try {
@@ -73,6 +83,13 @@ export function recordVisit() {
     const today = now.slice(0, 10);
     const here = window.location.href.slice(0, 500);
     const prev = readVisits();
+
+    // Ignore duplicate records for the same URL fired within a few seconds
+    // (initial load + router mount) so counts and the CTA trail stay accurate.
+    if (prev?.last_page === here && prev.last_visited_at) {
+      const gap = Date.now() - new Date(prev.last_visited_at).getTime();
+      if (gap >= 0 && gap < 3000) return;
+    }
 
     // Best-effort time-on-site: count the gap since the previous page view when
     // it looks like the same browsing session (under 30 minutes).
@@ -89,6 +106,9 @@ export function recordVisit() {
           days: prev.days?.includes(today) ? prev.days : [...(prev.days || []), today].slice(-365),
           visit_count: (prev.visit_count || 0) + 1,
           first_page_visited: prev.first_page_visited || here,
+          last_page: here,
+          previous_page:
+            prev.last_page && prev.last_page !== here ? prev.last_page : prev.previous_page,
           total_seconds: Math.round((prev.total_seconds || 0) + addSeconds),
         }
       : {
@@ -97,11 +117,13 @@ export function recordVisit() {
           days: [today],
           visit_count: 1,
           first_page_visited: here,
+          last_page: here,
           total_seconds: 0,
         };
     localStorage.setItem(VISIT_KEY, JSON.stringify(stats));
   } catch {}
 }
+
 
 const UTM_KEYS = [
   "utm_source",
@@ -146,6 +168,10 @@ export function getWebAttribution(): WebAttribution {
       out.days_visited = Array.isArray(v.days) ? v.days.length : undefined;
       out.visit_count = v.visit_count;
       out.first_page_visited = v.first_page_visited || out.landing_page;
+      // The page the visitor was on before this form — i.e. where they clicked
+      // the CTA. Falls back to the external document.referrer.
+      out.cta_referrer = v.previous_page || out.referrer || undefined;
+
       const visits = Math.max(1, v.visit_count || 1);
       out.average_time_spent_minutes =
         Math.round(((v.total_seconds || 0) / 60 / visits) * 100) / 100;

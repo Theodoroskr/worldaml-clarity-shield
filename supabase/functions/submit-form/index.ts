@@ -284,7 +284,33 @@ Deno.serve(async (req) => {
           .slice(0, 32000);
 
 
+        // ── Demo-request detection ────────────────────────────────────────
+        // The website's "Request a Demo" form (form_type "contact-sales") is a
+        // demo funnel whenever a demo-able product is selected. Academy — Team
+        // Plan and WorldAML Advisory are NOT demo products, so a request for
+        // those alone stays a plain "Contact Sales" lead.
+        const NON_DEMO_PRODUCTS = new Set([
+          "academy",
+          "academy-team",
+          "academy-team-plan",
+          "training",
+          "worldaml-advisory",
+          "advisory",
+          "mlro-advisory",
+        ]);
+        const selectedProducts = Array.isArray(products)
+          ? products.map((p) => String(p ?? "").trim().toLowerCase()).filter(Boolean)
+          : [];
+        const demoableProducts = selectedProducts.filter((p) => !NON_DEMO_PRODUCTS.has(p));
+        const formTypeKey = String(form_type ?? "").trim().toLowerCase();
+        const isContactSalesForm =
+          formTypeKey === "contact-sales" || formTypeKey === "contact_sales";
+        // True when this contact-sales submission should be treated as a demo
+        // request in Zoho (Form Type = Book Demo, Book Demo = true, etc.).
+        const isDemoRequest = isContactSalesForm && demoableProducts.length > 0;
+
         const leadRecord: Record<string, unknown> = {
+
           First_Name: first_name?.trim().slice(0, 40) || undefined,
           Last_Name: (last_name?.trim() || first_name?.trim() || "Unknown").slice(0, 80),
           Email: email.trim().slice(0, 100),
@@ -414,6 +440,9 @@ Deno.serve(async (req) => {
           // ['Contact Sales', 'Book Demo', 'Newsletter', 'Webinar',
           //  'Event Registration', 'Partner Request', 'General Contact']
           Form_Type: (() => {
+            // "Request a Demo" (contact-sales) with a demo-able product
+            // selected is a Book Demo lead.
+            if (isDemoRequest) return "Book Demo";
             const map: Record<string, string> = {
               "contact-sales": "Contact Sales",
               "contact_sales": "Contact Sales",
@@ -456,6 +485,7 @@ Deno.serve(async (req) => {
           // "Product Demo" on Leads is a TEXT field (api_name: ProductDemo) —
           // records which product-specific demo funnel the lead came from.
           ProductDemo: (() => {
+            if (isDemoRequest) return demoableProducts.join(", ").slice(0, 255);
             const key = String(form_type ?? "").trim().toLowerCase();
             if (key === "free-aml-check" || key === "free_aml_check") return "free_aml_check";
             if (key.includes("demo") || key === "free-trial") return key;
@@ -463,10 +493,12 @@ Deno.serve(async (req) => {
           })(),
           // "Book Demo" boolean — true for any demo / trial request funnel.
           BookDemo: (() => {
+            if (isDemoRequest) return true;
             const key = String(form_type ?? "").trim().toLowerCase();
             return key.includes("demo") || key === "free-trial" || key === "free_aml_check"
               ? true
               : undefined;
+
           })(),
           // Subject — short human-readable summary shown in list views.
           Subject: (() => {
@@ -610,8 +642,12 @@ Deno.serve(async (req) => {
           // Marketing / attribution custom fields (Zoho CRM API names)
           Website_Name: "WorldAML",
           Landing_Page_URL: attribution.landing_page || undefined,
-          // Custom writable URL field on Leads for document.referrer.
-          Referrer_URL: attribution.referrer || undefined,
+          // Custom writable URL field on Leads — the page the visitor was on
+          // when they clicked the CTA that led to this form (falls back to the
+          // external document.referrer).
+          Referrer_URL:
+            attribution.cta_referrer || attribution.referrer || undefined,
+
 
           Source_UTM: attribution.utm_source || undefined,
           Medium_UTM: attribution.utm_medium || undefined,
@@ -628,6 +664,8 @@ Deno.serve(async (req) => {
               (Array.isArray(products) &&
                 products.some((p) => String(p ?? "").toLowerCase().includes("partner")));
             if (isPartner) return "Partner";
+            if (isDemoRequest) return "Website Demo";
+
             const src = String(attribution.utm_source ?? "").toLowerCase();
             const med = String(attribution.utm_medium ?? "").toLowerCase();
             const ref = String(attribution.referrer ?? "").toLowerCase();
@@ -696,10 +734,9 @@ Deno.serve(async (req) => {
             return undefined;
           })(),
 
-          // Communication Consents (multiselectpicklist) — WorldAML leads
-          // consent to regulatory/compliance communications by submitting a
-          // demo request. Exact Zoho picklist value.
-          Communication_Consents: ["Regulatory Compliance & Corp Governance"],
+          // Communication Preferences / Communication Consents are intentionally
+          // NOT written from website forms — the CRM owns those preferences.
+
 
           // Marketing Communication Consent (boolean) — set true when the
           // visitor explicitly opts in via metadata.marketing_consent; leave

@@ -64,7 +64,9 @@ const ContactSales = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
   const [marketingConsent, setMarketingConsent] = useState(false);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -191,6 +193,9 @@ Preferred start date and number of seats below.`,
     }
 
     if (!termsAccepted) {
+      setTermsError(
+        "You must accept the Terms & Conditions and Privacy Policy before submitting your request.",
+      );
       toast({
         title: "Acceptance Required",
         description:
@@ -199,6 +204,8 @@ Preferred start date and number of seats below.`,
       });
       return;
     }
+    setTermsError(null);
+
 
     setIsSubmitting(true);
 
@@ -277,12 +284,12 @@ Preferred start date and number of seats below.`,
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Contact Sales"
-        description="Contact the WorldAML sales team for pricing, demos, and product information on AML screening, KYC, KYB and identity verification solutions."
+        title="Request a Demo"
+        description="Request a demo of WorldAML — AML screening, KYC/KYB, transaction monitoring and identity verification. Tell us your requirements and our team will be in touch."
         canonical="/contact-sales"
         breadcrumbs={[
           { name: "Home", url: "/" },
-          { name: "Contact Sales", url: "/contact-sales" },
+          { name: "Request a Demo", url: "/contact-sales" },
         ]}
       />
       <Header />
@@ -291,12 +298,13 @@ Preferred start date and number of seats below.`,
           <div className="container-enterprise">
             <div className="max-w-3xl mx-auto">
               <h1 className="text-display text-navy mb-4 text-center">
-                Contact Sales
+                Request a Demo
               </h1>
               <p className="text-body-lg text-text-secondary text-center mb-12">
-                Tell us about your requirements and our team will get back to you 
-                with information about the products and services that best fit your needs.
+                Tell us about your requirements and our team will get back to you
+                with a tailored demo of the products and services that best fit your needs.
               </p>
+
 
               <form onSubmit={handleSubmit} className="space-y-8">
                 {/* Product Selection */}
@@ -454,7 +462,11 @@ Preferred start date and number of seats below.`,
                     <label className="flex items-start gap-3 cursor-pointer">
                       <Checkbox
                         checked={termsAccepted}
-                        onCheckedChange={(v) => setTermsAccepted(v === true)}
+                        onCheckedChange={(v) => {
+                          setTermsAccepted(v === true);
+                          if (v === true) setTermsError(null);
+                        }}
+                        aria-invalid={!!termsError}
                         className="mt-0.5"
                       />
                       <span className="text-body-sm text-text-secondary">
@@ -469,6 +481,12 @@ Preferred start date and number of seats below.`,
                         . <span className="text-red-500">*</span>
                       </span>
                     </label>
+                    {termsError && (
+                      <p role="alert" className="text-body-sm text-destructive">
+                        {termsError}
+                      </p>
+                    )}
+
 
                     <label className="flex items-start gap-3 cursor-pointer">
                       <Checkbox
@@ -496,7 +514,7 @@ Preferred start date and number of seats below.`,
                     "Submitting..."
                   ) : (
                     <>
-                      Submit Request
+                      Request a Demo
                       <Send className="ml-2 h-4 w-4" />
                     </>
                   )}

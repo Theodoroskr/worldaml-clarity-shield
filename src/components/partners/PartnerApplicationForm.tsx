@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, CheckCircle } from "lucide-react";
@@ -15,6 +17,9 @@ const PartnerApplicationForm = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [form, setForm] = useState({
     company_name: "",
     website: "",
@@ -34,6 +39,16 @@ const PartnerApplicationForm = () => {
     if (!form.contact_email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contact_email.trim())) {
       toast.error("A valid contact email is required"); return;
     }
+    if (!termsAccepted) {
+      setTermsError(
+        "You must accept the Terms & Conditions and Privacy Policy before submitting your application.",
+      );
+      toast.error("Please accept the Terms & Conditions and Privacy Policy to submit your application.");
+      return;
+    }
+    setTermsError(null);
+    const consentTimestamp = new Date().toISOString();
+
 
     setLoading(true);
     const { data: inserted, error } = await supabase.from("partner_applications").insert({
@@ -80,6 +95,17 @@ const PartnerApplicationForm = () => {
               website: form.website.trim() || undefined,
               application_id: inserted?.id,
               attribution: getWebAttribution(),
+              terms_accepted: true,
+              terms_accepted_at: consentTimestamp,
+              marketing_consent: marketingConsent,
+              marketing_consent_at: marketingConsent ? consentTimestamp : null,
+              consent_timestamp: consentTimestamp,
+              consent_text:
+                "I accept the Terms & Conditions and the Privacy Policy." +
+                (marketingConsent
+                  ? " I'd like to receive marketing communications about WorldAML products, events and regulatory updates."
+                  : ""),
+
             },
           },
         })
@@ -150,7 +176,42 @@ const PartnerApplicationForm = () => {
             <Label htmlFor="description">How do you plan to refer clients?</Label>
             <Textarea id="description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} maxLength={2000} />
           </div>
+          <div className="space-y-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <Checkbox
+                checked={termsAccepted}
+                onCheckedChange={(v) => {
+                  setTermsAccepted(v === true);
+                  if (v === true) setTermsError(null);
+                }}
+                aria-invalid={!!termsError}
+                className="mt-0.5"
+              />
+              <span className="text-body-sm text-text-secondary">
+                I accept the{" "}
+                <Link to="/terms" className="text-teal hover:underline" target="_blank">Terms &amp; Conditions</Link>{" "}
+                and the{" "}
+                <Link to="/privacy" className="text-teal hover:underline" target="_blank">Privacy Policy</Link>
+                . <span className="text-red-500">*</span>
+              </span>
+            </label>
+            {termsError && (
+              <p role="alert" className="text-body-sm text-destructive">{termsError}</p>
+            )}
+            <label className="flex items-start gap-3 cursor-pointer">
+              <Checkbox
+                checked={marketingConsent}
+                onCheckedChange={(v) => setMarketingConsent(v === true)}
+                className="mt-0.5"
+              />
+              <span className="text-body-sm text-text-secondary">
+                I'd like to receive marketing communications about WorldAML products,
+                events and regulatory updates. (Optional.)
+              </span>
+            </label>
+          </div>
           <Button type="submit" className="w-full" disabled={loading}>
+
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             Submit Application
           </Button>

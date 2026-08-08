@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -26,6 +28,9 @@ const partnerTypes = [
 const PartnerContactSection = () => {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -33,6 +38,7 @@ const PartnerContactSection = () => {
     company: "",
     website: "",
     jobTitle: "",
+    country: "",
     partnerType: "referral",
     message: "",
   });
@@ -43,6 +49,7 @@ const PartnerContactSection = () => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,8 +66,22 @@ const PartnerContactSection = () => {
       toast({ title: "Missing information", description: "Please enter your company name.", variant: "destructive" });
       return;
     }
+    if (!termsAccepted) {
+      setTermsError(
+        "You must accept the Terms & Conditions and Privacy Policy before submitting your enquiry.",
+      );
+      toast({
+        title: "Acceptance required",
+        description:
+          "Please accept the Terms & Conditions and Privacy Policy to submit your enquiry.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setTermsError(null);
 
     setSubmitting(true);
+    const consentTimestamp = new Date().toISOString();
     try {
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-form`,
@@ -77,12 +98,23 @@ const PartnerContactSection = () => {
             email: form.email,
             company: form.company,
             job_title: form.jobTitle,
+            country: form.country,
             message: form.message,
             products: ["partnership"],
             metadata: {
               partner_type: form.partnerType,
               website: form.website,
               attribution: getWebAttribution(),
+              terms_accepted: true,
+              terms_accepted_at: consentTimestamp,
+              marketing_consent: marketingConsent,
+              marketing_consent_at: marketingConsent ? consentTimestamp : null,
+              consent_timestamp: consentTimestamp,
+              consent_text:
+                "I accept the Terms & Conditions and the Privacy Policy." +
+                (marketingConsent
+                  ? " I'd like to receive marketing communications about WorldAML products, events and regulatory updates."
+                  : ""),
             },
           }),
         },
@@ -106,9 +138,13 @@ const PartnerContactSection = () => {
         company: "",
         website: "",
         jobTitle: "",
+        country: "",
         partnerType: "referral",
         message: "",
       });
+      setTermsAccepted(false);
+      setMarketingConsent(false);
+
     } catch {
       toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
     } finally {
@@ -183,6 +219,19 @@ const PartnerContactSection = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="p-country">Country</Label>
+              <Input
+                id="p-country"
+                name="country"
+                value={form.country}
+                onChange={handleChange}
+                placeholder="Cyprus"
+                autoComplete="country-name"
+                maxLength={100}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="p-message">How do you plan to refer clients?</Label>
               <Textarea
                 id="p-message"
@@ -195,6 +244,48 @@ const PartnerContactSection = () => {
               />
               <p className="text-caption text-text-tertiary">{form.message.length}/1000 characters</p>
             </div>
+
+            <div className="space-y-3">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <Checkbox
+                  checked={termsAccepted}
+                  onCheckedChange={(v) => {
+                    setTermsAccepted(v === true);
+                    if (v === true) setTermsError(null);
+                  }}
+                  aria-invalid={!!termsError}
+                  className="mt-0.5"
+                />
+                <span className="text-body-sm text-text-secondary">
+                  I accept the{" "}
+                  <Link to="/terms" className="text-teal hover:underline" target="_blank">
+                    Terms &amp; Conditions
+                  </Link>{" "}
+                  and the{" "}
+                  <Link to="/privacy" className="text-teal hover:underline" target="_blank">
+                    Privacy Policy
+                  </Link>
+                  . <span className="text-red-500">*</span>
+                </span>
+              </label>
+              {termsError && (
+                <p role="alert" className="text-body-sm text-destructive">{termsError}</p>
+              )}
+
+              <label className="flex items-start gap-3 cursor-pointer">
+                <Checkbox
+                  checked={marketingConsent}
+                  onCheckedChange={(v) => setMarketingConsent(v === true)}
+                  className="mt-0.5"
+                />
+                <span className="text-body-sm text-text-secondary">
+                  I'd like to receive marketing communications about WorldAML products,
+                  events and regulatory updates. (Optional — you can unsubscribe at any time.)
+                </span>
+              </label>
+            </div>
+
+
 
             <Button type="submit" size="lg" className="w-full" disabled={submitting}>
               {submitting ? "Submitting..." : (<>Submit Partner Enquiry <Send className="ml-2 h-4 w-4" /></>)}
