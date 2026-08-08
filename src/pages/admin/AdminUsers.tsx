@@ -642,7 +642,7 @@ export default function AdminUsers() {
                           size="sm"
                           variant="ghost"
                           className={`h-7 text-xs ${el.eligible ? "text-teal-600" : "text-muted-foreground"}`}
-                          onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellDialog({ open: true, profile: p }); }}
+                          onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellData(undefined); setUpsellDialog({ open: true, profile: p }); }}
                           disabled={!el.eligible}
                           title={el.eligible ? `Basis: ${REASON_LABELS[el.reason]}` : `Blocked: ${REASON_LABELS[el.reason]}`}
                         >
