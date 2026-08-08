@@ -36,20 +36,20 @@ export default function PartnerOverview() {
         <QuickCard
           title="Register a deal"
           desc="Lock in deal protection & higher commission on qualified opportunities."
-          to="/partner-portal/deals"
+          to="/partner/deals"
           cta="Register deal"
         />
         <QuickCard
           title="Marketing assets"
           desc="Download logos, one-pagers, decks and email templates."
-          to="/partner-portal/assets"
+          to="/partner/assets"
           cta="Browse assets"
           icon={ImageIcon}
         />
         <QuickCard
           title="Sandbox API key"
           desc="Start integrating WorldAML APIs with your test key."
-          to="/partner-portal/profile"
+          to="/partner/profile"
           cta="View key"
           icon={Sparkles}
         />
@@ -60,7 +60,7 @@ export default function PartnerOverview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-base">Recent referrals</CardTitle>
-            <Link to="/partner-portal/referrals" className="text-xs text-teal hover:underline flex items-center gap-1">
+            <Link to="/partner/referrals" className="text-xs text-teal hover:underline flex items-center gap-1">
               View all <ArrowRight className="w-3 h-3" />
             </Link>
           </CardHeader>
@@ -83,7 +83,7 @@ export default function PartnerOverview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-base">Recent deals</CardTitle>
-            <Link to="/partner-portal/deals" className="text-xs text-teal hover:underline flex items-center gap-1">
+            <Link to="/partner/deals" className="text-xs text-teal hover:underline flex items-center gap-1">
               View all <ArrowRight className="w-3 h-3" />
             </Link>
           </CardHeader>

@@ -44,7 +44,7 @@ export default function PartnerWelcome() {
       setPrefs((p) => ({ ...p, ...(partner.notification_prefs as any) }));
     }
     if (partner.onboarding_completed_at) {
-      navigate("/partner-portal", { replace: true });
+      navigate("/partner", { replace: true });
     }
   }, [partner, navigate]);
 
@@ -95,7 +95,7 @@ export default function PartnerWelcome() {
     if (error) return toast.error(error.message);
     await refetch();
     toast.success("You're all set!");
-    navigate("/partner-portal", { replace: true });
+    navigate("/partner", { replace: true });
   };
 
   const copy = (v: string, label: string) => {

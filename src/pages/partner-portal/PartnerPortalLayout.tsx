@@ -22,8 +22,8 @@ export default function PartnerPortalLayout() {
   useEffect(() => {
     if (!partner?.is_active) return;
     if (partner.onboarding_completed_at) return;
-    if (location.pathname.startsWith("/partner-portal/welcome")) return;
-    navigate("/partner-portal/welcome", { replace: true });
+    if (location.pathname.startsWith("/partner/welcome")) return;
+    navigate("/partner/welcome", { replace: true });
   }, [partner?.is_active, partner?.onboarding_completed_at, location.pathname, navigate]);
 
   if (authLoading || isLoading) {
