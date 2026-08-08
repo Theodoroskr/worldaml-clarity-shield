@@ -122,7 +122,7 @@ const News = () => {
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
-                  <Link to="/get-started">Get Started</Link>
+                  <Link to="/contact-sales">Get Started</Link>
                 </Button>
               </div>
             </div>

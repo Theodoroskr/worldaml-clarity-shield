@@ -89,7 +89,7 @@ const IndustryCrypto = () => (
             </p>
             <div className="flex flex-wrap gap-4">
               <Button size="lg" variant="accent" asChild>
-                <Link to="/get-started">Get Started <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to="/contact-sales">Get Started <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
               <Button size="lg" variant="outline" className="border-slate/30 text-primary-foreground hover:bg-white/10" asChild>
                 <Link to="/demo">Request Demo</Link>

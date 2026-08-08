@@ -43,7 +43,7 @@ export const AMLApiHeroSection = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild>
-                <Link to="/get-started">
+                <Link to="/contact-sales">
                   Request API Access
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

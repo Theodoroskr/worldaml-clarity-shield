@@ -56,7 +56,7 @@ const IndustryLegal = lazyWithRetry(() => import("./pages/IndustryLegal"));
 const IndustryPayments = lazyWithRetry(() => import("./pages/IndustryPayments"));
 const Support = lazyWithRetry(() => import("./pages/Support"));
 const About = lazyWithRetry(() => import("./pages/About"));
-const GetStarted = lazyWithRetry(() => import("./pages/GetStarted"));
+
 const ContactSales = lazyWithRetry(() => import("./pages/ContactSales"));
 const BookDemo = lazyWithRetry(() => import("./pages/BookDemo"));
 const FAQ = lazyWithRetry(() => import("./pages/FAQ"));
@@ -337,7 +337,7 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/about-us" element={<Navigate to="/about" replace />} />
                 <Route path="/about-us/why-worldaml" element={<WhyWorldAML />} />
-                <Route path="/get-started" element={<GetStarted />} />
+                <Route path="/get-started" element={<Navigate to="/contact-sales" replace />} />
                 <Route path="/contact-sales" element={<ContactSales />} />
                 <Route path="/book-demo" element={<BookDemo />} />
                 <Route path="/faq" element={<FAQ />} />

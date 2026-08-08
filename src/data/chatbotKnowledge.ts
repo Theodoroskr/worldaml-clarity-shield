@@ -22,7 +22,7 @@ export const chatbotKnowledge: KnowledgeEntry[] = [
     keywords: ["free", "trial", "try", "test", "start"],
     question: "Is there a free trial?",
     answer: "Yes! You can get started with a free trial to explore our platform and run your first compliance checks.",
-    link: "/get-started",
+    link: "/contact-sales",
   },
   {
     keywords: ["aml", "screening", "check", "sanctions", "free check"],
