@@ -213,9 +213,13 @@ export default function BusinessSignup() {
             <div className="mx-auto mb-3 h-11 w-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
               <Building2 className="h-5 w-5" />
             </div>
-            <CardTitle className="text-2xl text-center">Create a business account</CardTitle>
+            <CardTitle className="text-2xl text-center">
+              {activateMode ? "Set up your business workspace" : "Create a business account"}
+            </CardTitle>
             <CardDescription className="text-center">
-              For companies and individuals buying WorldAML products. Academy learners and partners have their own portals.
+              {activateMode
+                ? "You're signed in — just confirm your company details to open the business portal."
+                : "For companies and individuals buying WorldAML products. Academy learners and partners have their own portals."}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -230,7 +234,7 @@ export default function BusinessSignup() {
                 <Button asChild variant="outline"><Link to="/business/login">Go to business sign-in</Link></Button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={activateMode ? handleActivate : handleSubmit} className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="company">Company name *</Label>
@@ -243,7 +247,15 @@ export default function BusinessSignup() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Work email *</Label>
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} required />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    maxLength={255}
+                    required
+                    disabled={activateMode}
+                  />
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -264,6 +276,7 @@ export default function BusinessSignup() {
                   <Label htmlFor="phone">Phone</Label>
                   <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={40} />
                 </div>
+                {!activateMode && (
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="password">Password *</Label>
@@ -274,13 +287,16 @@ export default function BusinessSignup() {
                     <Input id="confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={8} required />
                   </div>
                 </div>
+                )}
                 <Button type="submit" className="w-full" variant="accent" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create business account
+                  {activateMode ? "Open my business portal" : "Create business account"}
                 </Button>
-                <p className="text-center text-sm text-muted-foreground">
-                  Already have one? <Link to="/business/login" className="text-teal hover:underline">Sign in</Link>
-                </p>
+                {!activateMode && (
+                  <p className="text-center text-sm text-muted-foreground">
+                    Already have one? <Link to="/business/login" className="text-teal hover:underline">Sign in</Link>
+                  </p>
+                )}
               </form>
             )}
           </CardContent>
