@@ -664,6 +664,8 @@ Deno.serve(async (req) => {
               (Array.isArray(products) &&
                 products.some((p) => String(p ?? "").toLowerCase().includes("partner")));
             if (isPartner) return "Partner";
+            if (isDemoRequest) return "Website Demo";
+
             const src = String(attribution.utm_source ?? "").toLowerCase();
             const med = String(attribution.utm_medium ?? "").toLowerCase();
             const ref = String(attribution.referrer ?? "").toLowerCase();
