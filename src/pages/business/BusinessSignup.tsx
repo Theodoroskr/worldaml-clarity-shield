@@ -85,6 +85,7 @@ export default function BusinessSignup() {
     if (uid) {
       const { data: existing } = await supabase
         .from("business_accounts").select("id").eq("user_id", uid).maybeSingle();
+      let created = false;
       if (!existing) {
         const { error: insertError } = await supabase
           .from("business_accounts")
@@ -93,6 +94,16 @@ export default function BusinessSignup() {
           setIsLoading(false);
           toast({ title: "Could not save company details", description: insertError.message, variant: "destructive" });
           return;
+        }
+        created = true;
+      }
+      if (created) {
+        try {
+          await supabase.functions.invoke("send-business-welcome", {
+            body: { company_name: payload.company_name, contact_name: payload.contact_name },
+          });
+        } catch (mailErr) {
+          console.warn("Welcome email failed (non-blocking):", mailErr);
         }
       }
       setIsLoading(false);
