@@ -14,8 +14,10 @@ export interface BusinessPlan {
   summary: string;
   features: string[];
   /** Present only where genuine self-service checkout exists. */
-  checkout?: { fn: string; plan: string };
-}
+  checkout?: { fn: string; plan: string; body?: Record<string, unknown> };
+  /** Real in-app purchase path where the plan needs configuring before payment. */
+  configureUrl?: string;
+  configureLabel?: string;
 
 export interface BusinessSolution {
   key: string;
