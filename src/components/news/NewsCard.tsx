@@ -109,9 +109,12 @@ export const NewsCard = ({ item }: NewsCardProps) => {
 
       {/* Summary — long updates collapse behind a "Show more" control */}
       <div className="mb-4 flex-1">
-        <p className="text-body-sm text-text-secondary whitespace-pre-line">
-          {expanded ? fullText : preview}
-        </p>
+        {fullText && (
+          <p className="text-body-sm text-text-secondary whitespace-pre-line">
+            {expanded ? fullText : preview}
+          </p>
+        )}
+
         {isLong && (
           <button
             type="button"
