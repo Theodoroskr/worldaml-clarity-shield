@@ -107,8 +107,12 @@ Deno.serve(async (req) => {
     req.headers.get("x-real-ip") ||
     "unknown";
 
-  // Rate limit check
-  const { allowed, remaining } = checkRateLimit(ip);
+  // Rate limit check. Dry-run verification requests (no writes, no email, no
+  // CRM call) are exempt so mappings can be validated in bulk.
+  const isDryRunRequest = req.headers.get("x-dry-run") === "true";
+  const { allowed, remaining } = isDryRunRequest
+    ? { allowed: true, remaining: RATE_LIMIT_MAX }
+    : checkRateLimit(ip);
   if (!allowed) {
     return new Response(
       JSON.stringify({ error: "Too many requests. Please try again later." }),
@@ -161,12 +165,18 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Dry-run mode: build and return the Zoho Lead payload only — nothing is
+    // stored, emailed, or pushed to the CRM.
+    const dryRun = body?.dry_run === true;
+
     // Store in database
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { error: dbError } = await supabase.from("form_submissions").insert({
+    const { error: dbError } = dryRun
+      ? { error: null }
+      : await supabase.from("form_submissions").insert({
       form_type,
       first_name: first_name.trim().slice(0, 100),
       last_name: last_name.trim().slice(0, 100),
@@ -195,7 +205,8 @@ Deno.serve(async (req) => {
     try {
       const lovableKey = Deno.env.get("LOVABLE_API_KEY");
       const zohoKey = Deno.env.get("ZOHO_CRM_API_KEY");
-      if (lovableKey && zohoKey) {
+      if (dryRun || (lovableKey && zohoKey)) {
+
         const attribution = (metadata as any)?.attribution ?? {};
 
         // Description = visitor's message exactly as submitted. If no message,
@@ -277,8 +288,22 @@ Deno.serve(async (req) => {
               "financial services": "Financial Institutions",
               "cryptocurrency": "Financial Institutions",
               "law firms": "Law firms",
+              "real estate": "Real Estate Agents",
+              "retail": "Retail Trading Companies",
+              "technology": "Systems Integrator",
+              "professional services": "Consultants",
+              "consulting": "Consultants",
+              "healthcare services": "Healthcare Services",
+              "hospitality": "Hospitality Services",
+              "logistics": "Transportation and Logistics",
+              "transportation": "Transportation and Logistics",
+              "investment": "Investment Companies",
+              "corporate services": "Corporate Services & Fiduciaries",
+              "audit": "Auditors",
+              "auditors": "Auditors",
               "other": "Other",
             };
+
             const mapped = INDUSTRY_MAP[raw.toLowerCase()];
             if (mapped) return mapped;
             console.warn(`Unknown industry value from website form: "${raw}" — leaving Zoho Industry unset`);
@@ -359,8 +384,12 @@ Deno.serve(async (req) => {
               "free-aml-check": "Book Demo",
               "free_aml_check": "Book Demo",
               "partner-application": "Partner Request",
+              "partner-contact": "Partner Request",
+              "advisory-consultation": "Contact Sales",
               "newsletter": "Newsletter",
             };
+
+
             const ALLOWED = new Set([
               "Contact Sales",
               "Book Demo",
@@ -384,16 +413,33 @@ Deno.serve(async (req) => {
             const asIs = String(form_type);
             return ALLOWED.has(asIs) ? asIs : "General Contact";
           })(),
-          // Product_Demo (picklist on Leads) — identifies which product-specific
-          // demo funnel the lead came from. Set to "free_aml_check" for the
-          // /free-aml-check#lead-form walkthrough demo page.
-          Product_Demo: (() => {
+          // "Product Demo" on Leads is a TEXT field (api_name: ProductDemo) —
+          // records which product-specific demo funnel the lead came from.
+          ProductDemo: (() => {
             const key = String(form_type ?? "").trim().toLowerCase();
-            if (key === "free-aml-check" || key === "free_aml_check") {
-              return "free_aml_check";
-            }
+            if (key === "free-aml-check" || key === "free_aml_check") return "free_aml_check";
+            if (key.includes("demo") || key === "free-trial") return key;
             return undefined;
           })(),
+          // "Book Demo" boolean — true for any demo / trial request funnel.
+          BookDemo: (() => {
+            const key = String(form_type ?? "").trim().toLowerCase();
+            return key.includes("demo") || key === "free-trial" || key === "free_aml_check"
+              ? true
+              : undefined;
+          })(),
+          // Subject — short human-readable summary shown in list views.
+          Subject: (() => {
+            const products_ = Array.isArray(products) && products.length
+              ? formatProducts(products)
+              : "";
+            const base = `${String(form_type ?? "enquiry")}${products_ ? ` — ${products_}` : ""}`;
+            return base.slice(0, 255);
+          })(),
+          // Contact Phone mirrors the submitted phone number so both the
+          // standard Phone field and the layout's Contact Phone are populated.
+          Contact_Phone: phone?.trim().slice(0, 30) || undefined,
+
           // Detailed multi-select picklist "Products Multi Selection" (api_name:
           // Products_Multi_Selection) — the specific WorldAML products the lead
           // selected on the website. Values must exactly match the Zoho picklist.
@@ -530,12 +576,7 @@ Deno.serve(async (req) => {
           Source_UTM: attribution.utm_source || undefined,
           Medium_UTM: attribution.utm_medium || undefined,
           Name_UTM: attribution.utm_campaign || undefined,
-          // Attribution — mapped to standard Zoho campaign UTM-style fields where possible.
-          $utm_source: attribution.utm_source || undefined,
-          $utm_medium: attribution.utm_medium || undefined,
-          $utm_campaign: attribution.utm_campaign || undefined,
-          $utm_term: attribution.utm_term || undefined,
-          $utm_content: attribution.utm_content || undefined,
+
 
           // ── Lead Source 2 (channel picklist) ──────────────────────────────
           // Derived from UTM / referrer so the CRM's Lead Source block is
@@ -619,11 +660,47 @@ Deno.serve(async (req) => {
               : undefined,
 
           // Attendance — only applies to webinar / event registrations.
+          // Zoho picklist allows only 'Yes' / 'No'.
           Attendance: (() => {
             const ft = String(form_type ?? "").toLowerCase();
-            if (ft.includes("webinar") || ft.includes("event")) return "Attending";
+            if (ft.includes("webinar") || ft.includes("event")) return "Yes";
             return undefined;
           })(),
+
+          // Licence Type (picklist) — only when the form captured it.
+          Licence_Type: (() => {
+            const raw = String((metadata as any)?.licence_type ?? "").trim();
+            if (!raw) return undefined;
+            const ALLOWED = new Set([
+              "EMI",
+              "Payment Institution",
+              "PSP",
+              "E-Wallet Provider",
+              "Other",
+            ]);
+            return ALLOWED.has(raw) ? raw : "Other";
+          })(),
+
+          // Buying Timeline (picklist) — only when the form captured it.
+          Buying_Timeline: (() => {
+            const raw = String((metadata as any)?.buying_timeline ?? "").trim();
+            const ALLOWED = new Set([
+              "Immediately",
+              "1 Month",
+              "3 Months",
+              "6 Months",
+              "12+ Months",
+              "24+ Months",
+            ]);
+            return ALLOWED.has(raw) ? raw : undefined;
+          })(),
+
+          // Readiness Score (integer) — website lead score, when calculated.
+          Readiness_Score: (() => {
+            const n = Number((metadata as any)?.lead_score);
+            return Number.isFinite(n) && n > 0 ? Math.round(n) : undefined;
+          })(),
+
 
           // Old_CRM_lead_ID and Account_Party_ID are legacy identifiers from
           // Infocredit's previous CRM — populated only when the website sends
@@ -668,6 +745,17 @@ Deno.serve(async (req) => {
         Object.keys(leadRecord).forEach(
           (k) => leadRecord[k] === undefined && delete leadRecord[k],
         );
+
+        // Dry-run: return the exact Zoho Lead payload without creating the
+        // lead, sending email, or persisting anything. Used to verify field
+        // mappings against the CRM layout.
+        if (dryRun) {
+          return new Response(
+            JSON.stringify({ success: true, dry_run: true, lead_record: leadRecord }),
+            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+
 
         // Resolve the Zoho Lead Assignment Rule ID so ownership is decided by
         // Zoho CRM (via the configured Assignment Rule) rather than set here.
