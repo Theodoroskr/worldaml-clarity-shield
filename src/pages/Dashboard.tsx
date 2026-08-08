@@ -4,8 +4,11 @@ import { useEntitlements } from "@/hooks/useEntitlements";
 import { useAcademyOverview } from "@/hooks/useAcademyOverview";
 import {
   ContinueLearning, LearningOverview, MyCourses,
-  CertificatesSection, RecommendedNext, ResourcesSection, QuickCheckLink,
+  CertificatesSection, RecommendedNext, ResourcesSection,
 } from "@/components/dashboard/DashboardSections";
+import {
+  ComplianceInPractice, ExploreWorldAML, WorldAMLTools,
+} from "@/components/dashboard/EcosystemSections";
 
 export default function Dashboard() {
   const { firstName } = useEntitlements();
@@ -42,9 +45,13 @@ export default function Dashboard() {
 
         <RecommendedNext courses={academy.recommendedList} />
 
+        <ComplianceInPractice data={academy} />
+
+        <ExploreWorldAML />
+
         <ResourcesSection />
 
-        <QuickCheckLink />
+        <WorldAMLTools />
       </div>
     </>
   );

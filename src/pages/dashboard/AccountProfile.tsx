@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { ForOrganisations } from "@/components/dashboard/EcosystemSections";
 import { AppPageHeader } from "@/components/app-shell/AppShellLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -147,6 +148,10 @@ export default function AccountProfile() {
           </Button>
         </div>
       </form>
+
+      <div className="mt-6">
+        <ForOrganisations />
+      </div>
     </>
   );
 }

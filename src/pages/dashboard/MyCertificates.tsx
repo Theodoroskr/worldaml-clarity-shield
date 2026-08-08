@@ -7,6 +7,7 @@ import { AppPageHeader } from "@/components/app-shell/AppShellLayout";
 import { useAcademyOverview } from "@/hooks/useAcademyOverview";
 import { CertificateRowItem } from "@/components/dashboard/DashboardSections";
 import { academyHref } from "@/lib/academyHost";
+import { CourseCrossSell } from "@/components/dashboard/EcosystemSections";
 
 export default function MyCertificates() {
   const { certificates, cpdHours, isLoading } = useAcademyOverview();
@@ -34,6 +35,12 @@ export default function MyCertificates() {
       ) : (
         <div className="space-y-2">
           {certificates.map((c) => <CertificateRowItem key={c.id} cert={c} />)}
+          <div className="pt-4">
+            <CourseCrossSell
+              title={certificates[0]?.course?.title}
+              surface="certificates"
+            />
+          </div>
         </div>
       )}
     </>
