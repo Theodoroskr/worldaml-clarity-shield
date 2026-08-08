@@ -22,8 +22,8 @@ export function ProductDiscoveryCard({
   hasAccess?: boolean;
   surface: string;
 }) {
-  const href = hasAccess && product.appHref ? product.appHref : product.exploreHref;
-  const label = hasAccess && product.appLabel ? product.appLabel : product.exploreLabel;
+  const href = product.exploreHref;
+  const label = product.exploreLabel;
   const Icon = product.icon;
 
   return (
