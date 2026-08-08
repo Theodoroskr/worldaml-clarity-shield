@@ -22,8 +22,9 @@ export interface NewsItem {
   trustTier: TrustTier;
 }
 
-// Internal linking strategy based on category
-const categoryLinks: Record<NewsCategory, { label: string; href: string }[]> = {
+// Internal linking strategy based on category.
+// `href: null` renders the label as plain, unclickable text.
+const categoryLinks: Record<NewsCategory, { label: string; href: string | null }[]> = {
   "Regulatory Updates": [
     { label: "WorldAML API", href: "/api" },
     { label: "Industries", href: "/industries" },
@@ -33,7 +34,7 @@ const categoryLinks: Record<NewsCategory, { label: string; href: string }[]> = {
     { label: "Industries", href: "/industries" },
   ],
   "AML & Financial Crime": [
-    { label: "Ongoing Monitoring", href: "/api" },
+    { label: "Ongoing Monitoring", href: null },
     { label: "Industries", href: "/industries" },
   ],
   "GCC Regulatory Updates": [
@@ -65,7 +66,7 @@ export const NewsCard = ({ item }: NewsCardProps) => {
   const relatedLinks = categoryLinks[item.category];
 
   return (
-    <article className="bg-card border border-divider rounded-lg p-6 hover:border-primary/30 transition-colors">
+    <article className="bg-card border border-divider rounded-lg p-6 hover:border-primary/30 transition-colors flex flex-col h-full">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-3">
         <Badge 
@@ -80,13 +81,13 @@ export const NewsCard = ({ item }: NewsCardProps) => {
         </div>
       </div>
 
-      {/* Title */}
-      <h3 className="text-body font-semibold text-navy mb-2 line-clamp-2">
+      {/* Title — shown in full, never clipped */}
+      <h3 className="text-body font-semibold text-navy mb-2">
         {item.title}
       </h3>
 
-      {/* Summary */}
-      <p className="text-body-sm text-text-secondary mb-4 line-clamp-2">
+      {/* Summary — shown in full, never clipped */}
+      <p className="text-body-sm text-text-secondary mb-4 flex-1">
         {item.summary}
       </p>
 
@@ -105,16 +106,20 @@ export const NewsCard = ({ item }: NewsCardProps) => {
       </div>
 
       {/* Related Links */}
-      <div className="pt-4 border-t border-divider">
+      <div className="pt-4 border-t border-divider mt-auto">
         <span className="text-caption text-text-tertiary">Related: </span>
         {relatedLinks.map((link, index) => (
-          <span key={link.href}>
-            <Link
-              to={link.href}
-              className="text-caption text-primary hover:text-primary/80 transition-colors"
-            >
-              {link.label}
-            </Link>
+          <span key={link.label}>
+            {link.href ? (
+              <Link
+                to={link.href}
+                className="text-caption text-primary hover:text-primary/80 transition-colors"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <span className="text-caption text-text-secondary">{link.label}</span>
+            )}
             {index < relatedLinks.length - 1 && (
               <span className="text-text-tertiary"> • </span>
             )}
