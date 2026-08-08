@@ -1,4 +1,5 @@
 import type { NewsItem, NewsCategory, TrustTier } from "@/components/news/NewsCard";
+import { cleanSummary, cleanTitle, truncateSummary } from "@/lib/newsSummary";
 
 // RSS-to-JSON proxy service (free tier, no API key needed)
 const RSS2JSON_API = "https://api.rss2json.com/v1/api.json";
