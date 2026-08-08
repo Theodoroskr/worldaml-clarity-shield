@@ -3325,6 +3325,7 @@ export type Database = {
           partner_id: string
           referral_code_used: string
           referred_email: string | null
+          source: string | null
           status: Database["public"]["Enums"]["referral_status"]
         }
         Insert: {
@@ -3336,6 +3337,7 @@ export type Database = {
           partner_id: string
           referral_code_used: string
           referred_email?: string | null
+          source?: string | null
           status?: Database["public"]["Enums"]["referral_status"]
         }
         Update: {
@@ -3347,6 +3349,7 @@ export type Database = {
           partner_id?: string
           referral_code_used?: string
           referred_email?: string | null
+          source?: string | null
           status?: Database["public"]["Enums"]["referral_status"]
         }
         Relationships: [
