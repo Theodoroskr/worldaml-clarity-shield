@@ -24,6 +24,37 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
   });
 }
 
+/**
+ * Recolours the logo to solid white so it sits directly on the navy card
+ * (no white plate behind it). Transparency is preserved.
+ */
+function whitenLogo(img: HTMLImageElement, w: number, h: number): HTMLCanvasElement | null {
+  const off = document.createElement("canvas");
+  off.width = Math.max(1, Math.round(w));
+  off.height = Math.max(1, Math.round(h));
+  const octx = off.getContext("2d");
+  if (!octx) return null;
+  octx.drawImage(img, 0, 0, off.width, off.height);
+  // Drop any near-white/near-navy plate pixels, then paint remaining art white.
+  try {
+    const data = octx.getImageData(0, 0, off.width, off.height);
+    const px = data.data;
+    for (let i = 0; i < px.length; i += 4) {
+      const r = px[i], g = px[i + 1], b = px[i + 2];
+      if (px[i + 3] > 0 && r > 235 && g > 235 && b > 235) px[i + 3] = 0;
+    }
+    octx.putImageData(data, 0, 0);
+  } catch {
+    // Canvas tainted (shouldn't happen for same-origin assets) — keep as-is.
+  }
+  octx.globalCompositeOperation = "source-in";
+  octx.fillStyle = WHITE;
+  octx.fillRect(0, 0, off.width, off.height);
+  octx.globalCompositeOperation = "source-over";
+  return off;
+}
+
+
 function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -54,6 +85,7 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): st
 export async function renderRecognitionCard(
   r: RecognitionStatus,
   memberName?: string,
+  cpdHours = 0,
 ): Promise<Blob | null> {
   const W = 1200;
   const H = 630;
@@ -85,12 +117,14 @@ export async function renderRecognitionCard(
   ctx.fillStyle = accent;
   ctx.fillRect(0, 0, W, 8);
 
-  // Logo (constant branding)
+  // Logo (constant branding) — rendered in solid white, no plate behind it
   const logo = await loadImage(LOGO_SRC);
   if (logo) {
     const lw = 230;
     const lh = (logo.height / logo.width) * lw;
-    ctx.drawImage(logo, 72, 58, lw, lh);
+    const white = whitenLogo(logo, lw * 2, lh * 2);
+    if (white) ctx.drawImage(white, 72, 58, lw, lh);
+    else ctx.drawImage(logo, 72, 58, lw, lh);
   } else {
     ctx.fillStyle = WHITE;
     ctx.font = "bold 38px Arial, Helvetica, sans-serif";
@@ -151,8 +185,8 @@ export async function renderRecognitionCard(
   ctx.fillText("WORLDAML ACADEMY", cx, cy + 52);
   ctx.textAlign = "left";
 
-  // Achievement data — always the member's real counts
-  const specialisations = r.earnedBadges?.length ?? 0;
+  // Achievement data — real counts plus CPD / qualification claim
+  const hours = Math.round((cpdHours ?? 0) * 10) / 10;
   const tiles = [
     {
       value: String(r.completedCourses ?? 0),
@@ -165,9 +199,9 @@ export async function renderRecognitionCard(
       dim: (r.certificates ?? 0) === 0,
     },
     {
-      value: String(specialisations),
-      label: specialisations === 1 ? "Specialisation" : "Specialisations",
-      dim: specialisations === 0,
+      value: String(hours),
+      label: hours === 1 ? "CPD hour" : "CPD hours",
+      dim: hours === 0,
     },
   ];
 
@@ -192,17 +226,17 @@ export async function renderRecognitionCard(
     ctx.fillText(t.label, x + 20, ty + 88);
   });
 
-  // Earned specialisation names, elegantly listed (only when actually earned)
-  if (specialisations > 0) {
-    const names = r.earnedBadges.map((b) => b.name).join("  •  ");
-    ctx.fillStyle = accent;
-    ctx.font = "bold 13px Arial, Helvetica, sans-serif";
-    ctx.fillText("SPECIALISATIONS", 782, ty + 46);
-    ctx.fillStyle = WHITE;
-    ctx.font = "18px Arial, Helvetica, sans-serif";
-    const lines = wrap(ctx, names, W - 782 - 72).slice(0, 2);
-    lines.forEach((l, i) => ctx.fillText(l, 782, ty + 74 + i * 24));
-  }
+  // CPD / qualification claim
+  ctx.fillStyle = accent;
+  ctx.font = "bold 13px Arial, Helvetica, sans-serif";
+  ctx.fillText("CPD & QUALIFICATION", 782, ty + 46);
+  ctx.fillStyle = WHITE;
+  ctx.font = "18px Arial, Helvetica, sans-serif";
+  const claim = hours > 0
+    ? `${hours} CPD ${hours === 1 ? "hour" : "hours"} of structured AML learning, evidenced by verified WorldAML Academy certificates.`
+    : "Structured, CPD-aligned AML learning with verifiable WorldAML Academy certificates.";
+  wrap(ctx, claim, W - 782 - 72).slice(0, 3).forEach((l, i) => ctx.fillText(l, 782, ty + 74 + i * 24));
+
 
   // Footer
   ctx.fillStyle = "rgba(255,255,255,0.14)";
