@@ -27,6 +27,18 @@ const EMPTY: Form = {
   country: "", city: "", billing_address: "", postal_code: "", vat_number: "", marketing_consent: false,
 };
 
+/** Defined at module scope so inputs keep focus while typing. */
+function Field({ id, label, value, onChange, placeholder }: {
+  id: string; label: string; value: string; onChange: (v: string) => void; placeholder?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Input id={id} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  );
+}
+
 export default function AccountProfile() {
   const { user, profile, refreshProfile } = useAuth() as any;
   const { planLabel } = useEntitlements();
@@ -66,13 +78,6 @@ export default function AccountProfile() {
     toast({ title: "Profile updated" });
     refreshProfile?.();
   };
-
-  const Field = ({ id, label, value, onChange, placeholder }: any) => (
-    <div className="space-y-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <Input id={id} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
-    </div>
-  );
 
   return (
     <>
