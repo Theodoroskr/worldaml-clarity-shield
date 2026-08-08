@@ -59,7 +59,18 @@ export function cleanSummary(raw: string | null | undefined, title = ""): string
     if (remainder.length > 40) text = remainder;
   }
 
+
+  // Regulator feeds prefix the body with publication metadata such as
+  // "10 July 2026 Market data" — the date and topic labels are already
+  // represented by the card's own date and category fields.
+  text = text.replace(/^\d{1,2}\s+[A-Z][a-z]+\s+\d{4}\s*/, "").trim();
+  const sentenceStart = text.search(/\b(The|This|These|On|In|Following|Today|A|An)\b\s+[a-z(]|\b[A-Z]{2,6}\b\s+(?:has|have|is|are|will|publishes|published|announces|announced|launches|launched)\b/);
+  if (sentenceStart > 0 && sentenceStart < 120 && !/[.!?,;:]/.test(text.slice(0, sentenceStart))) {
+    text = text.slice(sentenceStart).trim();
+  }
+
   text = text.replace(/\s+/g, " ").replace(/^[\s\-–—:•|]+/, "").trim();
+
 
   // Anything shorter than this is a stub such as a publisher name.
   return text.length < 25 ? "" : text;
