@@ -650,12 +650,25 @@ Deno.serve(async (req) => {
           })(),
 
           // ── Visit Summary ─────────────────────────────────────────────────
-          // NOTE: Zoho's native Visit Summary fields (First_Visited_URL,
-          // First_Visited_Time, Last_Visited_Time, Referrer, Days_Visited) are
-          // owned by SalesIQ/PageSense. The API accepts writes to them but
-          // silently discards the values (verified: they read back as null).
-          // The same data is therefore written to the custom Landing_Page_URL
-          // and Referrer_URL fields (above) and summarised in the Note.
+          // Mapped to Zoho's Visit Summary block. These fields are SalesIQ-owned
+          // and may be ignored by the API on tenants where SalesIQ owns them, so
+          // the same values are also written to Landing_Page_URL / Referrer_URL
+          // and attached as a related Note record after the Lead is created.
+          First_Visited_Time: att.first_visited_at || undefined,
+          Last_Visited_Time: att.last_visited_at || undefined,
+          Referrer: att.referrer || undefined,
+          First_Visited_URL: att.first_page_visited || att.landing_page || undefined,
+          Days_Visited:
+            typeof att.days_visited === "number" ? att.days_visited : undefined,
+          Number_Of_Chats:
+            typeof att.number_of_chats === "number" ? att.number_of_chats : undefined,
+          Visitor_Score:
+            typeof att.visitor_score === "number" ? att.visitor_score : undefined,
+          Average_Time_Spent_Minutes:
+            typeof att.average_time_spent_minutes === "number"
+              ? att.average_time_spent_minutes
+              : undefined,
+
 
 
 
