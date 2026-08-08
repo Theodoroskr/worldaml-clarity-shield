@@ -445,6 +445,23 @@ Preferred start date and number of seats below.`,
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="referralCode">Partner referral code (Optional)</Label>
+                    <Input
+                      id="referralCode"
+                      name="referralCode"
+                      value={referralCode}
+                      onChange={(e) => setReferralCode(e.target.value)}
+                      placeholder="e.g. a1b2c3d4"
+                      maxLength={40}
+                      autoComplete="off"
+                    />
+                    <p className="text-caption text-text-tertiary">
+                      Referred by a WorldAML partner? Enter their referral code so they are credited.
+                    </p>
+                  </div>
+
+
+                  <div className="space-y-2">
                     <Label htmlFor="message">Message (Optional)</Label>
                     <Textarea
                       id="message"
