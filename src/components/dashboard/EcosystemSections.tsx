@@ -15,11 +15,9 @@ import type { AcademyOverview } from "@/hooks/useAcademyOverview";
 /* ── Compact product discovery card ──────────────────────────── */
 export function ProductDiscoveryCard({
   product,
-  hasAccess = false,
   surface,
 }: {
   product: EcosystemProduct;
-  hasAccess?: boolean;
   surface: string;
 }) {
   const href = product.exploreHref;
