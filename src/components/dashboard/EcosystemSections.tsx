@@ -1,8 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Building2, Scale, Search, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEntitlements } from "@/hooks/useEntitlements";
-import { useRcmOrg } from "@/hooks/useRcmOrg";
 import {
   ECOSYSTEM_PRODUCTS,
   productForCourse,
@@ -15,15 +13,13 @@ import type { AcademyOverview } from "@/hooks/useAcademyOverview";
 /* ── Compact product discovery card ──────────────────────────── */
 export function ProductDiscoveryCard({
   product,
-  hasAccess = false,
   surface,
 }: {
   product: EcosystemProduct;
-  hasAccess?: boolean;
   surface: string;
 }) {
-  const href = hasAccess && product.appHref ? product.appHref : product.exploreHref;
-  const label = hasAccess && product.appLabel ? product.appLabel : product.exploreLabel;
+  const href = product.exploreHref;
+  const label = product.exploreLabel;
   const Icon = product.icon;
 
   return (
@@ -40,9 +36,9 @@ export function ProductDiscoveryCard({
           size="sm"
           className="mt-2 -ml-2 h-auto px-2 py-1 text-xs text-accent hover:text-accent"
         >
-          <a href={href} onClick={() => trackEcosystemClick(product.id, surface)}>
+          <Link to={href} onClick={() => trackEcosystemClick(product.id, surface)}>
             {label} <ArrowRight className="h-3.5 w-3.5 ml-1" />
-          </a>
+          </Link>
         </Button>
       </div>
     </div>
@@ -51,9 +47,6 @@ export function ProductDiscoveryCard({
 
 /* ── Explore WorldAML (dashboard home, lower section) ────────── */
 export function ExploreWorldAML() {
-  const { hasSuite } = useEntitlements();
-  const { membership } = useRcmOrg();
-
   return (
     <div>
       <h2 className="text-sm font-semibold text-foreground">Explore WorldAML</h2>
@@ -61,8 +54,8 @@ export function ExploreWorldAML() {
         Discover more tools to support your compliance work.
       </p>
       <div className="grid gap-2 md:grid-cols-3">
-        <ProductDiscoveryCard product={ECOSYSTEM_PRODUCTS.suite} hasAccess={hasSuite} surface="explore" />
-        <ProductDiscoveryCard product={ECOSYSTEM_PRODUCTS.rcm} hasAccess={!!membership} surface="explore" />
+        <ProductDiscoveryCard product={ECOSYSTEM_PRODUCTS.suite} surface="explore" />
+        <ProductDiscoveryCard product={ECOSYSTEM_PRODUCTS.rcm} surface="explore" />
         <ProductDiscoveryCard product={ECOSYSTEM_PRODUCTS.quickcheck} surface="explore" />
       </div>
     </div>
@@ -71,9 +64,6 @@ export function ExploreWorldAML() {
 
 /* ── Compliance in Practice (course-context bridge) ──────────── */
 export function ComplianceInPractice({ data }: { data: AcademyOverview }) {
-  const { hasSuite } = useEntitlements();
-  const { membership } = useRcmOrg();
-
   const source =
     data.current?.course ??
     data.completed[0]?.course ??
@@ -81,7 +71,6 @@ export function ComplianceInPractice({ data }: { data: AcademyOverview }) {
     null;
 
   const product = productForCourse(source) ?? ECOSYSTEM_PRODUCTS.quickcheck;
-  const hasAccess = product.id === "suite" ? hasSuite : product.id === "rcm" ? !!membership : false;
 
   const context = source
     ? `Based on your work in “${source.title}”.`
@@ -93,7 +82,7 @@ export function ComplianceInPractice({ data }: { data: AcademyOverview }) {
       <p className="text-xs text-muted-foreground mt-0.5 mb-2">{context}</p>
       <div className="rounded-lg border border-border bg-accent/5 p-4">
         <div className="text-sm font-medium text-foreground">{promoHeadline(product)}</div>
-        <ProductDiscoveryCard product={product} hasAccess={hasAccess} surface="practice" />
+        <ProductDiscoveryCard product={product} surface="practice" />
       </div>
     </div>
   );
@@ -109,16 +98,13 @@ export function CourseCrossSell({
   title?: string | null;
   surface?: string;
 }) {
-  const { hasSuite } = useEntitlements();
-  const { membership } = useRcmOrg();
   const product = productForCourse({ category, title });
   if (!product) return null;
-  const hasAccess = product.id === "suite" ? hasSuite : product.id === "rcm" ? !!membership : false;
 
   return (
     <div className="rounded-lg border border-border bg-muted/30 p-4">
       <div className="text-sm font-medium text-foreground mb-2">{promoHeadline(product)}</div>
-      <ProductDiscoveryCard product={product} hasAccess={hasAccess} surface={surface} />
+      <ProductDiscoveryCard product={product} surface={surface} />
     </div>
   );
 }
@@ -136,14 +122,14 @@ export function WorldAMLTools() {
       <h2 className="text-sm font-semibold text-foreground mb-2">WorldAML Tools</h2>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
         {TOOLS.map((t) => (
-          <a
+          <Link
             key={t.href}
-            href={t.href}
+            to={t.href}
             className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-foreground hover:border-accent/50 hover:bg-accent/5 transition-colors"
           >
             <t.icon className="h-4 w-4 text-muted-foreground shrink-0" />
             <span className="truncate">{t.label}</span>
-          </a>
+          </Link>
         ))}
       </div>
     </div>
