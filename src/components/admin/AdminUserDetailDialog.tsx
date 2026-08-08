@@ -220,7 +220,7 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
                         <li key={p.id} className="flex justify-between gap-2">
                           <span className="text-foreground">{p.course_id}</span>
                           <span className="text-muted-foreground">
-                            {p.completed_at ? `Completed ${new Date(p.completed_at).toLocaleDateString()}` : `${p.progress_percent ?? 0}%`}
+                            {p.completed_at ? `Completed ${new Date(p.completed_at).toLocaleDateString()}` : `${(p.completed_modules || []).length} module(s) done`}{p.quiz_score != null ? ` · quiz ${p.quiz_score}%` : ""}
                           </span>
                         </li>
                       ))}
@@ -233,7 +233,7 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
                     <ul className="space-y-1 text-xs">
                       {certs.map((c) => (
                         <li key={c.id} className="flex justify-between gap-2">
-                          <span>{c.course_title || c.course_id}</span>
+                          <span>{c.course_id}{c.score != null ? ` · ${c.score}%` : ""}</span>
                           <span className="text-muted-foreground">{c.issued_at ? new Date(c.issued_at).toLocaleDateString() : ""}</span>
                         </li>
                       ))}
