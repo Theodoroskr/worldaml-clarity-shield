@@ -297,6 +297,14 @@ export default function BusinessSignup() {
                   {activateMode ? "Open my business portal" : "Create business account"}
                 </Button>
                 {!activateMode && (
+                  <p className="text-center text-xs text-muted-foreground">
+                    By creating an account you accept our <Link to="/terms" className="underline">Terms &amp; Conditions</Link> and{" "}
+                    <Link to="/privacy" className="underline">Privacy Notice</Link> (GDPR), and consent to marketing
+                    communications. Unsubscribe any time in Settings → Security.
+                  </p>
+                )}
+                {!activateMode && (
+
                   <p className="text-center text-sm text-muted-foreground">
                     Already have one? <Link to="/business/login" className="text-teal hover:underline">Sign in</Link>
                   </p>
