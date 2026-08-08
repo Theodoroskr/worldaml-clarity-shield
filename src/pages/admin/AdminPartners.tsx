@@ -743,7 +743,8 @@ export default function AdminPartners() {
         };
 
         return (
-          <Card>
+          <Card id="partner-referrals" className="scroll-mt-24">
+
             <CardHeader>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <CardTitle className="text-navy flex items-center gap-2">
