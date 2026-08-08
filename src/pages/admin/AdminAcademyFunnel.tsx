@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, TrendingUp, Download, RefreshCw, Filter, ChevronRight, Search } from "lucide-react";
+import { Loader2, TrendingUp, Download, RefreshCw, Filter, ChevronRight, Search, TrendingDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,19 +15,17 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-const FREE_EMAIL = new Set([
-  "gmail.com", "googlemail.com", "yahoo.com", "yahoo.co.uk", "yahoo.co.in",
-  "outlook.com", "hotmail.com", "live.com", "msn.com", "icloud.com", "me.com",
-  "protonmail.com", "proton.me", "gmx.com", "gmx.de", "aol.com", "mail.com",
-  "yandex.com", "yandex.ru", "zoho.com", "qq.com", "163.com", "126.com",
-]);
-
-const domainOf = (email: string | null | undefined) => {
-  if (!email) return "";
-  const at = email.lastIndexOf("@");
-  return at >= 0 ? email.slice(at + 1).toLowerCase() : "";
-};
+import { KpiCard, DefinitionsButton, MetricInfo } from "@/components/admin/AcademyMetricUI";
+import { RangePicker } from "@/components/admin/RangePicker";
+import {
+  FREE_EMAIL_DOMAINS as FREE_EMAIL,
+  domainOf,
+  money,
+  pct,
+  resolveRange,
+  useCourseTitles,
+  type RangeKey,
+} from "@/lib/academyAdmin";
 
 interface Profile {
   user_id: string;
@@ -35,6 +33,8 @@ interface Profile {
   full_name: string | null;
   company_name: string | null;
   created_at: string;
+  signup_source?: string | null;
+  signup_utm?: Record<string, string> | null;
 }
 
 interface Purchase {
@@ -47,27 +47,16 @@ interface Purchase {
   created_at: string;
 }
 
-type Range = "7d" | "30d" | "90d" | "ytd" | "all";
-
-const rangeStart = (r: Range): number => {
-  const now = Date.now();
-  switch (r) {
-    case "7d": return now - 7 * 86400000;
-    case "30d": return now - 30 * 86400000;
-    case "90d": return now - 90 * 86400000;
-    case "ytd": return new Date(new Date().getFullYear(), 0, 1).getTime();
-    case "all": return 0;
-  }
-};
-
-const pct = (n: number, d: number) => (d === 0 ? 0 : Math.round((n / d) * 1000) / 10);
-
 export default function AdminAcademyFunnel() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(true);
-  const [range, setRange] = useState<Range>("30d");
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [range, setRange] = useState<RangeKey>("30d");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
   const [domainSegment, setDomainSegment] = useState<"all" | "corporate" | "personal">("all");
+  const { titleOf } = useCourseTitles();
   const [drill, setDrill] = useState<{
     kind: "course" | "domain";
     key: string;
@@ -76,18 +65,26 @@ export default function AdminAcademyFunnel() {
     paidIds: string[];
   } | null>(null);
 
+  const resolved = useMemo(
+    () => resolveRange(range, customFrom, customTo),
+    [range, customFrom, customTo],
+  );
+
   const load = async () => {
     setLoading(true);
+    setLoadError(null);
     const [{ data: p, error: pErr }, { data: pu, error: puErr }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("user_id, email, full_name, company_name, created_at"),
+        .select("user_id, email, full_name, company_name, created_at, signup_source, signup_utm"),
       supabase
         .from("academy_course_purchases")
         .select("user_id, course_slug, amount_cents, currency, status, paid_at, created_at"),
     ]);
     if (pErr || puErr) {
-      toast.error((pErr || puErr)?.message || "Failed to load funnel data");
+      const msg = (pErr || puErr)?.message || "Failed to load funnel data";
+      setLoadError(msg);
+      toast.error(msg);
       setLoading(false);
       return;
     }
@@ -98,17 +95,25 @@ export default function AdminAcademyFunnel() {
 
   useEffect(() => { load(); }, []);
 
+  const sourceOf = (p: Profile | undefined): string => {
+    if (!p) return "Unknown";
+    const utm = (p.signup_utm || {}) as Record<string, string>;
+    return utm.utm_source || p.signup_source || "Direct / unknown";
+  };
+
   const data = useMemo(() => {
-    const start = rangeStart(range);
+    const start = resolved.start;
+    const end = resolved.end;
+    const within = (ts: string) => {
+      const t = new Date(ts).getTime();
+      return t >= start && t <= end;
+    };
 
     // Signups in range
-    const signups = profiles.filter(p => new Date(p.created_at).getTime() >= start);
-    const signupByUser = new Map(signups.map(p => [p.user_id, p]));
+    const signups = profiles.filter(p => within(p.created_at));
 
     // Purchases in range (by created_at)
-    const inRangePurchases = purchases.filter(
-      pu => new Date(pu.created_at).getTime() >= start
-    );
+    const inRangePurchases = purchases.filter(pu => within(pu.created_at));
 
     // Per-user state
     const userStartedSet = new Set<string>();
@@ -122,10 +127,12 @@ export default function AdminAcademyFunnel() {
       }
     });
 
+    const profileByIdAll = new Map(profiles.map(p => [p.user_id, p]));
+
     // Domain segment filter for signups & users
     const filterUser = (userId: string) => {
       if (domainSegment === "all") return true;
-      const prof = profiles.find(p => p.user_id === userId);
+      const prof = profileByIdAll.get(userId);
       const dom = domainOf(prof?.email);
       const isCorporate = !!dom && !FREE_EMAIL.has(dom);
       return domainSegment === "corporate" ? isCorporate : !isCorporate;
@@ -140,16 +147,37 @@ export default function AdminAcademyFunnel() {
     const totalPaid = filteredPaid.length;
     const totalRevenue = filteredPaid.reduce((s, uid) => s + (userRevenue.get(uid) || 0), 0);
 
+    // Lifetime revenue — shown alongside so period €0 never looks like a bug.
+    const lifetimeRevenue = purchases
+      .filter(pu => pu.status === "paid")
+      .reduce((s, pu) => s + (pu.amount_cents || 0), 0);
+
+    // Drop-off (commercial leakage)
+    const signupsNoCheckout = Math.max(
+      filteredSignups.filter(p => !userStartedSet.has(p.user_id)).length,
+      0,
+    );
+    const checkoutNotPaid = Math.max(totalStarted - totalPaid, 0);
+
     // Per-course
-    const courseMap = new Map<string, { started: Set<string>; paid: Set<string>; revenue: number; currency: string }>();
+    const courseMap = new Map<string, {
+      started: Set<string>; paid: Set<string>; revenue: number; currency: string;
+      paidRows: number; failedRows: number; pendingRows: number; refundedRows: number;
+    }>();
     inRangePurchases.forEach(pu => {
       if (!filterUser(pu.user_id)) return;
-      const c = courseMap.get(pu.course_slug) || { started: new Set(), paid: new Set(), revenue: 0, currency: pu.currency };
+      const c = courseMap.get(pu.course_slug) || {
+        started: new Set<string>(), paid: new Set<string>(), revenue: 0, currency: pu.currency,
+        paidRows: 0, failedRows: 0, pendingRows: 0, refundedRows: 0,
+      };
       c.started.add(pu.user_id);
       if (pu.status === "paid") {
         c.paid.add(pu.user_id);
         c.revenue += pu.amount_cents || 0;
-      }
+        c.paidRows += 1;
+      } else if (pu.status === "failed") c.failedRows += 1;
+      else if (pu.status === "pending") c.pendingRows += 1;
+      else if (pu.status === "refunded") c.refundedRows += 1;
       c.currency = pu.currency || c.currency;
       courseMap.set(pu.course_slug, c);
     });
@@ -160,9 +188,13 @@ export default function AdminAcademyFunnel() {
       conversion: pct(v.paid.size, v.started.size),
       revenue: v.revenue,
       currency: v.currency,
+      aov: v.paidRows ? v.revenue / v.paidRows : 0,
+      failedRows: v.failedRows,
+      pendingRows: v.pendingRows,
+      refundedRows: v.refundedRows,
       startedIds: Array.from(v.started),
       paidIds: Array.from(v.paid),
-    })).sort((a, b) => b.paid - a.paid);
+    })).sort((a, b) => b.paid - a.paid || b.started - a.started);
 
     // Per-domain
     const domainMap = new Map<string, {
@@ -186,7 +218,7 @@ export default function AdminAcademyFunnel() {
     });
     inRangePurchases.forEach(pu => {
       if (!filterUser(pu.user_id)) return;
-      const prof = profiles.find(p => p.user_id === pu.user_id);
+      const prof = profileByIdAll.get(pu.user_id);
       const dom = domainOf(prof?.email) || "(unknown)";
       const d = ensureDom(dom);
       d.started.add(pu.user_id);
@@ -199,6 +231,7 @@ export default function AdminAcademyFunnel() {
       .map(([dom, v]) => ({
         domain: dom,
         isCorporate: v.isCorporate,
+        users: v.signups.size + Array.from(v.started).filter(u => !v.signups.has(u)).length,
         signups: v.signups.size,
         started: v.started.size,
         paid: v.paid.size,
@@ -212,8 +245,32 @@ export default function AdminAcademyFunnel() {
       .filter(r => r.signups + r.started + r.paid > 0)
       .sort((a, b) => b.paid - a.paid || b.signups - a.signups);
 
+    // Per-source (from profiles.signup_utm.utm_source / signup_source)
+    const sourceMap = new Map<string, { signups: number; started: Set<string>; paid: Set<string>; revenue: number }>();
+    const ensureSrc = (k: string) => {
+      let s = sourceMap.get(k);
+      if (!s) { s = { signups: 0, started: new Set(), paid: new Set(), revenue: 0 }; sourceMap.set(k, s); }
+      return s;
+    };
+    filteredSignups.forEach(p => { ensureSrc(sourceOf(p)).signups += 1; });
+    inRangePurchases.forEach(pu => {
+      if (!filterUser(pu.user_id)) return;
+      const s = ensureSrc(sourceOf(profileByIdAll.get(pu.user_id)));
+      s.started.add(pu.user_id);
+      if (pu.status === "paid") { s.paid.add(pu.user_id); s.revenue += pu.amount_cents || 0; }
+    });
+    const sourceRows = Array.from(sourceMap.entries())
+      .map(([source, v]) => ({
+        source,
+        signups: v.signups,
+        started: v.started.size,
+        paid: v.paid.size,
+        revenue: v.revenue,
+        conversion: pct(v.paid.size, v.signups),
+      }))
+      .sort((a, b) => b.revenue - a.revenue || b.signups - a.signups);
+
     // Lookup helpers for drill-down
-    const profileById = new Map(profiles.map(p => [p.user_id, p]));
     const purchasesByUser = new Map<string, Purchase[]>();
     inRangePurchases.forEach(pu => {
       const arr = purchasesByUser.get(pu.user_id) || [];
@@ -227,16 +284,20 @@ export default function AdminAcademyFunnel() {
       totalStarted,
       totalPaid,
       totalRevenue,
+      lifetimeRevenue,
+      signupsNoCheckout,
+      checkoutNotPaid,
       signupToStarted: pct(totalStarted, totalSignups),
       startedToPaid: pct(totalPaid, totalStarted),
       signupToPaid: pct(totalPaid, totalSignups),
       courseRows,
       domainRows,
-      profileById,
+      sourceRows,
+      profileById: profileByIdAll,
       purchasesByUser,
       signupsInRangeSet,
     };
-  }, [profiles, purchases, range, domainSegment]);
+  }, [profiles, purchases, resolved, domainSegment]);
 
   const exportCsv = (filename: string, rows: (string | number)[][]) => {
     const csv = rows
@@ -253,8 +314,12 @@ export default function AdminAcademyFunnel() {
 
   const exportCourses = () => {
     exportCsv(`academy-funnel-courses-${range}.csv`, [
-      ["course_slug", "started_checkout", "paid", "conversion_%", "revenue", "currency"],
-      ...data.courseRows.map(r => [r.slug, r.started, r.paid, r.conversion, (r.revenue / 100).toFixed(2), r.currency.toUpperCase()]),
+      ["course", "course_slug", "started_checkout", "paid", "conversion_%", "avg_order_value", "failed_rows", "pending_rows", "refunded_rows", "revenue", "currency"],
+      ...data.courseRows.map(r => [
+        titleOf(r.slug), r.slug, r.started, r.paid, r.conversion,
+        (r.aov / 100).toFixed(2), r.failedRows, r.pendingRows, r.refundedRows,
+        (r.revenue / 100).toFixed(2), r.currency.toUpperCase(),
+      ]),
     ]);
   };
 
@@ -265,17 +330,27 @@ export default function AdminAcademyFunnel() {
     ]);
   };
 
+  const exportSources = () => {
+    exportCsv(`academy-funnel-sources-${range}.csv`, [
+      ["source", "signups", "started_checkout", "paid", "signup_to_paid_%", "revenue_eur"],
+      ...data.sourceRows.map(r => [r.source, r.signups, r.started, r.paid, r.conversion, (r.revenue / 100).toFixed(2)]),
+    ]);
+  };
+
+  const periodLabel = resolved.isLifetime ? "Lifetime" : resolved.label;
+
   return (
     <div className="p-6 space-y-5">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-primary" />
             Academy Funnel Metrics
           </h1>
           <p className="text-xs text-muted-foreground">
-            Conversion from signup → checkout → paid, broken down by course and email domain.
+            Conversion from signup → checkout → paid, broken down by course, email domain and source.
           </p>
+          <DefinitionsButton />
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
@@ -290,21 +365,16 @@ export default function AdminAcademyFunnel() {
         <div className="flex items-center gap-2">
           <Filter className="w-3.5 h-3.5 text-muted-foreground" />
           <span className="text-xs text-muted-foreground">Range</span>
-          <Select value={range} onValueChange={(v) => setRange(v as Range)}>
-            <SelectTrigger className="w-32 h-8 text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-              <SelectItem value="ytd">Year to date</SelectItem>
-              <SelectItem value="all">All time</SelectItem>
-            </SelectContent>
-          </Select>
+          <RangePicker
+            value={range} onChange={setRange}
+            from={customFrom} to={customTo}
+            onFromChange={setCustomFrom} onToChange={setCustomTo}
+          />
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Segment</span>
           <Select value={domainSegment} onValueChange={(v) => setDomainSegment(v as any)}>
-            <SelectTrigger className="w-40 h-8 text-sm"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-40 h-9 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All emails</SelectItem>
               <SelectItem value="corporate">Corporate only</SelectItem>
@@ -315,47 +385,89 @@ export default function AdminAcademyFunnel() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12">
+        <div className="flex flex-col items-center justify-center py-16 gap-2">
           <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">Building funnel…</span>
         </div>
+      ) : loadError ? (
+        <Card className="p-8 text-center space-y-3">
+          <p className="text-sm text-destructive">{loadError}</p>
+          <Button size="sm" variant="outline" onClick={load}>Try again</Button>
+        </Card>
       ) : (
         <>
           {/* Top funnel */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <FunnelCard label="Signups" value={data.totalSignups} />
-            <FunnelCard
-              label="Started checkout"
-              value={data.totalStarted}
-              sub={`${data.signupToStarted}% of signups`}
-              accent="blue"
+            <KpiCard
+              label="Signups" value={data.totalSignups} scope={periodLabel}
+              info="Profiles created in the selected period. Every WorldAML account creates a profile, so this is platform-wide top-of-funnel — not only Academy buyers."
             />
-            <FunnelCard
-              label="Paid learners"
-              value={data.totalPaid}
+            <KpiCard
+              label="Started checkout" value={data.totalStarted} accent="blue" scope={periodLabel}
+              sub={`${data.signupToStarted}% signup → checkout`}
+              info="Unique users with at least one Academy checkout session created during the selected period. Abandoned checkouts count here."
+            />
+            <KpiCard
+              label="Paid learners" value={data.totalPaid} accent="emerald" scope={periodLabel}
               sub={`${data.startedToPaid}% of checkouts · ${data.signupToPaid}% of signups`}
-              accent="emerald"
+              info="Unique users with at least one purchase in status 'paid' created in the selected period."
             />
-            <FunnelCard
-              label="Revenue"
-              value={`€${(data.totalRevenue / 100).toFixed(0)}`}
-              sub="Paid status only"
-              accent="violet"
+            <KpiCard
+              label="Revenue" value={money(data.totalRevenue)} accent="violet" scope={periodLabel}
+              sub={`Lifetime Academy revenue ${money(data.lifetimeRevenue)}`}
+              info="Sum of paid purchases created in the selected period. Lifetime revenue ignores the date filter — that is why the two can differ."
             />
           </div>
 
-          {/* Funnel bar */}
-          <Card className="p-4">
-            <div className="text-xs font-semibold uppercase text-muted-foreground mb-2">Funnel</div>
-            <FunnelBar label="Signups" value={data.totalSignups} max={Math.max(data.totalSignups, 1)} color="bg-slate-400" />
-            <FunnelBar label="Started checkout" value={data.totalStarted} max={Math.max(data.totalSignups, 1)} color="bg-blue-500" />
-            <FunnelBar label="Paid" value={data.totalPaid} max={Math.max(data.totalSignups, 1)} color="bg-emerald-500" />
-          </Card>
+          {/* Conversion + drop-off */}
+          <div className="grid gap-3 md:grid-cols-2">
+            <Card className="p-4">
+              <div className="text-xs font-semibold uppercase text-muted-foreground mb-2">Funnel</div>
+              <FunnelBar label="Signups" value={data.totalSignups} max={Math.max(data.totalSignups, 1)} color="bg-slate-400" />
+              <FunnelBar label="Started checkout" value={data.totalStarted} max={Math.max(data.totalSignups, 1)} color="bg-blue-500" />
+              <FunnelBar label="Paid" value={data.totalPaid} max={Math.max(data.totalSignups, 1)} color="bg-emerald-500" />
+              <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border">
+                <ConvStat label="Signup → Checkout" value={data.signupToStarted} />
+                <ConvStat label="Checkout → Paid" value={data.startedToPaid} />
+                <ConvStat label="Signup → Paid" value={data.signupToPaid} />
+              </div>
+            </Card>
 
-          {/* Per-course & per-domain */}
+            <Card className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingDown className="w-3.5 h-3.5 text-rose-500" />
+                <span className="text-xs font-semibold uppercase text-muted-foreground">Drop-off</span>
+                <MetricInfo text="Where the commercial leakage happens in the selected period. Signups that never opened a checkout, and checkouts that never completed payment." />
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-2xl font-semibold text-rose-500 tabular-nums">{data.signupsNoCheckout}</span>
+                  <span className="text-xs text-muted-foreground">
+                    signed up but did not start checkout
+                    {data.totalSignups > 0 && ` · ${pct(data.signupsNoCheckout, data.totalSignups)}% of signups`}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-2xl font-semibold text-amber-500 tabular-nums">{data.checkoutNotPaid}</span>
+                  <span className="text-xs text-muted-foreground">
+                    started checkout but did not pay
+                    {data.totalStarted > 0 && ` · ${pct(data.checkoutNotPaid, data.totalStarted)}% of checkouts`}
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground pt-2 border-t border-border">
+                  Unpaid checkouts remain <code>pending</code> until reconciliation confirms the
+                  Stripe session — check Academy Purchase Status for aging.
+                </p>
+              </div>
+            </Card>
+          </div>
+
+          {/* Per-course, per-domain, per-source */}
           <Tabs defaultValue="courses">
             <TabsList>
               <TabsTrigger value="courses">By Course ({data.courseRows.length})</TabsTrigger>
               <TabsTrigger value="domains">By Domain ({data.domainRows.length})</TabsTrigger>
+              <TabsTrigger value="sources">By Source ({data.sourceRows.length})</TabsTrigger>
             </TabsList>
 
             <TabsContent value="courses" className="space-y-3">
@@ -365,50 +477,54 @@ export default function AdminAcademyFunnel() {
                 </Button>
               </div>
               <Card className="overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border bg-muted/30 text-xs uppercase text-muted-foreground">
-                      <th className="px-3 py-2 text-left">Course</th>
-                      <th className="px-3 py-2 text-right">Started checkout</th>
-                      <th className="px-3 py-2 text-right">Paid</th>
-                      <th className="px-3 py-2 text-right">Checkout → Paid</th>
-                      <th className="px-3 py-2 text-right">Revenue</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {data.courseRows.map(r => (
-                      <tr
-                        key={r.slug}
-                        className="hover:bg-muted/30 cursor-pointer transition-colors"
-                        onClick={() => setDrill({
-                          kind: "course",
-                          key: r.slug,
-                          signupIds: [],
-                          startedIds: r.startedIds,
-                          paidIds: r.paidIds,
-                        })}
-                      >
-                        <td className="px-3 py-2 font-medium">
-                          <span className="inline-flex items-center gap-1 text-foreground hover:text-primary">
-                            {r.slug}
-                            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-                          </span>
-                        </td>
-                        <td className="px-3 py-2 text-right tabular-nums">{r.started}</td>
-                        <td className="px-3 py-2 text-right tabular-nums text-emerald-600 font-medium">{r.paid}</td>
-                        <td className="px-3 py-2 text-right tabular-nums">
-                          <ConvBadge value={r.conversion} />
-                        </td>
-                        <td className="px-3 py-2 text-right tabular-nums">
-                          {(r.revenue / 100).toFixed(2)} {r.currency.toUpperCase()}
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="sticky top-0">
+                      <tr className="border-b border-border bg-muted text-xs uppercase text-muted-foreground">
+                        <th className="px-3 py-2 text-left">Course</th>
+                        <th className="px-3 py-2 text-right">Started checkout</th>
+                        <th className="px-3 py-2 text-right">Paid</th>
+                        <th className="px-3 py-2 text-right">Checkout → Paid</th>
+                        <th className="px-3 py-2 text-right">Avg order</th>
+                        <th className="px-3 py-2 text-right">Failed</th>
+                        <th className="px-3 py-2 text-right">Refunds</th>
+                        <th className="px-3 py-2 text-right">Revenue</th>
                       </tr>
-                    ))}
-                    {data.courseRows.length === 0 && (
-                      <tr><td colSpan={5} className="text-center py-8 text-sm text-muted-foreground">No course activity in this range.</td></tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {data.courseRows.map(r => (
+                        <tr
+                          key={r.slug}
+                          className="hover:bg-muted/30 cursor-pointer transition-colors"
+                          onClick={() => setDrill({
+                            kind: "course",
+                            key: r.slug,
+                            signupIds: [],
+                            startedIds: r.startedIds,
+                            paidIds: r.paidIds,
+                          })}
+                        >
+                          <td className="px-3 py-2 font-medium">
+                            <span className="inline-flex items-center gap-1 text-foreground hover:text-primary" title={r.slug}>
+                              {titleOf(r.slug)}
+                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 text-right tabular-nums">{r.started}</td>
+                          <td className="px-3 py-2 text-right tabular-nums text-emerald-600 font-medium">{r.paid}</td>
+                          <td className="px-3 py-2 text-right tabular-nums"><ConvBadge value={r.conversion} /></td>
+                          <td className="px-3 py-2 text-right tabular-nums">{r.aov > 0 ? money(r.aov, r.currency) : "—"}</td>
+                          <td className="px-3 py-2 text-right tabular-nums text-rose-600">{r.failedRows || "—"}</td>
+                          <td className="px-3 py-2 text-right tabular-nums">{r.refundedRows || "—"}</td>
+                          <td className="px-3 py-2 text-right tabular-nums">{money(r.revenue, r.currency)}</td>
+                        </tr>
+                      ))}
+                      {data.courseRows.length === 0 && (
+                        <tr><td colSpan={8} className="text-center py-8 text-sm text-muted-foreground">No course activity in this range.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </Card>
             </TabsContent>
 
@@ -421,8 +537,8 @@ export default function AdminAcademyFunnel() {
               <Card className="overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/30 text-xs uppercase text-muted-foreground">
+                    <thead className="sticky top-0">
+                      <tr className="border-b border-border bg-muted text-xs uppercase text-muted-foreground">
                         <th className="px-3 py-2 text-left">Domain</th>
                         <th className="px-3 py-2 text-right">Signups</th>
                         <th className="px-3 py-2 text-right">Started checkout</th>
@@ -432,6 +548,7 @@ export default function AdminAcademyFunnel() {
                         <th className="px-3 py-2 text-right">Revenue</th>
                       </tr>
                     </thead>
+
                     <tbody className="divide-y divide-border">
                       {data.domainRows.map(r => (
                         <tr
