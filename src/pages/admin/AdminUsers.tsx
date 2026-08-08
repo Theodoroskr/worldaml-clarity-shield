@@ -488,7 +488,7 @@ export default function AdminUsers() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              {["User", "Company", "Status", "Tier", "Source", "Regulator", "Roles", "Registered", "Actions"].map(h => (
+              {["User", "Company", "Revenue", "Status", "Tier", "Source", "Regulator", "Roles", "Registered", "Actions"].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>
               ))}
             </tr>
@@ -497,10 +497,29 @@ export default function AdminUsers() {
             {filtered.map(p => (
               <tr key={p.id} className="hover:bg-muted/20 transition-colors">
                 <td className="px-4 py-3">
-                  <div className="font-medium text-foreground">{p.full_name || "—"}</div>
-                  <div className="text-xs text-muted-foreground">{p.email}</div>
+                  <button className="text-left" onClick={() => setDetailProfile(p)}>
+                    <div className="font-medium text-foreground hover:text-primary hover:underline">{p.full_name || "—"}</div>
+                    <div className="text-xs text-muted-foreground">{p.email}</div>
+                  </button>
+                  {p.marketing_opt_out_at && (
+                    <Badge variant="outline" className="mt-1 text-[10px] bg-red-50 text-red-700 border-red-200">Marketing opt-out</Badge>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">{p.company_name || "—"}</td>
+                <td className="px-4 py-3">
+                  {(() => {
+                    const rv = revenueFor(p);
+                    return (
+                      <button className="text-left" onClick={() => setDetailProfile(p)}>
+                        <div className={`text-sm font-semibold ${rv.total > 0 ? "text-foreground" : "text-muted-foreground"}`}>
+                          {formatMoney(rv.total, rv.currency)}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">{rv.items.length} txn</div>
+                      </button>
+                    );
+                  })()}
+                </td>
+
                 <td className="px-4 py-3">{statusBadge(p.status)}</td>
                 <td className="px-4 py-3">{tierBadge(p.subscription_tier)}</td>
                 <td className="px-4 py-3">{sourceBadge(p)}</td>
