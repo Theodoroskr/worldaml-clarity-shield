@@ -64,7 +64,7 @@ export function cleanSummary(raw: string | null | undefined, title = ""): string
   // "10 July 2026 Market data" — the date and topic labels are already
   // represented by the card's own date and category fields.
   text = text.replace(/^\d{1,2}\s+[A-Z][a-z]+\s+\d{4}\s*/, "").trim();
-  const sentenceStart = text.search(/\b(The|This|These|On|In|Following|Today|A|An)\b\s+[a-z(]|\b[A-Z]{2,6}\b\s+(?:has|have|is|are|will|publishes|published|announces|announced|launches|launched)\b/);
+  const sentenceStart = text.search(/\b(The|This|These|On|In|Following|Today)\b\s+\S|\b[A-Z]{2,6}\b\s+(?:has|have|is|are|will|publishes|published|announces|announced|launches|launched)\b/);
   if (sentenceStart > 0 && sentenceStart < 120 && !/[.!?,;:]/.test(text.slice(0, sentenceStart))) {
     text = text.slice(sentenceStart).trim();
   }
