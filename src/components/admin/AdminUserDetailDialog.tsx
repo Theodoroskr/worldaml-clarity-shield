@@ -94,6 +94,28 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
 
   const optedOut = !!profile.marketing_opt_out_at;
 
+  const ownedCourseIds = new Set<string>([
+    ...purchases.filter((p) => p.status === "paid").map((p) => p.course_id),
+    ...progress.map((p) => p.course_id),
+  ]);
+  const ownedSlugs = new Set(
+    courses.filter((c) => c.id && ownedCourseIds.has(c.id)).map((c) => c.slug),
+  );
+  const isBusiness = !!profile.company_name || business.length > 0 ||
+    ["business", "suite", "enterprise"].includes(String(profile.subscription_tier || "").toLowerCase());
+
+  const options: UpsellOption[] = buildUpsellOptions({
+    isBusiness,
+    courses,
+    ownedSlugs,
+    signals: {
+      interest_area: profile.interest_area,
+      industry: profile.industry,
+      regulator: profile.regulator,
+      company_name: profile.company_name,
+    },
+  });
+
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-4xl max-h-[88vh] overflow-y-auto">
