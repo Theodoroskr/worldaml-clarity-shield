@@ -20,17 +20,9 @@ import { Loader2, Plus, Pencil, Trash2, Upload, History } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
-const CATEGORIES = [
-  "logo",
-  "one_pager",
-  "deck",
-  "email_template",
-  "banner",
-  "case_study",
-  "contract",
-  "brand_guide",
-  "video",
-];
+import { ADMIN_CATEGORIES, ASSET_STATUSES, LANGUAGES, INDUSTRIES } from "@/lib/partnerAssetTaxonomy";
+
+const CATEGORIES = ADMIN_CATEGORIES;
 const CERT = ["bronze", "silver", "gold"];
 
 type Asset = any;
@@ -46,6 +38,14 @@ const EMPTY: any = {
   preview_url: "",
   is_active: true,
   sort_order: 0,
+  asset_type: "Brochure",
+  product: "",
+  language: "English",
+  industry: "All industries",
+  is_cobrandable: false,
+  status: "draft",
+  version_label: "",
+  cta_url: "",
 };
 
 export default function AdminPartnerAssets() {
@@ -92,6 +92,14 @@ export default function AdminPartnerAssets() {
       preview_url: a.preview_url ?? "",
       is_active: a.is_active,
       sort_order: a.sort_order ?? 0,
+      asset_type: a.asset_type ?? "Brochure",
+      product: a.product ?? "",
+      language: a.language ?? "English",
+      industry: a.industry ?? "All industries",
+      is_cobrandable: !!a.is_cobrandable,
+      status: a.status ?? "draft",
+      version_label: a.version_label ?? "",
+      cta_url: a.cta_url ?? "",
     });
     setOpen(true);
   };
@@ -226,6 +234,15 @@ export default function AdminPartnerAssets() {
       preview_url: form.preview_url || null,
       is_active: !!form.is_active,
       sort_order: Number(form.sort_order) || 0,
+      asset_type: form.asset_type || "Brochure",
+      product: form.product || null,
+      language: form.language || "English",
+      industry: form.industry || null,
+      is_cobrandable: !!form.is_cobrandable,
+      status: form.status || "draft",
+      version_label: form.version_label || null,
+      cta_url: form.cta_url || null,
+      published_at: form.status === "approved" ? new Date().toISOString() : null,
     };
     let error;
     if (editing) {
@@ -270,7 +287,7 @@ export default function AdminPartnerAssets() {
               <Plus className="w-4 h-4 mr-1" /> New asset
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editing ? "Edit asset" : "New asset"}</DialogTitle>
             </DialogHeader>
@@ -333,6 +350,59 @@ export default function AdminPartnerAssets() {
               <Field label="Preview URL (optional — image, PDF or video shown in the portal preview)">
                 <Input value={form.preview_url} onChange={(e) => setForm({ ...form, preview_url: e.target.value })} placeholder="https://... (defaults to the file itself)" />
               </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Product">
+                  <Input value={form.product} onChange={(e) => setForm({ ...form, product: e.target.value })} placeholder="e.g. AML Screening & Monitoring" />
+                </Field>
+                <Field label="Asset type">
+                  <Input value={form.asset_type} onChange={(e) => setForm({ ...form, asset_type: e.target.value })} placeholder="Brochure / One-Pager / Kit" />
+                </Field>
+                <Field label="Language">
+                  <select
+                    value={form.language}
+                    onChange={(e) => setForm({ ...form, language: e.target.value })}
+                    className="w-full h-10 px-3 rounded-md border border-border bg-background text-sm"
+                  >
+                    {LANGUAGES.map((l) => (
+                      <option key={l} value={l}>{l}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Industry">
+                  <select
+                    value={form.industry}
+                    onChange={(e) => setForm({ ...form, industry: e.target.value })}
+                    className="w-full h-10 px-3 rounded-md border border-border bg-background text-sm"
+                  >
+                    {INDUSTRIES.map((i) => (
+                      <option key={i} value={i}>{i}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Status">
+                  <select
+                    value={form.status}
+                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                    className="w-full h-10 px-3 rounded-md border border-border bg-background text-sm"
+                  >
+                    {ASSET_STATUSES.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Version label">
+                  <Input value={form.version_label} onChange={(e) => setForm({ ...form, version_label: e.target.value })} placeholder="v1.0" />
+                </Field>
+                <Field label="Approved destination URL">
+                  <Input value={form.cta_url} onChange={(e) => setForm({ ...form, cta_url: e.target.value })} placeholder="https://worldaml.com/contact-sales" />
+                </Field>
+                <Field label="Co-brandable">
+                  <div className="flex items-center gap-2 h-10">
+                    <Switch checked={!!form.is_cobrandable} onCheckedChange={(v) => setForm({ ...form, is_cobrandable: v })} />
+                    <span className="text-sm text-muted-foreground">{form.is_cobrandable ? "Partners can request" : "Master only"}</span>
+                  </div>
+                </Field>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Sort order">
                   <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} />
