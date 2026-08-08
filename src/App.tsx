@@ -408,11 +408,15 @@ const App = () => (
                 <Route path="/partners" element={<Partners />} />
                 <Route path="/partners/directory" element={<PartnersDirectory />} />
                 <Route path="/partners/apply" element={<PartnerApply />} />
-                <Route path="/partners/dashboard" element={<Navigate to="/partner-portal" replace />} />
+                <Route path="/partners/dashboard" element={<Navigate to="/partner/dashboard" replace />} />
 
-                {/* Channel Partner Portal */}
-                <Route path="/partner-portal" element={<PartnerPortalLayout />}>
-                  <Route index element={<PartnerOverview />} />
+                {/* Partner Portal — approved partners only */}
+                <Route path="/partner/login" element={<PartnerLogin />} />
+                <Route path="/partner/apply" element={<Navigate to="/partners/apply" replace />} />
+                <Route path="/partner/onboarding" element={<PartnerOnboardingPage />} />
+                <Route path="/partner" element={<PortalGuard portal="partner"><PartnerPortalLayout /></PortalGuard>}>
+                  <Route index element={<Navigate to="/partner/dashboard" replace />} />
+                  <Route path="dashboard" element={<PartnerOverview />} />
                   <Route path="welcome" element={<PartnerWelcomePage />} />
                   <Route path="referrals" element={<PartnerReferralsPage />} />
                   <Route path="deals" element={<PartnerDealsPage />} />
@@ -422,6 +426,11 @@ const App = () => (
                   <Route path="profile" element={<PartnerProfilePage />} />
                   <Route path="settings" element={<PartnerSettingsPage />} />
                 </Route>
+
+                {/* Legacy partner portal URLs */}
+                <Route path="/partner-portal" element={<Navigate to="/partner/dashboard" replace />} />
+                <Route path="/partner-portal/:section" element={<LegacyPartnerPortalRedirect />} />
+
 
                 {/* Academy */}
                 <Route path="/academy" element={<Academy />} />
