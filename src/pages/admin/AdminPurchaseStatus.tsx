@@ -167,12 +167,53 @@ export default function AdminPurchaseStatus() {
   }, [rows, statusFilter, search, sortKey, sortDir, createdFrom, createdTo, paidFrom, paidTo]);
 
   const totals = useMemo(() => {
-    const pending = rows.filter((r) => r.status === "pending").length;
-    const paid = rows.filter((r) => r.status === "paid").length;
-    const failed = rows.filter((r) => r.status === "failed").length;
-    const refunded = rows.filter((r) => r.status === "refunded").length;
-    return { pending, paid, failed, refunded, total: rows.length };
+    const sum = (list: PurchaseRow[]) => list.reduce((s, r) => s + (r.amount_cents || 0), 0);
+    const paidRows = rows.filter((r) => r.status === "paid");
+    const pendingRows = rows.filter((r) => r.status === "pending");
+    const failedRows = rows.filter((r) => r.status === "failed");
+    const refundedRows = rows.filter((r) => r.status === "refunded");
+
+    const now = Date.now();
+    const ageDays = (r: PurchaseRow) => (now - new Date(r.created_at).getTime()) / 86_400_000;
+    const aging = {
+      under1: pendingRows.filter((r) => ageDays(r) < 1).length,
+      d1to7: pendingRows.filter((r) => ageDays(r) >= 1 && ageDays(r) < 7).length,
+      d7to30: pendingRows.filter((r) => ageDays(r) >= 7 && ageDays(r) < 30).length,
+      over30: pendingRows.filter((r) => ageDays(r) >= 30).length,
+    };
+
+    // Data-quality checks that matter for finance sign-off
+    const sessionCounts = new Map<string, number>();
+    rows.forEach((r) => {
+      if (!r.stripe_session_id) return;
+      sessionCounts.set(r.stripe_session_id, (sessionCounts.get(r.stripe_session_id) || 0) + 1);
+    });
+    const duplicateSessions = Array.from(sessionCounts.values()).filter((c) => c > 1).length;
+    const paidWithoutTimestamp = paidRows.filter((r) => !r.paid_at).length;
+    const paidWithoutIntent = paidRows.filter((r) => !r.stripe_payment_intent_id).length;
+
+    const settled = paidRows.length + failedRows.length;
+    return {
+      total: rows.length,
+      pending: pendingRows.length,
+      paid: paidRows.length,
+      failed: failedRows.length,
+      refunded: refundedRows.length,
+      grossRevenue: sum(paidRows),
+      netRevenue: sum(paidRows) - sum(refundedRows),
+      pendingValue: sum(pendingRows),
+      refundedValue: sum(refundedRows),
+      failedValue: sum(failedRows),
+      aov: paidRows.length ? sum(paidRows) / paidRows.length : 0,
+      successRate: pct(paidRows.length, settled),
+      refundRate: pct(refundedRows.length, paidRows.length),
+      aging,
+      duplicateSessions,
+      paidWithoutTimestamp,
+      paidWithoutIntent,
+    };
   }, [rows]);
+
 
   const statusBadge = (status: string) => {
     switch (status) {
