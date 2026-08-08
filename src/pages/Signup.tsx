@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, GraduationCap } from "lucide-react";
 import { getAttribution, clearAttribution } from "@/lib/signupAttribution";
+import { ensureAuthAccount } from "@/lib/portalAccounts";
 
 const Signup = () => {
   const [firstName, setFirstName] = useState("");
