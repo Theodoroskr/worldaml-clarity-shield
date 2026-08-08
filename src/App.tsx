@@ -310,7 +310,8 @@ const App = () => (
                 </Route>
                 <Route path="/pending-approval" element={<PendingApproval />} />
                 <Route path="/admin" element={<Admin />} />
-                <Route path="/admin" element={<AdminLayout />}>
+                <Route path="/admin" element={<PortalGuard portal="admin"><AdminLayout /></PortalGuard>}>
+
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
                   <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="users" element={<AdminUsers />} />
