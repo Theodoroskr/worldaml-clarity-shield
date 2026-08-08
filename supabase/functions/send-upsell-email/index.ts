@@ -46,11 +46,109 @@ type TemplateId =
   | "password-reset-academy"
   | "aml-signal-outreach"
   | "seminar-discount-suite"
-  | "academy-paid-discount";
+  | "academy-paid-discount"
+  | "academy-course-upsell"
+  | "business-solutions-upsell";
+
+interface UpsellItem {
+  name: string;
+  description?: string;
+  url?: string;
+  meta?: string;
+}
 
 interface TemplateData {
   promoCode?: string;
   courseTitle?: string;
+  headline?: string;
+  intro?: string;
+  items?: UpsellItem[];
+}
+
+/** Only allow links back to our own properties inside generated emails. */
+function safeUrl(raw?: string): string {
+  if (!raw) return "https://worldaml.com";
+  try {
+    const u = new URL(raw);
+    const okHost = u.protocol === "https:" && /(^|\.)worldaml\.com$/.test(u.hostname);
+    return okHost ? u.toString() : "https://worldaml.com";
+  } catch {
+    return "https://worldaml.com";
+  }
+}
+
+function renderItems(items: UpsellItem[] = [], accent: string): string {
+  return items
+    .slice(0, 8)
+    .map(
+      (i) => `
+        <tr><td style="padding:0 0 14px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb;border-radius:10px;">
+            <tr><td style="padding:14px 16px;">
+              <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#1e3a5f;">${escapeHtml(i.name || "")}</p>
+              ${i.meta ? `<p style="margin:0 0 6px;font-size:12px;color:${accent};font-weight:600;">${escapeHtml(i.meta)}</p>` : ""}
+              ${i.description ? `<p style="margin:0 0 10px;font-size:13px;line-height:1.6;color:#4b5563;">${escapeHtml(i.description)}</p>` : ""}
+              <a href="${escapeAttribute(safeUrl(i.url))}" style="font-size:13px;font-weight:600;color:${accent};text-decoration:underline;">View details &rarr;</a>
+            </td></tr>
+          </table>
+        </td></tr>`,
+    )
+    .join("");
+}
+
+function renderItemsText(items: UpsellItem[] = []): string {
+  return items
+    .slice(0, 8)
+    .map((i) => `- ${i.name}${i.meta ? ` (${i.meta})` : ""}\n  ${safeUrl(i.url)}`)
+    .join("\n");
+}
+
+function buildListEmail(opts: {
+  firstName: string;
+  data: TemplateData | undefined;
+  brandTitle: string;
+  brandSubtitle: string;
+  headerBg: string;
+  accent: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  defaultHeadline: string;
+  defaultIntro: string;
+}): string {
+  const { firstName, data, brandTitle, brandSubtitle, headerBg, accent, ctaLabel, ctaUrl } = opts;
+  const headline = escapeHtml(data?.headline || opts.defaultHeadline);
+  const intro = escapeHtml(data?.intro || opts.defaultIntro);
+  return `
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"/></head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#0f1b3d;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);">
+        <tr><td bgcolor="${headerBg}" style="background-color:${headerBg};padding:28px 32px;text-align:center;">
+          <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">${brandTitle}</h1>
+          <p style="margin:6px 0 0;color:#ccfbf1;font-size:13px;">${brandSubtitle}</p>
+        </td></tr>
+        <tr><td style="padding:32px;">
+          <p style="margin:0 0 14px;font-size:15px;color:#374151;">Hi ${firstName || "there"},</p>
+          <h2 style="margin:0 0 12px;font-size:20px;color:#1e3a5f;line-height:1.35;">${headline}</h2>
+          <p style="margin:0 0 22px;font-size:15px;line-height:1.65;color:#374151;">${intro}</p>
+          <table width="100%" cellpadding="0" cellspacing="0">${renderItems(data?.items, accent)}</table>
+          <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:14px 0 4px;">
+            <a href="${ctaUrl}" style="display:inline-block;background-color:${accent};color:#ffffff;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;text-decoration:none;">
+              <span style="color:#ffffff;">${ctaLabel} &rarr;</span>
+            </a>
+          </td></tr></table>
+        </td></tr>
+        <tr><td style="padding:20px 32px;background:#f9fafb;border-top:1px solid #e5e7eb;">
+          <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center;">
+            WorldAML by Infocredit Group · <a href="https://worldaml.com" style="color:#9ca3af;">worldaml.com</a>
+          </p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
 }
 
 interface TemplateConfig {
@@ -345,6 +443,44 @@ const TEMPLATES: Record<TemplateId, TemplateConfig> = {
     buildText: (firstName: string, _resetLink?: string, data?: TemplateData) =>
       `Hi ${firstName || "there"},\n\nCongrats on finishing your free WorldAML course! Here's 30% off any paid Academy course:\n\n  Code: ${data?.promoCode || "ACADEMY30"}\n  Valid 30 days, single use.\n\nBrowse: https://academy.worldaml.com/?promo=${data?.promoCode || "ACADEMY30"}\n\nThe WorldAML Team`,
   },
+
+  "academy-course-upsell": {
+    subject: "Your next WorldAML Academy courses",
+    buildHtml: (firstName: string, _resetLink?: string, data?: TemplateData) =>
+      buildListEmail({
+        firstName,
+        data,
+        brandTitle: "WorldAML Academy",
+        brandSubtitle: "CPD-accredited compliance training",
+        headerBg: "#1e3a5f",
+        accent: "#0d9488",
+        ctaLabel: "Browse the Academy",
+        ctaUrl: "https://academy.worldaml.com/?utm_source=email&utm_medium=upsell&utm_campaign=course-suggestions",
+        defaultHeadline: "Courses picked for your next CPD step",
+        defaultIntro: "Based on your training so far, these CPD-accredited courses are the natural next step.",
+      }),
+    buildText: (firstName: string, _resetLink?: string, data?: TemplateData) =>
+      `Hi ${firstName || "there"},\n\n${data?.intro || "These WorldAML Academy courses are your natural next step."}\n\n${renderItemsText(data?.items)}\n\nBrowse the Academy: https://academy.worldaml.com\n\nThe WorldAML Team`,
+  },
+
+  "business-solutions-upsell": {
+    subject: "WorldAML solutions for your compliance team",
+    buildHtml: (firstName: string, _resetLink?: string, data?: TemplateData) =>
+      buildListEmail({
+        firstName,
+        data,
+        brandTitle: "WorldAML",
+        brandSubtitle: "Products · Services · Training",
+        headerBg: "#0d9488",
+        accent: "#1e3a5f",
+        ctaLabel: "Talk to our team",
+        ctaUrl: "https://worldaml.com/contact-sales?utm_source=email&utm_medium=upsell&utm_campaign=business-solutions",
+        defaultHeadline: "Compliance solutions for your team",
+        defaultIntro: "Here is how WorldAML can support your compliance programme across technology, expert services and team training.",
+      }),
+    buildText: (firstName: string, _resetLink?: string, data?: TemplateData) =>
+      `Hi ${firstName || "there"},\n\n${data?.intro || "Here is how WorldAML can support your compliance programme."}\n\n${renderItemsText(data?.items)}\n\nTalk to our team: https://worldaml.com/contact-sales\n\nThe WorldAML Team`,
+  },
 };
 
 /* ── Handler ── */
@@ -493,7 +629,9 @@ Deno.serve(async (req) => {
       templateId === "screening-upsell" ||
       templateId === "aml-signal-outreach" ||
       templateId === "seminar-discount-suite" ||
-      templateId === "academy-paid-discount";
+      templateId === "academy-paid-discount" ||
+      templateId === "academy-course-upsell" ||
+      templateId === "business-solutions-upsell";
 
     // Admins performing manual sends bypass the automated eligibility gate;
     // the gate only applies to queue-worker / internal calls.

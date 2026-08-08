@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { REGULATORY_PROFILES, REGULATOR_OPTIONS } from "@/data/regulatoryProfiles";
 import AdminUserDetailDialog, { RevenueItem } from "@/components/admin/AdminUserDetailDialog";
+import type { UpsellTemplate } from "@/lib/upsellRecommendation";
 import { exportRowsAsCsv, exportRowsAsXlsx } from "@/lib/adminUserExport";
 
 interface Profile {
@@ -110,7 +111,8 @@ export default function AdminUsers() {
   const [grantDialog, setGrantDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
   const [selectedRegulator, setSelectedRegulator] = useState("");
   const [upsellDialog, setUpsellDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
-  const [upsellTemplate, setUpsellTemplate] = useState<"suite-upsell" | "screening-upsell">("suite-upsell");
+  const [upsellTemplate, setUpsellTemplate] = useState<UpsellTemplate>("suite-upsell");
+  const [upsellData, setUpsellData] = useState<Record<string, any> | undefined>(undefined);
   const [upsellSending, setUpsellSending] = useState(false);
   const [upsellCounts, setUpsellCounts] = useState<Record<string, number>>({});
   const [historyDialog, setHistoryDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
@@ -145,6 +147,7 @@ export default function AdminUsers() {
           recipientEmail,
           recipientName: upsellDialog.profile.full_name || "",
           templateId: upsellTemplate,
+          templateData: upsellData,
         },
       });
       if (error) {
@@ -639,7 +642,7 @@ export default function AdminUsers() {
                           size="sm"
                           variant="ghost"
                           className={`h-7 text-xs ${el.eligible ? "text-teal-600" : "text-muted-foreground"}`}
-                          onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellDialog({ open: true, profile: p }); }}
+                          onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellData(undefined); setUpsellDialog({ open: true, profile: p }); }}
                           disabled={!el.eligible}
                           title={el.eligible ? `Basis: ${REASON_LABELS[el.reason]}` : `Blocked: ${REASON_LABELS[el.reason]}`}
                         >
@@ -907,24 +910,36 @@ export default function AdminUsers() {
                 <p className="text-xs text-muted-foreground">{upsellDialog.profile.company_name}</p>
               )}
             </div>
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Email Template</label>
-              <Select value={upsellTemplate} onValueChange={(v: any) => setUpsellTemplate(v)}>
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="suite-upsell">
-                    <span className="font-medium">WorldAML Suite</span>
-                    <span className="text-muted-foreground ml-1.5">— Full platform upsell</span>
-                  </SelectItem>
-                  <SelectItem value="screening-upsell">
-                    <span className="font-medium">AML Screening</span>
-                    <span className="text-muted-foreground ml-1.5">— 1,900+ watchlists</span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {upsellData ? (
+              <div className="p-3 rounded-lg border border-teal-200 bg-teal-50/50 space-y-1.5">
+                <p className="text-sm font-semibold text-teal-800">{upsellData.headline}</p>
+                <p className="text-xs text-teal-900/80">{upsellData.intro}</p>
+                <ul className="text-xs text-teal-900/80 list-disc pl-4 space-y-0.5">
+                  {(upsellData.items || []).map((i: any) => (
+                    <li key={i.name}>{i.name}{i.meta ? ` — ${i.meta}` : ""}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Email Template</label>
+                <Select value={upsellTemplate} onValueChange={(v: any) => setUpsellTemplate(v)}>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="suite-upsell">
+                      <span className="font-medium">WorldAML Suite</span>
+                      <span className="text-muted-foreground ml-1.5">— Full platform upsell</span>
+                    </SelectItem>
+                    <SelectItem value="screening-upsell">
+                      <span className="font-medium">AML Screening</span>
+                      <span className="text-muted-foreground ml-1.5">— 1,900+ watchlists</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {upsellDialog.profile && (() => {
               const el = evaluateEligibility(upsellDialog.profile);
               return el.eligible ? (
@@ -1025,8 +1040,9 @@ export default function AdminUsers() {
           revenue={revenueFor(detailProfile)}
           roles={userRoles[detailProfile.user_id] || []}
           onClose={() => setDetailProfile(null)}
-          onSendUpsell={(template) => {
+          onSendUpsell={(template, data) => {
             setUpsellTemplate(template);
+            setUpsellData(data);
             setUpsellDialog({ open: true, profile: detailProfile });
           }}
         />

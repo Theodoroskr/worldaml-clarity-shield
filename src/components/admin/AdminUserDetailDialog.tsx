@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Send, Sparkles, Euro, GraduationCap, Building2, Handshake, ShieldAlert } from "lucide-react";
 import { recommendUpsell, UpsellTemplate } from "@/lib/upsellRecommendation";
+import { buildUpsellOptions, type UpsellOption, type CourseRow } from "@/lib/upsellCatalog";
 
 export interface RevenueItem {
   source: "academy" | "product";
@@ -21,7 +22,7 @@ interface Props {
   revenue: { total: number; currency: string; items: RevenueItem[] };
   roles: string[];
   onClose: () => void;
-  onSendUpsell: (template: UpsellTemplate) => void;
+  onSendUpsell: (template: UpsellTemplate, templateData?: Record<string, any>) => void;
 }
 
 const money = (cents: number, currency = "EUR") =>
@@ -43,6 +44,8 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
   const [business, setBusiness] = useState<any[]>([]);
   const [partner, setPartner] = useState<any | null>(null);
   const [upsellLog, setUpsellLog] = useState<any[]>([]);
+  const [courses, setCourses] = useState<CourseRow[]>([]);
+  const [purchases, setPurchases] = useState<any[]>([]);
 
   useEffect(() => {
     if (!profile) return;
@@ -51,7 +54,7 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
       setLoading(true);
       const uid = profile.user_id;
       const email = (profile.email || "").toLowerCase();
-      const [pg, ce, bm, pt, ul] = await Promise.all([
+      const [pg, ce, bm, pt, ul, co, pu] = await Promise.all([
         uid ? supabase.from("academy_progress").select("*").eq("user_id", uid) : Promise.resolve({ data: [] } as any),
         uid ? supabase.from("academy_certificates").select("*").eq("user_id", uid) : Promise.resolve({ data: [] } as any),
         email ? supabase.from("business_members").select("id, business_account_id, role, status, academy_seat, products").eq("email", email) : Promise.resolve({ data: [] } as any),
@@ -59,6 +62,8 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
         supabase.from("admin_upsell_email_log").select("id, template_id, created_at").or(
           uid ? `recipient_user_id.eq.${uid},recipient_email.eq.${email}` : `recipient_email.eq.${email}`,
         ).order("created_at", { ascending: false }),
+        supabase.from("academy_courses").select("id, slug, title, description, category, difficulty, cpd_hours, price_eur_cents, is_published").eq("is_published", true).order("sort_order"),
+        uid ? supabase.from("academy_course_purchases").select("course_id, status").eq("user_id", uid) : Promise.resolve({ data: [] } as any),
       ]);
       if (!active) return;
       setProgress((pg as any).data || []);
@@ -66,6 +71,8 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
       setBusiness((bm as any).data || []);
       setPartner((pt as any).data || null);
       setUpsellLog((ul as any).data || []);
+      setCourses(((co as any).data || []) as CourseRow[]);
+      setPurchases((pu as any).data || []);
       setLoading(false);
     })();
     return () => { active = false; };
@@ -86,6 +93,28 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
   });
 
   const optedOut = !!profile.marketing_opt_out_at;
+
+  const ownedCourseIds = new Set<string>([
+    ...purchases.filter((p) => p.status === "paid").map((p) => p.course_id),
+    ...progress.map((p) => p.course_id),
+  ]);
+  const ownedSlugs = new Set(
+    courses.filter((c) => c.id && ownedCourseIds.has(c.id)).map((c) => c.slug),
+  );
+  const isBusiness = !!profile.company_name || business.length > 0 ||
+    ["business", "suite", "enterprise"].includes(String(profile.subscription_tier || "").toLowerCase());
+
+  const options: UpsellOption[] = buildUpsellOptions({
+    isBusiness,
+    courses,
+    ownedSlugs,
+    signals: {
+      interest_area: profile.interest_area,
+      industry: profile.industry,
+      regulator: profile.regulator,
+      company_name: profile.company_name,
+    },
+  });
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -140,6 +169,50 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
             {rec.blocked && <span className="text-xs text-red-700">{rec.blockedReason}</span>}
           </div>
         </div>
+
+        {options.length > 0 && (
+          <div className="rounded-lg border border-border p-3 space-y-3">
+            <p className="text-sm font-semibold flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-teal-600" />
+              {isBusiness ? "Company upsell options — products, services & courses" : "Academy upsell options — suggested courses"}
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              {options.map((o) => (
+                <div key={o.id} className="rounded-lg border border-border p-3 space-y-2 bg-muted/20">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{o.title}</p>
+                      <p className="text-[11px] text-muted-foreground">{o.rationale}</p>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] capitalize shrink-0">{o.audience}</Badge>
+                  </div>
+                  <ul className="text-xs text-muted-foreground space-y-0.5">
+                    {o.items.slice(0, 5).map((i) => (
+                      <li key={i.name}>• {i.name}{i.meta ? ` — ${i.meta}` : ""}</li>
+                    ))}
+                    {o.items.length > 5 && <li>• +{o.items.length - 5} more</li>}
+                  </ul>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={optedOut}
+                    onClick={() =>
+                      onSendUpsell(o.template, {
+                        headline: o.headline,
+                        intro: o.intro,
+                        items: o.items,
+                      })
+                    }
+                  >
+                    <Send className="w-3.5 h-3.5 mr-1" /> Send this email
+                  </Button>
+                </div>
+              ))}
+            </div>
+            {optedOut && <p className="text-xs text-red-700">User has opted out of marketing communications.</p>}
+          </div>
+        )}
+
 
         <Tabs defaultValue="profile" className="mt-2">
           <TabsList>
