@@ -389,6 +389,19 @@ Preferred start date and number of seats below.`,
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="country">Country</Label>
+                    <Input
+                      id="country"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleInputChange}
+                      placeholder="Cyprus"
+                      autoComplete="country-name"
+                      maxLength={100}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="message">Message (Optional)</Label>
                     <Textarea
                       id="message"
@@ -403,7 +416,42 @@ Preferred start date and number of seats below.`,
                       {formData.message.length}/1000 characters
                     </p>
                   </div>
+
+                  <div className="space-y-3 pt-2">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <Checkbox
+                        checked={termsAccepted}
+                        onCheckedChange={(v) => setTermsAccepted(v === true)}
+                        className="mt-0.5"
+                      />
+                      <span className="text-body-sm text-text-secondary">
+                        I accept the{" "}
+                        <Link to="/terms" className="text-teal hover:underline" target="_blank">
+                          Terms &amp; Conditions
+                        </Link>{" "}
+                        and the{" "}
+                        <Link to="/privacy" className="text-teal hover:underline" target="_blank">
+                          Privacy Policy
+                        </Link>
+                        . <span className="text-red-500">*</span>
+                      </span>
+                    </label>
+
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <Checkbox
+                        checked={marketingConsent}
+                        onCheckedChange={(v) => setMarketingConsent(v === true)}
+                        className="mt-0.5"
+                      />
+                      <span className="text-body-sm text-text-secondary">
+                        I'd like to receive marketing communications about WorldAML
+                        products, events and regulatory updates. (Optional — you can
+                        unsubscribe at any time.)
+                      </span>
+                    </label>
+                  </div>
                 </div>
+
 
                 <Button 
                   type="submit" 
