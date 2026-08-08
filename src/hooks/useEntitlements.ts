@@ -28,15 +28,12 @@ export function useEntitlements(): Entitlements {
   const hasPaidAcademy = hasAnnualPass || purchasedSlugs.size > 0;
   const tier = (subscriptionTier || "free").toLowerCase();
 
-  const planLabel = hasSuiteAccess
-    ? "Suite"
-    : hasAnnualPass
-      ? "Academy Annual Pass"
-      : hasPaidAcademy
-        ? "Academy Member"
-        : tier !== "free"
-          ? subscriptionTier
-          : "Free Account";
+  // Academy-facing plan label only — Suite/enterprise tiers are not surfaced here.
+  const planLabel = hasAnnualPass
+    ? "Annual Pass"
+    : hasPaidAcademy
+      ? "Academy Member"
+      : "Free Account";
 
   const fullName = profile?.full_name || user?.user_metadata?.full_name || "";
   const firstName = (fullName as string).trim().split(" ")[0] || (user?.email?.split("@")[0] ?? "there");
