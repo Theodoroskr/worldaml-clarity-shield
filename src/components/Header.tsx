@@ -6,7 +6,6 @@ import { Button } from "./ui/button";
 import { RegionSelector } from "./RegionSelector";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePartner } from "@/hooks/usePartner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -126,8 +125,6 @@ export const Header = () => {
   const location = useLocation();
   const { user, signOut, isAdmin, profile } = useAuth();
   const { has } = usePortalAccess();
-  const { partner } = usePartner();
-  const isActivePartner = !!partner?.is_active;
   const headerRef = useRef<HTMLElement>(null);
   const academyHost = isAcademyHost();
 
