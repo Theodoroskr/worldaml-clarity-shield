@@ -543,7 +543,8 @@ export default function AdminPartners() {
         const closeRate = deals.length > 0 ? Math.round((wonCount / deals.length) * 100) : 0;
 
         return (
-          <Card>
+          <Card id="deal-registrations" className="scroll-mt-24">
+
             <CardHeader>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <CardTitle className="text-navy flex items-center gap-2">
