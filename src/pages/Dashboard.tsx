@@ -10,6 +10,7 @@ import {
   ComplianceInPractice, ExploreWorldAML, WorldAMLTools,
 } from "@/components/dashboard/EcosystemSections";
 import { MemberLevelCard, LevelUpMoment } from "@/components/dashboard/RecognitionSections";
+import NewLearnerWelcome from "@/components/dashboard/NewLearnerWelcome";
 
 export default function Dashboard() {
   const { firstName } = useEntitlements();
