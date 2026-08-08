@@ -4,6 +4,7 @@ import App from "./App.tsx";
 import "./index.css";
 import "./i18n";
 import { captureAttribution } from "./lib/signupAttribution";
+import { recordVisit } from "./lib/webAttribution";
 
 // Redirect academy.worldaml.com → worldaml.com/academy (canonical path-based URL)
 if (typeof window !== "undefined" && window.location.hostname.toLowerCase() === "academy.worldaml.com") {
