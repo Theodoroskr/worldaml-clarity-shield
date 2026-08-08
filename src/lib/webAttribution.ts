@@ -89,5 +89,20 @@ export function getWebAttribution(): WebAttribution {
     }
   } catch {}
 
+  // Visit summary (first/last visit, days visited) for Zoho's Visit Summary block.
+  try {
+    const v = readVisits();
+    if (v) {
+      out.first_visited_at = v.first_visited_at;
+      out.last_visited_at = v.last_visited_at;
+      out.days_visited = Array.isArray(v.days) ? v.days.length : undefined;
+      out.visit_count = v.visit_count;
+    }
+    if (!out.first_visited_at) {
+      const first = getAttribution();
+      if (first.captured_at) out.first_visited_at = first.captured_at;
+    }
+  } catch {}
+
   return out;
 }
