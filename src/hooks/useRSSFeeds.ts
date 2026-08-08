@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { NewsItem, NewsCategory, TrustTier } from "@/components/news/NewsCard";
 import { fetchAllFeeds } from "@/services/rssService";
 import { supabase } from "@/integrations/supabase/client";
+import { cleanSummary, cleanTitle, truncateSummary } from "@/lib/newsSummary";
 
 const VALID_CATEGORIES: NewsCategory[] = [
   "Regulatory Updates",
@@ -28,19 +29,26 @@ async function fetchStoredUpdates(): Promise<NewsItem[]> {
 
   return (data ?? [])
     .filter((row) => VALID_CATEGORIES.includes(row.category as NewsCategory))
-    .map((row) => ({
-      id: `db-${row.id}`,
-      title: row.title,
-      source: row.source,
-      sourceUrl: row.source_url,
-      publishedAt: row.published_at,
-      category: row.category as NewsCategory,
-      tags: row.tags ?? [],
-      summary: row.summary,
-      fullSummary: row.full_summary ?? undefined,
-      trustTier: (row.trust_tier as TrustTier) ?? "A",
-    }));
+    .map((row) => {
+      const title = cleanTitle(row.title);
+      const full = cleanSummary(row.full_summary ?? row.summary, title);
+      const summary = cleanSummary(row.summary, title) || truncateSummary(full);
+      return {
+        id: `db-${row.id}`,
+        title,
+        source: row.source,
+        sourceUrl: row.source_url,
+        publishedAt: row.published_at,
+        category: row.category as NewsCategory,
+        tags: row.tags ?? [],
+        summary: summary || title,
+        fullSummary: full || undefined,
+        trustTier: (row.trust_tier as TrustTier) ?? "A",
+      };
+    })
+    .filter((item) => item.title && item.sourceUrl);
 }
+
 
 // Curated baseline updates, shown when live feeds are unavailable.
 const fallbackItems: NewsItem[] = [

@@ -1,4 +1,5 @@
 import type { NewsItem, NewsCategory, TrustTier } from "@/components/news/NewsCard";
+import { cleanSummary, cleanTitle, truncateSummary } from "@/lib/newsSummary";
 
 // RSS-to-JSON proxy service (free tier, no API key needed)
 const RSS2JSON_API = "https://api.rss2json.com/v1/api.json";
@@ -76,47 +77,9 @@ function parsePubDate(pubDate: string | null | undefined): string {
   return parsed.toISOString().split("T")[0];
 }
 
-// Extract plain text from HTML
-function stripHtml(html: string): string {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  return doc.body.textContent || "";
-}
+// Title/summary cleaning lives in `@/lib/newsSummary` so the live feeds, the
+// stored monthly updates and the curated fallbacks all present identical fields.
 
-// Feeds often repeat the headline at the start of the description — drop it so the
-// summary adds information instead of restating the title.
-function stripTitlePrefix(description: string, title: string): string {
-  const clean = stripHtml(description).replace(/\s+/g, " ").trim();
-  if (!title) return clean;
-  if (clean.toLowerCase().startsWith(title.toLowerCase())) {
-    return clean.slice(title.length).replace(/^[\s\-–—:.]+/, "").trim() || clean;
-  }
-  return clean;
-}
-
-// Trim text to a readable length WITHOUT leaving a half-finished sentence.
-// Prefers cutting at the last full sentence; otherwise falls back to a word boundary.
-function truncate(text: string, maxLength: number = 320): string {
-  const clean = stripHtml(text).replace(/\s+/g, " ").trim();
-  if (!clean) return "";
-  if (clean.length <= maxLength) return clean;
-
-  const window = clean.substring(0, maxLength);
-
-  // Last complete sentence inside the window (keep at least half the window).
-  const sentenceEnd = Math.max(
-    window.lastIndexOf(". "),
-    window.lastIndexOf("! "),
-    window.lastIndexOf("? "),
-  );
-  if (sentenceEnd > maxLength * 0.5) {
-    return window.substring(0, sentenceEnd + 1).trim();
-  }
-
-  // Otherwise cut on a word boundary and signal continuation.
-  const wordEnd = window.lastIndexOf(" ");
-  const cut = (wordEnd > 0 ? window.substring(0, wordEnd) : window).replace(/[,;:.\-–—]+$/, "").trim();
-  return `${cut}…`;
-}
 
 // Generate a stable, collision-free ID from a feed item.
 // (A base64 prefix was previously used, which produced identical IDs for every item
@@ -178,8 +141,8 @@ export async function fetchRssFeed(config: FeedConfig): Promise<NewsItem[]> {
     }
 
     const items: NewsItem[] = data.items.map((item) => {
-      const title = stripHtml(item.title).replace(/\s+/g, " ").trim();
-      const body = stripTitlePrefix(item.description, title);
+      const title = cleanTitle(item.title);
+      const body = cleanSummary(item.description, title);
       return {
         id: generateId(item, config.url),
         title,
@@ -188,11 +151,12 @@ export async function fetchRssFeed(config: FeedConfig): Promise<NewsItem[]> {
         publishedAt: parsePubDate(item.pubDate),
         category: config.category,
         tags: extractTags(item.title, item.description),
-        summary: truncate(body),
-        fullSummary: body,
+        summary: truncateSummary(body) || title,
+        fullSummary: body || undefined,
         trustTier: config.trustTier,
       };
-    });
+    }).filter((item) => item.title && item.sourceUrl);
+
 
     // Update cache
     cache.set(cacheKey, { data: items, timestamp: Date.now() });
