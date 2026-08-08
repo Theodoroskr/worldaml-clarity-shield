@@ -11,7 +11,7 @@ import { academyHref } from "@/lib/academyHost";
 import type { AcademyOverview, LearningCourse, CertificateRow } from "@/hooks/useAcademyOverview";
 import { formatDistanceToNow } from "date-fns";
 
-const courseUrl = (slug: string) => academyHref(`/academy/${slug}`);
+const courseUrl = (slug: string) => `/dashboard/courses/${slug}`;
 const certUrl = (token: string) => academyHref(`/academy/certificate/${token}`);
 
 export function courseStatus(c: LearningCourse): "Not Started" | "In Progress" | "Completed" {
@@ -44,7 +44,7 @@ export function ContinueLearning({ current, others }: { current: LearningCourse 
             <h3 className="font-semibold text-foreground">Start your first course</h3>
             <p className="text-sm text-muted-foreground mt-1">Build your compliance expertise with WorldAML Academy.</p>
           </div>
-          <Button asChild size="sm"><a href={academyHref("/academy")}>Browse Courses</a></Button>
+          <Button asChild size="sm"><Link to="/dashboard/courses">Browse Courses</Link></Button>
         </CardContent>
       </Card>
     );
@@ -151,7 +151,7 @@ export function MyCourses({ courses }: { courses: LearningCourse[] }) {
     <Card className="border-border">
       <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
         <CardTitle className="text-base">My Courses</CardTitle>
-        <Link to="/my-learning" className="text-xs font-medium text-accent hover:underline">View all courses →</Link>
+        <Link to="/dashboard/my-courses" className="text-xs font-medium text-accent hover:underline">View all courses →</Link>
       </CardHeader>
       <CardContent className="space-y-2">
         {courses.slice(0, 3).map((c) => <CourseRow key={c.course.id} c={c} />)}
@@ -183,14 +183,14 @@ export function CertificatesSection({ certificates }: { certificates: Certificat
       <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
         <CardTitle className="text-base">My Certificates</CardTitle>
         {certificates.length > 0 && (
-          <Link to="/certificates" className="text-xs font-medium text-accent hover:underline">View all certificates →</Link>
+          <Link to="/dashboard/certificates" className="text-xs font-medium text-accent hover:underline">View all certificates →</Link>
         )}
       </CardHeader>
       <CardContent className="space-y-2">
         {certificates.length === 0 ? (
           <div className="text-center py-5 space-y-3">
             <p className="text-sm text-muted-foreground">Complete a course to earn your first WorldAML certificate.</p>
-            <Button asChild variant="outline" size="sm"><a href={academyHref("/academy")}>Browse Courses</a></Button>
+            <Button asChild variant="outline" size="sm"><Link to="/dashboard/courses">Browse Courses</Link></Button>
           </div>
         ) : (
           certificates.slice(0, 2).map((c) => <CertificateRowItem key={c.id} cert={c} />)
