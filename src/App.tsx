@@ -183,6 +183,7 @@ const BusinessProfile = lazyWithRetry(() => import("./pages/business/BusinessPro
 const BusinessSecurity = lazyWithRetry(() => import("./pages/business/BusinessSecurity"));
 const BusinessBilling = lazyWithRetry(() => import("./pages/business/BusinessBilling"));
 const BusinessQuotes = lazyWithRetry(() => import("./pages/business/BusinessQuotes"));
+const BusinessResources = lazyWithRetry(() => import("./pages/business/BusinessResources"));
 const AdminRecognition = lazyWithRetry(() => import("./pages/admin/AdminRecognition"));
 
 const AcademyLogin = lazyWithRetry(() => import("./pages/auth/AcademyLogin"));
@@ -334,6 +335,7 @@ const App = () => (
                   <Route path="security" element={<BusinessSecurity />} />
                   <Route path="billing" element={<BusinessBilling />} />
                   <Route path="quotes" element={<BusinessQuotes />} />
+                  <Route path="resources" element={<BusinessResources />} />
                 </Route>
                 {/* WorldAML Academy — authenticated learner shell */}
                 <Route element={<PortalGuard portal="academy"><AppShellLayout /></PortalGuard>}>
