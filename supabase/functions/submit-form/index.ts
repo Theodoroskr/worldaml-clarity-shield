@@ -619,9 +619,14 @@ Deno.serve(async (req) => {
           Landing_Page_URL: attribution.landing_page || undefined,
           // Custom writable URL field on Leads — the page the visitor was on
           // when they clicked the CTA that led to this form (falls back to the
-          // external document.referrer).
-          Referrer_URL:
-            attribution.cta_referrer || attribution.referrer || undefined,
+          // external document.referrer). Zoho requires an absolute URL.
+          Referrer_URL: (() => {
+            const raw = attribution.cta_referrer || attribution.referrer;
+            if (!raw) return undefined;
+            if (/^https?:\/\//i.test(raw)) return raw;
+            return `https://worldaml.com${raw.startsWith("/") ? "" : "/"}${raw}`;
+          })(),
+
 
 
           Source_UTM: attribution.utm_source || undefined,
