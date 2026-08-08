@@ -530,12 +530,7 @@ Deno.serve(async (req) => {
           Source_UTM: attribution.utm_source || undefined,
           Medium_UTM: attribution.utm_medium || undefined,
           Name_UTM: attribution.utm_campaign || undefined,
-          // Attribution — mapped to standard Zoho campaign UTM-style fields where possible.
-          $utm_source: attribution.utm_source || undefined,
-          $utm_medium: attribution.utm_medium || undefined,
-          $utm_campaign: attribution.utm_campaign || undefined,
-          $utm_term: attribution.utm_term || undefined,
-          $utm_content: attribution.utm_content || undefined,
+
 
           // ── Lead Source 2 (channel picklist) ──────────────────────────────
           // Derived from UTM / referrer so the CRM's Lead Source block is
