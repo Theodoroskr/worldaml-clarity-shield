@@ -67,6 +67,8 @@ serve(async (req) => {
     const currency: string = (body?.currency ?? "eur").toLowerCase();
     const guestEmailRaw: string | undefined =
       typeof body?.guestEmail === "string" ? body.guestEmail.trim().toLowerCase() : undefined;
+    const referralPartner = await resolvePartnerByCode(serviceClient, body?.referralCode);
+
 
     if (courseSlugs.length === 0) return json({ error: "No courses provided" }, 400);
     if (!RATES[currency]) return json({ error: "Unsupported currency" }, 400);
