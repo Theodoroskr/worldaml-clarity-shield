@@ -1,5 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend";
+import { normaliseCode, recordReferral, resolvePartnerByCode } from "../_shared/referral.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
