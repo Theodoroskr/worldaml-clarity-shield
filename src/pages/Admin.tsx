@@ -663,8 +663,10 @@ const Admin = () => {
                             <th className="pb-3 pr-4 font-semibold text-navy">Type</th>
                             <th className="pb-3 pr-4 font-semibold text-navy">Products</th>
                             <th className="pb-3 pr-4 font-semibold text-navy">Region</th>
+                            <th className="pb-3 pr-4 font-semibold text-navy">Partner</th>
                             <th className="pb-3 pr-4 font-semibold text-navy">Date</th>
                             <th className="pb-3 pr-4 font-semibold text-navy">Status</th>
+
                           </tr>
                         </thead>
                         <tbody>
