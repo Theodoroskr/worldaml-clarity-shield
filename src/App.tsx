@@ -83,7 +83,6 @@ const CoursePlayer = lazyWithRetry(() => import("./pages/dashboard/CoursePlayer"
 const CartPage = lazyWithRetry(() => import("./pages/dashboard/CartPage"));
 const Plans = lazyWithRetry(() => import("./pages/dashboard/Plans"));
 const PendingApproval = lazyWithRetry(() => import("./pages/PendingApproval"));
-const Admin = lazyWithRetry(() => import("./pages/Admin"));
 const ForgotPassword = lazyWithRetry(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
 const WorldID = lazyWithRetry(() => import("./pages/WorldID"));
@@ -167,6 +166,7 @@ const AdminOutreachQueue = lazyWithRetry(() => import("./pages/admin/AdminOutrea
 const AdminPartnerAssets = lazyWithRetry(() => import("./pages/admin/AdminPartnerAssets"));
 const AdminBusiness = lazyWithRetry(() => import("./pages/admin/AdminBusiness"));
 const AdminIdentities = lazyWithRetry(() => import("./pages/admin/AdminIdentities"));
+const AdminInternalAccess = lazyWithRetry(() => import("./pages/admin/AdminInternalAccess"));
 const PartnerSignup = lazyWithRetry(() => import("./pages/partner/PartnerSignup"));
 const BusinessSignup = lazyWithRetry(() => import("./pages/business/BusinessSignup"));
 const BusinessLogin = lazyWithRetry(() => import("./pages/business/BusinessLogin"));
@@ -357,7 +357,6 @@ const App = () => (
 
                 </Route>
                 <Route path="/pending-approval" element={<PendingApproval />} />
-                <Route path="/admin" element={<Admin />} />
                 <Route path="/admin" element={<PortalGuard portal="admin"><AdminLayout /></PortalGuard>}>
 
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
@@ -377,6 +376,7 @@ const App = () => (
                   <Route path="partner-assets" element={<AdminPartnerAssets />} />
                   <Route path="business" element={<AdminBusiness />} />
                   <Route path="identities" element={<AdminIdentities />} />
+                  <Route path="internal-access" element={<AdminInternalAccess />} />
                   <Route path="domains" element={<AdminDomains />} />
                   <Route path="academy-users" element={<AdminAcademyUsers />} />
                   <Route path="academy-funnel" element={<AdminAcademyFunnel />} />
