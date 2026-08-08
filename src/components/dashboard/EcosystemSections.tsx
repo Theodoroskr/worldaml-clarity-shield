@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Building2, Library, Scale, Search, Shield, FileText } from "lucide-react";
+import { ArrowRight, Building2, Scale, Search, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { useRcmOrg } from "@/hooks/useRcmOrg";
@@ -126,9 +126,6 @@ export function CourseCrossSell({
 /* ── WorldAML Tools (discovery navigation under Resources) ───── */
 const TOOLS = [
   { label: "Sanctions Quick Check", href: "/sanctions-check", icon: Search },
-  { label: "Compliance Glossary", href: "/resources/glossary", icon: Library },
-  { label: "Sanctions Lists", href: "/resources/sanctions-lists", icon: Scale },
-  { label: "Regulatory Resources", href: "/resources/aml-regulations", icon: FileText },
   { label: "WorldAML Suite", href: "/platform/suite", icon: Shield },
   { label: "Regulatory Compliance Management", href: "/platform/regulatory-reporting", icon: Scale },
 ];

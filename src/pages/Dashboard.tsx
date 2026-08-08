@@ -4,7 +4,7 @@ import { useEntitlements } from "@/hooks/useEntitlements";
 import { useAcademyOverview } from "@/hooks/useAcademyOverview";
 import {
   ContinueLearning, LearningOverview, MyCourses,
-  CertificatesSection, RecommendedNext, ResourcesSection, QuickCheckLink,
+  CertificatesSection, RecommendedNext, ResourcesSection,
 } from "@/components/dashboard/DashboardSections";
 import {
   ComplianceInPractice, ExploreWorldAML, WorldAMLTools,
@@ -52,8 +52,6 @@ export default function Dashboard() {
         <ResourcesSection />
 
         <WorldAMLTools />
-
-        <QuickCheckLink />
       </div>
     </>
   );
