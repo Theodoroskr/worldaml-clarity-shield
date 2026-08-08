@@ -205,11 +205,12 @@ export async function renderRecognitionCard(
     },
   ];
 
-  const tw = 232;
-  const th = 108;
-  const ty = 424;
+  const tw = 214;
+  const tgap = 16;
+  const th = 104;
+  const ty = 428;
   tiles.forEach((t, i) => {
-    const x = 72 + i * (tw + 18);
+    const x = 72 + i * (tw + tgap);
     ctx.fillStyle = t.dim ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.07)";
     roundedRect(ctx, x, ty, tw, th, 14);
     ctx.fill();
@@ -219,23 +220,26 @@ export async function renderRecognitionCard(
     ctx.stroke();
 
     ctx.fillStyle = t.dim ? "rgba(255,255,255,0.45)" : WHITE;
-    ctx.font = "bold 40px Arial, Helvetica, sans-serif";
-    ctx.fillText(t.value, x + 20, ty + 58);
+    ctx.font = "bold 38px Arial, Helvetica, sans-serif";
+    ctx.fillText(t.value, x + 20, ty + 54);
     ctx.fillStyle = t.dim ? "rgba(148,163,184,0.65)" : MUTED;
-    ctx.font = "17px Arial, Helvetica, sans-serif";
-    ctx.fillText(t.label, x + 20, ty + 88);
+    ctx.font = "16px Arial, Helvetica, sans-serif";
+    ctx.fillText(t.label, x + 20, ty + 84);
   });
 
-  // CPD / qualification claim
+  // CPD / qualification claim — sits clear of the tiles (tiles end at 762)
+  const claimX = 800;
+  const claimW = W - claimX - 72;
   ctx.fillStyle = accent;
   ctx.font = "bold 13px Arial, Helvetica, sans-serif";
-  ctx.fillText("CPD & QUALIFICATION", 782, ty + 46);
+  ctx.fillText("CPD & QUALIFICATION", claimX, ty + 22);
   ctx.fillStyle = WHITE;
-  ctx.font = "18px Arial, Helvetica, sans-serif";
+  ctx.font = "16px Arial, Helvetica, sans-serif";
   const claim = hours > 0
     ? `${hours} CPD ${hours === 1 ? "hour" : "hours"} of structured AML learning, evidenced by verified WorldAML Academy certificates.`
     : "Structured, CPD-aligned AML learning with verifiable WorldAML Academy certificates.";
-  wrap(ctx, claim, W - 782 - 72).slice(0, 3).forEach((l, i) => ctx.fillText(l, 782, ty + 74 + i * 24));
+  wrap(ctx, claim, claimW).slice(0, 4).forEach((l, i) => ctx.fillText(l, claimX, ty + 50 + i * 22));
+
 
 
   // Footer
