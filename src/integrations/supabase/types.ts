@@ -686,6 +686,104 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_report_runs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          period_end: string | null
+          period_start: string | null
+          recipients: string[]
+          report_id: string | null
+          report_name: string
+          report_type: string
+          status: string
+          summary: Json | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          recipients?: string[]
+          report_id?: string | null
+          report_name: string
+          report_type: string
+          status?: string
+          summary?: Json | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          recipients?: string[]
+          report_id?: string | null
+          report_name?: string
+          report_type?: string
+          status?: string
+          summary?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_report_runs_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "admin_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_reports: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          format: string
+          frequency: string
+          id: string
+          is_active: boolean
+          last_run_at: string | null
+          name: string
+          portal_filter: string
+          range_key: string
+          recipients: string[]
+          report_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          format?: string
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          name: string
+          portal_filter?: string
+          range_key?: string
+          recipients?: string[]
+          report_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          format?: string
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          name?: string
+          portal_filter?: string
+          range_key?: string
+          recipients?: string[]
+          report_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       admin_subscription_tiers: {
         Row: {
           created_at: string
@@ -6900,6 +6998,7 @@ export type Database = {
         }[]
       }
       academy_recognition_status: { Args: never; Returns: Json }
+      admin_analytics: { Args: { _from: string; _to: string }; Returns: Json }
       admin_grant_suite_access:
         | { Args: { target_email: string }; Returns: undefined }
         | {
