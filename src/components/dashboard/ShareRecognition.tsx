@@ -20,23 +20,28 @@ const HASHTAGS = ["AML", "Compliance", "FinancialCrime", "KYC", "Sanctions", "Wo
  * achievement data, hyperlinks, mentions and hashtags. Member Level is a
  * recognition of continued learning, never a professional qualification.
  */
-export function buildShareMessage(r: RecognitionStatus, network: "linkedin" | "x" | "facebook" | "email") {
+export function buildShareMessage(
+  r: RecognitionStatus,
+  network: "linkedin" | "x" | "facebook" | "email",
+  cpdHours = 0,
+) {
   const preset = levelPresentation(r);
   const level = r.level?.name ?? "Member";
   const courses = plural(r.completedCourses, "Academy course", "Academy courses");
   const certs = r.certificates > 0
     ? ` and ${plural(r.certificates, "verified certificate", "verified certificates")} earned`
     : "";
-  const badges = r.earnedBadges.length
-    ? `\n\nSpecialisations earned: ${r.earnedBadges.map((b) => b.name).join(", ")}.`
-    : "";
+  const hours = Math.round((cpdHours ?? 0) * 10) / 10;
+  const cpd = hours > 0
+    ? `\n\nCPD: ${hours} ${hours === 1 ? "hour" : "hours"} of structured AML learning, evidenced by verified WorldAML Academy certificates.`
+    : "\n\nStructured, CPD-aligned AML learning with verifiable WorldAML Academy certificates.";
 
   const mention = network === "x" ? "@WorldAML" : "WorldAML";
   const opener = preset.caption.replace("WorldAML Academy", `${mention} Academy`);
   const tags = network === "email" ? "" : `\n\n${HASHTAGS.map((h) => `#${h}`).join(" ")}`;
 
   const body =
-    `${opener}\n\nSo far: ${courses} completed${certs}.${badges}` +
+    `${opener}\n\nSo far: ${courses} completed${certs}.${cpd}` +
     `\n\nExplore the WorldAML Academy: ${ACADEMY_URL}` +
     (network === "linkedin" ? `\nWorldAML on LinkedIn: ${LINKEDIN_PAGE}` : "") +
     tags;
