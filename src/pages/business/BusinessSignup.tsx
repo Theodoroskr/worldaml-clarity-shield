@@ -48,6 +48,14 @@ export default function BusinessSignup() {
       toast({ title: "Company name and work email are required", variant: "destructive" });
       return;
     }
+    if (!isWorkEmail(email)) {
+      toast({
+        title: "Use a company email address",
+        description: "Business accounts require a work email — free or disposable providers aren't accepted.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsLoading(true);
     const payload = {
@@ -59,35 +67,45 @@ export default function BusinessSignup() {
       phone: phone.trim() || null,
     };
 
-    const { error } = await signUp(email.trim(), password, {
+    const result = await ensureAuthAccount(email, password, {
       full_name: contactName.trim() || companyName.trim(),
       company_name: companyName.trim(),
       account_type: "business",
     });
 
-    if (error) {
+    if (result.error) {
       setIsLoading(false);
-      toast({ title: "Sign-up failed", description: error.message, variant: "destructive" });
+      toast({ title: "Sign-up failed", description: result.error, variant: "destructive" });
       return;
     }
 
-    const { data: authData } = await supabase.auth.getUser();
-    const uid = authData.user?.id;
+    const uid = result.userId;
 
     if (uid) {
-      const { error: insertError } = await supabase
-        .from("business_accounts")
-        .insert({ ...payload, user_id: uid });
-      setIsLoading(false);
-      if (insertError) {
-        toast({ title: "Could not save company details", description: insertError.message, variant: "destructive" });
-        return;
+      const { data: existing } = await supabase
+        .from("business_accounts").select("id").eq("user_id", uid).maybeSingle();
+      if (!existing) {
+        const { error: insertError } = await supabase
+          .from("business_accounts")
+          .insert({ ...payload, user_id: uid });
+        if (insertError) {
+          setIsLoading(false);
+          toast({ title: "Could not save company details", description: insertError.message, variant: "destructive" });
+          return;
+        }
       }
+      setIsLoading(false);
       localStorage.removeItem(PENDING_BUSINESS_KEY);
-      toast({ title: "Business account created", description: "Welcome to WorldAML." });
+      toast({
+        title: result.existingIdentity ? "Business profile added" : "Business account created",
+        description: result.existingIdentity
+          ? "Your existing WorldAML sign-in now also opens the business portal."
+          : "Welcome to WorldAML.",
+      });
       navigate(next);
       return;
     }
+
 
     // Email confirmation pending — finish account creation on first sign-in.
     localStorage.setItem(PENDING_BUSINESS_KEY, JSON.stringify(payload));
