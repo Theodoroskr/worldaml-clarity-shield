@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { FREE_ACADEMY_COURSES } from "@/data/academyPricing";
+import { FREE_ACADEMY_COURSES, isPaidCourse } from "@/data/academyPricing";
 
 interface CourseRow {
   id: string;
@@ -124,10 +124,11 @@ export const useCourseGate = (slug: string | undefined): GateResult => {
     };
   }
 
-  const isFree = FREE_ACADEMY_COURSES.has(course.slug);
-  // A course is "paid" when it isn't on the free list. We do NOT require a
-  // Stripe price to be set — courses without one just can't be checked out yet,
-  // but they still gate behind login + (eventually) purchase.
+  // A course is "paid" only when it has a price (pricing table or DB price).
+  // Courses with no price behave like free courses: sign in, start, and earn
+  // the certificate on completion — no purchase step.
+  const hasPrice = isPaidCourse(course.slug) || (course.price_eur_cents ?? 0) > 0;
+  const isFree = FREE_ACADEMY_COURSES.has(course.slug) || !hasPrice;
   const isPaid = !isFree;
 
   // Not signed in → blocked for every course (free included).

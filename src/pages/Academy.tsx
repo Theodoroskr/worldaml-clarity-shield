@@ -1655,7 +1655,11 @@ const Academy = () => {
                         {(() => {
                           const isFree = FREE_ACADEMY_COURSES.has(course.slug);
                           const purchased = hasAnnualPass || purchasedSlugs.has(course.slug);
-                          const requiresPurchase = !isFree && !purchased;
+                          // Courses without a price behave like free courses:
+                          // start CTA only, certificate after completion.
+                          const requiresPurchase =
+                            !isFree && isPaidCourse(course.slug) && !purchased;
+
                           const inCart = cart.has(course.slug);
 
                           if (status === "completed") {
