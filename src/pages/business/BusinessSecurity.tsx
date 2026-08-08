@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useBusinessWorkspace, BUSINESS_ROLE_LABEL } from "@/hooks/useBusinessWorkspace";
+import MarketingPreferences from "@/components/account/MarketingPreferences";
 
 export default function BusinessSecurity() {
   const { user } = useAuth();
@@ -93,6 +94,7 @@ export default function BusinessSecurity() {
           </div>
         </CardContent>
       </Card>
+        <MarketingPreferences />
     </div>
   );
 }
