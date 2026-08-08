@@ -66,6 +66,8 @@ const ContactSales = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState<string | null>(null);
   const [marketingConsent, setMarketingConsent] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
+
 
   const [formData, setFormData] = useState({
     firstName: "",
