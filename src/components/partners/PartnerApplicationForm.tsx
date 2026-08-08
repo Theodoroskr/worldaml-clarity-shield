@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, CheckCircle } from "lucide-react";
@@ -15,6 +17,9 @@ const PartnerApplicationForm = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [form, setForm] = useState({
     company_name: "",
     website: "",
@@ -34,6 +39,16 @@ const PartnerApplicationForm = () => {
     if (!form.contact_email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contact_email.trim())) {
       toast.error("A valid contact email is required"); return;
     }
+    if (!termsAccepted) {
+      setTermsError(
+        "You must accept the Terms & Conditions and Privacy Policy before submitting your application.",
+      );
+      toast.error("Please accept the Terms & Conditions and Privacy Policy to submit your application.");
+      return;
+    }
+    setTermsError(null);
+    const consentTimestamp = new Date().toISOString();
+
 
     setLoading(true);
     const { data: inserted, error } = await supabase.from("partner_applications").insert({
