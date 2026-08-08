@@ -693,7 +693,16 @@ export default function AdminUsers() {
             {nonPartnerProfiles.length} platform users · {suiteUsers.length} suite users · {partnerApplicants.length} partner applicants (processed in <Link to="/admin/partners" className="text-primary hover:underline">Partner Program</Link>) · {academyUsers.length} academy learners (managed in <a href="/admin/academy-users" className="text-primary hover:underline">Academy Signups</a>)
           </p>
         </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => runExport(nonPartnerProfiles, "csv")}>
+            <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => runExport(nonPartnerProfiles, "xlsx")}>
+            <Table2 className="w-3.5 h-3.5 mr-1" /> Export Excel
+          </Button>
+        </div>
       </div>
+
 
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-xs">
