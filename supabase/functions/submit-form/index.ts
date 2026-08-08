@@ -528,72 +528,93 @@ Deno.serve(async (req) => {
             return mapped.size ? Array.from(mapped) : undefined;
           })(),
 
-          // High-level category picklist "Product type list" (api_name:
-          // Product_type_list1). Zoho picklist values: Platform, Data Source,
-          // Training. Priority when multiple categories present:
-          // Training > Platform > Data Source.
+          // "Product type list" (api_name: Product_type_list1) — brand-level
+          // tag: partner-programme submissions are "WorldAML Partnership",
+          // every other website form is "WorldAML".
           Product_type_list1: (() => {
-            if (!Array.isArray(products) || products.length === 0) return undefined;
-            type Category = "Training" | "Platform" | "Data Source";
-            const CATEGORY_MAP: Record<string, Category> = {
-              // Platform
-              "worldaml-suite": "Platform",
-              "suite": "Platform",
-              "worldaml-api": "Platform",
-              "worldid": "Platform",
-              "sanctions-api": "Platform",
-              "kyc-kyb-api": "Platform",
-              "aml-screening": "Platform",
-              "transaction-monitoring": "Platform",
-              "regulatory-reporting": "Platform",
-              "risk-assessment": "Platform",
-              // Book-a-Demo use-case codes
-              "aml": "Platform",
-              "kyc": "Platform",
-              "kyb": "Platform",
-              "tm": "Platform",
-              "reporting": "Platform",
-              // Data Source
-              "worldcompliance": "Data Source",
-              "worldcompliance®": "Data Source",
-              "bridger-xg": "Data Source",
-              "bridger-insight-xg": "Data Source",
-              "bridger insight xg": "Data Source",
-              "bridger insight xg®": "Data Source",
-              // Training
-              "academy": "Training",
-              "academy-team": "Training",
-              "academy-team-plan": "Training",
-              "training": "Training",
-            };
-            // Live Zoho picklist values (from settings/fields metadata):
-            // 'Platforms', 'Data Sources', 'Training'.
-            const PICKLIST_FOR_CATEGORY: Record<Category, string> = {
-              Training: "Training",
-              Platform: "Platforms",
-              "Data Source": "Data Sources",
-            };
-
-            const seen = new Set<Category>();
-            for (const raw of products) {
-              const key = String(raw ?? "").trim().toLowerCase();
-              const cat = CATEGORY_MAP[key];
-              if (cat) seen.add(cat);
-            }
-            const chosen: Category | undefined = seen.has("Training")
-              ? "Training"
-              : seen.has("Platform")
-                ? "Platform"
-                : seen.has("Data Source")
-                  ? "Data Source"
-                  : undefined;
-            return chosen ? [PICKLIST_FOR_CATEGORY[chosen]] : undefined;
+            const key = String(form_type ?? "").trim().toLowerCase();
+            const isPartner =
+              key.includes("partner") ||
+              (Array.isArray(products) &&
+                products.some((p) => String(p ?? "").toLowerCase().includes("partner")));
+            return [isPartner ? "WorldAML Partnership" : "WorldAML"];
           })(),
 
           // Marketing / attribution custom fields (Zoho CRM API names)
           Website_Name: "WorldAML",
-          // Default reporting currency for WorldAML website leads.
-          Currency: "EUR",
+
+          // Currency (api_name: Expected_Revenue_Amount_Currency) — derived
+          // from the country the visitor selected on the form; Euro is the
+          // default when the country is unknown or not mapped.
+          Expected_Revenue_Amount_Currency: (() => {
+            const c = String((metadata as any)?.country ?? country ?? "")
+              .trim()
+              .toLowerCase();
+            if (!c) return "Euro";
+            const MAP: Record<string, string> = {
+              "united states": "US Dollar",
+              "united states of america": "US Dollar",
+              usa: "US Dollar",
+              us: "US Dollar",
+              "united kingdom": "Pound Sterling",
+              uk: "Pound Sterling",
+              "great britain": "Pound Sterling",
+              england: "Pound Sterling",
+              scotland: "Pound Sterling",
+              wales: "Pound Sterling",
+              canada: "Canadian Dollar",
+              australia: "Australian Dollar",
+              "new zealand": "New Zealand Dollar",
+              switzerland: "Swiss Franc",
+              norway: "Norwegian Krone",
+              sweden: "Swedish Krona",
+              denmark: "Danish Krone",
+              poland: "Zloty",
+              "czech republic": "Czech Koruna",
+              czechia: "Czech Koruna",
+              hungary: "Forint",
+              romania: "Romanian Leu",
+              bulgaria: "Bulgarian Lev",
+              turkey: "Turkish Lira",
+              "united arab emirates": "UAE Dirham",
+              uae: "UAE Dirham",
+              "saudi arabia": "Saudi Riyal",
+              qatar: "Qatari Rial",
+              kuwait: "Kuwaiti Dinar",
+              bahrain: "Bahraini Dinar",
+              oman: "Rial Omani",
+              israel: "New Israeli Sheqel",
+              india: "Indian Rupee",
+              singapore: "Singapore Dollar",
+              "hong kong": "Hong Kong Dollar",
+              japan: "Yen",
+              china: "Yuan Renminbi",
+              "south korea": "Won",
+              malaysia: "Malaysian Ringgit",
+              philippines: "Philippine Peso",
+              indonesia: "Rupiah",
+              thailand: "Baht",
+              vietnam: "Dong",
+              "south africa": "Rand",
+              nigeria: "Naira",
+              kenya: "Kenyan Shilling",
+              egypt: "Egyptian Pound",
+              morocco: "Moroccan Dirham",
+              brazil: "Brazilian Real",
+              mexico: "Mexican Peso",
+              argentina: "Argentine Peso",
+              chile: "Chilean Peso",
+              colombia: "Colombian Peso",
+              ukraine: "Hryvnia",
+              iceland: "Iceland Krona",
+              serbia: "Serbian Dinar",
+              georgia: "Lari",
+              mauritius: "Mauritius Rupee",
+              pakistan: "Pakistan Rupee",
+            };
+            return MAP[c] || "Euro";
+          })(),
+
 
           Landing_Page_URL: attribution.landing_page || undefined,
           // Custom writable URL field on Leads — the page the visitor was on
