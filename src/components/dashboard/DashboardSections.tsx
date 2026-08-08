@@ -52,13 +52,25 @@ export function ContinueLearning({ current, others }: { current: LearningCourse 
   }
 
   const cta = courseCta(current);
+  const cover = getCourseCover(current.course.slug);
   return (
     <div className="space-y-2">
       <Card className="border-border overflow-hidden">
         <div className="h-1 bg-accent" />
         <CardContent className="p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
+            {cover && (
+              <a href={cta.href} className="shrink-0 hidden sm:block">
+                <img
+                  src={cover}
+                  alt={`${current.course.title} course cover`}
+                  loading="lazy"
+                  className="h-24 w-40 rounded-lg object-cover border border-border"
+                />
+              </a>
+            )}
             <div className="min-w-0 flex-1">
+
               <div className="text-[11px] font-semibold uppercase tracking-wider text-accent mb-1">
                 {current.quizPassed ? "Recently completed" : "Continue learning"}
               </div>
