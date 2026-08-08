@@ -15,6 +15,8 @@ import {
 import { Loader2, CheckCircle, XCircle, Handshake, Pencil, FileSignature, Bell, History, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { logPartnerAdminAction } from "@/lib/partnerAudit";
+import PartnerProgramAnalytics from "@/components/admin/PartnerProgramAnalytics";
+
 
 const VERTICALS = ["banking", "fintech", "crypto", "igaming", "payments", "legal"];
 const STATUS_STYLES: Record<string, string> = {
