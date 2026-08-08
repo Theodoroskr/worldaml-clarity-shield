@@ -19,7 +19,6 @@ import { isAcademyHost } from "@/lib/academyHost";
 import AcademyHeader from "@/components/academy/AcademyHeader";
 import { AcademyCartButton } from "@/components/academy/AcademyCartDrawer";
 import SignInSelector from "@/components/auth/SignInSelector";
-import GetStartedSelector from "@/components/auth/GetStartedSelector";
 
 
 
