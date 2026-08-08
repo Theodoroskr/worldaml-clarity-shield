@@ -7100,6 +7100,7 @@ export type Database = {
       sweep_customer_document_expiry: { Args: never; Returns: Json }
       sweep_regulator_submission_sla: { Args: never; Returns: number }
       sweep_retention: { Args: never; Returns: Json }
+      sweep_sanctions_search_retention: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
