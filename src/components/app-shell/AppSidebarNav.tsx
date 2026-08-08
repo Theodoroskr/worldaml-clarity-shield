@@ -1,19 +1,17 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, GraduationCap, BookOpen, Award, Search, Library,
-  User, CreditCard, LifeBuoy, ShieldCheck, Building2, Landmark, Handshake,
-  PlayCircle,
+  LayoutDashboard, GraduationCap, BookOpen, Award, Library,
+  User, CreditCard, LifeBuoy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
 import { academyHref } from "@/lib/academyHost";
-import { useEntitlements } from "@/hooks/useEntitlements";
 
 export interface NavEntry {
   label: string;
   to: string;
   icon: any;
-  /** external = full page navigation (different host or legacy app area) */
+  /** external = full page navigation (different host or non-shell route) */
   external?: boolean;
 }
 export interface NavGroup {
@@ -21,73 +19,38 @@ export interface NavGroup {
   items: NavEntry[];
 }
 
+/**
+ * Academy learner navigation ONLY.
+ * Admin, WorldAML Suite, RCM and partner surfaces are intentionally absent —
+ * those live in their own layouts and must never appear here.
+ */
 export function useAppNav(): NavGroup[] {
-  const { hasSuite, hasRcm, hasPartnerPortal, isAdmin } = useEntitlements();
-
-  const groups: NavGroup[] = [
-    { label: "Home", items: [{ label: "Dashboard", to: "/dashboard", icon: LayoutDashboard }] },
-  ];
-
-  if (hasSuite) {
-    groups.push({
-      label: "Compliance",
+  return [
+    { label: "", items: [{ label: "Dashboard", to: "/dashboard", icon: LayoutDashboard }] },
+    {
+      label: "My Learning",
       items: [
-        { label: "Suite Workspace", to: "/suite", icon: Building2, external: true },
-        { label: "Screening", to: "/suite/screening", icon: ShieldCheck, external: true },
-        { label: "Alerts", to: "/suite/alerts", icon: Landmark, external: true },
-        { label: "Case Queue", to: "/suite/case-queue", icon: Library, external: true },
+        { label: "My Courses", to: "/my-learning", icon: GraduationCap },
+        { label: "Browse Courses", to: academyHref("/academy"), icon: BookOpen, external: true },
+        { label: "Certificates", to: "/certificates", icon: Award },
       ],
-    });
-  }
-
-  if (hasRcm) {
-    groups.push({
-      label: "Regulatory (RCM)",
+    },
+    {
+      label: "Resources",
       items: [
-        { label: "RCM Dashboard", to: "/rcm", icon: Landmark, external: true },
-        { label: "Obligations", to: "/rcm/obligations", icon: Library, external: true },
+        { label: "Compliance Resources", to: "/resources/best-practices", icon: Library, external: true },
+        { label: "Templates & Toolkit", to: academyHref("/academy/templates"), icon: BookOpen, external: true },
       ],
-    });
-  }
-
-  groups.push({
-    label: "My Learning",
-    items: [
-      { label: "Continue Learning", to: "/my-learning", icon: PlayCircle },
-      { label: "My Courses", to: "/my-learning", icon: GraduationCap },
-      { label: "Browse Courses", to: academyHref("/academy"), icon: BookOpen, external: true },
-      { label: "Certificates", to: "/certificates", icon: Award },
-    ],
-  });
-
-  groups.push({
-    label: "Tools",
-    items: [{ label: "Sanctions Quick Check", to: "/sanctions-check", icon: Search, external: true }],
-  });
-
-  groups.push({
-    label: "Resources",
-    items: [
-      { label: "Compliance Resources", to: "/resources/best-practices", icon: Library, external: true },
-    ],
-  });
-
-  if (hasPartnerPortal) {
-    groups.push({
-      label: "Partner",
-      items: [{ label: "Partner Portal", to: "/partner-portal", icon: Handshake, external: true }],
-    });
-  }
-
-  const account: NavEntry[] = [
-    { label: "Profile", to: "/account/profile", icon: User },
-    { label: "Subscription & Billing", to: "/account/billing", icon: CreditCard },
-    { label: "Help & Support", to: "/support", icon: LifeBuoy, external: true },
+    },
+    {
+      label: "Account",
+      items: [
+        { label: "Profile", to: "/account/profile", icon: User },
+        { label: "Subscription & Billing", to: "/account/billing", icon: CreditCard },
+        { label: "Help & Support", to: "/support", icon: LifeBuoy, external: true },
+      ],
+    },
   ];
-  if (isAdmin) account.push({ label: "Admin Panel", to: "/admin/dashboard", icon: ShieldCheck, external: true });
-  groups.push({ label: "Account", items: account });
-
-  return groups;
 }
 
 interface Props {
@@ -101,9 +64,9 @@ export default function AppSidebarNav({ collapsed = false, onNavigate }: Props) 
 
   return (
     <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
-      {groups.map((group) => (
-        <div key={group.label} className="space-y-0.5">
-          {!collapsed && (
+      {groups.map((group, gi) => (
+        <div key={group.label || `g${gi}`} className="space-y-0.5">
+          {!collapsed && group.label && (
             <div className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
               {group.label}
             </div>
@@ -124,11 +87,11 @@ export default function AppSidebarNav({ collapsed = false, onNavigate }: Props) 
               </>
             );
             return item.external ? (
-              <a key={`${group.label}-${item.label}`} href={item.to} className={classes} title={item.label} onClick={onNavigate}>
+              <a key={`${gi}-${item.label}`} href={item.to} className={classes} title={item.label} onClick={onNavigate}>
                 {content}
               </a>
             ) : (
-              <NavLink key={`${group.label}-${item.label}`} to={item.to} className={classes} title={item.label} onClick={onNavigate}>
+              <NavLink key={`${gi}-${item.label}`} to={item.to} className={classes} title={item.label} onClick={onNavigate}>
                 {content}
               </NavLink>
             );
@@ -141,7 +104,7 @@ export default function AppSidebarNav({ collapsed = false, onNavigate }: Props) 
 
 export function SidebarBrand({ collapsed }: { collapsed?: boolean }) {
   return (
-    <a href="/" className="flex h-14 items-center gap-2 border-b border-border px-4 shrink-0">
+    <a href={academyHref("/academy")} className="flex h-14 items-center gap-2 border-b border-border px-4 shrink-0">
       {collapsed ? <Logo size="sm" iconOnly /> : <Logo size="sm" />}
     </a>
   );
