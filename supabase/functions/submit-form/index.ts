@@ -619,9 +619,14 @@ Deno.serve(async (req) => {
           Landing_Page_URL: attribution.landing_page || undefined,
           // Custom writable URL field on Leads — the page the visitor was on
           // when they clicked the CTA that led to this form (falls back to the
-          // external document.referrer).
-          Referrer_URL:
-            attribution.cta_referrer || attribution.referrer || undefined,
+          // external document.referrer). Zoho requires an absolute URL.
+          Referrer_URL: (() => {
+            const raw = attribution.cta_referrer || attribution.referrer;
+            if (!raw) return undefined;
+            if (/^https?:\/\//i.test(raw)) return raw;
+            return `https://worldaml.com${raw.startsWith("/") ? "" : "/"}${raw}`;
+          })(),
+
 
 
           Source_UTM: attribution.utm_source || undefined,
@@ -684,6 +689,21 @@ Deno.serve(async (req) => {
             typeof attribution.average_time_spent_minutes === "number"
               ? attribution.average_time_spent_minutes
               : undefined,
+
+          // Writable mirrors of the read-only Visit Summary block (custom text
+          // fields created on the Leads layout).
+          Web_First_Visit: attribution.first_visited_at || undefined,
+          Web_Most_Recent_Visit: attribution.last_visited_at || undefined,
+          Web_Visitor_Score:
+            typeof attribution.visitor_score === "number"
+              ? String(attribution.visitor_score)
+              : undefined,
+          Web_Average_Time_Spend:
+            typeof attribution.average_time_spent_minutes === "number"
+              ? String(attribution.average_time_spent_minutes)
+              : undefined,
+
+
 
           // Sales Organisation Unit — WorldAML website leads belong to the
           // WorldAML sales unit.
