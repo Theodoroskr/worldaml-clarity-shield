@@ -138,9 +138,19 @@ export function LearningOverview({ data }: { data: AcademyOverview }) {
 export function CourseRow({ c }: { c: LearningCourse }) {
   const cta = courseCta(c);
   const status = courseStatus(c);
+  const cover = getCourseCover(c.course.slug);
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3">
+      {cover && (
+        <img
+          src={cover}
+          alt={`${c.course.title} course cover`}
+          loading="lazy"
+          className="h-11 w-16 rounded-md object-cover border border-border shrink-0 hidden sm:block"
+        />
+      )}
       <div className="min-w-0 flex-1">
+
         <div className="flex items-center gap-2">
           <span className="font-medium text-sm text-foreground truncate">{c.course.title}</span>
           {status === "Completed" && (
