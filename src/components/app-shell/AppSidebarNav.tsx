@@ -30,9 +30,10 @@ export function useAppNav(): NavGroup[] {
     {
       label: "My Learning",
       items: [
-        { label: "My Courses", to: "/my-learning", icon: GraduationCap },
-        { label: "Browse Courses", to: academyHref("/academy"), icon: BookOpen, external: true },
-        { label: "Certificates", to: "/certificates", icon: Award },
+        { label: "My Courses", to: "/dashboard/my-courses", icon: GraduationCap },
+        { label: "All Courses", to: "/dashboard/courses", icon: BookOpen },
+        { label: "Certificates", to: "/dashboard/certificates", icon: Award },
+        { label: "Plans & Pricing", to: "/dashboard/plans", icon: Sparkles },
       ],
     },
     {
@@ -46,10 +47,12 @@ export function useAppNav(): NavGroup[] {
       label: "Account",
       items: [
         { label: "Profile", to: "/account/profile", icon: User },
-        { label: "Subscription & Billing", to: "/account/billing", icon: CreditCard },
+        { label: "Purchases & Billing", to: "/account/billing", icon: CreditCard },
+        { label: "Security", to: "/account/security", icon: ShieldCheck },
         { label: "Help & Support", to: "/support", icon: LifeBuoy, external: true },
       ],
     },
+
   ];
 }
 
