@@ -19,6 +19,7 @@ import { isAcademyHost } from "@/lib/academyHost";
 import AcademyHeader from "@/components/academy/AcademyHeader";
 import { AcademyCartButton } from "@/components/academy/AcademyCartDrawer";
 import SignInSelector from "@/components/auth/SignInSelector";
+import GetStartedSelector from "@/components/auth/GetStartedSelector";
 
 
 
@@ -309,9 +310,11 @@ export const Header = () => {
                     <Button variant="ghost" size="sm" onClick={open}>Sign In</Button>
                   )}
                 />
-                <Button asChild size="sm">
-                  <Link to="/signup">Get Started</Link>
-                </Button>
+                <GetStartedSelector
+                  trigger={(open) => (
+                    <Button size="sm" onClick={open}>Get Started</Button>
+                  )}
+                />
               </>
             )}
 
@@ -438,9 +441,12 @@ export const Header = () => {
                         <Button variant="outline" onClick={open}>Sign In</Button>
                       )}
                     />
-                    <Button asChild onClick={() => setMobileMenuOpen(false)}>
-                      <Link to="/signup">Get Started</Link>
-                    </Button>
+                    <GetStartedSelector
+                      onNavigate={() => setMobileMenuOpen(false)}
+                      trigger={(open) => (
+                        <Button onClick={open}>Get Started</Button>
+                      )}
+                    />
                   </>
                 )}
 
