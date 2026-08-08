@@ -251,26 +251,37 @@ Deno.serve(async (req) => {
         ].filter(Boolean);
 
 
-        // Visit summary — Zoho's native Visit Summary fields are SalesIQ-owned
-        // and silently discard API writes, so the browser-tracked first/last
-        // touch data is recorded here where it is guaranteed to persist.
+        // Visit summary — mapped to Zoho's Visit Summary fields on the Lead
+        // (see the Visit Summary block below). Also repeated in an attached
+        // Note record so the data survives even where SalesIQ owns the field.
         const att = attribution ?? {};
         const visitLines = [
-          att.landing_page ? `First page visited: ${att.landing_page}` : null,
+          att.first_visited_at ? `First Visit: ${att.first_visited_at}` : null,
           att.referrer ? `Referrer: ${att.referrer}` : null,
-          att.first_visited_at ? `First visit: ${att.first_visited_at}` : null,
-          att.last_visited_at ? `Most recent visit: ${att.last_visited_at}` : null,
-          typeof att.days_visited === "number" ? `Days visited: ${att.days_visited}` : null,
+          att.last_visited_at ? `Most Recent Visit: ${att.last_visited_at}` : null,
+          typeof att.number_of_chats === "number" ? `Number Of Chats: ${att.number_of_chats}` : null,
+          typeof att.visitor_score === "number" ? `Visitor Score: ${att.visitor_score}` : null,
+          typeof att.average_time_spent_minutes === "number"
+            ? `Average Time Spent (Minutes): ${att.average_time_spent_minutes}`
+            : null,
+          att.first_page_visited || att.landing_page
+            ? `First Page Visited: ${att.first_page_visited || att.landing_page}`
+            : null,
+          typeof att.days_visited === "number" ? `Days Visited: ${att.days_visited}` : null,
         ].filter(Boolean);
         const visitBlock = visitLines.length
-          ? `Visit summary:\n${visitLines.join("\n")}`
+          ? `Visit Summary:\n${visitLines.join("\n")}`
           : "";
 
-        const descriptionValue =
-          [trimmedMessage || fallbackDesc, detailLines.join("\n"), visitBlock]
-            .filter(Boolean)
-            .join("\n\n")
-            .slice(0, 32000) || undefined;
+        // The Note field carries the visitor's message ONLY (per CRM policy).
+        // Everything else lives in Zoho fields and the attached Note record.
+        const descriptionValue = (trimmedMessage || fallbackDesc || "").slice(0, 32000) || undefined;
+
+        // Extra context attached as a related Note record on the Lead.
+        const contextNote = [detailLines.join("\n"), visitBlock]
+          .filter(Boolean)
+          .join("\n\n")
+          .slice(0, 32000);
 
 
         const leadRecord: Record<string, unknown> = {
