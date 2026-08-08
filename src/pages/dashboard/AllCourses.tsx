@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useSearchParams } from "react-router-dom";
+import { recordSearchTerm } from "@/lib/interestSignals";
 import { Loader2, Search, SlidersHorizontal, X, ShoppingCart } from "lucide-react";
 import { AppPageHeader } from "@/components/app-shell/AppShellLayout";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,10 @@ export default function AllCourses() {
     return m;
   }, [recognition.badges]);
   const [q, setQ] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => recordSearchTerm(q), 900);
+    return () => clearTimeout(t);
+  }, [q]);
   const [cats, setCats] = useState<string[]>([]);
   const [levels, setLevels] = useState<string[]>([]);
   const [searchParams] = useSearchParams();

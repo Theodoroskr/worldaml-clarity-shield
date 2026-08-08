@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useRecognition } from "@/hooks/useRecognition";
 import { BadgeCard, TierMark, tierStyle } from "@/components/dashboard/RecognitionSections";
+import ShareRecognition from "@/components/dashboard/ShareRecognition";
 
 function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: number }) {
   return (
@@ -57,6 +58,7 @@ export default function Recognition() {
               {r.level?.description && (
                 <p className="text-sm text-muted-foreground mt-1 max-w-xl">{r.level.description}</p>
               )}
+              <div className="mt-3"><ShareRecognition data={r} /></div>
             </div>
             {r.nextLevel && (
               <div className="w-full sm:w-64 space-y-1.5">
