@@ -171,7 +171,16 @@ const PartnerSignup = lazyWithRetry(() => import("./pages/partner/PartnerSignup"
 const BusinessSignup = lazyWithRetry(() => import("./pages/business/BusinessSignup"));
 const BusinessLogin = lazyWithRetry(() => import("./pages/business/BusinessLogin"));
 const BusinessLayout = lazyWithRetry(() => import("./pages/business/BusinessLayout"));
-const BusinessCatalogue = lazyWithRetry(() => import("./pages/business/BusinessCatalogue"));
+const BusinessDashboard = lazyWithRetry(() => import("./pages/business/BusinessDashboard"));
+const BusinessSolutions = lazyWithRetry(() => import("./pages/business/BusinessSolutions"));
+const BusinessSolutionDetail = lazyWithRetry(() => import("./pages/business/BusinessSolutionDetail"));
+const BusinessProducts = lazyWithRetry(() => import("./pages/business/BusinessProducts"));
+const BusinessTraining = lazyWithRetry(() => import("./pages/business/BusinessTraining"));
+const BusinessTeam = lazyWithRetry(() => import("./pages/business/BusinessTeam"));
+const BusinessCompany = lazyWithRetry(() => import("./pages/business/BusinessCompany"));
+const BusinessSupport = lazyWithRetry(() => import("./pages/business/BusinessSupport"));
+const BusinessProfile = lazyWithRetry(() => import("./pages/business/BusinessProfile"));
+const BusinessSecurity = lazyWithRetry(() => import("./pages/business/BusinessSecurity"));
 const BusinessBilling = lazyWithRetry(() => import("./pages/business/BusinessBilling"));
 const BusinessQuotes = lazyWithRetry(() => import("./pages/business/BusinessQuotes"));
 const AdminRecognition = lazyWithRetry(() => import("./pages/admin/AdminRecognition"));
@@ -313,7 +322,16 @@ const App = () => (
                 <Route path="/business/login" element={<BusinessLogin />} />
                 <Route path="/business" element={<BusinessLayout />}>
                   <Route index element={<Navigate to="/business/dashboard" replace />} />
-                  <Route path="dashboard" element={<BusinessCatalogue />} />
+                  <Route path="dashboard" element={<BusinessDashboard />} />
+                  <Route path="solutions" element={<BusinessSolutions />} />
+                  <Route path="solutions/:key" element={<BusinessSolutionDetail />} />
+                  <Route path="products" element={<BusinessProducts />} />
+                  <Route path="training" element={<BusinessTraining />} />
+                  <Route path="team" element={<BusinessTeam />} />
+                  <Route path="company" element={<BusinessCompany />} />
+                  <Route path="support" element={<BusinessSupport />} />
+                  <Route path="profile" element={<BusinessProfile />} />
+                  <Route path="security" element={<BusinessSecurity />} />
                   <Route path="billing" element={<BusinessBilling />} />
                   <Route path="quotes" element={<BusinessQuotes />} />
                 </Route>
