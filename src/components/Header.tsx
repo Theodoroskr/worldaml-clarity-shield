@@ -165,7 +165,7 @@ export const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden xl:flex items-center gap-0.5 ml-6 mr-4 min-w-0">
+          <nav className="hidden xl:flex items-center gap-0 ml-4 mr-3 min-w-0">
             {navLinks.map((link) =>
               link.groups ? (
                 /* Grouped two-column dropdown (WorldAML Suite) */
@@ -173,14 +173,14 @@ export const Header = () => {
                   <DropdownMenuTrigger asChild>
                     <button
                       className={cn(
-                        "px-2 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-0.5 whitespace-nowrap",
+                        "px-1.5 py-1.5 text-xs font-medium transition-colors rounded-md flex items-center gap-0.5 whitespace-nowrap",
                         link.href && location.pathname.startsWith(link.href)
                           ? "text-navy bg-secondary"
                           : "text-text-secondary hover:text-navy hover:bg-secondary/50"
                       )}
                     >
                       {link.label}
-                      <ChevronDown className="h-3.5 w-3.5" />
+                      <ChevronDown className="h-3 w-3" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="p-3 w-auto">
@@ -214,14 +214,14 @@ export const Header = () => {
                   <DropdownMenuTrigger asChild>
                     <button
                       className={cn(
-                        "px-2 py-2 text-body-sm font-medium transition-colors rounded-md flex items-center gap-0.5 whitespace-nowrap",
+                        "px-1.5 py-1.5 text-xs font-medium transition-colors rounded-md flex items-center gap-0.5 whitespace-nowrap",
                         link.href && location.pathname.startsWith(link.href)
                           ? "text-navy bg-secondary"
                           : "text-text-secondary hover:text-navy hover:bg-secondary/50"
                       )}
                     >
                       {link.label}
-                      <ChevronDown className="h-3.5 w-3.5" />
+                      <ChevronDown className="h-3 w-3" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="w-48">
@@ -245,7 +245,7 @@ export const Header = () => {
                   key={link.href}
                   to={link.href!}
                   className={cn(
-                    "px-2 py-2 text-body-sm font-medium transition-colors rounded-md whitespace-nowrap",
+                    "px-1.5 py-1.5 text-xs font-medium transition-colors rounded-md whitespace-nowrap",
                     location.pathname === link.href
                       ? "text-navy bg-secondary"
                       : "text-text-secondary hover:text-navy hover:bg-secondary/50"
