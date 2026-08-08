@@ -284,7 +284,33 @@ Deno.serve(async (req) => {
           .slice(0, 32000);
 
 
+        // ── Demo-request detection ────────────────────────────────────────
+        // The website's "Request a Demo" form (form_type "contact-sales") is a
+        // demo funnel whenever a demo-able product is selected. Academy — Team
+        // Plan and WorldAML Advisory are NOT demo products, so a request for
+        // those alone stays a plain "Contact Sales" lead.
+        const NON_DEMO_PRODUCTS = new Set([
+          "academy",
+          "academy-team",
+          "academy-team-plan",
+          "training",
+          "worldaml-advisory",
+          "advisory",
+          "mlro-advisory",
+        ]);
+        const selectedProducts = Array.isArray(products)
+          ? products.map((p) => String(p ?? "").trim().toLowerCase()).filter(Boolean)
+          : [];
+        const demoableProducts = selectedProducts.filter((p) => !NON_DEMO_PRODUCTS.has(p));
+        const formTypeKey = String(form_type ?? "").trim().toLowerCase();
+        const isContactSalesForm =
+          formTypeKey === "contact-sales" || formTypeKey === "contact_sales";
+        // True when this contact-sales submission should be treated as a demo
+        // request in Zoho (Form Type = Book Demo, Book Demo = true, etc.).
+        const isDemoRequest = isContactSalesForm && demoableProducts.length > 0;
+
         const leadRecord: Record<string, unknown> = {
+
           First_Name: first_name?.trim().slice(0, 40) || undefined,
           Last_Name: (last_name?.trim() || first_name?.trim() || "Unknown").slice(0, 80),
           Email: email.trim().slice(0, 100),
