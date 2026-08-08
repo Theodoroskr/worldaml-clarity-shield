@@ -534,6 +534,12 @@ export default function AdminPartners() {
                               </Badge>
                             </td>
                             <td className="py-3 pr-4">
+                              <Badge className="bg-teal-100 text-teal-800 border-teal-200">
+                                {(() => { const r = Number(p.commission_rate || 0); return `${Math.round((r <= 1 ? r * 100 : r) * 10) / 10}%`; })()}
+                              </Badge>
+                            </td>
+                            <td className="py-3 pr-4">
+
                               <Badge variant="outline" className={`capitalize ${certStyle(cert)}`}>
                                 {certLabel}
                               </Badge>
