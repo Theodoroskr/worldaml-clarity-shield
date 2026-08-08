@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, GraduationCap, BookOpen, Award, Library,
-  User, CreditCard, LifeBuoy,
+  User, CreditCard, LifeBuoy, Sparkles, ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
