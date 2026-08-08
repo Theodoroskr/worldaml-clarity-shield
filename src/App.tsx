@@ -284,11 +284,14 @@ const App = () => (
                 <Route path="/pricing" element={<Pricing />} />
 
                 
-{/* Auth Routes */}
+{/* Auth Routes — one backend, three distinct portal experiences */}
                 <Route path="/login" element={<Login />} />
+                <Route path="/academy/login" element={<AcademyLogin />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/signup" element={<Signup />} />
-                {/* My WorldAML — authenticated app shell */}
-                <Route element={<AppShellLayout />}>
+                {/* WorldAML Academy — authenticated learner shell */}
+                <Route element={<PortalGuard portal="academy"><AppShellLayout /></PortalGuard>}>
+
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/my-learning" element={<MyLearning />} />
                   <Route path="/dashboard/my-courses" element={<MyLearning />} />
