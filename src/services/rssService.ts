@@ -82,11 +82,29 @@ function stripHtml(html: string): string {
   return doc.body.textContent || "";
 }
 
-// Truncate text to specified length
-function truncate(text: string, maxLength: number = 200): string {
-  const clean = stripHtml(text).trim();
+// Trim text to a readable length WITHOUT leaving a half-finished sentence.
+// Prefers cutting at the last full sentence; otherwise falls back to a word boundary.
+function truncate(text: string, maxLength: number = 320): string {
+  const clean = stripHtml(text).replace(/\s+/g, " ").trim();
+  if (!clean) return "";
   if (clean.length <= maxLength) return clean;
-  return clean.substring(0, maxLength).trim() + "...";
+
+  const window = clean.substring(0, maxLength);
+
+  // Last complete sentence inside the window (keep at least half the window).
+  const sentenceEnd = Math.max(
+    window.lastIndexOf(". "),
+    window.lastIndexOf("! "),
+    window.lastIndexOf("? "),
+  );
+  if (sentenceEnd > maxLength * 0.5) {
+    return window.substring(0, sentenceEnd + 1).trim();
+  }
+
+  // Otherwise cut on a word boundary and signal continuation.
+  const wordEnd = window.lastIndexOf(" ");
+  const cut = (wordEnd > 0 ? window.substring(0, wordEnd) : window).replace(/[,;:.\-–—]+$/, "").trim();
+  return `${cut}…`;
 }
 
 // Generate unique ID from feed item
