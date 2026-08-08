@@ -59,7 +59,49 @@ export default function ShareRecognition({
   const [draft, setDraft] = useState<string | null>(null);
   const text = draft ?? message;
 
+  // Branded share image (WorldAML logo + recognition level) generated on open.
+  const [imageBlob, setImageBlob] = useState<Blob | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageBusy, setImageBusy] = useState(false);
+
+  useEffect(() => {
+    if (!open || !r?.level || imageUrl) return;
+    let cancelled = false;
+    setImageBusy(true);
+    renderRecognitionCard(r)
+      .then((blob) => {
+        if (cancelled || !blob) return;
+        setImageBlob(blob);
+        setImageUrl(URL.createObjectURL(blob));
+      })
+      .finally(() => !cancelled && setImageBusy(false));
+    return () => { cancelled = true; };
+  }, [open, r, imageUrl]);
+
+  useEffect(() => () => { if (imageUrl) URL.revokeObjectURL(imageUrl); }, [imageUrl]);
+
   if (!r?.authenticated || !r.level) return null;
+
+  const levelName = r.level.name;
+
+  const downloadImage = () => {
+    if (!imageBlob) return;
+    trackRecognition("share_image_download");
+    downloadBlob(imageBlob, `worldaml-${levelName.toLowerCase().replace(/\s+/g, "-")}-recognition.png`);
+    toast({ title: "Image downloaded", description: "Attach it to your social post for maximum reach." });
+  };
+
+  const copyImage = async () => {
+    if (!imageBlob) return;
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": imageBlob })]);
+      trackRecognition("share_image_copy");
+      toast({ title: "Image copied", description: "Paste it directly into your post." });
+    } catch {
+      downloadImage();
+    }
+  };
+
 
   const share = (network: "linkedin" | "x" | "facebook") => {
     trackRecognition(`share_${network}`);
