@@ -1040,8 +1040,9 @@ export default function AdminUsers() {
           revenue={revenueFor(detailProfile)}
           roles={userRoles[detailProfile.user_id] || []}
           onClose={() => setDetailProfile(null)}
-          onSendUpsell={(template) => {
+          onSendUpsell={(template, data) => {
             setUpsellTemplate(template);
+            setUpsellData(data);
             setUpsellDialog({ open: true, profile: detailProfile });
           }}
         />
