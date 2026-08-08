@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Handshake } from "lucide-react";
+import { GraduationCap, Handshake, Building2 } from "lucide-react";
 
 /**
  * Public sign-in selector. Admin is intentionally NOT listed.
