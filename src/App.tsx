@@ -171,6 +171,8 @@ const AcademyLogin = lazyWithRetry(() => import("./pages/auth/AcademyLogin"));
 const PartnerLogin = lazyWithRetry(() => import("./pages/auth/PartnerLogin"));
 const AdminLogin = lazyWithRetry(() => import("./pages/auth/AdminLogin"));
 const PartnerOnboardingPage = lazyWithRetry(() => import("./pages/partner-portal/Onboarding"));
+const LegacyPartnerPortalRedirect = lazyWithRetry(() => import("./components/partner-portal/LegacyPartnerPortalRedirect"));
+
 
 const PartnerPortalLayout = lazyWithRetry(() => import("./pages/partner-portal/PartnerPortalLayout"));
 
