@@ -364,7 +364,7 @@ const Pricing = () => {
                           <CrossSellCard
                             variant="default"
                             domain="worldkycsearch.com"
-                            destPath="/signup"
+                            destPath="/"
                             utmSource="worldaml.com"
                             utmMedium="pricing-page"
                             utmCampaign="not-ready-to-integrate"
