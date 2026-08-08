@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 
@@ -13,6 +13,7 @@ const NAV: NavItem[] = [
   { label: "Users", path: "/admin/users", icon: Users, section: "Platform" },
   { label: "Identities & Profiles", path: "/admin/identities", icon: GitBranch, section: "Platform" },
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Platform" },
+  { label: "Internal Access", path: "/admin/internal-access", icon: Lock, section: "Platform" },
 
   // Marketing site + lead capture
   { label: "Forms", path: "/admin/forms", icon: FileText, section: "Marketing" },
