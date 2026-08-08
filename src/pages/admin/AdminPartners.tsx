@@ -438,7 +438,8 @@ export default function AdminPartners() {
         };
         const activePartners = partners.filter((p: any) => p.is_active);
         return (
-          <Card>
+          <Card id="active-partners" className="scroll-mt-24">
+
             <CardHeader>
               <CardTitle className="text-navy">Active Partners</CardTitle>
               <p className="text-xs text-text-secondary mt-1">
