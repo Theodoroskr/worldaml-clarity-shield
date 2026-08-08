@@ -6,6 +6,9 @@ import {
   ContinueLearning, LearningOverview, MyCourses,
   CertificatesSection, RecommendedNext, ResourcesSection, QuickCheckLink,
 } from "@/components/dashboard/DashboardSections";
+import {
+  ComplianceInPractice, ExploreWorldAML, WorldAMLTools,
+} from "@/components/dashboard/EcosystemSections";
 
 export default function Dashboard() {
   const { firstName } = useEntitlements();
