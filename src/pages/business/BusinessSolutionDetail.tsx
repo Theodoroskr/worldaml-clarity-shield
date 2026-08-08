@@ -114,9 +114,13 @@ export default function BusinessSolutionDetail() {
                 <div className="mt-auto pt-2">
                   {p.checkout ? (
                     <Button className="w-full" variant="accent" disabled={loading === p.key}
-                      onClick={() => buy(p.key, p.checkout!.fn, p.checkout!.plan)}>
+                      onClick={() => buy(p.key, p.checkout!.fn, p.checkout!.plan, p.checkout!.body)}>
                       {loading === p.key && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       {owned ? "Upgrade" : "Buy Now"}
+                    </Button>
+                  ) : p.configureUrl ? (
+                    <Button asChild className="w-full" variant="accent">
+                      <Link to={p.configureUrl}>{p.configureLabel ?? "Configure & Buy"}</Link>
                     </Button>
                   ) : (
                     <Button asChild className="w-full" variant="outline">
