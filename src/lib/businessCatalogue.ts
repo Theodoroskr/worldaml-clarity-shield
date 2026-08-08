@@ -18,6 +18,8 @@ export interface BusinessPlan {
   /** Real in-app purchase path where the plan needs configuring before payment. */
   configureUrl?: string;
   configureLabel?: string;
+}
+
 
 export interface BusinessSolution {
   key: string;
