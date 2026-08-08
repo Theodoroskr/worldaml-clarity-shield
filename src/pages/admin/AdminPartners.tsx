@@ -15,6 +15,8 @@ import {
 import { Loader2, CheckCircle, XCircle, Handshake, Pencil, FileSignature, Bell, History, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { logPartnerAdminAction } from "@/lib/partnerAudit";
+import PartnerProgramAnalytics from "@/components/admin/PartnerProgramAnalytics";
+
 
 const VERTICALS = ["banking", "fintech", "crypto", "igaming", "payments", "legal"];
 const STATUS_STYLES: Record<string, string> = {
@@ -314,14 +316,42 @@ export default function AdminPartners() {
         <Handshake className="w-6 h-6 text-primary" />
         <div>
           <h1 className="text-2xl font-bold text-foreground">Partner Program</h1>
-          <p className="text-sm text-muted-foreground">Applications, active partners, and deal registrations.</p>
+          <p className="text-sm text-muted-foreground">Analytics, applications, active partners, referrals and deal registrations.</p>
         </div>
         {pendingCount > 0 && <Badge className="bg-amber-100 text-amber-800 border-amber-200">{pendingCount} pending apps</Badge>}
         {pendingDeals > 0 && <Badge className="bg-blue-100 text-blue-800 border-blue-200">{pendingDeals} pending deals</Badge>}
       </div>
 
+      {/* Quick jump */}
+      <div className="flex flex-wrap gap-2 text-xs">
+        {[
+          { id: "partner-applications", label: "Applications" },
+          { id: "active-partners", label: "Active partners" },
+          { id: "deal-registrations", label: "Deal registrations" },
+          { id: "partner-referrals", label: "Referrals" },
+        ].map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            className="rounded-full border border-border px-3 py-1 text-muted-foreground hover:text-foreground hover:border-primary transition-colors"
+          >
+            {s.label}
+          </a>
+        ))}
+      </div>
+
+      {/* Programme analytics */}
+      <PartnerProgramAnalytics
+        applications={partnerApps}
+        partners={partners}
+        deals={deals}
+        referrals={referrals}
+        loading={loading}
+      />
+
       {/* Applications */}
-      <Card>
+      <Card id="partner-applications" className="scroll-mt-24">
+
         <CardHeader><CardTitle className="text-navy">Applications</CardTitle></CardHeader>
         <CardContent>
           {loading ? (
@@ -408,7 +438,8 @@ export default function AdminPartners() {
         };
         const activePartners = partners.filter((p: any) => p.is_active);
         return (
-          <Card>
+          <Card id="active-partners" className="scroll-mt-24">
+
             <CardHeader>
               <CardTitle className="text-navy">Active Partners</CardTitle>
               <p className="text-xs text-text-secondary mt-1">
@@ -712,7 +743,8 @@ export default function AdminPartners() {
         };
 
         return (
-          <Card>
+          <Card id="partner-referrals" className="scroll-mt-24">
+
             <CardHeader>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <CardTitle className="text-navy flex items-center gap-2">
