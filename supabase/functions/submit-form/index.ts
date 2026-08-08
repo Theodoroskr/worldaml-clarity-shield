@@ -355,59 +355,9 @@ Deno.serve(async (req) => {
             console.warn(`Unknown industry value from website form: "${raw}" — leaving Zoho Industry unset`);
             return undefined;
           })(),
-          // Topic — "Partnership" for partner-program enquiries (WorldAML
-          // Partnership funnel), otherwise the default WorldAML brand topic.
-          Topic: (() => {
-            const key = String(form_type ?? "").trim().toLowerCase();
-            const isPartner =
-              key.includes("partner") ||
-              (Array.isArray(products) &&
-                products.some((p) => String(p ?? "").toLowerCase().includes("partner")));
-            return isPartner ? "Partnership" : "WorldAML";
-          })(),
-          // Business Use Cases (multiselectpicklist) — mapped from the
-          // website's use-case codes to Zoho's exact allowed values.
-          Business_Use_Cases: (() => {
-            if (!Array.isArray(products) || products.length === 0) return undefined;
-            const BUC_MAP: Record<string, string> = {
-              "aml": "AML Screening",
-              "aml_screening": "AML Screening",
-              "aml-screening": "AML Screening",
-              "sanctions": "Sanctions Screening",
-              "sanctions_screening": "Sanctions Screening",
-              "sanctions-api": "Sanctions Screening",
-              "kyc": "KYC",
-              "kyb": "KYB",
-              "kyc-kyb-api": "KYC",
-              "cdd": "CDD",
-              "edd": "EDD",
-              "tm": "Transaction Monitoring",
-              "transaction_monitoring": "Transaction Monitoring",
-              "transaction-monitoring": "Transaction Monitoring",
-              "pep": "PEP Screening",
-              "pep_screening": "PEP Screening",
-              "adverse_media": "Adverse Media",
-              "adverse-media": "Adverse Media",
-              "api": "API Integration",
-              "api_integration": "API Integration",
-              "worldaml-api": "API Integration",
-              "training": "Training",
-              "academy": "Training",
-              "academy-team": "Training",
-              "academy-team-plan": "Training",
-              "consulting": "Consulting",
-              "advisory": "Consulting",
-            };
-            const out = new Set<string>();
-            for (const raw of products) {
-              const key = String(raw ?? "").trim().toLowerCase();
-              if (!key) continue;
-              const mapped = BUC_MAP[key];
-              if (mapped) out.add(mapped);
-              else console.warn(`Unknown use-case value for Business_Use_Cases: "${raw}"`);
-            }
-            return out.size ? Array.from(out) : undefined;
-          })(),
+          // Topic — always the WorldAML brand topic for website leads.
+          Topic: "WorldAML",
+
           // This Zoho tenant uses "Note" (textarea) as the long-text field on
           // Leads — there is no "Description" field on the layout. The
           // visitor's message is stored verbatim here.
