@@ -10,7 +10,20 @@ const corsHeaders = {
 const VALID_CURRENCIES = ["EUR", "GBP", "USD"] as const;
 type ValidCurrency = typeof VALID_CURRENCIES[number];
 
-const REGION_PATTERN = /^[A-Za-z\s\-]{2,50}$/;
+// Region names sent by the pricing calculator (must match src/data region list).
+const VALID_REGIONS = [
+  "Europe & Middle East",
+  "United Kingdom & Ireland",
+  "North America",
+] as const;
+type ValidRegion = typeof VALID_REGIONS[number];
+
+// Base annual price per user, keyed by region + currency, mirroring the UI.
+const BASE_PRICES: Record<ValidRegion, Partial<Record<ValidCurrency, number>>> = {
+  "Europe & Middle East": { EUR: 3000 },
+  "United Kingdom & Ireland": { GBP: 2700, EUR: 3200 },
+  "North America": { USD: 4900 },
+};
 
 const errorResponse = (message: string, status = 400) =>
   new Response(JSON.stringify({ error: message }), {
