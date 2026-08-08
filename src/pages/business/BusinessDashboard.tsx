@@ -198,7 +198,7 @@ export default function BusinessDashboard() {
                 <SolutionCard
                   key={s.key}
                   solution={s}
-                  status={s.plans.some((p) => p.checkout || p.configureUrl) ? "Available" : "Contact Sales"}
+                  status={s.plans.some((p) => p.checkout || p.configureUrl || p.checkoutDialog) ? "Available" : "Contact Sales"}
                   onView={() => track("product_viewed", s.key)}
                 />
               ))}
