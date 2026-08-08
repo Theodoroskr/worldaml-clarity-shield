@@ -219,6 +219,19 @@ const PartnerContactSection = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="p-country">Country</Label>
+              <Input
+                id="p-country"
+                name="country"
+                value={form.country}
+                onChange={handleChange}
+                placeholder="Cyprus"
+                autoComplete="country-name"
+                maxLength={100}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="p-message">How do you plan to refer clients?</Label>
               <Textarea
                 id="p-message"
@@ -231,6 +244,48 @@ const PartnerContactSection = () => {
               />
               <p className="text-caption text-text-tertiary">{form.message.length}/1000 characters</p>
             </div>
+
+            <div className="space-y-3">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <Checkbox
+                  checked={termsAccepted}
+                  onCheckedChange={(v) => {
+                    setTermsAccepted(v === true);
+                    if (v === true) setTermsError(null);
+                  }}
+                  aria-invalid={!!termsError}
+                  className="mt-0.5"
+                />
+                <span className="text-body-sm text-text-secondary">
+                  I accept the{" "}
+                  <Link to="/terms" className="text-teal hover:underline" target="_blank">
+                    Terms &amp; Conditions
+                  </Link>{" "}
+                  and the{" "}
+                  <Link to="/privacy" className="text-teal hover:underline" target="_blank">
+                    Privacy Policy
+                  </Link>
+                  . <span className="text-red-500">*</span>
+                </span>
+              </label>
+              {termsError && (
+                <p role="alert" className="text-body-sm text-destructive">{termsError}</p>
+              )}
+
+              <label className="flex items-start gap-3 cursor-pointer">
+                <Checkbox
+                  checked={marketingConsent}
+                  onCheckedChange={(v) => setMarketingConsent(v === true)}
+                  className="mt-0.5"
+                />
+                <span className="text-body-sm text-text-secondary">
+                  I'd like to receive marketing communications about WorldAML products,
+                  events and regulatory updates. (Optional — you can unsubscribe at any time.)
+                </span>
+              </label>
+            </div>
+
+
 
             <Button type="submit" size="lg" className="w-full" disabled={submitting}>
               {submitting ? "Submitting..." : (<>Submit Partner Enquiry <Send className="ml-2 h-4 w-4" /></>)}
