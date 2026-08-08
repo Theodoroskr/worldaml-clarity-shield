@@ -572,6 +572,42 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_access_audit: {
+        Row: {
+          action: string
+          created_at: string
+          detail: string | null
+          id: string
+          new_value: string | null
+          performed_by: string | null
+          performed_by_email: string | null
+          previous_value: string | null
+          target_email: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          new_value?: string | null
+          performed_by?: string | null
+          performed_by_email?: string | null
+          previous_value?: string | null
+          target_email: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          new_value?: string | null
+          performed_by?: string | null
+          performed_by_email?: string | null
+          previous_value?: string | null
+          target_email?: string
+        }
+        Relationships: []
+      }
       admin_form_submissions: {
         Row: {
           created_at: string
@@ -657,38 +693,54 @@ export type Database = {
         Row: {
           accepted_at: string | null
           accepted_user_id: string | null
+          access_role: string
           created_at: string
+          department: string | null
           email: string
           id: string
           invited_by: string | null
           note: string | null
           revoked_at: string | null
+          suspended_at: string | null
+          updated_at: string
+          updated_by: string | null
         }
         Insert: {
           accepted_at?: string | null
           accepted_user_id?: string | null
+          access_role?: string
           created_at?: string
+          department?: string | null
           email: string
           id?: string
           invited_by?: string | null
           note?: string | null
           revoked_at?: string | null
+          suspended_at?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           accepted_at?: string | null
           accepted_user_id?: string | null
+          access_role?: string
           created_at?: string
+          department?: string | null
           email?: string
           id?: string
           invited_by?: string | null
           note?: string | null
           revoked_at?: string | null
+          suspended_at?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
       admin_report_runs: {
         Row: {
           created_at: string
+          duration_ms: number | null
           error_message: string | null
           id: string
           period_end: string | null
@@ -699,9 +751,11 @@ export type Database = {
           report_type: string
           status: string
           summary: Json | null
+          trigger_type: string
         }
         Insert: {
           created_at?: string
+          duration_ms?: number | null
           error_message?: string | null
           id?: string
           period_end?: string | null
@@ -712,9 +766,11 @@ export type Database = {
           report_type: string
           status?: string
           summary?: Json | null
+          trigger_type?: string
         }
         Update: {
           created_at?: string
+          duration_ms?: number | null
           error_message?: string | null
           id?: string
           period_end?: string | null
@@ -725,6 +781,7 @@ export type Database = {
           report_type?: string
           status?: string
           summary?: Json | null
+          trigger_type?: string
         }
         Relationships: [
           {
@@ -740,47 +797,65 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          day_of_month: number | null
+          day_of_week: number | null
+          description: string | null
           format: string
           frequency: string
           id: string
           is_active: boolean
           last_run_at: string | null
+          last_test_at: string | null
           name: string
           portal_filter: string
           range_key: string
           recipients: string[]
           report_type: string
+          send_hour_utc: number
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          day_of_month?: number | null
+          day_of_week?: number | null
+          description?: string | null
           format?: string
           frequency?: string
           id?: string
           is_active?: boolean
           last_run_at?: string | null
+          last_test_at?: string | null
           name: string
           portal_filter?: string
           range_key?: string
           recipients?: string[]
           report_type?: string
+          send_hour_utc?: number
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          day_of_month?: number | null
+          day_of_week?: number | null
+          description?: string | null
           format?: string
           frequency?: string
           id?: string
           is_active?: boolean
           last_run_at?: string | null
+          last_test_at?: string | null
           name?: string
           portal_filter?: string
           range_key?: string
           recipients?: string[]
           report_type?: string
+          send_hour_utc?: number
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -7005,10 +7080,17 @@ export type Database = {
             Args: { target_email: string; target_regulator?: string }
             Returns: undefined
           }
-      admin_invite_internal: {
-        Args: { _email: string; _note?: string }
-        Returns: Json
-      }
+      admin_invite_internal:
+        | { Args: { _email: string; _note?: string }; Returns: Json }
+        | {
+            Args: {
+              _access_role: string
+              _department: string
+              _email: string
+              _note: string
+            }
+            Returns: Json
+          }
       admin_list_courses_with_stripe: {
         Args: never
         Returns: {
@@ -7031,16 +7113,31 @@ export type Database = {
         Args: never
         Returns: {
           accepted_at: string
+          access_role: string
+          department: string
           email: string
+          full_name: string
+          granted_by_email: string
           invited_at: string
           is_admin: boolean
+          last_sign_in_at: string
           note: string
+          status: string
+          suspended_at: string
           user_id: string
         }[]
       }
       admin_revoke_internal: { Args: { _email: string }; Returns: undefined }
       admin_revoke_suite_access: {
         Args: { target_email: string }
+        Returns: undefined
+      }
+      admin_set_internal_role: {
+        Args: { _access_role: string; _department: string; _email: string }
+        Returns: undefined
+      }
+      admin_suspend_internal: {
+        Args: { _email: string; _suspend: boolean }
         Returns: undefined
       }
       business_account_ids: { Args: { _user_id: string }; Returns: string[] }
@@ -7119,6 +7216,16 @@ export type Database = {
         Returns: Json
       }
       is_portal_user_of: { Args: { _customer_id: string }; Returns: boolean }
+      log_admin_access_event: {
+        Args: {
+          _action: string
+          _detail?: string
+          _new?: string
+          _previous?: string
+          _target_email: string
+        }
+        Returns: undefined
+      }
       mark_overdue_periodic_reviews: { Args: never; Returns: number }
       news_clean_text: { Args: { _raw: string }; Returns: string }
       onboarding_form_publish: {
