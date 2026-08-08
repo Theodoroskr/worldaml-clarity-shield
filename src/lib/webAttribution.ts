@@ -72,7 +72,10 @@ function readChats(): number {
   }
 }
 
-/** Call once per page load to maintain first/last visit and days-visited counts. */
+/**
+ * Call on every page view (initial load and SPA route change) to maintain
+ * first/last visit, days-visited counts and the previous-page (CTA) trail.
+ */
 export function recordVisit() {
   if (typeof window === "undefined") return;
   try {
@@ -80,6 +83,13 @@ export function recordVisit() {
     const today = now.slice(0, 10);
     const here = window.location.href.slice(0, 500);
     const prev = readVisits();
+
+    // Ignore duplicate records for the same URL fired within a few seconds
+    // (initial load + router mount) so counts and the CTA trail stay accurate.
+    if (prev?.last_page === here && prev.last_visited_at) {
+      const gap = Date.now() - new Date(prev.last_visited_at).getTime();
+      if (gap >= 0 && gap < 3000) return;
+    }
 
     // Best-effort time-on-site: count the gap since the previous page view when
     // it looks like the same browsing session (under 30 minutes).
@@ -96,6 +106,9 @@ export function recordVisit() {
           days: prev.days?.includes(today) ? prev.days : [...(prev.days || []), today].slice(-365),
           visit_count: (prev.visit_count || 0) + 1,
           first_page_visited: prev.first_page_visited || here,
+          last_page: here,
+          previous_page:
+            prev.last_page && prev.last_page !== here ? prev.last_page : prev.previous_page,
           total_seconds: Math.round((prev.total_seconds || 0) + addSeconds),
         }
       : {
@@ -104,11 +117,13 @@ export function recordVisit() {
           days: [today],
           visit_count: 1,
           first_page_visited: here,
+          last_page: here,
           total_seconds: 0,
         };
     localStorage.setItem(VISIT_KEY, JSON.stringify(stats));
   } catch {}
 }
+
 
 const UTM_KEYS = [
   "utm_source",
