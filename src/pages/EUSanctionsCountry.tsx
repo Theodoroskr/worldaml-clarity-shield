@@ -1,5 +1,6 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import SEO from "@/components/SEO";
+import Header from "@/components/Header";
 import { allEUSanctionsRegimes, regionLabels } from "@/data/euSanctionsRegimes";
 import { Shield, ChevronRight, ExternalLink, ArrowLeft, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
