@@ -248,7 +248,30 @@ Deno.serve(async (req) => {
             : md.marketing_consent === false
               ? "Marketing communication consent: NO"
               : null,
-        ].filter(Boolean);
+          // Visit Summary mirror — Zoho's native Visit Summary fields are
+          // SalesIQ-owned and may reject API writes, so the same website
+          // analytics are always recorded here, one line per CRM field.
+          "",
+          "Visit Summary (website analytics)",
+          attribution.first_visited_at ? `First Visit: ${attribution.first_visited_at}` : null,
+          attribution.last_visited_at ? `Most Recent Visit: ${attribution.last_visited_at}` : null,
+          attribution.referrer ? `Referrer: ${attribution.referrer}` : null,
+          attribution.first_page_visited || attribution.landing_page
+            ? `First Page Visited: ${attribution.first_page_visited || attribution.landing_page}`
+            : null,
+          typeof attribution.days_visited === "number"
+            ? `Days Visited: ${attribution.days_visited}`
+            : null,
+          typeof attribution.number_of_chats === "number"
+            ? `Number Of Chats: ${attribution.number_of_chats}`
+            : null,
+          typeof attribution.visitor_score === "number"
+            ? `Visitor Score: ${attribution.visitor_score}`
+            : null,
+          typeof attribution.average_time_spent_minutes === "number"
+            ? `Average Time Spent (Minutes): ${attribution.average_time_spent_minutes}`
+            : null,
+        ].filter((l) => l !== null && l !== undefined);
 
 
         
