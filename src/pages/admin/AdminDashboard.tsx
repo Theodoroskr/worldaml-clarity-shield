@@ -60,6 +60,18 @@ export default function AdminDashboard() {
   const { data: a, isLoading, isFetching, refetch, error } = useAdminAnalytics(range);
   const feeds = useQuery({ queryKey: ["admin-feeds"], queryFn: loadFeeds, staleTime: 60_000 });
 
+  /**
+   * Operational tables (leads, applications, deals, orders) stream in live.
+   * Aggregated analytics are refetched alongside them so the KPI cards and the
+   * feeds never disagree.
+   */
+  const [liveAt, setLiveAt] = useState<number | null>(null);
+  useAdminRealtime(
+    ["form_submissions", "partner_applications", "deal_registrations", "academy_course_purchases"],
+    () => { setLiveAt(Date.now()); feeds.refetch(); refetch(); },
+  );
+
+
   const spark = (key: keyof NonNullable<typeof a>["series"][number]) =>
     a?.series?.map((p) => Number(p[key] ?? 0)) ?? [];
 
