@@ -615,21 +615,66 @@ export default function AdminUsers() {
   };
 
 
+  const extraCols = COLUMN_DEFS.filter((c) => c.optional && columns.includes(c.id));
+
+  const extraCell = (id: string, u?: EnrichedUser) => {
+    if (!u) return "—";
+    switch (id) {
+      case "user_type":
+        return (
+          <div className="flex flex-wrap gap-1">
+            {u.types.map((t) => <Badge key={t} variant="outline" className="text-[10px]">{USER_TYPE_LABELS[t]}</Badge>)}
+            {!u.types.length && <span className="text-xs text-muted-foreground">—</span>}
+          </div>
+        );
+      case "account_age": return formatAge(u.accountAgeDays);
+      case "last_activity": return formatDate(u.lastActivityAt);
+      case "days_inactive": return u.daysInactive == null ? "—" : `${u.daysInactive}d`;
+      case "country": return u.country || "—";
+      case "job_title": return u.jobTitle || "—";
+      case "domain": return u.domain || "—";
+      case "transactions": return u.transactions;
+      case "academy": return `${u.academyCourses} course(s) · ${u.certificates} cert.`;
+      case "business": return u.businessAccountId ? "Yes" : "—";
+      case "partner": return u.partnerStatus || "—";
+      case "lifecycle": return LIFECYCLE_LABELS[u.lifecycle] || u.lifecycle;
+      default: return "—";
+    }
+  };
+
   const renderTable = (list: Profile[], showSuiteActions: boolean) => {
     const filtered = applyFilters(list);
+    const toggleSelect = (id: string) => setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+    const allSelected = filtered.length > 0 && filtered.every((p) => selectedIds.has(p.id));
     return (
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              {["User", "Company", "Revenue", "Status", "Tier", "Source", "Regulator", "Roles", "Registered", "Actions"].map(h => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>
+              <th className="px-3 py-3 w-8">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={(v) => setSelectedIds(v ? new Set(filtered.map((p) => p.id)) : new Set())}
+                  aria-label="Select all users in view"
+                />
+              </th>
+              {["User", "Company", "Revenue", "Status", "Tier", "Source", "Regulator", "Roles", "Registered",
+                ...extraCols.map((c) => c.label), "Actions"].map(h => (
+                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {filtered.map(p => (
               <tr key={p.id} className="hover:bg-muted/20 transition-colors">
+                <td className="px-3 py-3">
+                  <Checkbox checked={selectedIds.has(p.id)} onCheckedChange={() => toggleSelect(p.id)} aria-label="Select user" />
+                </td>
+
                 <td className="px-4 py-3">
                   <button className="text-left" onClick={() => setDetailProfile(p)}>
                     <div className="font-medium text-foreground hover:text-primary hover:underline">{p.full_name || "—"}</div>
