@@ -217,11 +217,17 @@ export default function AdminUserDetailDialog({ profile, revenue, roles, onClose
         <Tabs defaultValue="profile" className="mt-2">
           <TabsList>
             <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="360">360° view</TabsTrigger>
             <TabsTrigger value="revenue">Revenue ({revenue.items.length})</TabsTrigger>
             <TabsTrigger value="academy">Academy ({progress.length + certs.length})</TabsTrigger>
             <TabsTrigger value="workspaces">Workspaces</TabsTrigger>
             <TabsTrigger value="marketing">Marketing ({upsellLog.length})</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="360">
+            <User360Panel userId={profile.id} />
+          </TabsContent>
+
 
           <TabsContent value="profile">
             <div className="grid gap-3 sm:grid-cols-3 rounded-lg border border-border p-3">
