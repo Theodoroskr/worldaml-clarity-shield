@@ -54,7 +54,11 @@ export function AdminNotificationProvider({ children }: { children: React.ReactN
     // Re-derive open items from business records once per session (auto-resolve + backfill).
     if (!syncedRef.current) {
       syncedRef.current = true;
-      await supabase.rpc("admin_notifications_sync" as any).catch(() => {});
+      try {
+        await supabase.rpc("admin_notifications_sync" as any);
+      } catch {
+        /* non-fatal */
+      }
     }
     const [{ data: notifs }, { data: st }, { data: pf }, { data: profile }] = await Promise.all([
       supabase
