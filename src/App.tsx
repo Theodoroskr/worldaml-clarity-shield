@@ -146,6 +146,8 @@ const Advisory = lazyWithRetry(() => import("./pages/Advisory"));
 const AdvisoryEwra = lazyWithRetry(() => import("./pages/AdvisoryEwra"));
 
 const AdminLayout = lazyWithRetry(() => import("./pages/admin/AdminLayout"));
+const AdminNotificationCentre = lazyWithRetry(() => import("./pages/admin/AdminNotificationCentre"));
+const AdminNotificationSettings = lazyWithRetry(() => import("./pages/admin/AdminNotificationSettings"));
 const AdminUsers = lazyWithRetry(() => import("./pages/admin/AdminUsers"));
 const AdminAlertRules = lazyWithRetry(() => import("./pages/admin/AdminAlertRules"));
 const AdminForms = lazyWithRetry(() => import("./pages/admin/AdminForms"));
