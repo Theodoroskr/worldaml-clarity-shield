@@ -201,15 +201,68 @@ export default function AdminUsers() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [{ data: p }, { data: r }, { data: logs }, { data: pa }, { data: acad }, { data: prod }] = await Promise.all([
+    const [{ data: p }, { data: r }, { data: logs }, { data: pa }, { data: acad }, { data: prod },
+      { data: activity, error: activityError }, { data: progress }, { data: certs }, { data: bmembers }, { data: partnerRows }] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("*"),
       supabase.from("admin_upsell_email_log").select("recipient_user_id, recipient_email"),
       supabase.from("partner_applications").select("user_id, email, status, partner_type, company_name, created_at").order("created_at", { ascending: false }),
       supabase.from("academy_course_purchases").select("user_id, course_slug, amount_cents, currency, status, paid_at, created_at"),
       supabase.from("product_purchase_notifications").select("customer_email, product, plan, amount_cents, currency, created_at"),
+      supabase.rpc("admin_user_activity"),
+      supabase.from("academy_progress").select("user_id, course_id, completed_at, created_at"),
+      supabase.from("academy_certificates").select("user_id, issued_at"),
+      supabase.from("business_members").select("user_id, email, business_account_id, status"),
+      supabase.from("partners").select("user_id, is_active"),
     ]);
+
+    // ---- Activity (last sign-in) ----
+    setActivityAvailable(!activityError);
+    const signIn: Record<string, string | null> = {};
+    ((activity as any[]) || []).forEach((row) => { signIn[row.user_id] = row.last_sign_in_at; });
+    setLastSignIn(signIn);
+
+    // ---- Academy activity ----
+    const aAgg: Record<string, { courses: number; completed: number; lastAt: string | null }> = {};
+    ((progress as any[]) || []).forEach((row) => {
+      const b = aAgg[row.user_id] || { courses: 0, completed: 0, lastAt: null };
+      b.courses += 1;
+      if (row.completed_at) b.completed += 1;
+      const stamp = row.completed_at || row.created_at;
+      if (stamp && (!b.lastAt || new Date(stamp) > new Date(b.lastAt))) b.lastAt = stamp;
+      aAgg[row.user_id] = b;
+    });
+    setAcademyAgg(aAgg);
+
+    const cCounts: Record<string, number> = {};
+    ((certs as any[]) || []).forEach((row) => { cCounts[row.user_id] = (cCounts[row.user_id] || 0) + 1; });
+    setCertCounts(cCounts);
+
+    const pAgg: Record<string, { paid: number; pending: number; lastAt: string | null; annualPass: boolean }> = {};
+    ((acad as any[]) || []).forEach((row) => {
+      const b = pAgg[row.user_id] || { paid: 0, pending: 0, lastAt: null, annualPass: false };
+      if (row.status === "paid") b.paid += 1; else b.pending += 1;
+      if (String(row.course_slug || "").includes("annual")) b.annualPass = true;
+      const stamp = row.paid_at || row.created_at;
+      if (stamp && (!b.lastAt || new Date(stamp) > new Date(b.lastAt))) b.lastAt = stamp;
+      pAgg[row.user_id] = b;
+    });
+    setPurchaseAgg(pAgg);
+
+    const bMap: Record<string, string> = {};
+    ((bmembers as any[]) || []).forEach((row) => {
+      if (row.email) bMap[String(row.email).toLowerCase()] = row.business_account_id;
+    });
+    setBusinessByEmail(bMap);
+
+    const partnerMap: Record<string, string> = {};
+    ((partnerRows as any[]) || []).forEach((row) => {
+      if (row.user_id) partnerMap[row.user_id] = row.is_active ? "active" : "inactive";
+    });
+    setPartnerByUserId(partnerMap);
+
     setProfiles((p || []) as Profile[]);
+
     const roleMap: Record<string, string[]> = {};
     (r || []).forEach((row: any) => {
       if (!roleMap[row.user_id]) roleMap[row.user_id] = [];
