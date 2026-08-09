@@ -152,6 +152,8 @@ export default function AdminSecurityAudit() {
         </button>
       </div>
 
+      <AdminActionRequired path="/admin/security" />
+
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <SummaryCard

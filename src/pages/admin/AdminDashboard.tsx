@@ -149,6 +149,8 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      <AdminActionRequired path="/admin/dashboard" />
+
       {error && (
         <Card className="border-destructive/40">
           <CardContent className="p-4 text-sm text-destructive">

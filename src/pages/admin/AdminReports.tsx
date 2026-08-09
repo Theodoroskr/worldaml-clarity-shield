@@ -323,6 +323,8 @@ export default function AdminReports() {
         <Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-2" /> New report</Button>
       </div>
 
+      <AdminActionRequired path="/admin/reports" />
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Card><CardContent className="p-3">
           <div className="text-xs text-muted-foreground">Active schedules</div>

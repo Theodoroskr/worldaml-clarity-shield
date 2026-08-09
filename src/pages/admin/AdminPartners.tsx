@@ -408,6 +408,8 @@ export default function AdminPartners() {
         {pendingDeals > 0 && <Badge className="bg-blue-100 text-blue-800 border-blue-200">{pendingDeals} pending deals</Badge>}
       </div>
 
+      <AdminActionRequired path="/admin/partners" />
+
       <PartnerActionCentre
         pendingApplications={pendingCount}
         moreInfoApplications={moreInfoCount}

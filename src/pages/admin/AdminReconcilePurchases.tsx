@@ -173,6 +173,8 @@ export default function AdminReconcilePurchases() {
         </Button>
       </div>
 
+      <AdminActionRequired path="/admin/reconcile-purchases" />
+
       {/* Current exposure */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard

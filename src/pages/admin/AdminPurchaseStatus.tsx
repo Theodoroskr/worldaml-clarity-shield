@@ -288,6 +288,8 @@ export default function AdminPurchaseStatus() {
         </Button>
       </div>
 
+      <AdminActionRequired path="/admin/purchase-status" />
+
       {/* Financial KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard
