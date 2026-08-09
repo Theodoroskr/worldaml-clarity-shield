@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Send, Sparkles, Euro, GraduationCap, Building2, Handshake, ShieldAlert } from "lucide-react";
 import { recommendUpsell, UpsellTemplate } from "@/lib/upsellRecommendation";
 import { buildUpsellOptions, type UpsellOption, type CourseRow } from "@/lib/upsellCatalog";
+import User360Panel from "@/components/admin/User360Panel";
+
 
 export interface RevenueItem {
   source: "academy" | "product";
