@@ -635,7 +635,7 @@ export default function AdminUsers() {
       case "domain": return u.domain || "—";
       case "transactions": return u.transactions;
       case "academy": return `${u.academyCourses} course(s) · ${u.certificates} cert.`;
-      case "business": return u.businessAccountId ? "Yes" : "—";
+      case "business": return u.businessOrg ? "Yes" : "—";
       case "partner": return u.partnerStatus || "—";
       case "lifecycle": return LIFECYCLE_LABELS[u.lifecycle] || u.lifecycle;
       default: return "—";
