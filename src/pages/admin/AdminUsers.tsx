@@ -828,6 +828,9 @@ export default function AdminUsers() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={exportCurrentView}>
+            <Table2 className="w-3.5 h-3.5 mr-1" /> Export current view
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setExportOpen(true)}>
             <Download className="w-3.5 h-3.5 mr-1" /> Export users
           </Button>
@@ -835,11 +838,18 @@ export default function AdminUsers() {
 
       </div>
 
+      <UserIntelSummary
+        users={allIntelUsers}
+        onDomainClick={(d) => setIntelFilters({
+          ...intelFilters,
+          conditions: [...intelFilters.conditions, { ...newCondition("domain"), values: [d] }],
+        })}
+      />
 
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search users…" className="w-full pl-8 py-2 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email, company or domain…" className="w-full pl-8 py-2 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-32 text-sm"><SelectValue /></SelectTrigger>
@@ -862,11 +872,29 @@ export default function AdminUsers() {
         </Select>
       </div>
 
+      <UserIntelFilters
+        filters={intelFilters}
+        onFilters={setIntelFilters}
+        users={allIntelUsers}
+        matchCount={visibleUsers.length}
+        columns={columns}
+        onColumns={(c) => { setColumns(c); persistColumns(c); }}
+        sortKey={sortKey}
+        sortDir={sortDir}
+        onSort={(k, d) => { setSortKey(k); setSortDir(d); }}
+        savedSegments={savedSegments}
+        onSaveSegment={(name) => setSavedSegments(saveSegmentFn(name, intelFilters))}
+        onDeleteSegment={(id) => setSavedSegments(deleteSegmentFn(id))}
+      />
+
+      {!activityAvailable && (
+        <p className="text-xs text-amber-700">Last activity data is unavailable right now — activity filters may be empty.</p>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
       ) : (
-        <Tabs defaultValue="all" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSelectedIds(new Set()); }} className="space-y-4">
           <TabsList>
             <TabsTrigger value="all">Platform Users ({nonPartnerProfiles.length})</TabsTrigger>
             <TabsTrigger value="suite">Suite Users ({suiteUsers.length})</TabsTrigger>
@@ -890,6 +918,7 @@ export default function AdminUsers() {
           </TabsContent>
         </Tabs>
       )}
+
 
       {/* Grant Suite Access Dialog */}
       <Dialog open={grantDialog.open} onOpenChange={(open) => !open && setGrantDialog({ open: false, profile: null })}>
