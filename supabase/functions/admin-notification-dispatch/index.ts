@@ -49,14 +49,15 @@ Deno.serve(async (req) => {
     // Keep derived notifications in sync (creates new ones, auto-resolves completed ones).
     await supabase.rpc("admin_notifications_sync");
 
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    // Only email recent events — prevents a flood when historic items are backfilled.
+    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { data: notifs } = await supabase
       .from("admin_notifications")
       .select("*")
       .eq("status", "open")
       .gte("created_at", since)
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(40);
 
     if (!notifs?.length) {
       return new Response(JSON.stringify({ sent: 0, reason: "nothing open" }), {
