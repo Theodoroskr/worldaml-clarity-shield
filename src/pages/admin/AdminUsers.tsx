@@ -842,7 +842,7 @@ export default function AdminUsers() {
         users={allIntelUsers}
         onDomainClick={(d) => setIntelFilters({
           ...intelFilters,
-          conditions: [...intelFilters.conditions, { ...newCondition("domain"), values: [d] }],
+          conditions: [...intelFilters.conditions, { ...newCondition("domain"), value: [d] }],
         })}
       />
 
