@@ -63,18 +63,31 @@ export function usePortalAccess(): PortalAccess {
     },
   });
 
+  const suiteQuery = useQuery({
+    queryKey: ["portal-access", "suite", user?.id],
+    enabled: !!user,
+    staleTime: 60_000,
+    queryFn: async (): Promise<boolean> => {
+      const { data, error } = await supabase.rpc("current_user_has_suite_access" as any);
+      if (error) return false;
+      return data === true;
+    },
+  });
+
   const signedIn = !!user;
-  const isLoading = authLoading || (signedIn && (profileLoading || partnerQuery.isLoading || businessQuery.isLoading));
+  const isLoading = authLoading || (signedIn && (profileLoading || partnerQuery.isLoading || businessQuery.isLoading || suiteQuery.isLoading));
 
   const academyAccess = signedIn && profile?.status !== "rejected";
   const partnerAccess = signedIn && partnerQuery.data === true;
   const businessAccess = signedIn && businessQuery.data === true;
+  const suiteAccess = signedIn && suiteQuery.data === true;
   const adminAccess = signedIn && isAdmin;
 
   const portals: PortalKey[] = [];
   if (academyAccess) portals.push("academy");
   if (partnerAccess) portals.push("partner");
   if (businessAccess) portals.push("business");
+  if (suiteAccess) portals.push("suite");
   if (adminAccess) portals.push("admin");
 
   return {
@@ -83,13 +96,15 @@ export function usePortalAccess(): PortalAccess {
     academyAccess,
     partnerAccess,
     businessAccess,
+    suiteAccess,
     adminAccess,
     portals,
     has: (portal) =>
       portal === "academy" ? academyAccess
         : portal === "partner" ? partnerAccess
           : portal === "business" ? businessAccess
-            : adminAccess,
+            : portal === "suite" ? suiteAccess
+              : adminAccess,
   };
 }
 
@@ -97,6 +112,7 @@ export const PORTAL_HOME: Record<PortalKey, string> = {
   academy: "/dashboard",
   partner: "/partner/dashboard",
   business: "/business/dashboard",
+  suite: "/suite",
   admin: "/admin/dashboard",
 };
 
@@ -104,5 +120,7 @@ export const PORTAL_LOGIN: Record<PortalKey, string> = {
   academy: "/academy/login",
   partner: "/partner/login",
   business: "/business/login",
+  suite: "/login",
   admin: "/admin/login",
 };
+
