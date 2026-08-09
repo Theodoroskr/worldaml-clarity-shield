@@ -1738,6 +1738,9 @@ export type Database = {
       }
       partner_applications: {
         Row: {
+          approved_partner_type:
+            | Database["public"]["Enums"]["partner_type"]
+            | null
           company_name: string
           contact_email: string | null
           contact_name: string | null
@@ -1746,8 +1749,11 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          internal_notes: string | null
           notes: string | null
+          partner_id: string | null
           partner_type: Database["public"]["Enums"]["partner_type"]
+          review_message: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["partner_status"]
@@ -1755,6 +1761,9 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          approved_partner_type?:
+            | Database["public"]["Enums"]["partner_type"]
+            | null
           company_name: string
           contact_email?: string | null
           contact_name?: string | null
@@ -1763,8 +1772,11 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          internal_notes?: string | null
           notes?: string | null
+          partner_id?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
+          review_message?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["partner_status"]
@@ -1772,6 +1784,9 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          approved_partner_type?:
+            | Database["public"]["Enums"]["partner_type"]
+            | null
           company_name?: string
           contact_email?: string | null
           contact_name?: string | null
@@ -1780,15 +1795,33 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          internal_notes?: string | null
           notes?: string | null
+          partner_id?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
+          review_message?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["partner_status"]
           user_id?: string
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "partner_applications_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "featured_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_applications_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partner_asset_events: {
         Row: {
@@ -2543,15 +2576,18 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          internal_notes: string | null
           is_active: boolean
           is_featured: boolean
           logo_url: string | null
           notification_prefs: Json
           onboarding_completed_at: string | null
           partner_manager_id: string | null
+          partner_since: string | null
           partner_type: Database["public"]["Enums"]["partner_type"]
           payout_details_encrypted: string | null
           payout_method: string | null
+          portal_access: string
           referral_code: string
           sandbox_key: string | null
           sandbox_key_issued_at: string | null
@@ -2569,15 +2605,18 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          internal_notes?: string | null
           is_active?: boolean
           is_featured?: boolean
           logo_url?: string | null
           notification_prefs?: Json
           onboarding_completed_at?: string | null
           partner_manager_id?: string | null
+          partner_since?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
           payout_details_encrypted?: string | null
           payout_method?: string | null
+          portal_access?: string
           referral_code?: string
           sandbox_key?: string | null
           sandbox_key_issued_at?: string | null
@@ -2595,15 +2634,18 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          internal_notes?: string | null
           is_active?: boolean
           is_featured?: boolean
           logo_url?: string | null
           notification_prefs?: Json
           onboarding_completed_at?: string | null
           partner_manager_id?: string | null
+          partner_since?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
           payout_details_encrypted?: string | null
           payout_method?: string | null
+          portal_access?: string
           referral_code?: string
           sandbox_key?: string | null
           sandbox_key_issued_at?: string | null
@@ -7080,6 +7122,19 @@ export type Database = {
       }
       academy_recognition_status: { Args: never; Returns: Json }
       admin_analytics: { Args: { _from: string; _to: string }; Returns: Json }
+      admin_approve_partner_application: {
+        Args: {
+          _app_id: string
+          _certification?: Database["public"]["Enums"]["partner_certification"]
+          _commission_rate: number
+          _grant_portal?: boolean
+          _internal_notes?: string
+          _manager_id?: string
+          _partner_type: Database["public"]["Enums"]["partner_type"]
+          _verticals?: string[]
+        }
+        Returns: Json
+      }
       admin_grant_suite_access:
         | { Args: { target_email: string }; Returns: undefined }
         | {
@@ -7137,6 +7192,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_review_partner_application: {
+        Args: { _app_id: string; _decision: string; _message: string }
+        Returns: undefined
+      }
       admin_revoke_internal: { Args: { _email: string }; Returns: undefined }
       admin_revoke_suite_access: {
         Args: { target_email: string }
@@ -7144,6 +7203,10 @@ export type Database = {
       }
       admin_set_internal_role: {
         Args: { _access_role: string; _department: string; _email: string }
+        Returns: undefined
+      }
+      admin_set_partner_portal_access: {
+        Args: { _access: string; _partner_id: string; _reason?: string }
         Returns: undefined
       }
       admin_suspend_internal: {
@@ -7221,6 +7284,10 @@ export type Database = {
         Args: { _course_id: string }
         Returns: boolean
       }
+      has_partner_portal_access: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -7266,6 +7333,16 @@ export type Database = {
           _schema: Json
         }
         Returns: string
+      }
+      partner_audit: {
+        Args: {
+          _action: string
+          _changes: Json
+          _entity_id: string
+          _entity_label: string
+          _entity_type: string
+        }
+        Returns: undefined
       }
       portal_accept_document: {
         Args: { _new_doc_id: string }
@@ -7343,7 +7420,12 @@ export type Database = {
         | "analyst"
         | "viewer"
       partner_certification: "none" | "bronze" | "silver" | "gold"
-      partner_status: "pending" | "approved" | "rejected"
+      partner_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "more_info"
+        | "withdrawn"
       partner_type: "referral" | "affiliate" | "reseller" | "technology"
       referral_status: "clicked" | "signed_up" | "converted"
     }
@@ -7490,7 +7572,13 @@ export const Constants = {
         "viewer",
       ],
       partner_certification: ["none", "bronze", "silver", "gold"],
-      partner_status: ["pending", "approved", "rejected"],
+      partner_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "more_info",
+        "withdrawn",
+      ],
       partner_type: ["referral", "affiliate", "reseller", "technology"],
       referral_status: ["clicked", "signed_up", "converted"],
     },

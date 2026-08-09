@@ -3,6 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import {
+  APPLICATION_STATUS_LABEL, PORTAL_ACCESS_LABEL, PORTAL_ACCESS_STYLE,
+} from "@/lib/partnerLifecycle";
 import { Loader2, Download } from "lucide-react";
 
 type Props = {
@@ -99,7 +102,10 @@ export default function PartnerDetailDialog({ partner, application, open, onOpen
             <Badge variant="outline" className="capitalize">{partner.partner_type}</Badge>
             <Badge className="bg-teal-100 text-teal-800 border-teal-200">{ratePct}% commission</Badge>
             <Badge className={partner.is_active ? "bg-green-100 text-green-800 border-green-200" : "bg-slate-100 text-slate-700 border-slate-200"}>
-              {partner.is_active ? "Active" : "Inactive"}
+              Partner {partner.is_active ? "active" : "inactive"}
+            </Badge>
+            <Badge variant="outline" className={PORTAL_ACCESS_STYLE[(partner as any).portal_access ?? "active"]}>
+              Portal: {PORTAL_ACCESS_LABEL[(partner as any).portal_access ?? "active"]}
             </Badge>
           </DialogTitle>
         </DialogHeader>
@@ -143,8 +149,11 @@ export default function PartnerDetailDialog({ partner, application, open, onOpen
                     ["Payout method", partner.payout_method || "—"],
                     ["Verticals", (partner.verticals ?? []).join(", ") || "—"],
                     ["Specialisations", (data.specialisations ?? []).map((s) => s.label).join(", ") || "—"],
-                    ["Application status", application?.status || "—"],
+                    ["Application status", APPLICATION_STATUS_LABEL[application?.status as string] || application?.status || "—"],
                     ["Applied", dt(application?.created_at)],
+                    ["Portal access", PORTAL_ACCESS_LABEL[(partner as any).portal_access ?? "active"]],
+                    ["Partner since", dt((partner as any).partner_since || partner.created_at)],
+                    ["Internal notes", (partner as any).internal_notes || "—"],
                   ].map(([k, v]) => (
                     <div key={String(k)} className="flex justify-between gap-4 border-b border-border/50 py-1.5">
                       <dt className="text-muted-foreground">{k}</dt>
