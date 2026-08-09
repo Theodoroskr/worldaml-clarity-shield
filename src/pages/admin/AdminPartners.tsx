@@ -467,6 +467,7 @@ export default function AdminPartners() {
               </p>
             </div>
           </div>
+          <AdminActionRequired eventTypes={["partner_application_pending"]} variant="inline" className="mt-3" title={"application awaiting review"} />
         </CardHeader>
         <CardContent className="space-y-3">
           {/* Filters */}
@@ -908,6 +909,7 @@ export default function AdminPartners() {
                   <Badge className="bg-blue-100 text-blue-800 border-blue-200">€{totalPipeline.toLocaleString()} pipeline</Badge>
                   <Badge className="bg-green-100 text-green-800 border-green-200">€{totalWon.toLocaleString()} won ({closeRate}%)</Badge>
                 </div>
+                <AdminActionRequired eventTypes={["partner_deal_pending"]} variant="inline" className="w-full" title={"deal awaiting approval"} />
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
