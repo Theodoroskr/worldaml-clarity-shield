@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import {
-  GraduationCap, Building2, Handshake, ShieldCheck, User, Lock, LogOut, Check,
+  GraduationCap, Building2, Handshake, ShieldCheck, Shield, User, Lock, LogOut, Check,
 } from "lucide-react";
 import {
   DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
@@ -8,6 +8,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { usePortalAccess, PortalKey, PORTAL_HOME } from "@/hooks/usePortalAccess";
 import { cn } from "@/lib/utils";
+
 
 type WorkspaceDef = {
   key: PortalKey;
