@@ -41,6 +41,13 @@ export const WORKSPACES: WorkspaceDef[] = [
     match: (p) => p.startsWith("/partner"),
   },
   {
+    key: "suite",
+    label: "Compliance Suite",
+    description: "Onboarding, screening, cases & monitoring",
+    icon: Shield,
+    match: (p) => p.startsWith("/suite"),
+  },
+  {
     key: "admin",
     label: "Admin",
     description: "Internal administration",
@@ -48,6 +55,7 @@ export const WORKSPACES: WorkspaceDef[] = [
     match: (p) => p.startsWith("/admin"),
   },
 ];
+
 
 /** Account / workspace switcher shown in the header when signed in. */
 export default function AccountMenu({ onNavigate }: { onNavigate?: () => void }) {
