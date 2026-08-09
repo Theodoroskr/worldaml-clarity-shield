@@ -1012,27 +1012,30 @@ export default function AdminUsers() {
         <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
       ) : (
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSelectedIds(new Set()); }} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="all">Platform Users ({nonPartnerProfiles.length})</TabsTrigger>
-            <TabsTrigger value="suite">Suite Users ({suiteUsers.length})</TabsTrigger>
-            <TabsTrigger value="regular">Regular Users ({regularUsers.length})</TabsTrigger>
+          <TabsList className="flex-wrap">
+            <TabsTrigger value="all">All Users ({profiles.length})</TabsTrigger>
+            <TabsTrigger value="academy">Academy ({academyCategory.length})</TabsTrigger>
+            <TabsTrigger value="business">Business ({businessCategory.length})</TabsTrigger>
             <TabsTrigger value="partners" className="gap-1.5">
               <Handshake className="w-3.5 h-3.5" />
-              Partner Applicants ({partnerApplicants.length})
+              Partners ({partnerCategory.length})
             </TabsTrigger>
+            <TabsTrigger value="suite">Suite Users ({suiteCategory.length})</TabsTrigger>
           </TabsList>
-          <TabsContent value="all">{renderTable(nonPartnerProfiles, false)}</TabsContent>
-          <TabsContent value="suite">{renderTable(suiteUsers, true)}</TabsContent>
-          <TabsContent value="regular">{renderTable(regularUsers, false)}</TabsContent>
+          <TabsContent value="all">{renderTable(profiles, false)}</TabsContent>
+          <TabsContent value="academy">{renderTable(academyCategory, false)}</TabsContent>
+          <TabsContent value="business">{renderTable(businessCategory, false)}</TabsContent>
           <TabsContent value="partners">
             <div className="mb-3 flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-              <span>These users applied to the Partner Program. Approve, reject, or edit their partner records in the dedicated workspace.</span>
+              <span>Users with a partner relationship. Applications, approvals and partner records stay in the Partner Program workspace.</span>
               <Link to="/admin/partners" className="inline-flex items-center gap-1 text-primary hover:underline">
                 Open Partner Program <ExternalLink className="w-3 h-3" />
               </Link>
             </div>
-            {renderPartnerApplicantsTable(applyFilters(partnerApplicants))}
+            {renderTable(partnerCategory, false)}
           </TabsContent>
+          <TabsContent value="suite">{renderTable(suiteCategory, true)}</TabsContent>
+
         </Tabs>
       )}
 
