@@ -178,17 +178,29 @@ export default function OnboardPublic() {
     if (errors[k]) setErrors((e) => ({ ...e, [k]: "" }));
   };
 
+  /** File types and size accepted for guest onboarding uploads (mirrors the storage rules). */
+  const ALLOWED_EXTENSIONS = ["pdf", "png", "jpg", "jpeg", "webp", "heic", "doc", "docx", "xls", "xlsx", "csv", "txt"];
+  const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
   const uploadFile = async (file: File, folder: string, subkey: string) => {
     if (!form) throw new Error("form missing");
-    const ext = file.name.split(".").pop() || "bin";
+    const ext = (file.name.split(".").pop() || "").toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      throw new Error(`"${file.name}" is not an accepted file type (${ALLOWED_EXTENSIONS.join(", ")}).`);
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      throw new Error(`"${file.name}" is larger than the 10 MB limit.`);
+    }
     const rand = crypto.randomUUID();
-    const path = `${form.id}/${folder}/${rand}-${subkey}.${ext}`;
+    const safeKey = subkey.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 64) || "file";
+    const path = `${form.id}/${folder}/${rand}-${safeKey}.${ext}`;
     const { error } = await supabase.storage
       .from("onboarding-submissions")
       .upload(path, file, { contentType: file.type, upsert: false });
     if (error) throw error;
     return { path, name: file.name, size: file.size, type: file.type };
   };
+
 
   const validateAll = (): Record<string, string> => {
     const errs: Record<string, string> = {};
