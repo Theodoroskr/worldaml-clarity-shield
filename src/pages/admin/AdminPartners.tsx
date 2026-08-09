@@ -16,11 +16,17 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, CheckCircle, XCircle, Handshake, Pencil, FileSignature, Bell, History, Trash2, Eye } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, Handshake, Pencil, FileSignature, Bell, History, Trash2, Eye, Search, ShieldCheck, ShieldOff, ChevronDown, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { logPartnerAdminAction } from "@/lib/partnerAudit";
 import PartnerProgramAnalytics from "@/components/admin/PartnerProgramAnalytics";
 import PartnerDetailDialog from "@/components/admin/PartnerDetailDialog";
+import PartnerActionCentre from "@/components/admin/PartnerActionCentre";
+import PartnerApplicationReviewDialog from "@/components/admin/PartnerApplicationReviewDialog";
+import {
+  APPLICATION_STATUS_LABEL, APPLICATION_STATUS_STYLE, PORTAL_ACCESS_LABEL, PORTAL_ACCESS_STYLE,
+  applicationAge, ageSeverity, auditActionLabel, summariseChanges, toPercent,
+} from "@/lib/partnerLifecycle";
 
 
 
@@ -53,6 +59,18 @@ export default function AdminPartners() {
   const [editForm, setEditForm] = useState<any>({});
   const [detailPartner, setDetailPartner] = useState<any | null>(null);
   const [removeTarget, setRemoveTarget] = useState<any | null>(null);
+  const [reviewApp, setReviewApp] = useState<any | null>(null);
+  const [managers, setManagers] = useState<any[]>([]);
+  const [appSearch, setAppSearch] = useState("");
+  const [appStatus, setAppStatus] = useState("all");
+  const [appType, setAppType] = useState("all");
+  const [appCountry, setAppCountry] = useState("all");
+  const [openNotes, setOpenNotes] = useState<Record<string, boolean>>({});
+  const [ptType, setPtType] = useState("all");
+  const [ptActive, setPtActive] = useState("all");
+  const [ptAccess, setPtAccess] = useState("all");
+  const [ptCert, setPtCert] = useState("all");
+  const [accessTarget, setAccessTarget] = useState<{ partner: any; access: string } | null>(null);
 
   const [auditLog, setAuditLog] = useState<any[]>([]);
   const [auditEntity, setAuditEntity] = useState<string>("all");
@@ -76,6 +94,8 @@ export default function AdminPartners() {
       supabase.from("partner_admin_audit_log" as any).select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("partner_notification_settings" as any).select("*").order("email", { ascending: true }),
     ]);
+    const { data: mgrs } = await supabase.from("partner_managers" as any).select("id,name,email");
+    setManagers((mgrs as any[]) || []);
     setPartnerApps((apps as any[]) || []);
     setPartners((pts as any[]) || []);
     setDeals((dl as any[]) || []);
@@ -96,6 +116,27 @@ export default function AdminPartners() {
   }, [user?.id]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  // Keep the open review drawer in sync with refreshed data
+  useEffect(() => {
+    if (!reviewApp) return;
+    const fresh = partnerApps.find((a: any) => a.id === reviewApp.id);
+    if (fresh && fresh !== reviewApp) setReviewApp(fresh);
+  }, [partnerApps]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const setPortalAccess = async (partner: any, access: string, reason?: string) => {
+    setActionLoading(partner.id);
+    const { error } = await supabase.rpc("admin_set_partner_portal_access" as any, {
+      _partner_id: partner.id, _access: access, _reason: reason ?? null,
+    } as any);
+    if (error) toast.error(error.message || "Failed to update portal access");
+    else {
+      toast.success(`Portal access ${PORTAL_ACCESS_LABEL[access].toLowerCase()}`);
+      fetchAll();
+    }
+    setActionLoading(null);
+    setAccessTarget(null);
+  };
 
   const approvePartnerApp = async (app: any) => {
     setActionLoading(app.id);
