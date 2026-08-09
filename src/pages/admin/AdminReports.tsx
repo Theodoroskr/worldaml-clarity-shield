@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,8 +29,6 @@ import {
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import { RANGE_LABELS, RangeKey } from "@/lib/adminAnalytics";
-import AdminActionRequired from "@/components/admin/AdminActionRequired";
-import AdminPageAttention from "@/components/admin/AdminPageAttention";
 
 const REPORT_TYPES: Record<string, string> = {
   executive: "Executive summary",

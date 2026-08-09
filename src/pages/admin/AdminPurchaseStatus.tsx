@@ -1,4 +1,6 @@
 import { useEffect, useState, useMemo, useRef } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,8 +10,6 @@ import { Loader2, Search, ArrowUpDown, CalendarRange, RefreshCw, Download, Alert
 import { toast } from "sonner";
 import { KpiCard, DefinitionsButton, MetricInfo } from "@/components/admin/AcademyMetricUI";
 import { money, pct, useCourseTitles } from "@/lib/academyAdmin";
-import AdminActionRequired from "@/components/admin/AdminActionRequired";
-import AdminPageAttention from "@/components/admin/AdminPageAttention";
 
 
 type PurchaseRow = {

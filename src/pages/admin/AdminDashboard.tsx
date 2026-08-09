@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -25,8 +27,6 @@ import {
 } from "@/lib/adminAnalytics";
 import { exportSummaryCsv, exportSummaryPdf } from "@/lib/adminReportExport";
 import {
-import AdminActionRequired from "@/components/admin/AdminActionRequired";
-import AdminPageAttention from "@/components/admin/AdminPageAttention";
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 

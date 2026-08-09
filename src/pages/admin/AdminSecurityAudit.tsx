@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Shield, ShieldCheck, ShieldAlert, ShieldX, Lock, Unlock, Database, HardDrive,
   CheckCircle2, XCircle, AlertTriangle, RefreshCw, ChevronDown, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import AdminActionRequired from "@/components/admin/AdminActionRequired";
-import AdminPageAttention from "@/components/admin/AdminPageAttention";
 
 /* ── Static edge-function registry ── */
 

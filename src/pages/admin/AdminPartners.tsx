@@ -1,4 +1,6 @@
 import { Fragment, useCallback, useEffect, useState } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,8 +26,6 @@ import PartnerDetailDialog from "@/components/admin/PartnerDetailDialog";
 import PartnerActionCentre from "@/components/admin/PartnerActionCentre";
 import PartnerApplicationReviewDialog from "@/components/admin/PartnerApplicationReviewDialog";
 import {
-import AdminActionRequired from "@/components/admin/AdminActionRequired";
-import AdminPageAttention from "@/components/admin/AdminPageAttention";
   APPLICATION_STATUS_LABEL, APPLICATION_STATUS_STYLE, PORTAL_ACCESS_LABEL, PORTAL_ACCESS_STYLE,
   applicationAge, ageSeverity, auditActionLabel, summariseChanges, toPercent,
 } from "@/lib/partnerLifecycle";

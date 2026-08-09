@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,8 +9,6 @@ import { Loader2, RefreshCw, AlertTriangle, Download, CheckCircle2, XCircle, Clo
 import { toast } from "sonner";
 import { KpiCard, DefinitionsButton, MetricInfo } from "@/components/admin/AcademyMetricUI";
 import { money } from "@/lib/academyAdmin";
-import AdminActionRequired from "@/components/admin/AdminActionRequired";
-import AdminPageAttention from "@/components/admin/AdminPageAttention";
 
 type ReconcileResult = {
   ok: boolean;

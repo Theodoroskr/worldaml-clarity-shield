@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { useNavigate } from "react-router-dom";
 import { Bell, Check, EyeOff, ArrowRight, Settings2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useAdminNotifications } from "@/hooks/useAdminNotifications";
-import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import {
   CATEGORY_LABELS,
   EVENT_MAP,
