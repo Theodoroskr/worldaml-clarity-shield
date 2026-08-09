@@ -86,6 +86,7 @@ export default function UserIntelFilters({
   sortKey, sortDir, onSort, savedSegments, onSaveSegment, onDeleteSegment,
 }: Props) {
   const [segName, setSegName] = useState("");
+  const [builderOpen, setBuilderOpen] = useState(false);
   const groups = useMemo(() => {
     const m = new Map<string, typeof FIELD_DEFS>();
     FIELD_DEFS.forEach((f) => m.set(f.group, [...(m.get(f.group) || []), f]));
