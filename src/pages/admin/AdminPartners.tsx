@@ -71,6 +71,10 @@ export default function AdminPartners() {
   const [ptAccess, setPtAccess] = useState("all");
   const [ptCert, setPtCert] = useState("all");
   const [accessTarget, setAccessTarget] = useState<{ partner: any; access: string } | null>(null);
+  const [approveDeal, setApproveDeal] = useState<any | null>(null);
+  const [dealForm, setDealForm] = useState<{ protection_expires_at: string; status: string; customer_id: string; admin_notes: string }>({
+    protection_expires_at: "", status: "approved", customer_id: "", admin_notes: "",
+  });
 
   const [auditLog, setAuditLog] = useState<any[]>([]);
   const [auditEntity, setAuditEntity] = useState<string>("all");
@@ -236,6 +240,54 @@ export default function AdminPartners() {
         entity_label: before?.prospect_company ?? null,
         changes: { status: { from: before?.status, to: status } },
       });
+      fetchAll();
+    }
+    setActionLoading(null);
+  };
+
+  const openApproveDeal = (deal: any) => {
+    setApproveDeal(deal);
+    setDealForm({
+      protection_expires_at: deal.protection_expires_at
+        ? new Date(deal.protection_expires_at).toISOString().slice(0, 10)
+        : "",
+      status: "approved",
+      customer_id: deal.linked_customer_id ?? "",
+      admin_notes: deal.admin_notes ?? "",
+    });
+  };
+
+  const confirmApproveDeal = async () => {
+    if (!approveDeal) return;
+    setActionLoading(approveDeal.id);
+    const payload: any = {
+      status: dealForm.status,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: user!.id,
+      admin_notes: dealForm.admin_notes || approveDeal.admin_notes || null,
+    };
+    // Commercial data is never overwritten silently — only what the admin confirms.
+    if (dealForm.protection_expires_at) {
+      payload.protection_expires_at = new Date(dealForm.protection_expires_at).toISOString();
+    }
+    if (dealForm.customer_id) payload.linked_customer_id = dealForm.customer_id;
+
+    const { error } = await supabase.from("deal_registrations").update(payload).eq("id", approveDeal.id);
+    if (error) toast.error("Failed to update deal");
+    else {
+      toast.success(`Deal ${dealForm.status}`);
+      await logPartnerAdminAction({
+        action: `deal_${dealForm.status}`,
+        entity_type: "deal_registration",
+        entity_id: approveDeal.id,
+        entity_label: approveDeal.prospect_company,
+        changes: {
+          status: { from: approveDeal.status, to: dealForm.status },
+          protection_expires_at: { from: approveDeal.protection_expires_at, to: payload.protection_expires_at ?? approveDeal.protection_expires_at },
+          linked_customer_id: { from: approveDeal.linked_customer_id ?? null, to: payload.linked_customer_id ?? approveDeal.linked_customer_id ?? null },
+        },
+      });
+      setApproveDeal(null);
       fetchAll();
     }
     setActionLoading(null);
@@ -946,7 +998,7 @@ export default function AdminPartners() {
                               <div className="flex flex-wrap gap-1">
                                 {d.status === "pending" && (
                                   <>
-                                    <Button size="sm" variant="outline" className="text-green-700" disabled={actionLoading === d.id} onClick={() => reviewDeal(d.id, "approved")}>Approve</Button>
+                                    <Button size="sm" variant="outline" className="text-green-700" disabled={actionLoading === d.id} onClick={() => openApproveDeal(d)}>Approve…</Button>
                                     <Button size="sm" variant="outline" className="text-red-700" disabled={actionLoading === d.id} onClick={() => reviewDeal(d.id, "rejected")}>Reject</Button>
                                   </>
                                 )}
@@ -1360,6 +1412,75 @@ export default function AdminPartners() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Approve deal dialog */}
+      <Dialog open={!!approveDeal} onOpenChange={(o) => !o && setApproveDeal(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Approve deal registration</DialogTitle></DialogHeader>
+          {approveDeal && (
+            <div className="grid gap-4 py-2 text-sm">
+              <div className="rounded-md border border-divider bg-surface-subtle/50 p-3 space-y-1">
+                <div><span className="text-text-secondary">Prospect: </span><span className="font-medium text-navy">{approveDeal.prospect_company}</span></div>
+                <div><span className="text-text-secondary">Partner: </span>{(partners.find((p: any) => p.id === approveDeal.partner_id) as any)?.display_name || approveDeal.partner_id.slice(0, 8)}</div>
+                <div><span className="text-text-secondary">Contact: </span>{approveDeal.prospect_contact_name || "—"}{approveDeal.prospect_email ? ` · ${approveDeal.prospect_email}` : ""}</div>
+                <div><span className="text-text-secondary">Estimated ARR: </span>{approveDeal.estimated_arr_eur ? `€${Number(approveDeal.estimated_arr_eur).toLocaleString()}` : "—"}</div>
+                <div><span className="text-text-secondary">Current status: </span>{approveDeal.status}</div>
+                <div><span className="text-text-secondary">Protection start: </span>{new Date(approveDeal.created_at).toLocaleDateString("en-GB")}</div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Protection end</Label>
+                  <Input
+                    type="date"
+                    value={dealForm.protection_expires_at}
+                    onChange={(e) => setDealForm({ ...dealForm, protection_expires_at: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Deal status</Label>
+                  <Select value={dealForm.status} onValueChange={(v) => setDealForm({ ...dealForm, status: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="pending">Keep pending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label>Linked customer (optional)</Label>
+                <Select
+                  value={dealForm.customer_id || "__none__"}
+                  onValueChange={(v) => setDealForm({ ...dealForm, customer_id: v === "__none__" ? "" : v })}
+                >
+                  <SelectTrigger><SelectValue placeholder="No customer linked" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    <SelectItem value="__none__">— No customer linked —</SelectItem>
+                    {customers.map((c: any) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {(c.company_name || c.name || "Unnamed")}{c.email ? ` · ${c.email}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Internal note</Label>
+                <Textarea rows={2} value={dealForm.admin_notes} onChange={(e) => setDealForm({ ...dealForm, admin_notes: e.target.value })} />
+              </div>
+              <p className="text-xs text-text-secondary">Estimated and actual ARR are left untouched.</p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setApproveDeal(null)}>Cancel</Button>
+            <Button onClick={confirmApproveDeal} disabled={actionLoading === approveDeal?.id}>
+              {actionLoading === approveDeal?.id ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Convert to Won dialog */}
       <Dialog open={!!winDeal} onOpenChange={(o) => !o && setWinDeal(null)}>
