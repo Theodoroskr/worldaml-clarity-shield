@@ -564,11 +564,23 @@ export default function AdminUsers() {
     return sortUsers(intel, sortKey, sortDir).map((u) => u.p as Profile);
   };
 
+  // ---- Business categories (a user can belong to several; never duplicated) ----
+  const typesOf = (p: Profile) => enrichedById[p.id]?.types || [];
+  const academyCategory = profiles.filter((p) => typesOf(p).includes("academy"));
+  const businessCategory = profiles.filter((p) => typesOf(p).includes("business"));
+  const partnerCategory = profiles.filter((p) => typesOf(p).includes("partner"));
+  const suiteCategory = profiles.filter((p) => typesOf(p).includes("suite"));
+
   const tabList = (tab: string): Profile[] =>
-    tab === "suite" ? suiteUsers : tab === "regular" ? regularUsers : tab === "partners" ? partnerApplicants : nonPartnerProfiles;
+    tab === "academy" ? academyCategory
+      : tab === "business" ? businessCategory
+        : tab === "partners" ? partnerCategory
+          : tab === "suite" ? suiteCategory
+            : profiles;
 
   const visibleUsers = enrichList(applyFilters(tabList(activeTab)));
-  const allIntelUsers = enrichList(nonPartnerProfiles);
+  const allIntelUsers = enrichList(profiles);
+
   const selectedUsers = visibleUsers.filter((u) => selectedIds.has(u.id));
 
 
@@ -621,13 +633,24 @@ export default function AdminUsers() {
   const extraCell = (id: string, u?: EnrichedUser) => {
     if (!u) return "—";
     switch (id) {
-      case "user_type":
+      case "user_type": {
+        const visible = u.types.filter((t) => t !== "platform");
+        const tone: Record<string, string> = {
+          academy: "bg-cyan-50 text-cyan-700 border-cyan-200",
+          business: "bg-indigo-50 text-indigo-700 border-indigo-200",
+          partner: "bg-amber-50 text-amber-700 border-amber-200",
+          suite: "bg-blue-50 text-blue-700 border-blue-200",
+        };
         return (
           <div className="flex flex-wrap gap-1">
-            {u.types.map((t) => <Badge key={t} variant="outline" className="text-[10px]">{USER_TYPE_LABELS[t]}</Badge>)}
-            {!u.types.length && <span className="text-xs text-muted-foreground">—</span>}
+            {visible.map((t) => (
+              <Badge key={t} variant="outline" className={`text-[10px] ${tone[t] || ""}`}>{USER_TYPE_LABELS[t]}</Badge>
+            ))}
+            {!visible.length && <span className="text-xs text-muted-foreground">No portal access</span>}
           </div>
         );
+      }
+
       case "account_age": return formatAge(u.accountAgeDays);
       case "last_activity": return formatDate(u.lastActivityAt);
       case "days_inactive": return u.daysInactive == null ? "—" : `${u.daysInactive}d`;
@@ -896,8 +919,9 @@ export default function AdminUsers() {
         <div>
           <h1 className="text-xl font-bold text-foreground">User Management</h1>
           <p className="text-xs text-muted-foreground">
-            {nonPartnerProfiles.length} platform users · {suiteUsers.length} suite users · {partnerApplicants.length} partner applicants (processed in <Link to="/admin/partners" className="text-primary hover:underline">Partner Program</Link>) · {academyUsers.length} academy learners (managed in <a href="/admin/academy-users" className="text-primary hover:underline">Academy Signups</a>)
+            {profiles.length} users · {academyCategory.length} academy · {businessCategory.length} business · {partnerCategory.length} partners (managed in <Link to="/admin/partners" className="text-primary hover:underline">Partner Program</Link>) · {suiteCategory.length} suite
           </p>
+
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={exportCurrentView}>
@@ -989,27 +1013,30 @@ export default function AdminUsers() {
         <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
       ) : (
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSelectedIds(new Set()); }} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="all">Platform Users ({nonPartnerProfiles.length})</TabsTrigger>
-            <TabsTrigger value="suite">Suite Users ({suiteUsers.length})</TabsTrigger>
-            <TabsTrigger value="regular">Regular Users ({regularUsers.length})</TabsTrigger>
+          <TabsList className="flex-wrap">
+            <TabsTrigger value="all">All Users ({profiles.length})</TabsTrigger>
+            <TabsTrigger value="academy">Academy ({academyCategory.length})</TabsTrigger>
+            <TabsTrigger value="business">Business ({businessCategory.length})</TabsTrigger>
             <TabsTrigger value="partners" className="gap-1.5">
               <Handshake className="w-3.5 h-3.5" />
-              Partner Applicants ({partnerApplicants.length})
+              Partners ({partnerCategory.length})
             </TabsTrigger>
+            <TabsTrigger value="suite">Suite Users ({suiteCategory.length})</TabsTrigger>
           </TabsList>
-          <TabsContent value="all">{renderTable(nonPartnerProfiles, false)}</TabsContent>
-          <TabsContent value="suite">{renderTable(suiteUsers, true)}</TabsContent>
-          <TabsContent value="regular">{renderTable(regularUsers, false)}</TabsContent>
+          <TabsContent value="all">{renderTable(profiles, false)}</TabsContent>
+          <TabsContent value="academy">{renderTable(academyCategory, false)}</TabsContent>
+          <TabsContent value="business">{renderTable(businessCategory, false)}</TabsContent>
           <TabsContent value="partners">
             <div className="mb-3 flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-              <span>These users applied to the Partner Program. Approve, reject, or edit their partner records in the dedicated workspace.</span>
+              <span>Users with a partner relationship. Applications, approvals and partner records stay in the Partner Program workspace.</span>
               <Link to="/admin/partners" className="inline-flex items-center gap-1 text-primary hover:underline">
                 Open Partner Program <ExternalLink className="w-3 h-3" />
               </Link>
             </div>
-            {renderPartnerApplicantsTable(applyFilters(partnerApplicants))}
+            {renderTable(partnerCategory, false)}
           </TabsContent>
+          <TabsContent value="suite">{renderTable(suiteCategory, true)}</TabsContent>
+
         </Tabs>
       )}
 
