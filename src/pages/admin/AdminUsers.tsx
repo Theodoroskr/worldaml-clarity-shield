@@ -732,6 +732,9 @@ export default function AdminUsers() {
                   </div>
                 </td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</td>
+                {extraCols.map((c) => (
+                  <td key={c.id} className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{extraCell(c.id, enrich(p))}</td>
+                ))}
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1 flex-wrap">
                     {p.status !== "approved" && (
