@@ -44,10 +44,15 @@ async function resolveAccess(portal: PortalKey, userId: string): Promise<boolean
       .from("partners").select("is_active").eq("user_id", userId).maybeSingle();
     return !!data?.is_active;
   }
+  if (portal === "suite") {
+    const { data } = await supabase.rpc("current_user_has_suite_access" as any);
+    return data === true;
+  }
   const { data } = await supabase
     .from("profiles").select("status").eq("user_id", userId).maybeSingle();
   return (data as { status?: string } | null)?.status !== "rejected";
 }
+
 
 /** Partner-specific denial copy based on where the application stands. */
 async function partnerDenialCopy(userId: string): Promise<string> {
