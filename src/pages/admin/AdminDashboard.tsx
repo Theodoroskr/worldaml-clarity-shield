@@ -138,6 +138,14 @@ export default function AdminDashboard() {
           <p className="text-sm text-muted-foreground mt-1">
             Internal intelligence across Academy, Business, Partners, Platform and Marketing — every figure is queried live from the database.
           </p>
+          <DataFreshness
+            className="mt-1"
+            updatedAt={a?.generated_at ?? null}
+            live={!!liveAt}
+            refreshing={isFetching}
+            onRefresh={() => { refetch(); feeds.refetch(); }}
+          />
+
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <AdminFilters
