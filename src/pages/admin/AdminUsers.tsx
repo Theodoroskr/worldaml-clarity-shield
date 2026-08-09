@@ -894,46 +894,68 @@ export default function AdminUsers() {
         })}
       />
 
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email, company or domain…" className="w-full pl-8 py-2 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary" />
+      <div className="space-y-2">
+        <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3 sm:flex-row sm:items-center">
+          <div className="relative min-w-0 flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search by name, email, company or domain…"
+              className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-10 w-[140px] text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sourceFilter} onValueChange={setSourceFilter}>
+              <SelectTrigger className="h-10 w-[160px] text-sm"><SelectValue placeholder="Source" /></SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                <SelectItem value="all">All sources</SelectItem>
+                <SelectItem value="unknown">Unknown</SelectItem>
+                {allSources.map(s => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {(search || statusFilter !== "all" || sourceFilter !== "all" || intelFilters.conditions.length > 0) && (
+              <Button variant="ghost" size="sm" className="h-10 text-xs text-muted-foreground hover:text-destructive"
+                onClick={() => { setSearch(""); setStatusFilter("all"); setSourceFilter("all"); setIntelFilters(EMPTY_FILTERS); }}>
+                <X className="w-3.5 h-3.5 mr-1" /> Clear all filters
+              </Button>
+            )}
+          </div>
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-32 text-sm"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={sourceFilter} onValueChange={setSourceFilter}>
-          <SelectTrigger className="w-40 text-sm"><SelectValue placeholder="Source" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All sources</SelectItem>
-            <SelectItem value="unknown">Unknown</SelectItem>
-            {allSources.map(s => (
-              <SelectItem key={s} value={s}>{s}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+        <UserIntelFilters
+          filters={intelFilters}
+          onFilters={setIntelFilters}
+          users={allIntelUsers}
+          matchCount={visibleUsers.length}
+          columns={columns}
+          onColumns={(c) => { setColumns(c); persistColumns(c); }}
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onSort={(k, d) => { setSortKey(k); setSortDir(d); }}
+          savedSegments={savedSegments}
+          onSaveSegment={(name) => setSavedSegments(saveSegmentFn(name, intelFilters))}
+          onDeleteSegment={(id) => setSavedSegments(deleteSegmentFn(id))}
+        />
       </div>
 
-      <UserIntelFilters
-        filters={intelFilters}
-        onFilters={setIntelFilters}
-        users={allIntelUsers}
-        matchCount={visibleUsers.length}
-        columns={columns}
-        onColumns={(c) => { setColumns(c); persistColumns(c); }}
-        sortKey={sortKey}
-        sortDir={sortDir}
-        onSort={(k, d) => { setSortKey(k); setSortDir(d); }}
-        savedSegments={savedSegments}
-        onSaveSegment={(name) => setSavedSegments(saveSegmentFn(name, intelFilters))}
-        onDeleteSegment={(id) => setSavedSegments(deleteSegmentFn(id))}
-      />
 
       {!activityAvailable && (
         <p className="text-xs text-amber-700">Last activity data is unavailable right now — activity filters may be empty.</p>
