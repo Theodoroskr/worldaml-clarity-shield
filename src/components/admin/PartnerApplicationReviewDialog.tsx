@@ -144,7 +144,8 @@ export default function PartnerApplicationReviewDialog({
       return;
     }
     // Approval is committed — an email failure must never undo it.
-    const sent = notifyApplicant ? await sendLifecycleEmail("approved") : true;
+    // Approval confirmation is always sent — the partner must receive their access details.
+    const sent = await sendLifecycleEmail("approved");
     setBusy(false);
     onDone();
     if (sent) {
@@ -402,10 +403,16 @@ export default function PartnerApplicationReviewDialog({
                   </span>
                 </span>
               </label>
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox checked={notifyApplicant} onCheckedChange={(v) => setNotifyApplicant(!!v)} />
-                <span>Send approval email to {app.contact_email || "the applicant"}</span>
-              </label>
+              <div className="flex items-start gap-2 text-sm">
+                <Mail className="h-4 w-4 mt-0.5 text-teal" />
+                <span>
+                  <span className="font-semibold text-navy">Access confirmation email is always sent</span>
+                  <span className="block text-xs text-text-secondary">
+                    A branded WorldAML welcome email with portal sign-in details, partner type, referral code and
+                    commission terms goes to {app.contact_email || "the applicant"}.
+                  </span>
+                </span>
+              </div>
             </div>
 
             <DialogFooter className="gap-2">
