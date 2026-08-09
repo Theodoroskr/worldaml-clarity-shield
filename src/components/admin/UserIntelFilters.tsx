@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, Table2, Bookmark, Trash2, ArrowUpDown } from "lucide-react";
+import { Plus, X, Table2, Bookmark, Trash2, ArrowUpDown, LayoutGrid, ChevronDown } from "lucide-react";
 import {
   COLUMN_DEFS, DATE_PRESET_LABELS, DatePreset, EnrichedUser, FIELD_DEFS, FIELD_BY_ID,
   FilterCondition, FilterState, QUICK_SEGMENTS, SavedSegment, SORT_LABELS, SortKey,
@@ -86,6 +86,7 @@ export default function UserIntelFilters({
   sortKey, sortDir, onSort, savedSegments, onSaveSegment, onDeleteSegment,
 }: Props) {
   const [segName, setSegName] = useState("");
+  const [builderOpen, setBuilderOpen] = useState(false);
   const groups = useMemo(() => {
     const m = new Map<string, typeof FIELD_DEFS>();
     FIELD_DEFS.forEach((f) => m.set(f.group, [...(m.get(f.group) || []), f]));
@@ -95,7 +96,10 @@ export default function UserIntelFilters({
   const update = (id: string, patch: Partial<FilterCondition>) =>
     onFilters({ ...filters, conditions: filters.conditions.map((c) => (c.id === id ? { ...c, ...patch } : c)) });
   const remove = (id: string) => onFilters({ ...filters, conditions: filters.conditions.filter((c) => c.id !== id) });
-  const add = () => onFilters({ ...filters, conditions: [...filters.conditions, newCondition()] });
+  const add = () => {
+    setBuilderOpen(true);
+    onFilters({ ...filters, conditions: [...filters.conditions, newCondition()] });
+  };
 
   const renderValue = (c: FilterCondition) => {
     const def = FIELD_BY_ID[c.field];
@@ -158,93 +162,107 @@ export default function UserIntelFilters({
     return <Input className="h-8 w-[180px] text-xs" placeholder="Contains…" value={c.value ?? ""} onChange={(e) => update(c.id, { value: e.target.value })} />;
   };
 
+  const segmentGroups = useMemo(() => {
+    const m = new Map<string, typeof QUICK_SEGMENTS>();
+    QUICK_SEGMENTS.forEach((s) => m.set(s.category, [...(m.get(s.category) || []), s]));
+    return [...m.entries()];
+  }, []);
+
+  const activeCount = filters.conditions.length;
+
   return (
-    <div className="space-y-3 rounded-xl border border-border bg-card/50 p-3">
-      {/* Quick segments */}
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mr-1">Quick segments</span>
-        {QUICK_SEGMENTS.map((s) => (
-          <Button key={s.id} variant="outline" size="sm" title={s.description}
-            className="h-7 rounded-full px-2.5 text-[11px] font-normal"
-            onClick={() => onFilters({ ...s.state, conditions: s.state.conditions.map((c) => ({ ...c, id: `${c.id}_${s.id}` })) })}>
-            {s.label}
-          </Button>
-        ))}
-      </div>
-
-      {savedSegments.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mr-1">Saved</span>
-          {savedSegments.map((s) => (
-            <span key={s.id} className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 pl-2.5 pr-1 py-0.5 text-[11px]">
-              <button className="text-primary" onClick={() => onFilters(s.state)}>{s.name}</button>
-              <button className="text-muted-foreground hover:text-destructive" onClick={() => onDeleteSegment(s.id)}>
-                <Trash2 className="w-3 h-3" />
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Condition rows */}
-      <div className="space-y-2">
-        {filters.conditions.map((c, idx) => (
-          <div key={c.id} className="flex flex-wrap items-center gap-2">
-            <span className="w-12 text-[11px] font-medium text-muted-foreground">
-              {idx === 0 ? "Where" : filters.logic}
-            </span>
-            <Select value={c.field} onValueChange={(v) => onFilters({ ...filters, conditions: filters.conditions.map((x) => (x.id === c.id ? { ...newCondition(v), id: x.id } : x)) })}>
-              <SelectTrigger className="h-8 w-[190px] text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent className="bg-popover z-50 max-h-72">
-                {groups.map(([g, fields]) => (
-                  <div key={g}>
-                    <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">{g}</div>
-                    {fields.map((f) => <SelectItem key={f.id} value={f.id}>{f.label}</SelectItem>)}
-                  </div>
-                ))}
-              </SelectContent>
-            </Select>
-            {["multi", "select", "text"].includes(FIELD_BY_ID[c.field]?.kind) && (
-              <Select value={c.operator} onValueChange={(v) => update(c.id, { operator: v as any })}>
-                <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-popover z-50">
-                  <SelectItem value="is">{FIELD_BY_ID[c.field]?.kind === "text" ? "contains" : "is"}</SelectItem>
-                  <SelectItem value="is_not">is not</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-            {renderValue(c)}
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground" onClick={() => remove(c.id)}>
-              <X className="w-3.5 h-3.5" />
+    <div className="rounded-xl border border-border bg-card">
+      {/* ---- Toolbar: segments · filters · sorting · columns ---- */}
+      <div className="flex flex-wrap items-center gap-2 p-3">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-8 text-xs">
+              <LayoutGrid className="w-3.5 h-3.5 mr-1.5" /> Quick segments
+              <ChevronDown className="w-3 h-3 ml-1.5 opacity-60" />
             </Button>
-          </div>
-        ))}
-      </div>
+          </PopoverTrigger>
+          <PopoverContent className="w-[420px] p-2 bg-popover z-50" align="start">
+            <div className="max-h-[22rem] overflow-auto space-y-3">
+              {segmentGroups.map(([category, segs]) => (
+                <div key={category}>
+                  <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{category}</p>
+                  <div className="grid gap-1 sm:grid-cols-2">
+                    {segs.map((s) => (
+                      <button
+                        key={s.id}
+                        className="rounded-md border border-border px-2 py-1.5 text-left hover:border-primary/50 hover:bg-muted/50"
+                        onClick={() => onFilters({ ...s.state, conditions: s.state.conditions.map((c) => ({ ...c, id: `${c.id}_${s.id}` })) })}
+                      >
+                        <span className="block text-xs font-medium text-foreground">{s.label}</span>
+                        <span className="block text-[10px] leading-tight text-muted-foreground">{s.description}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
 
-      <div className="flex flex-wrap items-center gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-8 text-xs" disabled={!savedSegments.length && !activeCount}>
+              <Bookmark className="w-3.5 h-3.5 mr-1.5" /> Saved
+              {savedSegments.length > 0 && (
+                <Badge variant="secondary" className="ml-1.5 h-4 px-1 text-[10px]">{savedSegments.length}</Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-2 bg-popover z-50" align="start">
+            <div className="space-y-1 max-h-56 overflow-auto">
+              {savedSegments.length === 0 && (
+                <p className="px-1 py-2 text-xs text-muted-foreground">No saved segments yet. Build a filter, then save it below.</p>
+              )}
+              {savedSegments.map((s) => (
+                <div key={s.id} className="flex items-center gap-1 rounded-md px-1 py-1 hover:bg-muted/50">
+                  <button className="flex-1 truncate text-left text-xs text-foreground" onClick={() => onFilters(s.state)}>{s.name}</button>
+                  <button className="text-muted-foreground hover:text-destructive" onClick={() => onDeleteSegment(s.id)} aria-label="Delete segment">
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 border-t border-border pt-2">
+              <Input className="h-8 text-xs mb-2" placeholder="Name this filter set" value={segName} onChange={(e) => setSegName(e.target.value)} />
+              <Button size="sm" className="h-8 w-full text-xs" disabled={!segName.trim() || !activeCount}
+                onClick={() => { onSaveSegment(segName.trim()); setSegName(""); }}>
+                Save current filters
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <span className="hidden h-5 w-px bg-border sm:block" />
+
         <Button variant="outline" size="sm" className="h-8 text-xs" onClick={add}>
-          <Plus className="w-3.5 h-3.5 mr-1" /> Add filter
+          <Plus className="w-3.5 h-3.5 mr-1.5" /> Add filter
         </Button>
 
-        {filters.conditions.length > 1 && (
+        {activeCount > 1 && (
           <Select value={filters.logic} onValueChange={(v) => onFilters({ ...filters, logic: v as "AND" | "OR" })}>
-            <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-[150px] text-xs"><SelectValue /></SelectTrigger>
             <SelectContent className="bg-popover z-50">
-              <SelectItem value="AND">Match ALL conditions</SelectItem>
-              <SelectItem value="OR">Match ANY condition</SelectItem>
+              <SelectItem value="AND">Match ALL</SelectItem>
+              <SelectItem value="OR">Match ANY</SelectItem>
             </SelectContent>
           </Select>
         )}
 
-        <div className="flex items-center gap-1.5">
-          <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
+        <div className="flex items-center">
+          <ArrowUpDown className="mr-1.5 w-3.5 h-3.5 text-muted-foreground" />
           <Select value={sortKey} onValueChange={(v) => onSort(v as SortKey, sortDir)}>
-            <SelectTrigger className="h-8 w-[150px] text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-[150px] rounded-r-none text-xs"><SelectValue /></SelectTrigger>
             <SelectContent className="bg-popover z-50">
               {(Object.keys(SORT_LABELS) as SortKey[]).map((k) => <SelectItem key={k} value={k}>{SORT_LABELS[k]}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => onSort(sortKey, sortDir === "asc" ? "desc" : "asc")}>
+          <Button variant="outline" size="sm" className="h-8 rounded-l-none border-l-0 px-2 text-xs"
+            onClick={() => onSort(sortKey, sortDir === "asc" ? "desc" : "asc")}>
             {sortDir === "asc" ? "Asc" : "Desc"}
           </Button>
         </div>
@@ -252,7 +270,7 @@ export default function UserIntelFilters({
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="h-8 text-xs">
-              <Table2 className="w-3.5 h-3.5 mr-1" /> Columns
+              <Table2 className="w-3.5 h-3.5 mr-1.5" /> Columns
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-60 p-2 bg-popover z-50" align="start">
@@ -272,39 +290,78 @@ export default function UserIntelFilters({
           </PopoverContent>
         </Popover>
 
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 text-xs" disabled={!filters.conditions.length}>
-              <Bookmark className="w-3.5 h-3.5 mr-1" /> Save segment
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-sm font-semibold text-foreground">
+            {matchCount.toLocaleString()} user{matchCount === 1 ? "" : "s"}
+            <span className="ml-1 text-xs font-normal text-muted-foreground">match these filters</span>
+          </span>
+          {activeCount > 0 && (
+            <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground hover:text-destructive"
+              onClick={() => onFilters({ logic: "AND", conditions: [] })}>
+              <X className="w-3.5 h-3.5 mr-1" /> Clear all filters
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64 p-2 bg-popover z-50" align="start">
-            <Input className="h-8 text-xs mb-2" placeholder="Segment name" value={segName} onChange={(e) => setSegName(e.target.value)} />
-            <Button size="sm" className="h-8 w-full text-xs" disabled={!segName.trim()}
-              onClick={() => { onSaveSegment(segName.trim()); setSegName(""); }}>
-              Save filter configuration
-            </Button>
-          </PopoverContent>
-        </Popover>
-
-        <span className="ml-auto text-xs font-medium text-foreground">
-          {matchCount} user{matchCount === 1 ? "" : "s"} match these filters
-        </span>
+          )}
+        </div>
       </div>
 
-      {filters.conditions.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 border-t border-border pt-2">
-          {filters.conditions.map((c) => (
-            <Badge key={c.id} variant="outline" className="gap-1 text-[11px] font-normal">
-              {describeCondition(c)}
-              <button onClick={() => remove(c.id)} className="text-muted-foreground hover:text-destructive"><X className="w-3 h-3" /></button>
-            </Badge>
+      {/* ---- Active filter chips ---- */}
+      {activeCount > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 border-t border-border bg-muted/20 px-3 py-2">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Active</span>
+          {filters.conditions.map((c, idx) => (
+            <span key={c.id} className="inline-flex items-center gap-1">
+              {idx > 0 && <span className="text-[10px] font-medium text-muted-foreground">{filters.logic}</span>}
+              <Badge variant="secondary" className="gap-1 rounded-full px-2 py-0.5 text-[11px] font-normal">
+                {describeCondition(c)}
+                <button onClick={() => remove(c.id)} className="text-muted-foreground hover:text-destructive" aria-label="Remove filter">
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            </span>
           ))}
-          <Button variant="ghost" size="sm" className="h-6 text-[11px]" onClick={() => onFilters({ logic: "AND", conditions: [] })}>
-            Clear all
+          <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px]" onClick={() => setBuilderOpen((v) => !v)}>
+            {builderOpen ? "Hide editor" : "Edit filters"}
           </Button>
+        </div>
+      )}
+
+      {/* ---- Condition builder ---- */}
+      {activeCount > 0 && builderOpen && (
+        <div className="space-y-2 border-t border-border p-3">
+          {filters.conditions.map((c, idx) => (
+            <div key={c.id} className="flex flex-wrap items-center gap-2">
+              <span className="w-12 text-[11px] font-medium text-muted-foreground">
+                {idx === 0 ? "Where" : filters.logic}
+              </span>
+              <Select value={c.field} onValueChange={(v) => onFilters({ ...filters, conditions: filters.conditions.map((x) => (x.id === c.id ? { ...newCondition(v), id: x.id } : x)) })}>
+                <SelectTrigger className="h-8 w-[190px] text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-popover z-50 max-h-72">
+                  {groups.map(([g, fields]) => (
+                    <div key={g}>
+                      <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">{g}</div>
+                      {fields.map((f) => <SelectItem key={f.id} value={f.id}>{f.label}</SelectItem>)}
+                    </div>
+                  ))}
+                </SelectContent>
+              </Select>
+              {["multi", "select", "text"].includes(FIELD_BY_ID[c.field]?.kind) && (
+                <Select value={c.operator} onValueChange={(v) => update(c.id, { operator: v as any })}>
+                  <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    <SelectItem value="is">{FIELD_BY_ID[c.field]?.kind === "text" ? "contains" : "is"}</SelectItem>
+                    <SelectItem value="is_not">is not</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+              {renderValue(c)}
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground" onClick={() => remove(c.id)}>
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
 }
+

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, FileText, Send, History, Handshake, ExternalLink, Download, Table2 } from "lucide-react";
+import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, FileText, Send, History, Handshake, ExternalLink, Download, Table2, X, MoreHorizontal } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -651,46 +652,48 @@ export default function AdminUsers() {
     });
     const allSelected = filtered.length > 0 && filtered.every((p) => selectedIds.has(p.id));
     return (
-      <div className="bg-card rounded-xl border border-border overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/30">
-              <th className="px-3 py-3 w-8">
-                <Checkbox
-                  checked={allSelected}
-                  onCheckedChange={(v) => setSelectedIds(v ? new Set(filtered.map((p) => p.id)) : new Set())}
-                  aria-label="Select all users in view"
-                />
-              </th>
-              {["User", "Company", "Revenue", "Status", "Tier", "Source", "Regulator", "Roles", "Registered",
-                ...extraCols.map((c) => c.label), "Actions"].map(h => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase whitespace-nowrap">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {filtered.map(p => (
-              <tr key={p.id} className="hover:bg-muted/20 transition-colors">
-                <td className="px-3 py-3">
+      <div className="bg-card rounded-xl border border-border">
+        <div className="max-h-[70vh] overflow-auto rounded-xl">
+          <table className="w-full min-w-[900px] text-sm">
+            <thead className="sticky top-0 z-20">
+              <tr className="bg-muted/95 backdrop-blur supports-[backdrop-filter]:bg-muted/80">
+                <th className="w-8 border-b border-border px-3 py-2.5">
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={(v) => setSelectedIds(v ? new Set(filtered.map((p) => p.id)) : new Set())}
+                    aria-label="Select all users in view"
+                  />
+                </th>
+                {["User", "Company", "Revenue", "Status", "Tier", "Source", "Regulator", "Roles", "Registered",
+                  ...extraCols.map((c) => c.label), "Actions"].map(h => (
+                  <th key={h} className={`border-b border-border px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground whitespace-nowrap ${h === "Actions" ? "text-right" : "text-left"}`}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {filtered.map(p => (
+                <tr key={p.id} className={`transition-colors hover:bg-muted/30 ${selectedIds.has(p.id) ? "bg-primary/5" : ""}`}>
+                <td className="px-3 py-4">
                   <Checkbox checked={selectedIds.has(p.id)} onCheckedChange={() => toggleSelect(p.id)} aria-label="Select user" />
                 </td>
 
-                <td className="px-4 py-3">
+                <td className="px-4 py-4">
                   <button className="text-left" onClick={() => setDetailProfile(p)}>
-                    <div className="font-medium text-foreground hover:text-primary hover:underline">{p.full_name || "—"}</div>
+                    <div className="text-sm font-semibold text-foreground hover:text-primary hover:underline">{p.full_name || "—"}</div>
                     <div className="text-xs text-muted-foreground">{p.email}</div>
                   </button>
                   {p.marketing_opt_out_at && (
-                    <Badge variant="outline" className="mt-1 text-[10px] bg-red-50 text-red-700 border-red-200">Marketing opt-out</Badge>
+                    <Badge variant="outline" className="mt-1 rounded-full border-destructive/30 px-1.5 py-0 text-[10px] font-normal text-destructive">Marketing opt-out</Badge>
                   )}
                 </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{p.company_name || "—"}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-4 text-xs text-muted-foreground">{p.company_name || "—"}</td>
+
+                <td className="px-4 py-4">
                   {(() => {
                     const rv = revenueFor(p);
                     return (
                       <button className="text-left" onClick={() => setDetailProfile(p)}>
-                        <div className={`text-sm font-semibold ${rv.total > 0 ? "text-foreground" : "text-muted-foreground"}`}>
+                        <div className={`text-sm font-semibold tabular-nums ${rv.total > 0 ? "text-foreground" : "text-muted-foreground"}`}>
                           {formatMoney(rv.total, rv.currency)}
                         </div>
                         <div className="text-[10px] text-muted-foreground">{rv.items.length} txn</div>
@@ -699,11 +702,11 @@ export default function AdminUsers() {
                   })()}
                 </td>
 
-                <td className="px-4 py-3">{statusBadge(p.status)}</td>
-                <td className="px-4 py-3">{tierBadge(p.subscription_tier)}</td>
-                <td className="px-4 py-3">{sourceBadge(p)}</td>
+                <td className="px-4 py-4">{statusBadge(p.status)}</td>
+                <td className="px-4 py-4">{tierBadge(p.subscription_tier)}</td>
+                <td className="px-4 py-4">{sourceBadge(p)}</td>
 
-                <td className="px-4 py-3">
+                <td className="px-4 py-4">
                   {isSuiteUser(p) ? (
                     <Select
                       value={p.regulator || ""}
@@ -725,93 +728,114 @@ export default function AdminUsers() {
                     </Select>
                   ) : regulatorBadge(p.regulator)}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-4">
                   <div className="flex gap-1 flex-wrap">
-                    {(userRoles[p.user_id] || []).map(r => <Badge key={r} variant="outline" className="text-xs">{r}</Badge>)}
+                    {(userRoles[p.user_id] || []).map(r => <Badge key={r} variant="outline" className="rounded-full px-1.5 py-0 text-[10px] font-normal">{r}</Badge>)}
                     {!(userRoles[p.user_id] || []).length && <span className="text-xs text-muted-foreground">user</span>}
                   </div>
                 </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</td>
+                <td className="px-4 py-4 text-xs text-muted-foreground whitespace-nowrap">{new Date(p.created_at).toLocaleDateString()}</td>
                 {extraCols.map((c) => (
-                  <td key={c.id} className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{extraCell(c.id, enrich(p))}</td>
+                  <td key={c.id} className="px-4 py-4 text-xs text-muted-foreground whitespace-nowrap">{extraCell(c.id, enrich(p))}</td>
                 ))}
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-1 flex-wrap">
-                    {p.status !== "approved" && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-emerald-600" onClick={() => updateStatus(p.id, "approved")} disabled={actionLoading === p.id}>
+                <td className="px-4 py-4">
+                  <div className="flex items-center justify-end gap-1">
+                    {p.status !== "approved" ? (
+                      <Button size="sm" variant="outline" className="h-7 text-xs text-emerald-600" onClick={() => updateStatus(p.id, "approved")} disabled={actionLoading === p.id}>
                         <ShieldCheck className="w-3.5 h-3.5 mr-1" />Approve
                       </Button>
-                    )}
-                    {p.status !== "rejected" && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => updateStatus(p.id, "rejected")} disabled={actionLoading === p.id}>
-                        <ShieldX className="w-3.5 h-3.5 mr-1" />Reject
-                      </Button>
-                    )}
-                    {p.user_id !== user?.id && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => toggleRole(p.user_id, "admin")} disabled={actionLoading === p.user_id}>
-                        <Shield className="w-3.5 h-3.5 mr-1" />{userRoles[p.user_id]?.includes("admin") ? "Remove Admin" : "Make Admin"}
-                      </Button>
-                    )}
-                    {showSuiteActions && isSuiteUser(p) && p.email && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => revokeSuiteAccess(p.email!, p.id)} disabled={actionLoading === p.id}>
-                        <UserMinus className="w-3.5 h-3.5 mr-1" />Revoke Suite
-                      </Button>
-                    )}
-                    {!showSuiteActions && !isSuiteUser(p) && p.email && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-blue-600" onClick={() => openGrantDialog(p)} disabled={actionLoading === p.id}>
-                        <KeyRound className="w-3.5 h-3.5 mr-1" />Grant Suite
-                      </Button>
-                    )}
-                    {p.email && (() => {
+                    ) : p.email && (() => {
                       const el = evaluateEligibility(p);
                       return (
                         <Button
                           size="sm"
-                          variant="ghost"
+                          variant="outline"
                           className={`h-7 text-xs ${el.eligible ? "text-teal-600" : "text-muted-foreground"}`}
                           onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellData(undefined); setUpsellDialog({ open: true, profile: p }); }}
                           disabled={!el.eligible}
                           title={el.eligible ? `Basis: ${REASON_LABELS[el.reason]}` : `Blocked: ${REASON_LABELS[el.reason]}`}
                         >
-                          <Send className="w-3.5 h-3.5 mr-1" />
-                          Upsell
-                          {!el.eligible && <span className="ml-1 text-[10px] opacity-70">· blocked</span>}
+                          <Send className="w-3.5 h-3.5 mr-1" />Upsell
                         </Button>
                       );
                     })()}
-                    {p.email && (upsellCounts[p.user_id] || upsellCounts[p.email] || 0) > 0 && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => openHistory(p)}>
-                        <History className="w-3.5 h-3.5 mr-1" />
-                        History
-                        <Badge variant="outline" className="ml-1 h-4 px-1 text-[10px]">
-                          {upsellCounts[p.user_id] || upsellCounts[p.email] || 0}
-                        </Badge>
-                      </Button>
-                    )}
-                    {p.email && (
-                      p.marketing_opt_out_at ? (
-                        <Button size="sm" variant="ghost" className="h-7 text-xs text-red-600" onClick={() => toggleMarketingConsent(p, true)} disabled={actionLoading === p.id} title={`Opted out ${new Date(p.marketing_opt_out_at).toLocaleDateString()}`}>
-                          Opted out · re-enable
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" aria-label="More actions">
+                          <MoreHorizontal className="w-4 h-4" />
                         </Button>
-                      ) : p.marketing_consent ? (
-                        <Button size="sm" variant="ghost" className="h-7 text-xs text-emerald-600" onClick={() => toggleMarketingConsent(p, false)} disabled={actionLoading === p.id} title={p.marketing_consent_at ? `Opted in ${new Date(p.marketing_consent_at).toLocaleDateString()}` : "Opted in"}>
-                          Opted in · opt out
-                        </Button>
-                      ) : (
-                        <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => toggleMarketingConsent(p, true)} disabled={actionLoading === p.id}>
-                          Record opt-in
-                        </Button>
-                      )
-                    )}
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56 bg-popover z-50">
+                        <DropdownMenuItem onClick={() => setDetailProfile(p)}>
+                          <FileText className="w-3.5 h-3.5 mr-2" />View user 360°
+                        </DropdownMenuItem>
+                        {p.status === "approved" && p.email && (
+                          <DropdownMenuItem
+                            disabled={!evaluateEligibility(p).eligible}
+                            onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellData(undefined); setUpsellDialog({ open: true, profile: p }); }}
+                          >
+                            <Send className="w-3.5 h-3.5 mr-2" />Send upsell
+                          </DropdownMenuItem>
+                        )}
+                        {p.status !== "approved" && (
+                          <DropdownMenuItem onClick={() => updateStatus(p.id, "approved")}>
+                            <ShieldCheck className="w-3.5 h-3.5 mr-2" />Approve
+                          </DropdownMenuItem>
+                        )}
+                        {p.status !== "rejected" && (
+                          <DropdownMenuItem className="text-destructive" onClick={() => updateStatus(p.id, "rejected")}>
+                            <ShieldX className="w-3.5 h-3.5 mr-2" />Reject
+                          </DropdownMenuItem>
+                        )}
+                        {p.user_id !== user?.id && (
+                          <DropdownMenuItem onClick={() => toggleRole(p.user_id, "admin")}>
+                            <Shield className="w-3.5 h-3.5 mr-2" />{userRoles[p.user_id]?.includes("admin") ? "Remove admin" : "Make admin"}
+                          </DropdownMenuItem>
+                        )}
+                        {showSuiteActions && isSuiteUser(p) && p.email && (
+                          <DropdownMenuItem className="text-destructive" onClick={() => revokeSuiteAccess(p.email!, p.id)}>
+                            <UserMinus className="w-3.5 h-3.5 mr-2" />Revoke Suite access
+                          </DropdownMenuItem>
+                        )}
+                        {!showSuiteActions && !isSuiteUser(p) && p.email && (
+                          <DropdownMenuItem onClick={() => openGrantDialog(p)}>
+                            <KeyRound className="w-3.5 h-3.5 mr-2" />Grant Suite access
+                          </DropdownMenuItem>
+                        )}
+                        {p.email && (upsellCounts[p.user_id] || upsellCounts[p.email] || 0) > 0 && (
+                          <DropdownMenuItem onClick={() => openHistory(p)}>
+                            <History className="w-3.5 h-3.5 mr-2" />
+                            Upsell history ({upsellCounts[p.user_id] || upsellCounts[p.email] || 0})
+                          </DropdownMenuItem>
+                        )}
+                        {p.email && (
+                          p.marketing_opt_out_at ? (
+                            <DropdownMenuItem onClick={() => toggleMarketingConsent(p, true)}>
+                              Marketing: opted out · re-enable
+                            </DropdownMenuItem>
+                          ) : p.marketing_consent ? (
+                            <DropdownMenuItem onClick={() => toggleMarketingConsent(p, false)}>
+                              Marketing: opted in · opt out
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem onClick={() => toggleMarketingConsent(p, true)}>
+                              Record marketing opt-in
+                            </DropdownMenuItem>
+                          )
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </td>
               </tr>
             ))}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
         {filtered.length === 0 && <div className="text-center py-8 text-sm text-muted-foreground">No users found.</div>}
       </div>
     );
+
   };
 
   const renderPartnerApplicantsTable = (list: Profile[]) => (
@@ -894,46 +918,68 @@ export default function AdminUsers() {
         })}
       />
 
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email, company or domain…" className="w-full pl-8 py-2 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary" />
+      <div className="space-y-2">
+        <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3 sm:flex-row sm:items-center">
+          <div className="relative min-w-0 flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search by name, email, company or domain…"
+              className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-10 w-[140px] text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sourceFilter} onValueChange={setSourceFilter}>
+              <SelectTrigger className="h-10 w-[160px] text-sm"><SelectValue placeholder="Source" /></SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                <SelectItem value="all">All sources</SelectItem>
+                <SelectItem value="unknown">Unknown</SelectItem>
+                {allSources.map(s => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {(search || statusFilter !== "all" || sourceFilter !== "all" || intelFilters.conditions.length > 0) && (
+              <Button variant="ghost" size="sm" className="h-10 text-xs text-muted-foreground hover:text-destructive"
+                onClick={() => { setSearch(""); setStatusFilter("all"); setSourceFilter("all"); setIntelFilters(EMPTY_FILTERS); }}>
+                <X className="w-3.5 h-3.5 mr-1" /> Clear all filters
+              </Button>
+            )}
+          </div>
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-32 text-sm"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={sourceFilter} onValueChange={setSourceFilter}>
-          <SelectTrigger className="w-40 text-sm"><SelectValue placeholder="Source" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All sources</SelectItem>
-            <SelectItem value="unknown">Unknown</SelectItem>
-            {allSources.map(s => (
-              <SelectItem key={s} value={s}>{s}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+        <UserIntelFilters
+          filters={intelFilters}
+          onFilters={setIntelFilters}
+          users={allIntelUsers}
+          matchCount={visibleUsers.length}
+          columns={columns}
+          onColumns={(c) => { setColumns(c); persistColumns(c); }}
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onSort={(k, d) => { setSortKey(k); setSortDir(d); }}
+          savedSegments={savedSegments}
+          onSaveSegment={(name) => setSavedSegments(saveSegmentFn(name, intelFilters))}
+          onDeleteSegment={(id) => setSavedSegments(deleteSegmentFn(id))}
+        />
       </div>
 
-      <UserIntelFilters
-        filters={intelFilters}
-        onFilters={setIntelFilters}
-        users={allIntelUsers}
-        matchCount={visibleUsers.length}
-        columns={columns}
-        onColumns={(c) => { setColumns(c); persistColumns(c); }}
-        sortKey={sortKey}
-        sortDir={sortDir}
-        onSort={(k, d) => { setSortKey(k); setSortDir(d); }}
-        savedSegments={savedSegments}
-        onSaveSegment={(name) => setSavedSegments(saveSegmentFn(name, intelFilters))}
-        onDeleteSegment={(id) => setSavedSegments(deleteSegmentFn(id))}
-      />
 
       {!activityAvailable && (
         <p className="text-xs text-amber-700">Last activity data is unavailable right now — activity filters may be empty.</p>
