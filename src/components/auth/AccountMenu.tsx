@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import {
-  GraduationCap, Building2, Handshake, ShieldCheck, User, Lock, LogOut, Check,
+  GraduationCap, Building2, Handshake, ShieldCheck, Shield, User, Lock, LogOut, Check,
 } from "lucide-react";
 import {
   DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
@@ -8,6 +8,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { usePortalAccess, PortalKey, PORTAL_HOME } from "@/hooks/usePortalAccess";
 import { cn } from "@/lib/utils";
+
 
 type WorkspaceDef = {
   key: PortalKey;
@@ -40,6 +41,13 @@ export const WORKSPACES: WorkspaceDef[] = [
     match: (p) => p.startsWith("/partner"),
   },
   {
+    key: "suite",
+    label: "Compliance Suite",
+    description: "Onboarding, screening, cases & monitoring",
+    icon: Shield,
+    match: (p) => p.startsWith("/suite"),
+  },
+  {
     key: "admin",
     label: "Admin",
     description: "Internal administration",
@@ -47,6 +55,7 @@ export const WORKSPACES: WorkspaceDef[] = [
     match: (p) => p.startsWith("/admin"),
   },
 ];
+
 
 /** Account / workspace switcher shown in the header when signed in. */
 export default function AccountMenu({ onNavigate }: { onNavigate?: () => void }) {
