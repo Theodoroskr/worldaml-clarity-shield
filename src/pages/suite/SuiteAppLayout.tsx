@@ -1,5 +1,6 @@
 import { Outlet, Navigate, Link, useLocation } from "react-router-dom";
 import { useAccess } from "@/hooks/useAccess";
+import { usePortalAccess } from "@/hooks/usePortalAccess";
 import { useOrganisation } from "@/hooks/useOrganisation";
 import SuiteAppSidebar from "@/components/suite-app/SuiteAppSidebar";
 import SuiteAppTopbar from "@/components/suite-app/SuiteAppTopbar";
@@ -7,7 +8,11 @@ import SEO from "@/components/SEO";
 import { Lock } from "lucide-react";
 
 export default function SuiteAppLayout() {
-  const { isLoading, isAuthenticated, hasSuiteAccess, subscriptionTier } = useAccess();
+  const { subscriptionTier } = useAccess();
+  const portal = usePortalAccess();
+  const isLoading = portal.isLoading;
+  const isAuthenticated = portal.signedIn;
+  const hasSuiteAccess = portal.suiteAccess;
   const { org, orgId, isLoading: orgLoading } = useOrganisation();
   const location = useLocation();
 
