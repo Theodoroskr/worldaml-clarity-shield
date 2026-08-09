@@ -633,13 +633,24 @@ export default function AdminUsers() {
   const extraCell = (id: string, u?: EnrichedUser) => {
     if (!u) return "—";
     switch (id) {
-      case "user_type":
+      case "user_type": {
+        const visible = u.types.filter((t) => t !== "platform");
+        const tone: Record<string, string> = {
+          academy: "bg-cyan-50 text-cyan-700 border-cyan-200",
+          business: "bg-indigo-50 text-indigo-700 border-indigo-200",
+          partner: "bg-amber-50 text-amber-700 border-amber-200",
+          suite: "bg-blue-50 text-blue-700 border-blue-200",
+        };
         return (
           <div className="flex flex-wrap gap-1">
-            {u.types.map((t) => <Badge key={t} variant="outline" className="text-[10px]">{USER_TYPE_LABELS[t]}</Badge>)}
-            {!u.types.length && <span className="text-xs text-muted-foreground">—</span>}
+            {visible.map((t) => (
+              <Badge key={t} variant="outline" className={`text-[10px] ${tone[t] || ""}`}>{USER_TYPE_LABELS[t]}</Badge>
+            ))}
+            {!visible.length && <span className="text-xs text-muted-foreground">No portal access</span>}
           </div>
         );
+      }
+
       case "account_age": return formatAge(u.accountAgeDays);
       case "last_activity": return formatDate(u.lastActivityAt);
       case "days_inactive": return u.daysInactive == null ? "—" : `${u.daysInactive}d`;
