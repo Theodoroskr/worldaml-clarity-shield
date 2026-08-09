@@ -651,40 +651,42 @@ export default function AdminUsers() {
     });
     const allSelected = filtered.length > 0 && filtered.every((p) => selectedIds.has(p.id));
     return (
-      <div className="bg-card rounded-xl border border-border overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/30">
-              <th className="px-3 py-3 w-8">
-                <Checkbox
-                  checked={allSelected}
-                  onCheckedChange={(v) => setSelectedIds(v ? new Set(filtered.map((p) => p.id)) : new Set())}
-                  aria-label="Select all users in view"
-                />
-              </th>
-              {["User", "Company", "Revenue", "Status", "Tier", "Source", "Regulator", "Roles", "Registered",
-                ...extraCols.map((c) => c.label), "Actions"].map(h => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase whitespace-nowrap">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {filtered.map(p => (
-              <tr key={p.id} className="hover:bg-muted/20 transition-colors">
-                <td className="px-3 py-3">
+      <div className="bg-card rounded-xl border border-border">
+        <div className="max-h-[70vh] overflow-auto rounded-xl">
+          <table className="w-full min-w-[900px] text-sm">
+            <thead className="sticky top-0 z-20">
+              <tr className="bg-muted/95 backdrop-blur supports-[backdrop-filter]:bg-muted/80">
+                <th className="w-8 border-b border-border px-3 py-2.5">
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={(v) => setSelectedIds(v ? new Set(filtered.map((p) => p.id)) : new Set())}
+                    aria-label="Select all users in view"
+                  />
+                </th>
+                {["User", "Company", "Revenue", "Status", "Tier", "Source", "Regulator", "Roles", "Registered",
+                  ...extraCols.map((c) => c.label), "Actions"].map(h => (
+                  <th key={h} className={`border-b border-border px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground whitespace-nowrap ${h === "Actions" ? "text-right" : "text-left"}`}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {filtered.map(p => (
+                <tr key={p.id} className={`transition-colors hover:bg-muted/30 ${selectedIds.has(p.id) ? "bg-primary/5" : ""}`}>
+                <td className="px-3 py-4">
                   <Checkbox checked={selectedIds.has(p.id)} onCheckedChange={() => toggleSelect(p.id)} aria-label="Select user" />
                 </td>
 
-                <td className="px-4 py-3">
+                <td className="px-4 py-4">
                   <button className="text-left" onClick={() => setDetailProfile(p)}>
-                    <div className="font-medium text-foreground hover:text-primary hover:underline">{p.full_name || "—"}</div>
+                    <div className="text-sm font-semibold text-foreground hover:text-primary hover:underline">{p.full_name || "—"}</div>
                     <div className="text-xs text-muted-foreground">{p.email}</div>
                   </button>
                   {p.marketing_opt_out_at && (
-                    <Badge variant="outline" className="mt-1 text-[10px] bg-red-50 text-red-700 border-red-200">Marketing opt-out</Badge>
+                    <Badge variant="outline" className="mt-1 rounded-full border-destructive/30 px-1.5 py-0 text-[10px] font-normal text-destructive">Marketing opt-out</Badge>
                   )}
                 </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{p.company_name || "—"}</td>
+                <td className="px-4 py-4 text-xs text-muted-foreground">{p.company_name || "—"}</td>
+
                 <td className="px-4 py-3">
                   {(() => {
                     const rv = revenueFor(p);
