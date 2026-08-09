@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, Table2, Bookmark, Trash2, ArrowUpDown } from "lucide-react";
+import { Plus, X, Table2, Bookmark, Trash2, ArrowUpDown, LayoutGrid, ChevronDown } from "lucide-react";
 import {
   COLUMN_DEFS, DATE_PRESET_LABELS, DatePreset, EnrichedUser, FIELD_DEFS, FIELD_BY_ID,
   FilterCondition, FilterState, QUICK_SEGMENTS, SavedSegment, SORT_LABELS, SortKey,
