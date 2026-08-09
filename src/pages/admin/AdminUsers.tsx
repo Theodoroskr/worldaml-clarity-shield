@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -6,6 +6,7 @@ import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, Fil
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -13,6 +14,15 @@ import { REGULATORY_PROFILES, REGULATOR_OPTIONS } from "@/data/regulatoryProfile
 import AdminUserDetailDialog, { RevenueItem } from "@/components/admin/AdminUserDetailDialog";
 import type { UpsellTemplate } from "@/lib/upsellRecommendation";
 import { exportRowsAsCsv, exportRowsAsXlsx } from "@/lib/adminUserExport";
+import UserIntelFilters from "@/components/admin/UserIntelFilters";
+import UserIntelSummary from "@/components/admin/UserIntelSummary";
+import UserIntelExportDialog, { ExportScope } from "@/components/admin/UserIntelExportDialog";
+import {
+  COLUMN_DEFS, EMPTY_FILTERS, EnrichedUser, FilterState, LIFECYCLE_LABELS, SavedSegment, SortKey,
+  USER_TYPE_LABELS, applyIntelFilters, deleteSegment as deleteSegmentFn, enrichUser, formatAge, formatDate,
+  loadColumns, loadSavedSegments, newCondition, persistColumns, saveSegment as saveSegmentFn, sortUsers,
+} from "@/lib/adminUserIntel";
+
 
 interface Profile {
   id: string;
@@ -106,6 +116,24 @@ export default function AdminUsers() {
   const [partnerApplicantEmails, setPartnerApplicantEmails] = useState<Set<string>>(new Set());
   const [partnerAppMeta, setPartnerAppMeta] = useState<Record<string, { status: string; partner_type: string | null; company_name: string | null; created_at: string }>>({});
 
+  // ---- User intelligence layer (additive) ----
+  const [lastSignIn, setLastSignIn] = useState<Record<string, string | null>>({});
+  const [academyAgg, setAcademyAgg] = useState<Record<string, { courses: number; completed: number; lastAt: string | null }>>({});
+  const [certCounts, setCertCounts] = useState<Record<string, number>>({});
+  const [purchaseAgg, setPurchaseAgg] = useState<Record<string, { paid: number; pending: number; lastAt: string | null; annualPass: boolean }>>({});
+  const [businessByEmail, setBusinessByEmail] = useState<Record<string, string>>({});
+  const [partnerByUserId, setPartnerByUserId] = useState<Record<string, string>>({});
+  const [activityAvailable, setActivityAvailable] = useState(true);
+  const [intelFilters, setIntelFilters] = useState<FilterState>(EMPTY_FILTERS);
+  const [columns, setColumns] = useState<string[]>(loadColumns());
+  const [sortKey, setSortKey] = useState<SortKey>("registered");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [savedSegments, setSavedSegments] = useState<SavedSegment[]>(loadSavedSegments());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState("all");
+
+
+
 
   // Grant Suite dialog state
   const [grantDialog, setGrantDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
@@ -174,15 +202,68 @@ export default function AdminUsers() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [{ data: p }, { data: r }, { data: logs }, { data: pa }, { data: acad }, { data: prod }] = await Promise.all([
+    const [{ data: p }, { data: r }, { data: logs }, { data: pa }, { data: acad }, { data: prod },
+      { data: activity, error: activityError }, { data: progress }, { data: certs }, { data: bmembers }, { data: partnerRows }] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("*"),
       supabase.from("admin_upsell_email_log").select("recipient_user_id, recipient_email"),
       supabase.from("partner_applications").select("user_id, email, status, partner_type, company_name, created_at").order("created_at", { ascending: false }),
       supabase.from("academy_course_purchases").select("user_id, course_slug, amount_cents, currency, status, paid_at, created_at"),
       supabase.from("product_purchase_notifications").select("customer_email, product, plan, amount_cents, currency, created_at"),
+      supabase.rpc("admin_user_activity"),
+      supabase.from("academy_progress").select("user_id, course_id, completed_at, created_at"),
+      supabase.from("academy_certificates").select("user_id, issued_at"),
+      supabase.from("business_members").select("user_id, email, business_account_id, status"),
+      supabase.from("partners").select("user_id, is_active"),
     ]);
+
+    // ---- Activity (last sign-in) ----
+    setActivityAvailable(!activityError);
+    const signIn: Record<string, string | null> = {};
+    ((activity as any[]) || []).forEach((row) => { signIn[row.user_id] = row.last_sign_in_at; });
+    setLastSignIn(signIn);
+
+    // ---- Academy activity ----
+    const aAgg: Record<string, { courses: number; completed: number; lastAt: string | null }> = {};
+    ((progress as any[]) || []).forEach((row) => {
+      const b = aAgg[row.user_id] || { courses: 0, completed: 0, lastAt: null };
+      b.courses += 1;
+      if (row.completed_at) b.completed += 1;
+      const stamp = row.completed_at || row.created_at;
+      if (stamp && (!b.lastAt || new Date(stamp) > new Date(b.lastAt))) b.lastAt = stamp;
+      aAgg[row.user_id] = b;
+    });
+    setAcademyAgg(aAgg);
+
+    const cCounts: Record<string, number> = {};
+    ((certs as any[]) || []).forEach((row) => { cCounts[row.user_id] = (cCounts[row.user_id] || 0) + 1; });
+    setCertCounts(cCounts);
+
+    const pAgg: Record<string, { paid: number; pending: number; lastAt: string | null; annualPass: boolean }> = {};
+    ((acad as any[]) || []).forEach((row) => {
+      const b = pAgg[row.user_id] || { paid: 0, pending: 0, lastAt: null, annualPass: false };
+      if (row.status === "paid") b.paid += 1; else b.pending += 1;
+      if (String(row.course_slug || "").includes("annual")) b.annualPass = true;
+      const stamp = row.paid_at || row.created_at;
+      if (stamp && (!b.lastAt || new Date(stamp) > new Date(b.lastAt))) b.lastAt = stamp;
+      pAgg[row.user_id] = b;
+    });
+    setPurchaseAgg(pAgg);
+
+    const bMap: Record<string, string> = {};
+    ((bmembers as any[]) || []).forEach((row) => {
+      if (row.email) bMap[String(row.email).toLowerCase()] = row.business_account_id;
+    });
+    setBusinessByEmail(bMap);
+
+    const partnerMap: Record<string, string> = {};
+    ((partnerRows as any[]) || []).forEach((row) => {
+      if (row.user_id) partnerMap[row.user_id] = row.is_active ? "active" : "inactive";
+    });
+    setPartnerByUserId(partnerMap);
+
     setProfiles((p || []) as Profile[]);
+
     const roleMap: Record<string, string[]> = {};
     (r || []).forEach((row: any) => {
       if (!roleMap[row.user_id]) roleMap[row.user_id] = [];
@@ -269,97 +350,61 @@ export default function AdminUsers() {
     return t >= from.getTime() && t <= to.getTime();
   };
 
-  const exportRows = (list: Profile[], from: Date, to: Date) =>
-    applyFilters(list)
-      .filter((p) => inWindow(p.created_at, from, to))
-      .map((p) => {
-        const rv = revenueFor(p);
-        const periodItems = rv.items.filter((i) => i.status === "paid" && inWindow(i.date, from, to));
-        const periodTotal = periodItems.reduce((s, i) => s + i.amountCents, 0);
-        return {
-          full_name: p.full_name || "",
-          email: p.email || "",
-          phone: p.phone || "",
-          company_name: p.company_name || "",
-          job_title: p.job_title || "",
-          department: p.department || "",
-          industry: p.industry || "",
-          company_size: p.company_size || "",
-          seniority: p.seniority || "",
-          interest_area: p.interest_area || "",
-          country: p.country || "",
-          city: p.city || "",
-          billing_address: p.billing_address || "",
-          postal_code: p.postal_code || "",
-          vat_number: p.vat_number || "",
-          status: p.status,
-          subscription_tier: p.subscription_tier,
-          regulator: p.regulator || "",
-          roles: (userRoles[p.user_id] || []).join("|") || "user",
-          lifetime_revenue: (rv.total / 100).toFixed(2),
-          period_revenue: (periodTotal / 100).toFixed(2),
-          period_transactions: periodItems.length,
-          revenue_currency: rv.currency,
-          transactions: rv.items.length,
-          marketing_consent: p.marketing_consent ? "yes" : "no",
-          marketing_consent_at: p.marketing_consent_at || "",
-          marketing_opted_out: p.marketing_opt_out_at ? "yes" : "no",
-          marketing_opt_out_at: p.marketing_opt_out_at || "",
-          terms_accepted_at: p.terms_accepted_at || "",
-          gdpr_consent_at: p.gdpr_consent_at || "",
-          signup_source: p.signup_source || "",
-          signup_landing_path: p.signup_landing_path || "",
-          signup_referrer: p.signup_referrer || "",
-          signup_utm: p.signup_utm ? JSON.stringify(p.signup_utm) : "",
-          suite_access_granted_at: p.suite_access_granted_at || "",
-          registered_at: p.created_at,
-          export_period_from: from.toISOString().slice(0, 10),
-          export_period_to: to.toISOString().slice(0, 10),
-          user_id: p.user_id || "",
-        };
-      });
-
-  const resolveRange = (): { from: Date; to: Date } | null => {
-    const now = new Date();
-    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-    const daysAgo = (d: number) => new Date(now.getFullYear(), now.getMonth(), now.getDate() - d);
-    switch (exportPreset) {
-      case "30d": return { from: daysAgo(30), to: end };
-      case "90d": return { from: daysAgo(90), to: end };
-      case "12m": return { from: new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()), to: end };
-      case "ytd": return { from: new Date(now.getFullYear(), 0, 1), to: end };
-      case "all": return { from: new Date(2000, 0, 1), to: end };
-      case "custom": {
-        if (!exportFrom || !exportTo) return null;
-        const f = new Date(`${exportFrom}T00:00:00`);
-        const t = new Date(`${exportTo}T23:59:59`);
-        if (isNaN(f.getTime()) || isNaN(t.getTime()) || f > t) return null;
-        return { from: f, to: t };
-      }
-      default: return null;
-    }
+  /** Records an export in the admin audit trail (metadata only — never the dataset). */
+  const logExport = async (detail: string) => {
+    try {
+      await supabase.rpc("log_admin_access_event", {
+        _target_email: user?.email || "",
+        _action: "user_export",
+        _detail: detail,
+        _previous: null,
+        _new: null,
+      } as any);
+    } catch { /* audit logging is best-effort */ }
   };
 
-  /** Users included in an export: all platform users (partner applicants excluded). */
-  const getExportList = () => nonPartnerProfiles;
-
-  const runExport = (format: "csv" | "xlsx") => {
-    const range = resolveRange();
-    if (!range) { toast.error("Select a valid export timeline first."); return; }
-    const rows = exportRows(getExportList(), range.from, range.to);
-    if (!rows.length) { toast.error("No users registered in the selected timeline match the current filters."); return; }
-    const name = `worldaml-users-${range.from.toISOString().slice(0, 10)}_to_${range.to.toISOString().slice(0, 10)}`;
+  const handleConfiguredExport = (
+    rows: Record<string, string | number>[],
+    meta: { count: number; scope: ExportScope; range: string; fields: number },
+    format: "csv" | "xlsx",
+  ) => {
+    if (!rows.length) { toast.error("No users match the selected export criteria."); return; }
+    const name = `worldaml-users-${new Date().toISOString().slice(0, 10)}`;
     if (format === "csv") exportRowsAsCsv(rows, name);
     else exportRowsAsXlsx(rows, name);
-    toast.success(`Exported ${rows.length} users (${name.replace("worldaml-users-", "")})`);
+    toast.success(`Exported ${rows.length} users (${meta.fields} fields)`);
+    logExport(`scope=${meta.scope}; range=${meta.range}; users=${meta.count}; fields=${meta.fields}; format=${format}`);
     setExportOpen(false);
   };
 
-  const previewCount = () => {
-    const range = resolveRange();
-    if (!range) return null;
-    return exportRows(getExportList(), range.from, range.to).length;
+  /** Quick export honouring the current search, tab filters, segments and sorting. */
+  const exportCurrentView = () => {
+    const list = visibleUsers;
+    if (!list.length) { toast.error("Nothing to export in the current view."); return; }
+    const rows = list.map((u) => ({
+      full_name: u.name,
+      email: u.email,
+      company_name: u.company,
+      company_domain: u.domain,
+      country: u.country,
+      job_title: u.jobTitle,
+      user_type: u.types.map((t) => USER_TYPE_LABELS[t]).join("|"),
+      status: u.status,
+      tier: u.tier,
+      roles: (u.roles.length ? u.roles : ["user"]).join("|"),
+      registered_at: u.registeredAt,
+      account_age_days: u.accountAgeDays ?? "",
+      last_activity: u.lastActivityAt || "",
+      days_inactive: u.daysInactive ?? "",
+      revenue_eur: (u.revenueCents / 100).toFixed(2),
+      transactions: u.transactions,
+      signup_source: u.source,
+    }));
+    exportRowsAsCsv(rows, `worldaml-users-current-view-${new Date().toISOString().slice(0, 10)}`);
+    toast.success(`Exported ${rows.length} users from the current view`);
+    logExport(`scope=current_view; users=${rows.length}; format=csv`);
   };
+
 
 
 
@@ -476,21 +521,55 @@ export default function AdminUsers() {
     new Set(profiles.map(p => p.signup_source).filter(Boolean) as string[])
   ).sort();
 
-  const applyFilters = (list: Profile[]) =>
-    list.filter(p => {
+  // ---- Enrichment: account age, activity, user types, lifecycle, domains ----
+  const enrichedById = useMemo(() => {
+    const inputs = {
+      roles: userRoles,
+      revenue: revenueFor,
+      lastSignIn,
+      academy: academyAgg,
+      certificates: certCounts,
+      purchases: purchaseAgg,
+      businessByEmail,
+      partnerByUserId,
+      isPartnerApplicant: (p: any) => !!isPartnerApplicant(p),
+    };
+    const map: Record<string, EnrichedUser> = {};
+    profiles.forEach((p) => { map[p.id] = enrichUser(p, inputs); });
+    return map;
+  }, [profiles, userRoles, revenue, lastSignIn, academyAgg, certCounts, purchaseAgg, businessByEmail, partnerByUserId, partnerApplicantIds, partnerApplicantEmails]);
+
+  const enrich = (p: Profile): EnrichedUser | undefined => enrichedById[p.id];
+  const enrichList = (list: Profile[]) => list.map((p) => enrichedById[p.id]).filter(Boolean) as EnrichedUser[];
+
+  const applyFilters = (list: Profile[]) => {
+    const base = list.filter(p => {
       const matchStatus = statusFilter === "all" || p.status === statusFilter;
       const matchSource =
         sourceFilter === "all" ||
         (sourceFilter === "unknown" ? !p.signup_source : p.signup_source === sourceFilter);
       const q = search.toLowerCase();
+      const e = enrichedById[p.id];
       const matchSearch =
         !q ||
         (p.full_name || "").toLowerCase().includes(q) ||
         (p.email || "").toLowerCase().includes(q) ||
         (p.company_name || "").toLowerCase().includes(q) ||
+        (e?.domain || "").includes(q) ||
         (p.signup_source || "").toLowerCase().includes(q);
       return matchStatus && matchSource && matchSearch;
     });
+    const intel = applyIntelFilters(enrichList(base), intelFilters);
+    return sortUsers(intel, sortKey, sortDir).map((u) => u.p as Profile);
+  };
+
+  const tabList = (tab: string): Profile[] =>
+    tab === "suite" ? suiteUsers : tab === "regular" ? regularUsers : tab === "partners" ? partnerApplicants : nonPartnerProfiles;
+
+  const visibleUsers = enrichList(applyFilters(tabList(activeTab)));
+  const allIntelUsers = enrichList(nonPartnerProfiles);
+  const selectedUsers = visibleUsers.filter((u) => selectedIds.has(u.id));
+
 
   const statusBadge = (s: string) => {
     if (s === "approved") return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Approved</Badge>;
@@ -536,21 +615,66 @@ export default function AdminUsers() {
   };
 
 
+  const extraCols = COLUMN_DEFS.filter((c) => c.optional && columns.includes(c.id));
+
+  const extraCell = (id: string, u?: EnrichedUser) => {
+    if (!u) return "—";
+    switch (id) {
+      case "user_type":
+        return (
+          <div className="flex flex-wrap gap-1">
+            {u.types.map((t) => <Badge key={t} variant="outline" className="text-[10px]">{USER_TYPE_LABELS[t]}</Badge>)}
+            {!u.types.length && <span className="text-xs text-muted-foreground">—</span>}
+          </div>
+        );
+      case "account_age": return formatAge(u.accountAgeDays);
+      case "last_activity": return formatDate(u.lastActivityAt);
+      case "days_inactive": return u.daysInactive == null ? "—" : `${u.daysInactive}d`;
+      case "country": return u.country || "—";
+      case "job_title": return u.jobTitle || "—";
+      case "domain": return u.domain || "—";
+      case "transactions": return u.transactions;
+      case "academy": return `${u.academyCourses} course(s) · ${u.certificates} cert.`;
+      case "business": return u.businessOrg ? "Yes" : "—";
+      case "partner": return u.partnerStatus || "—";
+      case "lifecycle": return LIFECYCLE_LABELS[u.lifecycle] || u.lifecycle;
+      default: return "—";
+    }
+  };
+
   const renderTable = (list: Profile[], showSuiteActions: boolean) => {
     const filtered = applyFilters(list);
+    const toggleSelect = (id: string) => setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+    const allSelected = filtered.length > 0 && filtered.every((p) => selectedIds.has(p.id));
     return (
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              {["User", "Company", "Revenue", "Status", "Tier", "Source", "Regulator", "Roles", "Registered", "Actions"].map(h => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">{h}</th>
+              <th className="px-3 py-3 w-8">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={(v) => setSelectedIds(v ? new Set(filtered.map((p) => p.id)) : new Set())}
+                  aria-label="Select all users in view"
+                />
+              </th>
+              {["User", "Company", "Revenue", "Status", "Tier", "Source", "Regulator", "Roles", "Registered",
+                ...extraCols.map((c) => c.label), "Actions"].map(h => (
+                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {filtered.map(p => (
               <tr key={p.id} className="hover:bg-muted/20 transition-colors">
+                <td className="px-3 py-3">
+                  <Checkbox checked={selectedIds.has(p.id)} onCheckedChange={() => toggleSelect(p.id)} aria-label="Select user" />
+                </td>
+
                 <td className="px-4 py-3">
                   <button className="text-left" onClick={() => setDetailProfile(p)}>
                     <div className="font-medium text-foreground hover:text-primary hover:underline">{p.full_name || "—"}</div>
@@ -608,6 +732,9 @@ export default function AdminUsers() {
                   </div>
                 </td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</td>
+                {extraCols.map((c) => (
+                  <td key={c.id} className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{extraCell(c.id, enrich(p))}</td>
+                ))}
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1 flex-wrap">
                     {p.status !== "approved" && (
@@ -749,6 +876,9 @@ export default function AdminUsers() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={exportCurrentView}>
+            <Table2 className="w-3.5 h-3.5 mr-1" /> Export current view
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setExportOpen(true)}>
             <Download className="w-3.5 h-3.5 mr-1" /> Export users
           </Button>
@@ -756,11 +886,18 @@ export default function AdminUsers() {
 
       </div>
 
+      <UserIntelSummary
+        users={allIntelUsers}
+        onDomainClick={(d) => setIntelFilters({
+          ...intelFilters,
+          conditions: [...intelFilters.conditions, { ...newCondition("domain"), value: [d] }],
+        })}
+      />
 
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search users…" className="w-full pl-8 py-2 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email, company or domain…" className="w-full pl-8 py-2 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-32 text-sm"><SelectValue /></SelectTrigger>
@@ -783,11 +920,29 @@ export default function AdminUsers() {
         </Select>
       </div>
 
+      <UserIntelFilters
+        filters={intelFilters}
+        onFilters={setIntelFilters}
+        users={allIntelUsers}
+        matchCount={visibleUsers.length}
+        columns={columns}
+        onColumns={(c) => { setColumns(c); persistColumns(c); }}
+        sortKey={sortKey}
+        sortDir={sortDir}
+        onSort={(k, d) => { setSortKey(k); setSortDir(d); }}
+        savedSegments={savedSegments}
+        onSaveSegment={(name) => setSavedSegments(saveSegmentFn(name, intelFilters))}
+        onDeleteSegment={(id) => setSavedSegments(deleteSegmentFn(id))}
+      />
+
+      {!activityAvailable && (
+        <p className="text-xs text-amber-700">Last activity data is unavailable right now — activity filters may be empty.</p>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
       ) : (
-        <Tabs defaultValue="all" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSelectedIds(new Set()); }} className="space-y-4">
           <TabsList>
             <TabsTrigger value="all">Platform Users ({nonPartnerProfiles.length})</TabsTrigger>
             <TabsTrigger value="suite">Suite Users ({suiteUsers.length})</TabsTrigger>
@@ -811,6 +966,7 @@ export default function AdminUsers() {
           </TabsContent>
         </Tabs>
       )}
+
 
       {/* Grant Suite Access Dialog */}
       <Dialog open={grantDialog.open} onOpenChange={(open) => !open && setGrantDialog({ open: false, profile: null })}>
@@ -1048,59 +1204,15 @@ export default function AdminUsers() {
         />
       )}
 
-      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Export users</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">Timeline (registration date) — required</label>
-              <Select value={exportPreset} onValueChange={(v) => setExportPreset(v as typeof exportPreset)}>
-                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30d">Last 30 days</SelectItem>
-                  <SelectItem value="90d">Last 90 days</SelectItem>
-                  <SelectItem value="12m">Last 12 months</SelectItem>
-                  <SelectItem value="ytd">Year to date</SelectItem>
-                  <SelectItem value="all">All time</SelectItem>
-                  <SelectItem value="custom">Custom range…</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      <UserIntelExportDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        allUsers={allIntelUsers}
+        filteredUsers={visibleUsers}
+        selectedUsers={selectedUsers}
+        onExport={handleConfiguredExport}
+      />
 
-            {exportPreset === "custom" && (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">From</label>
-                  <input type="date" value={exportFrom} onChange={(e) => setExportFrom(e.target.value)}
-                    className="w-full px-2 py-2 text-sm rounded-md border border-border bg-background" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">To</label>
-                  <input type="date" value={exportTo} onChange={(e) => setExportTo(e.target.value)}
-                    className="w-full px-2 py-2 text-sm rounded-md border border-border bg-background" />
-                </div>
-              </div>
-            )}
-
-            <p className="text-xs text-muted-foreground">
-              {previewCount() === null
-                ? "Select a valid date range to continue."
-                : `${previewCount()} user(s) match the timeline and the current search/filters. Files include lifetime revenue plus revenue earned inside the selected period.`}
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" size="sm" onClick={() => setExportOpen(false)}>Cancel</Button>
-            <Button variant="outline" size="sm" disabled={!previewCount()} onClick={() => runExport("csv")}>
-              <Download className="w-3.5 h-3.5 mr-1" /> CSV
-            </Button>
-            <Button size="sm" disabled={!previewCount()} onClick={() => runExport("xlsx")}>
-              <Table2 className="w-3.5 h-3.5 mr-1" /> Excel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
     </div>
   );

@@ -7150,6 +7150,15 @@ export type Database = {
         Args: { _email: string; _suspend: boolean }
         Returns: undefined
       }
+      admin_user_activity: {
+        Args: never
+        Returns: {
+          auth_created_at: string
+          email_confirmed_at: string
+          last_sign_in_at: string
+          user_id: string
+        }[]
+      }
       business_account_ids: { Args: { _user_id: string }; Returns: string[] }
       calculate_customer_risk_score: {
         Args: { p_customer_id: string }
