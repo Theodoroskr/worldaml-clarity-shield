@@ -96,7 +96,10 @@ export default function UserIntelFilters({
   const update = (id: string, patch: Partial<FilterCondition>) =>
     onFilters({ ...filters, conditions: filters.conditions.map((c) => (c.id === id ? { ...c, ...patch } : c)) });
   const remove = (id: string) => onFilters({ ...filters, conditions: filters.conditions.filter((c) => c.id !== id) });
-  const add = () => onFilters({ ...filters, conditions: [...filters.conditions, newCondition()] });
+  const add = () => {
+    setBuilderOpen(true);
+    onFilters({ ...filters, conditions: [...filters.conditions, newCondition()] });
+  };
 
   const renderValue = (c: FilterCondition) => {
     const def = FIELD_BY_ID[c.field];
