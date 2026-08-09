@@ -564,11 +564,23 @@ export default function AdminUsers() {
     return sortUsers(intel, sortKey, sortDir).map((u) => u.p as Profile);
   };
 
+  // ---- Business categories (a user can belong to several; never duplicated) ----
+  const typesOf = (p: Profile) => enrichedById[p.id]?.types || [];
+  const academyCategory = profiles.filter((p) => typesOf(p).includes("academy"));
+  const businessCategory = profiles.filter((p) => typesOf(p).includes("business"));
+  const partnerCategory = profiles.filter((p) => typesOf(p).includes("partner"));
+  const suiteCategory = profiles.filter((p) => typesOf(p).includes("suite"));
+
   const tabList = (tab: string): Profile[] =>
-    tab === "suite" ? suiteUsers : tab === "regular" ? regularUsers : tab === "partners" ? partnerApplicants : nonPartnerProfiles;
+    tab === "academy" ? academyCategory
+      : tab === "business" ? businessCategory
+        : tab === "partners" ? partnerCategory
+          : tab === "suite" ? suiteCategory
+            : profiles;
 
   const visibleUsers = enrichList(applyFilters(tabList(activeTab)));
-  const allIntelUsers = enrichList(nonPartnerProfiles);
+  const allIntelUsers = enrichList(profiles);
+
   const selectedUsers = visibleUsers.filter((u) => selectedIds.has(u.id));
 
 
