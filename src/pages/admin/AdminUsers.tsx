@@ -130,6 +130,7 @@ export default function AdminUsers() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [savedSegments, setSavedSegments] = useState<SavedSegment[]>(loadSavedSegments());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState("all");
 
 
 
