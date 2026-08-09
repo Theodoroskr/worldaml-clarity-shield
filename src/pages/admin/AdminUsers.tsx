@@ -520,21 +520,55 @@ export default function AdminUsers() {
     new Set(profiles.map(p => p.signup_source).filter(Boolean) as string[])
   ).sort();
 
-  const applyFilters = (list: Profile[]) =>
-    list.filter(p => {
+  // ---- Enrichment: account age, activity, user types, lifecycle, domains ----
+  const enrichedById = useMemo(() => {
+    const inputs = {
+      roles: userRoles,
+      revenue: revenueFor,
+      lastSignIn,
+      academy: academyAgg,
+      certificates: certCounts,
+      purchases: purchaseAgg,
+      businessByEmail,
+      partnerByUserId,
+      isPartnerApplicant: (p: any) => !!isPartnerApplicant(p),
+    };
+    const map: Record<string, EnrichedUser> = {};
+    profiles.forEach((p) => { map[p.id] = enrichUser(p, inputs); });
+    return map;
+  }, [profiles, userRoles, revenue, lastSignIn, academyAgg, certCounts, purchaseAgg, businessByEmail, partnerByUserId, partnerApplicantIds, partnerApplicantEmails]);
+
+  const enrich = (p: Profile): EnrichedUser | undefined => enrichedById[p.id];
+  const enrichList = (list: Profile[]) => list.map((p) => enrichedById[p.id]).filter(Boolean) as EnrichedUser[];
+
+  const applyFilters = (list: Profile[]) => {
+    const base = list.filter(p => {
       const matchStatus = statusFilter === "all" || p.status === statusFilter;
       const matchSource =
         sourceFilter === "all" ||
         (sourceFilter === "unknown" ? !p.signup_source : p.signup_source === sourceFilter);
       const q = search.toLowerCase();
+      const e = enrichedById[p.id];
       const matchSearch =
         !q ||
         (p.full_name || "").toLowerCase().includes(q) ||
         (p.email || "").toLowerCase().includes(q) ||
         (p.company_name || "").toLowerCase().includes(q) ||
+        (e?.domain || "").includes(q) ||
         (p.signup_source || "").toLowerCase().includes(q);
       return matchStatus && matchSource && matchSearch;
     });
+    const intel = applyIntelFilters(enrichList(base), intelFilters);
+    return sortUsers(intel, sortKey, sortDir).map((u) => u.p as Profile);
+  };
+
+  const tabList = (tab: string): Profile[] =>
+    tab === "suite" ? suiteUsers : tab === "regular" ? regularUsers : tab === "partners" ? partnerApplicants : nonPartnerProfiles;
+
+  const visibleUsers = enrichList(applyFilters(tabList(activeTab)));
+  const allIntelUsers = enrichList(nonPartnerProfiles);
+  const selectedUsers = visibleUsers.filter((u) => selectedIds.has(u.id));
+
 
   const statusBadge = (s: string) => {
     if (s === "approved") return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Approved</Badge>;
