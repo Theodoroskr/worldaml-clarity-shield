@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   /** When the currently displayed data was fetched. */
-  updatedAt?: Date | number | null;
+  updatedAt?: Date | number | string | null;
   /** True only when the figures come from a realtime subscription. */
   live?: boolean;
   refreshing?: boolean;
