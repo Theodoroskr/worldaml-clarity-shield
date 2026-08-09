@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -117,6 +119,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
+          <AdminPageAttention path="/admin/dashboard" className="ml-2" />
           <p className="text-sm text-muted-foreground mt-1">
             Internal intelligence across Academy, Business, Partners, Platform and Marketing — every figure is queried live from the database.
           </p>
@@ -145,6 +148,8 @@ export default function AdminDashboard() {
           </DropdownMenu>
         </div>
       </div>
+
+      <AdminActionRequired path="/admin/dashboard" />
 
       {error && (
         <Card className="border-destructive/40">

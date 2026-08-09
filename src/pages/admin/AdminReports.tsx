@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -312,6 +314,7 @@ export default function AdminReports() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Reports</h1>
+          <AdminPageAttention path="/admin/reports" className="ml-2" />
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
             Aggregated internal reports emailed to the team on a schedule. Figures only — no customer personal data
             is included. All times are UTC.
@@ -319,6 +322,8 @@ export default function AdminReports() {
         </div>
         <Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-2" /> New report</Button>
       </div>
+
+      <AdminActionRequired path="/admin/reports" />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Card><CardContent className="p-3">

@@ -1,4 +1,6 @@
 import { useEffect, useState, useMemo, useRef } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -275,6 +277,7 @@ export default function AdminPurchaseStatus() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Academy Purchase Status</h1>
+          <AdminPageAttention path="/admin/purchase-status" className="ml-2" />
           <p className="text-sm text-muted-foreground mt-1">
             Every Academy checkout row with its Stripe session, payment state and financial value.
           </p>
@@ -284,6 +287,8 @@ export default function AdminPurchaseStatus() {
           <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
         </Button>
       </div>
+
+      <AdminActionRequired path="/admin/purchase-status" />
 
       {/* Financial KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

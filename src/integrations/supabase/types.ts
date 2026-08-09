@@ -737,6 +737,157 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_notification_email_log: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          notification_id: string | null
+          recipient: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          notification_id?: string | null
+          recipient: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          notification_id?: string | null
+          recipient?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_notification_email_log_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "admin_notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_notification_prefs: {
+        Row: {
+          email: boolean
+          event_type: string
+          in_app: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          email?: boolean
+          event_type: string
+          in_app?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          email?: boolean
+          event_type?: string
+          in_app?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      admin_notification_state: {
+        Row: {
+          admin_id: string
+          ignored_at: string | null
+          notification_id: string
+          read_at: string | null
+          snoozed_until: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_id: string
+          ignored_at?: string | null
+          notification_id: string
+          read_at?: string | null
+          snoozed_until?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_id?: string
+          ignored_at?: string | null
+          notification_id?: string
+          read_at?: string | null
+          snoozed_until?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_notification_state_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "admin_notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_notifications: {
+        Row: {
+          action_url: string | null
+          category: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          event_type: string
+          id: string
+          message: string | null
+          metadata: Json
+          nav_path: string | null
+          priority: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          action_url?: string | null
+          category: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type: string
+          id?: string
+          message?: string | null
+          metadata?: Json
+          nav_path?: string | null
+          priority?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          action_url?: string | null
+          category?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type?: string
+          id?: string
+          message?: string | null
+          metadata?: Json
+          nav_path?: string | null
+          priority?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       admin_report_runs: {
         Row: {
           created_at: string
@@ -7191,6 +7342,36 @@ export type Database = {
           suspended_at: string
           user_id: string
         }[]
+      }
+      admin_notification_set_state: {
+        Args: {
+          _ignore?: boolean
+          _notification_id: string
+          _read?: boolean
+          _snooze_until?: string
+        }
+        Returns: undefined
+      }
+      admin_notifications_mark_all_read: { Args: never; Returns: undefined }
+      admin_notifications_sync: { Args: never; Returns: undefined }
+      admin_notify_resolve: {
+        Args: { _entity_id: string; _event_type: string; _note?: string }
+        Returns: undefined
+      }
+      admin_notify_upsert: {
+        Args: {
+          _action_url: string
+          _category: string
+          _entity_id: string
+          _entity_type: string
+          _event_type: string
+          _message: string
+          _metadata?: Json
+          _nav_path: string
+          _priority: string
+          _title: string
+        }
+        Returns: string
       }
       admin_review_partner_application: {
         Args: { _app_id: string; _decision: string; _message: string }

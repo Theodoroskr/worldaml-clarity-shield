@@ -1,4 +1,6 @@
 import { Fragment, useCallback, useEffect, useState } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -399,11 +401,14 @@ export default function AdminPartners() {
         <Handshake className="w-6 h-6 text-primary" />
         <div>
           <h1 className="text-2xl font-bold text-foreground">Partner Program</h1>
+          <AdminPageAttention path="/admin/partners" className="ml-2" />
           <p className="text-sm text-muted-foreground">Analytics, applications, active partners, referrals and deal registrations.</p>
         </div>
         {pendingCount > 0 && <Badge className="bg-amber-100 text-amber-800 border-amber-200">{pendingCount} pending applications</Badge>}
         {pendingDeals > 0 && <Badge className="bg-blue-100 text-blue-800 border-blue-200">{pendingDeals} pending deals</Badge>}
       </div>
+
+      <AdminActionRequired path="/admin/partners" />
 
       <PartnerActionCentre
         pendingApplications={pendingCount}
@@ -462,6 +467,7 @@ export default function AdminPartners() {
               </p>
             </div>
           </div>
+          <AdminActionRequired eventTypes={["partner_application_pending"]} variant="inline" className="mt-3" title={"application awaiting review"} />
         </CardHeader>
         <CardContent className="space-y-3">
           {/* Filters */}
@@ -903,6 +909,7 @@ export default function AdminPartners() {
                   <Badge className="bg-blue-100 text-blue-800 border-blue-200">€{totalPipeline.toLocaleString()} pipeline</Badge>
                   <Badge className="bg-green-100 text-green-800 border-green-200">€{totalWon.toLocaleString()} won ({closeRate}%)</Badge>
                 </div>
+                <AdminActionRequired eventTypes={["partner_deal_pending"]} variant="inline" className="w-full" title={"deal awaiting approval"} />
               </div>
             </CardHeader>
             <CardContent className="space-y-3">

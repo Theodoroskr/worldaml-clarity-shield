@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Shield, ShieldCheck, ShieldAlert, ShieldX, Lock, Unlock, Database, HardDrive,
@@ -135,6 +137,7 @@ export default function AdminSecurityAudit() {
             <Shield className="w-6 h-6 text-primary" />
             Security Audit
           </h1>
+          <AdminPageAttention path="/admin/security" className="ml-2" />
           <p className="text-sm text-muted-foreground mt-1">
             Edge function authentication, RLS policies, and storage bucket status
           </p>
@@ -148,6 +151,8 @@ export default function AdminSecurityAudit() {
           Refresh
         </button>
       </div>
+
+      <AdminActionRequired path="/admin/security" />
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

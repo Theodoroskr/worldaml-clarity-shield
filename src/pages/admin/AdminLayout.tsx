@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AdminNotificationProvider, useAdminNotifications } from "@/hooks/useAdminNotifications";
+import AdminNotificationBell from "@/components/admin/AdminNotificationBell";
 
 
 
@@ -18,6 +19,7 @@ const NAV: NavItem[] = [
   { label: "Identities & Profiles", path: "/admin/identities", icon: GitBranch, section: "Platform" },
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Platform" },
   { label: "Internal Access", path: "/admin/internal-access", icon: Lock, section: "Platform" },
+  { label: "Notifications", path: "/admin/notifications", icon: Bell, section: "Platform" },
 
   // Marketing site + lead capture
   { label: "Forms", path: "/admin/forms", icon: FileText, section: "Marketing" },
@@ -47,41 +49,17 @@ const NAV: NavItem[] = [
 ];
 
 
-export default function AdminLayout() {
+function AdminShell() {
   const { user, isLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [pendingPartners, setPendingPartners] = useState(0);
+  const { countsByPath } = useAdminNotifications();
 
   useEffect(() => {
     if (!isLoading && !user) navigate("/login");
     if (!isLoading && user && !isAdmin) navigate("/dashboard");
   }, [user, isLoading, isAdmin, navigate]);
-
-  // Live notification: new partner sign-ups awaiting review.
-  useEffect(() => {
-    if (!user || !isAdmin) return;
-    let active = true;
-    const load = async () => {
-      const { count } = await supabase
-        .from("partner_applications")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "pending");
-      if (active) setPendingPartners(count ?? 0);
-    };
-    load();
-    const timer = setInterval(load, 60000);
-    const channel = supabase
-      .channel("admin-partner-applications")
-      .on("postgres_changes", { event: "*", schema: "public", table: "partner_applications" }, load)
-      .subscribe();
-    return () => {
-      active = false;
-      clearInterval(timer);
-      supabase.removeChannel(channel);
-    };
-  }, [user, isAdmin]);
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   // Hard route-level block: non-admins never render any admin chrome or child route.
@@ -115,12 +93,17 @@ export default function AdminLayout() {
                 >
                   <n.icon className="w-4 h-4" />
                   <span className="flex-1 text-left">{n.label}</span>
-                  {n.path === "/admin/partners" && pendingPartners > 0 && (
+                  {(countsByPath[n.path] ?? 0) > 0 && (
                     <span
-                      className="min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-white text-[10px] font-semibold flex items-center justify-center"
-                      title={`${pendingPartners} partner sign-up${pendingPartners === 1 ? "" : "s"} awaiting review`}
+                      className={cn(
+                        "min-w-[18px] h-[18px] px-1 rounded-full text-white text-[10px] font-semibold flex items-center justify-center",
+                        n.path === "/admin/security" || n.path === "/admin/purchase-status"
+                          ? "bg-destructive"
+                          : "bg-amber-500"
+                      )}
+                      title={`${countsByPath[n.path]} item${countsByPath[n.path] === 1 ? "" : "s"} need attention`}
                     >
-                      {pendingPartners}
+                      {countsByPath[n.path]}
                     </span>
                   )}
                 </button>
@@ -137,9 +120,22 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
-        <Outlet />
-      </main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="h-12 shrink-0 border-b border-border bg-card flex items-center justify-end gap-1 px-4">
+          <AdminNotificationBell />
+        </header>
+        <main className="flex-1 overflow-y-auto">
+          <Outlet />
+        </main>
+      </div>
     </div>
+  );
+}
+
+export default function AdminLayout() {
+  return (
+    <AdminNotificationProvider>
+      <AdminShell />
+    </AdminNotificationProvider>
   );
 }

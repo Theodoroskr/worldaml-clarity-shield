@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -158,6 +160,7 @@ export default function AdminReconcilePurchases() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Reconcile Academy Purchases</h1>
+          <AdminPageAttention path="/admin/reconcile-purchases" className="ml-2" />
           <p className="text-sm text-muted-foreground mt-1">
             Cross-checks every <code className="text-xs">pending</code> Academy purchase against its
             Stripe Checkout Session and flips truly-paid rows to <code className="text-xs">paid</code>.
@@ -169,6 +172,8 @@ export default function AdminReconcilePurchases() {
           <RefreshCw className={`w-3.5 h-3.5 mr-1 ${snapLoading ? "animate-spin" : ""}`} /> Refresh
         </Button>
       </div>
+
+      <AdminActionRequired path="/admin/reconcile-purchases" />
 
       {/* Current exposure */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

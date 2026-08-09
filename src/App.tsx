@@ -146,6 +146,8 @@ const Advisory = lazyWithRetry(() => import("./pages/Advisory"));
 const AdvisoryEwra = lazyWithRetry(() => import("./pages/AdvisoryEwra"));
 
 const AdminLayout = lazyWithRetry(() => import("./pages/admin/AdminLayout"));
+const AdminNotificationCentre = lazyWithRetry(() => import("./pages/admin/AdminNotificationCentre"));
+const AdminNotificationSettings = lazyWithRetry(() => import("./pages/admin/AdminNotificationSettings"));
 const AdminUsers = lazyWithRetry(() => import("./pages/admin/AdminUsers"));
 const AdminAlertRules = lazyWithRetry(() => import("./pages/admin/AdminAlertRules"));
 const AdminForms = lazyWithRetry(() => import("./pages/admin/AdminForms"));
@@ -387,6 +389,8 @@ const App = () => (
                   <Route path="academy-funnel" element={<AdminAcademyFunnel />} />
                   <Route path="outreach-queue" element={<AdminOutreachQueue />} />
                   <Route path="recognition" element={<AdminRecognition />} />
+                  <Route path="notifications" element={<AdminNotificationCentre />} />
+                  <Route path="notification-settings" element={<AdminNotificationSettings />} />
                 </Route>
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
