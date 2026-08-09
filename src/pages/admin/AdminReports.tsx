@@ -27,6 +27,8 @@ import {
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import { RANGE_LABELS, RangeKey } from "@/lib/adminAnalytics";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 
 const REPORT_TYPES: Record<string, string> = {
   executive: "Executive summary",
@@ -312,6 +314,7 @@ export default function AdminReports() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Reports</h1>
+          <AdminPageAttention path="/admin/reports" className="ml-2" />
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
             Aggregated internal reports emailed to the team on a schedule. Figures only — no customer personal data
             is included. All times are UTC.

@@ -24,6 +24,8 @@ import PartnerDetailDialog from "@/components/admin/PartnerDetailDialog";
 import PartnerActionCentre from "@/components/admin/PartnerActionCentre";
 import PartnerApplicationReviewDialog from "@/components/admin/PartnerApplicationReviewDialog";
 import {
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
   APPLICATION_STATUS_LABEL, APPLICATION_STATUS_STYLE, PORTAL_ACCESS_LABEL, PORTAL_ACCESS_STYLE,
   applicationAge, ageSeverity, auditActionLabel, summariseChanges, toPercent,
 } from "@/lib/partnerLifecycle";
@@ -399,6 +401,7 @@ export default function AdminPartners() {
         <Handshake className="w-6 h-6 text-primary" />
         <div>
           <h1 className="text-2xl font-bold text-foreground">Partner Program</h1>
+          <AdminPageAttention path="/admin/partners" className="ml-2" />
           <p className="text-sm text-muted-foreground">Analytics, applications, active partners, referrals and deal registrations.</p>
         </div>
         {pendingCount > 0 && <Badge className="bg-amber-100 text-amber-800 border-amber-200">{pendingCount} pending applications</Badge>}

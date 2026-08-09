@@ -5,6 +5,8 @@ import {
   CheckCircle2, XCircle, AlertTriangle, RefreshCw, ChevronDown, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 
 /* ── Static edge-function registry ── */
 
@@ -135,6 +137,7 @@ export default function AdminSecurityAudit() {
             <Shield className="w-6 h-6 text-primary" />
             Security Audit
           </h1>
+          <AdminPageAttention path="/admin/security" className="ml-2" />
           <p className="text-sm text-muted-foreground mt-1">
             Edge function authentication, RLS policies, and storage bucket status
           </p>

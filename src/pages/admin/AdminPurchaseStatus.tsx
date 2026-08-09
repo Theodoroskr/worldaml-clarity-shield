@@ -8,6 +8,8 @@ import { Loader2, Search, ArrowUpDown, CalendarRange, RefreshCw, Download, Alert
 import { toast } from "sonner";
 import { KpiCard, DefinitionsButton, MetricInfo } from "@/components/admin/AcademyMetricUI";
 import { money, pct, useCourseTitles } from "@/lib/academyAdmin";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 
 
 type PurchaseRow = {
@@ -275,6 +277,7 @@ export default function AdminPurchaseStatus() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Academy Purchase Status</h1>
+          <AdminPageAttention path="/admin/purchase-status" className="ml-2" />
           <p className="text-sm text-muted-foreground mt-1">
             Every Academy checkout row with its Stripe session, payment state and financial value.
           </p>

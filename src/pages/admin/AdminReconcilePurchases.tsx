@@ -7,6 +7,8 @@ import { Loader2, RefreshCw, AlertTriangle, Download, CheckCircle2, XCircle, Clo
 import { toast } from "sonner";
 import { KpiCard, DefinitionsButton, MetricInfo } from "@/components/admin/AcademyMetricUI";
 import { money } from "@/lib/academyAdmin";
+import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminPageAttention from "@/components/admin/AdminPageAttention";
 
 type ReconcileResult = {
   ok: boolean;
@@ -158,6 +160,7 @@ export default function AdminReconcilePurchases() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Reconcile Academy Purchases</h1>
+          <AdminPageAttention path="/admin/reconcile-purchases" className="ml-2" />
           <p className="text-sm text-muted-foreground mt-1">
             Cross-checks every <code className="text-xs">pending</code> Academy purchase against its
             Stripe Checkout Session and flips truly-paid rows to <code className="text-xs">paid</code>.
