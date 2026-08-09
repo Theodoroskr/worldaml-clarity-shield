@@ -6,9 +6,11 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianG
 import { EnrichedUser, buildGrowthSeries, groupByDomain, topCounts } from "@/lib/adminUserIntel";
 
 const Kpi = ({ label, value, hint }: { label: string; value: string | number; hint?: string }) => (
-  <div className="rounded-lg border border-border bg-card px-3 py-2" title={hint}>
-    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
-    <div className="text-lg font-bold text-foreground leading-tight">{value}</div>
+  <div className="rounded-lg border border-border bg-background px-3 py-2.5" title={hint}>
+    <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
+    <div className="mt-0.5 text-2xl font-bold leading-none tracking-tight text-foreground">
+      {typeof value === "number" ? value.toLocaleString() : value}
+    </div>
   </div>
 );
 
