@@ -10,6 +10,9 @@ const corsHeaders = {
 const FROM_EMAIL = "WorldAML Partners <partners@worldaml.com>";
 const SUPPORT_EMAIL = "info@worldaml.com";
 const PORTAL_LOGIN = "https://worldaml.com/partner/login";
+const PORTAL_HOME = "https://worldaml.com/partner/dashboard";
+const LOGO_URL =
+  "https://worldaml.com/__l5e/assets-v1/6959ec13-8bb4-4a84-8492-accb88799d7f/worldaml-logo.png";
 
 function esc(s: unknown): string {
   return String(s ?? "")
@@ -20,7 +23,9 @@ function esc(s: unknown): string {
 function shell(title: string, body: string): string {
   return `
   <div style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;background:#fff;">
-    <div style="background:#1e3a5f;padding:26px 32px;">
+    <div style="background:#1e3a5f;padding:24px 32px;">
+      <img src="${LOGO_URL}" alt="WorldAML" width="150"
+           style="display:block;height:auto;max-width:150px;margin:0 0 14px;" />
       <h1 style="color:#fff;margin:0;font-size:20px;font-weight:700;">${esc(title)}</h1>
     </div>
     <div style="padding:26px 32px;color:#374151;font-size:15px;line-height:1.6;">${body}</div>
@@ -104,6 +109,25 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Partner record + manager details enrich the approval confirmation.
+    const { data: partnerRow } = app.user_id
+      ? await admin
+          .from("partners")
+          .select("referral_code,partner_type,commission_rate,commission_lifetime_months,academy_seats_granted,portal_access,partner_manager_id,display_name")
+          .eq("user_id", app.user_id)
+          .maybeSingle()
+      : { data: null as any };
+
+    let manager: { name?: string; email?: string } | null = null;
+    if (partnerRow?.partner_manager_id) {
+      const { data: m } = await admin
+        .from("partner_managers")
+        .select("name,email")
+        .eq("id", partnerRow.partner_manager_id)
+        .maybeSingle();
+      manager = (m as any) ?? null;
+    }
+
     const firstName = String(app.contact_name ?? "").split(" ")[0] || "there";
     const partnerType = String(app.approved_partner_type ?? app.partner_type ?? "").replace(/^\w/, (c) => c.toUpperCase());
 
@@ -111,12 +135,50 @@ Deno.serve(async (req) => {
     let html = "";
 
     if (type === "approved") {
-      subject = "Welcome to the WorldAML Partner Programme";
+      const rate = partnerRow?.commission_rate != null
+        ? `${(Number(partnerRow.commission_rate) * 100).toFixed(0)}%`
+        : null;
+      const rows: Array<[string, string]> = [
+        ["Company", String(app.company_name ?? "—")],
+        ["Partner type", partnerType || "Partner"],
+        ...(rate ? [["Commission rate", `${rate} on referred revenue`] as [string, string]] : []),
+        ...(partnerRow?.commission_lifetime_months
+          ? [["Commission lifetime", `${partnerRow.commission_lifetime_months} months per customer`] as [string, string]]
+          : []),
+        ...(partnerRow?.referral_code
+          ? [["Your referral code", String(partnerRow.referral_code)] as [string, string]]
+          : []),
+        ...(partnerRow?.academy_seats_granted
+          ? [["Academy seats", `${partnerRow.academy_seats_granted} free seats included`] as [string, string]]
+          : []),
+        ["Portal sign-in", PORTAL_LOGIN],
+        ["Account email", String(to)],
+      ];
+      const detailTable = `
+        <table style="width:100%;border-collapse:collapse;margin:18px 0;font-size:14px;">
+          ${rows.map(([k, v], i) => `
+            <tr style="background:${i % 2 ? "#ffffff" : "#f9fafb"};">
+              <td style="padding:9px 12px;color:#6b7280;width:42%;border-bottom:1px solid #e5e7eb;">${esc(k)}</td>
+              <td style="padding:9px 12px;color:#111827;font-weight:600;border-bottom:1px solid #e5e7eb;">${esc(v)}</td>
+            </tr>`).join("")}
+        </table>`;
+
+      const managerBlock = manager?.email
+        ? `<div style="background:#f0fdfa;border-left:4px solid #0d9488;padding:12px 16px;margin:18px 0;">
+             <p style="margin:0;font-size:14px;">
+               <strong style="color:#1e3a5f;">Your partner manager:</strong> ${esc(manager.name ?? manager.email)} ·
+               <a href="mailto:${esc(manager.email)}" style="color:#0d9488;">${esc(manager.email)}</a>
+             </p>
+           </div>`
+        : "";
+
+      subject = "Your WorldAML Partner Portal access is active";
       html = shell("Welcome to the WorldAML Partner Programme", `
         <p>Hi ${esc(firstName)},</p>
-        <p>Your WorldAML Partner Programme application for <strong>${esc(app.company_name)}</strong> has been approved.</p>
-        <p><strong>Partner type:</strong> ${esc(partnerType)}</p>
-        <p>You can now access the WorldAML Partner Portal to:</p>
+        <p>Your WorldAML Partner Programme application for <strong>${esc(app.company_name)}</strong> has been approved and your Partner Portal access is now active.</p>
+        ${detailTable}
+        ${managerBlock}
+        <p>Sign in to the WorldAML Partner Portal to:</p>
         <ul style="padding-left:18px;">
           <li>register opportunities</li>
           <li>track deal protection</li>
@@ -124,8 +186,16 @@ Deno.serve(async (req) => {
           <li>view commissions where applicable</li>
           <li>complete partner training</li>
         </ul>
-        ${cta(PORTAL_LOGIN, "Access Partner Portal")}
-        <p style="font-size:13px;color:#6b7280;">Sign in with your existing WorldAML account — no new account is needed. If you have not set a password yet, use “Forgot password” on the sign-in page to set one securely.</p>
+        ${cta(PORTAL_LOGIN, "Sign in to the Partner Portal")}
+        <p style="font-size:13px;color:#6b7280;">
+          Sign in with your existing WorldAML account (${esc(to)}) — no new account is needed. If you have not set a
+          password yet, use “Forgot password” on the sign-in page to set one securely. After signing in you land on
+          your dashboard at <a href="${PORTAL_HOME}" style="color:#0d9488;">${PORTAL_HOME}</a>.
+        </p>
+        <p style="font-size:13px;color:#6b7280;">
+          Questions about commercials, co-selling or collateral? Reply to this email and our partnerships team
+          (${SUPPORT_EMAIL}) will respond within one business day.
+        </p>
       `);
     } else if (type === "more_info") {
       subject = `More information needed — WorldAML Partner application (${app.company_name})`;
