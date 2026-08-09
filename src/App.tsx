@@ -575,7 +575,7 @@ const App = () => (
                 <Route path="/suite-layout-preview" element={<SuiteLayout />} />
 
                 {/* Suite App (functional dashboard) */}
-                <Route path="/suite" element={<SuiteAppLayout />}>
+                <Route path="/suite" element={<PortalGuard portal="suite"><SuiteAppLayout /></PortalGuard>}>
                   <Route index element={<SuiteDashboard />} />
                   <Route path="setup" element={<SuiteSetup />} />
 
