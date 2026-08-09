@@ -919,8 +919,9 @@ export default function AdminUsers() {
         <div>
           <h1 className="text-xl font-bold text-foreground">User Management</h1>
           <p className="text-xs text-muted-foreground">
-            {nonPartnerProfiles.length} platform users · {suiteUsers.length} suite users · {partnerApplicants.length} partner applicants (processed in <Link to="/admin/partners" className="text-primary hover:underline">Partner Program</Link>) · {academyUsers.length} academy learners (managed in <a href="/admin/academy-users" className="text-primary hover:underline">Academy Signups</a>)
+            {profiles.length} users · {academyCategory.length} academy · {businessCategory.length} business · {partnerCategory.length} partners (managed in <Link to="/admin/partners" className="text-primary hover:underline">Partner Program</Link>) · {suiteCategory.length} suite
           </p>
+
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={exportCurrentView}>
