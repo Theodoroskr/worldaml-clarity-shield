@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -6,6 +6,7 @@ import { Loader2, Search, Shield, ShieldCheck, ShieldX, KeyRound, UserMinus, Fil
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -13,6 +14,15 @@ import { REGULATORY_PROFILES, REGULATOR_OPTIONS } from "@/data/regulatoryProfile
 import AdminUserDetailDialog, { RevenueItem } from "@/components/admin/AdminUserDetailDialog";
 import type { UpsellTemplate } from "@/lib/upsellRecommendation";
 import { exportRowsAsCsv, exportRowsAsXlsx } from "@/lib/adminUserExport";
+import UserIntelFilters from "@/components/admin/UserIntelFilters";
+import UserIntelSummary from "@/components/admin/UserIntelSummary";
+import UserIntelExportDialog, { ExportScope } from "@/components/admin/UserIntelExportDialog";
+import {
+  COLUMN_DEFS, EMPTY_FILTERS, EnrichedUser, FilterState, LIFECYCLE_LABELS, SavedSegment, SortKey,
+  USER_TYPE_LABELS, applyIntelFilters, deleteSegment as deleteSegmentFn, enrichUser, formatAge, formatDate,
+  loadColumns, loadSavedSegments, newCondition, persistColumns, saveSegment as saveSegmentFn, sortUsers,
+} from "@/lib/adminUserIntel";
+
 
 interface Profile {
   id: string;
