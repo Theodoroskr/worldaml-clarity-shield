@@ -18,6 +18,8 @@ const NAV: NavItem[] = [
   { label: "Users", path: "/admin/users", icon: Users, section: "Platform" },
   { label: "Identities & Profiles", path: "/admin/identities", icon: GitBranch, section: "Platform" },
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Platform" },
+  { label: "Data Quality", path: "/admin/data-quality", icon: Stethoscope, section: "Platform" },
+
   { label: "Internal Access", path: "/admin/internal-access", icon: Lock, section: "Platform" },
   { label: "Notifications", path: "/admin/notifications", icon: Bell, section: "Platform" },
 
