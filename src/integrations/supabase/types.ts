@@ -1738,6 +1738,9 @@ export type Database = {
       }
       partner_applications: {
         Row: {
+          approved_partner_type:
+            | Database["public"]["Enums"]["partner_type"]
+            | null
           company_name: string
           contact_email: string | null
           contact_name: string | null
@@ -1746,8 +1749,11 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          internal_notes: string | null
           notes: string | null
+          partner_id: string | null
           partner_type: Database["public"]["Enums"]["partner_type"]
+          review_message: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["partner_status"]
@@ -1755,6 +1761,9 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          approved_partner_type?:
+            | Database["public"]["Enums"]["partner_type"]
+            | null
           company_name: string
           contact_email?: string | null
           contact_name?: string | null
@@ -1763,8 +1772,11 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          internal_notes?: string | null
           notes?: string | null
+          partner_id?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
+          review_message?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["partner_status"]
@@ -1772,6 +1784,9 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          approved_partner_type?:
+            | Database["public"]["Enums"]["partner_type"]
+            | null
           company_name?: string
           contact_email?: string | null
           contact_name?: string | null
@@ -1780,15 +1795,33 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          internal_notes?: string | null
           notes?: string | null
+          partner_id?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
+          review_message?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["partner_status"]
           user_id?: string
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "partner_applications_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "featured_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_applications_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partner_asset_events: {
         Row: {
@@ -2543,15 +2576,18 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          internal_notes: string | null
           is_active: boolean
           is_featured: boolean
           logo_url: string | null
           notification_prefs: Json
           onboarding_completed_at: string | null
           partner_manager_id: string | null
+          partner_since: string | null
           partner_type: Database["public"]["Enums"]["partner_type"]
           payout_details_encrypted: string | null
           payout_method: string | null
+          portal_access: string
           referral_code: string
           sandbox_key: string | null
           sandbox_key_issued_at: string | null
@@ -2569,15 +2605,18 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          internal_notes?: string | null
           is_active?: boolean
           is_featured?: boolean
           logo_url?: string | null
           notification_prefs?: Json
           onboarding_completed_at?: string | null
           partner_manager_id?: string | null
+          partner_since?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
           payout_details_encrypted?: string | null
           payout_method?: string | null
+          portal_access?: string
           referral_code?: string
           sandbox_key?: string | null
           sandbox_key_issued_at?: string | null
@@ -2595,15 +2634,18 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          internal_notes?: string | null
           is_active?: boolean
           is_featured?: boolean
           logo_url?: string | null
           notification_prefs?: Json
           onboarding_completed_at?: string | null
           partner_manager_id?: string | null
+          partner_since?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"]
           payout_details_encrypted?: string | null
           payout_method?: string | null
+          portal_access?: string
           referral_code?: string
           sandbox_key?: string | null
           sandbox_key_issued_at?: string | null
@@ -7343,7 +7385,12 @@ export type Database = {
         | "analyst"
         | "viewer"
       partner_certification: "none" | "bronze" | "silver" | "gold"
-      partner_status: "pending" | "approved" | "rejected"
+      partner_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "more_info"
+        | "withdrawn"
       partner_type: "referral" | "affiliate" | "reseller" | "technology"
       referral_status: "clicked" | "signed_up" | "converted"
     }
@@ -7490,7 +7537,13 @@ export const Constants = {
         "viewer",
       ],
       partner_certification: ["none", "bronze", "silver", "gold"],
-      partner_status: ["pending", "approved", "rejected"],
+      partner_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "more_info",
+        "withdrawn",
+      ],
       partner_type: ["referral", "affiliate", "reseller", "technology"],
       referral_status: ["clicked", "signed_up", "converted"],
     },
