@@ -138,56 +138,6 @@ export default function AdminPartners() {
     setAccessTarget(null);
   };
 
-  const approvePartnerApp = async (app: any) => {
-    setActionLoading(app.id);
-    const { error: updateErr } = await supabase
-      .from("partner_applications")
-      .update({ status: "approved", reviewed_at: new Date().toISOString(), reviewed_by: user!.id } as any)
-      .eq("id", app.id);
-    if (updateErr) { toast.error("Failed to approve"); setActionLoading(null); return; }
-    const { error: insertErr } = await supabase.from("partners").insert({
-      user_id: app.user_id,
-      partner_type: app.partner_type,
-      display_name: app.company_name,
-      website_url: app.website,
-    } as any);
-    if (insertErr) { toast.error("Failed to create partner record"); console.error(insertErr); }
-    else {
-      toast.success("Partner approved — sandbox key & Academy seats issued.");
-      await logPartnerAdminAction({
-        action: "approve_application",
-        entity_type: "partner_application",
-        entity_id: app.id,
-        entity_label: app.company_name,
-        changes: { status: { from: app.status, to: "approved" }, partner_type: app.partner_type },
-      });
-      fetchAll();
-    }
-    setActionLoading(null);
-  };
-
-  const rejectPartnerApp = async (appId: string) => {
-    setActionLoading(appId);
-    const app = partnerApps.find((a) => a.id === appId);
-    const { error } = await supabase
-      .from("partner_applications")
-      .update({ status: "rejected", reviewed_at: new Date().toISOString(), reviewed_by: user!.id } as any)
-      .eq("id", appId);
-    if (error) toast.error("Failed to reject");
-    else {
-      toast.success("Application rejected");
-      await logPartnerAdminAction({
-        action: "reject_application",
-        entity_type: "partner_application",
-        entity_id: appId,
-        entity_label: app?.company_name ?? null,
-        changes: { status: { from: app?.status, to: "rejected" } },
-      });
-      fetchAll();
-    }
-    setActionLoading(null);
-  };
-
   const togglePartner = async (p: any, field: string, value: any) => {
     const { error } = await supabase.from("partners").update({ [field]: value } as any).eq("id", p.id);
     if (error) toast.error("Update failed");
@@ -382,7 +332,14 @@ export default function AdminPartners() {
 
 
   const pendingCount = partnerApps.filter((a) => a.status === "pending").length;
+  const moreInfoCount = partnerApps.filter((a) => a.status === "more_info").length;
   const pendingDeals = deals.filter((d) => d.status === "pending").length;
+  const accessIssues = partners.filter(
+    (p: any) => p.is_active && (p.portal_access ?? "active") !== "active",
+  ).length;
+  const managerName = (id?: string | null) =>
+    managers.find((m: any) => m.id === id)?.name ?? null;
+  const partnerByUser = new Map(partners.map((p: any) => [p.user_id, p]));
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -392,9 +349,28 @@ export default function AdminPartners() {
           <h1 className="text-2xl font-bold text-foreground">Partner Program</h1>
           <p className="text-sm text-muted-foreground">Analytics, applications, active partners, referrals and deal registrations.</p>
         </div>
-        {pendingCount > 0 && <Badge className="bg-amber-100 text-amber-800 border-amber-200">{pendingCount} pending apps</Badge>}
+        {pendingCount > 0 && <Badge className="bg-amber-100 text-amber-800 border-amber-200">{pendingCount} pending applications</Badge>}
         {pendingDeals > 0 && <Badge className="bg-blue-100 text-blue-800 border-blue-200">{pendingDeals} pending deals</Badge>}
       </div>
+
+      <PartnerActionCentre
+        pendingApplications={pendingCount}
+        moreInfoApplications={moreInfoCount}
+        pendingDeals={pendingDeals}
+        accessIssues={accessIssues}
+        onReviewApplications={() => {
+          setAppStatus("pending");
+          document.getElementById("partner-applications")?.scrollIntoView({ behavior: "smooth" });
+        }}
+        onReviewDeals={() => {
+          setDealStatus("pending");
+          document.getElementById("deal-registrations")?.scrollIntoView({ behavior: "smooth" });
+        }}
+        onReviewAccess={() => {
+          setPtAccess("issues");
+          document.getElementById("active-partners")?.scrollIntoView({ behavior: "smooth" });
+        }}
+      />
 
       {/* Quick jump */}
       <div className="flex flex-wrap gap-2 text-xs">
@@ -425,14 +401,81 @@ export default function AdminPartners() {
 
       {/* Applications */}
       <Card id="partner-applications" className="scroll-mt-24">
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <CardTitle className="text-navy">Applications</CardTitle>
+              <p className="text-xs text-text-secondary mt-1">
+                {pendingCount} pending review · {moreInfoCount} awaiting information · {partnerApps.length} total
+              </p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={appSearch}
+                onChange={(e) => setAppSearch(e.target.value)}
+                placeholder="Search company, contact, email…"
+                className="h-9 w-72 pl-8"
+              />
+            </div>
+            <Select value={appStatus} onValueChange={setAppStatus}>
+              <SelectTrigger className="h-9 w-48"><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {Object.entries(APPLICATION_STATUS_LABEL).map(([k, v]) => (
+                  <SelectItem key={k} value={k}>{v}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={appType} onValueChange={setAppType}>
+              <SelectTrigger className="h-9 w-40"><SelectValue placeholder="Type" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All types</SelectItem>
+                <SelectItem value="referral">Referral</SelectItem>
+                <SelectItem value="affiliate">Affiliate</SelectItem>
+                <SelectItem value="reseller">Reseller</SelectItem>
+                <SelectItem value="technology">Technology</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={appCountry} onValueChange={setAppCountry}>
+              <SelectTrigger className="h-9 w-44"><SelectValue placeholder="Country" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All countries</SelectItem>
+                {Array.from(new Set(partnerApps.map((a: any) => a.country).filter(Boolean))).map((c: any) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {(appSearch || appStatus !== "all" || appType !== "all" || appCountry !== "all") && (
+              <Button size="sm" variant="ghost" onClick={() => { setAppSearch(""); setAppStatus("all"); setAppType("all"); setAppCountry("all"); }}>
+                Clear
+              </Button>
+            )}
+          </div>
 
-        <CardHeader><CardTitle className="text-navy">Applications</CardTitle></CardHeader>
-        <CardContent>
           {loading ? (
             <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-teal" /></div>
           ) : partnerApps.length === 0 ? (
             <p className="text-text-secondary text-sm py-4 text-center">No partner applications yet.</p>
-          ) : (
+          ) : (() => {
+            const q = appSearch.trim().toLowerCase();
+            const rows = partnerApps.filter((a: any) => {
+              if (appStatus !== "all" && a.status !== appStatus) return false;
+              if (appType !== "all" && a.partner_type !== appType) return false;
+              if (appCountry !== "all" && a.country !== appCountry) return false;
+              if (!q) return true;
+              return [a.company_name, a.contact_name, a.contact_email, a.country, a.website]
+                .filter(Boolean).some((v: string) => String(v).toLowerCase().includes(q));
+            });
+            if (rows.length === 0) {
+              return <p className="text-text-secondary text-sm py-4 text-center">No applications match these filters.</p>;
+            }
+            return (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -443,59 +486,95 @@ export default function AdminPartners() {
                     <th className="pb-3 pr-4 font-semibold text-navy">Country</th>
                     <th className="pb-3 pr-4 font-semibold text-navy">Website</th>
                     <th className="pb-3 pr-4 font-semibold text-navy">Type</th>
-                    <th className="pb-3 pr-4 font-semibold text-navy">Date</th>
+                    <th className="pb-3 pr-4 font-semibold text-navy">Submitted</th>
                     <th className="pb-3 pr-4 font-semibold text-navy">Status</th>
-                    <th className="pb-3 font-semibold text-navy">Actions</th>
+                    <th className="pb-3 pr-4 font-semibold text-navy">Portal access</th>
+                    <th className="pb-3 font-semibold text-navy text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {partnerApps.map((app: any) => (
+                <tbody className="divide-y divide-divider/40">
+                  {rows.map((app: any) => {
+                    const linkedPartner = partnerByUser.get(app.user_id);
+                    const access = linkedPartner?.portal_access ?? "not_granted";
+                    const sev = ageSeverity(app.created_at, app.status);
+                    const notesText = [app.description, app.notes].filter(Boolean).join("\n\n");
+                    const notesOpen = !!openNotes[app.id];
+                    return (
                     <Fragment key={app.id}>
-                    <tr className="border-b border-divider/30 hover:bg-surface-subtle">
-                      <td className="py-3 pr-4 font-medium text-navy align-top">{app.company_name}</td>
-                      <td className="py-3 pr-4 text-text-secondary align-top">
+                    <tr className="hover:bg-surface-subtle align-top">
+                      <td className="py-4 pr-4 font-medium text-navy">{app.company_name}</td>
+                      <td className="py-4 pr-4 text-text-secondary">
                         {app.contact_name ? <div className="text-navy">{app.contact_name}</div> : null}
                         {app.contact_email ? (
                           <a href={`mailto:${app.contact_email}`} className="text-teal hover:underline text-xs">{app.contact_email}</a>
                         ) : <span className="text-xs">—</span>}
                       </td>
-                      <td className="py-3 pr-4 text-text-secondary align-top text-xs">
+                      <td className="py-4 pr-4 text-text-secondary text-xs">
                         {app.contact_phone ? <a href={`tel:${app.contact_phone}`} className="hover:underline">{app.contact_phone}</a> : "—"}
                       </td>
-                      <td className="py-3 pr-4 text-text-secondary align-top text-xs">{app.country || "—"}</td>
-                      <td className="py-3 pr-4 text-text-secondary align-top text-xs">
+                      <td className="py-4 pr-4 text-text-secondary text-xs">{app.country || "—"}</td>
+                      <td className="py-4 pr-4 text-text-secondary text-xs">
                         {app.website ? <a href={app.website} target="_blank" rel="noreferrer" className="text-teal hover:underline">{app.website}</a> : "—"}
                       </td>
-                      <td className="py-3 pr-4 align-top"><Badge className="bg-purple-100 text-purple-800 border-purple-200">{app.partner_type}</Badge></td>
-                      <td className="py-3 pr-4 text-text-secondary align-top text-xs">{new Date(app.created_at).toLocaleDateString("en-GB")}</td>
-                      <td className="py-3 pr-4 align-top"><Badge className={STATUS_STYLES[app.status]}>{app.status}</Badge></td>
-                      <td className="py-3 align-top">
-                        {app.status === "pending" && (
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="outline" className="text-green-700 border-green-300 hover:bg-green-50" disabled={actionLoading === app.id} onClick={() => approvePartnerApp(app)}>
-                              {actionLoading === app.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-                              Approve
+                      <td className="py-4 pr-4"><Badge className="bg-purple-100 text-purple-800 border-purple-200 capitalize">{app.partner_type}</Badge></td>
+                      <td className="py-4 pr-4 text-xs">
+                        <div className="text-navy whitespace-nowrap">
+                          {new Date(app.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                        </div>
+                        <div className={
+                          sev === "late" ? "text-red-600 font-medium"
+                            : sev === "warn" ? "text-amber-600"
+                            : "text-text-secondary"
+                        }>
+                          {applicationAge(app.created_at)}
+                        </div>
+                      </td>
+                      <td className="py-4 pr-4">
+                        <Badge className={APPLICATION_STATUS_STYLE[app.status] ?? STATUS_STYLES[app.status]}>
+                          {APPLICATION_STATUS_LABEL[app.status] ?? app.status}
+                        </Badge>
+                      </td>
+                      <td className="py-4 pr-4">
+                        <Badge variant="outline" className={PORTAL_ACCESS_STYLE[access]}>
+                          {PORTAL_ACCESS_LABEL[access]}
+                        </Badge>
+                      </td>
+                      <td className="py-4 text-right">
+                        <div className="flex justify-end gap-1">
+                          {notesText && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setOpenNotes({ ...openNotes, [app.id]: !notesOpen })}
+                            >
+                              {notesOpen ? <ChevronDown className="h-3 w-3 mr-1" /> : <ChevronRight className="h-3 w-3 mr-1" />}
+                              Notes
                             </Button>
-                            <Button size="sm" variant="outline" className="text-red-700 border-red-300 hover:bg-red-50" disabled={actionLoading === app.id} onClick={() => rejectPartnerApp(app.id)}>
-                              <XCircle className="h-3 w-3 mr-1" /> Reject
-                            </Button>
-                          </div>
-                        )}
+                          )}
+                          <Button size="sm" onClick={() => setReviewApp(app)}>
+                            <Eye className="h-3 w-3 mr-1" /> Review
+                          </Button>
+                        </div>
                       </td>
                     </tr>
-                    {app.description && (
-                      <tr key={`${app.id}-notes`} className="border-b border-divider/50 bg-surface-subtle/40">
-                        <td colSpan={9} className="py-2 px-4 text-xs text-text-secondary">
-                          <span className="font-semibold text-navy">Notes: </span>{app.description}
+                    {notesText && notesOpen && (
+                      <tr className="bg-surface-subtle/40">
+                        <td colSpan={10} className="py-3 px-4 text-xs text-text-secondary whitespace-pre-wrap">
+                          <span className="font-semibold text-navy">Notes: </span>{notesText}
+                          {app.review_message && (
+                            <div className="mt-2"><span className="font-semibold text-navy">Last message to applicant: </span>{app.review_message}</div>
+                          )}
                         </td>
                       </tr>
                     )}
                     </Fragment>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-          )}
+            );
+          })()}
         </CardContent>
       </Card>
 
