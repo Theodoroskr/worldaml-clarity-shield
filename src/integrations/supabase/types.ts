@@ -7122,6 +7122,19 @@ export type Database = {
       }
       academy_recognition_status: { Args: never; Returns: Json }
       admin_analytics: { Args: { _from: string; _to: string }; Returns: Json }
+      admin_approve_partner_application: {
+        Args: {
+          _app_id: string
+          _certification?: Database["public"]["Enums"]["partner_certification"]
+          _commission_rate: number
+          _grant_portal?: boolean
+          _internal_notes?: string
+          _manager_id?: string
+          _partner_type: Database["public"]["Enums"]["partner_type"]
+          _verticals?: string[]
+        }
+        Returns: Json
+      }
       admin_grant_suite_access:
         | { Args: { target_email: string }; Returns: undefined }
         | {
@@ -7179,6 +7192,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_review_partner_application: {
+        Args: { _app_id: string; _decision: string; _message: string }
+        Returns: undefined
+      }
       admin_revoke_internal: { Args: { _email: string }; Returns: undefined }
       admin_revoke_suite_access: {
         Args: { target_email: string }
@@ -7186,6 +7203,10 @@ export type Database = {
       }
       admin_set_internal_role: {
         Args: { _access_role: string; _department: string; _email: string }
+        Returns: undefined
+      }
+      admin_set_partner_portal_access: {
+        Args: { _access: string; _partner_id: string; _reason?: string }
         Returns: undefined
       }
       admin_suspend_internal: {
@@ -7263,6 +7284,10 @@ export type Database = {
         Args: { _course_id: string }
         Returns: boolean
       }
+      has_partner_portal_access: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -7308,6 +7333,16 @@ export type Database = {
           _schema: Json
         }
         Returns: string
+      }
+      partner_audit: {
+        Args: {
+          _action: string
+          _changes: Json
+          _entity_id: string
+          _entity_label: string
+          _entity_type: string
+        }
+        Returns: undefined
       }
       portal_accept_document: {
         Args: { _new_doc_id: string }
