@@ -29,6 +29,9 @@ import { exportSummaryCsv, exportSummaryPdf } from "@/lib/adminReportExport";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAdminRealtime } from "@/hooks/useAdminRealtime";
+import DataFreshness from "@/components/admin/DataFreshness";
+
 
 /** Recent activity feeds — kept from the original dashboard. */
 async function loadFeeds() {
