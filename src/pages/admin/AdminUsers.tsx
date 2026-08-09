@@ -1127,59 +1127,15 @@ export default function AdminUsers() {
         />
       )}
 
-      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Export users</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">Timeline (registration date) — required</label>
-              <Select value={exportPreset} onValueChange={(v) => setExportPreset(v as typeof exportPreset)}>
-                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30d">Last 30 days</SelectItem>
-                  <SelectItem value="90d">Last 90 days</SelectItem>
-                  <SelectItem value="12m">Last 12 months</SelectItem>
-                  <SelectItem value="ytd">Year to date</SelectItem>
-                  <SelectItem value="all">All time</SelectItem>
-                  <SelectItem value="custom">Custom range…</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      <UserIntelExportDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        allUsers={allIntelUsers}
+        filteredUsers={visibleUsers}
+        selectedUsers={selectedUsers}
+        onExport={handleConfiguredExport}
+      />
 
-            {exportPreset === "custom" && (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">From</label>
-                  <input type="date" value={exportFrom} onChange={(e) => setExportFrom(e.target.value)}
-                    className="w-full px-2 py-2 text-sm rounded-md border border-border bg-background" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">To</label>
-                  <input type="date" value={exportTo} onChange={(e) => setExportTo(e.target.value)}
-                    className="w-full px-2 py-2 text-sm rounded-md border border-border bg-background" />
-                </div>
-              </div>
-            )}
-
-            <p className="text-xs text-muted-foreground">
-              {previewCount() === null
-                ? "Select a valid date range to continue."
-                : `${previewCount()} user(s) match the timeline and the current search/filters. Files include lifetime revenue plus revenue earned inside the selected period.`}
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" size="sm" onClick={() => setExportOpen(false)}>Cancel</Button>
-            <Button variant="outline" size="sm" disabled={!previewCount()} onClick={() => runExport("csv")}>
-              <Download className="w-3.5 h-3.5 mr-1" /> CSV
-            </Button>
-            <Button size="sm" disabled={!previewCount()} onClick={() => runExport("xlsx")}>
-              <Table2 className="w-3.5 h-3.5 mr-1" /> Excel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
     </div>
   );
