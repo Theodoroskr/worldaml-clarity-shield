@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type PortalKey = "academy" | "partner" | "business" | "admin";
+export type PortalKey = "academy" | "partner" | "business" | "suite" | "admin";
 
 export interface PortalAccess {
   isLoading: boolean;
@@ -13,12 +13,15 @@ export interface PortalAccess {
   partnerAccess: boolean;
   /** Business buyer — an owned or member business account. */
   businessAccess: boolean;
+  /** Suite compliance platform — subscription tier or org membership. */
+  suiteAccess: boolean;
   /** Internal WorldAML staff (user_roles.role = 'admin'). */
   adminAccess: boolean;
   /** Number of non-admin workspaces the user can enter. */
   portals: PortalKey[];
   has: (portal: PortalKey) => boolean;
 }
+
 
 /**
  * Single source of truth for portal entitlements.
