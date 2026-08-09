@@ -35,13 +35,13 @@ export function usePortalAccess(): PortalAccess {
     enabled: !!user,
     staleTime: 60_000,
     queryFn: async (): Promise<boolean> => {
-      const { data, error } = await supabase
-        .from("partners")
-        .select("is_active")
-        .eq("user_id", user!.id)
-        .maybeSingle();
+      // Authoritative check runs in the database (security definer), so a
+      // pending, rejected or suspended partner can never reach /partner/*.
+      const { data, error } = await supabase.rpc("has_partner_portal_access" as any, {
+        _user_id: user!.id,
+      } as any);
       if (error) return false;
-      return !!data?.is_active;
+      return data === true;
     },
   });
 
