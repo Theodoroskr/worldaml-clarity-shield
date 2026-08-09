@@ -387,6 +387,8 @@ const App = () => (
                   <Route path="academy-funnel" element={<AdminAcademyFunnel />} />
                   <Route path="outreach-queue" element={<AdminOutreachQueue />} />
                   <Route path="recognition" element={<AdminRecognition />} />
+                  <Route path="notifications" element={<AdminNotificationCentre />} />
+                  <Route path="notification-settings" element={<AdminNotificationSettings />} />
                 </Route>
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
