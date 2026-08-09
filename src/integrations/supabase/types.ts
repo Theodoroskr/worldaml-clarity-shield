@@ -141,6 +141,8 @@ export type Database = {
           paid_at: string | null
           recovery_email_24h_sent_at: string | null
           recovery_email_sent_at: string | null
+          refund_amount_cents: number
+          refunded_at: string | null
           status: string
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
@@ -157,6 +159,8 @@ export type Database = {
           paid_at?: string | null
           recovery_email_24h_sent_at?: string | null
           recovery_email_sent_at?: string | null
+          refund_amount_cents?: number
+          refunded_at?: string | null
           status?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -173,6 +177,8 @@ export type Database = {
           paid_at?: string | null
           recovery_email_24h_sent_at?: string | null
           recovery_email_sent_at?: string | null
+          refund_amount_cents?: number
+          refunded_at?: string | null
           status?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -1590,6 +1596,45 @@ export type Database = {
           },
         ]
       }
+      ecosystem_events: {
+        Row: {
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          event_type: string
+          id: string
+          metadata: Json
+          occurred_at: string
+          organisation_id: string | null
+          portal: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          organisation_id?: string | null
+          portal: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          organisation_id?: string | null
+          portal?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       fatf_country_risk: {
         Row: {
           country_code: string
@@ -2936,6 +2981,7 @@ export type Database = {
           industry: string | null
           interest_area: string | null
           job_title: string | null
+          last_activity_at: string | null
           last_name: string | null
           marketing_consent: boolean
           marketing_consent_at: string | null
@@ -2974,6 +3020,7 @@ export type Database = {
           industry?: string | null
           interest_area?: string | null
           job_title?: string | null
+          last_activity_at?: string | null
           last_name?: string | null
           marketing_consent?: boolean
           marketing_consent_at?: string | null
@@ -3012,6 +3059,7 @@ export type Database = {
           industry?: string | null
           interest_area?: string | null
           job_title?: string | null
+          last_activity_at?: string | null
           last_name?: string | null
           marketing_consent?: boolean
           marketing_consent_at?: string | null
@@ -7558,6 +7606,18 @@ export type Database = {
       rcm_member_role: {
         Args: { _org: string }
         Returns: Database["public"]["Enums"]["org_member_role"]
+      }
+      record_ecosystem_event: {
+        Args: {
+          _entity_id: string
+          _entity_type: string
+          _event_type: string
+          _metadata?: Json
+          _organisation_id: string
+          _portal: string
+          _user_id: string
+        }
+        Returns: undefined
       }
       request_str_amendment: {
         Args: { _reason: string; _report_id: string }
