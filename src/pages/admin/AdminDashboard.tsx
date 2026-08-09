@@ -29,6 +29,9 @@ import { exportSummaryCsv, exportSummaryPdf } from "@/lib/adminReportExport";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAdminRealtime } from "@/hooks/useAdminRealtime";
+import DataFreshness from "@/components/admin/DataFreshness";
+
 
 /** Recent activity feeds — kept from the original dashboard. */
 async function loadFeeds() {
@@ -59,6 +62,18 @@ export default function AdminDashboard() {
 
   const { data: a, isLoading, isFetching, refetch, error } = useAdminAnalytics(range);
   const feeds = useQuery({ queryKey: ["admin-feeds"], queryFn: loadFeeds, staleTime: 60_000 });
+
+  /**
+   * Operational tables (leads, applications, deals, orders) stream in live.
+   * Aggregated analytics are refetched alongside them so the KPI cards and the
+   * feeds never disagree.
+   */
+  const [liveAt, setLiveAt] = useState<number | null>(null);
+  useAdminRealtime(
+    ["form_submissions", "partner_applications", "deal_registrations", "academy_course_purchases"],
+    () => { setLiveAt(Date.now()); feeds.refetch(); refetch(); },
+  );
+
 
   const spark = (key: keyof NonNullable<typeof a>["series"][number]) =>
     a?.series?.map((p) => Number(p[key] ?? 0)) ?? [];
@@ -123,6 +138,14 @@ export default function AdminDashboard() {
           <p className="text-sm text-muted-foreground mt-1">
             Internal intelligence across Academy, Business, Partners, Platform and Marketing — every figure is queried live from the database.
           </p>
+          <DataFreshness
+            className="mt-1"
+            updatedAt={a?.generated_at ?? null}
+            live={!!liveAt}
+            refreshing={isFetching}
+            onRefresh={() => { refetch(); feeds.refetch(); }}
+          />
+
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <AdminFilters

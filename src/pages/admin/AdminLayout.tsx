@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock, BarChart3 } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock, BarChart3, Stethoscope } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AdminNotificationProvider, useAdminNotifications } from "@/hooks/useAdminNotifications";
 import AdminNotificationBell from "@/components/admin/AdminNotificationBell";
@@ -18,6 +18,8 @@ const NAV: NavItem[] = [
   { label: "Users", path: "/admin/users", icon: Users, section: "Platform" },
   { label: "Identities & Profiles", path: "/admin/identities", icon: GitBranch, section: "Platform" },
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Platform" },
+  { label: "Data Quality", path: "/admin/data-quality", icon: Stethoscope, section: "Platform" },
+
   { label: "Internal Access", path: "/admin/internal-access", icon: Lock, section: "Platform" },
   { label: "Notifications", path: "/admin/notifications", icon: Bell, section: "Platform" },
 
