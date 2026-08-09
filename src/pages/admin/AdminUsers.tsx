@@ -116,6 +116,23 @@ export default function AdminUsers() {
   const [partnerApplicantEmails, setPartnerApplicantEmails] = useState<Set<string>>(new Set());
   const [partnerAppMeta, setPartnerAppMeta] = useState<Record<string, { status: string; partner_type: string | null; company_name: string | null; created_at: string }>>({});
 
+  // ---- User intelligence layer (additive) ----
+  const [lastSignIn, setLastSignIn] = useState<Record<string, string | null>>({});
+  const [academyAgg, setAcademyAgg] = useState<Record<string, { courses: number; completed: number; lastAt: string | null }>>({});
+  const [certCounts, setCertCounts] = useState<Record<string, number>>({});
+  const [purchaseAgg, setPurchaseAgg] = useState<Record<string, { paid: number; pending: number; lastAt: string | null; annualPass: boolean }>>({});
+  const [businessByEmail, setBusinessByEmail] = useState<Record<string, string>>({});
+  const [partnerByUserId, setPartnerByUserId] = useState<Record<string, string>>({});
+  const [activityAvailable, setActivityAvailable] = useState(true);
+  const [intelFilters, setIntelFilters] = useState<FilterState>(EMPTY_FILTERS);
+  const [columns, setColumns] = useState<string[]>(loadColumns());
+  const [sortKey, setSortKey] = useState<SortKey>("registered");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [savedSegments, setSavedSegments] = useState<SavedSegment[]>(loadSavedSegments());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+
+
 
   // Grant Suite dialog state
   const [grantDialog, setGrantDialog] = useState<{ open: boolean; profile: Profile | null }>({ open: false, profile: null });
