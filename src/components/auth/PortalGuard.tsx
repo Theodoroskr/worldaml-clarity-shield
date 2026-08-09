@@ -25,12 +25,19 @@ const COPY: Record<PortalKey, { title: string; body: string; primary?: { label: 
     primary: { label: "Create a business account", to: "/business/signup" },
     secondary: { label: "Return to WorldAML", to: "/" },
   },
+  suite: {
+    title: "No Suite access",
+    body: "Your account does not currently have access to the WorldAML Compliance Suite.",
+    primary: { label: "View Suite plans", to: "/pricing" },
+    secondary: { label: "Return to WorldAML", to: "/" },
+  },
   admin: {
     title: "Access denied",
     body: "This area is restricted to authorised WorldAML staff.",
     secondary: { label: "Return to WorldAML", to: "/" },
   },
 };
+
 
 /**
  * Route-level authorisation. Never renders portal content (or its chrome)
