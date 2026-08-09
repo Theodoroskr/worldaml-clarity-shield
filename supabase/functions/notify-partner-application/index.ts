@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
     const admin = createClient(supabaseUrl, serviceKey);
     const { data: app, error: appErr } = await admin
       .from("partner_applications")
-      .select("id, user_id, company_name, website, partner_type, description, created_at")
+      .select("id, user_id, company_name, website, partner_type, description, created_at, contact_name, contact_email, contact_phone, country")
       .eq("id", body.application_id)
       .maybeSingle();
 
@@ -94,8 +94,18 @@ Deno.serve(async (req) => {
       .eq("user_id", app.user_id)
       .maybeSingle();
 
-    const applicantEmail = profile?.email || authData.user.email || "";
-    const applicantName = profile?.full_name || "there";
+    const applicantEmail = (app as any).contact_email || profile?.email || authData.user.email || "";
+    const applicantName = (app as any).contact_name || profile?.full_name || "there";
+
+    // Internal recipients come from the admin notification preferences —
+    // never hardcoded when opted-in admins exist.
+    const { data: prefs } = await admin
+      .from("partner_notification_settings")
+      .select("email, notify_new_application, is_active");
+    const adminRecipients = ((prefs as any[]) ?? [])
+      .filter((r) => r.is_active && r.notify_new_application && r.email)
+      .map((r) => r.email as string);
+    if (adminRecipients.length === 0) adminRecipients.push(ADMIN_EMAIL);
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (!resendApiKey) {
@@ -117,20 +127,28 @@ Deno.serve(async (req) => {
     };
 
     // 1. Admin notification
+    const safeCountry = escapeHtml((app as any).country || "—");
+    const safePhone = escapeHtml((app as any).contact_phone || "—");
+    const submitted = new Date(app.created_at).toLocaleDateString("en-GB", {
+      day: "2-digit", month: "short", year: "numeric",
+    });
     const adminHtml = `
       <div style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;background:#fff;">
         <div style="background:#1e3a5f;padding:24px 32px;">
           <h1 style="color:#fff;margin:0;font-size:18px;font-weight:700;">New Partner Application</h1>
         </div>
         <div style="padding:28px 32px;color:#374151;font-size:14px;line-height:1.6;">
+          <p>A new Partner Programme application has been submitted.</p>
           <p><strong>Company:</strong> ${safe.company}</p>
-          <p><strong>Website:</strong> ${safe.website}</p>
-          <p><strong>Partner Type:</strong> ${safe.type}</p>
-          <p><strong>Applicant:</strong> ${safe.name} &lt;${safe.email}&gt;</p>
-          <p><strong>Plan / Description:</strong><br/>${safe.description}</p>
+          <p><strong>Contact:</strong> ${safe.name}</p>
+          <p><strong>Email:</strong> ${safe.email}</p>
+          <p><strong>Phone:</strong> ${safePhone}</p>
+          <p><strong>Country:</strong> ${safeCountry}</p>
+          <p><strong>Requested partner type:</strong> ${safe.type}</p>
+          <p><strong>Submitted:</strong> ${submitted}</p>
           <p style="margin-top:24px;">
-            <a href="${SITE_URL}/admin" style="display:inline-block;background:#0d9488;color:#fff;text-decoration:none;padding:10px 22px;border-radius:6px;font-weight:600;font-size:14px;">
-              Review in Admin →
+            <a href="${SITE_URL}/admin/partners?application=${app.id}#partner-applications" style="display:inline-block;background:#0d9488;color:#fff;text-decoration:none;padding:10px 22px;border-radius:6px;font-weight:600;font-size:14px;">
+              Review Application →
             </a>
           </p>
         </div>
@@ -164,8 +182,8 @@ Deno.serve(async (req) => {
 
     await safeSend(resend, {
       from: FROM_EMAIL,
-      to: [ADMIN_EMAIL],
-      subject: `New partner application: ${app.company_name} (${app.partner_type})`,
+      to: adminRecipients,
+      subject: `New WorldAML Partner Application — ${app.company_name}`,
       html: adminHtml,
       reply_to: applicantEmail || undefined,
     });
