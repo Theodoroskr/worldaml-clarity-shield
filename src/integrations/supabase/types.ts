@@ -7334,6 +7334,11 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_company_360: {
+        Args: { _business_account_id?: string; _domain?: string }
+        Returns: Json
+      }
+      admin_data_quality: { Args: never; Returns: Json }
       admin_grant_suite_access:
         | { Args: { target_email: string }; Returns: undefined }
         | {
@@ -7442,6 +7447,7 @@ export type Database = {
         Args: { _email: string; _suspend: boolean }
         Returns: undefined
       }
+      admin_user_360: { Args: { _user_id: string }; Returns: Json }
       admin_user_activity: {
         Args: never
         Returns: {
