@@ -46,8 +46,8 @@ export default function UserIntelSummary({ users, onDomainClick }: { users: Enri
   const countries = useMemo(() => topCounts(users, (u) => u.country), [users]);
 
   return (
-    <div className="rounded-xl border border-border bg-card/50">
-      <div className="grid grid-cols-2 gap-2 p-3 sm:grid-cols-4 lg:grid-cols-8">
+    <div className="rounded-xl border border-border bg-card">
+      <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4 xl:grid-cols-8">
         <Kpi label="Total users" value={stats.total} />
         <Kpi label="New today" value={stats.today} />
         <Kpi label="New 7 days" value={stats.d7} />
@@ -57,18 +57,19 @@ export default function UserIntelSummary({ users, onDomainClick }: { users: Enri
         <Kpi label="Partners" value={stats.partner} />
         <Kpi label="Paid users" value={stats.paid} />
       </div>
-      <div className="flex items-center justify-between border-t border-border px-3 py-1.5">
-        <div className="flex flex-wrap gap-1.5 text-[11px] text-muted-foreground">
-          <Badge variant="outline" className="text-[10px]">{stats.multiPortal} multi-portal</Badge>
-          <Badge variant="outline" className="text-[10px]">{stats.corporate} corporate email</Badge>
-          <Badge variant="outline" className="text-[10px]">{stats.suite} suite</Badge>
-          <Badge variant="outline" className="text-[10px]">{stats.inactive90} inactive 90+ days</Badge>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-2">
+        <div className="flex flex-wrap gap-1.5">
+          <Badge variant="secondary" className="rounded-full px-2 py-0 text-[10px] font-normal">{stats.multiPortal} multi-portal</Badge>
+          <Badge variant="secondary" className="rounded-full px-2 py-0 text-[10px] font-normal">{stats.corporate} corporate email</Badge>
+          <Badge variant="secondary" className="rounded-full px-2 py-0 text-[10px] font-normal">{stats.suite} suite</Badge>
+          <Badge variant="secondary" className="rounded-full px-2 py-0 text-[10px] font-normal">{stats.inactive90} inactive 90+ days</Badge>
         </div>
         <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setOpen((v) => !v)}>
           {open ? <ChevronUp className="w-3.5 h-3.5 mr-1" /> : <ChevronDown className="w-3.5 h-3.5 mr-1" />}
           {open ? "Hide" : "Show"} growth & acquisition
         </Button>
       </div>
+
 
       {open && (
         <div className="grid gap-3 border-t border-border p-3 lg:grid-cols-3">
