@@ -596,10 +596,54 @@ export default function AdminPartners() {
             <CardHeader>
               <CardTitle className="text-navy">Active Partners</CardTitle>
               <p className="text-xs text-text-secondary mt-1">
-                {activePartners.length} active · {partners.length - activePartners.length} inactive
+                {activePartners.length} active · {partners.length - activePartners.length} inactive ·{" "}
+                {partners.filter((p: any) => (p.portal_access ?? "active") === "active").length} with portal access
               </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Select value={ptType} onValueChange={setPtType}>
+                  <SelectTrigger className="h-9 w-40"><SelectValue placeholder="Type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All types</SelectItem>
+                    <SelectItem value="referral">Referral</SelectItem>
+                    <SelectItem value="affiliate">Affiliate</SelectItem>
+                    <SelectItem value="reseller">Reseller</SelectItem>
+                    <SelectItem value="technology">Technology</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={ptActive} onValueChange={setPtActive}>
+                  <SelectTrigger className="h-9 w-44"><SelectValue placeholder="Partner status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any partner status</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={ptAccess} onValueChange={setPtAccess}>
+                  <SelectTrigger className="h-9 w-48"><SelectValue placeholder="Portal access" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any portal access</SelectItem>
+                    <SelectItem value="issues">Access issues only</SelectItem>
+                    {Object.entries(PORTAL_ACCESS_LABEL).map(([k, v]) => (
+                      <SelectItem key={k} value={k}>{v}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={ptCert} onValueChange={setPtCert}>
+                  <SelectTrigger className="h-9 w-40"><SelectValue placeholder="Certification" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any certification</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="bronze">Bronze</SelectItem>
+                    <SelectItem value="silver">Silver</SelectItem>
+                    <SelectItem value="gold">Gold</SelectItem>
+                  </SelectContent>
+                </Select>
+                {(ptType !== "all" || ptActive !== "all" || ptAccess !== "all" || ptCert !== "all") && (
+                  <Button size="sm" variant="ghost" onClick={() => { setPtType("all"); setPtActive("all"); setPtAccess("all"); setPtCert("all"); }}>Clear</Button>
+                )}
+              </div>
               {partners.length === 0 ? (
                 <p className="text-text-secondary text-sm py-4 text-center">No active partners yet.</p>
               ) : (
@@ -614,14 +658,27 @@ export default function AdminPartners() {
                         <th className="pb-3 pr-4 font-semibold text-navy">Certification</th>
 
                         <th className="pb-3 pr-4 font-semibold text-navy">Verticals</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Portal access</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Partner since</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy">Manager</th>
                         <th className="pb-3 pr-4 font-semibold text-navy text-center">Featured</th>
-                        <th className="pb-3 pr-4 font-semibold text-navy text-center">Active</th>
+                        <th className="pb-3 pr-4 font-semibold text-navy text-center">Partner status</th>
                         <th className="pb-3 font-semibold text-navy text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {partners.map((p: any) => {
+                      {partners.filter((p: any) => {
+                        const acc = p.portal_access ?? "active";
+                        if (ptType !== "all" && p.partner_type !== ptType) return false;
+                        if (ptActive === "active" && !p.is_active) return false;
+                        if (ptActive === "inactive" && p.is_active) return false;
+                        if (ptAccess === "issues" && !(p.is_active && acc !== "active")) return false;
+                        if (ptAccess !== "all" && ptAccess !== "issues" && acc !== ptAccess) return false;
+                        if (ptCert !== "all" && (p.certification_level ?? "none") !== ptCert) return false;
+                        return true;
+                      }).map((p: any) => {
                         const app = appByUser.get(p.user_id);
+                        const access = p.portal_access ?? "active";
                         const displayName = p.display_name || app?.company_name || "Unnamed partner";
                         const contactEmail = app?.contact_email;
                         const cert = (p.certification_level || "").toLowerCase();
@@ -680,11 +737,25 @@ export default function AdminPartners() {
                                 </div>
                               )}
                             </td>
+                            <td className="py-3 pr-4">
+                              <Badge variant="outline" className={PORTAL_ACCESS_STYLE[access]}>
+                                {PORTAL_ACCESS_LABEL[access]}
+                              </Badge>
+                            </td>
+                            <td className="py-3 pr-4 text-xs text-text-secondary whitespace-nowrap">
+                              {p.partner_since || p.created_at
+                                ? new Date(p.partner_since || p.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+                                : "—"}
+                            </td>
+                            <td className="py-3 pr-4 text-xs text-text-secondary">
+                              {managerName(p.partner_manager_id) ?? "Unassigned"}
+                            </td>
                             <td className="py-3 pr-4 text-center">
                               <Switch checked={p.is_featured} onCheckedChange={(v) => togglePartner(p, "is_featured", v)} />
                             </td>
                             <td className="py-3 pr-4 text-center">
                               <Switch checked={p.is_active} onCheckedChange={(v) => togglePartner(p, "is_active", v)} />
+                              <div className="text-[10px] text-text-secondary mt-1">{p.is_active ? "Active" : "Inactive"}</div>
                             </td>
                             <td className="py-3 text-right">
                               <div className="flex justify-end gap-1">
@@ -694,13 +765,32 @@ export default function AdminPartners() {
                                 <Button size="sm" variant="outline" onClick={() => openEdit(p)}>
                                   <Pencil className="h-3 w-3 mr-1" /> Edit
                                 </Button>
+                                {access === "active" ? (
+                                  <Button
+                                    size="sm" variant="outline"
+                                    className="text-orange-700 border-orange-300 hover:bg-orange-50"
+                                    disabled={actionLoading === p.id}
+                                    onClick={() => setAccessTarget({ partner: p, access: "suspended" })}
+                                  >
+                                    <ShieldOff className="h-3 w-3 mr-1" /> Suspend access
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    size="sm" variant="outline"
+                                    className="text-green-700 border-green-300 hover:bg-green-50"
+                                    disabled={actionLoading === p.id}
+                                    onClick={() => setPortalAccess(p, "active")}
+                                  >
+                                    <ShieldCheck className="h-3 w-3 mr-1" /> Reactivate access
+                                  </Button>
+                                )}
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   className="text-red-700 border-red-300 hover:bg-red-50"
                                   onClick={() => setRemoveTarget(p)}
                                 >
-                                  <Trash2 className="h-3 w-3 mr-1" /> Remove
+                                  <Trash2 className="h-3 w-3 mr-1" /> Remove partner
                                 </Button>
                               </div>
                             </td>
@@ -1061,9 +1151,10 @@ export default function AdminPartners() {
           <div className="rounded-lg border border-divider p-4 bg-surface-subtle/40">
             <div className="text-sm font-semibold text-navy mb-1">Your alerts</div>
             <div className="text-xs text-text-secondary mb-3">
-              Sent to <span className="font-mono">{user?.email ?? "—"}</span>
+              Notifications sent to <span className="font-mono">{user?.email ?? "—"}</span>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2 text-[11px] font-semibold uppercase tracking-wide text-teal">Partner applications</div>
               <label className="flex items-center justify-between gap-3 text-sm">
                 <span>New partner applications</span>
                 <Switch
@@ -1071,6 +1162,7 @@ export default function AdminPartners() {
                   onCheckedChange={(v) => setMyNotif({ ...myNotif, notify_new_application: v })}
                 />
               </label>
+              <div className="sm:col-span-2 text-[11px] font-semibold uppercase tracking-wide text-teal mt-2">Deals</div>
               <label className="flex items-center justify-between gap-3 text-sm">
                 <span>New deal registrations</span>
                 <Switch
@@ -1085,8 +1177,9 @@ export default function AdminPartners() {
                   onCheckedChange={(v) => setMyNotif({ ...myNotif, notify_deal_status_change: v })}
                 />
               </label>
+              <div className="sm:col-span-2 text-[11px] font-semibold uppercase tracking-wide text-teal mt-2">General</div>
               <label className="flex items-center justify-between gap-3 text-sm">
-                <span>Receive alerts</span>
+                <span>Receive partner programme alerts</span>
                 <Switch
                   checked={myNotif.is_active}
                   onCheckedChange={(v) => setMyNotif({ ...myNotif, is_active: v })}
@@ -1102,7 +1195,10 @@ export default function AdminPartners() {
           </div>
 
           <div>
-            <div className="text-sm font-semibold text-navy mb-2">All recipients</div>
+            <div className="text-sm font-semibold text-navy mb-1">All recipients</div>
+            <p className="text-xs text-text-secondary mb-2">
+              Admins who currently receive Partner Programme notifications.
+            </p>
             {notifSettings.length === 0 ? (
               <p className="text-text-secondary text-sm py-4 text-center">No admins have opted in yet.</p>
             ) : (
@@ -1201,15 +1297,25 @@ export default function AdminPartners() {
                         </td>
                         <td className="py-2 pr-4 text-text-secondary text-xs">{r.actor_email ?? r.actor_user_id?.slice(0, 8) ?? "—"}</td>
                         <td className="py-2 pr-4">
-                          <Badge variant="outline" className="capitalize font-mono text-[11px]">{r.action.replace(/_/g, " ")}</Badge>
+                          <Badge variant="outline" className="text-[11px] whitespace-nowrap">{auditActionLabel(r.action)}</Badge>
                         </td>
                         <td className="py-2 pr-4 text-text-secondary text-xs">{r.entity_type.replace(/_/g, " ")}</td>
                         <td className="py-2 pr-4 text-navy text-xs">{r.entity_label ?? r.entity_id?.slice(0, 8) ?? "—"}</td>
                         <td className="py-2 text-text-secondary text-xs max-w-md">
                           {r.changes && Object.keys(r.changes).length > 0 ? (
-                            <pre className="whitespace-pre-wrap font-mono text-[11px] bg-surface-subtle/60 p-2 rounded max-h-32 overflow-auto">
+                            <details>
+                              <summary className="cursor-pointer list-none">
+                                <span className="space-y-0.5 block">
+                                  {summariseChanges(r.changes).map((line, i) => (
+                                    <span key={i} className="block text-navy">{line}</span>
+                                  ))}
+                                </span>
+                                <span className="text-[10px] text-teal underline">raw</span>
+                              </summary>
+                              <pre className="whitespace-pre-wrap font-mono text-[11px] bg-surface-subtle/60 p-2 rounded max-h-32 overflow-auto mt-1">
 {JSON.stringify(r.changes, null, 2)}
-                            </pre>
+                              </pre>
+                            </details>
                           ) : "—"}
                         </td>
                       </tr>
@@ -1222,6 +1328,38 @@ export default function AdminPartners() {
         </CardContent>
       </Card>
 
+
+      {/* Application review */}
+      <PartnerApplicationReviewDialog
+        app={reviewApp}
+        partners={partners}
+        applications={partnerApps}
+        onClose={() => setReviewApp(null)}
+        onDone={fetchAll}
+      />
+
+      {/* Suspend portal access confirmation */}
+      <AlertDialog open={!!accessTarget} onOpenChange={(o) => !o && setAccessTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Suspend Partner Portal access?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {accessTarget?.partner?.display_name || "This partner"} will immediately lose access to /partner/*.
+              The partner relationship, commissions, deals and any Academy or Business account access are kept intact,
+              and access can be reactivated at any time.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-orange-600 hover:bg-orange-700"
+              onClick={() => accessTarget && setPortalAccess(accessTarget.partner, "suspended")}
+            >
+              Suspend access
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Convert to Won dialog */}
       <Dialog open={!!winDeal} onOpenChange={(o) => !o && setWinDeal(null)}>
