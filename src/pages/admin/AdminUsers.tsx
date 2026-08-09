@@ -687,12 +687,12 @@ export default function AdminUsers() {
                 </td>
                 <td className="px-4 py-4 text-xs text-muted-foreground">{p.company_name || "—"}</td>
 
-                <td className="px-4 py-3">
+                <td className="px-4 py-4">
                   {(() => {
                     const rv = revenueFor(p);
                     return (
                       <button className="text-left" onClick={() => setDetailProfile(p)}>
-                        <div className={`text-sm font-semibold ${rv.total > 0 ? "text-foreground" : "text-muted-foreground"}`}>
+                        <div className={`text-sm font-semibold tabular-nums ${rv.total > 0 ? "text-foreground" : "text-muted-foreground"}`}>
                           {formatMoney(rv.total, rv.currency)}
                         </div>
                         <div className="text-[10px] text-muted-foreground">{rv.items.length} txn</div>
@@ -701,11 +701,11 @@ export default function AdminUsers() {
                   })()}
                 </td>
 
-                <td className="px-4 py-3">{statusBadge(p.status)}</td>
-                <td className="px-4 py-3">{tierBadge(p.subscription_tier)}</td>
-                <td className="px-4 py-3">{sourceBadge(p)}</td>
+                <td className="px-4 py-4">{statusBadge(p.status)}</td>
+                <td className="px-4 py-4">{tierBadge(p.subscription_tier)}</td>
+                <td className="px-4 py-4">{sourceBadge(p)}</td>
 
-                <td className="px-4 py-3">
+                <td className="px-4 py-4">
                   {isSuiteUser(p) ? (
                     <Select
                       value={p.regulator || ""}
@@ -727,93 +727,114 @@ export default function AdminUsers() {
                     </Select>
                   ) : regulatorBadge(p.regulator)}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-4">
                   <div className="flex gap-1 flex-wrap">
-                    {(userRoles[p.user_id] || []).map(r => <Badge key={r} variant="outline" className="text-xs">{r}</Badge>)}
+                    {(userRoles[p.user_id] || []).map(r => <Badge key={r} variant="outline" className="rounded-full px-1.5 py-0 text-[10px] font-normal">{r}</Badge>)}
                     {!(userRoles[p.user_id] || []).length && <span className="text-xs text-muted-foreground">user</span>}
                   </div>
                 </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</td>
+                <td className="px-4 py-4 text-xs text-muted-foreground whitespace-nowrap">{new Date(p.created_at).toLocaleDateString()}</td>
                 {extraCols.map((c) => (
-                  <td key={c.id} className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{extraCell(c.id, enrich(p))}</td>
+                  <td key={c.id} className="px-4 py-4 text-xs text-muted-foreground whitespace-nowrap">{extraCell(c.id, enrich(p))}</td>
                 ))}
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-1 flex-wrap">
-                    {p.status !== "approved" && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-emerald-600" onClick={() => updateStatus(p.id, "approved")} disabled={actionLoading === p.id}>
+                <td className="px-4 py-4">
+                  <div className="flex items-center justify-end gap-1">
+                    {p.status !== "approved" ? (
+                      <Button size="sm" variant="outline" className="h-7 text-xs text-emerald-600" onClick={() => updateStatus(p.id, "approved")} disabled={actionLoading === p.id}>
                         <ShieldCheck className="w-3.5 h-3.5 mr-1" />Approve
                       </Button>
-                    )}
-                    {p.status !== "rejected" && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => updateStatus(p.id, "rejected")} disabled={actionLoading === p.id}>
-                        <ShieldX className="w-3.5 h-3.5 mr-1" />Reject
-                      </Button>
-                    )}
-                    {p.user_id !== user?.id && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => toggleRole(p.user_id, "admin")} disabled={actionLoading === p.user_id}>
-                        <Shield className="w-3.5 h-3.5 mr-1" />{userRoles[p.user_id]?.includes("admin") ? "Remove Admin" : "Make Admin"}
-                      </Button>
-                    )}
-                    {showSuiteActions && isSuiteUser(p) && p.email && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => revokeSuiteAccess(p.email!, p.id)} disabled={actionLoading === p.id}>
-                        <UserMinus className="w-3.5 h-3.5 mr-1" />Revoke Suite
-                      </Button>
-                    )}
-                    {!showSuiteActions && !isSuiteUser(p) && p.email && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-blue-600" onClick={() => openGrantDialog(p)} disabled={actionLoading === p.id}>
-                        <KeyRound className="w-3.5 h-3.5 mr-1" />Grant Suite
-                      </Button>
-                    )}
-                    {p.email && (() => {
+                    ) : p.email && (() => {
                       const el = evaluateEligibility(p);
                       return (
                         <Button
                           size="sm"
-                          variant="ghost"
+                          variant="outline"
                           className={`h-7 text-xs ${el.eligible ? "text-teal-600" : "text-muted-foreground"}`}
                           onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellData(undefined); setUpsellDialog({ open: true, profile: p }); }}
                           disabled={!el.eligible}
                           title={el.eligible ? `Basis: ${REASON_LABELS[el.reason]}` : `Blocked: ${REASON_LABELS[el.reason]}`}
                         >
-                          <Send className="w-3.5 h-3.5 mr-1" />
-                          Upsell
-                          {!el.eligible && <span className="ml-1 text-[10px] opacity-70">· blocked</span>}
+                          <Send className="w-3.5 h-3.5 mr-1" />Upsell
                         </Button>
                       );
                     })()}
-                    {p.email && (upsellCounts[p.user_id] || upsellCounts[p.email] || 0) > 0 && (
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => openHistory(p)}>
-                        <History className="w-3.5 h-3.5 mr-1" />
-                        History
-                        <Badge variant="outline" className="ml-1 h-4 px-1 text-[10px]">
-                          {upsellCounts[p.user_id] || upsellCounts[p.email] || 0}
-                        </Badge>
-                      </Button>
-                    )}
-                    {p.email && (
-                      p.marketing_opt_out_at ? (
-                        <Button size="sm" variant="ghost" className="h-7 text-xs text-red-600" onClick={() => toggleMarketingConsent(p, true)} disabled={actionLoading === p.id} title={`Opted out ${new Date(p.marketing_opt_out_at).toLocaleDateString()}`}>
-                          Opted out · re-enable
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" aria-label="More actions">
+                          <MoreHorizontal className="w-4 h-4" />
                         </Button>
-                      ) : p.marketing_consent ? (
-                        <Button size="sm" variant="ghost" className="h-7 text-xs text-emerald-600" onClick={() => toggleMarketingConsent(p, false)} disabled={actionLoading === p.id} title={p.marketing_consent_at ? `Opted in ${new Date(p.marketing_consent_at).toLocaleDateString()}` : "Opted in"}>
-                          Opted in · opt out
-                        </Button>
-                      ) : (
-                        <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => toggleMarketingConsent(p, true)} disabled={actionLoading === p.id}>
-                          Record opt-in
-                        </Button>
-                      )
-                    )}
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56 bg-popover z-50">
+                        <DropdownMenuItem onClick={() => setDetailProfile(p)}>
+                          <FileText className="w-3.5 h-3.5 mr-2" />View user 360°
+                        </DropdownMenuItem>
+                        {p.status === "approved" && p.email && (
+                          <DropdownMenuItem
+                            disabled={!evaluateEligibility(p).eligible}
+                            onClick={() => { setUpsellTemplate("suite-upsell"); setUpsellData(undefined); setUpsellDialog({ open: true, profile: p }); }}
+                          >
+                            <Send className="w-3.5 h-3.5 mr-2" />Send upsell
+                          </DropdownMenuItem>
+                        )}
+                        {p.status !== "approved" && (
+                          <DropdownMenuItem onClick={() => updateStatus(p.id, "approved")}>
+                            <ShieldCheck className="w-3.5 h-3.5 mr-2" />Approve
+                          </DropdownMenuItem>
+                        )}
+                        {p.status !== "rejected" && (
+                          <DropdownMenuItem className="text-destructive" onClick={() => updateStatus(p.id, "rejected")}>
+                            <ShieldX className="w-3.5 h-3.5 mr-2" />Reject
+                          </DropdownMenuItem>
+                        )}
+                        {p.user_id !== user?.id && (
+                          <DropdownMenuItem onClick={() => toggleRole(p.user_id, "admin")}>
+                            <Shield className="w-3.5 h-3.5 mr-2" />{userRoles[p.user_id]?.includes("admin") ? "Remove admin" : "Make admin"}
+                          </DropdownMenuItem>
+                        )}
+                        {showSuiteActions && isSuiteUser(p) && p.email && (
+                          <DropdownMenuItem className="text-destructive" onClick={() => revokeSuiteAccess(p.email!, p.id)}>
+                            <UserMinus className="w-3.5 h-3.5 mr-2" />Revoke Suite access
+                          </DropdownMenuItem>
+                        )}
+                        {!showSuiteActions && !isSuiteUser(p) && p.email && (
+                          <DropdownMenuItem onClick={() => openGrantDialog(p)}>
+                            <KeyRound className="w-3.5 h-3.5 mr-2" />Grant Suite access
+                          </DropdownMenuItem>
+                        )}
+                        {p.email && (upsellCounts[p.user_id] || upsellCounts[p.email] || 0) > 0 && (
+                          <DropdownMenuItem onClick={() => openHistory(p)}>
+                            <History className="w-3.5 h-3.5 mr-2" />
+                            Upsell history ({upsellCounts[p.user_id] || upsellCounts[p.email] || 0})
+                          </DropdownMenuItem>
+                        )}
+                        {p.email && (
+                          p.marketing_opt_out_at ? (
+                            <DropdownMenuItem onClick={() => toggleMarketingConsent(p, true)}>
+                              Marketing: opted out · re-enable
+                            </DropdownMenuItem>
+                          ) : p.marketing_consent ? (
+                            <DropdownMenuItem onClick={() => toggleMarketingConsent(p, false)}>
+                              Marketing: opted in · opt out
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem onClick={() => toggleMarketingConsent(p, true)}>
+                              Record marketing opt-in
+                            </DropdownMenuItem>
+                          )
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </td>
               </tr>
             ))}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
         {filtered.length === 0 && <div className="text-center py-8 text-sm text-muted-foreground">No users found.</div>}
       </div>
     );
+
   };
 
   const renderPartnerApplicantsTable = (list: Profile[]) => (
