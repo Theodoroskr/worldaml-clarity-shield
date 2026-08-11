@@ -148,10 +148,7 @@ export default function OnboardPublic() {
     const load = async () => {
       if (!token) return;
       const { data, error } = await supabase
-        .from("suite_onboarding_forms")
-        .select("id,organisation_id,name,description,branding,schema,required_checks,redirect_url,is_active")
-        .eq("id", token)
-        .eq("is_active", true)
+        .rpc("get_public_onboarding_form" as any, { _form_id: token })
         .maybeSingle();
       if (error || !data) setNotFound(true);
       else setForm(data as any);
