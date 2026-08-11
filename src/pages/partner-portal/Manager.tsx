@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, CalendarDays, LifeBuoy } from "lucide-react";
 
 const PARTNERSHIPS_EMAIL = "partners@worldaml.com";
-const SUPPORT_EMAIL = "support@worldaml.com";
+const SUPPORT_EMAIL = "info@worldaml.com";
 
 export default function PartnerManager() {
   const { partner } = usePartner();

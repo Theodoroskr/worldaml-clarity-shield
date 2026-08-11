@@ -65,7 +65,7 @@ export default function BusinessProfile() {
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="mail">Email</Label>
             <Input id="mail" value={user?.email ?? ""} disabled />
-            <p className="text-xs text-muted-foreground">Your sign-in email cannot be changed here — contact support@worldaml.com.</p>
+            <p className="text-xs text-muted-foreground">Your sign-in email cannot be changed here — contact info@worldaml.com.</p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="phone">Phone</Label>
