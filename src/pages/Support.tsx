@@ -24,8 +24,8 @@ const supportChannels = [
     icon: Mail,
     title: "Email Support",
     description: "Get in touch with our support team for technical questions and account assistance. All email enquiries are triaged and routed to the appropriate specialist within one business day.",
-    action: "support@worldaml.com",
-    link: "mailto:support@worldaml.com",
+    action: "info@worldaml.com",
+    link: "mailto:info@worldaml.com",
   },
   {
     icon: Phone,

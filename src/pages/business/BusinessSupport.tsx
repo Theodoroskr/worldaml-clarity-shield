@@ -29,7 +29,7 @@ export default function BusinessSupport() {
           <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><Mail className="w-4 h-4 text-teal" /> Email support</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">Technical and account queries, answered by the WorldAML team.</p>
-            <Button asChild variant="outline"><a href="mailto:support@worldaml.com">support@worldaml.com</a></Button>
+            <Button asChild variant="outline"><a href="mailto:info@worldaml.com">info@worldaml.com</a></Button>
           </CardContent>
         </Card>
 

@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           from: "WorldAML Platform <notifications@worldaml.com>",
-          to: ["support@worldaml.com"],
+          to: ["info@worldaml.com"],
           subject: `[Quiz Error] ${userEmail || userId} — ${error_code || "unknown"}`.slice(0, 200),
           html: `<h2>Quiz Submission Error Report</h2>
 <p><strong>User:</strong> ${esc(userEmail || "N/A")} (${esc(userId)})</p>
