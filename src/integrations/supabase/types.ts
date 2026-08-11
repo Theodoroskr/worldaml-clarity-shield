@@ -7497,6 +7497,20 @@ export type Database = {
         Returns: string
       }
       get_certificate_by_token: { Args: { _token: string }; Returns: Json }
+      get_public_onboarding_form: {
+        Args: { _form_id: string }
+        Returns: {
+          branding: Json
+          description: string
+          id: string
+          is_active: boolean
+          name: string
+          organisation_id: string
+          redirect_url: string
+          required_checks: Json
+          schema: Json
+        }[]
+      }
       get_rls_audit: {
         Args: never
         Returns: {
