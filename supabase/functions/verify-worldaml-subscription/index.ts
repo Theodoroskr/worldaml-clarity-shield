@@ -134,19 +134,20 @@ serve(async (req) => {
       });
     }
 
-    await admin.rpc("ensure_default_screening_policy", { _org: orgId }).catch?.(() => {});
+    try {
+      await admin.rpc("ensure_default_screening_policy", { _org: orgId });
+    } catch (_) { /* non-fatal */ }
 
     // Internal purchase notification (best effort).
     try {
       await admin.from("product_purchase_notifications").insert({
         product: "WorldAML Screening & Monitoring",
         plan,
-        user_id: user.id,
-        email: user.email,
-        amount_total: session.amount_total ?? null,
+        customer_email: user.email,
+        amount_cents: session.amount_total ?? null,
         currency: session.currency ?? null,
         stripe_session_id: session.id,
-        status: "paid",
+        mode: "subscription",
       });
     } catch (_) { /* non-fatal */ }
 
