@@ -181,7 +181,14 @@ export function normaliseEntityProfile(content: Record<string, unknown>): FullEn
     primary_name: (doc?.name as string) ?? null,
     entity_type: (doc?.entity_type as string) ?? null,
     aliases: uniq(((doc?.aka as Array<Record<string, unknown>>) ?? []).map((a) => String(a?.name ?? ""))),
-    countries: uniq((doc?.countries as string[]) ?? []),
+    countries: uniq([
+      ...((doc?.countries as string[]) ?? []),
+      // Fallback: some records carry countries only as a comma-separated field.
+      ...[...bySource.values()]
+        .flat()
+        .filter((d) => /^countr/i.test(d.label))
+        .flatMap((d) => d.values.flatMap((v) => v.split(",").map((s) => s.trim()))),
+    ]),
     dates_of_birth: uniq(dobs),
     places_of_birth: uniq(pobs),
     nationalities: uniq(nationalities),
