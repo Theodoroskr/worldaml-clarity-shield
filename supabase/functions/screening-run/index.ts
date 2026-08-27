@@ -41,18 +41,26 @@ Deno.serve(async (req) => {
     return json({ error: "Invalid screening information" }, 400);
   }
 
-  const subject = payload.subject as ScreeningSubjectInput | undefined;
+  const rawSubject = (payload.subject ?? {}) as Record<string, unknown>;
+  // Normalise: trim strings and drop blanks so empty optional inputs never fail validation.
+  const subject = Object.fromEntries(
+    Object.entries(rawSubject)
+      .map(([k, v]) => [k, typeof v === "string" ? v.trim() : v])
+      .filter(([, v]) => v !== "" && v !== null && v !== undefined),
+  ) as unknown as ScreeningSubjectInput;
   const includeAdverseMedia = payload.include_adverse_media === true;
   const startMonitoring = payload.start_monitoring === true;
   const advanced = (payload.advanced ?? {}) as Record<string, unknown>;
 
-  if (!subject || typeof subject.full_name !== "string" || !subject.full_name.trim()) {
-    return json({ error: "Invalid screening information" }, 400);
+  if (typeof subject.full_name !== "string" || !subject.full_name) {
+    return json({ error: "Enter the name of the person or organisation to screen" }, 400);
   }
   if (subject.subject_type !== "person" && subject.subject_type !== "organisation") {
-    return json({ error: "Invalid screening information" }, 400);
+    return json({ error: "Select a subject type (individual or organisation)" }, 400);
   }
-  if (subject.full_name.length > 300) return json({ error: "Invalid screening information" }, 400);
+  if (subject.full_name.length > 300) {
+    return json({ error: "The name is too long (maximum 300 characters)" }, 400);
+  }
 
   // ── resolve organisation ────────────────────────────────────────────────
   const { data: membership } = await admin

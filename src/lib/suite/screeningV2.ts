@@ -95,7 +95,15 @@ export async function runScreeningV2(payload: {
 }): Promise<RunScreeningResult> {
   const { data, error } = await supabase.functions.invoke("screening-run", { body: payload });
   if (error) {
-    const message = (data as { error?: string } | null)?.error;
+    // Non-2xx responses put the body on error.context, not on `data`.
+    let message = (data as { error?: string } | null)?.error;
+    const res = (error as unknown as { context?: Response }).context;
+    if (!message && res && typeof res.json === "function") {
+      try {
+        const body = await res.clone().json();
+        message = (body as { error?: string })?.error;
+      } catch { /* keep fallback message */ }
+    }
     throw new Error(message || "Screening could not be completed");
   }
   if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
