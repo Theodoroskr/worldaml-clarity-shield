@@ -1032,8 +1032,42 @@ function MatchReview({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[50vh]">
+        <ScrollArea className="max-h-[55vh]">
           <div className="space-y-6 pr-2">
+            <section className="rounded-lg border border-border p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <h4 className="text-sm font-semibold">Key information</h4>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={profileLoading || !match}
+                  onClick={() => match && loadProfile(match.id, true)}
+                >
+                  {profileLoading
+                    ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    : <RefreshCw className="mr-1.5 h-3.5 w-3.5" />}
+                  Refresh profile
+                </Button>
+              </div>
+              {profileLoading && !profile && (
+                <p className="text-xs text-muted-foreground">Loading the full listed profile…</p>
+              )}
+              {profileError && <p className="text-xs text-red-600">{profileError}</p>}
+              {profile && (
+                <dl className="grid gap-x-6 gap-y-2 text-sm md:grid-cols-2">
+                  <KeyInfo label="Full name" value={profile.primary_name} />
+                  <KeyInfo label="Entity type" value={profile.entity_type} />
+                  <KeyInfo label="Dates of birth" value={profile.dates_of_birth.join(", ")} />
+                  <KeyInfo label="Place of birth" value={profile.places_of_birth.join(", ")} />
+                  <KeyInfo label="Nationalities" value={profile.nationalities.join(", ")} />
+                  <KeyInfo label="Countries" value={profile.countries.join(", ")} />
+                  <div className="md:col-span-2">
+                    <KeyInfo label="Also known as" value={profile.aliases.join(", ")} />
+                  </div>
+                </dl>
+              )}
+            </section>
+
             {Object.entries(groupedAttributes).map(([group, items]) => (
               <section key={group}>
                 <h4 className="mb-2 text-sm font-semibold">{group}</h4>
@@ -1064,7 +1098,75 @@ function MatchReview({
               </section>
             ))}
 
-            {sources.length > 0 && (
+            {profile && profile.associates.length > 0 && (
+              <section>
+                <h4 className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
+                  <Users className="h-4 w-4" /> Associates ({profile.associates.length})
+                </h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {profile.associates.map((a, i) => (
+                    <Badge key={i} variant="outline" className="font-normal">
+                      {a.name}{a.relationship ? ` · ${a.relationship}` : ""}
+                    </Badge>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {profile && profile.listings.length > 0 ? (
+              <section>
+                <h4 className="mb-2 text-sm font-semibold">Listings and sources ({profile.listings.length})</h4>
+                <ul className="space-y-2">
+                  {profile.listings.map((l) => (
+                    <li key={l.source_key} className="rounded-lg border border-border p-3 text-sm">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium">{l.source_name}</p>
+                        {l.category_label && (
+                          <Badge variant="outline" className={`text-[11px] ${riskTone(l.category ? [l.category] : [])}`}>
+                            {l.category_label}
+                          </Badge>
+                        )}
+                        <Badge variant="outline" className="text-[11px]">
+                          {l.status === "former" ? "Removed" : l.status === "current" ? "Currently listed" : "Listed"}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {[
+                          l.country_codes.join(", ") || null,
+                          l.listed_from ? `From ${l.listed_from.slice(0, 10)}` : null,
+                          l.listed_to ? `To ${l.listed_to.slice(0, 10)}` : null,
+                        ].filter(Boolean).join(" · ")}
+                      </p>
+                      {l.details.length > 0 && (
+                        <dl className="mt-2 grid gap-x-4 gap-y-1 text-xs md:grid-cols-2">
+                          {l.details.map((d) => (
+                            <div key={d.label} className="flex gap-1.5">
+                              <dt className="shrink-0 font-medium text-foreground">{d.label}:</dt>
+                              <dd className="text-muted-foreground">{d.values.join("; ")}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                      )}
+                      {l.urls.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {l.urls.slice(0, 6).map((u) => (
+                            <a
+                              key={u}
+                              href={u}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-primary underline underline-offset-2"
+                            >
+                              <ExternalLink className="h-3 w-3" /> Source
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : sources.length > 0 && (
               <section>
                 <h4 className="mb-2 text-sm font-semibold">Listings and sources</h4>
                 <ul className="space-y-2">
@@ -1075,6 +1177,31 @@ function MatchReview({
                         {[s.jurisdiction, s.listing_date ? `Listed ${s.listing_date}` : null, s.category ? CATEGORY_LABELS[s.category] ?? s.category : null].filter(Boolean).join(" · ")}
                       </p>
                       {s.description && <p className="mt-1 text-xs text-muted-foreground">{s.description}</p>}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {profile && profile.media.length > 0 && (
+              <section>
+                <h4 className="mb-2 text-sm font-semibold">Adverse media ({profile.media.length})</h4>
+                <ul className="space-y-2">
+                  {profile.media.slice(0, 15).map((m, i) => (
+                    <li key={i} className="rounded-lg border border-border p-3 text-sm">
+                      <p className="font-medium">{m.title}</p>
+                      <p className="text-xs text-muted-foreground">{m.date?.slice(0, 10) ?? "Date not stated"}</p>
+                      {m.snippet && <p className="mt-1 text-xs text-muted-foreground">{m.snippet}</p>}
+                      {m.url && (
+                        <a
+                          href={m.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 inline-flex items-center gap-1 text-xs text-primary underline underline-offset-2"
+                        >
+                          <ExternalLink className="h-3 w-3" /> Read article
+                        </a>
+                      )}
                     </li>
                   ))}
                 </ul>
