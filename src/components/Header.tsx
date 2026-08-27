@@ -57,6 +57,16 @@ const navLinks: NavLink[] = [
       },
     ],
   },
+  {
+    label: "Screening & Monitoring",
+    href: "/screening-monitoring",
+    children: [
+      { href: "/screening-monitoring", label: "Product Overview" },
+      { href: "/screening-monitoring/pricing", label: "Pricing & Packages" },
+      { href: "/sanctions-screening-api", label: "API & Docs" },
+      { href: "/screening", label: "Open Workspace" },
+    ],
+  },
   { href: "/platform/api", label: "API" },
   
   {
