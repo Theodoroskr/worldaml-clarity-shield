@@ -5,6 +5,7 @@ import AMLHeroSection from "@/components/aml-screening/AMLHeroSection";
 import AMLWhatIsSection from "@/components/aml-screening/AMLWhatIsSection";
 import AMLFeaturesSection from "@/components/aml-screening/AMLFeaturesSection";
 import AMLUseCasesSection from "@/components/aml-screening/AMLUseCasesSection";
+import AMLPackagesSection from "@/components/aml-screening/AMLPackagesSection";
 import AMLCTASection from "@/components/aml-screening/AMLCTASection";
 import StickyDemoCTA from "@/components/StickyDemoCTA";
 import { useEffect } from "react";
