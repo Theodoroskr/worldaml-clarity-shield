@@ -88,7 +88,7 @@ export const AMLScreeningSection = () => {
             ))}
           </div>
           <p className="text-center text-sm text-text-tertiary mt-6 pt-6 border-t border-divider">
-            Data powered by LexisNexis Risk Solutions — WorldCompliance® and Bridger Insight XG®
+            Screening across 1,900+ global sanctions, PEP, and adverse media lists
           </p>
         </div>
       </div>
