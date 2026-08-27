@@ -126,6 +126,7 @@ const PlatformAMLScreening = () => {
       <AMLWhatIsSection />
       <AMLFeaturesSection />
       <AMLUseCasesSection />
+      <AMLPackagesSection />
       <AMLCTASection />
     </main>
     <Footer />
