@@ -210,6 +210,7 @@ const SuiteOnboardingSubmissions = lazyWithRetry(() => import("./pages/suite/Sui
 const SuiteIDV = lazyWithRetry(() => import("./pages/suite/SuiteIDV"));
 const SuiteScreening = lazyWithRetry(() => import("./pages/suite/SuiteScreening"));
 const SuiteScreeningV2 = lazyWithRetry(() => import("./pages/suite/SuiteScreeningV2"));
+const ScreeningWorkspace = lazyWithRetry(() => import("./pages/screening/ScreeningWorkspace"));
 
 const SuiteTransactions = lazyWithRetry(() => import("./pages/suite/SuiteTransactions"));
 const SuiteMonitoring = lazyWithRetry(() => import("./pages/suite/SuiteMonitoring"));
@@ -553,6 +554,10 @@ const App = () => (
 
                 <Route path="/suite-layout-preview" element={<SuiteLayout />} />
 
+                {/* WorldAML Screening & Monitoring — standalone product workspace (separate from Suite) */}
+                <Route path="/screening" element={<PortalGuard portal="business"><ScreeningWorkspace /></PortalGuard>} />
+
+
                 {/* Suite App (functional dashboard) */}
                 <Route path="/suite" element={<PortalGuard portal="suite"><SuiteAppLayout /></PortalGuard>}>
                   <Route index element={<SuiteDashboard />} />
@@ -564,7 +569,7 @@ const App = () => (
                   <Route path="onboarding-submissions" element={<SuiteOnboardingSubmissions />} />
                   <Route path="idv" element={<SuiteIDV />} />
                   <Route path="screening" element={<SuiteScreening />} />
-                  <Route path="screening-v2" element={<SuiteScreeningV2 />} />
+                  <Route path="screening-v2" element={<Navigate to="/screening" replace />} />
 
                   <Route path="transactions" element={<SuiteTransactions />} />
                   <Route path="monitoring" element={<SuiteMonitoring />} />
