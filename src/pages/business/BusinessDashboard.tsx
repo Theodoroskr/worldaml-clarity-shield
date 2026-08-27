@@ -177,6 +177,7 @@ export default function BusinessDashboard() {
           {/* QUICK ACTIONS */}
           <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {[
+              { label: "AML Screening", to: "/screening", icon: ShieldCheck },
               { label: "Explore Solutions", to: "/business/solutions", icon: Compass },
               { label: "Manage Team", to: "/business/team", icon: Users },
               { label: "View Billing", to: "/business/billing", icon: CreditCard },
