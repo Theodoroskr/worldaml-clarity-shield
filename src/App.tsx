@@ -33,22 +33,10 @@ const PlatformRegulatoryReporting = lazyWithRetry(() => import("./pages/Platform
 const PlatformKYCKYB = lazyWithRetry(() => import("./pages/PlatformKYCKYB"));
 const PlatformAMLScreening = lazyWithRetry(() => import("./pages/PlatformAMLScreening"));
 const PlatformRiskAssessment = lazyWithRetry(() => import("./pages/PlatformRiskAssessment"));
-const DataSources = lazyWithRetry(() => import("./pages/DataSources"));
-const WorldCompliance = lazyWithRetry(() => import("./pages/WorldCompliance"));
-const WorldComplianceDemo = lazyWithRetry(() => import("./pages/WorldComplianceDemo"));
-const WorldCompliancePricing = lazyWithRetry(() => import("./pages/WorldCompliancePricing"));
-const WorldComplianceEUME = lazyWithRetry(() => import("./pages/WorldComplianceEUME"));
-const WorldComplianceUKIE = lazyWithRetry(() => import("./pages/WorldComplianceUKIE"));
-const WorldComplianceNA = lazyWithRetry(() => import("./pages/WorldComplianceNA"));
-const ResourcesDataCoverage = lazyWithRetry(() => import("./pages/ResourcesDataCoverage"));
 const WhatIsSanctionsScreening = lazyWithRetry(() => import("./pages/WhatIsSanctionsScreening"));
 const UAEAMLComplianceGuide = lazyWithRetry(() => import("./pages/UAEAMLComplianceGuide"));
 const AMLComplianceChecklist = lazyWithRetry(() => import("./pages/AMLComplianceChecklist"));
 const FATFTravelRuleGuide = lazyWithRetry(() => import("./pages/FATFTravelRuleGuide"));
-const BridgerXG = lazyWithRetry(() => import("./pages/BridgerXG"));
-const BridgerXGEUME = lazyWithRetry(() => import("./pages/BridgerXGEUME"));
-const BridgerXGUKIE = lazyWithRetry(() => import("./pages/BridgerXGUKIE"));
-const BridgerXGNA = lazyWithRetry(() => import("./pages/BridgerXGNA"));
 const Industries = lazyWithRetry(() => import("./pages/Industries"));
 const IndustryBanking = lazyWithRetry(() => import("./pages/IndustryBanking"));
 const IndustryFintech = lazyWithRetry(() => import("./pages/IndustryFintech"));
@@ -90,7 +78,6 @@ const BestPractices = lazyWithRetry(() => import("./pages/BestPractices"));
 const SanctionsCheck = lazyWithRetry(() => import("./pages/SanctionsCheck"));
 const SanctionsLists = lazyWithRetry(() => import("./pages/SanctionsLists"));
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
-const CompareAmlDataProviders = lazyWithRetry(() => import("./pages/CompareAmlDataProviders"));
 const RcmLayout = lazyWithRetry(() => import("./pages/rcm/RcmLayout"));
 const RcmDashboard = lazyWithRetry(() => import("./pages/rcm/RcmDashboard"));
 const RcmPlaceholder = lazyWithRetry(() => import("./pages/rcm/RcmPlaceholder"));
@@ -109,8 +96,6 @@ const PartnerApply = lazyWithRetry(() => import("./pages/PartnerApply"));
 const OnboardPublic = lazyWithRetry(() => import("./pages/OnboardPublic"));
 
 const PartnersDirectory = lazyWithRetry(() => import("./pages/PartnersDirectory"));
-const DataCoverageIndex = lazyWithRetry(() => import("./pages/DataCoverageIndex"));
-const DataCoverageCountry = lazyWithRetry(() => import("./pages/DataCoverageCountry"));
 const Academy = lazyWithRetry(() => import("./pages/Academy"));
 const AcademyCourse = lazyWithRetry(() => import("./pages/AcademyCourse"));
 const AcademyCertificate = lazyWithRetry(() => import("./pages/AcademyCertificate"));
@@ -455,11 +440,11 @@ const App = () => (
                 <Route path="/resources/uae-aml-compliance-guide" element={<UAEAMLComplianceGuide />} />
                 <Route path="/resources/aml-compliance-checklist" element={<AMLComplianceChecklist />} />
                 <Route path="/resources/fatf-travel-rule-compliance-guide" element={<FATFTravelRuleGuide />} />
-                <Route path="/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones" element={<CompareAmlDataProviders />} />
+                <Route path="/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones" element={<Navigate to="/alternatives" replace />} />
                 <Route path="/sanctions-check" element={<SanctionsCheck />} />
                 <Route path="/free-aml-check" element={<FreeAMLCheck />} />
-                <Route path="/data-coverage" element={<DataCoverageIndex />} />
-                <Route path="/data-coverage/:country" element={<DataCoverageCountry />} />
+                <Route path="/data-coverage" element={<Navigate to="/platform/aml-screening" replace />} />
+                <Route path="/data-coverage/:country" element={<Navigate to="/platform/aml-screening" replace />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/rss" element={<RssPage />} />
