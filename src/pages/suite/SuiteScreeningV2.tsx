@@ -239,8 +239,66 @@ export default function SuiteScreeningV2() {
                   Place under ongoing monitoring
                 </label>
                 <p className="text-xs text-muted-foreground">
-                  Sanctions, PEP and RCA, and warnings are always screened under your organisation&apos;s policy.
+                  By default all sources permitted by your organisation&apos;s policy are screened.
                 </p>
+              </div>
+
+              {/* ── Sources & search profile ─────────────────────────── */}
+              <div className="space-y-3 rounded-lg border border-border p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium">Sources</p>
+                    <p className="text-xs text-muted-foreground">
+                      Use your organisation&apos;s policy defaults, select categories manually, or apply a search profile.
+                    </p>
+                  </div>
+                  <label className="flex items-center gap-2 text-sm">
+                    <Switch
+                      checked={customiseSources}
+                      onCheckedChange={setCustomiseSources}
+                      disabled={!!searchProfileId.trim()}
+                    />
+                    Select categories manually
+                  </label>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="search-profile">Search profile ID (optional)</Label>
+                  <Input
+                    id="search-profile"
+                    value={searchProfileId}
+                    onChange={(e) => setSearchProfileId(e.target.value)}
+                    placeholder="Leave blank to use category selection below"
+                  />
+                  {searchProfileId.trim() && (
+                    <p className="text-xs text-muted-foreground">
+                      A search profile is applied — manual source categories are ignored for this screening.
+                    </p>
+                  )}
+                </div>
+
+                {customiseSources && !searchProfileId.trim() && (
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {SOURCE_GROUPS.map((group) => (
+                      <div key={group.label} className="space-y-2">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          {group.label}
+                        </p>
+                        {group.hint && <p className="text-xs text-muted-foreground">{group.hint}</p>}
+                        {group.types.map((t) => (
+                          <label key={t.value} className="flex items-start gap-2 text-sm">
+                            <Checkbox
+                              className="mt-0.5"
+                              checked={sourceTypes.includes(t.value)}
+                              onCheckedChange={(c) => toggleSourceType(t.value, c === true)}
+                            />
+                            <span className="leading-snug">{t.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <Button onClick={onRun} disabled={running}>
