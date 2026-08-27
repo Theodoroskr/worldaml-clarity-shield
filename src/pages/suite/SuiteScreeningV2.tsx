@@ -938,10 +938,27 @@ function MatchReview({
   const [reason, setReason] = useState<string>(FALSE_POSITIVE_REASONS[0]);
   const [rationale, setRationale] = useState("");
   const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState<FullEntityProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+
+  const loadProfile = useCallback(async (matchId: string, refresh = false) => {
+    setProfileLoading(true);
+    setProfileError(null);
+    try {
+      setProfile(await fetchFullProfile(matchId, refresh));
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : "The full profile could not be loaded");
+    } finally {
+      setProfileLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!match) return;
     setRationale("");
+    setProfile(null);
+    setProfileError(null);
     (async () => {
       const [{ data: attrs }, { data: srcs }] = await Promise.all([
         supabase
@@ -957,7 +974,8 @@ function MatchReview({
       setAttributes((attrs as AttributeRow[]) ?? []);
       setSources((srcs as SourceRow[]) ?? []);
     })();
-  }, [match]);
+    loadProfile(match.id);
+  }, [match, loadProfile]);
 
   const needsReason = decision === "false_positive";
   const canSave = useMemo(() => rationale.trim().length >= 10, [rationale]);
