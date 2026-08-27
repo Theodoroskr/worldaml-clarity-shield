@@ -4,7 +4,6 @@ import Footer from "@/components/Footer";
 import AMLHeroSection from "@/components/aml-screening/AMLHeroSection";
 import AMLWhatIsSection from "@/components/aml-screening/AMLWhatIsSection";
 import AMLFeaturesSection from "@/components/aml-screening/AMLFeaturesSection";
-import AMLDataSourcesSection from "@/components/aml-screening/AMLDataSourcesSection";
 import AMLUseCasesSection from "@/components/aml-screening/AMLUseCasesSection";
 import AMLCTASection from "@/components/aml-screening/AMLCTASection";
 import StickyDemoCTA from "@/components/StickyDemoCTA";
@@ -16,7 +15,7 @@ const softwareData = {
   "@type": "SoftwareApplication",
   name: "WorldAML AML Screening & Monitoring",
   applicationCategory: "FinancialApplication",
-  description: "AML screening and monitoring software covering sanctions, PEPs, adverse media, and RCAs. Powered by WorldCompliance® and Bridger Insight XG® data. FATF R.6, R.12, and R.16 aligned.",
+  description: "AML screening and monitoring software covering sanctions, PEPs, adverse media, and RCAs. FATF R.6, R.12, and R.16 aligned.",
   operatingSystem: "Web",
   url: "https://www.worldaml.com/platform/aml-screening",
   offers: { "@type": "Offer", category: "SaaS", url: "https://www.worldaml.com/pricing" },
@@ -111,7 +110,7 @@ const PlatformAMLScreening = () => {
   <div className="min-h-screen flex flex-col">
     <SEO
       title="AML Screening & Monitoring — Sanctions & PEP"
-      description="AML screening software covering sanctions, PEPs, adverse media, and RCAs. Real-time and batch screening powered by WorldCompliance® data."
+      description="AML screening software covering sanctions, PEPs, adverse media, and RCAs. Real-time and batch screening across 1,900+ global lists."
       canonical="/platform/aml-screening"
       breadcrumbs={[
         { name: "Home", url: "/" },
@@ -125,7 +124,6 @@ const PlatformAMLScreening = () => {
       <AMLHeroSection />
       <AMLWhatIsSection />
       <AMLFeaturesSection />
-      <AMLDataSourcesSection />
       <AMLUseCasesSection />
       <AMLCTASection />
     </main>
