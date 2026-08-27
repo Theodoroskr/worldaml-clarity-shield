@@ -19,13 +19,17 @@ export function getProvider(): ScreeningProviderAdapter {
 
 export function providerErrorResponse(err: unknown, cors: Record<string, string>) {
   if (err instanceof ProviderError) {
+    // Technical detail stays server-side (logs only); the client sees userMessage.
+    console.error("[screening] provider error", err.userMessage, "|", err.detail);
     return new Response(JSON.stringify({ error: err.userMessage }), {
       status: err.httpStatus,
       headers: { ...cors, "Content-Type": "application/json" },
     });
   }
+  console.error("[screening] unexpected error", err instanceof Error ? err.stack : String(err));
   return new Response(JSON.stringify({ error: "Screening could not be completed" }), {
     status: 500,
     headers: { ...cors, "Content-Type": "application/json" },
   });
 }
+
