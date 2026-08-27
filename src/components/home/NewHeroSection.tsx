@@ -179,7 +179,7 @@ export const NewHeroSection = () => {
           </div>
           
           <p className="text-body-sm text-text-tertiary border-t border-divider pt-6 mt-4">
-            Powered by LexisNexis Risk Solutions. Delivered and supported by Infocredit Group.
+            Delivered and supported by Infocredit Group.
           </p>
         </div>
 
@@ -287,18 +287,18 @@ export const NewHeroSection = () => {
               </div>
               <div className="inline-flex items-center gap-2 mb-2">
                 <span className="text-xs font-medium px-2 py-1 rounded-full border border-teal/20 bg-teal/5 text-teal">
-                  Data Source: LexisNexis
+                  AML Screening
                 </span>
               </div>
               <CardTitle className="text-lg text-navy">Screening Solutions</CardTitle>
               <CardDescription className="text-text-secondary text-sm">
-                Access 1,900+ global watchlists via WorldCompliance® and Bridger Insight XG®.
+                Screen against 1,900+ global sanctions, PEP, and adverse media lists.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Button variant="outline" asChild className="w-full" size="sm">
-                <Link to="/data-sources">
-                  View Data Sources
+                <Link to="/platform/aml-screening">
+                  Explore AML Screening
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
