@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +18,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  ALL_SOURCE_TYPES,
   ASSESSMENT_LABELS,
   assessmentTone,
   CASE_STATUS_LABELS,
@@ -27,6 +29,8 @@ import {
   recordDecision,
   riskTone,
   runScreeningV2,
+  SOURCE_GROUPS,
+  SUBJECT_TYPE_LABELS,
   type ScreeningCategory,
   type SubjectInput,
   type SubjectType,
