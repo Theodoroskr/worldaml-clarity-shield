@@ -418,7 +418,7 @@ function CaseWorkspace({
                   <div className="min-w-0">
                     <p className="font-medium">{m.matched_name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {[m.entity_type === "organisation" ? "Organisation" : "Individual", m.country, m.year_of_birth]
+                      {[m.entity_type ? SUBJECT_TYPE_LABELS[m.entity_type as SubjectType] ?? m.entity_type : null, m.country, m.year_of_birth]
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
