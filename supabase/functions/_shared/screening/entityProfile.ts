@@ -31,6 +31,11 @@ export interface FullEntityProfile {
 
 const IGNORED_FIELD_NAMES = new Set(["picture url"]);
 
+/** The data provider is never named in customer-facing output. */
+function scrubProvider(value: string): string {
+  return value.replace(/comply\s*advantage/gi, "WorldAML").trim();
+}
+
 function uniq(values: (string | null | undefined)[]): string[] {
   const out: string[] = [];
   for (const v of values) {
