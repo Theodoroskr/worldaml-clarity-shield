@@ -149,7 +149,10 @@ export interface ScreeningProviderAdapter {
     idempotencyKey: string,
   ): Promise<NormalisedScreening>;
   retrieveScreening(providerSearchId: string): Promise<NormalisedScreening>;
-  retrieveFullDetails(providerEntityId: string): Promise<Record<string, unknown>>;
+  retrieveFullDetails(
+    providerSearchId: string,
+    providerEntityId: string,
+  ): Promise<Record<string, unknown>>;
   updateMatchDecision(
     providerSearchId: string,
     providerEntityId: string,
