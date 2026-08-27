@@ -236,9 +236,22 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
     return this.normalise(body, null, null);
   }
 
-  async retrieveFullDetails(providerEntityId: string): Promise<Record<string, unknown>> {
-    const body = await this.request(`/entities/${encodeURIComponent(providerEntityId)}`);
-    return (body?.content as Record<string, unknown>) ?? {};
+  /**
+   * Full detail for a single listed entity. The provider exposes it through the
+   * search-details payload, so the matching hit document is extracted here.
+   */
+  async retrieveFullDetails(
+    providerSearchId: string,
+    providerEntityId: string,
+  ): Promise<Record<string, unknown>> {
+    const body = await this.request(
+      `/searches/${encodeURIComponent(providerSearchId)}/details?share_url=0`,
+    );
+    const content = (body?.content as Record<string, unknown>) ?? {};
+    const data = (content?.data as Record<string, unknown>) ?? content;
+    const hits = (data?.hits as Array<Record<string, unknown>>) ?? [];
+    const hit = hits.find((h) => String((h?.doc as Record<string, unknown>)?.id ?? "") === providerEntityId);
+    return ((hit?.doc as Record<string, unknown>) ?? {}) as Record<string, unknown>;
   }
 
   async updateMatchDecision(

@@ -178,6 +178,54 @@ export async function recordDecision(payload: {
   return data as { ok: boolean; case_status: string; match_status: string | null };
 }
 
+export interface ProfileListing {
+  source_key: string;
+  source_name: string;
+  category: string | null;
+  category_label: string | null;
+  status: "current" | "former" | "unknown";
+  listed_from: string | null;
+  listed_to: string | null;
+  country_codes: string[];
+  urls: string[];
+  details: { label: string; values: string[] }[];
+}
+
+export interface FullEntityProfile {
+  primary_name: string | null;
+  entity_type: string | null;
+  aliases: string[];
+  countries: string[];
+  dates_of_birth: string[];
+  places_of_birth: string[];
+  nationalities: string[];
+  images: string[];
+  associates: { name: string; relationship: string | null }[];
+  listings: ProfileListing[];
+  media: { title: string; url: string | null; date: string | null; snippet: string | null }[];
+  last_updated: string | null;
+}
+
+/** Loads the complete listed-entity profile for a match (cached after first load). */
+export async function fetchFullProfile(matchId: string, refresh = false): Promise<FullEntityProfile> {
+  const { data, error } = await supabase.functions.invoke("screening-entity-details", {
+    body: { match_id: matchId, refresh },
+  });
+  if (error) {
+    let message = (data as { error?: string } | null)?.error;
+    const res = (error as unknown as { context?: Response }).context;
+    if (!message && res && typeof res.json === "function") {
+      try {
+        const body = await res.clone().json();
+        message = (body as { error?: string })?.error;
+      } catch { /* keep fallback message */ }
+    }
+    throw new Error(message || "The full profile could not be loaded");
+  }
+  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+  return (data as { profile: FullEntityProfile }).profile;
+}
+
 export function riskTone(categories: string[]): string {
   if (categories.includes("sanctions")) return "bg-red-50 text-red-700 border-red-200";
   if (categories.includes("warnings")) return "bg-amber-50 text-amber-700 border-amber-200";
