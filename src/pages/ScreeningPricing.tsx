@@ -30,7 +30,7 @@ const structuredData = {
 const ScreeningPricing = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
-      title="Screening & Monitoring Pricing | WorldAML"
+      title="Screening & Monitoring Pricing & Packages"
       description="Transparent pricing for WorldAML Screening & Monitoring. Plans from €99/month with monitored entities, full API access and audit-ready evidence."
       canonical="/screening-monitoring/pricing"
       breadcrumbs={[
