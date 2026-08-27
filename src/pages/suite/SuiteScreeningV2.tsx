@@ -76,6 +76,15 @@ export default function SuiteScreeningV2() {
   const [cases, setCases] = useState<CaseRow[]>([]);
   const [activeCase, setActiveCase] = useState<CaseRow | null>(null);
   const [loadingCases, setLoadingCases] = useState(true);
+  // Sources: null = policy defaults (everything); otherwise the granular selection.
+  const [customiseSources, setCustomiseSources] = useState(false);
+  const [sourceTypes, setSourceTypes] = useState<string[]>(ALL_SOURCE_TYPES);
+  const [searchProfileId, setSearchProfileId] = useState("");
+
+  const toggleSourceType = (value: string, checked: boolean) =>
+    setSourceTypes((prev) =>
+      checked ? Array.from(new Set([...prev, value])) : prev.filter((t) => t !== value)
+    );
 
   const set = <K extends keyof SubjectInput>(key: K, value: SubjectInput[K]) =>
     setSubject((s) => ({ ...s, [key]: value }));
@@ -100,10 +109,16 @@ export default function SuiteScreeningV2() {
     }
     setRunning(true);
     try {
+      const profileId = searchProfileId.trim();
       const result = await runScreeningV2({
         subject,
-        include_adverse_media: adverseMedia,
+        include_adverse_media: adverseMedia ||
+          (customiseSources && sourceTypes.some((t) => t.startsWith("adverse-media"))),
         start_monitoring: monitoring,
+        advanced: {
+          ...(profileId ? { search_profile_id: profileId } : {}),
+          ...(customiseSources && !profileId ? { source_types: sourceTypes } : {}),
+        },
       });
       toast.success(
         result.match_count === 0
