@@ -209,12 +209,23 @@ export default function SuiteScreeningV2() {
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-3">
-                  <Field label="Incorporation date" type="date" value={subject.incorporation_date} onChange={(v) => set("incorporation_date", v)} />
-                  <Field label="Country of incorporation" value={subject.country_of_incorporation} onChange={(v) => set("country_of_incorporation", v)} />
-                  <Field label="Registration number" value={subject.registration_number} onChange={(v) => set("registration_number", v)} />
-                  <Field label="Registered address" value={subject.registered_address} onChange={(v) => set("registered_address", v)} />
-                  <Field label="Previous name" value={subject.previous_name} onChange={(v) => set("previous_name", v)} />
-                  <Field label="Customer reference" value={subject.customer_reference} onChange={(v) => set("customer_reference", v)} />
+                  {subject.subject_type === "vessel" || subject.subject_type === "aircraft" ? (
+                    <>
+                      <Field label="Registration / IMO / tail number" value={subject.registration_number} onChange={(v) => set("registration_number", v)} />
+                      <Field label="Country of registration" value={subject.country_of_incorporation} onChange={(v) => set("country_of_incorporation", v)} />
+                      <Field label="Previous name" value={subject.previous_name} onChange={(v) => set("previous_name", v)} />
+                      <Field label="Customer reference" value={subject.customer_reference} onChange={(v) => set("customer_reference", v)} />
+                    </>
+                  ) : (
+                    <>
+                      <Field label="Incorporation date" type="date" value={subject.incorporation_date} onChange={(v) => set("incorporation_date", v)} />
+                      <Field label="Country of incorporation" value={subject.country_of_incorporation} onChange={(v) => set("country_of_incorporation", v)} />
+                      <Field label="Registration number" value={subject.registration_number} onChange={(v) => set("registration_number", v)} />
+                      <Field label="Registered address" value={subject.registered_address} onChange={(v) => set("registered_address", v)} />
+                      <Field label="Previous name" value={subject.previous_name} onChange={(v) => set("previous_name", v)} />
+                      <Field label="Customer reference" value={subject.customer_reference} onChange={(v) => set("customer_reference", v)} />
+                    </>
+                  )}
                 </div>
               )}
 
