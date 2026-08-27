@@ -753,7 +753,7 @@ function SummaryRow({
   const [copied, setCopied] = useState(false);
   return (
     <div className="flex items-start justify-between gap-3">
-      <span className="text-muted-foreground">{label}</span>
+      <span className="shrink-0 whitespace-nowrap text-muted-foreground">{label}</span>
       <div className="flex items-center gap-2 text-right font-medium">
         <span className="break-all">{value}</span>
         {copyable && (
