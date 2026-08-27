@@ -146,7 +146,7 @@ export function normaliseEntityProfile(content: Record<string, unknown>): FullEn
     ]);
     return {
       source_key: key,
-      source_name: String(note?.name ?? primaryType ?? "Public list"),
+      source_name: scrubProvider(String(note?.name ?? primaryType ?? "Public list")),
       category: primaryType ? normaliseCategory(primaryType) : null,
       category_label: primaryType ? categoryLabel(primaryType) : null,
       status: listedTo ? "former" : (note?.listing_started_utc ? "current" : "unknown"),
