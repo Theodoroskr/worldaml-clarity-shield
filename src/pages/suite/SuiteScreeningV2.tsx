@@ -560,10 +560,16 @@ function ResultsWorkspace({
   };
 
   const searchParams = caseDetail.search?.search_parameters ?? {};
-  const fuzziness =
-    typeof searchParams === "object" && searchParams !== null && "fuzziness" in searchParams
-      ? (searchParams as { fuzziness?: number }).fuzziness
-      : undefined;
+  const fuzziness = useMemo(() => {
+    if (typeof searchParams !== "object" || searchParams === null) return undefined;
+    const p = searchParams as Record<string, unknown>;
+    if (typeof p.fuzziness === "number") return p.fuzziness;
+    if (typeof p.name_threshold === "number") {
+      const threshold = Math.max(0, Math.min(1, p.name_threshold));
+      return 1 - threshold;
+    }
+    return undefined;
+  }, [searchParams]);
 
   return (
     <div className="space-y-4">
