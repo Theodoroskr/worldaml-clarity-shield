@@ -562,6 +562,8 @@ const App = () => (
                   <Route path="onboarding-submissions" element={<SuiteOnboardingSubmissions />} />
                   <Route path="idv" element={<SuiteIDV />} />
                   <Route path="screening" element={<SuiteScreening />} />
+                  <Route path="screening-v2" element={<SuiteScreeningV2 />} />
+
                   <Route path="transactions" element={<SuiteTransactions />} />
                   <Route path="monitoring" element={<SuiteMonitoring />} />
                   <Route path="alerts" element={<SuiteAlerts />} />
