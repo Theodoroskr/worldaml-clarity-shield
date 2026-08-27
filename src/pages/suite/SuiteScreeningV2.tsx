@@ -929,6 +929,15 @@ function MatchCard({
   );
 }
 
+function KeyInfo({ label, value }: { label: string; value: string | null }) {
+  return (
+    <div>
+      <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dd className="text-sm">{value && value.trim() ? value : "—"}</dd>
+    </div>
+  );
+}
+
 function MatchReview({
   match, onClose, onSaved,
 }: { match: MatchRow | null; onClose: () => void; onSaved: () => void }) {
