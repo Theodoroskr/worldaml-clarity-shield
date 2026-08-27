@@ -34,6 +34,7 @@ import {
   DECISIONS,
   FALSE_POSITIVE_REASONS,
   fetchFullProfile,
+  prefetchFullProfile,
   MATCH_STATUS_LABELS,
   recordDecision,
   riskTone,
@@ -248,12 +249,28 @@ export default function SuiteScreeningV2() {
 
   return (
     <div className="space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">WorldAML Screening &amp; Monitoring</h1>
-        <p className="text-sm text-muted-foreground">
-          Screen individuals and organisations against sanctions, PEP and RCA, warnings and regulatory
-          enforcement, and adverse media — then resolve every potential match with a recorded decision.
-        </p>
+      <header className="relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10 p-6">
+        <div className="flex items-start gap-4">
+          <span className="hidden rounded-xl bg-primary/15 p-3 text-primary sm:block">
+            <ShieldCheck className="h-6 w-6" />
+          </span>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold tracking-tight">WorldAML Screening &amp; Monitoring</h1>
+            <p className="max-w-3xl text-sm text-muted-foreground">
+              Screen individuals and organisations against sanctions, PEP and RCA, warnings and regulatory
+              enforcement, and adverse media — then resolve every potential match with a recorded decision.
+            </p>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              <Badge variant="outline" className={riskTone(["sanctions"])}>Sanctions</Badge>
+              <Badge variant="outline" className={riskTone(["warnings"])}>Warnings &amp; enforcement</Badge>
+              <Badge variant="outline" className={riskTone(["pep_rca"])}>PEP &amp; RCA</Badge>
+              <Badge variant="outline" className={riskTone(["adverse_media"])}>Adverse media</Badge>
+              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                <Activity className="mr-1 h-3 w-3" /> Ongoing monitoring
+              </Badge>
+            </div>
+          </div>
+        </div>
       </header>
 
       {activeCase ? (
@@ -491,6 +508,13 @@ function ResultsWorkspace({
     const rows = (data as MatchRow[]) ?? [];
     setMatches(rows);
 
+    // Warm the highest-ranked matches in the background so the first review opens instantly.
+    const warm = () => rows.slice(0, 3).forEach((r) => prefetchFullProfile(r.id));
+    const idle = (window as unknown as { requestIdleCallback?: (cb: () => void) => number })
+      .requestIdleCallback;
+    if (idle) idle(warm);
+    else setTimeout(warm, 400);
+
     if (rows.length > 0) {
       const ids = rows.map((r) => r.id);
       const [{ data: sourcesData }, { data: mediaData }] = await Promise.all([
@@ -528,6 +552,15 @@ function ResultsWorkspace({
       return true;
     });
   }, [matches, statusFilter, categoryFilter]);
+
+  // Headline tally used by the case header chips.
+  const matchTally = useMemo(() => ({
+    confirmed: matches.filter((m) => m.status === "confirmed").length,
+    cleared: matches.filter((m) => m.status === "false_positive").length,
+    open: matches.filter((m) => m.status !== "confirmed" && m.status !== "false_positive").length,
+  }), [matches]);
+
+
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -575,9 +608,9 @@ function ResultsWorkspace({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/15 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4">
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" onClick={onBack}>
+          <Button variant="outline" size="sm" onClick={onBack} className="bg-background">
             <ArrowLeft className="mr-1.5 h-4 w-4" /> Back to cases
           </Button>
           <div>
@@ -585,16 +618,34 @@ function ResultsWorkspace({
             <p className="text-xs text-muted-foreground">
               {CASE_STATUS_LABELS[caseDetail.status] ?? caseDetail.status}
               {caseDetail.monitoring_status === "active" && (
-                <span className="ml-2 inline-flex items-center gap-1 text-emerald-600">
+                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700">
                   <Activity className="h-3 w-3" /> Monitored
                 </span>
               )}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline" className="border-primary/30 bg-background text-primary">
+            {matches.length} potential {matches.length === 1 ? "match" : "matches"}
+          </Badge>
+          {matchTally.confirmed > 0 && (
+            <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">
+              {matchTally.confirmed} confirmed
+            </Badge>
+          )}
+          {matchTally.open > 0 && (
+            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+              {matchTally.open} to review
+            </Badge>
+          )}
+          {matchTally.cleared > 0 && (
+            <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+              {matchTally.cleared} cleared
+            </Badge>
+          )}
           {selectedIds.size > 0 && (
-            <Badge variant="outline">{selectedIds.size} selected</Badge>
+            <Badge variant="outline" className="bg-background">{selectedIds.size} selected</Badge>
           )}
         </div>
       </div>
@@ -654,6 +705,7 @@ function ResultsWorkspace({
                   selected={selectedIds.has(m.id)}
                   onToggleSelect={() => toggleSelect(m.id)}
                   onReview={() => setSelected(m)}
+                  onPrefetch={() => prefetchFullProfile(m.id)}
                   onDecision={onDecision}
                 />
               ))}
@@ -790,6 +842,7 @@ function MatchCard({
   selected,
   onToggleSelect,
   onReview,
+  onPrefetch,
   onDecision,
 }: {
   match: MatchRow;
@@ -797,6 +850,7 @@ function MatchCard({
   selected: boolean;
   onToggleSelect: () => void;
   onReview: () => void;
+  onPrefetch: () => void;
   onDecision: (id: string, decision: string, reason?: string) => Promise<void>;
 }) {
   const [falsePositiveOpen, setFalsePositiveOpen] = useState(false);
@@ -839,20 +893,54 @@ function MatchCard({
     setFalsePositiveOpen(false);
   };
 
+  // The most severe category drives the card's accent stripe.
+  const severity: "critical" | "high" | "medium" | "low" =
+    match.categories.includes("sanctions") ? "critical"
+    : match.categories.includes("warnings") ? "high"
+    : match.categories.includes("pep_rca") ? "medium"
+    : "low";
+  const stripe = {
+    critical: "before:bg-red-500",
+    high: "before:bg-amber-500",
+    medium: "before:bg-sky-500",
+    low: "before:bg-slate-300",
+  }[severity];
+  const similarity = match.name_similarity ?? null;
+  const similarityTone =
+    similarity == null ? "border-border bg-muted text-muted-foreground"
+    : similarity >= 95 ? "border-red-200 bg-red-50 text-red-700"
+    : similarity >= 80 ? "border-amber-200 bg-amber-50 text-amber-700"
+    : "border-sky-200 bg-sky-50 text-sky-700";
+
   return (
-    <Card className="overflow-hidden">
+    <Card
+      className={`relative overflow-hidden pl-1 transition-all duration-200 before:absolute before:inset-y-0 before:left-0 before:w-1.5 ${stripe} hover:-translate-y-0.5 hover:shadow-lg ${
+        selected ? "ring-2 ring-primary/50" : ""
+      }`}
+      // Warm the full profile before the analyst commits to opening the match.
+      onMouseEnter={onPrefetch}
+      onFocusCapture={onPrefetch}
+    >
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-muted-foreground">
               {ENTITY_ICONS[entityType] ?? <User className="h-3.5 w-3.5" />}
               {entityLabel}
             </span>
+            {similarity != null && (
+              <span className={`rounded-full border px-2 py-0.5 font-medium ${similarityTone}`}>
+                {Math.round(similarity)}% name match
+              </span>
+            )}
           </div>
           <Checkbox checked={selected} onCheckedChange={onToggleSelect} aria-label="Select match" />
         </div>
 
-        <h3 className="mt-2 text-base font-semibold text-primary hover:underline cursor-pointer" onClick={onReview}>
+        <h3
+          className="mt-2 cursor-pointer text-base font-semibold text-foreground transition-colors hover:text-primary hover:underline"
+          onClick={onReview}
+        >
           {match.matched_name}
         </h3>
 
@@ -892,16 +980,21 @@ function MatchCard({
           </div>
         </dl>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <Button size="sm" variant="outline" onClick={onReview}>Review</Button>
-          <Button size="sm" variant="outline" className="text-emerald-600" onClick={() => onDecision(match.id, "confirm_match")}>
-            Confirm
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
+          <Button size="sm" onClick={onReview} className="bg-primary/90 hover:bg-primary">Review</Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+            onClick={() => onDecision(match.id, "confirm_match")}
+          >
+            <Check className="mr-1 h-3.5 w-3.5" /> Confirm
           </Button>
 
           <Popover open={falsePositiveOpen} onOpenChange={setFalsePositiveOpen}>
             <PopoverTrigger asChild>
-              <Button size="sm" variant="outline" className="text-slate-600">
-                False positive
+              <Button size="sm" variant="outline" className="border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100">
+                <X className="mr-1 h-3.5 w-3.5" /> False positive
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-72 space-y-3">
@@ -920,7 +1013,12 @@ function MatchCard({
             </PopoverContent>
           </Popover>
 
-          <Button size="sm" variant="ghost" onClick={() => onDecision(match.id, "escalate")}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-amber-700 hover:bg-amber-50 hover:text-amber-800"
+            onClick={() => onDecision(match.id, "escalate")}
+          >
             <AlertTriangle className="mr-1 h-3.5 w-3.5" /> Escalate
           </Button>
         </div>

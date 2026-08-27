@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock, BarChart3, Stethoscope } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock, BarChart3, Stethoscope, FileSearch } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AdminNotificationProvider, useAdminNotifications } from "@/hooks/useAdminNotifications";
 import AdminNotificationBell from "@/components/admin/AdminNotificationBell";
@@ -48,6 +48,7 @@ const NAV: NavItem[] = [
   { label: "Workflows", path: "/admin/workflows", icon: GitBranch, section: "Suite" },
   { label: "Pricing", path: "/admin/pricing", icon: CreditCard, section: "Suite" },
   { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText, section: "Suite" },
+  { label: "Profile Enrichment Audit", path: "/admin/screening-profile-audit", icon: FileSearch, section: "Suite" },
 ];
 
 

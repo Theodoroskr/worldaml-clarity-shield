@@ -206,8 +206,11 @@ export interface FullEntityProfile {
   last_updated: string | null;
 }
 
-/** Loads the complete listed-entity profile for a match (cached after first load). */
-export async function fetchFullProfile(matchId: string, refresh = false): Promise<FullEntityProfile> {
+/** In-flight and resolved profile requests, keyed by match id, so hover prefetch and
+ *  opening the review dialog never fire the same request twice. */
+const profileCache = new Map<string, Promise<FullEntityProfile>>();
+
+async function requestFullProfile(matchId: string, refresh: boolean): Promise<FullEntityProfile> {
   const { data, error } = await supabase.functions.invoke("screening-entity-details", {
     body: { match_id: matchId, refresh },
   });
@@ -225,6 +228,27 @@ export async function fetchFullProfile(matchId: string, refresh = false): Promis
   if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
   return (data as { profile: FullEntityProfile }).profile;
 }
+
+/** Loads the complete listed-entity profile for a match (deduplicated per session). */
+export function fetchFullProfile(matchId: string, refresh = false): Promise<FullEntityProfile> {
+  if (refresh) profileCache.delete(matchId);
+  const cached = profileCache.get(matchId);
+  if (cached) return cached;
+  const promise = requestFullProfile(matchId, refresh).catch((err) => {
+    // A failed attempt must not be cached, so the next open retries.
+    profileCache.delete(matchId);
+    throw err;
+  });
+  profileCache.set(matchId, promise);
+  return promise;
+}
+
+/** Warms the cache in the background; failures stay silent. */
+export function prefetchFullProfile(matchId: string): void {
+  if (profileCache.has(matchId)) return;
+  void fetchFullProfile(matchId).catch(() => undefined);
+}
+
 
 export function riskTone(categories: string[]): string {
   if (categories.includes("sanctions")) return "bg-red-50 text-red-700 border-red-200";
