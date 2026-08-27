@@ -96,14 +96,14 @@ export const GUIDE_LINKS: Record<string, RelatedGuideLink> = {
     description: "Recommendation 16 for VASPs, thresholds, and originator/beneficiary data.",
   },
   compareProviders: {
-    to: "/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones",
-    title: "World-Check vs WorldCompliance vs Dow Jones",
-    description: "Side-by-side comparison of the top three AML data providers.",
+    to: "/alternatives",
+    title: "AML Screening Provider Comparisons",
+    description: "Side-by-side comparisons of WorldAML against the major AML screening vendors.",
   },
   worldCheckAlt: {
     to: "/world-check-alternative",
     title: "World-Check Alternative",
-    description: "How LexisNexis WorldCompliance compares as a Refinitiv World-Check replacement.",
+    description: "How WorldAML Screening compares as a Refinitiv World-Check replacement.",
   },
   csUS: {
     to: "/compliance-software/us",
