@@ -83,12 +83,7 @@ Deno.serve(async (req) => {
   if (newStatus) {
     await admin
       .from("screening_matches")
-      .update({
-        status: newStatus,
-        decided_by: user.id,
-        decided_at: new Date().toISOString(),
-        decision_rationale: rationale,
-      })
+      .update({ status: newStatus })
       .eq("id", matchId);
   }
 
@@ -96,11 +91,13 @@ Deno.serve(async (req) => {
     organisation_id: visible.organisation_id,
     case_id: visible.case_id,
     match_id: matchId,
-    decision_kind: decision,
-    rationale,
-    resulting_status: newStatus,
+    decision,
+    reason_code: String(body.reason_code ?? decision),
+    reason_label: String(body.reason_label ?? decision.replace(/_/g, " ")),
+    comment: rationale,
     decided_by: user.id,
   });
+
 
   await admin.from("screening_audit_events").insert({
     organisation_id: visible.organisation_id,
