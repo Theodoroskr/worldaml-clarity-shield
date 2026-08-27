@@ -57,16 +57,21 @@ Deno.serve(async (req) => {
 
   const { data: ref } = await admin
     .from("provider_references")
-    .select("provider_id")
+    .select("provider_id, provider_ref")
     .eq("entity_kind", "match")
     .eq("entity_id", matchId)
     .maybeSingle();
 
-  if (!ref?.provider_id) return json({ error: "No listed profile is available for this match" }, 404);
+  const providerSearchId = String(
+    (ref?.provider_ref as Record<string, unknown> | null)?.search_id ?? "",
+  );
+  if (!ref?.provider_id || !providerSearchId) {
+    return json({ error: "No listed profile is available for this match" }, 404);
+  }
 
   try {
     const provider = getProvider();
-    const content = await provider.retrieveFullDetails(String(ref.provider_id));
+    const content = await provider.retrieveFullDetails(providerSearchId, String(ref.provider_id));
     const profile = normaliseEntityProfile(content);
 
     await admin
