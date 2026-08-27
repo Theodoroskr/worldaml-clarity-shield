@@ -186,10 +186,25 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
     options: ScreeningOptions,
     idempotencyKey: string,
   ): Promise<NormalisedScreening> {
-    const filters: Record<string, unknown> = {
-      types: options.categories.flatMap((c) => CATEGORY_FILTERS[c] ?? []),
-      entity_type: subject.subject_type === "organisation" ? "company" : "person",
+    // Subject type maps 1:1 onto the provider's filters.entity_type values.
+    const ENTITY_TYPE_MAP: Record<SubjectType, string> = {
+      person: "person",
+      company: "company",
+      organisation: "organisation",
+      vessel: "vessel",
+      aircraft: "aircraft",
     };
+
+    const filters: Record<string, unknown> = {
+      entity_type: ENTITY_TYPE_MAP[subject.subject_type] ?? "person",
+    };
+    // When a search profile is selected the provider applies its own source
+    // configuration — manual category/type filters must not be sent.
+    if (!options.searchProfileId) {
+      filters.types = options.providerTypes?.length
+        ? options.providerTypes
+        : options.categories.flatMap((c) => CATEGORY_FILTERS[c] ?? []);
+    }
     if (options.countries?.length) filters.country_codes = options.countries;
     if (options.yearOfBirth) filters.birth_year = String(options.yearOfBirth);
 
@@ -202,6 +217,7 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
         : Math.round(Math.max(0, Math.min(1, 1 - options.nameThreshold)) * 10) / 10,
       limit: options.maxResults,
       share_url: 0,
+      ...(options.searchProfileId ? { search_profile_id: options.searchProfileId } : {}),
       filters,
     };
 
@@ -307,10 +323,11 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
       const regNumber = firstFieldValue(fields, ["registration number", "company number"]);
       const address = firstFieldValue(fields, ["address"]);
       const placeOfBirth = firstFieldValue(fields, ["place of birth"]);
+      const rawEntityType = String(doc?.entity_type ?? "").toLowerCase();
       const entityType: SubjectType | null =
-        String(doc?.entity_type ?? "").toLowerCase() === "company" ? "organisation"
-        : String(doc?.entity_type ?? "").toLowerCase() === "person" ? "person"
-        : null;
+        (SUBJECT_TYPES as string[]).includes(rawEntityType)
+          ? (rawEntityType as SubjectType)
+          : null;
 
       const attributes: NormalisedAttribute[] = [
         attr("name", "Name", subject?.full_name ?? null, String(doc?.name ?? ""), 1),
