@@ -140,6 +140,16 @@ export default function SuiteScreeningV2() {
   };
 
   const isPerson = subject.subject_type === "person";
+  const nameLabel =
+    subject.subject_type === "person" ? "Full name"
+    : subject.subject_type === "vessel" ? "Vessel name"
+    : subject.subject_type === "aircraft" ? "Aircraft name / tail number"
+    : "Registered name";
+  const namePlaceholder =
+    subject.subject_type === "person" ? "e.g. Maria Georgiou"
+    : subject.subject_type === "vessel" ? "e.g. MV Aurora Borealis"
+    : subject.subject_type === "aircraft" ? "e.g. N12345"
+    : "e.g. Northwind Trading Ltd";
 
   return (
     <div className="space-y-6">
@@ -165,24 +175,25 @@ export default function SuiteScreeningV2() {
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label>Subject type</Label>
+                  <Label>Entity type</Label>
                   <Select
                     value={subject.subject_type}
                     onValueChange={(v) => setSubject({ ...emptySubject, subject_type: v as SubjectType })}
                   >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="person">Individual</SelectItem>
-                      <SelectItem value="organisation">Organisation</SelectItem>
+                      {(Object.keys(SUBJECT_TYPE_LABELS) as SubjectType[]).map((t) => (
+                        <SelectItem key={t} value={t}>{SUBJECT_TYPE_LABELS[t]}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label>{isPerson ? "Full name" : "Registered name"}</Label>
+                  <Label>{nameLabel}</Label>
                   <Input
                     value={subject.full_name}
                     onChange={(e) => set("full_name", e.target.value)}
-                    placeholder={isPerson ? "e.g. Maria Georgiou" : "e.g. Northwind Trading Ltd"}
+                    placeholder={namePlaceholder}
                   />
                 </div>
               </div>
