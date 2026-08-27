@@ -99,12 +99,14 @@ export function usePortalAccess(): PortalAccess {
     suiteAccess,
     adminAccess,
     portals,
+    // Internal staff (admins) can enter every workspace for support and QA.
     has: (portal) =>
-      portal === "academy" ? academyAccess
+      adminAccess ? true
+        : portal === "academy" ? academyAccess
         : portal === "partner" ? partnerAccess
           : portal === "business" ? businessAccess
             : portal === "suite" ? suiteAccess
-              : adminAccess,
+              : false,
   };
 }
 
