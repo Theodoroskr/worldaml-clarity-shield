@@ -2,11 +2,14 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   Category,
+  categoryForSourceType,
   getProvider,
+  PROVIDER_SOURCE_TYPES,
   ProviderError,
   providerErrorResponse,
   ScreeningOptions,
   ScreeningSubjectInput,
+  SUBJECT_TYPES,
 } from "../_shared/screening/index.ts";
 
 const json = (body: unknown, status = 200) =>
@@ -53,10 +56,10 @@ Deno.serve(async (req) => {
   const advanced = (payload.advanced ?? {}) as Record<string, unknown>;
 
   if (typeof subject.full_name !== "string" || !subject.full_name) {
-    return json({ error: "Enter the name of the person or organisation to screen" }, 400);
+    return json({ error: "Enter the name of the subject to screen" }, 400);
   }
-  if (subject.subject_type !== "person" && subject.subject_type !== "organisation") {
-    return json({ error: "Select a subject type (individual or organisation)" }, 400);
+  if (!(SUBJECT_TYPES as string[]).includes(String(subject.subject_type))) {
+    return json({ error: "Select a subject type (individual, company, organisation, vessel or aircraft)" }, 400);
   }
   if (subject.full_name.length > 300) {
     return json({ error: "The name is too long (maximum 300 characters)" }, 400);
@@ -92,19 +95,50 @@ Deno.serve(async (req) => {
     .eq("version", policy.current_version)
     .maybeSingle();
 
-  const categories: Category[] = [];
-  if (cfg.sanctions !== false) categories.push("sanctions");
-  if (cfg.pep !== false) categories.push("pep_rca");
-  if (cfg.warnings !== false) categories.push("warnings");
+  const policyCategories: Category[] = [];
+  if (cfg.sanctions !== false) policyCategories.push("sanctions");
+  if (cfg.pep !== false) policyCategories.push("pep_rca");
+  if (cfg.warnings !== false) policyCategories.push("warnings");
   const adverseMediaAllowed = cfg.adverse_media === true;
   const adverseMediaOn = includeAdverseMedia && adverseMediaAllowed;
-  if (adverseMediaOn) categories.push("adverse_media");
+  if (adverseMediaOn) policyCategories.push("adverse_media");
 
   if (includeAdverseMedia && !adverseMediaAllowed) {
     return json({ error: "Adverse media is not included in your plan" }, 403);
   }
 
   const allowAdvanced = cfg.allow_user_advanced_options !== false;
+
+  // Optional provider search profile — when set it replaces manual source filters.
+  const searchProfileId = allowAdvanced && typeof advanced.search_profile_id === "string" &&
+      advanced.search_profile_id.trim()
+    ? advanced.search_profile_id.trim().slice(0, 100)
+    : null;
+
+  // Optional granular "Sources" selection (validated against the provider allowlist).
+  const sourceTypes = allowAdvanced && !searchProfileId && Array.isArray(advanced.source_types)
+    ? (advanced.source_types as unknown[])
+        .map((t) => String(t))
+        .filter((t) => (PROVIDER_SOURCE_TYPES as readonly string[]).includes(t))
+    : [];
+
+  // Normalised categories actually screened: policy categories intersected with
+  // whatever the granular source selection implies (adverse media stays plan-gated).
+  let categories = policyCategories;
+  if (sourceTypes.length) {
+    const implied = Array.from(
+      new Set(
+        sourceTypes
+          .map((t) => categoryForSourceType(t))
+          .filter((c): c is Category => !!c && (c !== "adverse_media" || adverseMediaAllowed)),
+      ),
+    );
+    if (!implied.length) {
+      return json({ error: "Select at least one source category included in your plan" }, 400);
+    }
+    categories = policyCategories.filter((c) => implied.includes(c));
+  }
+
   const options: ScreeningOptions = {
     categories,
     nameThreshold: allowAdvanced && typeof advanced.name_threshold === "number"
@@ -119,6 +153,8 @@ Deno.serve(async (req) => {
       : subject.year_of_birth) ?? null,
     maxResults: Math.min(Number(advanced.max_results ?? cfg.max_results ?? 50), 100),
     monitoring: startMonitoring,
+    providerTypes: sourceTypes.length ? sourceTypes : undefined,
+    searchProfileId,
   };
 
   const excluded: Category[] = (["sanctions", "pep_rca", "warnings", "adverse_media"] as Category[])
@@ -220,6 +256,9 @@ Deno.serve(async (req) => {
         countries: options.countries ?? [],
         year_of_birth: options.yearOfBirth,
         max_results: options.maxResults,
+        source_types: options.providerTypes ?? [],
+        search_profile_id: options.searchProfileId ?? null,
+        entity_type: subject.subject_type,
       },
       adverse_media_requested: adverseMediaOn,
       monitoring_requested: startMonitoring,

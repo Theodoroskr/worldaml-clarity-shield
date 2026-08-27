@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +18,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  ALL_SOURCE_TYPES,
   ASSESSMENT_LABELS,
   assessmentTone,
   CASE_STATUS_LABELS,
@@ -27,6 +29,8 @@ import {
   recordDecision,
   riskTone,
   runScreeningV2,
+  SOURCE_GROUPS,
+  SUBJECT_TYPE_LABELS,
   type ScreeningCategory,
   type SubjectInput,
   type SubjectType,
@@ -72,6 +76,15 @@ export default function SuiteScreeningV2() {
   const [cases, setCases] = useState<CaseRow[]>([]);
   const [activeCase, setActiveCase] = useState<CaseRow | null>(null);
   const [loadingCases, setLoadingCases] = useState(true);
+  // Sources: null = policy defaults (everything); otherwise the granular selection.
+  const [customiseSources, setCustomiseSources] = useState(false);
+  const [sourceTypes, setSourceTypes] = useState<string[]>(ALL_SOURCE_TYPES);
+  const [searchProfileId, setSearchProfileId] = useState("");
+
+  const toggleSourceType = (value: string, checked: boolean) =>
+    setSourceTypes((prev) =>
+      checked ? Array.from(new Set([...prev, value])) : prev.filter((t) => t !== value)
+    );
 
   const set = <K extends keyof SubjectInput>(key: K, value: SubjectInput[K]) =>
     setSubject((s) => ({ ...s, [key]: value }));
@@ -96,10 +109,16 @@ export default function SuiteScreeningV2() {
     }
     setRunning(true);
     try {
+      const profileId = searchProfileId.trim();
       const result = await runScreeningV2({
         subject,
-        include_adverse_media: adverseMedia,
+        include_adverse_media: adverseMedia ||
+          (customiseSources && sourceTypes.some((t) => t.startsWith("adverse-media"))),
         start_monitoring: monitoring,
+        advanced: {
+          ...(profileId ? { search_profile_id: profileId } : {}),
+          ...(customiseSources && !profileId ? { source_types: sourceTypes } : {}),
+        },
       });
       toast.success(
         result.match_count === 0
@@ -121,6 +140,16 @@ export default function SuiteScreeningV2() {
   };
 
   const isPerson = subject.subject_type === "person";
+  const nameLabel =
+    subject.subject_type === "person" ? "Full name"
+    : subject.subject_type === "vessel" ? "Vessel name"
+    : subject.subject_type === "aircraft" ? "Aircraft name / tail number"
+    : "Registered name";
+  const namePlaceholder =
+    subject.subject_type === "person" ? "e.g. Maria Georgiou"
+    : subject.subject_type === "vessel" ? "e.g. MV Aurora Borealis"
+    : subject.subject_type === "aircraft" ? "e.g. N12345"
+    : "e.g. Northwind Trading Ltd";
 
   return (
     <div className="space-y-6">
@@ -146,24 +175,25 @@ export default function SuiteScreeningV2() {
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label>Subject type</Label>
+                  <Label>Entity type</Label>
                   <Select
                     value={subject.subject_type}
                     onValueChange={(v) => setSubject({ ...emptySubject, subject_type: v as SubjectType })}
                   >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="person">Individual</SelectItem>
-                      <SelectItem value="organisation">Organisation</SelectItem>
+                      {(Object.keys(SUBJECT_TYPE_LABELS) as SubjectType[]).map((t) => (
+                        <SelectItem key={t} value={t}>{SUBJECT_TYPE_LABELS[t]}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label>{isPerson ? "Full name" : "Registered name"}</Label>
+                  <Label>{nameLabel}</Label>
                   <Input
                     value={subject.full_name}
                     onChange={(e) => set("full_name", e.target.value)}
-                    placeholder={isPerson ? "e.g. Maria Georgiou" : "e.g. Northwind Trading Ltd"}
+                    placeholder={namePlaceholder}
                   />
                 </div>
               </div>
@@ -179,12 +209,23 @@ export default function SuiteScreeningV2() {
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-3">
-                  <Field label="Incorporation date" type="date" value={subject.incorporation_date} onChange={(v) => set("incorporation_date", v)} />
-                  <Field label="Country of incorporation" value={subject.country_of_incorporation} onChange={(v) => set("country_of_incorporation", v)} />
-                  <Field label="Registration number" value={subject.registration_number} onChange={(v) => set("registration_number", v)} />
-                  <Field label="Registered address" value={subject.registered_address} onChange={(v) => set("registered_address", v)} />
-                  <Field label="Previous name" value={subject.previous_name} onChange={(v) => set("previous_name", v)} />
-                  <Field label="Customer reference" value={subject.customer_reference} onChange={(v) => set("customer_reference", v)} />
+                  {subject.subject_type === "vessel" || subject.subject_type === "aircraft" ? (
+                    <>
+                      <Field label="Registration / IMO / tail number" value={subject.registration_number} onChange={(v) => set("registration_number", v)} />
+                      <Field label="Country of registration" value={subject.country_of_incorporation} onChange={(v) => set("country_of_incorporation", v)} />
+                      <Field label="Previous name" value={subject.previous_name} onChange={(v) => set("previous_name", v)} />
+                      <Field label="Customer reference" value={subject.customer_reference} onChange={(v) => set("customer_reference", v)} />
+                    </>
+                  ) : (
+                    <>
+                      <Field label="Incorporation date" type="date" value={subject.incorporation_date} onChange={(v) => set("incorporation_date", v)} />
+                      <Field label="Country of incorporation" value={subject.country_of_incorporation} onChange={(v) => set("country_of_incorporation", v)} />
+                      <Field label="Registration number" value={subject.registration_number} onChange={(v) => set("registration_number", v)} />
+                      <Field label="Registered address" value={subject.registered_address} onChange={(v) => set("registered_address", v)} />
+                      <Field label="Previous name" value={subject.previous_name} onChange={(v) => set("previous_name", v)} />
+                      <Field label="Customer reference" value={subject.customer_reference} onChange={(v) => set("customer_reference", v)} />
+                    </>
+                  )}
                 </div>
               )}
 
@@ -198,8 +239,66 @@ export default function SuiteScreeningV2() {
                   Place under ongoing monitoring
                 </label>
                 <p className="text-xs text-muted-foreground">
-                  Sanctions, PEP and RCA, and warnings are always screened under your organisation&apos;s policy.
+                  By default all sources permitted by your organisation&apos;s policy are screened.
                 </p>
+              </div>
+
+              {/* ── Sources & search profile ─────────────────────────── */}
+              <div className="space-y-3 rounded-lg border border-border p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium">Sources</p>
+                    <p className="text-xs text-muted-foreground">
+                      Use your organisation&apos;s policy defaults, select categories manually, or apply a search profile.
+                    </p>
+                  </div>
+                  <label className="flex items-center gap-2 text-sm">
+                    <Switch
+                      checked={customiseSources}
+                      onCheckedChange={setCustomiseSources}
+                      disabled={!!searchProfileId.trim()}
+                    />
+                    Select categories manually
+                  </label>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="search-profile">Search profile ID (optional)</Label>
+                  <Input
+                    id="search-profile"
+                    value={searchProfileId}
+                    onChange={(e) => setSearchProfileId(e.target.value)}
+                    placeholder="Leave blank to use category selection below"
+                  />
+                  {searchProfileId.trim() && (
+                    <p className="text-xs text-muted-foreground">
+                      A search profile is applied — manual source categories are ignored for this screening.
+                    </p>
+                  )}
+                </div>
+
+                {customiseSources && !searchProfileId.trim() && (
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {SOURCE_GROUPS.map((group) => (
+                      <div key={group.label} className="space-y-2">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          {group.label}
+                        </p>
+                        {group.hint && <p className="text-xs text-muted-foreground">{group.hint}</p>}
+                        {group.types.map((t) => (
+                          <label key={t.value} className="flex items-start gap-2 text-sm">
+                            <Checkbox
+                              className="mt-0.5"
+                              checked={sourceTypes.includes(t.value)}
+                              onCheckedChange={(c) => toggleSourceType(t.value, c === true)}
+                            />
+                            <span className="leading-snug">{t.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <Button onClick={onRun} disabled={running}>
@@ -319,7 +418,7 @@ function CaseWorkspace({
                   <div className="min-w-0">
                     <p className="font-medium">{m.matched_name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {[m.entity_type === "organisation" ? "Organisation" : "Individual", m.country, m.year_of_birth]
+                      {[m.entity_type ? SUBJECT_TYPE_LABELS[m.entity_type as SubjectType] ?? m.entity_type : null, m.country, m.year_of_birth]
                         .filter(Boolean)
                         .join(" · ")}
                     </p>

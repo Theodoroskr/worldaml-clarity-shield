@@ -8831,7 +8831,12 @@ export type Database = {
         | "possible"
         | "false_positive"
         | "escalated"
-      screening_subject_type: "person" | "organisation"
+      screening_subject_type:
+        | "person"
+        | "organisation"
+        | "company"
+        | "vessel"
+        | "aircraft"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -9027,7 +9032,13 @@ export const Constants = {
         "false_positive",
         "escalated",
       ],
-      screening_subject_type: ["person", "organisation"],
+      screening_subject_type: [
+        "person",
+        "organisation",
+        "company",
+        "vessel",
+        "aircraft",
+      ],
     },
   },
 } as const

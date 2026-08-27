@@ -1,7 +1,62 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type SubjectType = "person" | "organisation";
+export type SubjectType = "person" | "company" | "organisation" | "vessel" | "aircraft";
 export type ScreeningCategory = "sanctions" | "pep_rca" | "warnings" | "adverse_media";
+
+export const SUBJECT_TYPE_LABELS: Record<SubjectType, string> = {
+  person: "Individual",
+  company: "Company",
+  organisation: "Organization",
+  vessel: "Vessel",
+  aircraft: "Aircraft",
+};
+
+/**
+ * Granular "Sources" selection shown in the Search UI. Values are provider
+ * source types validated and allow-listed server-side; a provider search
+ * profile (when entered) replaces this manual selection entirely.
+ */
+export const SOURCE_GROUPS: { label: string; hint?: string; types: { value: string; label: string }[] }[] = [
+  {
+    label: "Sanctions, Warnings and Fitness & Probity",
+    types: [
+      { value: "sanction", label: "Sanctions (e.g. OFAC SDN List, HM Treasury Sanctions List)" },
+      { value: "warning", label: "Warnings (e.g. US Immigration and Customs Wanted)" },
+      { value: "fitness-probity", label: "Fitness & Probity (e.g. US SAM Exclusions)" },
+    ],
+  },
+  {
+    label: "PEPs",
+    types: [
+      { value: "pep-class-1", label: "PEP Class 1 — Heads of State, National Parliaments, National Governments" },
+      { value: "pep-class-2", label: "PEP Class 2 — Regional Governments, Regional Parliaments" },
+      { value: "pep-class-3", label: "PEP Class 3 — Senior Management & Boards of SOEs" },
+      { value: "pep-class-4", label: "PEP Class 4 — Mayors and Local City Councils" },
+    ],
+  },
+  {
+    label: "Adverse Media",
+    hint: "Included in plans with adverse media",
+    types: [
+      { value: "adverse-media-v2-financial-aml-cft", label: "Financial AML/CFT" },
+      { value: "adverse-media-v2-fraud-linked", label: "Fraud-linked" },
+      { value: "adverse-media-v2-narcotics-aml-cft", label: "Narcotics AML/CFT" },
+      { value: "adverse-media-v2-violence-aml-cft", label: "Violence AML/CFT" },
+      { value: "adverse-media-v2-terrorism", label: "Terrorism" },
+      { value: "adverse-media-v2-cybercrime", label: "Cybercrime" },
+      { value: "adverse-media-v2-general-aml-cft", label: "General AML/CFT" },
+      { value: "adverse-media-v2-regulatory", label: "Regulatory" },
+      { value: "adverse-media-v2-financial-difficulty", label: "Financial difficulty" },
+      { value: "adverse-media-v2-violence-non-aml-cft", label: "Violence NON-AML/CFT" },
+      { value: "adverse-media-v2-other-financial", label: "Other Financial" },
+      { value: "adverse-media-v2-other-serious", label: "Other Serious" },
+      { value: "adverse-media-v2-other-minor", label: "Other Minor" },
+    ],
+  },
+];
+
+/** All selectable source type values (default = everything). */
+export const ALL_SOURCE_TYPES: string[] = SOURCE_GROUPS.flatMap((g) => g.types.map((t) => t.value));
 
 export const CATEGORY_LABELS: Record<ScreeningCategory, string> = {
   sanctions: "Sanctions",

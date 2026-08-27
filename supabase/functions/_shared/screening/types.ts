@@ -1,7 +1,8 @@
 // WorldAML normalised screening model.
 // Nothing provider-specific may leave the edge functions in these shapes.
 
-export type SubjectType = "person" | "organisation";
+export type SubjectType = "person" | "company" | "organisation" | "vessel" | "aircraft";
+export const SUBJECT_TYPES: SubjectType[] = ["person", "company", "organisation", "vessel", "aircraft"];
 export type Category = "sanctions" | "pep_rca" | "warnings" | "adverse_media";
 export type Assessment = "match" | "partial_match" | "conflict" | "unavailable";
 
@@ -32,6 +33,48 @@ export interface ScreeningOptions {
   yearOfBirth?: number | null;
   maxResults: number;
   monitoring: boolean;
+  /** Granular provider source types (e.g. "pep-class-1"); overrides the types derived from `categories`. */
+  providerTypes?: string[];
+  /** Provider-defined search profile; when set, manual source/category filters are not sent. */
+  searchProfileId?: string | null;
+}
+
+/**
+ * Provider source types selectable in the Search UI ("Sources" section).
+ * Validated server-side; mapped back to normalised categories for policy checks.
+ */
+export const PROVIDER_SOURCE_TYPES = [
+  "sanction",
+  "warning",
+  "fitness-probity",
+  "pep",
+  "pep-class-1",
+  "pep-class-2",
+  "pep-class-3",
+  "pep-class-4",
+  "adverse-media",
+  "adverse-media-v2-financial-aml-cft",
+  "adverse-media-v2-fraud-linked",
+  "adverse-media-v2-narcotics-aml-cft",
+  "adverse-media-v2-violence-aml-cft",
+  "adverse-media-v2-terrorism",
+  "adverse-media-v2-cybercrime",
+  "adverse-media-v2-general-aml-cft",
+  "adverse-media-v2-regulatory",
+  "adverse-media-v2-financial-difficulty",
+  "adverse-media-v2-violence-non-aml-cft",
+  "adverse-media-v2-other-financial",
+  "adverse-media-v2-other-serious",
+  "adverse-media-v2-other-minor",
+] as const;
+
+export function categoryForSourceType(t: string): Category | null {
+  const key = t.toLowerCase();
+  if (key.startsWith("sanction")) return "sanctions";
+  if (key.startsWith("pep") || key === "rca") return "pep_rca";
+  if (key.startsWith("warning") || key.startsWith("fitness")) return "warnings";
+  if (key.startsWith("adverse-media")) return "adverse_media";
+  return null;
 }
 
 export interface NormalisedSource {
