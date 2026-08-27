@@ -2,11 +2,14 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   Category,
+  categoryForSourceType,
   getProvider,
+  PROVIDER_SOURCE_TYPES,
   ProviderError,
   providerErrorResponse,
   ScreeningOptions,
   ScreeningSubjectInput,
+  SUBJECT_TYPES,
 } from "../_shared/screening/index.ts";
 
 const json = (body: unknown, status = 200) =>
@@ -53,10 +56,10 @@ Deno.serve(async (req) => {
   const advanced = (payload.advanced ?? {}) as Record<string, unknown>;
 
   if (typeof subject.full_name !== "string" || !subject.full_name) {
-    return json({ error: "Enter the name of the person or organisation to screen" }, 400);
+    return json({ error: "Enter the name of the subject to screen" }, 400);
   }
-  if (subject.subject_type !== "person" && subject.subject_type !== "organisation") {
-    return json({ error: "Select a subject type (individual or organisation)" }, 400);
+  if (!(SUBJECT_TYPES as string[]).includes(String(subject.subject_type))) {
+    return json({ error: "Select a subject type (individual, company, organisation, vessel or aircraft)" }, 400);
   }
   if (subject.full_name.length > 300) {
     return json({ error: "The name is too long (maximum 300 characters)" }, 400);
