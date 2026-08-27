@@ -56,14 +56,6 @@ const navLinks: NavLink[] = [
           { href: "/platform/security", label: "Security" },
         ],
       },
-      {
-        groupLabel: "Data Sources",
-        items: [
-          { href: "/data-sources", label: "Overview" },
-          { href: "/data-sources/worldcompliance", label: "WorldCompliance®" },
-          { href: "/data-sources/bridger-xg", label: "Bridger Insight XG®" },
-        ],
-      },
     ],
   },
   { href: "/platform/api", label: "API" },
@@ -111,7 +103,6 @@ const navLinks: NavLink[] = [
       { href: "/blog", label: "Blog" },
       { href: "/resources/glossary", label: "Compliance Glossary" },
       { href: "/resources/aml-regulations", label: "AML Regulations" },
-      { href: "/data-coverage", label: "Data Coverage" },
       { href: "/eu-sanctions-map", label: "EU Sanctions Map" },
       { href: "/faq", label: "FAQ" },
       { href: "/support", label: "Support" },
