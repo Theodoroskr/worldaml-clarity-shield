@@ -196,7 +196,10 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
     const payload = {
       search_term: subject.full_name,
       client_ref: subject.customer_reference ?? undefined,
-      fuzziness: options.exactMatch ? 1 : Math.max(0, Math.min(1, options.nameThreshold)),
+      // Provider semantics: 0 = exact match, 1 = maximum fuzziness, max 1 decimal place.
+      fuzziness: options.exactMatch
+        ? 0
+        : Math.round(Math.max(0, Math.min(1, 1 - options.nameThreshold)) * 10) / 10,
       limit: options.maxResults,
       share_url: 0,
       filters,
