@@ -64,11 +64,11 @@ export const PRODUCT_CATALOG: UpsellItem[] = [
     meta: "Platform",
   },
   {
-    name: "LexisNexis Data Coverage",
+    name: "AML Screening & Ongoing Monitoring",
     description:
-      "Premium risk intelligence data as an add-on for deeper adverse media, sanctions and enforcement coverage.",
-    url: `${SITE}/data/lexisnexis`,
-    meta: "Data",
+      "Continuous screening against 1,900+ sanctions, PEP and adverse media lists with tunable match thresholds.",
+    url: `${SITE}/platform/aml-screening`,
+    meta: "Platform",
   },
 ];
 

@@ -20,7 +20,7 @@ const AMLHeroSection = () => {
             comprehensive coverage across 50+ risk categories from world-leading data providers.
           </p>
           <p className="text-body text-text-secondary mb-8">
-            Powered by WorldCompliance® and Bridger Insight XG® data. Designed to satisfy FATF
+            Designed to satisfy FATF
             Recommendations 6, 12, and 16, EU AMLD obligations, and national watchlist screening
             requirements. Available as part of WorldAML Suite and via the WorldAML API.
           </p>

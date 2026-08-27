@@ -34,11 +34,11 @@ export function recommendUpsell(s: UpsellSignals): UpsellRecommendation {
     return {
       template: "screening-upsell",
       title: "Expand screening volume & data coverage",
-      rationale: "Already a Suite customer — grow account value with additional screening capacity, WorldID or LexisNexis data.",
+      rationale: "Already a Suite customer — grow account value with additional screening capacity or WorldID.",
       nextSteps: [
         "Review monthly screening usage against plan limits",
         "Offer WorldID identity verification add-on",
-        "Introduce LexisNexis premium data coverage",
+        "Introduce expanded adverse media and PEP screening coverage",
       ],
       blocked,
       blockedReason,

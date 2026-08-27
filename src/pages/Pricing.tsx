@@ -12,7 +12,6 @@ import { LaneBadge } from "@/components/LaneBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import WorldCompliancePricingCalculator from "@/components/pricing/WorldCompliancePricingCalculator";
 
 const apiPlans = [
   {
@@ -222,7 +221,7 @@ const Pricing = () => {
     <div className="min-h-screen flex flex-col">
       <SEO
         title="Pricing"
-        description="Transparent pricing for WorldAML API, WorldID identity verification, and LexisNexis screening data. Annual billing with volume-based discounts."
+        description="Transparent pricing for the WorldAML API, WorldID identity verification, and AML screening. Annual billing with volume-based discounts."
         canonical="/pricing"
         breadcrumbs={[
           { name: "Home", url: "/" },
@@ -274,10 +273,6 @@ const Pricing = () => {
                 <a href="#worldid" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-divider bg-background text-sm font-medium text-navy hover:bg-secondary hover:border-slate-muted transition-all">
                   <Fingerprint className="w-4 h-4" />
                   WorldID
-                </a>
-                <a href="#lexisnexis" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-divider bg-background text-sm font-medium text-navy hover:bg-secondary hover:border-slate-muted transition-all">
-                  <Database className="w-4 h-4" />
-                  LexisNexis Data
                 </a>
               </div>
 
@@ -466,68 +461,6 @@ const Pricing = () => {
                     </div>
                   </div>
 
-                  {/* LexisNexis Section */}
-                  <div id="lexisnexis" className="mb-12 scroll-mt-24">
-                    <div className="bg-surface-subtle rounded-xl p-6 md:p-8 lg:p-10 text-left">
-                      <div className="flex items-center gap-3 mb-6 flex-wrap">
-                        <LaneBadge lane="data-source" />
-                        <span className="text-xs font-medium px-2 py-1 rounded bg-muted text-muted-foreground">
-                          Powered by LexisNexis Risk Solutions
-                        </span>
-                      </div>
-                        
-                        {/* WorldCompliance Section with Full Calculator */}
-                        <div className="mb-10">
-                          <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
-                            <h2 className="text-2xl text-navy">WorldCompliance® Online</h2>
-                            <span className="text-xs font-medium px-2 py-1 rounded-full bg-teal/10 text-teal">
-                              Online Purchase
-                            </span>
-                          </div>
-                          <p className="text-body text-text-secondary mb-6">
-                            Search-based screening for individuals and companies across global sanctions, PEPs, and adverse media.
-                            Progressive per-user discounts apply.
-                          </p>
-                          <WorldCompliancePricingCalculator />
-                        </div>
-
-                        {/* Bridger Insight XG */}
-                        <div className="mb-8">
-                          <Card className="border-l-4 border-l-navy border-divider">
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-2">
-                                <CardTitle>Bridger Insight XG®</CardTitle>
-                                <span className="text-xs font-medium px-2 py-1 rounded-full bg-navy/10 text-navy">
-                                  Enterprise Only
-                                </span>
-                              </div>
-                              <CardDescription>
-                                Enterprise-grade screening solution with advanced matching algorithms and batch processing.
-                              </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                              <p className="text-body-sm text-text-secondary mb-6">
-                                Pricing is provided on request. Enterprise deployment includes dedicated implementation support and custom SLAs.
-                              </p>
-                              <Button variant="outline" asChild className="w-full">
-                                <Link to="/contact-sales">
-                                  Contact Sales
-                                  <ArrowRight className="ml-2 h-4 w-4" />
-                                </Link>
-                              </Button>
-                            </CardContent>
-                          </Card>
-                        </div>
-
-                        {/* Data Source Attribution */}
-                        <div className="p-4 rounded-lg bg-white border border-divider">
-                          <p className="text-body-sm text-text-tertiary text-center">
-                            WorldCompliance® and Bridger Insight XG® are products of LexisNexis Risk Solutions. 
-                            Delivered and supported by Infocredit Group.
-                          </p>
-                      </div>
-                    </div>
-                  </div>
                 </>
 
             </div>

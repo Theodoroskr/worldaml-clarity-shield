@@ -24,12 +24,6 @@ const footerLinks = {
     { href: "/products/worldid", label: "WorldID" },
     { href: "/pricing", label: "Pricing" },
   ],
-  dataSources: [
-    { href: "/data-sources", label: "Data Sources Overview" },
-    { href: "/data-sources/worldcompliance", label: "WorldCompliance®" },
-    { href: "/data-sources/bridger-xg", label: "Bridger Insight XG®" },
-    { href: "/data-sources/resources", label: "Resources & Data Coverage" },
-  ],
   markets: [
     { href: "/markets/uk", label: "United Kingdom" },
     { href: "/markets/germany", label: "Germany" },
@@ -62,7 +56,6 @@ const footerLinks = {
     { href: "/resources/aml-regulations", label: "AML Regulations" },
     { href: "/resources/best-practices", label: "Best Practices" },
     { href: "/resources/sanctions-lists", label: "Sanctions Lists" },
-    { href: "/data-coverage", label: "Data Coverage" },
     { href: "/eu-sanctions-map", label: "EU Sanctions Map" },
     { href: "/demo", label: "Request Demo" },
     { href: "/rss", label: "RSS Feed" },
@@ -139,23 +132,6 @@ export const Footer = () => {
             <h4 className="font-semibold text-body-sm text-navy mb-4">Platform</h4>
             <ul className="space-y-3">
               {footerLinks.platform.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-body-sm text-text-secondary hover:text-navy transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Data Sources */}
-          <div>
-            <h4 className="font-semibold text-body-sm text-navy mb-4">Data Sources</h4>
-            <ul className="space-y-3">
-              {footerLinks.dataSources.map((link) => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
@@ -257,10 +233,7 @@ export const Footer = () => {
         <div className="mt-8 pt-8 border-t border-divider">
           <div className="text-center mb-6">
             <p className="text-caption text-text-tertiary mb-2">
-              WorldAML is operated by Infocredit Group, an authorized regional partner of LexisNexis Risk Solutions.
-            </p>
-            <p className="text-caption text-text-tertiary mb-2">
-              LexisNexis and related product names are trademarks of LexisNexis Risk Solutions and are used under authorization.
+              WorldAML is operated by Infocredit Group.
             </p>
             <p className="text-caption text-text-tertiary">
               Product availability and service scope may vary by jurisdiction.
