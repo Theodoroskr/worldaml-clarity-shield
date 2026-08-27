@@ -5,6 +5,7 @@ import AMLHeroSection from "@/components/aml-screening/AMLHeroSection";
 import AMLWhatIsSection from "@/components/aml-screening/AMLWhatIsSection";
 import AMLFeaturesSection from "@/components/aml-screening/AMLFeaturesSection";
 import AMLUseCasesSection from "@/components/aml-screening/AMLUseCasesSection";
+import AMLPackagesSection from "@/components/aml-screening/AMLPackagesSection";
 import AMLCTASection from "@/components/aml-screening/AMLCTASection";
 import StickyDemoCTA from "@/components/StickyDemoCTA";
 import { useEffect } from "react";
@@ -106,6 +107,15 @@ const PlatformAMLScreening = () => {
     });
   }, []);
 
+  // Deep links from the portal / checkout cancel land on #packages.
+  useEffect(() => {
+    if (window.location.hash !== "#packages") return;
+    const t = window.setTimeout(() => {
+      document.getElementById("packages")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 200);
+    return () => window.clearTimeout(t);
+  }, []);
+
   return (
   <div className="min-h-screen flex flex-col">
     <SEO
@@ -125,6 +135,7 @@ const PlatformAMLScreening = () => {
       <AMLWhatIsSection />
       <AMLFeaturesSection />
       <AMLUseCasesSection />
+      <AMLPackagesSection />
       <AMLCTASection />
     </main>
     <Footer />

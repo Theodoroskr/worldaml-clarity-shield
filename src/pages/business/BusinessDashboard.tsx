@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useBusinessWorkspace } from "@/hooks/useBusinessWorkspace";
 import { usePortalAccess } from "@/hooks/usePortalAccess";
+import { useScreeningAccess } from "@/hooks/useScreeningAccess";
 import { BUSINESS_SOLUTIONS, SOLUTION_BY_KEY, recommendSolutions, CROSS_SELL_COPY } from "@/lib/businessCatalogue";
 import { SolutionCard, TalkToExpert } from "@/components/business/SolutionCard";
 import { BusinessNewsFeed } from "@/components/business/BusinessNewsFeed";
@@ -22,6 +23,7 @@ const fmtDate = (d?: string | null) =>
 export default function BusinessDashboard() {
   const { account, activeEntitlements, ownedKeys, hasProducts, members, track } = useBusinessWorkspace();
   const { academyAccess } = usePortalAccess();
+  const { hasAccess: hasScreeningAccess } = useScreeningAccess();
 
   useEffect(() => { track("dashboard_viewed"); }, [track]);
 
@@ -177,7 +179,7 @@ export default function BusinessDashboard() {
           {/* QUICK ACTIONS */}
           <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[
-              { label: "AML Screening", to: "/screening", icon: ShieldCheck },
+              { label: "AML Screening", to: hasScreeningAccess ? "/screening" : "/platform/aml-screening#packages", icon: ShieldCheck },
               { label: "Explore Solutions", to: "/business/solutions", icon: Compass },
               { label: "Manage Team", to: "/business/team", icon: Users },
               { label: "View Billing", to: "/business/billing", icon: CreditCard },

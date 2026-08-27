@@ -211,6 +211,7 @@ const SuiteIDV = lazyWithRetry(() => import("./pages/suite/SuiteIDV"));
 const SuiteScreening = lazyWithRetry(() => import("./pages/suite/SuiteScreening"));
 const SuiteScreeningV2 = lazyWithRetry(() => import("./pages/suite/SuiteScreeningV2"));
 const ScreeningWorkspace = lazyWithRetry(() => import("./pages/screening/ScreeningWorkspace"));
+const ScreeningActivate = lazyWithRetry(() => import("./pages/screening/ScreeningActivate"));
 
 const SuiteTransactions = lazyWithRetry(() => import("./pages/suite/SuiteTransactions"));
 const SuiteMonitoring = lazyWithRetry(() => import("./pages/suite/SuiteMonitoring"));
@@ -556,6 +557,7 @@ const App = () => (
 
                 {/* WorldAML Screening & Monitoring — standalone product workspace (separate from Suite) */}
                 <Route path="/screening" element={<PortalGuard portal="business"><ScreeningWorkspace /></PortalGuard>} />
+                <Route path="/screening/activate" element={<ScreeningActivate />} />
 
 
                 {/* Suite App (functional dashboard) */}

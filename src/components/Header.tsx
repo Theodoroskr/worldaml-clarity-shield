@@ -43,7 +43,7 @@ const navLinks: NavLink[] = [
         items: [
           { href: "/platform/suite", label: "Suite Overview" },
           { href: "/platform/kyc-kyb", label: "KYC & KYB" },
-          { href: "/screening", label: "AML Screening" },
+          { href: "/platform/aml-screening", label: "AML Screening" },
           { href: "/platform/risk-assessment", label: "Risk Assessment" },
         ],
       },

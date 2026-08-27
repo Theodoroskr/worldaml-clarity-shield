@@ -5346,6 +5346,59 @@ export type Database = {
         }
         Relationships: []
       }
+      screening_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          monitored_entity_quota: number
+          organisation_id: string
+          plan: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_session_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          monitored_entity_quota?: number
+          organisation_id: string
+          plan: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          monitored_entity_quota?: number
+          organisation_id?: string
+          plan?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_subscriptions_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       signup_followups_sent: {
         Row: {
           email: string
@@ -8503,6 +8556,16 @@ export type Database = {
       current_portal_customer_id: { Args: never; Returns: string }
       current_user_has_suite_access: { Args: never; Returns: boolean }
       current_user_org_id: { Args: never; Returns: string }
+      current_user_screening_entitlement: {
+        Args: never
+        Returns: {
+          current_period_end: string
+          has_access: boolean
+          monitored_entity_quota: number
+          plan: string
+          status: string
+        }[]
+      }
       dsar_execute_erasure: {
         Args: { _customer_id: string; _dsar_id?: string; _reason?: string }
         Returns: Json
