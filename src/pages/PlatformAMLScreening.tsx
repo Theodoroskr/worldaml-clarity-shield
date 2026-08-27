@@ -107,6 +107,15 @@ const PlatformAMLScreening = () => {
     });
   }, []);
 
+  // Deep links from the portal / checkout cancel land on #packages.
+  useEffect(() => {
+    if (window.location.hash !== "#packages") return;
+    const t = window.setTimeout(() => {
+      document.getElementById("packages")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 200);
+    return () => window.clearTimeout(t);
+  }, []);
+
   return (
   <div className="min-h-screen flex flex-col">
     <SEO

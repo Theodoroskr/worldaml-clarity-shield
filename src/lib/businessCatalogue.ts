@@ -104,7 +104,7 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
     pairsWith: ["worldid", "academy"],
     usageUnit: "monitored entities",
     openUrl: "/screening",
-    publicUrl: "/products/worldaml-api",
+    publicUrl: "/platform/aml-screening",
   },
   {
     key: "worldid",
