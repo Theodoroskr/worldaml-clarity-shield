@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useBusinessWorkspace } from "@/hooks/useBusinessWorkspace";
 import { usePortalAccess } from "@/hooks/usePortalAccess";
+import { useScreeningAccess } from "@/hooks/useScreeningAccess";
 import { BUSINESS_SOLUTIONS, SOLUTION_BY_KEY, recommendSolutions, CROSS_SELL_COPY } from "@/lib/businessCatalogue";
 import { SolutionCard, TalkToExpert } from "@/components/business/SolutionCard";
 import { BusinessNewsFeed } from "@/components/business/BusinessNewsFeed";
@@ -22,6 +23,7 @@ const fmtDate = (d?: string | null) =>
 export default function BusinessDashboard() {
   const { account, activeEntitlements, ownedKeys, hasProducts, members, track } = useBusinessWorkspace();
   const { academyAccess } = usePortalAccess();
+  const { hasAccess: hasScreeningAccess } = useScreeningAccess();
 
   useEffect(() => { track("dashboard_viewed"); }, [track]);
 
