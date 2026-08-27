@@ -1212,6 +1212,129 @@ export type Database = {
         }
         Relationships: []
       }
+      adverse_media_items: {
+        Row: {
+          case_id: string | null
+          created_at: string
+          headline: string
+          id: string
+          internal_source_url: string | null
+          match_id: string | null
+          media_category: string | null
+          organisation_id: string
+          publication: string | null
+          published_at: string | null
+          relevant_subject: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          snippet: string | null
+          status: Database["public"]["Enums"]["adverse_media_status"]
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string
+          headline: string
+          id?: string
+          internal_source_url?: string | null
+          match_id?: string | null
+          media_category?: string | null
+          organisation_id: string
+          publication?: string | null
+          published_at?: string | null
+          relevant_subject?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          snippet?: string | null
+          status?: Database["public"]["Enums"]["adverse_media_status"]
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string
+          headline?: string
+          id?: string
+          internal_source_url?: string | null
+          match_id?: string | null
+          media_category?: string | null
+          organisation_id?: string
+          publication?: string | null
+          published_at?: string | null
+          relevant_subject?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          snippet?: string | null
+          status?: Database["public"]["Enums"]["adverse_media_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adverse_media_items_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "screening_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adverse_media_items_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "screening_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analyst_decisions: {
+        Row: {
+          case_id: string
+          comment: string | null
+          decided_at: string
+          decided_by: string | null
+          decision: Database["public"]["Enums"]["analyst_decision_kind"]
+          id: string
+          match_id: string | null
+          organisation_id: string
+          reason_code: string | null
+          reason_label: string | null
+        }
+        Insert: {
+          case_id: string
+          comment?: string | null
+          decided_at?: string
+          decided_by?: string | null
+          decision: Database["public"]["Enums"]["analyst_decision_kind"]
+          id?: string
+          match_id?: string | null
+          organisation_id: string
+          reason_code?: string | null
+          reason_label?: string | null
+        }
+        Update: {
+          case_id?: string
+          comment?: string | null
+          decided_at?: string
+          decided_by?: string | null
+          decision?: Database["public"]["Enums"]["analyst_decision_kind"]
+          id?: string
+          match_id?: string | null
+          organisation_id?: string
+          reason_code?: string | null
+          reason_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analyst_decisions_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "screening_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analyst_decisions_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "screening_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auto_approve_domains: {
         Row: {
           created_at: string
@@ -1505,6 +1628,95 @@ export type Database = {
           },
         ]
       }
+      case_attachments: {
+        Row: {
+          case_id: string
+          created_at: string
+          file_name: string
+          id: string
+          mime_type: string | null
+          organisation_id: string
+          size_bytes: number | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          file_name: string
+          id?: string
+          mime_type?: string | null
+          organisation_id: string
+          size_bytes?: number | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          file_name?: string
+          id?: string
+          mime_type?: string | null
+          organisation_id?: string
+          size_bytes?: number | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_attachments_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "screening_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_comments: {
+        Row: {
+          author_id: string | null
+          body: string
+          case_id: string
+          created_at: string
+          id: string
+          match_id: string | null
+          organisation_id: string
+        }
+        Insert: {
+          author_id?: string | null
+          body: string
+          case_id: string
+          created_at?: string
+          id?: string
+          match_id?: string | null
+          organisation_id: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string
+          case_id?: string
+          created_at?: string
+          id?: string
+          match_id?: string | null
+          organisation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_comments_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "screening_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_comments_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "screening_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_registrations: {
         Row: {
           actual_arr_eur: number | null
@@ -1712,6 +1924,185 @@ export type Database = {
           region?: string | null
         }
         Relationships: []
+      }
+      match_attributes: {
+        Row: {
+          assessment: Database["public"]["Enums"]["attribute_assessment"]
+          created_at: string
+          field_key: string
+          field_label: string
+          id: string
+          match_id: string
+          match_value: string | null
+          organisation_id: string
+          sort_order: number
+          subject_value: string | null
+        }
+        Insert: {
+          assessment?: Database["public"]["Enums"]["attribute_assessment"]
+          created_at?: string
+          field_key: string
+          field_label: string
+          id?: string
+          match_id: string
+          match_value?: string | null
+          organisation_id: string
+          sort_order?: number
+          subject_value?: string | null
+        }
+        Update: {
+          assessment?: Database["public"]["Enums"]["attribute_assessment"]
+          created_at?: string
+          field_key?: string
+          field_label?: string
+          id?: string
+          match_id?: string
+          match_value?: string | null
+          organisation_id?: string
+          sort_order?: number
+          subject_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_attributes_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "screening_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitoring_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          case_id: string | null
+          change_description: string
+          change_type: string
+          created_at: string
+          details: Json
+          detected_at: string
+          id: string
+          monitoring_subject_id: string
+          organisation_id: string
+          status: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          case_id?: string | null
+          change_description: string
+          change_type: string
+          created_at?: string
+          details?: Json
+          detected_at?: string
+          id?: string
+          monitoring_subject_id: string
+          organisation_id: string
+          status?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          case_id?: string | null
+          change_description?: string
+          change_type?: string
+          created_at?: string
+          details?: Json
+          detected_at?: string
+          id?: string
+          monitoring_subject_id?: string
+          organisation_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_alerts_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "screening_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monitoring_alerts_monitoring_subject_id_fkey"
+            columns: ["monitoring_subject_id"]
+            isOneToOne: false
+            referencedRelation: "monitoring_subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitoring_subjects: {
+        Row: {
+          assigned_to: string | null
+          case_id: string | null
+          categories: Database["public"]["Enums"]["screening_category"][]
+          created_at: string
+          created_by: string | null
+          frequency: string
+          id: string
+          last_change_at: string | null
+          last_checked_at: string | null
+          organisation_id: string
+          started_at: string
+          status: Database["public"]["Enums"]["monitoring_status"]
+          stopped_at: string | null
+          stopped_by: string | null
+          subject_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          case_id?: string | null
+          categories?: Database["public"]["Enums"]["screening_category"][]
+          created_at?: string
+          created_by?: string | null
+          frequency?: string
+          id?: string
+          last_change_at?: string | null
+          last_checked_at?: string | null
+          organisation_id: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["monitoring_status"]
+          stopped_at?: string | null
+          stopped_by?: string | null
+          subject_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          case_id?: string | null
+          categories?: Database["public"]["Enums"]["screening_category"][]
+          created_at?: string
+          created_by?: string | null
+          frequency?: string
+          id?: string
+          last_change_at?: string | null
+          last_checked_at?: string | null
+          organisation_id?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["monitoring_status"]
+          stopped_at?: string | null
+          stopped_by?: string | null
+          subject_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_subjects_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "screening_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monitoring_subjects_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "screening_subjects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       news_updates: {
         Row: {
@@ -3084,6 +3475,89 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_raw_responses: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error_detail: string | null
+          http_status: number | null
+          id: string
+          operation: string
+          organisation_id: string
+          provider: string
+          request_payload: Json | null
+          response_payload: Json | null
+          search_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error_detail?: string | null
+          http_status?: number | null
+          id?: string
+          operation: string
+          organisation_id: string
+          provider: string
+          request_payload?: Json | null
+          response_payload?: Json | null
+          search_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error_detail?: string | null
+          http_status?: number | null
+          id?: string
+          operation?: string
+          organisation_id?: string
+          provider?: string
+          request_payload?: Json | null
+          response_payload?: Json | null
+          search_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_raw_responses_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "screening_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_references: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_kind: string
+          id: string
+          organisation_id: string
+          provider: string
+          provider_id: string
+          provider_ref: Json
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_kind: string
+          id?: string
+          organisation_id: string
+          provider: string
+          provider_id: string
+          provider_ref?: Json
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_kind?: string
+          id?: string
+          organisation_id?: string
+          provider?: string
+          provider_id?: string
+          provider_ref?: Json
+        }
+        Relationships: []
+      }
       quiz_error_reports: {
         Row: {
           course_id: string | null
@@ -4348,6 +4822,527 @@ export type Database = {
           results_count?: number | null
           session_id?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      screening_audit_events: {
+        Row: {
+          actor_id: string | null
+          case_id: string | null
+          created_at: string
+          description: string
+          event_type: string
+          id: string
+          match_id: string | null
+          metadata: Json
+          organisation_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          case_id?: string | null
+          created_at?: string
+          description: string
+          event_type: string
+          id?: string
+          match_id?: string | null
+          metadata?: Json
+          organisation_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          case_id?: string | null
+          created_at?: string
+          description?: string
+          event_type?: string
+          id?: string
+          match_id?: string | null
+          metadata?: Json
+          organisation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_audit_events_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "screening_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_audit_events_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "screening_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      screening_cases: {
+        Row: {
+          adverse_media_matches: number
+          assigned_to: string | null
+          case_reference: string
+          closed_at: string | null
+          created_at: string
+          created_by: string | null
+          customer_reference: string | null
+          due_date: string | null
+          id: string
+          is_legacy: boolean
+          monitoring_status:
+            | Database["public"]["Enums"]["monitoring_status"]
+            | null
+          organisation_id: string
+          pep_matches: number
+          priority: string
+          sanctions_matches: number
+          search_id: string | null
+          status: Database["public"]["Enums"]["screening_case_status"]
+          subject_id: string | null
+          updated_at: string
+          warning_matches: number
+        }
+        Insert: {
+          adverse_media_matches?: number
+          assigned_to?: string | null
+          case_reference: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_reference?: string | null
+          due_date?: string | null
+          id?: string
+          is_legacy?: boolean
+          monitoring_status?:
+            | Database["public"]["Enums"]["monitoring_status"]
+            | null
+          organisation_id: string
+          pep_matches?: number
+          priority?: string
+          sanctions_matches?: number
+          search_id?: string | null
+          status?: Database["public"]["Enums"]["screening_case_status"]
+          subject_id?: string | null
+          updated_at?: string
+          warning_matches?: number
+        }
+        Update: {
+          adverse_media_matches?: number
+          assigned_to?: string | null
+          case_reference?: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_reference?: string | null
+          due_date?: string | null
+          id?: string
+          is_legacy?: boolean
+          monitoring_status?:
+            | Database["public"]["Enums"]["monitoring_status"]
+            | null
+          organisation_id?: string
+          pep_matches?: number
+          priority?: string
+          sanctions_matches?: number
+          search_id?: string | null
+          status?: Database["public"]["Enums"]["screening_case_status"]
+          subject_id?: string | null
+          updated_at?: string
+          warning_matches?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_cases_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "screening_searches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_cases_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "screening_subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      screening_matches: {
+        Row: {
+          case_id: string
+          categories: Database["public"]["Enums"]["screening_category"][]
+          category_labels: string[]
+          conflicting_attribute_count: number
+          country: string | null
+          created_at: string
+          entity_type:
+            | Database["public"]["Enums"]["screening_subject_type"]
+            | null
+          id: string
+          last_data_update: string | null
+          matched_attribute_count: number
+          matched_name: string
+          name_similarity: number | null
+          organisation_id: string
+          profile: Json
+          search_id: string | null
+          status: Database["public"]["Enums"]["screening_match_status"]
+          updated_at: string
+          year_of_birth: number | null
+        }
+        Insert: {
+          case_id: string
+          categories?: Database["public"]["Enums"]["screening_category"][]
+          category_labels?: string[]
+          conflicting_attribute_count?: number
+          country?: string | null
+          created_at?: string
+          entity_type?:
+            | Database["public"]["Enums"]["screening_subject_type"]
+            | null
+          id?: string
+          last_data_update?: string | null
+          matched_attribute_count?: number
+          matched_name: string
+          name_similarity?: number | null
+          organisation_id: string
+          profile?: Json
+          search_id?: string | null
+          status?: Database["public"]["Enums"]["screening_match_status"]
+          updated_at?: string
+          year_of_birth?: number | null
+        }
+        Update: {
+          case_id?: string
+          categories?: Database["public"]["Enums"]["screening_category"][]
+          category_labels?: string[]
+          conflicting_attribute_count?: number
+          country?: string | null
+          created_at?: string
+          entity_type?:
+            | Database["public"]["Enums"]["screening_subject_type"]
+            | null
+          id?: string
+          last_data_update?: string | null
+          matched_attribute_count?: number
+          matched_name?: string
+          name_similarity?: number | null
+          organisation_id?: string
+          profile?: Json
+          search_id?: string | null
+          status?: Database["public"]["Enums"]["screening_match_status"]
+          updated_at?: string
+          year_of_birth?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_matches_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "screening_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_matches_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "screening_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      screening_policies: {
+        Row: {
+          config: Json
+          created_at: string
+          created_by: string | null
+          current_version: number
+          description: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          organisation_id: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          current_version?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          organisation_id: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          current_version?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          organisation_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      screening_policy_versions: {
+        Row: {
+          config: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          organisation_id: string
+          policy_id: string
+          version: number
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          organisation_id: string
+          policy_id: string
+          version: number
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          organisation_id?: string
+          policy_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_policy_versions_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "screening_policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      screening_searches: {
+        Row: {
+          adverse_media_requested: boolean
+          categories_excluded: Database["public"]["Enums"]["screening_category"][]
+          categories_screened: Database["public"]["Enums"]["screening_category"][]
+          created_at: string
+          error_message: string | null
+          id: string
+          initiated_by: string | null
+          is_legacy: boolean
+          monitoring_requested: boolean
+          organisation_id: string
+          policy_id: string | null
+          policy_name: string | null
+          policy_version_id: string | null
+          reference: string
+          screened_at: string
+          search_parameters: Json
+          status: string
+          subject_id: string | null
+        }
+        Insert: {
+          adverse_media_requested?: boolean
+          categories_excluded?: Database["public"]["Enums"]["screening_category"][]
+          categories_screened?: Database["public"]["Enums"]["screening_category"][]
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          initiated_by?: string | null
+          is_legacy?: boolean
+          monitoring_requested?: boolean
+          organisation_id: string
+          policy_id?: string | null
+          policy_name?: string | null
+          policy_version_id?: string | null
+          reference: string
+          screened_at?: string
+          search_parameters?: Json
+          status?: string
+          subject_id?: string | null
+        }
+        Update: {
+          adverse_media_requested?: boolean
+          categories_excluded?: Database["public"]["Enums"]["screening_category"][]
+          categories_screened?: Database["public"]["Enums"]["screening_category"][]
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          initiated_by?: string | null
+          is_legacy?: boolean
+          monitoring_requested?: boolean
+          organisation_id?: string
+          policy_id?: string | null
+          policy_name?: string | null
+          policy_version_id?: string | null
+          reference?: string
+          screened_at?: string
+          search_parameters?: Json
+          status?: string
+          subject_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_searches_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "screening_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_searches_policy_version_id_fkey"
+            columns: ["policy_version_id"]
+            isOneToOne: false
+            referencedRelation: "screening_policy_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_searches_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "screening_subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      screening_sources: {
+        Row: {
+          category: Database["public"]["Enums"]["screening_category"] | null
+          created_at: string
+          description: string | null
+          id: string
+          internal_source_url: string | null
+          jurisdiction: string | null
+          last_updated: string | null
+          listing_date: string | null
+          match_id: string
+          organisation_id: string
+          reference_number: string | null
+          source_name: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["screening_category"] | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          internal_source_url?: string | null
+          jurisdiction?: string | null
+          last_updated?: string | null
+          listing_date?: string | null
+          match_id: string
+          organisation_id: string
+          reference_number?: string | null
+          source_name: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["screening_category"] | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          internal_source_url?: string | null
+          jurisdiction?: string | null
+          last_updated?: string | null
+          listing_date?: string | null
+          match_id?: string
+          organisation_id?: string
+          reference_number?: string | null
+          source_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_sources_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "screening_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      screening_subjects: {
+        Row: {
+          country_of_incorporation: string | null
+          country_of_residence: string | null
+          created_at: string
+          created_by: string | null
+          customer_reference: string | null
+          date_of_birth: string | null
+          first_name: string | null
+          full_name: string
+          id: string
+          identification_number: string | null
+          incorporation_date: string | null
+          last_name: string | null
+          middle_name: string | null
+          nationality: string | null
+          organisation_id: string
+          previous_name: string | null
+          registered_address: string | null
+          registration_number: string | null
+          subject_type: Database["public"]["Enums"]["screening_subject_type"]
+          suite_customer_id: string | null
+          updated_at: string
+          year_of_birth: number | null
+        }
+        Insert: {
+          country_of_incorporation?: string | null
+          country_of_residence?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_reference?: string | null
+          date_of_birth?: string | null
+          first_name?: string | null
+          full_name: string
+          id?: string
+          identification_number?: string | null
+          incorporation_date?: string | null
+          last_name?: string | null
+          middle_name?: string | null
+          nationality?: string | null
+          organisation_id: string
+          previous_name?: string | null
+          registered_address?: string | null
+          registration_number?: string | null
+          subject_type: Database["public"]["Enums"]["screening_subject_type"]
+          suite_customer_id?: string | null
+          updated_at?: string
+          year_of_birth?: number | null
+        }
+        Update: {
+          country_of_incorporation?: string | null
+          country_of_residence?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_reference?: string | null
+          date_of_birth?: string | null
+          first_name?: string | null
+          full_name?: string
+          id?: string
+          identification_number?: string | null
+          incorporation_date?: string | null
+          last_name?: string | null
+          middle_name?: string | null
+          nationality?: string | null
+          organisation_id?: string
+          previous_name?: string | null
+          registered_address?: string | null
+          registration_number?: string | null
+          subject_type?: Database["public"]["Enums"]["screening_subject_type"]
+          suite_customer_id?: string | null
+          updated_at?: string
+          year_of_birth?: number | null
         }
         Relationships: []
       }
@@ -7121,6 +8116,47 @@ export type Database = {
           },
         ]
       }
+      usage_transactions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          credits: number
+          description: string | null
+          id: string
+          kind: string
+          organisation_id: string
+          search_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          credits?: number
+          description?: string | null
+          id?: string
+          kind: string
+          organisation_id: string
+          search_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          credits?: number
+          description?: string | null
+          id?: string
+          kind?: string
+          organisation_id?: string
+          search_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_transactions_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "screening_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -7481,6 +8517,10 @@ export type Database = {
         }
         Returns: string
       }
+      ensure_default_screening_policy: {
+        Args: { _org: string }
+        Returns: string
+      }
       file_str_amendment: {
         Args: { _explanation: string; _report_id: string }
         Returns: undefined
@@ -7563,6 +8603,7 @@ export type Database = {
       }
       mark_overdue_periodic_reviews: { Args: never; Returns: number }
       news_clean_text: { Args: { _raw: string }; Returns: string }
+      next_screening_reference: { Args: { _prefix?: string }; Returns: string }
       onboarding_form_publish: {
         Args: { _form_id: string; _notes?: string }
         Returns: string
@@ -7651,6 +8692,7 @@ export type Database = {
           signup_count: number
         }[]
       }
+      screening_is_org_member: { Args: { _org: string }; Returns: boolean }
       submit_quiz_and_issue_certificate: {
         Args: { _answers: Json; _course_id: string; _holder_name: string }
         Returns: Json
@@ -7666,7 +8708,25 @@ export type Database = {
       sweep_sanctions_search_retention: { Args: never; Returns: number }
     }
     Enums: {
+      adverse_media_status:
+        | "new"
+        | "relevant"
+        | "not_relevant"
+        | "duplicate"
+        | "escalated"
+      analyst_decision_kind:
+        | "confirm_match"
+        | "keep_possible"
+        | "false_positive"
+        | "escalate"
+        | "add_to_monitoring"
+        | "reopen"
       app_role: "admin" | "moderator" | "user"
+      attribute_assessment:
+        | "match"
+        | "partial_match"
+        | "conflict"
+        | "unavailable"
       deal_registration_status:
         | "pending"
         | "approved"
@@ -7674,6 +8734,7 @@ export type Database = {
         | "won"
         | "lost"
         | "expired"
+      monitoring_status: "active" | "paused" | "stopped"
       org_member_role:
         | "admin"
         | "mlro"
@@ -7689,6 +8750,25 @@ export type Database = {
         | "withdrawn"
       partner_type: "referral" | "affiliate" | "reseller" | "technology"
       referral_status: "clicked" | "signed_up" | "converted"
+      screening_case_status:
+        | "no_potential_matches"
+        | "potential_matches_require_review"
+        | "review_in_progress"
+        | "match_confirmed"
+        | "false_positives_resolved"
+        | "escalated"
+        | "screening_failed"
+        | "monitoring_update_requires_review"
+        | "closed"
+      screening_category: "sanctions" | "pep_rca" | "warnings" | "adverse_media"
+      screening_match_status:
+        | "review_required"
+        | "review_in_progress"
+        | "confirmed"
+        | "possible"
+        | "false_positive"
+        | "escalated"
+      screening_subject_type: "person" | "organisation"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -7816,7 +8896,28 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      adverse_media_status: [
+        "new",
+        "relevant",
+        "not_relevant",
+        "duplicate",
+        "escalated",
+      ],
+      analyst_decision_kind: [
+        "confirm_match",
+        "keep_possible",
+        "false_positive",
+        "escalate",
+        "add_to_monitoring",
+        "reopen",
+      ],
       app_role: ["admin", "moderator", "user"],
+      attribute_assessment: [
+        "match",
+        "partial_match",
+        "conflict",
+        "unavailable",
+      ],
       deal_registration_status: [
         "pending",
         "approved",
@@ -7825,6 +8926,7 @@ export const Constants = {
         "lost",
         "expired",
       ],
+      monitoring_status: ["active", "paused", "stopped"],
       org_member_role: [
         "admin",
         "mlro",
@@ -7842,6 +8944,27 @@ export const Constants = {
       ],
       partner_type: ["referral", "affiliate", "reseller", "technology"],
       referral_status: ["clicked", "signed_up", "converted"],
+      screening_case_status: [
+        "no_potential_matches",
+        "potential_matches_require_review",
+        "review_in_progress",
+        "match_confirmed",
+        "false_positives_resolved",
+        "escalated",
+        "screening_failed",
+        "monitoring_update_requires_review",
+        "closed",
+      ],
+      screening_category: ["sanctions", "pep_rca", "warnings", "adverse_media"],
+      screening_match_status: [
+        "review_required",
+        "review_in_progress",
+        "confirmed",
+        "possible",
+        "false_positive",
+        "escalated",
+      ],
+      screening_subject_type: ["person", "organisation"],
     },
   },
 } as const
