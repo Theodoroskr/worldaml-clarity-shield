@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Loader2, Search, ShieldCheck, Activity, FileText, ChevronRight,
   ArrowLeft, Copy, Check, X, Filter, Tag, MoreHorizontal,
-  AlertTriangle, User, Building2, Ship, Plane,
+  AlertTriangle, User, Building2, Ship, Plane, RefreshCw, ExternalLink, Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
