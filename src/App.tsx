@@ -410,19 +410,11 @@ const App = () => (
                 <Route path="/platform/aml-screening" element={<PlatformAMLScreening />} />
                 <Route path="/platform/risk-assessment" element={<PlatformRiskAssessment />} />
                 
-                {/* Data Sources (Lane 2) */}
-                <Route path="/data-sources" element={<DataSources />} />
-                <Route path="/data-sources/resources" element={<ResourcesDataCoverage />} />
-                <Route path="/data-sources/worldcompliance" element={<WorldCompliance />} />
-                <Route path="/data-sources/worldcompliance/demo" element={<WorldComplianceDemo />} />
-                <Route path="/data-sources/worldcompliance/pricing" element={<WorldCompliancePricing />} />
-                <Route path="/data-sources/worldcompliance/eu-me" element={<WorldComplianceEUME />} />
-                <Route path="/data-sources/worldcompliance/uk-ie" element={<WorldComplianceUKIE />} />
-                <Route path="/data-sources/worldcompliance/na" element={<WorldComplianceNA />} />
-                <Route path="/data-sources/bridger-xg" element={<BridgerXG />} />
-                <Route path="/data-sources/bridger-xg/eu-me" element={<BridgerXGEUME />} />
-                <Route path="/data-sources/bridger-xg/uk-ie" element={<BridgerXGUKIE />} />
-                <Route path="/data-sources/bridger-xg/na" element={<BridgerXGNA />} />
+                {/* Retired data-source lane — redirect to WorldAML AML Screening */}
+                <Route path="/data-sources/worldcompliance/pricing" element={<Navigate to="/pricing" replace />} />
+                <Route path="/data-sources/*" element={<Navigate to="/platform/aml-screening" replace />} />
+                <Route path="/data-sources" element={<Navigate to="/platform/aml-screening" replace />} />
+
                 
                 {/* Products */}
                 <Route path="/products" element={<Navigate to="/products/worldid" replace />} />
