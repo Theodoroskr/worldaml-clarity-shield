@@ -124,7 +124,7 @@ const Platform = () => {
         {/* Product Links */}
         <section className="section-padding bg-background">
           <div className="container-enterprise">
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               <Card className="border-divider hover:border-navy/20 transition-colors">
                 <CardHeader>
                   <CardTitle>WorldAML Suite</CardTitle>
@@ -136,6 +136,23 @@ const Platform = () => {
                   <Button variant="outline" asChild className="w-full">
                     <Link to="/platform/suite">
                       Explore Suite
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+              <Card className="border-divider hover:border-navy/20 transition-colors">
+                <CardHeader>
+                  <CardTitle>Screening &amp; Monitoring</CardTitle>
+                  <CardDescription>
+                    A separate WorldAML product that integrates with the Platform — sanctions, PEP and adverse
+                    media screening with ongoing monitoring.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="outline" asChild className="w-full">
+                    <Link to="/screening-monitoring">
+                      Explore the product
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>

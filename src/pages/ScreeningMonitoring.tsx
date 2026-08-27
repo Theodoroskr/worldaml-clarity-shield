@@ -8,6 +8,7 @@ import AMLUseCasesSection from "@/components/aml-screening/AMLUseCasesSection";
 import AMLPackagesSection from "@/components/aml-screening/AMLPackagesSection";
 import AMLCTASection from "@/components/aml-screening/AMLCTASection";
 import StickyDemoCTA from "@/components/StickyDemoCTA";
+import ScreeningProductNav from "@/components/screening/ScreeningProductNav";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,8 +19,8 @@ const softwareData = {
   applicationCategory: "FinancialApplication",
   description: "AML screening and monitoring software covering sanctions, PEPs, adverse media, and RCAs. FATF R.6, R.12, and R.16 aligned.",
   operatingSystem: "Web",
-  url: "https://www.worldaml.com/platform/aml-screening",
-  offers: { "@type": "Offer", category: "SaaS", url: "https://www.worldaml.com/pricing" },
+  url: "https://www.worldaml.com/screening-monitoring",
+  offers: { "@type": "Offer", category: "SaaS", url: "https://www.worldaml.com/screening-monitoring/pricing" },
   provider: { "@type": "Organization", name: "WorldAML", url: "https://www.worldaml.com" },
 };
 
@@ -96,13 +97,13 @@ const faqData = {
 
 const structuredData = [softwareData, faqData];
 
-const PlatformAMLScreening = () => {
+const ScreeningMonitoring = () => {
   useEffect(() => {
     // Fire-and-forget: only tracked for authenticated users; edge function requires JWT
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) return;
       supabase.functions.invoke("log-outreach-event", {
-        body: { event_type: "aml_page_view", path: "/platform/aml-screening" },
+        body: { event_type: "aml_page_view", path: "/screening-monitoring" },
       }).catch(() => {});
     });
   }, []);
@@ -121,15 +122,15 @@ const PlatformAMLScreening = () => {
     <SEO
       title="AML Screening & Monitoring — Sanctions & PEP"
       description="AML screening software covering sanctions, PEPs, adverse media, and RCAs. Real-time and batch screening across 1,900+ global lists."
-      canonical="/platform/aml-screening"
+      canonical="/screening-monitoring"
       breadcrumbs={[
         { name: "Home", url: "/" },
-        { name: "Platform", url: "/platform" },
-        { name: "AML Screening & Monitoring", url: "/platform/aml-screening" },
+        { name: "Screening & Monitoring", url: "/screening-monitoring" },
       ]}
       structuredData={structuredData}
     />
     <Header />
+    <ScreeningProductNav />
     <main className="flex-1">
       <AMLHeroSection />
       <AMLWhatIsSection />
@@ -144,4 +145,4 @@ const PlatformAMLScreening = () => {
   );
 };
 
-export default PlatformAMLScreening;
+export default ScreeningMonitoring;

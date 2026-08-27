@@ -46,7 +46,7 @@ export const PRODUCT_CATALOG: UpsellItem[] = [
     name: "AML Screening",
     description:
       "Screen customers and counterparties against 1,900+ global sanctions, PEP and adverse media lists — instantly or via API.",
-    url: `${SITE}/platform/aml-screening`,
+    url: `${SITE}/screening-monitoring`,
     meta: "Platform",
   },
   {
@@ -67,7 +67,7 @@ export const PRODUCT_CATALOG: UpsellItem[] = [
     name: "AML Screening & Ongoing Monitoring",
     description:
       "Continuous screening against 1,900+ sanctions, PEP and adverse media lists with tunable match thresholds.",
-    url: `${SITE}/platform/aml-screening`,
+    url: `${SITE}/screening-monitoring`,
     meta: "Platform",
   },
 ];

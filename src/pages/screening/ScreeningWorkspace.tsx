@@ -45,7 +45,7 @@ export default function ScreeningWorkspace() {
               </p>
               <div className="flex gap-3 flex-wrap">
                 <Button asChild variant="accent">
-                  <Link to="/platform/aml-screening#packages">
+                  <Link to="/screening-monitoring/pricing">
                     View packages <ArrowRight className="ml-1.5 h-4 w-4" />
                   </Link>
                 </Button>

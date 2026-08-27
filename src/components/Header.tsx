@@ -43,7 +43,6 @@ const navLinks: NavLink[] = [
         items: [
           { href: "/platform/suite", label: "Suite Overview" },
           { href: "/platform/kyc-kyb", label: "KYC & KYB" },
-          { href: "/platform/aml-screening", label: "AML Screening" },
           { href: "/platform/risk-assessment", label: "Risk Assessment" },
         ],
       },
@@ -56,6 +55,16 @@ const navLinks: NavLink[] = [
           { href: "/platform/security", label: "Security" },
         ],
       },
+    ],
+  },
+  {
+    label: "Screening & Monitoring",
+    href: "/screening-monitoring",
+    children: [
+      { href: "/screening-monitoring", label: "Product Overview" },
+      { href: "/screening-monitoring/pricing", label: "Pricing & Packages" },
+      { href: "/sanctions-screening-api", label: "API & Docs" },
+      { href: "/screening", label: "Open Workspace" },
     ],
   },
   { href: "/platform/api", label: "API" },

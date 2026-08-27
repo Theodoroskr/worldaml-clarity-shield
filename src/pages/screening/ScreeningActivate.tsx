@@ -107,7 +107,7 @@ export default function ScreeningActivate() {
               <p className="text-sm text-muted-foreground">
                 Contact info@worldaml.com with your payment reference and we will activate your workspace.
               </p>
-              <Button asChild variant="outline"><Link to="/platform/aml-screening#packages">Back to packages</Link></Button>
+              <Button asChild variant="outline"><Link to="/screening-monitoring/pricing">Back to packages</Link></Button>
             </CardContent>
           </Card>
         )}

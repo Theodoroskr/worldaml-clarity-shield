@@ -56,7 +56,7 @@ export default function AMLPackagesSection() {
   const onBuy = (planKey: string, fn: string, plan: string) => {
     if (!isAuthenticated) {
       sessionStorage.setItem(INTENT_KEY, planKey);
-      navigate(`/signup?redirect=${encodeURIComponent("/platform/aml-screening#packages")}`);
+      navigate(`/signup?redirect=${encodeURIComponent("/screening-monitoring/pricing")}`);
       return;
     }
     void startCheckout(planKey, fn, plan);

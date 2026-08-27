@@ -31,7 +31,8 @@ const PlatformSecurity = lazyWithRetry(() => import("./pages/PlatformSecurity"))
 const PlatformTransactionMonitoring = lazyWithRetry(() => import("./pages/PlatformTransactionMonitoring"));
 const PlatformRegulatoryReporting = lazyWithRetry(() => import("./pages/PlatformRegulatoryReporting"));
 const PlatformKYCKYB = lazyWithRetry(() => import("./pages/PlatformKYCKYB"));
-const PlatformAMLScreening = lazyWithRetry(() => import("./pages/PlatformAMLScreening"));
+const ScreeningMonitoring = lazyWithRetry(() => import("./pages/ScreeningMonitoring"));
+const ScreeningPricing = lazyWithRetry(() => import("./pages/ScreeningPricing"));
 const PlatformRiskAssessment = lazyWithRetry(() => import("./pages/PlatformRiskAssessment"));
 const WhatIsSanctionsScreening = lazyWithRetry(() => import("./pages/WhatIsSanctionsScreening"));
 const UAEAMLComplianceGuide = lazyWithRetry(() => import("./pages/UAEAMLComplianceGuide"));
@@ -388,6 +389,10 @@ const App = () => (
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 
+                {/* Screening & Monitoring (standalone product) */}
+                <Route path="/screening-monitoring" element={<ScreeningMonitoring />} />
+                <Route path="/screening-monitoring/pricing" element={<ScreeningPricing />} />
+
                 {/* Platform (Lane 1) */}
                 <Route path="/platform" element={<Platform />} />
                 <Route path="/platform/suite" element={<PlatformSuite />} />
@@ -396,13 +401,13 @@ const App = () => (
                 <Route path="/platform/transaction-monitoring" element={<PlatformTransactionMonitoring />} />
                 <Route path="/platform/regulatory-reporting" element={<PlatformRegulatoryReporting />} />
                 <Route path="/platform/kyc-kyb" element={<PlatformKYCKYB />} />
-                <Route path="/platform/aml-screening" element={<PlatformAMLScreening />} />
+                <Route path="/platform/aml-screening" element={<Navigate to="/screening-monitoring" replace />} />
                 <Route path="/platform/risk-assessment" element={<PlatformRiskAssessment />} />
                 
                 {/* Retired data-source lane — redirect to WorldAML AML Screening */}
                 <Route path="/data-sources/worldcompliance/pricing" element={<Navigate to="/pricing" replace />} />
-                <Route path="/data-sources/*" element={<Navigate to="/platform/aml-screening" replace />} />
-                <Route path="/data-sources" element={<Navigate to="/platform/aml-screening" replace />} />
+                <Route path="/data-sources/*" element={<Navigate to="/screening-monitoring" replace />} />
+                <Route path="/data-sources" element={<Navigate to="/screening-monitoring" replace />} />
 
                 
                 {/* Products */}
@@ -447,8 +452,8 @@ const App = () => (
                 <Route path="/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones" element={<Navigate to="/alternatives" replace />} />
                 <Route path="/sanctions-check" element={<SanctionsCheck />} />
                 <Route path="/free-aml-check" element={<FreeAMLCheck />} />
-                <Route path="/data-coverage" element={<Navigate to="/platform/aml-screening" replace />} />
-                <Route path="/data-coverage/:country" element={<Navigate to="/platform/aml-screening" replace />} />
+                <Route path="/data-coverage" element={<Navigate to="/screening-monitoring" replace />} />
+                <Route path="/data-coverage/:country" element={<Navigate to="/screening-monitoring" replace />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/rss" element={<RssPage />} />
