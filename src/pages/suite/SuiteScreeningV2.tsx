@@ -813,7 +813,6 @@ function MatchCard({
 
   const categoryBadges = useMemo(() => {
     const counts: Record<string, number> = {};
-    match.categories.forEach((c) => { counts[c] = (counts[c] ?? 0) + 1; });
     if (extra) {
       Object.entries(extra.sourceCounts).forEach(([cat, count]) => {
         counts[cat] = (counts[cat] ?? 0) + count;
@@ -822,6 +821,10 @@ function MatchCard({
         counts.adverse_media = (counts.adverse_media ?? 0) + extra.adverseMediaCount;
       }
     }
+    // Fallback to category flags when granular source rows haven't been loaded yet.
+    match.categories.forEach((c) => {
+      if (!(c in counts)) counts[c] = 1;
+    });
     return Object.entries(counts)
       .filter(([cat]) => cat !== "unknown")
       .map(([cat, count]) => ({ cat: cat as ScreeningCategory, count }));
