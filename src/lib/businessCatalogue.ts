@@ -19,7 +19,6 @@ export interface BusinessPlan {
   configureUrl?: string;
   configureLabel?: string;
   /** In-portal configure-then-pay dialog (keeps the buyer inside the business portal). */
-  checkoutDialog?: "worldcompliance";
 
 }
 
@@ -167,53 +166,6 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
     publicUrl: "/products/worldid",
   },
   {
-    key: "lexisnexis",
-    name: "LexisNexis Risk Data",
-    lane: "Data Source",
-    icon: Database,
-    tagline: "WorldCompliance® data and Bridger Insight XG® enterprise deployment.",
-    outcome: "Licence enterprise-grade risk data directly through WorldAML.",
-    solves: [
-      "Fragmented or low-quality risk data",
-      "Enterprise deployments requiring on-premise matching",
-      "Group-wide screening across business units",
-    ],
-    capabilities: [
-      "2.5M+ risk profiles across 50+ risk categories",
-      "Unlimited searches on WorldCompliance®",
-      "Batch processing and advanced matching (Bridger Insight XG®)",
-      "Multi-user licensing",
-    ],
-    idealFor: "Banks, large regulated groups and enterprise compliance functions.",
-    included: ["Data licence", "Onboarding assistance", "LexisNexis® support pathway"],
-    faq: [
-      { q: "Is this WorldAML software?", a: "No — these are LexisNexis® Risk Solutions products licensed through WorldAML as an authorised partner." },
-      { q: "Can we buy online?", a: "Enterprise data licensing is arranged with our team via a consultation." },
-    ],
-    plans: [
-      {
-        key: "worldcompliance",
-        name: "WorldCompliance®",
-        price: "From €1,750",
-        period: "/year",
-        summary: "Hosted screening data with unlimited searches.",
-        features: ["2.5M+ profiles, 50+ risk categories", "Unlimited searches", "Multi-user discounts"],
-        checkoutDialog: "worldcompliance",
-        configureLabel: "Configure & Buy",
-
-      },
-      {
-        key: "bridger",
-        name: "Bridger Insight XG®",
-        price: null,
-        summary: "Enterprise deployment with advanced matching.",
-        features: ["Batch processing", "Advanced matching", "Custom SLAs"],
-      },
-    ],
-    pairsWith: ["worldaml"],
-    publicUrl: "/products/lexisnexis",
-  },
-  {
     key: "academy",
     name: "WorldAML Academy for Business",
     lane: "Training",
@@ -320,7 +272,7 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
         features: ["Unlimited entities and users", "Dedicated account manager", "SLA guarantees"],
       },
     ],
-    pairsWith: ["worldid", "lexisnexis", "academy"],
+    pairsWith: ["worldid", "academy"],
     usageUnit: "monitored entities",
     openUrl: "/suite/dashboard",
     publicUrl: "/platform/suite",
@@ -334,7 +286,6 @@ export const SOLUTION_BY_KEY = Object.fromEntries(
 export const CROSS_SELL_COPY: Record<string, string> = {
   worldaml: "Extend your compliance programme with ongoing screening and monitoring.",
   worldid: "Add identity verification so you know who you are onboarding.",
-  lexisnexis: "Licence enterprise risk data for group-wide screening.",
   academy: "Train your team on the controls you have just put in place.",
   suite: "Run onboarding, screening, cases and reporting in one compliance workspace.",
 };
