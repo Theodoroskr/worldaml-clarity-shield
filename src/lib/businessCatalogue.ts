@@ -103,7 +103,7 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
     ],
     pairsWith: ["worldid", "academy"],
     usageUnit: "monitored entities",
-    openUrl: "/suite/dashboard",
+    openUrl: "/screening",
     publicUrl: "/products/worldaml-api",
   },
   {
