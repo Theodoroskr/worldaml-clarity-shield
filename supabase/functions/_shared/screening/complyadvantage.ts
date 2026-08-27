@@ -15,6 +15,7 @@ import {
   ScreeningOptions,
   ScreeningProviderAdapter,
   ScreeningSubjectInput,
+  SUBJECT_TYPES,
   SubjectType,
 } from "./types.ts";
 
