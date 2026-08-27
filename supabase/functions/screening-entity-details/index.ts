@@ -74,10 +74,12 @@ Deno.serve(async (req) => {
     const content = await provider.retrieveFullDetails(providerSearchId, String(ref.provider_id));
     const profile = normaliseEntityProfile(content);
 
+    const fetchedAt = new Date().toISOString();
     await admin
       .from("screening_matches")
       .update({
-        profile: { ...cached, full_profile: profile, full_profile_loaded_at: new Date().toISOString() },
+        profile: { ...cached, full_profile: profile, full_profile_loaded_at: fetchedAt },
+        profile_fetched_at: fetchedAt,
       })
       .eq("id", matchId);
 
@@ -86,7 +88,13 @@ Deno.serve(async (req) => {
       match_id: matchId,
       event_type: "profile_enriched",
       description: `Full listed profile loaded for ${visible.matched_name}`,
-      metadata: { listings: profile.listings.length, associates: profile.associates.length },
+      metadata: {
+        listings: profile.listings.length,
+        associates: profile.associates.length,
+        media: profile.media.length,
+        refresh: body.refresh === true,
+        fetched_at: fetchedAt,
+      },
       actor_id: user.id,
     });
 

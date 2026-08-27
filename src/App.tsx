@@ -145,6 +145,7 @@ const AdminAnalytics = lazyWithRetry(() => import("./pages/admin/AdminAnalytics"
 const AdminReports = lazyWithRetry(() => import("./pages/admin/AdminReports"));
 const AdminAuditLog = lazyWithRetry(() => import("./pages/admin/AdminAuditLog"));
 const AdminRegulatoryHub = lazyWithRetry(() => import("./pages/admin/AdminRegulatoryHub"));
+const AdminScreeningProfileAudit = lazyWithRetry(() => import("./pages/admin/AdminScreeningProfileAudit"));
 const AdminSecurityAudit = lazyWithRetry(() => import("./pages/admin/AdminSecurityAudit"));
 const AdminDataQuality = lazyWithRetry(() => import("./pages/admin/AdminDataQuality"));
 
@@ -367,6 +368,7 @@ const App = () => (
                   <Route path="workflows" element={<AdminWorkflows />} />
                   <Route path="pricing" element={<AdminPricing />} />
                   <Route path="audit-log" element={<AdminAuditLog />} />
+                  <Route path="screening-profile-audit" element={<AdminScreeningProfileAudit />} />
                   <Route path="regulatory" element={<AdminRegulatoryHub />} />
                   <Route path="security" element={<AdminSecurityAudit />} />
                   <Route path="data-quality" element={<AdminDataQuality />} />

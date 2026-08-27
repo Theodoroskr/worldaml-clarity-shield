@@ -4984,6 +4984,7 @@ export type Database = {
           name_similarity: number | null
           organisation_id: string
           profile: Json
+          profile_fetched_at: string | null
           search_id: string | null
           status: Database["public"]["Enums"]["screening_match_status"]
           updated_at: string
@@ -5006,6 +5007,7 @@ export type Database = {
           name_similarity?: number | null
           organisation_id: string
           profile?: Json
+          profile_fetched_at?: string | null
           search_id?: string | null
           status?: Database["public"]["Enums"]["screening_match_status"]
           updated_at?: string
@@ -5028,6 +5030,7 @@ export type Database = {
           name_similarity?: number | null
           organisation_id?: string
           profile?: Json
+          profile_fetched_at?: string | null
           search_id?: string | null
           status?: Database["public"]["Enums"]["screening_match_status"]
           updated_at?: string
@@ -8523,6 +8526,25 @@ export type Database = {
       admin_revoke_suite_access: {
         Args: { target_email: string }
         Returns: undefined
+      }
+      admin_screening_profile_audit: {
+        Args: { _limit?: number; _search?: string }
+        Returns: {
+          actor_email: string
+          actor_id: string
+          actor_name: string
+          case_id: string
+          case_reference: string
+          description: string
+          event_id: string
+          match_id: string
+          matched_name: string
+          metadata: Json
+          occurred_at: string
+          organisation_id: string
+          organisation_name: string
+          profile_cached_at: string
+        }[]
       }
       admin_set_internal_role: {
         Args: { _access_role: string; _department: string; _email: string }
