@@ -137,11 +137,19 @@ const NetworkGlobeVisual = () => (
 export const NewHeroSection = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const [demoOpen, setDemoOpen] = useState(false);
 
-  const handleQuickSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-    navigate(`/sanctions-check?q=${encodeURIComponent(query.trim())}`);
+  // The quick check no longer runs an open-source search — it starts the
+  // registration flow that grants 5 free screenings on activation.
+  const startDemo = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const term = query.trim();
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      navigate(term ? `/screening?demo=1&q=${encodeURIComponent(term)}` : "/screening?demo=1");
+      return;
+    }
+    setDemoOpen(true);
   };
 
   return (
