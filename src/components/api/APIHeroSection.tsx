@@ -31,7 +31,7 @@ export const APIHeroSection = () => {
               WorldAML API
             </h1>
             <p className="text-body-lg text-teal font-medium mb-6">
-              AML Screening & Monitoring via a Unified API Layer
+              WORLDAML Screening & Monitoring via a Unified API Layer
             </p>
             <p className="text-body-lg text-text-secondary mb-8">
               WorldAML API provides programmatic access to AML screening and ongoing 
