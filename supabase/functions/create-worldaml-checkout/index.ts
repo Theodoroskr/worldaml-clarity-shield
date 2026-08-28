@@ -7,18 +7,38 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Annual WorldAML Screening & Monitoring plans.
-const WORLDAML_PRICES: Record<string, string> = {
-  essentials: "price_1U9NUCLz1lUQpGdDcU0HY0k2",
-  starter: "price_1U9NUDLz1lUQpGdDw8qxmjng",
-  professional: "price_1U9NUELz1lUQpGdDKpRJEy9I",
-  compliance: "price_1U9NUELz1lUQpGdD44gsuBzO",
-  // Legacy monthly prices preserved for existing customers.
+// Legacy prices preserved for existing customers — never reused for new pricing.
+const LEGACY_PRICES: Record<string, string> = {
+  essentials_legacy: "price_1U9NUCLz1lUQpGdDcU0HY0k2",
+  starter_legacy_annual: "price_1U9NUDLz1lUQpGdDw8qxmjng",
+  professional_legacy: "price_1U9NUELz1lUQpGdDKpRJEy9I",
+  compliance_legacy_annual: "price_1U9NUELz1lUQpGdD44gsuBzO",
   starter_legacy: "price_1SzfOKLz1lUQpGdDOeGRsgdn",
   compliance_legacy: "price_1SzfPqLz1lUQpGdDDtgsGVbp",
 };
 
-const VALID_PLANS = Object.keys(WORLDAML_PRICES);
+// New annual pricing. Each plan resolves to a Stripe price configured as a secret.
+// Checkout stays disabled until the correct annual price is explicitly mapped.
+const PRICE_ENV_BY_PLAN: Record<string, string> = {
+  essentials: "STRIPE_PRICE_SCREENING_ESSENTIALS",
+  starter: "STRIPE_PRICE_SCREENING_STARTER",
+  professional: "STRIPE_PRICE_SCREENING_PROFESSIONAL",
+  compliance: "STRIPE_PRICE_SCREENING_COMPLIANCE",
+  api_starter: "STRIPE_PRICE_SCREENING_API_STARTER",
+  api_professional: "STRIPE_PRICE_SCREENING_API_PROFESSIONAL",
+  api_compliance: "STRIPE_PRICE_SCREENING_API_COMPLIANCE",
+};
+
+const resolvePrice = (plan: string): string | undefined => {
+  const envKey = PRICE_ENV_BY_PLAN[plan];
+  if (envKey) {
+    const value = Deno.env.get(envKey);
+    return value && value.startsWith("price_") ? value : undefined;
+  }
+  return LEGACY_PRICES[plan];
+};
+
+const VALID_PLANS = [...Object.keys(PRICE_ENV_BY_PLAN), ...Object.keys(LEGACY_PRICES)];
 
 const errorResponse = (message: string, status = 400) =>
   new Response(JSON.stringify({ error: message }), {
