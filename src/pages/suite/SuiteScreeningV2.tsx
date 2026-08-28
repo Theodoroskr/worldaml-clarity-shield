@@ -1016,14 +1016,29 @@ function MatchCard({
             </PopoverContent>
           </Popover>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            className="text-amber-700 hover:bg-amber-50 hover:text-amber-800"
-            onClick={() => onDecision(match.id, "escalate")}
-          >
-            <AlertTriangle className="mr-1 h-3.5 w-3.5" /> Escalate
-          </Button>
+          {fourEyes ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-amber-700 hover:bg-amber-50 hover:text-amber-800"
+              onClick={() => onDecision(match.id, "escalate")}
+            >
+              <AlertTriangle className="mr-1 h-3.5 w-3.5" /> Escalate
+            </Button>
+          ) : (
+            <Button
+              asChild
+              size="sm"
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground"
+              title="Escalation & Four-Eyes Review is an optional add-on module"
+            >
+              <Link to="/screening/modules">
+                <Lock className="mr-1 h-3.5 w-3.5" /> Escalate
+              </Link>
+            </Button>
+          )}
+
         </div>
       </CardContent>
     </Card>
