@@ -174,7 +174,18 @@ Deno.serve(async (req) => {
   else if (statuses.some((s) => s === "review_in_progress" || s === "possible")) caseStatus = "review_in_progress";
   else if (!statuses.length) caseStatus = "no_potential_matches";
 
-  await admin.from("screening_cases").update({ status: caseStatus }).eq("id", visible.case_id);
+  const caseUpdate: Record<string, unknown> = { status: caseStatus };
+  if (decision === "escalate") {
+    caseUpdate.escalated_to = escalationAssignee;
+    caseUpdate.escalated_by = user.id;
+    caseUpdate.escalated_at = new Date().toISOString();
+    caseUpdate.escalation_note = rationale;
+    if (escalationAssignee) caseUpdate.assigned_to = escalationAssignee;
+  } else if (caseStatus !== "escalated") {
+    caseUpdate.escalated_to = null;
+  }
+  await admin.from("screening_cases").update(caseUpdate).eq("id", visible.case_id);
+
 
   // Best-effort provider feedback loop (never surfaced to the customer).
   if (newStatus) {
