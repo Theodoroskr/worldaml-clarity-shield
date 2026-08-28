@@ -37,6 +37,7 @@ export function useScreeningAccess(): ScreeningEntitlement {
         isLoading: false,
         isAuthenticated: false,
         hasAccess: false,
+        isAdmin: false,
         plan: null,
         status: null,
         monitoredEntityQuota: null,
