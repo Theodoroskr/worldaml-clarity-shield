@@ -52,7 +52,13 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
 };
 
 export default function ScreeningTeam() {
-  const { isLoading: accessLoading, hasAccess, isAdmin } = useScreeningAccess();
+  const {
+    isLoading: accessLoading,
+    hasAccess,
+    isAdmin,
+    seatQuota,
+    seatsUsed,
+  } = useScreeningAccess();
   const { profile } = useAuth();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,6 +68,10 @@ export default function ScreeningTeam() {
   const [inviteBusy, setInviteBusy] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<TeamMember | null>(null);
   const [removeBusy, setRemoveBusy] = useState(false);
+
+  const activeSeats = members.length;
+  const seatLimit = seatQuota ?? null;
+  const seatsFull = seatLimit != null && activeSeats >= seatLimit;
 
   const load = useCallback(async () => {
     setLoading(true);
