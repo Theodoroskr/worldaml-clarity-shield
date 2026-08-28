@@ -710,7 +710,9 @@ function ResultsWorkspace({
                   onReview={() => setSelected(m)}
                   onPrefetch={() => prefetchFullProfile(m.id)}
                   onDecision={onDecision}
+                  fourEyes={fourEyes}
                 />
+
               ))}
             </div>
           )}
