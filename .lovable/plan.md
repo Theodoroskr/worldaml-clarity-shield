@@ -4,19 +4,24 @@ Two connected pieces: a package model that defines what each customer actually g
 
 ## Part 1 — Packages
 
-### Package structure (proposed)
+### Package structure — annual billing
 
-| | Starter EUR 99/mo | Compliance EUR 495/mo | Enterprise (contact) |
-|---|---|---|---|
-| Screening searches / month | 500 | 5,000 | Negotiated |
-| Monitored entities | 2,000 | 10,000 | Unlimited |
-| Seats | 3 | 15 | Unlimited |
-| Case management | Yes | Yes | Yes |
-| Adverse media | Yes | Yes | Yes |
-| Monitoring frequency | Daily | Daily | Daily + priority |
-| Batch + REST API | Yes | Yes | Yes |
-| Case SLA targets | Fixed defaults | Configurable | Configurable |
-| Support | Email | Priority | Dedicated manager + SLA |
+All packages are billed **yearly** (annual commitment, 12 months for the price of 10). A smaller entry tier is added so small teams can start without a big commitment.
+
+| | Essentials EUR 490/yr (≈ EUR 41/mo) | Starter EUR 990/yr (≈ EUR 83/mo) | Compliance EUR 4,950/yr (≈ EUR 413/mo) | Enterprise (contact) |
+|---|---|---|---|---|
+| Screening searches / month | 150 | 500 | 5,000 | Negotiated |
+| Monitored entities | 500 | 2,000 | 10,000 | Unlimited |
+| Seats | 1 | 3 | 15 | Unlimited |
+| Case management | Yes | Yes | Yes | Yes |
+| Adverse media | Yes | Yes | Yes | Yes |
+| Monitoring frequency | Weekly | Daily | Daily | Daily + priority |
+| Batch + REST API | — | Yes | Yes | Yes |
+| Case SLA targets | Fixed defaults | Fixed defaults | Configurable | Configurable |
+| Support | Email | Email | Priority | Dedicated manager + SLA |
+
+- New Stripe annual prices are created for the three self-serve tiers; the existing monthly prices are replaced on the public pricing page and the business catalogue.
+- Cancellation within the first 14 days is refunded in full; afterwards the subscription runs to the end of the paid year (no partial refunds).
 
 Paid add-on modules stay separate and stack on any package:
 - Escalation & Four-Eyes Review — EUR 149/mo (already built)
@@ -72,7 +77,8 @@ Monitoring alert reopens the case -> back to In review
 5. Metrics dashboard and exports.
 
 ## Technical notes
-- Migration: extend `screening_subscriptions` (quotas, usage counters), add `screening_sla_settings` per organisation, add case activity/assignment audit rows where not already covered by `screening_audit_events`.
-- Frontend: new `src/lib/screeningPlans.ts`, `src/pages/screening/ScreeningCases.tsx`, `ScreeningCaseDetail.tsx`, usage widget component; reuse existing shadcn table/dialog patterns from the Suite case queue.
+- Stripe: create three annual prices (Essentials EUR 490/yr, Starter EUR 990/yr, Compliance EUR 4,950/yr); `create-worldaml-checkout` accepts `essentials` and points at the yearly price ids; `verify-worldaml-subscription` maps annual subscriptions to quotas.
+- Migration: extend `screening_subscriptions` (quotas, usage counters, billing interval), add `screening_sla_settings` per organisation, add case activity/assignment audit rows where not already covered by `screening_audit_events`.
+- Frontend: new `src/lib/screeningPlans.ts` (single source for tiers/quotas), `src/pages/screening/ScreeningCases.tsx`, `ScreeningCaseDetail.tsx`, usage widget component; reuse existing shadcn table/dialog patterns from the Suite case queue. Pricing page and business catalogue updated to yearly display.
 - Edge functions: quota check in `screening-run`, decision/closure rules extended in `screening-decision`, reopen handling in `screening-monitoring-poll`.
 - Pricing displayed identically signed in and signed out, read from the shared catalogue.
