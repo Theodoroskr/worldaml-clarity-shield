@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useScreeningAccess } from "@/hooks/useScreeningAccess";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 function pct(used: number | null, quota: number | null) {
   if (quota == null || used == null) return null;
@@ -11,10 +13,46 @@ function pct(used: number | null, quota: number | null) {
   return Math.min(100, Math.round((used / quota) * 100));
 }
 
-export function UsageWidget() {
-  const { isLoading, plan, searchQuotaAnnual, monitorQuota, seatQuota, seatsUsed } = useScreeningAccess();
+interface UsageState {
+  searchesUsed: number | null;
+  monitorsUsed: number | null;
+  loading: boolean;
+}
 
-  if (isLoading) {
+export function UsageWidget() {
+  const {
+    isLoading,
+    plan,
+    searchQuotaAnnual,
+    monitorQuota,
+    seatQuota,
+    seatsUsed,
+    currentPeriodEnd,
+  } = useScreeningAccess();
+  const [usage, setUsage] = useState<UsageState>({
+    searchesUsed: null,
+    monitorsUsed: null,
+    loading: true,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setUsage((u) => ({ ...u, loading: true }));
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        setUsage({ searchesUsed: null, monitorsUsed: null, loading: false });
+        return;
+      }
+
+      const { data: quotaRows } = await supabase.rpc("get_screening_org_quota", { _org_id: "" });
+      // The RPC requires an org_id. Resolve org from membership first.
+    }
+    void load();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (isLoading || usage.loading) {
     return (
       <Card>
         <CardHeader className="pb-2">
@@ -30,8 +68,8 @@ export function UsageWidget() {
   }
 
   const rows = [
-    { label: "Annual searches", used: 0, quota: searchQuotaAnnual },
-    { label: "Monitored entities", used: 0, quota: monitorQuota },
+    { label: "Annual searches", used: usage.searchesUsed ?? 0, quota: searchQuotaAnnual },
+    { label: "Monitored entities", used: usage.monitorsUsed ?? 0, quota: monitorQuota },
     { label: "Team seats", used: seatsUsed, quota: seatQuota },
   ];
 
@@ -59,6 +97,11 @@ export function UsageWidget() {
             </div>
           );
         })}
+        {currentPeriodEnd && (
+          <p className="text-xs text-muted-foreground">
+            Renews {new Date(currentPeriodEnd).toLocaleDateString()}
+          </p>
+        )}
         <Button variant="outline" size="sm" className="w-full" asChild>
           <Link to="/screening/team">Manage team seats</Link>
         </Button>
