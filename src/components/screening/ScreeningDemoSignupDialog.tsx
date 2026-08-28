@@ -88,13 +88,13 @@ export function ScreeningDemoSignupDialog({ open, onOpenChange, query }: Props) 
     }
 
     const { data } = await supabase.auth.getSession();
-    if (data.session) {
-      // Email confirmation is off for this project state — go straight in.
-      window.location.assign(target.toString());
-      return;
-    }
+    // Always confirm on screen; the activation / welcome email is sent either
+    // by auth (confirmation link) or by claim-screening-demo (welcome email).
+    setActivationUrl(target.toString());
+    setSignedIn(Boolean(data.session));
     setSent(true);
   };
+
 
   return (
     <Dialog
