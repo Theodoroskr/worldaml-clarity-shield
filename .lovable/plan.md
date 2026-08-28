@@ -6,24 +6,18 @@ Two connected pieces: a package model that defines what each customer actually g
 
 ### Package structure — annual billing
 
-All packages are billed **yearly** (annual commitment, 12 months for the price of 10). A smaller entry tier is added so small teams can start without a big commitment.
-
-One number defines the package: the **annual entity allowance**. Every screened subject counts once against it, and the same subject can be kept under ongoing monitoring for the whole year at no extra cost — screening and monitoring volumes are always identical.
-
-| | Essentials EUR 490/yr | Starter EUR 990/yr | Compliance EUR 4,950/yr | Enterprise (contact) |
+| Plan | Annual price | Screening searches / year | Monitored entities |
 |---|---|---|---|---|
-| Screening searches / year | 500 | 1,000 | 5,000 | Negotiated |
-| Monitored entities (included) | 500 | 1,000 | 5,000 | Unlimited |
-| Seats | 1 | 3 | 15 | Unlimited |
-| Case management | Yes | Yes | Yes | Yes |
-| Adverse media | Yes | Yes | Yes | Yes |
-| Monitoring frequency | Weekly | Daily | Daily | Daily + priority |
-| Batch + REST API | — | Yes | Yes | Yes |
-| Case SLA targets | Fixed defaults | Fixed defaults | Configurable | Configurable |
-| Support | Email | Email | Priority | Dedicated manager + SLA |
+| Demo | Free | 5 | — |
+| Essentials | €490 | 500 | 100 |
+| Starter | €990 | 1,000 | 200 |
+| Professional | €1,990 | 2,000 | 500 |
+| Compliance | €4,950 | 5,000 | 1,000 |
+| Enterprise | Contact us | Negotiated | Negotiated |
 
-- Allowance resets on the subscription renewal date; unused searches do not roll over.
-- New Stripe annual prices are created for the three self-serve tiers; the existing monthly prices are replaced on the public pricing page and the business catalogue.
+- All paid plans are billed **yearly** (annual commitment). The Demo plan is free and capped at 5 screening searches; it does not include ongoing monitoring.
+- Allowances reset on the subscription renewal date; unused searches do not roll over.
+- New Stripe annual prices are created for Essentials, Starter, Professional and Compliance; the existing monthly prices are replaced on the public pricing page and the business catalogue.
 - Cancellation within the first 14 days is refunded in full; afterwards the subscription runs to the end of the paid year (no partial refunds).
 
 Paid add-on modules stay separate and stack on any package:
@@ -32,9 +26,10 @@ Paid add-on modules stay separate and stack on any package:
 - Enhanced Due Diligence reports — priced on request
 
 ### Making the package real (limits, not just marketing)
-- Extend `screening_subscriptions` with `search_quota_annual`, `seat_quota`, `searches_used_this_period`, `period_started_at` (monitored entities use the same allowance number).
+- Extend `screening_subscriptions` with `search_quota_annual`, `monitor_quota`, `seat_quota`, `searches_used_this_period`, `monitors_used`, `period_started_at`.
 - Plan definitions live in one place (`src/lib/screeningPlans.ts`) and are used by the public pricing page, the workspace usage widget and the admin screening product page — so there is a single source of truth.
-- `screening-run` edge function checks quota before calling the provider; over quota returns a clear upgrade message instead of a silent failure.
+- `screening-run` edge function checks search quota before calling the provider; over quota returns a clear upgrade message instead of a silent failure.
+- Adding a subject to monitoring checks `monitor_quota`; over quota returns an upgrade prompt.
 - `/screening/team` blocks adding members beyond the seat quota with an upgrade prompt.
 - Usage bar in the workspace header: searches used / monitored entities / seats, with a renewal date.
 - Admin can override quotas per organisation from `/admin/screening-product`.
@@ -80,8 +75,8 @@ Monitoring alert reopens the case -> back to In review
 5. Metrics dashboard and exports.
 
 ## Technical notes
-- Stripe: create three annual prices (Essentials EUR 490/yr, Starter EUR 990/yr, Compliance EUR 4,950/yr); `create-worldaml-checkout` accepts `essentials` and points at the yearly price ids; `verify-worldaml-subscription` maps annual subscriptions to quotas.
-- Migration: extend `screening_subscriptions` (quotas, usage counters, billing interval), add `screening_sla_settings` per organisation, add case activity/assignment audit rows where not already covered by `screening_audit_events`.
+- Stripe: create four annual prices (Essentials €490, Starter €990, Professional €1,990, Compliance €4,950); `create-worldaml-checkout` accepts `essentials`, `starter`, `professional` and `compliance`; Demo is free and requires no checkout. `verify-worldaml-subscription` maps annual subscriptions to quotas.
+- Migration: extend `screening_subscriptions` with separate `search_quota_annual` and `monitor_quota`, plus usage counters; add `screening_sla_settings` per organisation; add case activity/assignment audit rows where not already covered by `screening_audit_events`.
 - Frontend: new `src/lib/screeningPlans.ts` (single source for tiers/quotas), `src/pages/screening/ScreeningCases.tsx`, `ScreeningCaseDetail.tsx`, usage widget component; reuse existing shadcn table/dialog patterns from the Suite case queue. Pricing page and business catalogue updated to yearly display.
 - Edge functions: quota check in `screening-run`, decision/closure rules extended in `screening-decision`, reopen handling in `screening-monitoring-poll`.
 - Pricing displayed identically signed in and signed out, read from the shared catalogue.
