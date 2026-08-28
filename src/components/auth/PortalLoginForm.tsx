@@ -75,6 +75,7 @@ const NO_ACCESS_COPY: Record<PortalKey, string> = {
   partner: "Your account does not currently have access to the WorldAML Partner Portal.",
   business: "This sign-in is not linked to a WorldAML business account yet.",
   suite: "Your account does not currently have access to the WorldAML Compliance Suite.",
+  screening: "Your account does not currently have access to WorldAML Screening & Monitoring.",
   admin: "This account is not authorised for internal access.",
 };
 
