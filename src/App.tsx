@@ -372,6 +372,7 @@ const App = () => (
                   <Route path="pricing" element={<AdminPricing />} />
                   <Route path="audit-log" element={<AdminAuditLog />} />
                   <Route path="screening-profile-audit" element={<AdminScreeningProfileAudit />} />
+                  <Route path="screening-product" element={<AdminScreeningProduct />} />
                   <Route path="regulatory" element={<AdminRegulatoryHub />} />
                   <Route path="security" element={<AdminSecurityAudit />} />
                   <Route path="data-quality" element={<AdminDataQuality />} />
