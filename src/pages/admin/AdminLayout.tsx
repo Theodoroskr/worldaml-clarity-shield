@@ -52,7 +52,6 @@ const NAV: NavItem[] = [
   { label: "Workflows", path: "/admin/workflows", icon: GitBranch, section: "Suite" },
   { label: "Pricing", path: "/admin/pricing", icon: CreditCard, section: "Suite" },
   { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText, section: "Suite" },
-  { label: "Profile Enrichment Audit", path: "/admin/screening-profile-audit", icon: FileSearch, section: "Suite" },
 ];
 
 
