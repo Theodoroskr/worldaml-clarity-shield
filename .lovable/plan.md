@@ -36,11 +36,20 @@ Academy          Admin (seat manager) | Learner
 
 Each preset maps to a fixed capability set (run screenings, review matches, confirm/false-positive, manage members, export, view-only). Screening's MLRO/Approver preset is what makes Four-Eyes work: an org needs at least two approvers.
 
-### 3. Screening access now (live product)
+### 3. Screening access now (live product, online sales flow)
+**Buyer = manager.** When someone buys Screening online:
+1. Checkout creates (or links) their client organisation and a Screening subscription.
+2. The buyer automatically becomes the **Screening Admin** of that organisation — they are the main user.
+3. From the workspace's Team & Access screen they invite colleagues, assign presets (MLRO/Approver, Analyst, Viewer) and revoke access — limited by the seats in their plan.
+4. Single-user plans default to solo mode (no case management). Enabling **Case Management / Four-Eyes** unlocks the additional-user workflow — that's exactly when the buyer allocates seats to analysts and approvers.
+5. More seats can be added from the activation/pricing flow; seat limit is enforced at invite time server-side.
+
+Implementation:
 - `product_members` table for per-user presets per product, with GRANTs, RLS and org-locking triggers.
-- Screening workspace UI: Team & Access screen where a client Admin invites people, assigns a preset, revokes access — limited by seats.
+- Team & Access screen in the Screening workspace: invite by email, assign preset, revoke — visible only to Screening Admins.
 - `screening-decision` and the workspace respect presets: Analysts review, MLRO/Approver resolves escalations, Admin manages members.
-- Seat count surfaced on the activation page (`/screening/activate`) and in the Screening modules view.
+- Seats used vs bought surfaced on `/screening/activate` and in the workspace.
+- Four-Eyes activation requires at least two approver-capable members — enforced and explained in the UI.
 
 ### 4. Internal staff rights (tiered)
 - Super Admin — everything (current 3 admins stay Super Admin).
