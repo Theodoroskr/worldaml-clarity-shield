@@ -436,8 +436,8 @@ export default function ScreeningMonitored() {
               {transferBusy && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />} Transfer
             </Button>
           </DialogFooter>
-        </DialogFooter>
         </DialogContent>
+
       </Dialog>
     </div>,
   );
