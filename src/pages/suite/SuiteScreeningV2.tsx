@@ -481,6 +481,10 @@ export default function SuiteScreeningV2() {
             </Card>
           </TabsContent>
         </Tabs>
+        <aside className="space-y-4 hidden lg:block">
+          <UsageWidget />
+        </aside>
+      </div>
       )}
     </div>
   );
