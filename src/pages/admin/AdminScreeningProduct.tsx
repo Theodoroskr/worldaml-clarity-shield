@@ -378,7 +378,9 @@ export default function AdminScreeningProduct() {
                         <TableHead>Organisation</TableHead>
                         <TableHead>Plan</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Monitoring quota</TableHead>
+                        <TableHead>Annual searches</TableHead>
+                        <TableHead>Monitored entities</TableHead>
+                        <TableHead>Seats</TableHead>
                         <TableHead>Renews</TableHead>
                         <TableHead>Started</TableHead>
                       </TableRow>
