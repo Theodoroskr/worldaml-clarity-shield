@@ -13,7 +13,7 @@ const AMLHeroSection = () => {
             <Shield className="h-4 w-4" />
             WorldAML Suite Module
           </div>
-          <h1 className="text-navy mb-6">AML Screening & Monitoring Software</h1>
+          <h1 className="text-navy mb-6">WORLDAML Screening & Monitoring Software</h1>
           <p className="text-body-lg text-text-secondary mb-4">
             Screen customers against global sanctions lists, PEP databases, and adverse media sources
             at onboarding and continuously thereafter. WorldAML's AML screening module delivers

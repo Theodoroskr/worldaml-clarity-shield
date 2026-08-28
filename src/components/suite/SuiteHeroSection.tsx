@@ -6,7 +6,7 @@ import { LaneBadge } from "@/components/LaneBadge";
 const includedModules = [
   { label: "KYC – Individual Onboarding & Screening", href: "/platform/kyc-kyb" },
   { label: "KYB – Business Entity Screening", href: "/platform/kyc-kyb" },
-  { label: "AML Screening & Monitoring", href: "/screening-monitoring" },
+  { label: "WORLDAML Screening & Monitoring", href: "/screening-monitoring" },
   { label: "Risk Assessment & Categorisation", href: "/platform/risk-assessment" },
   { label: "Transaction Monitoring", href: "/platform/transaction-monitoring" },
   { label: "Regulatory Reporting (CRS, FATCA, FINTRAC)", href: "/platform/regulatory-reporting" },

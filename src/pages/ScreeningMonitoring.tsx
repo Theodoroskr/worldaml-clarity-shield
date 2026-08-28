@@ -16,9 +16,9 @@ import { supabase } from "@/integrations/supabase/client";
 const softwareData = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "WorldAML AML Screening & Monitoring",
+  name: "WORLDAML Screening & Monitoring",
   applicationCategory: "FinancialApplication",
-  description: "AML screening and monitoring software covering sanctions, PEPs, adverse media, and RCAs. FATF R.6, R.12, and R.16 aligned.",
+  description: "WORLDAML Screening & Monitoring software covering sanctions, PEPs, adverse media, and RCAs. FATF R.6, R.12, and R.16 aligned.",
   operatingSystem: "Web",
   url: "https://www.worldaml.com/screening-monitoring",
   offers: { "@type": "Offer", category: "SaaS", url: "https://www.worldaml.com/screening-monitoring/pricing" },
@@ -121,8 +121,8 @@ const ScreeningMonitoring = () => {
   return (
   <div className="min-h-screen flex flex-col">
     <SEO
-      title="AML Screening & Monitoring — Sanctions & PEP"
-      description="AML screening software covering sanctions, PEPs, adverse media, and RCAs. Real-time and batch screening across 1,900+ global lists."
+      title="WORLDAML Screening & Monitoring — Sanctions & PEP"
+      description="WORLDAML Screening & Monitoring software covering sanctions, PEPs, adverse media, and RCAs. Real-time and batch screening across 1,900+ global lists."
       canonical="/screening-monitoring"
       breadcrumbs={[
         { name: "Home", url: "/" },

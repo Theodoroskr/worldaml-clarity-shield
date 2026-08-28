@@ -43,7 +43,7 @@ export const PARTNER_PRODUCTS: PartnerProduct[] = [
   },
   {
     id: "screening",
-    name: "AML Screening & Monitoring",
+    name: "WORLDAML Screening & Monitoring",
     positioning: "Sanctions, PEP and adverse-media screening plus ongoing transaction monitoring.",
     idealFor: "Any obliged entity needing continuous screening coverage.",
     problem: "High false positives and no defensible evidence of ongoing monitoring.",
