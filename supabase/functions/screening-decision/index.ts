@@ -74,10 +74,61 @@ Deno.serve(async (req) => {
   // Authorisation: the caller must be able to read the match under RLS.
   const { data: visible } = await userClient
     .from("screening_matches")
-    .select("id, case_id, organisation_id, matched_name")
+    .select("id, case_id, organisation_id, matched_name, status")
     .eq("id", matchId)
     .maybeSingle();
   if (!visible) return json({ error: "Not found" }, 404);
+
+  // Four-eyes escalation is a paid add-on module.
+  const { data: moduleActive } = await admin.rpc("screening_module_active", {
+    _organisation_id: visible.organisation_id,
+    _module: "four_eyes",
+  });
+  const fourEyes = moduleActive === true;
+
+  // Senior role of the caller inside the organisation (used by the add-on).
+  const { data: membership } = await admin
+    .from("suite_org_members")
+    .select("role")
+    .eq("organization_id", visible.organisation_id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const isSenior = ["mlro", "compliance_officer", "admin"].includes(String(membership?.role ?? ""));
+
+  let escalationAssignee: string | null = null;
+
+  if (decision === "escalate") {
+    if (!fourEyes) {
+      return json({
+        error:
+          "Escalation & Four-Eyes Review is an optional add-on module. Activate it for your organisation to route matches to your MLRO.",
+        code: "module_required",
+        module: "four_eyes",
+      }, 402);
+    }
+    const { data: reviewers } = await admin
+      .from("suite_org_members")
+      .select("user_id, role")
+      .eq("organization_id", visible.organisation_id)
+      .in("role", ["mlro", "compliance_officer", "admin"]);
+    const requested = body.assign_to ? String(body.assign_to) : null;
+    const list = reviewers ?? [];
+    const rank = (r: string) => (r === "mlro" ? 1 : r === "compliance_officer" ? 2 : 3);
+    const sorted = [...list].sort((a, b) => rank(String(a.role)) - rank(String(b.role)));
+    escalationAssignee = requested && list.some((r) => r.user_id === requested)
+      ? requested
+      : (sorted[0]?.user_id ?? null);
+  }
+
+  // With the add-on active, only senior reviewers may close an escalated match.
+  if (
+    fourEyes && visible.status === "escalated" && decision !== "escalate" && !isSenior
+  ) {
+    return json({
+      error: "Only an MLRO, compliance officer or organisation admin can resolve an escalated match.",
+      code: "senior_review_required",
+    }, 403);
+  }
 
   const newStatus = MATCH_STATUS[decision];
   if (newStatus) {
@@ -86,6 +137,7 @@ Deno.serve(async (req) => {
       .update({ status: newStatus })
       .eq("id", matchId);
   }
+
 
   await admin.from("analyst_decisions").insert({
     organisation_id: visible.organisation_id,
@@ -122,7 +174,18 @@ Deno.serve(async (req) => {
   else if (statuses.some((s) => s === "review_in_progress" || s === "possible")) caseStatus = "review_in_progress";
   else if (!statuses.length) caseStatus = "no_potential_matches";
 
-  await admin.from("screening_cases").update({ status: caseStatus }).eq("id", visible.case_id);
+  const caseUpdate: Record<string, unknown> = { status: caseStatus };
+  if (decision === "escalate") {
+    caseUpdate.escalated_to = escalationAssignee;
+    caseUpdate.escalated_by = user.id;
+    caseUpdate.escalated_at = new Date().toISOString();
+    caseUpdate.escalation_note = rationale;
+    if (escalationAssignee) caseUpdate.assigned_to = escalationAssignee;
+  } else if (caseStatus !== "escalated") {
+    caseUpdate.escalated_to = null;
+  }
+  await admin.from("screening_cases").update(caseUpdate).eq("id", visible.case_id);
+
 
   // Best-effort provider feedback loop (never surfaced to the customer).
   if (newStatus) {

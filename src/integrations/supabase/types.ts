@@ -4886,6 +4886,10 @@ export type Database = {
           created_by: string | null
           customer_reference: string | null
           due_date: string | null
+          escalated_at: string | null
+          escalated_by: string | null
+          escalated_to: string | null
+          escalation_note: string | null
           id: string
           is_legacy: boolean
           monitoring_status:
@@ -4910,6 +4914,10 @@ export type Database = {
           created_by?: string | null
           customer_reference?: string | null
           due_date?: string | null
+          escalated_at?: string | null
+          escalated_by?: string | null
+          escalated_to?: string | null
+          escalation_note?: string | null
           id?: string
           is_legacy?: boolean
           monitoring_status?:
@@ -4934,6 +4942,10 @@ export type Database = {
           created_by?: string | null
           customer_reference?: string | null
           due_date?: string | null
+          escalated_at?: string | null
+          escalated_by?: string | null
+          escalated_to?: string | null
+          escalation_note?: string | null
           id?: string
           is_legacy?: boolean
           monitoring_status?:
@@ -5052,6 +5064,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      screening_org_modules: {
+        Row: {
+          activated_at: string | null
+          cancelled_at: string | null
+          created_at: string
+          current_period_end: string | null
+          id: string
+          module: string
+          monthly_price_eur: number | null
+          notes: string | null
+          organisation_id: string
+          requested_at: string
+          requested_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          module: string
+          monthly_price_eur?: number | null
+          notes?: string | null
+          organisation_id: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          module?: string
+          monthly_price_eur?: number | null
+          notes?: string | null
+          organisation_id?: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       screening_policies: {
         Row: {
@@ -8588,6 +8648,19 @@ export type Database = {
           status: string
         }[]
       }
+      current_user_screening_modules: {
+        Args: never
+        Returns: {
+          activated_at: string
+          current_period_end: string
+          member_role: string
+          module: string
+          monthly_price_eur: number
+          organisation_id: string
+          requested_at: string
+          status: string
+        }[]
+      }
       dsar_execute_erasure: {
         Args: { _customer_id: string; _dsar_id?: string; _reason?: string }
         Returns: Json
@@ -8777,7 +8850,20 @@ export type Database = {
           signup_count: number
         }[]
       }
+      screening_escalation_reviewers: {
+        Args: { _organisation_id: string }
+        Returns: {
+          email: string
+          full_name: string
+          role: string
+          user_id: string
+        }[]
+      }
       screening_is_org_member: { Args: { _org: string }; Returns: boolean }
+      screening_module_active: {
+        Args: { _module: string; _organisation_id: string }
+        Returns: boolean
+      }
       submit_quiz_and_issue_certificate: {
         Args: { _answers: Json; _course_id: string; _holder_name: string }
         Returns: Json

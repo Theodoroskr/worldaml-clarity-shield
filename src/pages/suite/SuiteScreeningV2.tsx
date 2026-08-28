@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Loader2, Search, ShieldCheck, Activity, FileText, ChevronRight,
   ArrowLeft, Copy, Check, X, Filter, Tag, MoreHorizontal,
-  AlertTriangle, User, Building2, Ship, Plane, RefreshCw, ExternalLink, Users,
+  AlertTriangle, User, Building2, Ship, Plane, RefreshCw, ExternalLink, Users, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useScreeningModules } from "@/hooks/useScreeningModules";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -488,7 +491,10 @@ function Field({
 function ResultsWorkspace({
   caseDetail, onBack,
 }: { caseDetail: CaseDetail; onBack: () => void }) {
+  const { hasModule } = useScreeningModules();
+  const fourEyes = hasModule("four_eyes");
   const [matches, setMatches] = useState<MatchRow[]>([]);
+
   const [extras, setExtras] = useState<Record<string, MatchExtra>>({});
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<MatchRow | null>(null);
@@ -707,7 +713,9 @@ function ResultsWorkspace({
                   onReview={() => setSelected(m)}
                   onPrefetch={() => prefetchFullProfile(m.id)}
                   onDecision={onDecision}
+                  fourEyes={fourEyes}
                 />
+
               ))}
             </div>
           )}
@@ -844,6 +852,7 @@ function MatchCard({
   onReview,
   onPrefetch,
   onDecision,
+  fourEyes,
 }: {
   match: MatchRow;
   extra?: MatchExtra;
@@ -852,6 +861,9 @@ function MatchCard({
   onReview: () => void;
   onPrefetch: () => void;
   onDecision: (id: string, decision: string, reason?: string) => Promise<void>;
+  /** Escalation & Four-Eyes Review add-on active for the organisation. */
+  fourEyes: boolean;
+
 }) {
   const [falsePositiveOpen, setFalsePositiveOpen] = useState(false);
   const [reason, setReason] = useState(FALSE_POSITIVE_REASONS[0]);
@@ -1013,14 +1025,29 @@ function MatchCard({
             </PopoverContent>
           </Popover>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            className="text-amber-700 hover:bg-amber-50 hover:text-amber-800"
-            onClick={() => onDecision(match.id, "escalate")}
-          >
-            <AlertTriangle className="mr-1 h-3.5 w-3.5" /> Escalate
-          </Button>
+          {fourEyes ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-amber-700 hover:bg-amber-50 hover:text-amber-800"
+              onClick={() => onDecision(match.id, "escalate")}
+            >
+              <AlertTriangle className="mr-1 h-3.5 w-3.5" /> Escalate
+            </Button>
+          ) : (
+            <Button
+              asChild
+              size="sm"
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground"
+              title="Escalation & Four-Eyes Review is an optional add-on module"
+            >
+              <Link to="/screening/modules">
+                <Lock className="mr-1 h-3.5 w-3.5" /> Escalate
+              </Link>
+            </Button>
+          )}
+
         </div>
       </CardContent>
     </Card>
