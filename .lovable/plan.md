@@ -1,43 +1,60 @@
-# Role Evaluation & Governance
+# Product Access Rights — 5 Products
 
-## What the data shows today (verified)
+One clear model: for each product, who can use it and what they can do. Applied both internally (WorldAML staff managing clients) and client-side (a client org assigning rights to its own people).
 
-Internal staff roles (`user_roles`, enum admin/moderator/user):
-- 3 rows, all `admin`: theodoros@, gnicolaou@, sviolari@ (infocreditgroup.com)
-- No `moderator` or `user` rows — internal access is effectively all-or-nothing
+Products: Compliance Suite, KYC/KYB Onboarding, AML Screening & Monitoring, Regulatory Change Management, Academy.
 
-Customer-side roles:
-- Suite org members: 2 rows, both `admin` — theodoros@ (My OrganisationTest), gnicolaou@ (Infocredit)
-- RCM org members: 1 `admin`
-- Business members: 0 rows (3 business accounts, owner-only)
-- Partners: 4 active (2 with no linked staff profile), all `portal_access = active`
-- Profiles: 794, all `approved`
-- Customer portal users: 0
+## Where we stand today (verified)
 
-## Issues this surfaces
+- Internal staff: 3 rows in `user_roles`, all `admin`. No tiering.
+- Client-side membership is fragmented: 2 Suite org members, 1 RCM org member, 0 business members, 0 business entitlements, 0 screening subscriptions, 0 screening add-on modules.
+- Result: there is no single answer to "which client has which product, and who inside that client can do what".
 
-1. Four-Eyes / Escalation module cannot function: no member anywhere holds `mlro` or `compliance_officer`, and each org has exactly one member — an escalated match has no second senior reviewer.
-2. Every internal staff member is a full admin; there is no read-only / support / finance tier even though the org-member enum supports `analyst` and `viewer`.
-3. No single place to see, per user, which roles and entitlements they hold across Academy, Business, Partner, Suite/Screening, RCM and Admin.
+## What gets built
 
-## Proposed work
+### 1. Product access registry
+A single source of truth linking client organisation to product: product key, plan, status (trial / active / suspended), seats, start and renewal dates. Every product page and guard reads from here.
 
-### 1. Roles & Access overview (Admin Portal)
-New page `/admin/roles` listing every account that holds any role or entitlement, with columns: user, email, staff role, suite org + org role, RCM role, business membership, partner status, screening plan, last activity. Search + filter by surface and by role. Read-only first release.
+### 2. Role presets per product
+Fixed presets, no free-form permissions:
 
-### 2. Role assignment actions
-From the same page: grant/revoke staff role, and change a user's suite org role (admin / mlro / compliance_officer / analyst / viewer). Every change written to the existing admin audit trail.
+```text
+Suite            Admin | Manager | Analyst | Viewer
+KYC/KYB          Admin | Reviewer | Submitter | Viewer
+Screening        Admin | MLRO/Approver | Analyst | Viewer
+RCM              Admin | Owner | Contributor | Viewer
+Academy          Admin (seat manager) | Learner
+```
 
-### 3. Segregation-of-duties checks
-A checks panel that flags, from live data:
-- orgs on the Escalation module with fewer than two members able to approve
-- orgs where all members are `admin`
-- partners with no linked user account
-- staff admins with no recent activity
+Each preset maps to a fixed capability set (manage members, create/edit records, approve/escalate, export, view-only). Screening's MLRO/Approver preset is what unlocks the Four-Eyes module: an org needs at least two people who can approve.
+
+### 3. Client-side management
+Inside each product, a Team & Access screen where the client's product Admin invites people, assigns a preset, and revokes access. Limited by seats in the registry. Cannot grant a product the org does not hold.
+
+### 4. Internal staff rights
+Staff roles become tiered per product instead of blanket admin:
+- Super Admin — everything
+- Product Manager (per product) — manage clients, plans, seats and members for that product only
+- Support — read-only across products, no plan or role changes
+- Finance — plans, seats and billing status only
+
+### 5. Admin "Clients & Access" view
+One table: client org, products held, plan and status per product, seats used vs bought, member count, approvers count, last activity. Filters by product and status. Actions: grant/suspend a product, adjust seats, change a member's preset. Plus flags for orgs on Four-Eyes with fewer than two approvers, orgs with zero admins, and seats over limit.
+
+### 6. Enforcement
+Route guards and RLS both derive from the registry plus the member's preset — so a revoked product or downgraded preset takes effect immediately, server side, not just in the UI.
 
 ## Technical notes
 
-- New `admin_roles_overview()` SECURITY DEFINER RPC aggregating `user_roles`, `profiles`, `suite_org_members`, `rcm_org_members`, `business_members`/`business_accounts`, `partners`, `screening_subscriptions`.
-- Role mutations reuse existing patterns (`admin_set_internal_role`, `admin_revoke_internal`) plus a new RPC for suite org role changes, both admin-gated via `has_role()` and logged.
-- No enum changes: `app_role` and `org_member_role` already cover the needed tiers.
-- UI follows the existing admin table/tab conventions used in `AdminScreeningProduct.tsx`.
+- New tables: `product_access` (org + product + plan/status/seats) and `product_members` (org + product + user + preset), both with GRANTs, RLS and org-locking triggers matching existing suite/rcm patterns.
+- Backfill from current data: Suite/RCM org members, partner academy seats, screening subscriptions and modules map into the new tables so nothing is lost.
+- Staff tiering extends the existing internal-access flow (`admin_set_internal_role`, `admin_revoke_internal`) with a product scope; all changes written to the existing admin audit trail.
+- New RPCs: `admin_client_access_overview()`, `admin_set_product_access()`, `set_product_member_role()` — all `SECURITY DEFINER`, admin- or org-admin-gated.
+- Existing guards (`PortalGuard`, `useAccess`, `current_user_has_suite_access`) switch to reading the registry; legacy checks kept as fallback during rollout.
+
+## Rollout
+
+1. Tables + backfill + RPCs (no UI change, guards keep working)
+2. Admin Clients & Access view and staff tiering
+3. Client-side Team & Access screens per product
+4. Switch guards and RLS to the registry, retire legacy checks
