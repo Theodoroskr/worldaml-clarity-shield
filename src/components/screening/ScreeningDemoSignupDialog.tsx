@@ -206,6 +206,7 @@ export function ScreeningDemoSignupDialog({ open, onOpenChange, query }: Props) 
               <div className="space-y-1.5">
                 <Label htmlFor="demo-password">Password</Label>
                 <Input id="demo-password" type="password" value={password} maxLength={128}
+                  onBlur={(e) => validateField("password", e.target.value)}
                   onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
                 {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
               </div>
