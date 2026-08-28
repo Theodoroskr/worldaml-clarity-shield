@@ -223,7 +223,7 @@ export default function ScreeningTeam() {
             </p>
           </div>
           {isAdmin && (
-            <Button onClick={() => setInviteOpen(true)} variant="accent">
+            <Button onClick={() => setInviteOpen(true)} variant="accent" disabled={seatsFull}>
               <Plus className="mr-1.5 h-4 w-4" /> Invite member
             </Button>
           )}
