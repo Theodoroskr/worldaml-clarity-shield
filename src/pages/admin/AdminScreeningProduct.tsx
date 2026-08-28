@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   Activity, AlertTriangle, Building2, CheckCircle2, Clock, Loader2, RefreshCw,
-  Search, ShieldCheck, Sparkles, XCircle,
+  Search, ShieldCheck, Sparkles, Users, XCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +64,26 @@ type SearchRow = {
   monitoring_requested: boolean;
 };
 
+type UserRow = {
+  user_id: string;
+  organisation_id: string;
+  organisation_name: string | null;
+  role: string | null;
+  email: string | null;
+  full_name: string | null;
+  company_name: string | null;
+  job_title: string | null;
+  country: string | null;
+  joined_at: string | null;
+  last_activity_at: string | null;
+  searches_total: number;
+  searches_30d: number;
+  decisions_total: number;
+  last_search_at: string | null;
+  subscription_status: string | null;
+  plan: string | null;
+};
+
 type Overview = {
   totals: Record<string, number>;
   subscriptions: SubscriptionRow[];
@@ -111,15 +131,21 @@ function Kpi({ icon: Icon, label, value, tone }: { icon: any; label: string; val
 
 export default function AdminScreeningProduct() {
   const [data, setData] = useState<Overview | null>(null);
+  const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [q, setQ] = useState("");
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
-    const { data: res, error } = await supabase.rpc("admin_screening_overview" as never);
+    const [{ data: res, error }, { data: usr, error: uErr }] = await Promise.all([
+      supabase.rpc("admin_screening_overview" as never),
+      supabase.rpc("admin_screening_users" as never),
+    ]);
     if (error) toast.error(error.message);
     else setData(res as unknown as Overview);
+    if (uErr) toast.error(uErr.message);
+    else setUsers((usr as unknown as UserRow[]) ?? []);
     setLoading(false);
   }, []);
 
@@ -157,6 +183,15 @@ export default function AdminScreeningProduct() {
     () => (data?.modules ?? []).filter((m) =>
       !term || (m.organisation_name ?? "").toLowerCase().includes(term) || m.module.toLowerCase().includes(term)),
     [data, term],
+  );
+  const people = useMemo(
+    () => users.filter((u) =>
+      !term
+      || (u.email ?? "").toLowerCase().includes(term)
+      || (u.full_name ?? "").toLowerCase().includes(term)
+      || (u.organisation_name ?? "").toLowerCase().includes(term)
+      || (u.role ?? "").toLowerCase().includes(term)),
+    [users, term],
   );
 
   const moduleName = (key: string) =>
@@ -215,8 +250,65 @@ export default function AdminScreeningProduct() {
               </TabsTrigger>
               <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
               <TabsTrigger value="organisations">Organisations &amp; usage</TabsTrigger>
+              <TabsTrigger value="users">Users &amp; clients</TabsTrigger>
               <TabsTrigger value="activity">Recent activity</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="users" className="mt-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground" /> People with screening access ({people.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>User</TableHead>
+                        <TableHead>Organisation</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead>Plan</TableHead>
+                        <TableHead>Searches (30d)</TableHead>
+                        <TableHead>Searches (all)</TableHead>
+                        <TableHead>Decisions</TableHead>
+                        <TableHead>Last search</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {people.length === 0 && (
+                        <TableRow><TableCell colSpan={8} className="text-center text-sm text-muted-foreground py-8">
+                          No screening users yet.
+                        </TableCell></TableRow>
+                      )}
+                      {people.map((u) => (
+                        <TableRow key={`${u.organisation_id}-${u.user_id}`}>
+                          <TableCell className="font-medium">
+                            {u.full_name ?? u.email ?? "Unknown"}
+                            {u.email && <div className="text-xs text-muted-foreground">{u.email}</div>}
+                            {u.job_title && <div className="text-xs text-muted-foreground">{u.job_title}</div>}
+                          </TableCell>
+                          <TableCell>
+                            {u.organisation_name ?? "—"}
+                            {u.country && <div className="text-xs text-muted-foreground">{u.country}</div>}
+                          </TableCell>
+                          <TableCell className="capitalize">{(u.role ?? "—").replace(/_/g, " ")}</TableCell>
+                          <TableCell>
+                            {u.plan ? <span className="capitalize">{u.plan}</span> : <span className="text-muted-foreground">—</span>}
+                            {u.subscription_status && <div className="mt-1"><StatusBadge status={u.subscription_status} /></div>}
+                          </TableCell>
+                          <TableCell>{u.searches_30d}</TableCell>
+                          <TableCell>{u.searches_total}</TableCell>
+                          <TableCell>{u.decisions_total}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground">{fmtDateTime(u.last_search_at)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
 
             <TabsContent value="modules" className="mt-4">
               <Card>
