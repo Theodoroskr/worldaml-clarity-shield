@@ -572,6 +572,8 @@ const App = () => (
                 {/* WorldAML Screening & Monitoring — standalone product workspace (separate from Suite) */}
                 <Route path="/screening" element={<ScreeningWorkspace />} />
                 <Route path="/screening/team" element={<ScreeningTeam />} />
+                <Route path="/screening/monitored" element={<ScreeningMonitored />} />
+
                 <Route path="/screening/activate" element={<ScreeningActivate />} />
                 <Route path="/screening/modules" element={<ScreeningModules />} />
 
