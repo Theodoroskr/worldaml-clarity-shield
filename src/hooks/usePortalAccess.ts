@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type PortalKey = "academy" | "partner" | "business" | "suite" | "admin";
+export type PortalKey = "academy" | "partner" | "business" | "suite" | "screening" | "admin";
 
 export interface PortalAccess {
   isLoading: boolean;
