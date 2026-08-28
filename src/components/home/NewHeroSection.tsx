@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowRight, Search, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -140,6 +140,18 @@ export const NewHeroSection = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [demoOpen, setDemoOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  // Legacy /sanctions-check and /free-aml-check links redirect here with ?demo=1.
+  useEffect(() => {
+    if (searchParams.get("demo") !== "1") return;
+    const q = searchParams.get("q");
+    if (q) setQuery(q);
+    void (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) setDemoOpen(true);
+    })();
+  }, [searchParams]);
 
   // The quick check no longer runs an open-source search — it starts the
   // registration flow that grants 5 free screenings on activation.
