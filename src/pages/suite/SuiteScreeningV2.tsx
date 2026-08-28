@@ -28,6 +28,7 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { UsageWidget } from "@/components/screening/UsageWidget";
 import {
   ALL_SOURCE_TYPES,
   ASSESSMENT_LABELS,
