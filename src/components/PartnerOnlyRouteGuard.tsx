@@ -22,6 +22,7 @@ export default function PartnerOnlyRouteGuard() {
   const { hasSuiteAccess } = useAccess();
   const { partner, isLoading: partnerLoading } = usePartner();
 
+  console.log('[dbg] render', {authLoading, profileLoading, partnerLoading, isAdmin, path: location.pathname});
   useEffect(() => {
     // Wait until roles/entitlements have actually resolved — otherwise an admin
     // who is also a partner gets bounced out of /admin before isAdmin loads.
