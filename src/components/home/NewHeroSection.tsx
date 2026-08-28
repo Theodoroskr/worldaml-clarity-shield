@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogoIcon } from "@/components/Logo";
+import { supabase } from "@/integrations/supabase/client";
+import ScreeningDemoSignupDialog from "@/components/screening/ScreeningDemoSignupDialog";
 
 
 // Abstract Network Globe visual component
@@ -178,11 +180,9 @@ export const NewHeroSection = () => {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link to="/free-aml-check">
-                Run a Free AML Check
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+            <Button variant="outline" size="lg" onClick={() => void startDemo()}>
+              Run a Free AML Check
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
           
@@ -206,7 +206,7 @@ export const NewHeroSection = () => {
             </div>
 
             {/* Search form */}
-            <form onSubmit={handleQuickSearch} className="p-4 flex gap-2">
+            <form onSubmit={startDemo} className="p-4 flex gap-2">
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -223,13 +223,12 @@ export const NewHeroSection = () => {
 
             {/* Footnote */}
             <p className="px-4 pb-3 text-xs text-muted-foreground">
-              Open-source lists only · May be delayed · Not legal advice ·{" "}
-              <Link to="/sanctions-check" className="underline hover:text-foreground">
-                Full tool →
-              </Link>
+              Register with a business email to run 5 free screenings across 1,900+ lists · No card required.
             </p>
           </div>
         </div>
+
+        <ScreeningDemoSignupDialog open={demoOpen} onOpenChange={setDemoOpen} query={query} />
 
         {/* Three-Column Product Split */}
         <h2 className="sr-only">Our Products</h2>
