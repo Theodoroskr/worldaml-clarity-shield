@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   Activity, AlertTriangle, Building2, CheckCircle2, Clock, Loader2, RefreshCw,
-  Search, ShieldCheck, Sparkles, XCircle,
+  Search, ShieldCheck, Sparkles, Users, XCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
