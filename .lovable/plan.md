@@ -6,7 +6,7 @@ The homepage hero's inline "Free Sanctions Quick Check" widget is replaced by a 
 
 ## Decisions (defaults chosen)
 
-- **Replace the hero widget** with a demo CTA card. The standalone `/sanctions-check` page stays live (still linked from footer/other pages); only the homepage hero section changes.
+- **Replace the hero widget** with a demo CTA card, and **delete the existing free quick-check experience entirely** — the standalone `/sanctions-check` page, its links (footer/nav/other pages), and the free-check components are removed; `/sanctions-check` (and `/free-aml-check`) redirect to the demo signup flow.
 - **Demo grant happens automatically on first entry to the screening workspace** for any signed-in user with no screening subscription — so both CTA-originated signups and organic signups get the same one-time demo. One demo per organisation, idempotent.
 
 ## Current state (verified)
@@ -21,7 +21,7 @@ The homepage hero's inline "Free Sanctions Quick Check" widget is replaced by a 
 ### 1. Hero section (`src/components/home/NewHeroSection.tsx`)
 - Replace the quick-check card with a demo card: headline "Try the Demo — 5 Free Screenings", subline "Register a business account and run 5 real screening searches across 1,900+ global lists. No card required.", CTA button "Start Free Demo".
 - CTA routes to `/signup?redirect=/screening&demo=1` (unauthenticated) or straight to `/screening` if already signed in.
-- Keep a small footnote link "Just need a one-off check? Free Sanctions Quick Check →" pointing to `/sanctions-check`.
+- No quick-check footnote or link remains; footnote instead reads "No card required · Business email · 5 screenings included".
 
 ### 2. Demo provisioning Edge Function `claim-screening-demo` (new)
 - Auth required (bearer token). Idempotent:
@@ -34,8 +34,14 @@ The homepage hero's inline "Free Sanctions Quick Check" widget is replaced by a 
 - When `useScreeningAccess` resolves with `isAuthenticated && !hasAccess`, invoke `claim-screening-demo` once, then `refresh()` the entitlement so the workspace opens with demo quotas.
 - Demo users see a welcome banner: "Demo plan — 5 free screening searches" + link to `/screening-monitoring/pricing`. Existing `UsageWidget` and quota-exceeded banner handle the rest.
 
-### 4. SEO/sitemap hygiene
-- No route changes. Update homepage copy only; `/sanctions-check` unchanged.
+### 4. Remove the existing free quick-check
+- Delete the `/sanctions-check` and `/free-aml-check` pages and their supporting quick-check components/hooks.
+- Remove every internal link/CTA pointing at them (header, footer, hero, marketing pages, upsell banners, chatbot knowledge).
+- Add client redirects `/sanctions-check` → `/signup?redirect=/screening&demo=1` and `/free-aml-check` → same, so indexed traffic lands on the demo flow.
+- Retire the `sanctions-search` Edge Function only if nothing else calls it; otherwise leave it in place (checked during implementation).
+
+### 5. SEO/sitemap hygiene
+- Remove the deleted URLs from `public/sitemap.xml`, `public/llms.txt`, and any structured data referencing the free check.
 
 ## Technical notes
 
@@ -46,5 +52,5 @@ The homepage hero's inline "Free Sanctions Quick Check" widget is replaced by a 
 
 ## Verification
 
-- Playwright: homepage renders new demo card; `/sanctions-check` still works.
+- Playwright: homepage renders new demo card; `/sanctions-check` redirects to the demo signup; no dead links remain (full-text search for `sanctions-check` / `free-aml-check` returns only the redirects).
 - End-to-end: new signup → land in `/screening` → demo plan active → run a search → quota widget shows 1/5 → after 5, run is blocked with upgrade message.
