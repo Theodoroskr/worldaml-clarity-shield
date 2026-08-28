@@ -8587,6 +8587,7 @@ export type Database = {
         Args: { target_email: string }
         Returns: undefined
       }
+      admin_screening_overview: { Args: never; Returns: Json }
       admin_screening_profile_audit: {
         Args: { _limit?: number; _search?: string }
         Returns: {
@@ -8613,6 +8614,16 @@ export type Database = {
       admin_set_partner_portal_access: {
         Args: { _access: string; _partner_id: string; _reason?: string }
         Returns: undefined
+      }
+      admin_set_screening_module: {
+        Args: {
+          _current_period_end?: string
+          _module_id: string
+          _monthly_price_eur?: number
+          _notes?: string
+          _status: string
+        }
+        Returns: Json
       }
       admin_suspend_internal: {
         Args: { _email: string; _suspend: boolean }

@@ -42,13 +42,16 @@ const NAV: NavItem[] = [
   { label: "Partners", path: "/admin/partners", icon: Handshake, section: "Partners" },
   { label: "Partner Assets", path: "/admin/partner-assets", icon: ImageIcon, section: "Partners" },
 
+  // Screening & Monitoring product
+  { label: "Screening Product", path: "/admin/screening-product", icon: ShieldCheck, section: "Screening" },
+  { label: "Profile Enrichment Audit", path: "/admin/screening-profile-audit", icon: FileSearch, section: "Screening" },
+
   // Suite (compliance product)
   { label: "Organizations", path: "/admin/organizations", icon: Building2, section: "Suite" },
   { label: "Alert Rules", path: "/admin/alert-rules", icon: Bell, section: "Suite" },
   { label: "Workflows", path: "/admin/workflows", icon: GitBranch, section: "Suite" },
   { label: "Pricing", path: "/admin/pricing", icon: CreditCard, section: "Suite" },
   { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText, section: "Suite" },
-  { label: "Profile Enrichment Audit", path: "/admin/screening-profile-audit", icon: FileSearch, section: "Suite" },
 ];
 
 
