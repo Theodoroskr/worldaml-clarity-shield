@@ -14,7 +14,18 @@ const json = (body: unknown, status = 200) =>
     status,
   });
 
-const PLAN_QUOTA: Record<string, number> = { starter: 2000, compliance: 10000 };
+// Annual plan quotas. Enterprise is negotiated; null means unlimited.
+const PLAN_QUOTA: Record<string, { search: number | null; monitor: number | null; seats: number | null }> = {
+  demo: { search: 5, monitor: 0, seats: 1 },
+  essentials: { search: 500, monitor: 100, seats: 1 },
+  starter: { search: 1000, monitor: 200, seats: 3 },
+  professional: { search: 2000, monitor: 500, seats: 5 },
+  compliance: { search: 5000, monitor: 1000, seats: 10 },
+  enterprise: { search: null, monitor: null, seats: null },
+  // Legacy monthly mapping retained for compatibility.
+  starter_legacy: { search: 2000, monitor: 2000, seats: 3 },
+  compliance_legacy: { search: 10000, monitor: 10000, seats: 10 },
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -58,7 +69,7 @@ serve(async (req) => {
     }
 
     const plan = (session.metadata?.plan ?? "starter").toLowerCase();
-    const quota = PLAN_QUOTA[plan] ?? 2000;
+    const quota = PLAN_QUOTA[plan] ?? PLAN_QUOTA.starter;
 
     // Resolve or create the buyer's organisation.
     const { data: membership } = await admin
@@ -92,11 +103,13 @@ serve(async (req) => {
     const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
 
     let periodEnd: string | null = null;
+    let periodStart: string | null = null;
     if (subscriptionId) {
       try {
         const sub = await stripe.subscriptions.retrieve(subscriptionId);
-        const end = (sub as unknown as { current_period_end?: number }).current_period_end;
-        if (end) periodEnd = new Date(end * 1000).toISOString();
+        const s = sub as unknown as { current_period_end?: number; current_period_start?: number };
+        if (s.current_period_end) periodEnd = new Date(s.current_period_end * 1000).toISOString();
+        if (s.current_period_start) periodStart = new Date(s.current_period_start * 1000).toISOString();
       } catch (_) { /* non-fatal */ }
     }
 
@@ -107,32 +120,76 @@ serve(async (req) => {
       .eq("stripe_subscription_id", subscriptionId ?? "")
       .maybeSingle();
 
+    const subscriptionPayload = {
+      organisation_id: orgId,
+      user_id: user.id,
+      plan,
+      status: "active",
+      monitored_entity_quota: quota.monitor,
+      search_quota_annual: quota.search,
+      monitor_quota: quota.monitor,
+      seat_quota: quota.seats,
+      current_period_end: periodEnd,
+      stripe_customer_id: customerId,
+      stripe_subscription_id: subscriptionId,
+      stripe_session_id: session.id,
+      updated_at: new Date().toISOString(),
+    };
+
     if (existing) {
-      await admin
-        .from("screening_subscriptions")
-        .update({
-          plan,
-          status: "active",
-          monitored_entity_quota: quota,
-          current_period_end: periodEnd,
-          stripe_customer_id: customerId,
-          stripe_session_id: session.id,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", existing.id);
+      await admin.from("screening_subscriptions").update(subscriptionPayload).eq("id", existing.id);
     } else {
-      await admin.from("screening_subscriptions").insert({
-        organisation_id: orgId,
-        user_id: user.id,
-        plan,
-        status: "active",
-        monitored_entity_quota: quota,
-        current_period_end: periodEnd,
-        stripe_customer_id: customerId,
-        stripe_subscription_id: subscriptionId,
-        stripe_session_id: session.id,
-      });
+      await admin.from("screening_subscriptions").insert(subscriptionPayload);
     }
+
+    // Keep the product_access registry in sync (source of truth for portal guards).
+    const { data: existingAccess } = await admin
+      .from("product_access")
+      .select("id")
+      .eq("organisation_id", orgId)
+      .eq("product", "screening")
+      .maybeSingle();
+
+    const seatsUsed = (
+      await admin
+        .from("product_members")
+        .select("id", { count: "exact", head: true })
+        .eq("organisation_id", orgId)
+        .eq("product", "screening")
+    ).count ?? 0;
+
+    const accessPayload = {
+      organisation_id: orgId,
+      product: "screening",
+      plan,
+      status: "active",
+      seats: quota.seats,
+      seats_used: seatsUsed,
+      current_period_start: periodStart,
+      current_period_end: periodEnd,
+      started_at: periodStart,
+      metadata: {
+        search_quota_annual: quota.search,
+        monitor_quota: quota.monitor,
+        stripe_subscription_id: subscriptionId,
+      },
+      updated_at: new Date().toISOString(),
+    };
+
+    if (existingAccess) {
+      await admin.from("product_access").update(accessPayload).eq("id", existingAccess.id);
+    } else {
+      await admin.from("product_access").insert(accessPayload);
+    }
+
+    // Ensure the buyer is a product admin.
+    await admin.from("product_members").upsert({
+      organisation_id: orgId,
+      product: "screening",
+      user_id: user.id,
+      role: "admin",
+      created_by: user.id,
+    }, { onConflict: "organisation_id,product,user_id" });
 
     try {
       await admin.rpc("ensure_default_screening_policy", { _org: orgId });
@@ -154,7 +211,10 @@ serve(async (req) => {
     return json({
       status: "active",
       plan,
-      monitored_entity_quota: quota,
+      search_quota_annual: quota.search,
+      monitor_quota: quota.monitor,
+      monitored_entity_quota: quota.monitor,
+      seat_quota: quota.seats,
       current_period_end: periodEnd,
       organisation_id: orgId,
     });

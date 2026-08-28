@@ -37,6 +37,9 @@ type SubscriptionRow = {
   plan: string;
   status: string;
   monitored_entity_quota: number | null;
+  search_quota_annual: number | null;
+  monitor_quota: number | null;
+  seat_quota: number | null;
   current_period_end: string | null;
   created_at: string;
   stripe_subscription_id: string | null;
@@ -378,14 +381,16 @@ export default function AdminScreeningProduct() {
                         <TableHead>Organisation</TableHead>
                         <TableHead>Plan</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Monitoring quota</TableHead>
+                        <TableHead>Annual searches</TableHead>
+                        <TableHead>Monitored entities</TableHead>
+                        <TableHead>Seats</TableHead>
                         <TableHead>Renews</TableHead>
                         <TableHead>Started</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {subs.length === 0 && (
-                        <TableRow><TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
+                        <TableRow><TableCell colSpan={8} className="text-center text-sm text-muted-foreground py-8">
                           No subscriptions found.
                         </TableCell></TableRow>
                       )}
@@ -394,7 +399,9 @@ export default function AdminScreeningProduct() {
                           <TableCell className="font-medium">{s.organisation_name ?? "Unknown"}</TableCell>
                           <TableCell className="capitalize">{s.plan}</TableCell>
                           <TableCell><StatusBadge status={s.status} /></TableCell>
-                          <TableCell>{s.monitored_entity_quota ?? "—"}</TableCell>
+                          <TableCell>{s.search_quota_annual ?? "—"}</TableCell>
+                          <TableCell>{s.monitor_quota ?? "—"}</TableCell>
+                          <TableCell>{s.seat_quota ?? "—"}</TableCell>
                           <TableCell className="text-sm text-muted-foreground">{fmtDate(s.current_period_end)}</TableCell>
                           <TableCell className="text-sm text-muted-foreground">{fmtDate(s.created_at)}</TableCell>
                         </TableRow>

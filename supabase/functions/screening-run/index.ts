@@ -75,6 +75,50 @@ Deno.serve(async (req) => {
   const orgId = membership?.organization_id as string | undefined;
   if (!orgId) return json({ error: "No organisation is linked to your account" }, 403);
 
+  // ── quota enforcement ───────────────────────────────────────────────────
+  const { data: quotaRows } = await admin.rpc("get_screening_org_quota", { _org_id: orgId });
+  const quota = Array.isArray(quotaRows) ? quotaRows[0] : null;
+
+  // Search quota: count completed searches in the current billing year.
+  let periodStart: Date | null = null;
+  let periodEnd: Date | null = null;
+  if (quota?.current_period_end) {
+    periodEnd = new Date(quota.current_period_end);
+    periodStart = new Date(periodEnd);
+    periodStart.setFullYear(periodStart.getFullYear() - 1);
+  }
+
+  if (quota?.search_quota_annual != null) {
+    const { count: usedSearches, error: countErr } = await admin
+      .from("screening_searches")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", orgId)
+      .eq("status", "completed")
+      .gte("created_at", periodStart ? periodStart.toISOString() : "1970-01-01")
+      .lte("created_at", periodEnd ? periodEnd.toISOString() : new Date().toISOString());
+    if (!countErr && (usedSearches ?? 0) >= quota.search_quota_annual) {
+      return json({
+        error: "Annual screening search quota reached. Upgrade your plan or contact sales.",
+        code: "search_quota_exceeded",
+      }, 403);
+    }
+  }
+
+  // Monitoring quota: count active monitored subjects.
+  if (startMonitoring && quota?.monitor_quota != null) {
+    const { count: usedMonitors, error: monitorCountErr } = await admin
+      .from("monitoring_subjects")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", orgId)
+      .in("status", ["active", "paused"]);
+    if (!monitorCountErr && (usedMonitors ?? 0) >= quota.monitor_quota) {
+      return json({
+        error: "Monitored entity quota reached. Remove a monitored subject or upgrade your plan.",
+        code: "monitor_quota_exceeded",
+      }, 403);
+    }
+  }
+
   // ── resolve policy ──────────────────────────────────────────────────────
   await admin.rpc("ensure_default_screening_policy", { _org: orgId });
   const { data: policy } = await admin

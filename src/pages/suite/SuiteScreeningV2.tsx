@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useScreeningModules } from "@/hooks/useScreeningModules";
+import { UsageWidget } from "@/components/screening/UsageWidget";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -289,11 +290,12 @@ export default function SuiteScreeningV2() {
           onBack={() => { setActiveCase(null); loadCases(); }}
         />
       ) : (
-        <Tabs defaultValue="screen">
-          <TabsList>
-            <TabsTrigger value="screen"><Search className="mr-2 h-4 w-4" />New screening</TabsTrigger>
-            <TabsTrigger value="cases"><FileText className="mr-2 h-4 w-4" />Cases</TabsTrigger>
-          </TabsList>
+        <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+          <Tabs defaultValue="screen" className="min-w-0">
+            <TabsList>
+              <TabsTrigger value="screen"><Search className="mr-2 h-4 w-4" />New screening</TabsTrigger>
+              <TabsTrigger value="cases"><FileText className="mr-2 h-4 w-4" />Cases</TabsTrigger>
+            </TabsList>
 
           <TabsContent value="screen" className="mt-4">
             <Card>
@@ -479,6 +481,10 @@ export default function SuiteScreeningV2() {
             </Card>
           </TabsContent>
         </Tabs>
+        <aside className="space-y-4 hidden lg:block">
+          <UsageWidget />
+        </aside>
+      </div>
       )}
     </div>
   );

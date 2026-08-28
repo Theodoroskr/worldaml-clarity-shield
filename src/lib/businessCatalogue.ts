@@ -1,4 +1,5 @@
 import { Layers, Fingerprint, Database, GraduationCap, ShieldCheck, LucideIcon } from "lucide-react";
+import { SCREENING_PLANS } from "./screeningPlans";
 
 /**
  * Authenticated business product catalogue.
@@ -74,33 +75,17 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
       { q: "Can we screen in bulk?", a: "Yes — batch screening and the REST API are included on all plans." },
       { q: "Is there a free trial?", a: "Trials are arranged with our team. Use Contact Sales to request an evaluation." },
     ],
-    plans: [
-      {
-        key: "starter",
-        name: "Starter",
-        price: "€99",
-        period: "/month",
-        summary: "For smaller compliance teams starting structured screening.",
-        features: ["Up to 2,000 monitored entities", "Full API access", "Email support"],
-        checkout: { fn: "create-worldaml-checkout", plan: "starter" },
-      },
-      {
-        key: "compliance",
-        name: "Compliance",
-        price: "€495",
-        period: "/month",
-        summary: "For established compliance programmes with ongoing monitoring.",
-        features: ["Up to 10,000 monitored entities", "Enhanced monitoring", "Priority support"],
-        checkout: { fn: "create-worldaml-checkout", plan: "compliance" },
-      },
-      {
-        key: "enterprise",
-        name: "Enterprise",
-        price: null,
-        summary: "For high-volume and multi-entity groups.",
-        features: ["Unlimited entities", "Dedicated account manager", "SLA guarantees"],
-      },
-    ],
+    plans: SCREENING_PLANS.map((p) => ({
+      key: p.key,
+      name: p.name,
+      price: p.priceDisplay,
+      period: p.period,
+      summary: p.summary,
+      features: p.features,
+      checkout: p.priceCents !== null && p.priceCents > 0
+        ? { fn: "create-worldaml-checkout", plan: p.checkoutPlan }
+        : undefined,
+    })),
     pairsWith: ["worldid", "academy"],
     usageUnit: "monitored entities",
     openUrl: "/screening",
@@ -245,33 +230,17 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
       { q: "How does the Suite relate to the API?", a: "The Suite is the workspace interface powered by the same WorldAML engine as the API. You can start with either." },
       { q: "Can we buy it online?", a: "Suite plans start with the Screening & Monitoring subscription; larger deployments are scoped with our team." },
     ],
-    plans: [
-      {
-        key: "starter",
-        name: "Suite Starter",
-        price: "€99",
-        period: "/month",
-        summary: "Suite workspace with screening and monitoring for smaller teams.",
-        features: ["Up to 2,000 monitored entities", "Case and alert management", "Email support"],
-        checkout: { fn: "create-worldaml-checkout", plan: "starter" },
-      },
-      {
-        key: "compliance",
-        name: "Suite Compliance",
-        price: "€495",
-        period: "/month",
-        summary: "Full workspace for established compliance programmes.",
-        features: ["Up to 10,000 monitored entities", "Enhanced monitoring", "Priority support"],
-        checkout: { fn: "create-worldaml-checkout", plan: "compliance" },
-      },
-      {
-        key: "enterprise",
-        name: "Suite Enterprise",
-        price: null,
-        summary: "Multi-entity groups with bespoke reporting requirements.",
-        features: ["Unlimited entities and users", "Dedicated account manager", "SLA guarantees"],
-      },
-    ],
+    plans: SCREENING_PLANS.map((p) => ({
+      key: p.key,
+      name: p.key === "enterprise" ? "Suite Enterprise" : `Suite ${p.name}`,
+      price: p.priceDisplay,
+      period: p.period,
+      summary: p.summary,
+      features: p.features,
+      checkout: p.priceCents !== null && p.priceCents > 0
+        ? { fn: "create-worldaml-checkout", plan: p.checkoutPlan }
+        : undefined,
+    })),
     pairsWith: ["worldid", "academy"],
     usageUnit: "monitored entities",
     openUrl: "/suite/dashboard",

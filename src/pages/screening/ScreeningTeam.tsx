@@ -52,7 +52,13 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
 };
 
 export default function ScreeningTeam() {
-  const { isLoading: accessLoading, hasAccess, isAdmin } = useScreeningAccess();
+  const {
+    isLoading: accessLoading,
+    hasAccess,
+    isAdmin,
+    seatQuota,
+    seatsUsed,
+  } = useScreeningAccess();
   const { profile } = useAuth();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,6 +68,10 @@ export default function ScreeningTeam() {
   const [inviteBusy, setInviteBusy] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<TeamMember | null>(null);
   const [removeBusy, setRemoveBusy] = useState(false);
+
+  const activeSeats = members.length;
+  const seatLimit = seatQuota ?? null;
+  const seatsFull = seatLimit != null && activeSeats >= seatLimit;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -213,7 +223,7 @@ export default function ScreeningTeam() {
             </p>
           </div>
           {isAdmin && (
-            <Button onClick={() => setInviteOpen(true)} variant="accent">
+            <Button onClick={() => setInviteOpen(true)} variant="accent" disabled={seatsFull}>
               <Plus className="mr-1.5 h-4 w-4" /> Invite member
             </Button>
           )}
@@ -233,6 +243,10 @@ export default function ScreeningTeam() {
             <CardTitle className="text-base">Members</CardTitle>
             <CardDescription>
               {members.length} seat{members.length !== 1 ? "s" : ""} allocated
+              {seatLimit != null && ` / ${seatLimit} included`}
+              {seatsFull && (
+                <span className="ml-2 text-amber-600">Seat quota reached</span>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -8,6 +8,10 @@ export interface ScreeningEntitlement {
   isAdmin: boolean;
   plan: string | null;
   status: string | null;
+  searchQuotaAnnual: number | null;
+  monitorQuota: number | null;
+  seatQuota: number | null;
+  seatsUsed: number | null;
   monitoredEntityQuota: number | null;
   currentPeriodEnd: string | null;
   refresh: () => Promise<void>;
@@ -26,6 +30,10 @@ export function useScreeningAccess(): ScreeningEntitlement {
     isAdmin: false,
     plan: null,
     status: null,
+    searchQuotaAnnual: null,
+    monitorQuota: null,
+    seatQuota: null,
+    seatsUsed: null,
     monitoredEntityQuota: null,
     currentPeriodEnd: null,
   });
@@ -40,6 +48,10 @@ export function useScreeningAccess(): ScreeningEntitlement {
         isAdmin: false,
         plan: null,
         status: null,
+        searchQuotaAnnual: null,
+        monitorQuota: null,
+        seatQuota: null,
+        seatsUsed: null,
         monitoredEntityQuota: null,
         currentPeriodEnd: null,
       });
@@ -56,6 +68,10 @@ export function useScreeningAccess(): ScreeningEntitlement {
       isAdmin: !!row?.is_admin,
       plan: row?.plan ?? null,
       status: row?.status ?? null,
+      searchQuotaAnnual: row?.search_quota_annual ?? null,
+      monitorQuota: row?.monitor_quota ?? null,
+      seatQuota: row?.seat_quota ?? null,
+      seatsUsed: row?.seats_used ?? null,
       monitoredEntityQuota: row?.monitored_entity_quota ?? null,
       currentPeriodEnd: row?.current_period_end ?? null,
     });
