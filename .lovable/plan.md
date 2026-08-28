@@ -8,10 +8,12 @@ Two connected pieces: a package model that defines what each customer actually g
 
 All packages are billed **yearly** (annual commitment, 12 months for the price of 10). A smaller entry tier is added so small teams can start without a big commitment.
 
-| | Essentials EUR 490/yr (≈ EUR 41/mo) | Starter EUR 990/yr (≈ EUR 83/mo) | Compliance EUR 4,950/yr (≈ EUR 413/mo) | Enterprise (contact) |
+One number defines the package: the **annual entity allowance**. Every screened subject counts once against it, and the same subject can be kept under ongoing monitoring for the whole year at no extra cost — screening and monitoring volumes are always identical.
+
+| | Essentials EUR 490/yr | Starter EUR 990/yr | Compliance EUR 4,950/yr | Enterprise (contact) |
 |---|---|---|---|---|
-| Screening searches / month | 150 | 500 | 5,000 | Negotiated |
-| Monitored entities | 500 | 2,000 | 10,000 | Unlimited |
+| Screening searches / year | 500 | 2,000 | 10,000 | Negotiated |
+| Monitored entities (included) | 500 | 2,000 | 10,000 | Unlimited |
 | Seats | 1 | 3 | 15 | Unlimited |
 | Case management | Yes | Yes | Yes | Yes |
 | Adverse media | Yes | Yes | Yes | Yes |
@@ -20,6 +22,7 @@ All packages are billed **yearly** (annual commitment, 12 months for the price o
 | Case SLA targets | Fixed defaults | Fixed defaults | Configurable | Configurable |
 | Support | Email | Email | Priority | Dedicated manager + SLA |
 
+- Allowance resets on the subscription renewal date; unused searches do not roll over.
 - New Stripe annual prices are created for the three self-serve tiers; the existing monthly prices are replaced on the public pricing page and the business catalogue.
 - Cancellation within the first 14 days is refunded in full; afterwards the subscription runs to the end of the paid year (no partial refunds).
 
