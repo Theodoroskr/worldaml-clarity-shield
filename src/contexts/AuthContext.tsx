@@ -177,16 +177,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const currentUser = currentSession?.user ?? null;
 
       setSession(currentSession);
-      setUser((prevUser) => {
-        // If user identity changed, drop stale profile immediately.
-        if (prevUser?.id !== currentUser?.id) {
-          clearUserState();
-        } else if (currentUser) {
-          // Same user — keep existing profile only if it matches.
-          setProfile((p) => (p?.user_id === currentUser.id ? p : null));
-        }
-        return currentUser;
-      });
+
+      // Identity comparison happens here (not inside the setUser updater) so the
+      // resulting state writes are queued in a deterministic order — a
+      // clearUserState() running inside the updater would execute during the next
+      // render and silently undo the profileLoading flag set below.
+      const prevUserId = lastUserId.current;
+      lastUserId.current = currentUser?.id ?? null;
+
+      if (prevUserId !== (currentUser?.id ?? null)) {
+        // Identity changed — drop stale profile/role immediately.
+        clearUserState();
+      } else if (currentUser) {
+        // Same user — keep existing profile only if it matches.
+        setProfile((p) => (p?.user_id === currentUser.id ? p : null));
+      }
+      setUser(currentUser);
 
       if (currentUser) {
         // Mark profile/role resolution as pending *synchronously* so route guards
