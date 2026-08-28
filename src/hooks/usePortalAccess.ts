@@ -115,6 +115,7 @@ export const PORTAL_HOME: Record<PortalKey, string> = {
   partner: "/partner/dashboard",
   business: "/business/dashboard",
   suite: "/suite",
+  screening: "/screening",
   admin: "/admin/dashboard",
 };
 
@@ -123,6 +124,7 @@ export const PORTAL_LOGIN: Record<PortalKey, string> = {
   partner: "/partner/login",
   business: "/business/login",
   suite: "/login",
+  screening: "/login",
   admin: "/admin/login",
 };
 
