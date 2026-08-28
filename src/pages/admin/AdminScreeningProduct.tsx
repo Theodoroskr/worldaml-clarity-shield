@@ -37,6 +37,9 @@ type SubscriptionRow = {
   plan: string;
   status: string;
   monitored_entity_quota: number | null;
+  search_quota_annual: number | null;
+  monitor_quota: number | null;
+  seat_quota: number | null;
   current_period_end: string | null;
   created_at: string;
   stripe_subscription_id: string | null;
