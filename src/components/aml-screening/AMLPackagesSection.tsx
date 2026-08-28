@@ -104,29 +104,57 @@ export default function AMLPackagesSection() {
                 </li>
               ))}
             </ul>
-            <div className="mt-auto pt-2">
+            <div className="mt-auto pt-2 space-y-2">
               {isCheckoutEnabled(p) ? (
-                <Button
-                  className="w-full"
-                  variant="accent"
-                  disabled={busy === p.key}
-                  onClick={() => onBuy(p)}
-                >
-                  {busy === p.key && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                  )}
-                  {p.cta}
-                </Button>
+                <>
+                  <Button
+                    className="w-full"
+                    variant="accent"
+                    disabled={busy === p.key}
+                    onClick={() => onBuy(p)}
+                  >
+                    {busy === p.key ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <CreditCard className="mr-2 h-4 w-4" aria-hidden="true" />
+                    )}
+                    Buy now with card
+                  </Button>
+                  <Button asChild className="w-full" variant="outline">
+                    <Link to={salesLink(p)}>
+                      <Phone className="mr-2 h-4 w-4" aria-hidden="true" /> Talk to sales
+                    </Link>
+                  </Button>
+                  <p className="text-[11px] text-center text-muted-foreground">
+                    Secure card checkout · or get an invoice via sales
+                  </p>
+                </>
               ) : p.priceCents === 0 ? (
-                <Button asChild className="w-full" variant="accent">
-                  <Link to={isAuthenticated ? "/screening" : "/signup"}>{p.cta}</Link>
-                </Button>
+                <>
+                  <Button asChild className="w-full" variant="accent">
+                    <Link to={isAuthenticated ? "/screening" : "/signup"}>{p.cta}</Link>
+                  </Button>
+                  <Button asChild className="w-full" variant="outline">
+                    <Link to={salesLink(p)}>
+                      <Phone className="mr-2 h-4 w-4" aria-hidden="true" /> Talk to sales
+                    </Link>
+                  </Button>
+                </>
               ) : (
-                <Button asChild className="w-full" variant="outline">
-                  <Link to={salesLink(p)}>{p.priceCents == null ? p.cta : "Contact Sales"}</Link>
-                </Button>
+                <>
+                  <Button asChild className="w-full" variant="accent">
+                    <Link to={salesLink(p)}>
+                      <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
+                      {p.priceCents == null ? p.cta : "Talk to sales"}
+                    </Link>
+                  </Button>
+                  <p className="text-[11px] text-center text-muted-foreground">
+                    Card checkout for this package is arranged by our team.
+                  </p>
+                </>
               )}
             </div>
+
           </CardContent>
         </Card>
       ))}
