@@ -28,7 +28,6 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { UsageWidget } from "@/components/screening/UsageWidget";
 import {
   ALL_SOURCE_TYPES,
   ASSESSMENT_LABELS,
@@ -291,14 +290,10 @@ export default function SuiteScreeningV2() {
         />
       ) : (
         <Tabs defaultValue="screen">
-          <div className="mb-4 grid gap-4 lg:grid-cols-[1fr_320px]">
-            <TabsList>
-              <TabsTrigger value="screen"><Search className="mr-2 h-4 w-4" />New screening</TabsTrigger>
-              <TabsTrigger value="cases"><FileText className="mr-2 h-4 w-4" />Cases</TabsTrigger>
-            </TabsList>
-            <div className="hidden lg:block" />
-          </div>
-          <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+          <TabsList>
+            <TabsTrigger value="screen"><Search className="mr-2 h-4 w-4" />New screening</TabsTrigger>
+            <TabsTrigger value="cases"><FileText className="mr-2 h-4 w-4" />Cases</TabsTrigger>
+          </TabsList>
 
           <TabsContent value="screen" className="mt-4">
             <Card>
@@ -484,11 +479,7 @@ export default function SuiteScreeningV2() {
             </Card>
           </TabsContent>
         </Tabs>
-
-        <aside className="space-y-4 hidden lg:block">
-          <UsageWidget />
-        </aside>
-      </div>
+      )}
     </div>
   );
 }
