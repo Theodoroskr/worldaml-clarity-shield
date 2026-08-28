@@ -53,6 +53,7 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
 
 export default function ScreeningTeam() {
   const { isLoading: accessLoading, hasAccess, isAdmin } = useScreeningAccess();
+  const { profile } = useAuth();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [inviteOpen, setInviteOpen] = useState(false);
