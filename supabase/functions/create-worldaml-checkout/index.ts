@@ -29,6 +29,18 @@ const PRICE_ENV_BY_PLAN: Record<string, string> = {
   api_compliance: "STRIPE_PRICE_SCREENING_API_COMPLIANCE",
 };
 
+// Server-side annual catalogue (EUR cents). Used to build an inline annual
+// price when no Stripe price ID is mapped yet, so card checkout always works.
+const PLAN_CATALOGUE: Record<string, { name: string; amount: number }> = {
+  essentials: { name: "WorldAML Screening — Essentials (annual)", amount: 59000 },
+  starter: { name: "WorldAML Screening — Starter (annual)", amount: 119000 },
+  professional: { name: "WorldAML Screening — Professional (annual)", amount: 249000 },
+  compliance: { name: "WorldAML Screening — Compliance (annual)", amount: 595000 },
+  api_starter: { name: "WorldAML Screening API — Starter (annual)", amount: 195000 },
+  api_professional: { name: "WorldAML Screening API — Professional (annual)", amount: 395000 },
+  api_compliance: { name: "WorldAML Screening API — Compliance (annual)", amount: 795000 },
+};
+
 const resolvePrice = (plan: string): string | undefined => {
   const envKey = PRICE_ENV_BY_PLAN[plan];
   if (envKey) {
@@ -39,6 +51,7 @@ const resolvePrice = (plan: string): string | undefined => {
 };
 
 const VALID_PLANS = [...Object.keys(PRICE_ENV_BY_PLAN), ...Object.keys(LEGACY_PRICES)];
+
 
 const errorResponse = (message: string, status = 400) =>
   new Response(JSON.stringify({ error: message }), {
