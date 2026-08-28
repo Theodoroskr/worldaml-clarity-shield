@@ -146,7 +146,7 @@ export default function ScreeningTeam() {
   if (!hasAccess) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        <SEO title="Team & Access | WorldAML Screening" noindex />
+        <SEO title="Team & Access | WorldAML Screening" description="Manage Screening workspace members, roles and seat allocation." noindex />
         <Header />
         <main className="flex-1 container mx-auto px-4 py-8">
           <Card className="max-w-2xl mx-auto">
