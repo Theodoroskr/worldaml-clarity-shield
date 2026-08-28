@@ -1,56 +1,62 @@
-# Replace Hero "Free Sanctions Quick Check" with Demo Access Flow (5 Free Screenings)
+# Hero Quick Check → Register for 5 Free Screenings
 
 ## Goal
 
-The homepage hero's inline "Free Sanctions Quick Check" widget is replaced by a **demo acquisition flow**: a visitor registers a business account and immediately gets the **Demo plan — 5 free screening searches** in the WorldAML Screening workspace, with quota enforcement and an upgrade path when the 5 are used.
-
-## Decisions (defaults chosen)
-
-- **Replace the hero widget** with a demo CTA card, and **delete the existing free quick-check experience entirely** — the standalone `/sanctions-check` page, its links (footer/nav/other pages), and the free-check components are removed; `/sanctions-check` (and `/free-aml-check`) redirect to the demo signup flow.
-- **Demo grant happens automatically on first entry to the screening workspace** for any signed-in user with no screening subscription — so both CTA-originated signups and organic signups get the same one-time demo. One demo per organisation, idempotent.
+Keep the existing hero "Free Sanctions Quick Check" card exactly as it looks today (same card, same header strip, same input). Change what happens on **Check**: instead of running a free open-source search, it opens a short registration prompt (business email + company), sends an activation email, and on activation the account gets the **Demo plan — 5 free screening searches** in the WorldAML Screening workspace.
 
 ## Current state (verified)
 
-- `src/components/home/NewHeroSection.tsx` lines 186–224 hold the quick-check card (search box, "Check" button, footnote with "Full tool →").
-- Demo plan exists in `src/lib/screeningPlans.ts` (5 searches, 0 monitoring, 1 seat) but **nothing provisions it** — `verify-worldaml-subscription` only runs after a paid Stripe checkout; the Demo card CTA just links to `/signup` or `/screening`.
-- `screening-run` Edge Function already enforces annual search/monitor quotas via `get_screening_org_quota` and returns `search_quota_exceeded`, so once a demo subscription row exists, hard blocking + upgrade messaging already work (`useScreeningQuota`, `UsageWidget`).
-- `/signup` already accepts `?redirect=` and the packages section uses an intent key pattern we can mirror.
+- `src/components/home/NewHeroSection.tsx` holds the quick-check card: navy header strip ("Free Sanctions Quick Check · OFAC · EU · UN · HMT"), a name/company input, a "Check" submit button, and a footnote linking to `/sanctions-check`.
+- `handleQuickSearch` currently routes the typed query into the free check flow.
+- Demo plan already exists in `src/lib/screeningPlans.ts` (5 searches, 0 monitoring, 1 seat) but nothing provisions it — only paid Stripe checkout creates a `screening_subscriptions` row.
+- `screening-run` already enforces annual quotas and returns `search_quota_exceeded`, so once a demo row exists, blocking + upgrade messaging work via `useScreeningQuota` / `UsageWidget`.
 
 ## Changes
 
-### 1. Hero section (`src/components/home/NewHeroSection.tsx`)
-- Replace the quick-check card with a demo card: headline "Try the Demo — 5 Free Screenings", subline "Register a business account and run 5 real screening searches across 1,900+ global lists. No card required.", CTA button "Start Free Demo".
-- CTA routes to `/signup?redirect=/screening&demo=1` (unauthenticated) or straight to `/screening` if already signed in.
-- No quick-check footnote or link remains; footnote instead reads "No card required · Business email · 5 screenings included".
+### 1. Hero card (visual unchanged)
+- Keep the card, header strip, input, footnote layout and styling as-is.
+- Change the footnote copy to: "Register with a business email to run 5 free screenings across 1,900+ lists · No card required."
+- `Check` no longer performs a search. It opens a **registration dialog**, carrying the typed name/company through as the first search the user will run.
 
-### 2. Demo provisioning Edge Function `claim-screening-demo` (new)
-- Auth required (bearer token). Idempotent:
-  1. Resolve caller's org (`suite_org_members`); create org + admin membership if none (same pattern as `verify-worldaml-subscription`).
-  2. If a `screening_subscriptions` row already exists for the org → return current plan (no demo grant).
-  3. Otherwise insert `screening_subscriptions` with `plan='demo'`, `status='active'`, `search_quota_annual=5`, `monitor_quota=0`, `seat_quota=1`, `current_period_end = now + 1 year`, and sync `product_access` (`product_key='screening'`, status active).
-- Returns `{ plan: 'demo', granted: true|false }`.
+### 2. Registration dialog (new `ScreeningDemoSignupDialog`)
+Fields: Full name, Business email, Company name, Country (optional), password. Validation:
+- Business email required — free providers (gmail, outlook, yahoo, etc.) rejected using the existing `src/lib/workEmail.ts` helper, with a clear inline message.
+- Company name required.
+- Signed-in users skip the dialog entirely and go straight to `/screening?q=<query>`.
 
-### 3. Workspace auto-claim (`src/pages/suite/SuiteScreeningV2.tsx`)
-- When `useScreeningAccess` resolves with `isAuthenticated && !hasAccess`, invoke `claim-screening-demo` once, then `refresh()` the entitlement so the workspace opens with demo quotas.
-- Demo users see a welcome banner: "Demo plan — 5 free screening searches" + link to `/screening-monitoring/pricing`. Existing `UsageWidget` and quota-exceeded banner handle the rest.
+On submit: `supabase.auth.signUp` with `emailRedirectTo = ${window.location.origin}/screening?demo=1&q=<query>` and metadata `{ full_name, company_name, country, demo_intent: 'screening' }`. Show a "Check your email to activate" confirmation state inside the dialog (no auto-login claim).
 
-### 4. Remove the existing free quick-check
-- Delete the `/sanctions-check` and `/free-aml-check` pages and their supporting quick-check components/hooks.
-- Remove every internal link/CTA pointing at them (header, footer, hero, marketing pages, upsell banners, chatbot knowledge).
-- Add client redirects `/sanctions-check` → `/signup?redirect=/screening&demo=1` and `/free-aml-check` → same, so indexed traffic lands on the demo flow.
-- Retire the `sanctions-search` Edge Function only if nothing else calls it; otherwise leave it in place (checked during implementation).
+### 3. Activation email
+- Email confirmation stays on for this flow (the activation link is what verifies the business email). The Supabase confirmation email redirects to `/screening?demo=1&q=…`.
+- After the redirect lands with a session, the workspace claims the demo automatically (below).
 
-### 5. SEO/sitemap hygiene
-- Remove the deleted URLs from `public/sitemap.xml`, `public/llms.txt`, and any structured data referencing the free check.
+### 4. Demo provisioning Edge Function `claim-screening-demo` (new)
+Auth required (bearer token), idempotent:
+1. Resolve the caller's org (`suite_org_members`); create org + admin membership if none, same pattern as `verify-worldaml-subscription`.
+2. If a `screening_subscriptions` row already exists for the org → return the current plan, grant nothing.
+3. Otherwise insert `plan='demo'`, `status='active'`, `search_quota_annual=5`, `monitor_quota=0`, `seat_quota=1`, `current_period_end = now + 1 year`, and sync `product_access` (`product_key='screening'`, active).
+
+Returns `{ plan, granted }`. One demo per organisation; a paid subscription is never downgraded.
+
+### 5. Workspace auto-claim (`src/pages/suite/SuiteScreeningV2.tsx`)
+- When `useScreeningAccess` resolves as `isAuthenticated && !hasAccess`, invoke `claim-screening-demo` once, then `refresh()`.
+- If `?q=` is present, prefill the screening search box with it so the user's hero query is their first real screening.
+- Show a banner: "Demo plan — 5 free screening searches" with a link to `/screening-monitoring/pricing`. Existing `UsageWidget` and the quota-exceeded banner handle the rest.
+
+### 6. Existing free-check surfaces
+- `/sanctions-check` and `/free-aml-check` pages are **removed**; `/sanctions-check` and `/free-aml-check` redirect to the homepage hero flow (`/?demo=1`), and the hero's "Run a Free AML Check" secondary CTA now opens the same registration dialog.
+- Remove internal links/CTAs pointing at the deleted pages (header, footer, marketing pages, upsell banners, chatbot knowledge).
+- Remove the deleted URLs from `public/sitemap.xml` and `public/llms.txt`.
+- Retire the `sanctions-search` Edge Function only if nothing else calls it.
 
 ## Technical notes
 
-- New Edge Function deployed via `supabase--deploy_edge_functions`; uses service role server-side only, never exposes keys.
-- Demo searches run through the existing `screening-run` pipeline (same providers, same audit trail); monitoring stays disabled (quota 0), adverse media remains plan-gated.
-- Abuse control: one demo per organisation; a user with an existing paid subscription never gets downgraded by the claim function.
-- Admin visibility: demo subscriptions appear in Admin → Screening (existing `admin_screening_overview` / users queries read `screening_subscriptions`).
+- Edge Function uses the service role server-side only; no keys reach the client.
+- Demo searches run through the existing `screening-run` pipeline (same providers, same audit trail); monitoring stays at quota 0 and adverse media stays plan-gated.
+- Admin visibility: demo subscriptions show up in Admin → Screening through the existing `screening_subscriptions` reads.
 
 ## Verification
 
-- Playwright: homepage renders new demo card; `/sanctions-check` redirects to the demo signup; no dead links remain (full-text search for `sanctions-check` / `free-aml-check` returns only the redirects).
-- End-to-end: new signup → land in `/screening` → demo plan active → run a search → quota widget shows 1/5 → after 5, run is blocked with upgrade message.
+- Playwright: hero card renders unchanged; clicking Check with a query opens the dialog; a personal email is rejected; a business email shows the "check your email" state.
+- End-to-end: activate → land on `/screening` with the query prefilled → demo plan active → run a search → usage shows 1/5 → after 5, runs are blocked with the upgrade message.
+- Full-text search confirms no dead links to `/sanctions-check` or `/free-aml-check` remain outside the redirects.
