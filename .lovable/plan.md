@@ -24,7 +24,7 @@ Proposed mechanism:
 
 1. **Store the risk level.** Each monitored entity keeps its last evaluated risk level so a change can be detected instead of re-derived every page load.
 2. **Alert rules, per organisation.** A rule says: notify when an entity's risk reaches or crosses a chosen threshold (Elevated / Medium / High), optionally limited to certain categories (e.g. sanctions only) and to entities assigned to a given owner. Each rule chooses its channels: in-app alert, email to named recipients, or both. Rules can be enabled/disabled.
-3. **Evaluation points.** Risk is re-evaluated whenever a screening re-run or a monitoring poll updates an entity's match counts. If the new level is higher than the stored one and crosses an active rule's threshold, an alert record is written and the channels fire.
+3. **Evaluation points.** Risk is re-evaluated (a) after every screening run, when the case's match counts are written, and (b) during the nightly monitoring poll. The poll currently records a provider change and flags the case, but does not refresh match counts — so it will be extended to re-retrieve the screening from the provider for the affected entity and update the counts before evaluating risk. If the new level is higher than the stored one and crosses an active rule's threshold, an alert record is written and the channels fire.
 4. **Surfacing.** Crossings appear as a "Risk threshold crossed" entry in the entity drawer's monitoring history, as a banner/count on the Monitored entities page, and (if enabled) as an email.
 5. **Settings UI.** A new "Risk alerts" panel — reachable from the Monitored entities page and the workspace sidebar — lists rules with threshold, scope, channels, and last triggered, with create/edit/delete.
 
