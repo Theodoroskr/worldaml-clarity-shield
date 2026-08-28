@@ -6,19 +6,20 @@ Two connected pieces: a package model that defines what each customer actually g
 
 ### Package structure — annual billing
 
-| Plan | Annual price | Screening searches / year | Monitored entities |
-|---|---|---|---|---|
-| Demo | Free | 5 | — |
-| Essentials | €490 | 500 | 100 |
-| Starter | €990 | 1,000 | 200 |
-| Professional | €1,990 | 2,000 | 500 |
-| Compliance | €4,950 | 5,000 | 1,000 |
-| Enterprise | Contact us | Negotiated | Negotiated |
+| Plan | Annual price | Seats | Screening searches / year | Monitored entities |
+|---|---|---|---|---|---|
+| Demo | Free | 1 | 5 | — |
+| Essentials | €490 | 1 | 500 | 100 |
+| Starter | €990 | 3 | 1,000 | 200 |
+| Professional | €1,990 | 5 | 2,000 | 500 |
+| Compliance | €4,950 | 10 | 5,000 | 1,000 |
+| Enterprise | Contact us | Negotiated | Negotiated | Negotiated |
 
-- All paid plans are billed **yearly** (annual commitment). The Demo plan is free and capped at 5 screening searches; it does not include ongoing monitoring.
+- All paid plans are billed **yearly** (annual commitment). The Demo plan is free, capped at 5 screening searches, limited to 1 user and does not include ongoing monitoring.
 - Allowances reset on the subscription renewal date; unused searches do not roll over.
 - New Stripe annual prices are created for Essentials, Starter, Professional and Compliance; the existing monthly prices are replaced on the public pricing page and the business catalogue.
 - Cancellation within the first 14 days is refunded in full; afterwards the subscription runs to the end of the paid year (no partial refunds).
+- Extra seats can be added to paid plans at €29/user/month billed annually (€348/user/yr); blocked if it exceeds the plan’s seat limit unless the customer upgrades.
 
 Paid add-on modules stay separate and stack on any package:
 - Escalation & Four-Eyes Review — EUR 149/mo (already built)
