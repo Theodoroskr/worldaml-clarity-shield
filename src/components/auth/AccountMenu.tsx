@@ -41,6 +41,13 @@ export const WORKSPACES: WorkspaceDef[] = [
     match: (p) => p.startsWith("/partner"),
   },
   {
+    key: "screening",
+    label: "WorldAML Screening",
+    description: "Sanctions, PEP & adverse media screening",
+    icon: Radar,
+    match: (p) => p.startsWith("/screening") || p.startsWith("/screening-monitoring"),
+  },
+  {
     key: "suite",
     label: "Compliance Suite",
     description: "Onboarding, screening, cases & monitoring",
