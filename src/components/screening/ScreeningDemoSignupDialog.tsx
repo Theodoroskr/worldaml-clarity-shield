@@ -40,12 +40,28 @@ export function ScreeningDemoSignupDialog({ open, onOpenChange, query }: Props) 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+  const [activationUrl, setActivationUrl] = useState<string | null>(null);
+
+  /** Inline field validation on blur so errors appear before submit. */
+  const validateField = (field: "fullName" | "email" | "company" | "password", value: string) => {
+    const result = schema.shape[field].safeParse(value);
+    setErrors((prev) => {
+      const next = { ...prev };
+      if (result.success) delete next[field];
+      else next[field] = result.error.issues[0]?.message ?? "Invalid value";
+      return next;
+    });
+  };
 
   const reset = () => {
     setErrors({});
     setSent(false);
     setSubmitting(false);
+    setSignedIn(false);
+    setActivationUrl(null);
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
