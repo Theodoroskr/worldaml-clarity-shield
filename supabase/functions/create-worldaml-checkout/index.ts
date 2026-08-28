@@ -132,7 +132,7 @@ serve(async (req) => {
       customer_email: !customerId && userEmail ? userEmail : undefined,
       // NOTE: `customer_creation` is only valid in `payment` mode. In subscription
       // mode Stripe always creates/attaches a Customer automatically.
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [lineItem],
       mode: "subscription",
       allow_promotion_codes: true,
       billing_address_collection: "auto",
