@@ -32,7 +32,7 @@ Paid add-on modules stay separate and stack on any package:
 - Enhanced Due Diligence reports — priced on request
 
 ### Making the package real (limits, not just marketing)
-- Extend `screening_subscriptions` with `search_quota_monthly`, `seat_quota`, `searches_used_this_period`, `period_started_at`.
+- Extend `screening_subscriptions` with `search_quota_annual`, `seat_quota`, `searches_used_this_period`, `period_started_at` (monitored entities use the same allowance number).
 - Plan definitions live in one place (`src/lib/screeningPlans.ts`) and are used by the public pricing page, the workspace usage widget and the admin screening product page — so there is a single source of truth.
 - `screening-run` edge function checks quota before calling the provider; over quota returns a clear upgrade message instead of a silent failure.
 - `/screening/team` blocks adding members beyond the seat quota with an upgrade prompt.
