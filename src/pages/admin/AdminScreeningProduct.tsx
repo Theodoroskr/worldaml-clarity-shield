@@ -64,6 +64,26 @@ type SearchRow = {
   monitoring_requested: boolean;
 };
 
+type UserRow = {
+  user_id: string;
+  organisation_id: string;
+  organisation_name: string | null;
+  role: string | null;
+  email: string | null;
+  full_name: string | null;
+  company_name: string | null;
+  job_title: string | null;
+  country: string | null;
+  joined_at: string | null;
+  last_activity_at: string | null;
+  searches_total: number;
+  searches_30d: number;
+  decisions_total: number;
+  last_search_at: string | null;
+  subscription_status: string | null;
+  plan: string | null;
+};
+
 type Overview = {
   totals: Record<string, number>;
   subscriptions: SubscriptionRow[];
