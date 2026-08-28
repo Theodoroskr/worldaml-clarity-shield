@@ -6,7 +6,7 @@ The homepage hero's inline "Free Sanctions Quick Check" widget is replaced by a 
 
 ## Decisions (defaults chosen)
 
-- **Replace the hero widget** with a demo CTA card. The standalone `/sanctions-check` page stays live (still linked from footer/other pages); only the homepage hero section changes.
+- **Replace the hero widget** with a demo CTA card, and **delete the existing free quick-check experience entirely** — the standalone `/sanctions-check` page, its links (footer/nav/other pages), and the free-check components are removed; `/sanctions-check` (and `/free-aml-check`) redirect to the demo signup flow.
 - **Demo grant happens automatically on first entry to the screening workspace** for any signed-in user with no screening subscription — so both CTA-originated signups and organic signups get the same one-time demo. One demo per organisation, idempotent.
 
 ## Current state (verified)
