@@ -305,10 +305,15 @@ export const SCREENING_API_PLANS: ScreeningPlanDefinition[] = [
   },
 ];
 
-/** Checkout is only offered once the matching annual Stripe price is mapped. */
+/**
+ * Card checkout is offered for every fixed-price annual plan. The backend uses
+ * the mapped Stripe price when one exists, otherwise it builds the same annual
+ * amount inline. Custom-priced plans (null) always route to sales.
+ */
 export function isCheckoutEnabled(plan: ScreeningPlanDefinition): boolean {
-  return Boolean(plan.priceCents && plan.stripePriceId);
+  return Boolean(plan.priceCents && plan.priceCents > 0);
 }
+
 
 export const SCREENING_PLAN_BY_KEY = Object.fromEntries(
   [...SCREENING_PLANS, ...SCREENING_API_PLANS].map((p) => [p.key, p])

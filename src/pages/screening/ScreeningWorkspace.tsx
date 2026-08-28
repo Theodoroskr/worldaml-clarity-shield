@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Loader2, Lock, ArrowRight, Sparkles } from "lucide-react";
+import { Loader2, Lock, ArrowRight, Sparkles, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
@@ -9,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SuiteScreeningV2 from "@/pages/suite/SuiteScreeningV2";
 import { useScreeningAccess } from "@/hooks/useScreeningAccess";
+import { useScreeningQuota } from "@/hooks/useScreeningQuota";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -18,8 +20,10 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export default function ScreeningWorkspace() {
   const { isLoading, isAuthenticated, hasAccess, plan, refresh } = useScreeningAccess();
+  const quota = useScreeningQuota();
   const [searchParams] = useSearchParams();
   const [claiming, setClaiming] = useState(false);
+  const [justActivated, setJustActivated] = useState(false);
   const claimedRef = useRef(false);
 
   useEffect(() => {
@@ -30,6 +34,7 @@ export default function ScreeningWorkspace() {
       try {
         await supabase.functions.invoke("claim-screening-demo", { body: {} });
         await refresh();
+        setJustActivated(true);
       } catch (err) {
         console.warn("Demo activation failed", err);
       } finally {
@@ -39,6 +44,12 @@ export default function ScreeningWorkspace() {
   }, [isLoading, isAuthenticated, hasAccess, refresh]);
 
   const busy = isLoading || claiming;
+  const isDemo = plan === "demo";
+  // Until the demo credits are counted, screening runs stay blocked.
+  const provisioning = isDemo && quota.loading;
+  const searchQuota = quota.searchQuota ?? 5;
+  const used = quota.searchesUsed ?? 0;
+  const remaining = Math.max(0, searchQuota - used);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -48,7 +59,40 @@ export default function ScreeningWorkspace() {
         noindex
       />
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
+
+      {/* Product app bar — gives the module a platform / console feel */}
+      <div className="border-b border-border bg-muted/40 backdrop-blur supports-[backdrop-filter]:bg-muted/30 sticky top-0 z-30">
+        <div className="container mx-auto px-4 flex flex-wrap items-center gap-3 py-3">
+          <span className="inline-flex items-center gap-2 font-semibold text-foreground">
+            <ShieldCheck className="h-4 w-4 text-teal" aria-hidden="true" />
+            WorldAML Screening &amp; Monitoring
+          </span>
+          {plan && (
+            <Badge variant="outline" className="border-teal/40 text-teal uppercase text-[10px] tracking-wide">
+              {plan} plan
+            </Badge>
+          )}
+          {isDemo && !provisioning && (
+            <Badge variant="outline" className="text-[10px]">
+              {remaining}/{searchQuota} screenings left
+            </Badge>
+          )}
+          <nav className="ml-auto flex items-center gap-1 text-sm" aria-label="Screening workspace">
+            <Link to="/screening" className="rounded-md px-2.5 py-1.5 bg-background font-medium shadow-sm">
+              Workspace
+            </Link>
+            <Link to="/screening/team" className="rounded-md px-2.5 py-1.5 text-muted-foreground hover:text-foreground">
+              Team &amp; access
+            </Link>
+            <Link to="/screening-monitoring/pricing" className="rounded-md px-2.5 py-1.5 text-muted-foreground hover:text-foreground">
+              Packages
+            </Link>
+          </nav>
+        </div>
+      </div>
+
+      <main className="flex-1 container mx-auto px-4 py-6">
+
         {busy ? (
           <div className="flex items-center gap-3 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -56,20 +100,51 @@ export default function ScreeningWorkspace() {
           </div>
         ) : hasAccess ? (
           <>
-            {plan === "demo" && (
-              <Alert className="mb-6">
-                <Sparkles className="h-4 w-4" />
-                <AlertTitle>Demo plan — 5 free screening searches</AlertTitle>
-                <AlertDescription className="flex flex-wrap items-center gap-2">
-                  Run real screenings across 1,900+ sanctions, PEP and watchlist sources. Ongoing
-                  monitoring and adverse media need a paid package.
-                  <Link to="/screening-monitoring/pricing" className="underline font-medium">
-                    View packages →
-                  </Link>
+            {isDemo && (
+              <Alert className="mb-6 border-teal/40 bg-teal/5">
+                {justActivated ? (
+                  <CheckCircle2 className="h-4 w-4 text-teal" />
+                ) : (
+                  <Sparkles className="h-4 w-4 text-teal" />
+                )}
+                <AlertTitle>
+                  {justActivated
+                    ? `Activated — you have exactly ${searchQuota} free screenings`
+                    : `Demo plan — ${searchQuota} free screening searches`}
+                </AlertTitle>
+                <AlertDescription className="space-y-2">
+                  <p className="flex flex-wrap items-center gap-2">
+                    {provisioning ? (
+                      <span className="inline-flex items-center gap-2 font-medium text-foreground">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Provisioning your demo
+                        credits… screening runs unlock in a moment.
+                      </span>
+                    ) : (
+                      <span className="font-medium text-foreground">
+                        {remaining} of {searchQuota} free screenings remaining
+                      </span>
+                    )}
+                  </p>
+                  <p className="flex flex-wrap items-center gap-2">
+                    Run real screenings across 1,900+ sanctions, PEP and watchlist sources. Ongoing
+                    monitoring and adverse media need a paid package.
+                    <Link to="/screening-monitoring/pricing" className="underline font-medium">
+                      View packages →
+                    </Link>
+                  </p>
                 </AlertDescription>
               </Alert>
             )}
-            <SuiteScreeningV2 initialQuery={searchParams.get("q") ?? undefined} />
+            {provisioning ? (
+              <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 px-4 py-6 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Preparing your workspace — screening is disabled until your demo credits are
+                provisioned.
+              </div>
+            ) : (
+              <SuiteScreeningV2 initialQuery={searchParams.get("q") ?? undefined} />
+            )}
+
           </>
         ) : (
           <Card className="max-w-2xl mx-auto">

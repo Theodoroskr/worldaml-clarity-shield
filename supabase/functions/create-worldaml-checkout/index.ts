@@ -29,6 +29,18 @@ const PRICE_ENV_BY_PLAN: Record<string, string> = {
   api_compliance: "STRIPE_PRICE_SCREENING_API_COMPLIANCE",
 };
 
+// Server-side annual catalogue (EUR cents). Used to build an inline annual
+// price when no Stripe price ID is mapped yet, so card checkout always works.
+const PLAN_CATALOGUE: Record<string, { name: string; amount: number }> = {
+  essentials: { name: "WorldAML Screening — Essentials (annual)", amount: 59000 },
+  starter: { name: "WorldAML Screening — Starter (annual)", amount: 119000 },
+  professional: { name: "WorldAML Screening — Professional (annual)", amount: 249000 },
+  compliance: { name: "WorldAML Screening — Compliance (annual)", amount: 595000 },
+  api_starter: { name: "WorldAML Screening API — Starter (annual)", amount: 195000 },
+  api_professional: { name: "WorldAML Screening API — Professional (annual)", amount: 395000 },
+  api_compliance: { name: "WorldAML Screening API — Compliance (annual)", amount: 795000 },
+};
+
 const resolvePrice = (plan: string): string | undefined => {
   const envKey = PRICE_ENV_BY_PLAN[plan];
   if (envKey) {
@@ -39,6 +51,7 @@ const resolvePrice = (plan: string): string | undefined => {
 };
 
 const VALID_PLANS = [...Object.keys(PRICE_ENV_BY_PLAN), ...Object.keys(LEGACY_PRICES)];
+
 
 const errorResponse = (message: string, status = 400) =>
   new Response(JSON.stringify({ error: message }), {
@@ -82,13 +95,26 @@ serve(async (req) => {
 
     const normalizedPlan = plan.toLowerCase();
     const priceId = resolvePrice(normalizedPlan);
-    if (!priceId) {
+    const catalogue = PLAN_CATALOGUE[normalizedPlan];
+    if (!priceId && !catalogue) {
       console.error("[create-worldaml-checkout] No Stripe price mapped for plan", normalizedPlan);
       return errorResponse(
         "Online checkout for this plan is not available yet. Please contact sales.",
         409
       );
     }
+    const lineItem = priceId
+      ? { price: priceId, quantity: 1 }
+      : {
+          quantity: 1,
+          price_data: {
+            currency: "eur",
+            unit_amount: catalogue.amount,
+            recurring: { interval: "year" as const },
+            product_data: { name: catalogue.name },
+          },
+        };
+
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -106,7 +132,7 @@ serve(async (req) => {
       customer_email: !customerId && userEmail ? userEmail : undefined,
       // NOTE: `customer_creation` is only valid in `payment` mode. In subscription
       // mode Stripe always creates/attaches a Customer automatically.
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [lineItem],
       mode: "subscription",
       allow_promotion_codes: true,
       billing_address_collection: "auto",

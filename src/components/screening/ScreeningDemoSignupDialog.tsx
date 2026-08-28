@@ -40,12 +40,28 @@ export function ScreeningDemoSignupDialog({ open, onOpenChange, query }: Props) 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+  const [activationUrl, setActivationUrl] = useState<string | null>(null);
+
+  /** Inline field validation on blur so errors appear before submit. */
+  const validateField = (field: "fullName" | "email" | "company" | "password", value: string) => {
+    const result = schema.shape[field].safeParse(value);
+    setErrors((prev) => {
+      const next = { ...prev };
+      if (result.success) delete next[field];
+      else next[field] = result.error.issues[0]?.message ?? "Invalid value";
+      return next;
+    });
+  };
 
   const reset = () => {
     setErrors({});
     setSent(false);
     setSubmitting(false);
+    setSignedIn(false);
+    setActivationUrl(null);
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,13 +104,13 @@ export function ScreeningDemoSignupDialog({ open, onOpenChange, query }: Props) 
     }
 
     const { data } = await supabase.auth.getSession();
-    if (data.session) {
-      // Email confirmation is off for this project state — go straight in.
-      window.location.assign(target.toString());
-      return;
-    }
+    // Always confirm on screen; the activation / welcome email is sent either
+    // by auth (confirmation link) or by claim-screening-demo (welcome email).
+    setActivationUrl(target.toString());
+    setSignedIn(Boolean(data.session));
     setSent(true);
   };
+
 
   return (
     <Dialog
@@ -109,15 +125,36 @@ export function ScreeningDemoSignupDialog({ open, onOpenChange, query }: Props) 
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <MailCheck className="h-5 w-5 text-teal" /> Check your email to activate
+                <MailCheck className="h-5 w-5 text-teal" />
+                {signedIn ? "Account created — activation email sent" : "Check your email to activate"}
               </DialogTitle>
               <DialogDescription>
-                We sent an activation link to <span className="font-medium">{email}</span>. Open it to
-                verify your business email — your account then opens with 5 free screening searches
-                {query?.trim() ? <> and “{query.trim()}” ready to screen</> : null}.
+                We sent an activation email to <span className="font-medium">{email}</span>.
+                {signedIn
+                  ? " Your account is ready — the email confirms your access."
+                  : " Open the link to verify your business email."}
               </DialogDescription>
             </DialogHeader>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+            <div className="rounded-lg border border-teal/40 bg-teal/5 p-3 text-sm">
+              <p className="font-medium text-foreground flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-teal" /> You receive exactly 5 free screenings
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                Screening stays disabled until the 5 demo credits are provisioned on your workspace —
+                this takes a few seconds after activation
+                {query?.trim() ? <>, then “{query.trim()}” is ready to screen</> : null}.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              {signedIn && activationUrl && (
+                <Button className="flex-1" onClick={() => window.location.assign(activationUrl)}>
+                  Continue to workspace
+                </Button>
+              )}
+              <Button variant="outline" className={signedIn ? "" : "flex-1"} onClick={() => onOpenChange(false)}>
+                Close
+              </Button>
+            </div>
           </>
         ) : (
           <>
@@ -131,10 +168,12 @@ export function ScreeningDemoSignupDialog({ open, onOpenChange, query }: Props) 
               </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-3" noValidate>
               <div className="space-y-1.5">
                 <Label htmlFor="demo-name">Full name</Label>
                 <Input id="demo-name" value={fullName} maxLength={120}
+                  aria-invalid={Boolean(errors.fullName)}
+                  onBlur={(e) => validateField("fullName", e.target.value)}
                   onChange={(e) => setFullName(e.target.value)} autoComplete="name" />
                 {errors.fullName && <p className="text-xs text-destructive">{errors.fullName}</p>}
               </div>
@@ -142,16 +181,21 @@ export function ScreeningDemoSignupDialog({ open, onOpenChange, query }: Props) 
               <div className="space-y-1.5">
                 <Label htmlFor="demo-email">Business email</Label>
                 <Input id="demo-email" type="email" value={email} maxLength={255}
+                  aria-invalid={Boolean(errors.email)}
+                  onBlur={(e) => validateField("email", e.target.value)}
                   onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
                 {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="demo-company">Company</Label>
+                <Label htmlFor="demo-company">Company name</Label>
                 <Input id="demo-company" value={company} maxLength={160}
+                  aria-invalid={Boolean(errors.company)}
+                  onBlur={(e) => validateField("company", e.target.value)}
                   onChange={(e) => setCompany(e.target.value)} autoComplete="organization" />
                 {errors.company && <p className="text-xs text-destructive">{errors.company}</p>}
               </div>
+
 
               <div className="space-y-1.5">
                 <Label htmlFor="demo-country">Country <span className="text-muted-foreground">(optional)</span></Label>
@@ -162,6 +206,7 @@ export function ScreeningDemoSignupDialog({ open, onOpenChange, query }: Props) 
               <div className="space-y-1.5">
                 <Label htmlFor="demo-password">Password</Label>
                 <Input id="demo-password" type="password" value={password} maxLength={128}
+                  onBlur={(e) => validateField("password", e.target.value)}
                   onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
                 {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
               </div>
