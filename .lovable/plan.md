@@ -44,14 +44,6 @@ Two connected pieces: a package model that defines what each customer actually g
 - Workspace header shows searches used / monitored entities / seats with renewal date.
 - Admin can override quotas per organisation from `/admin/screening-product`.
 
-### Making the package real (limits, not just marketing)
-- Extend `screening_subscriptions` with `search_quota_annual`, `monitor_quota`, `seat_quota`, `searches_used_this_period`, `monitors_used`, `period_started_at`.
-- Plan definitions live in one place (`src/lib/screeningPlans.ts`) and are used by the public pricing page, the workspace usage widget and the admin screening product page — so there is a single source of truth.
-- `screening-run` edge function checks search quota before calling the provider; over quota returns a clear upgrade message instead of a silent failure.
-- Adding a subject to monitoring checks `monitor_quota`; over quota returns an upgrade prompt.
-- `/screening/team` blocks adding members beyond the seat quota with an upgrade prompt.
-- Usage bar in the workspace header: searches used / monitored entities / seats, with a renewal date.
-- Admin can override quotas per organisation from `/admin/screening-product`.
 
 ## Part 2 — Case management workflow
 
