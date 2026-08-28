@@ -5387,6 +5387,47 @@ export type Database = {
           },
         ]
       }
+      screening_sla_settings: {
+        Row: {
+          auto_escalate: boolean
+          created_at: string
+          high_sla_hours: number
+          id: string
+          low_sla_hours: number
+          medium_sla_hours: number
+          organisation_id: string
+          updated_at: string
+        }
+        Insert: {
+          auto_escalate?: boolean
+          created_at?: string
+          high_sla_hours?: number
+          id?: string
+          low_sla_hours?: number
+          medium_sla_hours?: number
+          organisation_id: string
+          updated_at?: string
+        }
+        Update: {
+          auto_escalate?: boolean
+          created_at?: string
+          high_sla_hours?: number
+          id?: string
+          low_sla_hours?: number
+          medium_sla_hours?: number
+          organisation_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_sla_settings_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: true
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       screening_sources: {
         Row: {
           category: Database["public"]["Enums"]["screening_category"] | null
@@ -5520,9 +5561,12 @@ export type Database = {
           created_at: string
           current_period_end: string | null
           id: string
+          monitor_quota: number | null
           monitored_entity_quota: number
           organisation_id: string
           plan: string
+          search_quota_annual: number | null
+          seat_quota: number | null
           status: string
           stripe_customer_id: string | null
           stripe_session_id: string | null
@@ -5534,9 +5578,12 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           id?: string
+          monitor_quota?: number | null
           monitored_entity_quota?: number
           organisation_id: string
           plan: string
+          search_quota_annual?: number | null
+          seat_quota?: number | null
           status?: string
           stripe_customer_id?: string | null
           stripe_session_id?: string | null
@@ -5548,9 +5595,12 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           id?: string
+          monitor_quota?: number | null
           monitored_entity_quota?: number
           organisation_id?: string
           plan?: string
+          search_quota_annual?: number | null
+          seat_quota?: number | null
           status?: string
           stripe_customer_id?: string | null
           stripe_session_id?: string | null
@@ -8817,8 +8867,12 @@ export type Database = {
           current_period_end: string
           has_access: boolean
           is_admin: boolean
+          monitor_quota: number
           monitored_entity_quota: number
           plan: string
+          search_quota_annual: number
+          seat_quota: number
+          seats_used: number
           status: string
         }[]
       }
@@ -8891,6 +8945,17 @@ export type Database = {
           policy_name: string
           rls_enabled: boolean
           table: string
+        }[]
+      }
+      get_screening_org_quota: {
+        Args: { _org_id: string }
+        Returns: {
+          current_period_end: string
+          monitor_quota: number
+          plan: string
+          search_quota_annual: number
+          seat_quota: number
+          status: string
         }[]
       }
       get_storage_buckets_audit: {
