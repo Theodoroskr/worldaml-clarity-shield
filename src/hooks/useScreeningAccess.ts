@@ -5,6 +5,7 @@ export interface ScreeningEntitlement {
   isLoading: boolean;
   isAuthenticated: boolean;
   hasAccess: boolean;
+  isAdmin: boolean;
   plan: string | null;
   status: string | null;
   monitoredEntityQuota: number | null;
