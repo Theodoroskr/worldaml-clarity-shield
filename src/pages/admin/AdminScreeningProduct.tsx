@@ -131,15 +131,21 @@ function Kpi({ icon: Icon, label, value, tone }: { icon: any; label: string; val
 
 export default function AdminScreeningProduct() {
   const [data, setData] = useState<Overview | null>(null);
+  const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [q, setQ] = useState("");
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
-    const { data: res, error } = await supabase.rpc("admin_screening_overview" as never);
+    const [{ data: res, error }, { data: usr, error: uErr }] = await Promise.all([
+      supabase.rpc("admin_screening_overview" as never),
+      supabase.rpc("admin_screening_users" as never),
+    ]);
     if (error) toast.error(error.message);
     else setData(res as unknown as Overview);
+    if (uErr) toast.error(uErr.message);
+    else setUsers((usr as unknown as UserRow[]) ?? []);
     setLoading(false);
   }, []);
 
