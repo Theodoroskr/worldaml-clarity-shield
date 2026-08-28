@@ -119,6 +119,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // reject results that belong to a previous user even if the request id
   // somehow matches (defence in depth).
   const inFlightUserId = useRef<string | null>(null);
+  // Last auth identity seen by handleAuth, compared outside React state updaters.
+  const lastUserId = useRef<string | null>(null);
 
   /** Load profile + admin role for `userId`, gated by `requestId`. */
   const loadFor = useCallback(async (userId: string, requestId: number) => {
