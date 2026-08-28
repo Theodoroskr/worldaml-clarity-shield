@@ -189,6 +189,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (currentUser) {
+        // Mark profile/role resolution as pending *synchronously* so route guards
+        // never evaluate entitlements (isAdmin, profile.status) before they load.
+        setProfileLoading(true);
         // Defer to break out of the auth callback (Supabase guidance).
         setTimeout(() => { void loadFor(currentUser.id, requestId); }, 0);
       } else {
