@@ -52,5 +52,5 @@ The homepage hero's inline "Free Sanctions Quick Check" widget is replaced by a 
 
 ## Verification
 
-- Playwright: homepage renders new demo card; `/sanctions-check` still works.
+- Playwright: homepage renders new demo card; `/sanctions-check` redirects to the demo signup; no dead links remain (full-text search for `sanctions-check` / `free-aml-check` returns only the redirects).
 - End-to-end: new signup → land in `/screening` → demo plan active → run a search → quota widget shows 1/5 → after 5, run is blocked with upgrade message.
