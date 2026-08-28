@@ -17,7 +17,7 @@ const structuredData = {
     "Sanctions, PEP and adverse media screening with ongoing monitoring, case management and full audit trail.",
   brand: { "@type": "Organization", name: "WorldAML" },
   offers: (solution?.plans ?? [])
-    .filter((p) => p.price)
+    .filter((p) => p.price && /\d/.test(p.price))
     .map((p) => ({
       "@type": "Offer",
       name: p.name,
@@ -32,7 +32,7 @@ const ScreeningPricing = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
       title="Screening & Monitoring Pricing & Packages"
-      description="Transparent pricing for WorldAML Screening & Monitoring. Plans from €99/month with monitored entities, full API access and audit-ready evidence."
+      description="Annual pricing for WorldAML Screening & Monitoring. Platform plans from €590/year and API-only plans from €1,950/year with monitoring and audit-ready evidence."
       canonical="/screening-monitoring/pricing"
       breadcrumbs={[
         { name: "Home", url: "/" },
@@ -50,8 +50,8 @@ const ScreeningPricing = () => (
             Screening &amp; Monitoring pricing
           </h1>
           <p className="mt-3 text-muted-foreground">
-            Same pricing whether you are signed in or not. Buy online, activate immediately, and start
-            screening in the workspace.
+            Annual subscriptions in two lanes — WorldAML Platform and API Only. Same pricing whether
+            you are signed in or not.
           </p>
         </div>
       </section>

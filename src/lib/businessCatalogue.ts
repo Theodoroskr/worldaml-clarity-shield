@@ -1,5 +1,5 @@
 import { Layers, Fingerprint, Database, GraduationCap, ShieldCheck, LucideIcon } from "lucide-react";
-import { SCREENING_PLANS } from "./screeningPlans";
+import { SCREENING_PLANS, isCheckoutEnabled } from "./screeningPlans";
 
 /**
  * Authenticated business product catalogue.
@@ -82,7 +82,7 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
       period: p.period,
       summary: p.summary,
       features: p.features,
-      checkout: p.priceCents !== null && p.priceCents > 0
+      checkout: isCheckoutEnabled(p)
         ? { fn: "create-worldaml-checkout", plan: p.checkoutPlan }
         : undefined,
     })),
@@ -237,7 +237,7 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
       period: p.period,
       summary: p.summary,
       features: p.features,
-      checkout: p.priceCents !== null && p.priceCents > 0
+      checkout: isCheckoutEnabled(p)
         ? { fn: "create-worldaml-checkout", plan: p.checkoutPlan }
         : undefined,
     })),
