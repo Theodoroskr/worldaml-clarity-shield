@@ -74,13 +74,41 @@ export function usePortalAccess(): PortalAccess {
     },
   });
 
-  const signedIn = !!user;
-  const isLoading = authLoading || (signedIn && (profileLoading || partnerQuery.isLoading || businessQuery.isLoading || suiteQuery.isLoading));
+  const productAccessQuery = useQuery({
+    queryKey: ["portal-access", "products", user?.id],
+    enabled: !!user,
+    staleTime: 60_000,
+    queryFn: async (): Promise<Record<string, { status: string; has_access: boolean }>> => {
+      const { data, error } = await supabase
+        .from("product_access")
+        .select("product, status, has_access")
+        .in("product", ["screening", "suite", "academy"]);
+      if (error) return {};
+      return Object.fromEntries(
+        (data ?? []).map((row: any) => [row.product, { status: row.status, has_access: row.has_access }])
+      );
+    },
+  });
 
-  const academyAccess = signedIn && profile?.status !== "rejected";
+  const signedIn = !!user;
+  const isLoading =
+    authLoading ||
+    (signedIn &&
+      (profileLoading ||
+        partnerQuery.isLoading ||
+        businessQuery.isLoading ||
+        suiteQuery.isLoading ||
+        productAccessQuery.isLoading));
+
+  const products = productAccessQuery.data ?? {};
+  const hasProduct = (product: string) =>
+    !!products[product]?.has_access && products[product]?.status !== "cancelled" && products[product]?.status !== "suspended";
+
+  const academyAccess = signedIn && (profile?.status !== "rejected" || hasProduct("academy"));
   const partnerAccess = signedIn && partnerQuery.data === true;
   const businessAccess = signedIn && businessQuery.data === true;
-  const suiteAccess = signedIn && suiteQuery.data === true;
+  const suiteAccess = signedIn && (suiteQuery.data === true || hasProduct("suite"));
+  const screeningAccess = signedIn && hasProduct("screening");
   const adminAccess = signedIn && isAdmin;
 
   const portals: PortalKey[] = [];
@@ -88,6 +116,7 @@ export function usePortalAccess(): PortalAccess {
   if (partnerAccess) portals.push("partner");
   if (businessAccess) portals.push("business");
   if (suiteAccess) portals.push("suite");
+  if (screeningAccess) portals.push("screening");
   if (adminAccess) portals.push("admin");
 
   return {
@@ -97,6 +126,7 @@ export function usePortalAccess(): PortalAccess {
     partnerAccess,
     businessAccess,
     suiteAccess,
+    screeningAccess,
     adminAccess,
     portals,
     // Internal staff (admins) can enter every workspace for support and QA.
@@ -106,7 +136,8 @@ export function usePortalAccess(): PortalAccess {
         : portal === "partner" ? partnerAccess
           : portal === "business" ? businessAccess
             : portal === "suite" ? suiteAccess
-              : false,
+              : portal === "screening" ? screeningAccess
+                : false,
   };
 }
 
