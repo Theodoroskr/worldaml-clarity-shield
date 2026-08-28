@@ -32,7 +32,7 @@ const ScreeningPricing = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
       title="Screening & Monitoring Pricing & Packages"
-      description="Transparent pricing for WorldAML Screening & Monitoring. Plans from €99/month with monitored entities, full API access and audit-ready evidence."
+      description="Annual pricing for WorldAML Screening & Monitoring. Platform plans from €590/year and API-only plans from €1,950/year with monitoring and audit-ready evidence."
       canonical="/screening-monitoring/pricing"
       breadcrumbs={[
         { name: "Home", url: "/" },
