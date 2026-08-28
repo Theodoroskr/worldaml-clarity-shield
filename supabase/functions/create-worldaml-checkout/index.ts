@@ -7,13 +7,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const VALID_PLANS = ["starter", "compliance"] as const;
-type ValidPlan = typeof VALID_PLANS[number];
-
-const WORLDAML_PRICES: Record<ValidPlan, string> = {
-  starter: "price_1SzfOKLz1lUQpGdDOeGRsgdn",
-  compliance: "price_1SzfPqLz1lUQpGdDDtgsGVbp",
+// Annual WorldAML Screening & Monitoring plans.
+const WORLDAML_PRICES: Record<string, string> = {
+  essentials: "price_1U9NUCLz1lUQpGdDcU0HY0k2",
+  starter: "price_1U9NUDLz1lUQpGdDw8qxmjng",
+  professional: "price_1U9NUELz1lUQpGdDKpRJEy9I",
+  compliance: "price_1U9NUELz1lUQpGdD44gsuBzO",
+  // Legacy monthly prices preserved for existing customers.
+  starter_legacy: "price_1SzfOKLz1lUQpGdDOeGRsgdn",
+  compliance_legacy: "price_1SzfPqLz1lUQpGdDDtgsGVbp",
 };
+
+const VALID_PLANS = Object.keys(WORLDAML_PRICES);
 
 const errorResponse = (message: string, status = 400) =>
   new Response(JSON.stringify({ error: message }), {
@@ -51,11 +56,11 @@ serve(async (req) => {
     const { plan } = body as Record<string, unknown>;
 
     // Strict whitelist validation
-    if (typeof plan !== "string" || !VALID_PLANS.includes(plan.toLowerCase() as ValidPlan)) {
+    if (typeof plan !== "string" || !VALID_PLANS.includes(plan.toLowerCase())) {
       return errorResponse("Invalid request");
     }
 
-    const normalizedPlan = plan.toLowerCase() as ValidPlan;
+    const normalizedPlan = plan.toLowerCase();
     const priceId = WORLDAML_PRICES[normalizedPlan];
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
