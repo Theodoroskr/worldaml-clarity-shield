@@ -81,7 +81,14 @@ serve(async (req) => {
     }
 
     const normalizedPlan = plan.toLowerCase();
-    const priceId = WORLDAML_PRICES[normalizedPlan];
+    const priceId = resolvePrice(normalizedPlan);
+    if (!priceId) {
+      console.error("[create-worldaml-checkout] No Stripe price mapped for plan", normalizedPlan);
+      return errorResponse(
+        "Online checkout for this plan is not available yet. Please contact sales.",
+        409
+      );
+    }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
