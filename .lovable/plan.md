@@ -34,8 +34,14 @@ The homepage hero's inline "Free Sanctions Quick Check" widget is replaced by a 
 - When `useScreeningAccess` resolves with `isAuthenticated && !hasAccess`, invoke `claim-screening-demo` once, then `refresh()` the entitlement so the workspace opens with demo quotas.
 - Demo users see a welcome banner: "Demo plan — 5 free screening searches" + link to `/screening-monitoring/pricing`. Existing `UsageWidget` and quota-exceeded banner handle the rest.
 
-### 4. SEO/sitemap hygiene
-- No route changes. Update homepage copy only; `/sanctions-check` unchanged.
+### 4. Remove the existing free quick-check
+- Delete the `/sanctions-check` and `/free-aml-check` pages and their supporting quick-check components/hooks.
+- Remove every internal link/CTA pointing at them (header, footer, hero, marketing pages, upsell banners, chatbot knowledge).
+- Add client redirects `/sanctions-check` → `/signup?redirect=/screening&demo=1` and `/free-aml-check` → same, so indexed traffic lands on the demo flow.
+- Retire the `sanctions-search` Edge Function only if nothing else calls it; otherwise leave it in place (checked during implementation).
+
+### 5. SEO/sitemap hygiene
+- Remove the deleted URLs from `public/sitemap.xml`, `public/llms.txt`, and any structured data referencing the free check.
 
 ## Technical notes
 
