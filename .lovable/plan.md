@@ -12,8 +12,8 @@ One number defines the package: the **annual entity allowance**. Every screened 
 
 | | Essentials EUR 490/yr | Starter EUR 990/yr | Compliance EUR 4,950/yr | Enterprise (contact) |
 |---|---|---|---|---|
-| Screening searches / year | 500 | 2,000 | 10,000 | Negotiated |
-| Monitored entities (included) | 500 | 2,000 | 10,000 | Unlimited |
+| Screening searches / year | 500 | 1,000 | 5,000 | Negotiated |
+| Monitored entities (included) | 500 | 1,000 | 5,000 | Unlimited |
 | Seats | 1 | 3 | 15 | Unlimited |
 | Case management | Yes | Yes | Yes | Yes |
 | Adverse media | Yes | Yes | Yes | Yes |
