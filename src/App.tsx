@@ -145,6 +145,7 @@ const AdminAnalytics = lazyWithRetry(() => import("./pages/admin/AdminAnalytics"
 const AdminReports = lazyWithRetry(() => import("./pages/admin/AdminReports"));
 const AdminAuditLog = lazyWithRetry(() => import("./pages/admin/AdminAuditLog"));
 const AdminRegulatoryHub = lazyWithRetry(() => import("./pages/admin/AdminRegulatoryHub"));
+const AdminClientAccess = lazyWithRetry(() => import("./pages/admin/AdminClientAccess"));
 const AdminScreeningProfileAudit = lazyWithRetry(() => import("./pages/admin/AdminScreeningProfileAudit"));
 const AdminScreeningProduct = lazyWithRetry(() => import("./pages/admin/AdminScreeningProduct"));
 const AdminSecurityAudit = lazyWithRetry(() => import("./pages/admin/AdminSecurityAudit"));
