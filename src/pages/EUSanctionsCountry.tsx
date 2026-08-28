@@ -230,7 +230,7 @@ const EUSanctionsCountry = () => {
             WorldAML's platform screens against 1,400+ sanctions lists including all EU restrictive measures, updated in real-time.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/sanctions-check">
+            <Link to="/?demo=1">
               <Button size="lg">
                 <Shield className="w-4 h-4 mr-2" /> Free Sanctions Check
               </Button>

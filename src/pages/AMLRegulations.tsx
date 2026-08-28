@@ -294,7 +294,7 @@ const AMLRegulations = () => {
                 <Link to="/resources/glossary" className="text-brand-teal hover:text-navy font-medium transition-colors inline-flex items-center gap-1">
                   <Globe className="h-3.5 w-3.5" /> Compliance Glossary
                 </Link>
-                <Link to="/free-aml-check" className="text-brand-teal hover:text-navy font-medium transition-colors inline-flex items-center gap-1">
+                <Link to="/?demo=1" className="text-brand-teal hover:text-navy font-medium transition-colors inline-flex items-center gap-1">
                   <ArrowRight className="h-3.5 w-3.5" /> Free Sanctions Check
                 </Link>
               </div>
@@ -429,7 +429,7 @@ const AMLRegulations = () => {
                 { title: "KYC & KYB Onboarding", description: "Streamlined identity verification and business due diligence workflows.", href: "/platform/kyc-kyb" },
                 { title: "Transaction Monitoring", description: "Rule-based and AI-driven monitoring to detect suspicious activity patterns.", href: "/platform/transaction-monitoring" },
                 { title: "Compliance Glossary", description: "Definitions for AML, KYC, UBO, PEP, SAR, and 200+ compliance terms.", href: "/resources/glossary" },
-                { title: "Free Sanctions Check", description: "Search global sanctions and PEP lists instantly — no account required.", href: "/free-aml-check" },
+                { title: "Free Sanctions Check", description: "Search global sanctions and PEP lists instantly — no account required.", href: "/?demo=1" },
                 { title: "Data Coverage", description: "Explore the breadth of our global data sources across 200+ countries.", href: "/resources/data-coverage" },
               ].map((item) => (
                 <Link

@@ -435,7 +435,7 @@ const Glossary = () => {
                 Request a Demo <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                to="/sanctions-check"
+                to="/?demo=1"
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-divider text-navy font-medium px-6 py-2.5 hover:bg-background transition-colors"
               >
                 Free Sanctions Check

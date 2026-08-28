@@ -81,7 +81,7 @@ const AlternativeLandingTemplate = (p: AlternativeLandingProps) => {
                   <Link to="/contact-sales">Compare against your {p.competitorName} quote</Link>
                 </Button>
                 <Button variant="outline-light" size="lg" asChild>
-                  <Link to="/free-aml-check">
+                  <Link to="/?demo=1">
                     Run a free AML check <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>

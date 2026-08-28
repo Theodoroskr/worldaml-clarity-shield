@@ -231,7 +231,7 @@ const ComplianceSoftwareUK = () => {
                   <Link to="/contact-sales">Talk to a UK compliance specialist</Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <Link to="/free-aml-check">
+                  <Link to="/?demo=1">
                     Run a free OFSI sanctions check <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
@@ -369,7 +369,7 @@ const ComplianceSoftwareUK = () => {
                 asChild
                 className="bg-transparent text-white border-white/40 hover:bg-white/10 hover:text-white"
               >
-                <Link to="/free-aml-check">Try a free OFSI check</Link>
+                <Link to="/?demo=1">Try a free OFSI check</Link>
               </Button>
             </div>
           </div>

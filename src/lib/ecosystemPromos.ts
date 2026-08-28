@@ -41,7 +41,7 @@ export const ECOSYSTEM_PRODUCTS: Record<EcosystemProductId, EcosystemProduct> = 
     name: "Sanctions Quick Check",
     blurb: "Run a quick sanctions screening against major global lists.",
     icon: Search,
-    exploreHref: "/sanctions-check",
+    exploreHref: "/?demo=1",
     exploreLabel: "Run Quick Check",
   },
 };

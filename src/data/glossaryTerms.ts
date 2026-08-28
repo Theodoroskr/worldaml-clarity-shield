@@ -50,7 +50,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition:
       "A unified list that aggregates multiple sanctions measures issued by a single authority. For example, the EU Consolidated Sanctions List combines all sanctions regimes adopted by the European Union. Financial institutions are required to screen against these lists to prevent prohibited transactions.",
     relatedTerms: ["OFAC", "SDN", "AML", "Sanctions"],
-    relatedLinks: [{ label: "Sanctions Lists Reference", href: "/resources/sanctions-lists" }, { label: "Free Sanctions Check", href: "/sanctions-check" }],
+    relatedLinks: [{ label: "Sanctions Lists Reference", href: "/resources/sanctions-lists" }, { label: "Free Sanctions Check", href: "/?demo=1" }],
   },
   {
     term: "Correspondent Banking",
@@ -211,7 +211,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition:
       "Coercive economic and political measures imposed by governments or international bodies against countries, entities, or individuals to achieve foreign policy or national security objectives. Financial sanctions prohibit doing business with designated parties and are enforced by bodies such as OFAC, the EU, UN Security Council, and HM Treasury.",
     relatedTerms: ["OFAC", "SDN", "Consolidated Sanctions List", "Sanctions Screening"],
-    relatedLinks: [{ label: "Sanctions Lists Reference", href: "/resources/sanctions-lists" }, { label: "Free Sanctions Check", href: "/sanctions-check" }],
+    relatedLinks: [{ label: "Sanctions Lists Reference", href: "/resources/sanctions-lists" }, { label: "Free Sanctions Check", href: "/?demo=1" }],
   },
   {
     term: "Shell Company",
@@ -284,7 +284,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition:
       "The process of checking individuals, entities, or transactions against published lists of sanctioned parties, designated terrorists, PEPs, and other high-risk subjects. Watchlist screening is typically automated and performed at onboarding, on a periodic basis, and in real-time whenever monitored lists are updated.",
     relatedTerms: ["Sanctions", "PEP", "Adverse Media", "Fuzzy Matching"],
-    relatedLinks: [{ label: "AML Screening Module", href: "/platform/aml-screening" }, { label: "Free Sanctions Check", href: "/sanctions-check" }],
+    relatedLinks: [{ label: "AML Screening Module", href: "/platform/aml-screening" }, { label: "Free Sanctions Check", href: "/?demo=1" }],
   },
 ];
 

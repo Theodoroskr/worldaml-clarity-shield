@@ -156,8 +156,10 @@ function categoryFromSourceType(t: string): ScreeningCategory | null {
   return null;
 }
 
-export default function SuiteScreeningV2() {
-  const [subject, setSubject] = useState<SubjectInput>(emptySubject);
+export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: string } = {}) {
+  const [subject, setSubject] = useState<SubjectInput>(
+    initialQuery?.trim() ? { ...emptySubject, full_name: initialQuery.trim() } : emptySubject,
+  );
   const [adverseMedia, setAdverseMedia] = useState(false);
   const [monitoring, setMonitoring] = useState(false);
   const [running, setRunning] = useState(false);

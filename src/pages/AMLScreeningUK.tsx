@@ -91,7 +91,7 @@ const AMLScreeningUK = () => {
                   <Link to="/contact-sales">Talk to a UK compliance specialist</Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <Link to="/free-aml-check">
+                  <Link to="/?demo=1">
                     Run a free UK sanctions check <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>

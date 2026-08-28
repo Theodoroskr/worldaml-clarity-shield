@@ -38,7 +38,7 @@ export const SanctionsApiCTASection = () => {
               </Link>
             </Button>
             <Button size="lg" variant="outline-light" asChild>
-              <Link to="/sanctions-check">
+              <Link to="/?demo=1">
                 Try Free Sanctions Check
               </Link>
             </Button>

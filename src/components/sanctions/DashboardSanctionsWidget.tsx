@@ -135,7 +135,7 @@ export const DashboardSanctionsWidget = ({ onSearchComplete }: Props) => {
               </div>
             )}
             <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-foreground gap-1.5">
-              <Link to="/sanctions-check">
+              <Link to="/?demo=1">
                 Full search page
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>

@@ -269,7 +269,7 @@ const SanctionsLists = () => {
 
             <div className="flex flex-wrap items-center gap-4">
               <Button size="lg" asChild>
-                <Link to="/sanctions-check">
+                <Link to="/?demo=1">
                   <Search className="w-4 h-4 mr-2" />
                   Run a Sanctions Check
                 </Link>
@@ -434,7 +434,7 @@ const SanctionsLists = () => {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" asChild>
-              <Link to="/sanctions-check">
+              <Link to="/?demo=1">
                 <Search className="w-4 h-4 mr-2" />
                 Run a Free Sanctions Check
               </Link>

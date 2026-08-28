@@ -48,7 +48,7 @@ export const SanctionsApiHeroSection = () => {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link to="/sanctions-check">
+                <Link to="/?demo=1">
                   Try Free Sanctions Check
                 </Link>
               </Button>

@@ -109,7 +109,7 @@ const USIndustryLanding = ({ config }: { config: USIndustryLandingConfig }) => {
                   <a href="#request-demo">Request a demo</a>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <Link to="/free-aml-check">
+                  <Link to="/?demo=1">
                     Run a free sanctions check <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
