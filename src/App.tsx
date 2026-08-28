@@ -216,6 +216,8 @@ const ScreeningWorkspace = lazyWithRetry(() => import("./pages/screening/Screeni
 const ScreeningActivate = lazyWithRetry(() => import("./pages/screening/ScreeningActivate"));
 const ScreeningModules = lazyWithRetry(() => import("./pages/screening/ScreeningModules"));
 const ScreeningTeam = lazyWithRetry(() => import("./pages/screening/ScreeningTeam"));
+const ScreeningMonitored = lazyWithRetry(() => import("./pages/screening/ScreeningMonitored"));
+
 
 
 const SuiteTransactions = lazyWithRetry(() => import("./pages/suite/SuiteTransactions"));
@@ -570,6 +572,8 @@ const App = () => (
                 {/* WorldAML Screening & Monitoring — standalone product workspace (separate from Suite) */}
                 <Route path="/screening" element={<ScreeningWorkspace />} />
                 <Route path="/screening/team" element={<ScreeningTeam />} />
+                <Route path="/screening/monitored" element={<ScreeningMonitored />} />
+
                 <Route path="/screening/activate" element={<ScreeningActivate />} />
                 <Route path="/screening/modules" element={<ScreeningModules />} />
 
