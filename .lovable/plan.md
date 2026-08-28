@@ -2,38 +2,48 @@
 
 Two connected pieces: a package model that defines what each customer actually gets (and enforces it), and a case management workflow so screening results become auditable work items with owners, SLAs and outcomes.
 
-## Part 1 — Packages
+## Part 1 — Package Offerings
 
-### Package structure — annual billing
+### Annual screening & monitoring packages
 
-| Plan | Annual price | Seats | Screening searches / year | Monitored entities |
+| Plan | Annual price | Users included | Screening searches / year | Monitored entities | Best for |
 |---|---|---|---|---|---|
-| Demo | Free | 1 | 5 | — |
-| Essentials | €490 | 1 | 500 | 100 |
-| Starter | €990 | 3 | 1,000 | 200 |
-| Professional | €1,990 | 5 | 2,000 | 500 |
-| Compliance | €4,950 | 10 | 5,000 | 1,000 |
-| Enterprise | Contact us | Negotiated | Negotiated | Negotiated |
+| **Demo** | Free | 1 user | 5 | — | Individual evaluation |
+| **Essentials** | €490 | 1 user | 500 | 100 | Small teams starting out |
+| **Starter** | €990 | 3 users | 1,000 | 200 | Growing compliance teams |
+| **Professional** | €1,990 | 5 users | 2,000 | 500 | Mid-size operators |
+| **Compliance** | €4,950 | 10 users | 5,000 | 1,000 | Regulated enterprises |
+| **Enterprise** | Contact us | Negotiated | Negotiated | Negotiated | Custom volume / SLA |
 
-- All paid plans are billed **yearly** (annual commitment). The Demo plan is free, capped at 5 screening searches, limited to 1 user and does not include ongoing monitoring.
+### What is included in every paid package
+- **Screening searches** against sanctions, PEP, RCA, warnings and adverse media lists.
+- **Ongoing monitoring** of entities with automated alerts when lists change.
+- **Case management workspace** with assignment, decisions, comments and audit trail.
+- **Team seats** at the user count shown above; additional seats available.
+- **Standard support** via email; Enterprise includes dedicated account management.
+
+### Billing rules
+- All paid plans are billed **yearly** (annual commitment).
+- **Demo** is free, limited to 1 user, 5 screening searches and does not include monitoring.
 - Allowances reset on the subscription renewal date; unused searches do not roll over.
-- New Stripe annual prices are created for Essentials, Starter, Professional and Compliance; the existing monthly prices are replaced on the public pricing page and the business catalogue.
-- Cancellation within the first 14 days is refunded in full; afterwards the subscription runs to the end of the paid year (no partial refunds).
-- Extra seats can be added to paid plans at €29/user/month billed annually (€348/user/yr); blocked if it exceeds the plan’s seat limit unless the customer upgrades.
+- 14-day full refund; afterwards the subscription runs to the end of the paid year.
+- Extra seats on paid plans: **€29/user/month billed annually** (€348/user/yr). Seat purchase is blocked if it would exceed the plan’s included user count unless the customer upgrades.
 
-Paid add-on modules stay separate and stack on any package:
-- Escalation & Four-Eyes Review — EUR 149/mo (already built)
-- Additional monitored entities / search blocks — priced on request
-- Enhanced Due Diligence reports — priced on request
+### Paid add-on modules (stack on any package)
+| Add-on | Price | What it adds |
+|---|---|---|
+| Escalation & Four-Eyes Review | €149/mo | MLRO queue, senior approval and escalation audit trail |
+| Additional search / monitor block | On request | Top-up packs for searches or monitored entities |
+| Enhanced Due Diligence reports | On request | Manual analyst reports and source packs |
 
-### Making the package real (limits, not just marketing)
-- Extend `screening_subscriptions` with `search_quota_annual`, `monitor_quota`, `seat_quota`, `searches_used_this_period`, `monitors_used`, `period_started_at`.
-- Plan definitions live in one place (`src/lib/screeningPlans.ts`) and are used by the public pricing page, the workspace usage widget and the admin screening product page — so there is a single source of truth.
-- `screening-run` edge function checks search quota before calling the provider; over quota returns a clear upgrade message instead of a silent failure.
-- Adding a subject to monitoring checks `monitor_quota`; over quota returns an upgrade prompt.
+### Package enforcement
+- Plan definitions live in one place (`src/lib/screeningPlans.ts`) and drive the public pricing page, workspace usage widget and admin screening product page.
+- `screening-run` Edge Function checks the remaining annual search quota before calling the provider; over quota returns an upgrade prompt.
+- Adding a subject to monitoring checks the monitored-entity quota; over quota returns an upgrade prompt.
 - `/screening/team` blocks adding members beyond the seat quota with an upgrade prompt.
-- Usage bar in the workspace header: searches used / monitored entities / seats, with a renewal date.
+- Workspace header shows searches used / monitored entities / seats with renewal date.
 - Admin can override quotas per organisation from `/admin/screening-product`.
+
 
 ## Part 2 — Case management workflow
 
