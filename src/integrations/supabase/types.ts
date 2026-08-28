@@ -8607,6 +8607,7 @@ export type Database = {
           profile_cached_at: string
         }[]
       }
+      admin_screening_users: { Args: never; Returns: Json }
       admin_set_internal_role: {
         Args: { _access_role: string; _department: string; _email: string }
         Returns: undefined
