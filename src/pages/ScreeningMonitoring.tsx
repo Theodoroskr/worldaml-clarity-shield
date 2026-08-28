@@ -6,6 +6,7 @@ import AMLWhatIsSection from "@/components/aml-screening/AMLWhatIsSection";
 import AMLFeaturesSection from "@/components/aml-screening/AMLFeaturesSection";
 import AMLUseCasesSection from "@/components/aml-screening/AMLUseCasesSection";
 import AMLPackagesSection from "@/components/aml-screening/AMLPackagesSection";
+import ScreeningPlanComparison from "@/components/aml-screening/ScreeningPlanComparison";
 import AMLCTASection from "@/components/aml-screening/AMLCTASection";
 import StickyDemoCTA from "@/components/StickyDemoCTA";
 import ScreeningProductNav from "@/components/screening/ScreeningProductNav";
@@ -137,6 +138,7 @@ const ScreeningMonitoring = () => {
       <AMLFeaturesSection />
       <AMLUseCasesSection />
       <AMLPackagesSection />
+      <ScreeningPlanComparison />
       <AMLCTASection />
     </main>
     <Footer />

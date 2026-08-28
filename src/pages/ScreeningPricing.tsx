@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScreeningProductNav from "@/components/screening/ScreeningProductNav";
 import AMLPackagesSection from "@/components/aml-screening/AMLPackagesSection";
+import ScreeningPlanComparison from "@/components/aml-screening/ScreeningPlanComparison";
 import AMLCTASection from "@/components/aml-screening/AMLCTASection";
 import { SOLUTION_BY_KEY } from "@/lib/businessCatalogue";
 
@@ -55,6 +56,7 @@ const ScreeningPricing = () => (
         </div>
       </section>
       <AMLPackagesSection />
+      <ScreeningPlanComparison />
       <AMLCTASection />
     </main>
     <Footer />

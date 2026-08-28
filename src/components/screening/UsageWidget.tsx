@@ -1,84 +1,21 @@
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useScreeningAccess } from "@/hooks/useScreeningAccess";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { AlertTriangle } from "lucide-react";
+import { useScreeningQuota } from "@/hooks/useScreeningQuota";
 
 function pct(used: number | null, quota: number | null) {
   if (quota == null || used == null) return null;
-  if (quota <= 0) return 0;
+  if (quota <= 0) return 100;
   return Math.min(100, Math.round((used / quota) * 100));
 }
 
-interface UsageState {
-  searchesUsed: number | null;
-  monitorsUsed: number | null;
-  loading: boolean;
-}
-
 export function UsageWidget() {
-  const {
-    isLoading,
-    plan,
-    searchQuotaAnnual,
-    monitorQuota,
-    seatQuota,
-    seatsUsed,
-    currentPeriodEnd,
-  } = useScreeningAccess();
-  const [usage, setUsage] = useState<UsageState>({
-    searchesUsed: null,
-    monitorsUsed: null,
-    loading: true,
-  });
+  const q = useScreeningQuota();
 
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      setUsage((u) => ({ ...u, loading: true }));
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session) {
-        setUsage({ searchesUsed: null, monitorsUsed: null, loading: false });
-        return;
-      }
-
-      const { data: orgId } = await supabase.rpc("current_user_org_id");
-      if (!orgId) {
-        setUsage({ searchesUsed: null, monitorsUsed: null, loading: false });
-        return;
-      }
-
-      const now = new Date();
-      const periodStart = new Date(now.getFullYear(), 0, 1).toISOString();
-
-      const [{ count: searchesUsed }, { count: monitorsUsed }] = await Promise.all([
-        supabase
-          .from("screening_searches")
-          .select("id", { count: "exact", head: true })
-          .eq("organisation_id", orgId)
-          .gte("created_at", periodStart),
-        supabase
-          .from("monitoring_subjects")
-          .select("id", { count: "exact", head: true })
-          .eq("organisation_id", orgId)
-          .eq("status", "active"),
-      ]);
-
-      if (cancelled) return;
-      setUsage({
-        searchesUsed: searchesUsed ?? 0,
-        monitorsUsed: monitorsUsed ?? 0,
-        loading: false,
-      });
-    }
-    void load();
-    return () => { cancelled = true; };
-  }, []);
-
-  if (isLoading || usage.loading) {
+  if (q.loading) {
     return (
       <Card>
         <CardHeader className="pb-2">
@@ -94,16 +31,17 @@ export function UsageWidget() {
   }
 
   const rows = [
-    { label: "Annual searches", used: usage.searchesUsed ?? 0, quota: searchQuotaAnnual },
-    { label: "Monitored entities", used: usage.monitorsUsed ?? 0, quota: monitorQuota },
-    { label: "Team seats", used: seatsUsed, quota: seatQuota },
+    { label: "Annual searches", used: q.searchesUsed ?? 0, quota: q.searchQuota, over: q.searchesExceeded },
+    { label: "Monitored entities", used: q.monitorsUsed ?? 0, quota: q.monitorQuota, over: q.monitorsExceeded },
+    { label: "Team seats", used: q.seatsUsed ?? 0, quota: q.seatQuota, over: q.seatsExceeded },
   ];
+  const anyExceeded = q.searchesExceeded || q.monitorsExceeded;
 
   return (
     <Card>
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
         <CardTitle className="text-base font-semibold">Plan usage</CardTitle>
-        <span className="text-xs text-muted-foreground capitalize">{plan ?? "Demo"}</span>
+        <span className="text-xs text-muted-foreground capitalize">{q.plan ?? "Demo"}</span>
       </CardHeader>
       <CardContent className="space-y-4">
         {rows.map((row) => {
@@ -113,19 +51,37 @@ export function UsageWidget() {
             <div key={row.label} className="space-y-1">
               <div className="flex justify-between text-sm">
                 <span>{row.label}</span>
-                <span className="text-muted-foreground">
-                  {unlimited ? "Unlimited" : `${row.used ?? 0} / ${row.quota}`}
+                <span className={row.over ? "text-destructive font-medium" : "text-muted-foreground"}>
+                  {unlimited ? "Unlimited" : `${row.used} / ${row.quota}`}
                 </span>
               </div>
               {!unlimited && p !== null && (
-                <Progress value={p} className="h-2" />
+                <Progress
+                  value={p}
+                  className={`h-2 ${row.over ? "[&>div]:bg-destructive" : ""}`}
+                />
               )}
             </div>
           );
         })}
-        {currentPeriodEnd && (
+
+        {anyExceeded && (
+          <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+            <p className="flex items-start gap-2 font-medium">
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              {q.searchesExceeded
+                ? "Annual search allowance used up — new screenings are blocked."
+                : "Monitored entity allowance used up — no new subjects can be monitored."}
+            </p>
+            <Button asChild size="sm" variant="accent" className="mt-2 w-full">
+              <Link to="/screening-monitoring/pricing">Upgrade plan</Link>
+            </Button>
+          </div>
+        )}
+
+        {q.currentPeriodEnd && (
           <p className="text-xs text-muted-foreground">
-            Renews {new Date(currentPeriodEnd).toLocaleDateString()}
+            Renews {new Date(q.currentPeriodEnd).toLocaleDateString()}
           </p>
         )}
         <Button variant="outline" size="sm" className="w-full" asChild>

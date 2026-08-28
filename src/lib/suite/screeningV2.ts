@@ -142,6 +142,19 @@ export interface RunScreeningResult {
   match_count: number;
 }
 
+/** Error carrying the backend's machine-readable code (e.g. quota codes). */
+export class ScreeningError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.name = "ScreeningError";
+    this.code = code;
+  }
+}
+
+export const isQuotaCode = (code?: string) =>
+  code === "search_quota_exceeded" || code === "monitor_quota_exceeded";
+
 export async function runScreeningV2(payload: {
   subject: SubjectInput;
   include_adverse_media: boolean;
@@ -152,16 +165,23 @@ export async function runScreeningV2(payload: {
   if (error) {
     // Non-2xx responses put the body on error.context, not on `data`.
     let message = (data as { error?: string } | null)?.error;
+    let code = (data as { code?: string } | null)?.code;
     const res = (error as unknown as { context?: Response }).context;
     if (!message && res && typeof res.json === "function") {
       try {
-        const body = await res.clone().json();
-        message = (body as { error?: string })?.error;
+        const body = await res.clone().json() as { error?: string; code?: string };
+        message = body?.error;
+        code = body?.code ?? code;
       } catch { /* keep fallback message */ }
     }
-    throw new Error(message || "Screening could not be completed");
+    throw new ScreeningError(message || "Screening could not be completed", code);
   }
-  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+  if ((data as { error?: string })?.error) {
+    throw new ScreeningError(
+      (data as { error: string }).error,
+      (data as { code?: string }).code,
+    );
+  }
   return data as RunScreeningResult;
 }
 
