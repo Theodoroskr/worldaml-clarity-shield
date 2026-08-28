@@ -15,6 +15,8 @@ export interface PortalAccess {
   businessAccess: boolean;
   /** Suite compliance platform — subscription tier or org membership. */
   suiteAccess: boolean;
+  /** WorldAML Screening & Monitoring product access. */
+  screeningAccess: boolean;
   /** Internal WorldAML staff (user_roles.role = 'admin'). */
   adminAccess: boolean;
   /** Number of non-admin workspaces the user can enter. */
