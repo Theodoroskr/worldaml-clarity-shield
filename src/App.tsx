@@ -214,6 +214,8 @@ const SuiteScreening = lazyWithRetry(() => import("./pages/suite/SuiteScreening"
 const SuiteScreeningV2 = lazyWithRetry(() => import("./pages/suite/SuiteScreeningV2"));
 const ScreeningWorkspace = lazyWithRetry(() => import("./pages/screening/ScreeningWorkspace"));
 const ScreeningActivate = lazyWithRetry(() => import("./pages/screening/ScreeningActivate"));
+const ScreeningModules = lazyWithRetry(() => import("./pages/screening/ScreeningModules"));
+
 
 const SuiteTransactions = lazyWithRetry(() => import("./pages/suite/SuiteTransactions"));
 const SuiteMonitoring = lazyWithRetry(() => import("./pages/suite/SuiteMonitoring"));
