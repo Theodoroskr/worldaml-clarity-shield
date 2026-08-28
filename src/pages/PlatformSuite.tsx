@@ -50,7 +50,7 @@ const faqData = {
       name: "What modules are included in the WorldAML Suite?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "The WorldAML Suite includes seven core modules: KYC & KYB onboarding, AML Screening & Monitoring (sanctions, PEP, adverse media), Risk Assessment & Categorisation, Transaction Monitoring, Regulatory Reporting (CRS, FATCA, FINTRAC), WorldID digital identity verification, and a Logs & Audit Trail module. All modules are interoperable and share a unified customer record.",
+        text: "The WorldAML Suite includes seven core modules: KYC & KYB onboarding, WORLDAML Screening & Monitoring (sanctions, PEP, adverse media), Risk Assessment & Categorisation, Transaction Monitoring, Regulatory Reporting (CRS, FATCA, FINTRAC), WorldID digital identity verification, and a Logs & Audit Trail module. All modules are interoperable and share a unified customer record.",
       },
     },
     {
