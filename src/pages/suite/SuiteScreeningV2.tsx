@@ -849,6 +849,7 @@ function MatchCard({
   onReview,
   onPrefetch,
   onDecision,
+  fourEyes,
 }: {
   match: MatchRow;
   extra?: MatchExtra;
@@ -857,6 +858,9 @@ function MatchCard({
   onReview: () => void;
   onPrefetch: () => void;
   onDecision: (id: string, decision: string, reason?: string) => Promise<void>;
+  /** Escalation & Four-Eyes Review add-on active for the organisation. */
+  fourEyes: boolean;
+
 }) {
   const [falsePositiveOpen, setFalsePositiveOpen] = useState(false);
   const [reason, setReason] = useState(FALSE_POSITIVE_REASONS[0]);
