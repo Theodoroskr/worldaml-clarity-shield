@@ -21,7 +21,7 @@ The homepage hero's inline "Free Sanctions Quick Check" widget is replaced by a 
 ### 1. Hero section (`src/components/home/NewHeroSection.tsx`)
 - Replace the quick-check card with a demo card: headline "Try the Demo — 5 Free Screenings", subline "Register a business account and run 5 real screening searches across 1,900+ global lists. No card required.", CTA button "Start Free Demo".
 - CTA routes to `/signup?redirect=/screening&demo=1` (unauthenticated) or straight to `/screening` if already signed in.
-- Keep a small footnote link "Just need a one-off check? Free Sanctions Quick Check →" pointing to `/sanctions-check`.
+- No quick-check footnote or link remains; footnote instead reads "No card required · Business email · 5 screenings included".
 
 ### 2. Demo provisioning Edge Function `claim-screening-demo` (new)
 - Auth required (bearer token). Idempotent:
