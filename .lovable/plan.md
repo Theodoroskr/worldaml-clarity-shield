@@ -43,3 +43,11 @@ match counts change ──► evaluate risk ──► level increased?
 - Threshold crossings are recorded in the existing `monitoring_alerts` table with a `risk_threshold` change type, so the drawer timeline needs no second data source.
 - Evaluation lives in the existing screening-run and monitoring-poll edge functions; email dispatch reuses the existing transactional email path.
 - Drawer built with the existing sheet/drawer component, lazy-loading its data only when opened.
+
+## Fit with the current setup
+
+- All drawer data already exists: screening searches, cases and match counts, monitoring alerts, adverse media items, and the screening audit trail. No provider call is needed to render it.
+- The provider adapter already exposes monitoring change retrieval, screening retrieval and full entity details, so risk re-evaluation needs no new provider capability or new API contract.
+- Timeliness depends on the monitoring poll running on a schedule; alerts are as fresh as that job (currently a daily window). Real-time risk alerts would require provider webhooks, which are out of scope here.
+- Risk levels are derived from WorldAML's own match-count rules, not a provider-supplied score, so thresholds stay provider-independent.
+
