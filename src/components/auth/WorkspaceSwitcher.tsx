@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Check, GraduationCap, Handshake, Building2, Shield } from "lucide-react";
+import { Check, GraduationCap, Handshake, Building2, Shield, Radar } from "lucide-react";
 import {
   DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
