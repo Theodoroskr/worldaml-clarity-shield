@@ -3310,6 +3310,112 @@ export type Database = {
           },
         ]
       }
+      product_access: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          metadata: Json
+          organisation_id: string
+          plan: string | null
+          product: Database["public"]["Enums"]["product_key"]
+          seats: number
+          seats_used: number
+          started_at: string | null
+          status: Database["public"]["Enums"]["product_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          metadata?: Json
+          organisation_id: string
+          plan?: string | null
+          product: Database["public"]["Enums"]["product_key"]
+          seats?: number
+          seats_used?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["product_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          metadata?: Json
+          organisation_id?: string
+          plan?: string | null
+          product?: Database["public"]["Enums"]["product_key"]
+          seats?: number
+          seats_used?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["product_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_access_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_members: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          invite_token: string | null
+          invited_email: string | null
+          is_invite: boolean
+          organisation_id: string
+          product: Database["public"]["Enums"]["product_key"]
+          role: Database["public"]["Enums"]["product_role"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invite_token?: string | null
+          invited_email?: string | null
+          is_invite?: boolean
+          organisation_id: string
+          product: Database["public"]["Enums"]["product_key"]
+          role: Database["public"]["Enums"]["product_role"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invite_token?: string | null
+          invited_email?: string | null
+          is_invite?: boolean
+          organisation_id?: string
+          product?: Database["public"]["Enums"]["product_key"]
+          role?: Database["public"]["Enums"]["product_role"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_members_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_purchase_notifications: {
         Row: {
           amount_cents: number | null
@@ -6981,6 +7087,50 @@ export type Database = {
           },
         ]
       }
+      suite_module_access: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json
+          module: Database["public"]["Enums"]["suite_module_key"]
+          organisation_id: string
+          seats: number
+          seats_used: number
+          status: Database["public"]["Enums"]["product_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          module: Database["public"]["Enums"]["suite_module_key"]
+          organisation_id: string
+          seats?: number
+          seats_used?: number
+          status?: Database["public"]["Enums"]["product_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          module?: Database["public"]["Enums"]["suite_module_key"]
+          organisation_id?: string
+          seats?: number
+          seats_used?: number
+          status?: Database["public"]["Enums"]["product_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_module_access_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_notification_log: {
         Row: {
           alert_ids: string[]
@@ -8486,6 +8636,7 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_client_access_overview: { Args: never; Returns: Json }
       admin_company_360: {
         Args: { _business_account_id?: string; _domain?: string }
         Returns: Json
@@ -8614,6 +8765,16 @@ export type Database = {
       }
       admin_set_partner_portal_access: {
         Args: { _access: string; _partner_id: string; _reason?: string }
+        Returns: undefined
+      }
+      admin_set_product_access: {
+        Args: {
+          _organisation_id: string
+          _plan?: string
+          _product: Database["public"]["Enums"]["product_key"]
+          _seats?: number
+          _status: Database["public"]["Enums"]["product_status"]
+        }
         Returns: undefined
       }
       admin_set_screening_module: {
@@ -8876,6 +9037,15 @@ export type Database = {
         Args: { _module: string; _organisation_id: string }
         Returns: boolean
       }
+      set_product_member_role: {
+        Args: {
+          _organisation_id: string
+          _product: Database["public"]["Enums"]["product_key"]
+          _role: Database["public"]["Enums"]["product_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
       submit_quiz_and_issue_certificate: {
         Args: { _answers: Json; _course_id: string; _holder_name: string }
         Returns: Json
@@ -8932,6 +9102,20 @@ export type Database = {
         | "more_info"
         | "withdrawn"
       partner_type: "referral" | "affiliate" | "reseller" | "technology"
+      product_key: "screening" | "suite" | "academy"
+      product_role:
+        | "admin"
+        | "manager"
+        | "analyst"
+        | "viewer"
+        | "mlro_approver"
+        | "reviewer"
+        | "submitter"
+        | "owner"
+        | "contributor"
+        | "learner"
+        | "seat_manager"
+      product_status: "trial" | "active" | "suspended" | "cancelled"
       referral_status: "clicked" | "signed_up" | "converted"
       screening_case_status:
         | "no_potential_matches"
@@ -8957,6 +9141,7 @@ export type Database = {
         | "company"
         | "vessel"
         | "aircraft"
+      suite_module_key: "kyc_kyb" | "rcm"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -9131,6 +9316,21 @@ export const Constants = {
         "withdrawn",
       ],
       partner_type: ["referral", "affiliate", "reseller", "technology"],
+      product_key: ["screening", "suite", "academy"],
+      product_role: [
+        "admin",
+        "manager",
+        "analyst",
+        "viewer",
+        "mlro_approver",
+        "reviewer",
+        "submitter",
+        "owner",
+        "contributor",
+        "learner",
+        "seat_manager",
+      ],
+      product_status: ["trial", "active", "suspended", "cancelled"],
       referral_status: ["clicked", "signed_up", "converted"],
       screening_case_status: [
         "no_potential_matches",
@@ -9159,6 +9359,7 @@ export const Constants = {
         "vessel",
         "aircraft",
       ],
+      suite_module_key: ["kyc_kyb", "rcm"],
     },
   },
 } as const
