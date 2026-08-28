@@ -290,15 +290,17 @@ export default function SuiteScreeningV2() {
           onBack={() => { setActiveCase(null); loadCases(); }}
         />
       ) : (
-        <div className="space-y-4">
-          <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
-            <Tabs defaultValue="screen">
-              <TabsList>
-                <TabsTrigger value="screen"><Search className="mr-2 h-4 w-4" />New screening</TabsTrigger>
-                <TabsTrigger value="cases"><FileText className="mr-2 h-4 w-4" />Cases</TabsTrigger>
-              </TabsList>
+        <Tabs defaultValue="screen">
+          <div className="mb-4 grid gap-4 lg:grid-cols-[1fr_320px]">
+            <TabsList>
+              <TabsTrigger value="screen"><Search className="mr-2 h-4 w-4" />New screening</TabsTrigger>
+              <TabsTrigger value="cases"><FileText className="mr-2 h-4 w-4" />Cases</TabsTrigger>
+            </TabsList>
+            <div className="hidden lg:block" />
+          </div>
+          <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
 
-              <TabsContent value="screen" className="mt-4">
+          <TabsContent value="screen" className="mt-4">
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Subject details</CardTitle>
