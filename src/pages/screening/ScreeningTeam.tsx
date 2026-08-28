@@ -24,6 +24,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { useScreeningAccess } from "@/hooks/useScreeningAccess";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TeamMember {
   user_id: string | null;
