@@ -58,7 +58,40 @@ export default function ScreeningWorkspace() {
         noindex
       />
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
+
+      {/* Product app bar — gives the module a platform / console feel */}
+      <div className="border-b border-border bg-muted/40 backdrop-blur supports-[backdrop-filter]:bg-muted/30 sticky top-0 z-30">
+        <div className="container mx-auto px-4 flex flex-wrap items-center gap-3 py-3">
+          <span className="inline-flex items-center gap-2 font-semibold text-foreground">
+            <ShieldCheck className="h-4 w-4 text-teal" aria-hidden="true" />
+            WorldAML Screening &amp; Monitoring
+          </span>
+          {plan && (
+            <Badge variant="outline" className="border-teal/40 text-teal uppercase text-[10px] tracking-wide">
+              {plan} plan
+            </Badge>
+          )}
+          {isDemo && !provisioning && (
+            <Badge variant="outline" className="text-[10px]">
+              {remaining}/{searchQuota} screenings left
+            </Badge>
+          )}
+          <nav className="ml-auto flex items-center gap-1 text-sm" aria-label="Screening workspace">
+            <Link to="/screening" className="rounded-md px-2.5 py-1.5 bg-background font-medium shadow-sm">
+              Workspace
+            </Link>
+            <Link to="/screening/team" className="rounded-md px-2.5 py-1.5 text-muted-foreground hover:text-foreground">
+              Team &amp; access
+            </Link>
+            <Link to="/screening-monitoring/pricing" className="rounded-md px-2.5 py-1.5 text-muted-foreground hover:text-foreground">
+              Packages
+            </Link>
+          </nav>
+        </div>
+      </div>
+
+      <main className="flex-1 container mx-auto px-4 py-6">
+
         {busy ? (
           <div className="flex items-center gap-3 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
