@@ -17,7 +17,7 @@ const structuredData = {
     "Sanctions, PEP and adverse media screening with ongoing monitoring, case management and full audit trail.",
   brand: { "@type": "Organization", name: "WorldAML" },
   offers: (solution?.plans ?? [])
-    .filter((p) => p.price)
+    .filter((p) => p.price && /\d/.test(p.price))
     .map((p) => ({
       "@type": "Offer",
       name: p.name,
