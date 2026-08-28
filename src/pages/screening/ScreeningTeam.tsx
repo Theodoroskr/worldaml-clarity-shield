@@ -86,15 +86,33 @@ export default function ScreeningTeam() {
       _email: inviteEmail.trim(),
       _role: inviteRole as any,
     });
-    setInviteBusy(false);
+
     if (error) {
+      setInviteBusy(false);
       toast.error(error.message);
-    } else {
-      toast.success("Invitation sent");
-      setInviteEmail("");
-      setInviteOpen(false);
-      load();
+      return;
     }
+
+    // Notify the invited user by email (best-effort; don't block UI on failure)
+    try {
+      const existing = members.find((m) => m.email.toLowerCase() === inviteEmail.trim().toLowerCase());
+      await supabase.functions.invoke("send-screening-invite-email", {
+        body: {
+          email: inviteEmail.trim(),
+          inviter_name: profile?.full_name || profile?.email || "Your organisation",
+          role: ROLE_LABELS[inviteRole] || inviteRole,
+          is_new_user: !existing?.user_id,
+        },
+      });
+    } catch (err: any) {
+      console.warn("Failed to send screening invite email:", err);
+    }
+
+    setInviteBusy(false);
+    toast.success("Invitation sent");
+    setInviteEmail("");
+    setInviteOpen(false);
+    load();
   };
 
   const handleRoleChange = async (member: TeamMember, role: string) => {
