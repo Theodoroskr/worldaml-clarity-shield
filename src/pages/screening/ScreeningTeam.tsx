@@ -243,6 +243,10 @@ export default function ScreeningTeam() {
             <CardTitle className="text-base">Members</CardTitle>
             <CardDescription>
               {members.length} seat{members.length !== 1 ? "s" : ""} allocated
+              {seatLimit != null && ` / ${seatLimit} included`}
+              {seatsFull && (
+                <span className="ml-2 text-amber-600">Seat quota reached</span>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
