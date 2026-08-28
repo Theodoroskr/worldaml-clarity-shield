@@ -145,6 +145,7 @@ const AdminAnalytics = lazyWithRetry(() => import("./pages/admin/AdminAnalytics"
 const AdminReports = lazyWithRetry(() => import("./pages/admin/AdminReports"));
 const AdminAuditLog = lazyWithRetry(() => import("./pages/admin/AdminAuditLog"));
 const AdminRegulatoryHub = lazyWithRetry(() => import("./pages/admin/AdminRegulatoryHub"));
+const AdminClientAccess = lazyWithRetry(() => import("./pages/admin/AdminClientAccess"));
 const AdminScreeningProfileAudit = lazyWithRetry(() => import("./pages/admin/AdminScreeningProfileAudit"));
 const AdminScreeningProduct = lazyWithRetry(() => import("./pages/admin/AdminScreeningProduct"));
 const AdminSecurityAudit = lazyWithRetry(() => import("./pages/admin/AdminSecurityAudit"));
@@ -216,6 +217,7 @@ const SuiteScreeningV2 = lazyWithRetry(() => import("./pages/suite/SuiteScreenin
 const ScreeningWorkspace = lazyWithRetry(() => import("./pages/screening/ScreeningWorkspace"));
 const ScreeningActivate = lazyWithRetry(() => import("./pages/screening/ScreeningActivate"));
 const ScreeningModules = lazyWithRetry(() => import("./pages/screening/ScreeningModules"));
+const ScreeningTeam = lazyWithRetry(() => import("./pages/screening/ScreeningTeam"));
 
 
 const SuiteTransactions = lazyWithRetry(() => import("./pages/suite/SuiteTransactions"));
@@ -373,6 +375,7 @@ const App = () => (
                   <Route path="audit-log" element={<AdminAuditLog />} />
                   <Route path="screening-profile-audit" element={<AdminScreeningProfileAudit />} />
                   <Route path="screening-product" element={<AdminScreeningProduct />} />
+                  <Route path="clients-access" element={<AdminClientAccess />} />
                   <Route path="regulatory" element={<AdminRegulatoryHub />} />
                   <Route path="security" element={<AdminSecurityAudit />} />
                   <Route path="data-quality" element={<AdminDataQuality />} />
@@ -568,6 +571,7 @@ const App = () => (
 
                 {/* WorldAML Screening & Monitoring — standalone product workspace (separate from Suite) */}
                 <Route path="/screening" element={<ScreeningWorkspace />} />
+                <Route path="/screening/team" element={<ScreeningTeam />} />
                 <Route path="/screening/activate" element={<ScreeningActivate />} />
                 <Route path="/screening/modules" element={<ScreeningModules />} />
 

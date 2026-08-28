@@ -5,6 +5,7 @@ export interface ScreeningEntitlement {
   isLoading: boolean;
   isAuthenticated: boolean;
   hasAccess: boolean;
+  isAdmin: boolean;
   plan: string | null;
   status: string | null;
   monitoredEntityQuota: number | null;
@@ -22,6 +23,7 @@ export function useScreeningAccess(): ScreeningEntitlement {
     isLoading: true,
     isAuthenticated: false,
     hasAccess: false,
+    isAdmin: false,
     plan: null,
     status: null,
     monitoredEntityQuota: null,
@@ -35,6 +37,7 @@ export function useScreeningAccess(): ScreeningEntitlement {
         isLoading: false,
         isAuthenticated: false,
         hasAccess: false,
+        isAdmin: false,
         plan: null,
         status: null,
         monitoredEntityQuota: null,
@@ -50,6 +53,7 @@ export function useScreeningAccess(): ScreeningEntitlement {
       isLoading: false,
       isAuthenticated: true,
       hasAccess: !!row?.has_access,
+      isAdmin: !!row?.is_admin,
       plan: row?.plan ?? null,
       status: row?.status ?? null,
       monitoredEntityQuota: row?.monitored_entity_quota ?? null,

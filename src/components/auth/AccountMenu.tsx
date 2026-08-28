@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import {
-  GraduationCap, Building2, Handshake, ShieldCheck, Shield, User, Lock, LogOut, Check,
+  GraduationCap, Building2, Handshake, ShieldCheck, Shield, Radar, User, Lock, LogOut, Check,
 } from "lucide-react";
 import {
   DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
@@ -39,6 +39,13 @@ export const WORKSPACES: WorkspaceDef[] = [
     description: "Deals, commissions & resources",
     icon: Handshake,
     match: (p) => p.startsWith("/partner"),
+  },
+  {
+    key: "screening",
+    label: "WorldAML Screening",
+    description: "Sanctions, PEP & adverse media screening",
+    icon: Radar,
+    match: (p) => p.startsWith("/screening") || p.startsWith("/screening-monitoring"),
   },
   {
     key: "suite",

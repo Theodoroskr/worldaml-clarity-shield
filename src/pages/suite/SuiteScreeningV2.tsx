@@ -253,26 +253,33 @@ export default function SuiteScreeningV2() {
   return (
     <div className="space-y-6">
       <header className="relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10 p-6">
-        <div className="flex items-start gap-4">
-          <span className="hidden rounded-xl bg-primary/15 p-3 text-primary sm:block">
-            <ShieldCheck className="h-6 w-6" />
-          </span>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight">WorldAML Screening &amp; Monitoring</h1>
-            <p className="max-w-3xl text-sm text-muted-foreground">
-              Screen individuals and organisations against sanctions, PEP and RCA, warnings and regulatory
-              enforcement, and adverse media — then resolve every potential match with a recorded decision.
-            </p>
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              <Badge variant="outline" className={riskTone(["sanctions"])}>Sanctions</Badge>
-              <Badge variant="outline" className={riskTone(["warnings"])}>Warnings &amp; enforcement</Badge>
-              <Badge variant="outline" className={riskTone(["pep_rca"])}>PEP &amp; RCA</Badge>
-              <Badge variant="outline" className={riskTone(["adverse_media"])}>Adverse media</Badge>
-              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
-                <Activity className="mr-1 h-3 w-3" /> Ongoing monitoring
-              </Badge>
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <span className="hidden rounded-xl bg-primary/15 p-3 text-primary sm:block">
+              <ShieldCheck className="h-6 w-6" />
+            </span>
+            <div className="space-y-2">
+              <h1 className="text-2xl font-semibold tracking-tight">WorldAML Screening &amp; Monitoring</h1>
+              <p className="max-w-3xl text-sm text-muted-foreground">
+                Screen individuals and organisations against sanctions, PEP and RCA, warnings and regulatory
+                enforcement, and adverse media — then resolve every potential match with a recorded decision.
+              </p>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <Badge variant="outline" className={riskTone(["sanctions"])}>Sanctions</Badge>
+                <Badge variant="outline" className={riskTone(["warnings"])}>Warnings &amp; enforcement</Badge>
+                <Badge variant="outline" className={riskTone(["pep_rca"])}>PEP &amp; RCA</Badge>
+                <Badge variant="outline" className={riskTone(["adverse_media"])}>Adverse media</Badge>
+                <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                  <Activity className="mr-1 h-3 w-3" /> Ongoing monitoring
+                </Badge>
+              </div>
             </div>
           </div>
+          <Button asChild variant="outline" size="sm" className="shrink-0">
+            <Link to="/screening/team">
+              <Users className="mr-1.5 h-4 w-4" /> Team &amp; Access
+            </Link>
+          </Button>
         </div>
       </header>
 

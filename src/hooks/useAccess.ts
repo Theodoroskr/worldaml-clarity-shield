@@ -37,8 +37,8 @@ export function useAccess(): AccessFlags {
         return;
       }
 
-      // Fetch profile + role in parallel — use user_id (not id)
-      const [profileRes, roleRes] = await Promise.all([
+      // Fetch profile, role and product access in parallel — use user_id (not id)
+      const [profileRes, roleRes, productRes] = await Promise.all([
         supabase
           .from("profiles")
           .select("subscription_tier")
@@ -50,11 +50,19 @@ export function useAccess(): AccessFlags {
           .eq("user_id", user.id)
           .eq("role", "admin")
           .maybeSingle(),
+        supabase
+          .from("product_access")
+          .select("product, has_access, status")
+          .in("product", ["suite", "screening"]),
       ]);
 
       const tier = (profileRes.data as any)?.subscription_tier ?? "free";
       const isAdmin = !!roleRes.data;
-      const hasSuiteAccess = isAdmin || tier === "suite" || tier === "enterprise";
+      const hasProductAccess = (product: string) =>
+        (productRes.data ?? []).some(
+          (row: any) => row.product === product && row.has_access && row.status !== "cancelled" && row.status !== "suspended"
+        );
+      const hasSuiteAccess = isAdmin || tier === "suite" || tier === "enterprise" || hasProductAccess("suite") || hasProductAccess("screening");
 
       if (mounted) {
         setFlags({

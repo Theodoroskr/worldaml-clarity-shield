@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock, BarChart3, Stethoscope, FileSearch } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock, BarChart3, Stethoscope, FileSearch, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AdminNotificationProvider, useAdminNotifications } from "@/hooks/useAdminNotifications";
 import AdminNotificationBell from "@/components/admin/AdminNotificationBell";
@@ -16,7 +16,9 @@ const NAV: NavItem[] = [
   { label: "Analytics", path: "/admin/analytics", icon: TrendingUp, section: "Platform" },
   { label: "Reports", path: "/admin/reports", icon: BarChart3, section: "Platform" },
   { label: "Users", path: "/admin/users", icon: Users, section: "Platform" },
+  { label: "Clients & Access", path: "/admin/clients-access", icon: Briefcase, section: "Platform" },
   { label: "Identities & Profiles", path: "/admin/identities", icon: GitBranch, section: "Platform" },
+  { label: "Regulatory Hub", path: "/admin/regulatory", icon: Landmark, section: "Platform" },
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Platform" },
   { label: "Data Quality", path: "/admin/data-quality", icon: Stethoscope, section: "Platform" },
 
@@ -26,7 +28,6 @@ const NAV: NavItem[] = [
   // Marketing site + lead capture
   { label: "Forms", path: "/admin/forms", icon: FileText, section: "Marketing" },
   { label: "Outreach Queue", path: "/admin/outreach-queue", icon: Send, section: "Marketing" },
-  { label: "Regulatory Hub", path: "/admin/regulatory", icon: Landmark, section: "Marketing" },
   { label: "Domains", path: "/admin/domains", icon: Globe, section: "Marketing" },
 
   // Academy
