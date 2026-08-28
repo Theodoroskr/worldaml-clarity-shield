@@ -397,6 +397,18 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://worldaml.com/sanctions-check</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/free-aml-check</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://worldaml.com/data-coverage</loc>
     <lastmod>2026-08-28</lastmod>
     <changefreq>monthly</changefreq>
