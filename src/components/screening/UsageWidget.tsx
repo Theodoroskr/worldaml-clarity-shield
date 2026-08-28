@@ -45,8 +45,34 @@ export function UsageWidget() {
         return;
       }
 
-      const { data: quotaRows } = await supabase.rpc("get_screening_org_quota", { _org_id: "" });
-      // The RPC requires an org_id. Resolve org from membership first.
+      const { data: orgId } = await supabase.rpc("current_user_org_id");
+      if (!orgId) {
+        setUsage({ searchesUsed: null, monitorsUsed: null, loading: false });
+        return;
+      }
+
+      const now = new Date();
+      const periodStart = new Date(now.getFullYear(), 0, 1).toISOString();
+
+      const [{ count: searchesUsed }, { count: monitorsUsed }] = await Promise.all([
+        supabase
+          .from("screening_searches")
+          .select("id", { count: "exact", head: true })
+          .eq("organisation_id", orgId)
+          .gte("created_at", periodStart),
+        supabase
+          .from("monitoring_subjects")
+          .select("id", { count: "exact", head: true })
+          .eq("organisation_id", orgId)
+          .eq("status", "active"),
+      ]);
+
+      if (cancelled) return;
+      setUsage({
+        searchesUsed: searchesUsed ?? 0,
+        monitorsUsed: monitorsUsed ?? 0,
+        loading: false,
+      });
     }
     void load();
     return () => { cancelled = true; };
