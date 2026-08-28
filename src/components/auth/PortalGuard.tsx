@@ -31,6 +31,12 @@ const COPY: Record<PortalKey, { title: string; body: string; primary?: { label: 
     primary: { label: "View Suite plans", to: "/pricing" },
     secondary: { label: "Return to WorldAML", to: "/" },
   },
+  screening: {
+    title: "No Screening access",
+    body: "Your account does not currently have access to WorldAML Screening & Monitoring.",
+    primary: { label: "View Screening packages", to: "/screening-monitoring/pricing" },
+    secondary: { label: "Return to WorldAML", to: "/" },
+  },
   admin: {
     title: "Access denied",
     body: "This area is restricted to authorised WorldAML staff.",
