@@ -8,6 +8,8 @@ import {
 import { toast } from "sonner";
 import { useScreeningModules } from "@/hooks/useScreeningModules";
 import { UsageWidget } from "@/components/screening/UsageWidget";
+import { useScreeningQuota } from "@/hooks/useScreeningQuota";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -43,6 +45,8 @@ import {
   recordDecision,
   riskTone,
   runScreeningV2,
+  isQuotaCode,
+  ScreeningError,
   SOURCE_GROUPS,
   SUBJECT_TYPE_LABELS,
   type FullEntityProfile,
@@ -157,6 +161,7 @@ export default function SuiteScreeningV2() {
   const [adverseMedia, setAdverseMedia] = useState(false);
   const [monitoring, setMonitoring] = useState(false);
   const [running, setRunning] = useState(false);
+  const quota = useScreeningQuota();
   const [cases, setCases] = useState<CaseRow[]>([]);
   const [activeCase, setActiveCase] = useState<CaseDetail | null>(null);
   const [loadingCases, setLoadingCases] = useState(true);
@@ -190,6 +195,14 @@ export default function SuiteScreeningV2() {
       toast.error("Enter the name to screen");
       return;
     }
+    if (quota.searchesExceeded) {
+      toast.error("Annual search limit reached — upgrade your plan to keep screening.");
+      return;
+    }
+    if (monitoring && quota.monitorsExceeded) {
+      toast.error("Monitored entity limit reached — remove a monitored subject or upgrade.");
+      return;
+    }
     setRunning(true);
     try {
       const profileId = searchProfileId.trim();
@@ -215,8 +228,20 @@ export default function SuiteScreeningV2() {
         .eq("id", result.case_id)
         .maybeSingle();
       if (data) openCase(data as CaseRow);
+      void quota.refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Screening could not be completed");
+      const code = err instanceof ScreeningError ? err.code : undefined;
+      const message = err instanceof Error ? err.message : "Screening could not be completed";
+      if (isQuotaCode(code)) {
+        void quota.refresh();
+        toast.error(message, {
+          description: "Your annual allowance for this plan is used up.",
+          action: { label: "Upgrade", onClick: () => { window.location.href = "/screening-monitoring/pricing"; } },
+          duration: 10000,
+        });
+      } else {
+        toast.error(message);
+      }
     } finally {
       setRunning(false);
     }
@@ -365,8 +390,15 @@ export default function SuiteScreeningV2() {
                     Include adverse media
                   </label>
                   <label className="flex items-center gap-3 text-sm">
-                    <Switch checked={monitoring} onCheckedChange={setMonitoring} />
+                    <Switch
+                      checked={monitoring && !quota.monitorsExceeded}
+                      disabled={quota.monitorsExceeded}
+                      onCheckedChange={setMonitoring}
+                    />
                     Place under ongoing monitoring
+                    {quota.monitorsExceeded && (
+                      <span className="text-xs text-destructive">Limit reached</span>
+                    )}
                   </label>
                   <p className="text-xs text-muted-foreground">
                     By default all sources permitted by your organisation&apos;s policy are screened.
@@ -430,7 +462,33 @@ export default function SuiteScreeningV2() {
                   )}
                 </div>
 
-                <Button onClick={onRun} disabled={running}>
+                {(quota.searchesExceeded || quota.monitorsExceeded) && (
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>
+                      {quota.searchesExceeded
+                        ? "Annual search allowance used up"
+                        : "Monitored entity allowance used up"}
+                    </AlertTitle>
+                    <AlertDescription className="space-y-2">
+                      <p>
+                        {quota.searchesExceeded
+                          ? `You have used all ${quota.searchQuota} searches included in your ${quota.plan ?? "current"} plan for this year. New screenings are blocked until you upgrade.`
+                          : `You are monitoring ${quota.monitorsUsed} of ${quota.monitorQuota} entities included in your ${quota.plan ?? "current"} plan. Stop monitoring a subject or upgrade to add more.`}
+                      </p>
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        <Button asChild size="sm" variant="secondary">
+                          <Link to="/screening-monitoring/pricing">Upgrade plan</Link>
+                        </Button>
+                        <Button asChild size="sm" variant="outline">
+                          <Link to="/contact-sales">Talk to sales</Link>
+                        </Button>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <Button onClick={onRun} disabled={running || quota.searchesExceeded}>
                   {running ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
                   Run screening
                 </Button>
