@@ -53,6 +53,7 @@ export function useScreeningAccess(): ScreeningEntitlement {
       isLoading: false,
       isAuthenticated: true,
       hasAccess: !!row?.has_access,
+      isAdmin: !!row?.is_admin,
       plan: row?.plan ?? null,
       status: row?.status ?? null,
       monitoredEntityQuota: row?.monitored_entity_quota ?? null,
