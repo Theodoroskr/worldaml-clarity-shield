@@ -134,9 +134,10 @@ export default function ScreeningMonitored() {
 
   const setStatus = async (row: MonitoredRow, status: MonitoringStatus) => {
     setBusyId(row.id);
-    const patch: Record<string, unknown> = { status };
+    const patch: { status: MonitoringStatus; stopped_at?: string } = { status };
     if (status === "stopped") patch.stopped_at = new Date().toISOString();
     const { error } = await supabase.from("monitoring_subjects").update(patch).eq("id", row.id);
+
     setBusyId(null);
     if (error) {
       toast.error(error.message);
