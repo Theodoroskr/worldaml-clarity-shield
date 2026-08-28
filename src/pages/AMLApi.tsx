@@ -42,7 +42,7 @@ const faqStructuredData = {
 const softwareStructuredData = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "WorldAML AML Screening API",
+  name: "WORLDAML Screening API",
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description: "RESTful API for automated AML screening including sanctions, PEPs, adverse media, and ongoing monitoring.",
@@ -57,7 +57,7 @@ const softwareStructuredData = {
 const webApiStructuredData = {
   "@context": "https://schema.org",
   "@type": "WebAPI",
-  name: "WorldAML AML Screening API",
+  name: "WORLDAML Screening API",
   description: "RESTful API for automated AML sanctions, PEP, and adverse media screening with real-time results and ongoing monitoring.",
   url: "https://worldaml.com/aml-api",
   provider: { "@id": "https://worldaml.com/#organization" },
