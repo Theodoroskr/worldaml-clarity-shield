@@ -8915,6 +8915,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      invite_screening_member: {
+        Args: {
+          _email: string
+          _role: Database["public"]["Enums"]["product_role"]
+        }
+        Returns: undefined
+      }
       is_business_admin: { Args: { _account: string }; Returns: boolean }
       is_business_member: { Args: { _account: string }; Returns: boolean }
       is_eligible_for_sales_outreach: {
@@ -9011,6 +9018,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      remove_screening_member: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
       request_str_amendment: {
         Args: { _reason: string; _report_id: string }
         Returns: string
@@ -9037,10 +9048,18 @@ export type Database = {
         Args: { _module: string; _organisation_id: string }
         Returns: boolean
       }
+      screening_team_members: { Args: never; Returns: Json }
       set_product_member_role: {
         Args: {
           _organisation_id: string
           _product: Database["public"]["Enums"]["product_key"]
+          _role: Database["public"]["Enums"]["product_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      set_screening_member_role: {
+        Args: {
           _role: Database["public"]["Enums"]["product_role"]
           _user_id: string
         }
