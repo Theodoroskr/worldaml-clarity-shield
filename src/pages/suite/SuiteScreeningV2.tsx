@@ -491,7 +491,10 @@ function Field({
 function ResultsWorkspace({
   caseDetail, onBack,
 }: { caseDetail: CaseDetail; onBack: () => void }) {
+  const { hasModule } = useScreeningModules();
+  const fourEyes = hasModule("four_eyes");
   const [matches, setMatches] = useState<MatchRow[]>([]);
+
   const [extras, setExtras] = useState<Record<string, MatchExtra>>({});
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<MatchRow | null>(null);
