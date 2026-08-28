@@ -230,7 +230,7 @@ const CasinoAMLComplianceUS = () => {
                 </Button>
 
                 <Button variant="outline" size="lg" asChild>
-                  <Link to="/free-aml-check">
+                  <Link to="/?demo=1">
                     Run a free OFAC patron check <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>

@@ -72,7 +72,7 @@ const solutions = [
     icon: <Zap className="w-4 h-4 text-[hsl(184_40%_40%)]" />,
   },
   {
-    href: "/sanctions-check",
+    href: "/?demo=1",
     label: "WorldKYC Search",
     description: "Instant PEP, sanctions & adverse media lookup",
     icon: <Search className="w-4 h-4 text-[hsl(222_47%_40%)]" />,

@@ -229,7 +229,7 @@ const ComplianceSoftwareUS = () => {
                   <Link to="/contact-sales">Talk to a US compliance specialist</Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <Link to="/free-aml-check">
+                  <Link to="/?demo=1">
                     Run a free OFAC sanctions check <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
@@ -415,7 +415,7 @@ const ComplianceSoftwareUS = () => {
                 <Link to="/contact-sales">Request a demo</Link>
               </Button>
               <Button variant="outline" size="lg" asChild className="bg-transparent text-white border-white/40 hover:bg-white/10 hover:text-white">
-                <Link to="/free-aml-check">Try a free OFAC check</Link>
+                <Link to="/?demo=1">Try a free OFAC check</Link>
               </Button>
             </div>
           </div>

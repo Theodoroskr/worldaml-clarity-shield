@@ -299,7 +299,7 @@ export function ResourcesSection() {
 export function QuickCheckLink() {
   return (
     <a
-      href="/sanctions-check"
+      href="/?demo=1"
       className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 hover:border-accent/50 hover:bg-accent/5 transition-colors"
     >
       <Search className="h-4 w-4 text-accent shrink-0" />

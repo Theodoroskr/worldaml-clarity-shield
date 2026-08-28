@@ -229,7 +229,7 @@ const EUSanctionsMap = () => {
             , maintained by the European Commission. This page is for informational purposes only and does not constitute legal advice.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <Link to="/sanctions-check">
+            <Link to="/?demo=1">
               <Button size="lg">
                 <Shield className="w-4 h-4 mr-2" />
                 Free Sanctions Check

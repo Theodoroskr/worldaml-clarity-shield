@@ -93,7 +93,7 @@ const WhatIsSanctionsScreening = () => {
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild>
-                <Link to="/free-aml-check">
+                <Link to="/?demo=1">
                   Try a free sanctions check <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -227,7 +227,7 @@ const WhatIsSanctionsScreening = () => {
               Ready to operationalise sanctions screening? Explore our
               <Link to="/platform/aml-screening" className="text-primary hover:underline"> AML screening platform</Link>,
               browse <Link to="/resources/sanctions-lists" className="text-primary hover:underline">our coverage of 1,900+ global lists</Link>,
-              or run a <Link to="/free-aml-check" className="text-primary hover:underline">free sanctions check</Link> against major regimes now.
+              or run a <Link to="/?demo=1" className="text-primary hover:underline">free sanctions check</Link> against major regimes now.
             </p>
           </article>
         </section>

@@ -56,7 +56,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML & KYC Software for UK Fintechs and EMIs",
       subheadline: "Support faster onboarding, stronger controls, and audit-ready compliance operations with a scalable AML platform aligned with FCA expectations.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Check", href: "/?demo=1" },
     },
     challenges: {
       title: "UK Compliance Challenges",
@@ -182,7 +182,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML & KYC Software for US Fintechs",
       subheadline: "Automate screening, onboarding, monitoring, and investigations with a scalable compliance solution designed for high-growth regulated businesses.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Risk Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Risk Check", href: "/?demo=1" },
     },
     challenges: {
       title: "US AML Compliance Challenges",
@@ -245,7 +245,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML Compliance Software for Greece",
       subheadline: "Meet AML obligations under Law 4557/2018 and the EU AML Regulation with a scalable compliance platform designed for Greek financial institutions, fintechs, and crypto licensees.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Check", href: "/?demo=1" },
     },
     challenges: {
       title: "Greece Compliance Challenges",
@@ -308,7 +308,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML & KYC Software for Cyprus Investment Firms",
       subheadline: "Meet CySEC AML obligations with a scalable compliance platform built for Cyprus Investment Firms, forex brokers, payment institutions, and crypto service providers.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Check", href: "/?demo=1" },
     },
     challenges: {
       title: "Cyprus Compliance Challenges",
@@ -371,7 +371,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML Compliance for Malta iGaming & Fintech",
       subheadline: "Meet FIAU and MFSA AML obligations with a scalable compliance platform designed for Malta's iGaming operators, crypto licensees, payment institutions, and financial services firms.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Check", href: "/?demo=1" },
     },
     challenges: {
       title: "Malta Compliance Challenges",
@@ -434,7 +434,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML & ANSPDCP-Aligned Compliance Software for Romania",
       subheadline: "Meet AML obligations under Law 129/2019 and the EU AML Regulation while respecting ANSPDCP (GDPR) data-protection requirements — one scalable platform for Romanian banks, fintechs, NBFIs, and payment institutions.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Check", href: "/?demo=1" },
     },
     challenges: {
       title: "Romania Compliance Challenges",
@@ -501,7 +501,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML Compliance Software for Singapore",
       subheadline: "Meet MAS AML/CFT obligations under the Payment Services Act and MAS Notices with a scalable compliance platform designed for Singapore's digital banks, payment institutions, and crypto licensees.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Check", href: "/?demo=1" },
     },
     challenges: {
       title: "Singapore Compliance Challenges",
@@ -564,7 +564,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML & KYC Compliance Software for Germany",
       subheadline: "Meet GwG and EU AML Regulation obligations with a scalable compliance platform designed for German banks, fintechs, crypto custody providers, and real estate firms.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Check", href: "/?demo=1" },
     },
     challenges: {
       title: "Germany Compliance Challenges",
@@ -627,7 +627,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML Compliance Software for South Africa",
       subheadline: "Meet FICA obligations and demonstrate FATF compliance with a scalable AML platform designed for South African banks, insurers, estate agents, and crypto asset service providers.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Check", href: "/?demo=1" },
     },
     challenges: {
       title: "South Africa Compliance Challenges",
@@ -690,7 +690,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML Compliance for Netherlands Financial Institutions",
       subheadline: "Meet Wwft obligations with a scalable compliance platform designed for Dutch banks, payment institutions, crypto firms, and trust offices.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Check", href: "/?demo=1" },
     },
     challenges: {
       title: "Netherlands Compliance Challenges",
@@ -753,7 +753,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML & KYC Software for Ireland",
       subheadline: "Meet Central Bank of Ireland AML obligations with a scalable compliance platform designed for Irish e-money institutions, payment firms, fund administrators, and crypto providers.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Check", href: "/?demo=1" },
     },
     challenges: {
       title: "Ireland Compliance Challenges",
@@ -816,7 +816,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML Compliance Software for Nigeria",
       subheadline: "Meet CBN and NFIU AML obligations with a scalable compliance platform designed for Nigerian banks, fintechs, mobile money operators, and crypto exchanges.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Check", href: "/?demo=1" },
     },
     challenges: {
       title: "Nigeria Compliance Challenges",
@@ -879,7 +879,7 @@ export const marketPages: Record<string, MarketPageData> = {
       headline: "AML & KYC Software for East Africa",
       subheadline: "Meet regional AML/CFT obligations across Kenya, Uganda, Tanzania, Rwanda, and Ethiopia with a scalable compliance platform built for banks, mobile money operators, SACCOs, and fintechs.",
       primaryCta: { label: "Book a Demo", href: "/contact-sales" },
-      secondaryCta: { label: "Free AML Check", href: "/sanctions-check" },
+      secondaryCta: { label: "Free AML Check", href: "/?demo=1" },
     },
     challenges: {
       title: "East Africa Compliance Challenges",

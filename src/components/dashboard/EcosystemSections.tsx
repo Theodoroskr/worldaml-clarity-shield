@@ -111,7 +111,7 @@ export function CourseCrossSell({
 
 /* ── WorldAML Tools (discovery navigation under Resources) ───── */
 const TOOLS = [
-  { label: "Sanctions Quick Check", href: "/sanctions-check", icon: Search },
+  { label: "Sanctions Quick Check", href: "/?demo=1", icon: Search },
   { label: "WorldAML Suite", href: "/platform/suite", icon: Shield },
   { label: "Regulatory Compliance Management", href: "/platform/regulatory-reporting", icon: Scale },
 ];

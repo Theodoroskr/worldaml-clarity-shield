@@ -97,7 +97,7 @@ const AlternativesIndex = () => {
                 <Link to="/contact-sales">Request a side-by-side comparison</Link>
               </Button>
               <Button variant="outline-light" size="lg" asChild>
-                <Link to="/free-aml-check">
+                <Link to="/?demo=1">
                   Run a free AML check <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>

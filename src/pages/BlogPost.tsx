@@ -233,7 +233,7 @@ const BlogPost = () => {
                       Request Demo <ArrowRight className="h-4 w-4" />
                     </Link>
                     <Link
-                      to="/sanctions-check"
+                      to="/?demo=1"
                       className="flex items-center justify-center gap-2 w-full mt-2 rounded-lg border border-divider text-navy text-body-sm font-medium py-2.5 px-4 hover:bg-surface-subtle transition-colors"
                     >
                       Free Sanctions Check
