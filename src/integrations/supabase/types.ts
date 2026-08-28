@@ -8816,6 +8816,7 @@ export type Database = {
         Returns: {
           current_period_end: string
           has_access: boolean
+          is_admin: boolean
           monitored_entity_quota: number
           plan: string
           status: string
