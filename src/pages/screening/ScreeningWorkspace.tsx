@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Loader2, Lock, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
+import { Loader2, Lock, ArrowRight, Sparkles, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
