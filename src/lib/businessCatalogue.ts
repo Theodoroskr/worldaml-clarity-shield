@@ -1,4 +1,5 @@
 import { Layers, Fingerprint, Database, GraduationCap, ShieldCheck, LucideIcon } from "lucide-react";
+import { SCREENING_PLANS } from "./screeningPlans";
 
 /**
  * Authenticated business product catalogue.
