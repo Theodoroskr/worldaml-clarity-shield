@@ -74,8 +74,8 @@ Monitoring alert reopens the case -> back to In review
 5. Metrics dashboard and exports.
 
 ## Technical notes
-- Stripe: create three annual prices (Essentials EUR 490/yr, Starter EUR 990/yr, Compliance EUR 4,950/yr); `create-worldaml-checkout` accepts `essentials` and points at the yearly price ids; `verify-worldaml-subscription` maps annual subscriptions to quotas.
-- Migration: extend `screening_subscriptions` (quotas, usage counters, billing interval), add `screening_sla_settings` per organisation, add case activity/assignment audit rows where not already covered by `screening_audit_events`.
+- Stripe: create four annual prices (Essentials €490, Starter €990, Professional €1,990, Compliance €4,950); `create-worldaml-checkout` accepts `essentials`, `starter`, `professional` and `compliance`; Demo is free and requires no checkout. `verify-worldaml-subscription` maps annual subscriptions to quotas.
+- Migration: extend `screening_subscriptions` with separate `search_quota_annual` and `monitor_quota`, plus usage counters; add `screening_sla_settings` per organisation; add case activity/assignment audit rows where not already covered by `screening_audit_events`.
 - Frontend: new `src/lib/screeningPlans.ts` (single source for tiers/quotas), `src/pages/screening/ScreeningCases.tsx`, `ScreeningCaseDetail.tsx`, usage widget component; reuse existing shadcn table/dialog patterns from the Suite case queue. Pricing page and business catalogue updated to yearly display.
 - Edge functions: quota check in `screening-run`, decision/closure rules extended in `screening-decision`, reopen handling in `screening-monitoring-poll`.
 - Pricing displayed identically signed in and signed out, read from the shared catalogue.
