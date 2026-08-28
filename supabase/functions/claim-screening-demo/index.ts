@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { Resend } from "npm:resend";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,6 +15,15 @@ const json = (body: unknown, status = 200) =>
   });
 
 // Demo allowance: 5 annual searches, no monitoring, single seat.
+function escapeHtml(str: string): string {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const DEMO_QUOTA = { search: 5, monitor: 0, seats: 1 };
 
 serve(async (req) => {
@@ -136,6 +146,48 @@ serve(async (req) => {
     try {
       await admin.rpc("ensure_default_screening_policy", { _org: orgId });
     } catch (_) { /* non-fatal */ }
+
+    // Welcome / confirmation email — non-fatal if it fails.
+    try {
+      const apiKey = Deno.env.get("RESEND_API_KEY");
+      if (apiKey && user.email) {
+        const name = escapeHtml(
+          ((user.user_metadata?.full_name as string | undefined) ?? "").split(" ")[0] || "there",
+        );
+        const resend = new Resend(apiKey);
+        await resend.emails.send({
+          from: "WorldAML Screening <info@worldaml.com>",
+          to: [user.email],
+          subject: "Your 5 free WorldAML screenings are active",
+          html: `
+  <div style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;background:#fff;">
+    <div style="background:#1e3a5f;padding:28px 32px;">
+      <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">Your demo is active</h1>
+    </div>
+    <div style="padding:28px 32px;">
+      <p style="color:#374151;font-size:15px;margin:0 0 16px;">Hi ${name},</p>
+      <p style="color:#374151;font-size:15px;margin:0 0 20px;line-height:1.6;">
+        Your WorldAML account is confirmed and <strong>5 free screening searches</strong> have been added to your
+        workspace. Screen any person or company against 1,900+ global sanctions, PEP and watchlist sources.
+      </p>
+      <div style="text-align:center;margin:28px 0 12px;">
+        <a href="https://worldaml.com/screening" style="display:inline-block;background:#0d9488;color:#fff;text-decoration:none;padding:14px 32px;border-radius:6px;font-weight:700;font-size:15px;">
+          Open your workspace &rarr;
+        </a>
+      </div>
+      <p style="color:#6b7280;font-size:13px;margin:24px 0 0;line-height:1.5;">
+        Need ongoing monitoring, adverse media or more seats? See the
+        <a href="https://worldaml.com/screening-monitoring/pricing" style="color:#0d9488;">annual packages</a>,
+        or reply to this email and our team will help.
+      </p>
+    </div>
+  </div>`,
+          text: `Hi ${name},\n\nYour WorldAML account is confirmed and 5 free screening searches have been added to your workspace.\n\nOpen your workspace: https://worldaml.com/screening\nPackages: https://worldaml.com/screening-monitoring/pricing\n`,
+        });
+      }
+    } catch (mailErr) {
+      console.error("demo welcome email failed", mailErr);
+    }
 
     return json({ plan: "demo", granted: true });
   } catch (error) {
