@@ -413,7 +413,7 @@ const App = () => (
                 <Route path="/platform/aml-screening" element={<Navigate to="/screening-monitoring" replace />} />
                 <Route path="/platform/risk-assessment" element={<PlatformRiskAssessment />} />
                 
-                {/* Retired data-source lane — redirect to WorldAML AML Screening */}
+                {/* Retired data-source lane — redirect to WORLDAML Screening & Monitoring */}
                 <Route path="/data-sources/worldcompliance/pricing" element={<Navigate to="/pricing" replace />} />
                 <Route path="/data-sources/*" element={<Navigate to="/screening-monitoring" replace />} />
                 <Route path="/data-sources" element={<Navigate to="/screening-monitoring" replace />} />
