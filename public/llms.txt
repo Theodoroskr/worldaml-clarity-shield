@@ -48,7 +48,6 @@ WorldAML, part of Infocredit Group, provides a unified compliance platform plus 
 - [Glossary](/glossary): Compliance terminology.
 - [FAQ](/faq): Common questions.
 - [Academy](/academy): WorldAML compliance training and CPD certificates.
-- [Free AML Check](/free-aml-check): One-off sanctions screening.
 
 ## Company
 

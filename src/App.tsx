@@ -76,7 +76,6 @@ const ForgotPassword = lazyWithRetry(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
 const WorldID = lazyWithRetry(() => import("./pages/WorldID"));
 const BestPractices = lazyWithRetry(() => import("./pages/BestPractices"));
-const SanctionsCheck = lazyWithRetry(() => import("./pages/SanctionsCheck"));
 const SanctionsLists = lazyWithRetry(() => import("./pages/SanctionsLists"));
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
 const RcmLayout = lazyWithRetry(() => import("./pages/rcm/RcmLayout"));
@@ -91,7 +90,6 @@ const RssPage = lazyWithRetry(() => import("./pages/Rss"));
 const Glossary = lazyWithRetry(() => import("./pages/Glossary"));
 const AMLRegulations = lazyWithRetry(() => import("./pages/AMLRegulations"));
 const MarketPage = lazyWithRetry(() => import("./pages/MarketPage"));
-const FreeAMLCheck = lazyWithRetry(() => import("./pages/FreeAMLCheck"));
 const Partners = lazyWithRetry(() => import("./pages/Partners"));
 const PartnerApply = lazyWithRetry(() => import("./pages/PartnerApply"));
 const OnboardPublic = lazyWithRetry(() => import("./pages/OnboardPublic"));
@@ -459,8 +457,8 @@ const App = () => (
                 <Route path="/resources/aml-compliance-checklist" element={<AMLComplianceChecklist />} />
                 <Route path="/resources/fatf-travel-rule-compliance-guide" element={<FATFTravelRuleGuide />} />
                 <Route path="/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones" element={<Navigate to="/alternatives" replace />} />
-                <Route path="/sanctions-check" element={<SanctionsCheck />} />
-                <Route path="/free-aml-check" element={<FreeAMLCheck />} />
+                <Route path="/sanctions-check" element={<Navigate to="/?demo=1" replace />} />
+                <Route path="/free-aml-check" element={<Navigate to="/?demo=1" replace />} />
                 <Route path="/data-coverage" element={<Navigate to="/screening-monitoring" replace />} />
                 <Route path="/data-coverage/:country" element={<Navigate to="/screening-monitoring" replace />} />
                 <Route path="/blog" element={<Blog />} />
