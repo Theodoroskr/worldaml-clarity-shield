@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Loader2, Lock, ArrowRight, Sparkles } from "lucide-react";
+import { Loader2, Lock, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SuiteScreeningV2 from "@/pages/suite/SuiteScreeningV2";
 import { useScreeningAccess } from "@/hooks/useScreeningAccess";
+import { useScreeningQuota } from "@/hooks/useScreeningQuota";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
