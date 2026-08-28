@@ -67,7 +67,7 @@ export default function ScreeningTeam() {
     if (error) {
       toast.error("Could not load team members: " + error.message);
     } else {
-      setMembers((data as TeamMember[]) ?? []);
+      setMembers((data as unknown as TeamMember[]) ?? []);
     }
     setLoading(false);
   }, []);
