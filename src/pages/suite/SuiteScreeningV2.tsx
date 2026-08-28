@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Loader2, Search, ShieldCheck, Activity, FileText, ChevronRight,
   ArrowLeft, Copy, Check, X, Filter, Tag, MoreHorizontal,
-  AlertTriangle, User, Building2, Ship, Plane, RefreshCw, ExternalLink, Users,
+  AlertTriangle, User, Building2, Ship, Plane, RefreshCw, ExternalLink, Users, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useScreeningModules } from "@/hooks/useScreeningModules";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
