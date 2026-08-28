@@ -184,6 +184,15 @@ export default function AdminScreeningProduct() {
       !term || (m.organisation_name ?? "").toLowerCase().includes(term) || m.module.toLowerCase().includes(term)),
     [data, term],
   );
+  const people = useMemo(
+    () => users.filter((u) =>
+      !term
+      || (u.email ?? "").toLowerCase().includes(term)
+      || (u.full_name ?? "").toLowerCase().includes(term)
+      || (u.organisation_name ?? "").toLowerCase().includes(term)
+      || (u.role ?? "").toLowerCase().includes(term)),
+    [users, term],
+  );
 
   const moduleName = (key: string) =>
     SCREENING_MODULES.find((m) => m.key === key)?.name ?? key.replace(/_/g, " ");
