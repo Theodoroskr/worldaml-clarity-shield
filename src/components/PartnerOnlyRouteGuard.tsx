@@ -18,12 +18,14 @@ const RESTRICTED_PREFIXES = ["/admin", "/suite", "/rcm", "/dashboard"];
 export default function PartnerOnlyRouteGuard() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isLoading: authLoading, isAdmin } = useAuth();
+  const { user, isLoading: authLoading, profileLoading, isAdmin } = useAuth();
   const { hasSuiteAccess } = useAccess();
   const { partner, isLoading: partnerLoading } = usePartner();
 
   useEffect(() => {
-    if (authLoading || partnerLoading) return;
+    // Wait until roles/entitlements have actually resolved — otherwise an admin
+    // who is also a partner gets bounced out of /admin before isAdmin loads.
+    if (authLoading || profileLoading || partnerLoading) return;
     if (!user) return;
     if (isAdmin) return;
     if (hasSuiteAccess) return;
@@ -38,6 +40,7 @@ export default function PartnerOnlyRouteGuard() {
     }
   }, [
     authLoading,
+    profileLoading,
     partnerLoading,
     user,
     isAdmin,
