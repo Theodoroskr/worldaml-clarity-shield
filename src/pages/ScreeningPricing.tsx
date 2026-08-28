@@ -50,8 +50,8 @@ const ScreeningPricing = () => (
             Screening &amp; Monitoring pricing
           </h1>
           <p className="mt-3 text-muted-foreground">
-            Same pricing whether you are signed in or not. Buy online, activate immediately, and start
-            screening in the workspace.
+            Annual subscriptions in two lanes — WorldAML Platform and API Only. Same pricing whether
+            you are signed in or not.
           </p>
         </div>
       </section>
