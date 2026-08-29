@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowLeft, CheckCircle2, Clock, Loader2, ShieldCheck, Sparkles } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import ScreeningLayout from "@/components/screening/ScreeningLayout";
 import SEO from "@/components/SEO";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,14 +39,16 @@ export default function ScreeningModules() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <SEO
-        title="Screening Add-on Modules | WorldAML"
-        description="Optional, separately priced modules for the WorldAML Screening & Monitoring workspace."
-        noindex
-      />
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
+    <ScreeningLayout
+      head={
+        <SEO
+          title="Screening Add-on Modules | WorldAML"
+          description="Optional, separately priced modules for the WorldAML Screening & Monitoring workspace."
+          noindex
+        />
+      }
+    >
+      <div className="max-w-4xl">
         <Button asChild variant="ghost" size="sm" className="mb-4">
           <Link to="/screening"><ArrowLeft className="mr-1.5 h-4 w-4" /> Back to workspace</Link>
         </Button>
@@ -142,8 +143,7 @@ export default function ScreeningModules() {
             })}
           </div>
         )}
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </ScreeningLayout>
   );
 }

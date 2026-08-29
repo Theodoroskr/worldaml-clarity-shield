@@ -9,8 +9,7 @@ import { deriveRiskLevel, RISK_LEVEL_META, RISK_LEVEL_ORDER, type RiskLevel } fr
 
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import ScreeningLayout from "@/components/screening/ScreeningLayout";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -198,16 +197,17 @@ export default function ScreeningMonitored() {
   };
 
   const shell = (children: React.ReactNode) => (
-    <div className="min-h-screen bg-background flex flex-col">
-      <SEO
-        title="Monitored Entities | WorldAML Screening"
-        description="Manage ongoing monitoring: active entities, next monitoring run, risk level and access."
-        noindex
-      />
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">{children}</main>
-      <Footer />
-    </div>
+    <ScreeningLayout
+      head={
+        <SEO
+          title="Monitored Entities | WorldAML Screening"
+          description="Manage ongoing monitoring: active entities, next monitoring run, risk level and access."
+          noindex
+        />
+      }
+    >
+      {children}
+    </ScreeningLayout>
   );
 
   if (accessLoading || (hasAccess && loading)) {
