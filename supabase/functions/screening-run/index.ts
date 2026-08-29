@@ -70,12 +70,18 @@ Deno.serve(async (req) => {
   // ── resolve organisation ────────────────────────────────────────────────
   const { data: membership } = await admin
     .from("suite_org_members")
-    .select("organization_id")
+    .select("organization_id, role")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
   const orgId = membership?.organization_id as string | undefined;
   if (!orgId) return json({ error: "No organisation is linked to your account" }, 403);
+
+  // Debug output exposes internal scoring inputs: restricted to senior roles.
+  const DEBUG_ROLES = ["admin", "mlro", "compliance_officer", "analyst"];
+  const debugRequested = payload.debug === true;
+  const debugAllowed = debugRequested && DEBUG_ROLES.includes(String(membership?.role ?? ""));
+
 
   // ── quota enforcement ───────────────────────────────────────────────────
   const { data: quotaRows } = await admin.rpc("get_screening_org_quota", { _org_id: orgId });
@@ -201,6 +207,7 @@ Deno.serve(async (req) => {
     monitoring: startMonitoring,
     providerTypes: sourceTypes.length ? sourceTypes : undefined,
     searchProfileId,
+    debug: debugAllowed,
   };
 
   const excluded: Category[] = (["sanctions", "pep_rca", "warnings", "adverse_media"] as Category[])
@@ -370,6 +377,10 @@ Deno.serve(async (req) => {
         categories: m.categories,
         category_labels: m.category_labels,
         name_similarity: m.name_similarity,
+        match_types: m.match_types ?? [],
+        match_type_labels: m.match_type_labels ?? [],
+        match_basis: m.match_basis ?? null,
+        provider_relevance: m.provider_relevance ?? null,
         country: m.country,
         year_of_birth: m.year_of_birth,
         matched_attribute_count: m.matched_attribute_count,
@@ -473,5 +484,34 @@ Deno.serve(async (req) => {
     categories_screened: categories,
     categories_excluded: excluded,
     match_count: result.matches.length,
+    // Per-match summary of how each displayed name match was derived.
+    matches: result.matches.map((m) => ({
+      matched_name: m.matched_name,
+      name_similarity: m.name_similarity,
+      match_basis: m.match_basis,
+      match_types: m.match_types,
+      match_type_labels: m.match_type_labels,
+      provider_relevance: m.provider_relevance,
+    })),
+    ...(debugAllowed
+      ? {
+        debug: {
+          subject_name: subject.full_name,
+          name_threshold: options.nameThreshold,
+          exact_match: options.exactMatch,
+          matches: result.matches.map((m) => ({
+            matched_name: m.matched_name,
+            name_similarity: m.name_similarity,
+            match_basis: m.match_basis,
+            match_types: m.match_types,
+            similarity: m.similarity_debug ?? null,
+          })),
+        },
+      }
+      : {}),
+    ...(debugRequested && !debugAllowed
+      ? { debug_error: "Debug output requires an analyst, compliance officer, MLRO or admin role" }
+      : {}),
   });
 });
+

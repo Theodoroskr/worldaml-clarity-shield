@@ -5103,12 +5103,16 @@ export type Database = {
             | null
           id: string
           last_data_update: string | null
+          match_basis: string | null
+          match_type_labels: string[]
+          match_types: string[]
           matched_attribute_count: number
           matched_name: string
           name_similarity: number | null
           organisation_id: string
           profile: Json
           profile_fetched_at: string | null
+          provider_relevance: number | null
           search_id: string | null
           status: Database["public"]["Enums"]["screening_match_status"]
           updated_at: string
@@ -5126,12 +5130,16 @@ export type Database = {
             | null
           id?: string
           last_data_update?: string | null
+          match_basis?: string | null
+          match_type_labels?: string[]
+          match_types?: string[]
           matched_attribute_count?: number
           matched_name: string
           name_similarity?: number | null
           organisation_id: string
           profile?: Json
           profile_fetched_at?: string | null
+          provider_relevance?: number | null
           search_id?: string | null
           status?: Database["public"]["Enums"]["screening_match_status"]
           updated_at?: string
@@ -5149,12 +5157,16 @@ export type Database = {
             | null
           id?: string
           last_data_update?: string | null
+          match_basis?: string | null
+          match_type_labels?: string[]
+          match_types?: string[]
           matched_attribute_count?: number
           matched_name?: string
           name_similarity?: number | null
           organisation_id?: string
           profile?: Json
           profile_fetched_at?: string | null
+          provider_relevance?: number | null
           search_id?: string | null
           status?: Database["public"]["Enums"]["screening_match_status"]
           updated_at?: string

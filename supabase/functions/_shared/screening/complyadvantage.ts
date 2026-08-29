@@ -18,6 +18,7 @@ import {
   SUBJECT_TYPES,
   SubjectType,
 } from "./types.ts";
+import { computeNameMatch } from "./nameMatch.ts";
 
 const DEFAULT_BASE = "https://api.complyadvantage.com";
 const TIMEOUT_MS = 25_000;
@@ -101,91 +102,10 @@ function yearOf(value: string | null): string | null {
 }
 
 // ── name similarity ────────────────────────────────────────────────────────
-// The provider's `score` is a list-relevance figure (typically a flat 0.7 for
-// any fuzzy hit) — it is NOT a name-similarity measure. We compute our own
-// Jaro-Winkler similarity between the searched name and the matched
-// name/aliases so the UI can honestly say "name match".
+// The scoring engine lives in ./nameMatch.ts so it can be unit-tested in
+// isolation. The provider's `score` is a list-relevance figure (typically a
+// flat 0.7 for any fuzzy hit) — it is NOT a name-similarity measure.
 
-function normaliseName(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function jaro(a: string, b: string): number {
-  if (!a || !b) return 0;
-  if (a === b) return 1;
-  const window = Math.max(0, Math.floor(Math.max(a.length, b.length) / 2) - 1);
-  const aFlags = new Array(a.length).fill(false);
-  const bFlags = new Array(b.length).fill(false);
-  let matches = 0;
-  for (let i = 0; i < a.length; i++) {
-    const start = Math.max(0, i - window);
-    const end = Math.min(i + window + 1, b.length);
-    for (let j = start; j < end; j++) {
-      if (bFlags[j] || a[i] !== b[j]) continue;
-      aFlags[i] = true;
-      bFlags[j] = true;
-      matches++;
-      break;
-    }
-  }
-  if (!matches) return 0;
-  let transpositions = 0;
-  let k = 0;
-  for (let i = 0; i < a.length; i++) {
-    if (!aFlags[i]) continue;
-    while (!bFlags[k]) k++;
-    if (a[i] !== b[k]) transpositions++;
-    k++;
-  }
-  transpositions /= 2;
-  return (matches / a.length + matches / b.length + (matches - transpositions) / matches) / 3;
-}
-
-function jaroWinkler(a: string, b: string): number {
-  const base = jaro(a, b);
-  let prefix = 0;
-  while (prefix < 4 && prefix < a.length && prefix < b.length && a[prefix] === b[prefix]) prefix++;
-  return base + prefix * 0.1 * (1 - base);
-}
-
-/** Token-order-insensitive similarity (handles "Udrea Elena Gabriela"). */
-function nameSimilarity(subjectName: string, candidate: string): number {
-  const a = normaliseName(subjectName);
-  const b = normaliseName(candidate);
-  if (!a || !b) return 0;
-  if (a === b) return 1;
-  const aTokens = a.split(" ").sort();
-  const bTokens = b.split(" ").sort();
-  if (aTokens.join(" ") === bTokens.join(" ")) return 0.98;
-  // Every searched token present in the candidate (extra middle names allowed).
-  const allPresent = aTokens.every((t) => bTokens.some((u) => jaroWinkler(t, u) >= 0.95));
-  const direct = jaroWinkler(a, b);
-  const sorted = jaroWinkler(aTokens.join(" "), bTokens.join(" "));
-  return Math.max(direct, sorted, allPresent ? 0.92 : 0);
-}
-
-function bestNameSimilarity(
-  subjectName: string | null | undefined,
-  matchedName: string,
-  aliases: string[],
-  matchTypes: string[],
-): number | null {
-  if (!subjectName?.trim()) return null;
-  const exactFlag = matchTypes.some((t) => /name_exact|equivalent_name|exact_match/i.test(t));
-  const best = [matchedName, ...aliases]
-    .filter(Boolean)
-    .reduce((acc, candidate) => Math.max(acc, nameSimilarity(subjectName, candidate)), 0);
-  // Only trust the provider's "name matched exactly" flag when our own
-  // comparison agrees the names are effectively the same.
-  const score = exactFlag && best >= 0.9 ? 1 : best;
-  return Math.round(Math.max(0, Math.min(1, score)) * 100);
-}
 
 
 export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
@@ -476,13 +396,15 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
         .filter(Boolean);
       // Provider relevance (flat 0.7 for fuzzy hits) is kept for reference, but the
       // displayed name match is our own Jaro-Winkler similarity.
-      const providerRelevance = score != null ? Math.max(0, Math.min(100, Math.round(score * 100))) : null;
-      const similarity = bestNameSimilarity(
-        subject?.full_name ?? null,
-        String(doc?.name ?? ""),
-        aliasNames,
+      const nameMatch = computeNameMatch({
+        subjectName: subject?.full_name ?? null,
+        matchedName: String(doc?.name ?? ""),
+        aliases: aliasNames,
         matchTypes,
-      ) ?? providerRelevance;
+        providerScore: score,
+        debug: options?.debug === true,
+      });
+      const providerRelevance = nameMatch.provider_relevance;
 
       return {
         provider_id: String(doc?.id ?? ""),
@@ -490,7 +412,13 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
         entity_type: entityType,
         categories,
         category_labels: Array.from(new Set(types.map(labelFor))),
-        name_similarity: similarity != null ? Math.min(100, similarity) : null,
+        name_similarity: nameMatch.name_similarity,
+        match_types: nameMatch.match_types,
+        match_type_labels: nameMatch.match_type_labels,
+        match_basis: nameMatch.match_basis,
+        provider_relevance: providerRelevance,
+        similarity_debug: nameMatch.debug ?? null,
+
 
         country,
         year_of_birth: yearOf(dobValue) ? Number(yearOf(dobValue)) : null,
@@ -510,6 +438,8 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
           sanctions_programmes: fields.filter((f) => String(f?.name ?? "").toLowerCase().includes("program")).map((f) => f?.value),
           associates: (doc?.associates as unknown[]) ?? [],
           match_types: matchTypes,
+          match_type_labels: nameMatch.match_type_labels,
+          match_basis: nameMatch.match_basis,
           provider_relevance: providerRelevance,
           last_updated: doc?.last_updated_utc ?? null,
         },

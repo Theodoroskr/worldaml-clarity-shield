@@ -1,6 +1,9 @@
 // WorldAML normalised screening model.
 // Nothing provider-specific may leave the edge functions in these shapes.
 
+import type { MatchBasis, NameMatchDebug } from "./nameMatch.ts";
+export type { MatchBasis, NameMatchDebug, NameMatchResult, NameMatchCandidate } from "./nameMatch.ts";
+
 export type SubjectType = "person" | "company" | "organisation" | "vessel" | "aircraft";
 export const SUBJECT_TYPES: SubjectType[] = ["person", "company", "organisation", "vessel", "aircraft"];
 export type Category = "sanctions" | "pep_rca" | "warnings" | "adverse_media";
@@ -37,6 +40,8 @@ export interface ScreeningOptions {
   providerTypes?: string[];
   /** Provider-defined search profile; when set, manual source/category filters are not sent. */
   searchProfileId?: string | null;
+  /** When true, matches carry `similarity_debug` explaining the name scoring. */
+  debug?: boolean;
 }
 
 /**
@@ -114,6 +119,16 @@ export interface NormalisedMatch {
   categories: Category[];
   category_labels: string[];
   name_similarity: number | null;
+  /** Raw provider signals, e.g. "name_exact". */
+  match_types: string[];
+  /** Plain-English labels for `match_types`. */
+  match_type_labels: string[];
+  /** Displayed match status the similarity maps to. */
+  match_basis: MatchBasis;
+  /** Provider list-relevance (0-100); reference only, never shown as name match. */
+  provider_relevance: number | null;
+  /** Only populated when the caller requested debug output. */
+  similarity_debug?: NameMatchDebug | null;
   country: string | null;
   year_of_birth: number | null;
   matched_attribute_count: number;
