@@ -291,6 +291,7 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
   };
 
   const openCase = async (row: CaseRow) => {
+    try {
     const [{ data: caseData }, { data: searchData }, { data: subjectData }] = await Promise.all([
       supabase.from("screening_cases").select("*").eq("id", row.id).maybeSingle(),
       row.search_id
