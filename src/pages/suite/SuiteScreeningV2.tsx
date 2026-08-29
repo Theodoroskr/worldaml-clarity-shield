@@ -1325,7 +1325,7 @@ function MatchReview({
     } finally {
       setProfileLoading(false);
     }
-  }, [quota]);
+  }, []);
 
   useEffect(() => {
     if (!match) return;
