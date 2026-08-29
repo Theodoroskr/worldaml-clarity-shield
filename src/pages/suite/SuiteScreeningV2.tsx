@@ -1305,6 +1305,10 @@ function MatchReview({
   const [profileError, setProfileError] = useState<string | null>(null);
   const [confirmRefresh, setConfirmRefresh] = useState(false);
   const quota = useScreeningQuota();
+  // The quota hook returns a fresh object on every render, so keep a ref to
+  // avoid re-creating loadProfile (which would re-trigger the load effect).
+  const quotaRefreshRef = useRef(quota.refresh);
+  quotaRefreshRef.current = quota.refresh;
 
   const loadProfile = useCallback(async (matchId: string, refresh = false) => {
     setProfileLoading(true);
