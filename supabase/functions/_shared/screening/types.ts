@@ -37,6 +37,8 @@ export interface ScreeningOptions {
   providerTypes?: string[];
   /** Provider-defined search profile; when set, manual source/category filters are not sent. */
   searchProfileId?: string | null;
+  /** When true, matches carry `similarity_debug` explaining the name scoring. */
+  debug?: boolean;
 }
 
 /**
