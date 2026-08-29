@@ -195,6 +195,18 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
   const [sourceTypes, setSourceTypes] = useState<string[]>(ALL_SOURCE_TYPES);
   const [searchProfileId, setSearchProfileId] = useState("");
   const [adverseMediaAllowed, setAdverseMediaAllowed] = useState(true);
+  // One-click "provider portal view" preset: broadest net (any entity type,
+  // all sources, fuzziness 50%) to reproduce the provider portal's results.
+  const [portalView, setPortalView] = useState(false);
+
+  const applyPortalView = () => {
+    setSubject((s) => ({ ...s, subject_type: "any" }));
+    setCustomiseSources(true);
+    setSourceTypes(ALL_SOURCE_TYPES);
+    setSearchProfileId("");
+    setPortalView(true);
+  };
+  const clearPortalView = () => setPortalView(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -416,7 +428,13 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
                   </div>
                 ) : (
                   <div className="grid gap-4 md:grid-cols-3">
-                    {subject.subject_type === "vessel" || subject.subject_type === "aircraft" ? (
+                    {isAnyType ? (
+                      <>
+                        <Field label="Previous name / also known as" value={subject.previous_name} onChange={(v) => set("previous_name", v)} />
+                        <Field label="Country" value={subject.country_of_incorporation} onChange={(v) => set("country_of_incorporation", v)} />
+                        <Field label="Customer reference" value={subject.customer_reference} onChange={(v) => set("customer_reference", v)} />
+                      </>
+                    ) : subject.subject_type === "vessel" || subject.subject_type === "aircraft" ? (
                       <>
                         <Field label="Registration / IMO / tail number" value={subject.registration_number} onChange={(v) => set("registration_number", v)} />
                         <Field label="Country of registration" value={subject.country_of_incorporation} onChange={(v) => set("country_of_incorporation", v)} />
