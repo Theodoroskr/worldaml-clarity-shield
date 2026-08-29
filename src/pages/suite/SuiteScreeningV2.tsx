@@ -612,6 +612,8 @@ function ResultsWorkspace({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [basisFilter, setBasisFilter] = useState<string>("all");
+  const [sortMode, setSortMode] = useState<string>("similarity_desc");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
 
@@ -663,12 +665,32 @@ function ResultsWorkspace({
   useEffect(() => { load(); }, [load]);
 
   const filteredMatches = useMemo(() => {
-    return matches.filter((m) => {
+    const filtered = matches.filter((m) => {
       if (statusFilter !== "all" && m.status !== statusFilter) return false;
       if (categoryFilter !== "all" && !m.categories.includes(categoryFilter)) return false;
+      if (basisFilter !== "all") {
+        const basis = inferMatchBasis(m.match_basis, m.name_similarity);
+        // Group exact_name + exact_alias under the "exact" filter option.
+        if (basisFilter === "exact" && basis !== "exact_name" && basis !== "exact_alias") return false;
+        if (basisFilter !== "exact" && basis !== basisFilter) return false;
+      }
       return true;
     });
-  }, [matches, statusFilter, categoryFilter]);
+    const sorted = [...filtered];
+    switch (sortMode) {
+      case "similarity_asc":
+        sorted.sort((a, b) => (a.name_similarity ?? -1) - (b.name_similarity ?? -1));
+        break;
+      case "name_az":
+        sorted.sort((a, b) => (a.matched_name ?? "").localeCompare(b.matched_name ?? ""));
+        break;
+      case "similarity_desc":
+      default:
+        sorted.sort((a, b) => (b.name_similarity ?? -1) - (a.name_similarity ?? -1));
+        break;
+    }
+    return sorted;
+  }, [matches, statusFilter, categoryFilter, basisFilter, sortMode]);
 
   // Headline tally used by the case header chips.
   const matchTally = useMemo(() => ({
