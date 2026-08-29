@@ -73,8 +73,7 @@ export default function ScreeningRiskAlerts() {
 
   const load = useCallback(async () => {
     const [orgRes, membersRes] = await Promise.all([
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (supabase.rpc as any)("current_user_screening_org") as Promise<{ data: string | null; error: unknown }>,
+      supabase.rpc("current_user_screening_org"),
       supabase.rpc("screening_team_members"),
     ]);
     if (orgRes.error) {
@@ -88,8 +87,7 @@ export default function ScreeningRiskAlerts() {
     setMembers(team.filter((m) => m.user_id).map((m) => ({ user_id: m.user_id as string, full_name: m.full_name, email: m.email })));
 
     if (orgRes.data) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase.from as any)("screening_risk_alert_rules")
+      const { data } = await supabase.from("screening_risk_alert_rules")
         .select("*")
         .eq("organisation_id", orgRes.data)
         .order("created_at", { ascending: false }) as { data: Rule[] | null };
@@ -159,8 +157,8 @@ export default function ScreeningRiskAlerts() {
       enabled: form.enabled,
     };
     const { error } = editing
-      ? await (supabase.from as any)("screening_risk_alert_rules").update(payload).eq("id", editing.id)
-      : await (supabase.from as any)("screening_risk_alert_rules").insert(payload);
+      ? await supabase.from("screening_risk_alert_rules").update(payload).eq("id", editing.id)
+      : await supabase.from("screening_risk_alert_rules").insert(payload);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success(editing ? "Rule updated" : "Rule created");
@@ -169,14 +167,14 @@ export default function ScreeningRiskAlerts() {
   };
 
   const toggleEnabled = async (rule: Rule, enabled: boolean) => {
-    const { error } = await (supabase.from as any)("screening_risk_alert_rules").update({ enabled }).eq("id", rule.id);
+    const { error } = await supabase.from("screening_risk_alert_rules").update({ enabled }).eq("id", rule.id);
     if (error) { toast.error(error.message); return; }
     setRules((rs) => rs.map((r) => (r.id === rule.id ? { ...r, enabled } : r)));
   };
 
   const remove = async (rule: Rule) => {
     if (!confirm(`Delete rule "${rule.name}"? This cannot be undone.`)) return;
-    const { error } = await (supabase.from as any)("screening_risk_alert_rules").delete().eq("id", rule.id);
+    const { error } = await supabase.from("screening_risk_alert_rules").delete().eq("id", rule.id);
     if (error) { toast.error(error.message); return; }
     toast.success("Rule deleted");
     void load();
