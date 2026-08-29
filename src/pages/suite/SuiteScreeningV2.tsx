@@ -1894,12 +1894,21 @@ function MatchReview({
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={save} disabled={!canSave || saving}>
-            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Record decision
+        <DialogFooter className="gap-2 sm:justify-between">
+          <Button variant="outline" onClick={exportPdf} disabled={exporting || !match}>
+            {exporting
+              ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              : <FileDown className="mr-2 h-4 w-4" />}
+            Export PDF
           </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
+            <Button onClick={save} disabled={!canSave || saving}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Record decision
+            </Button>
+          </div>
         </DialogFooter>
+
       </DialogContent>
     </Dialog>
   );
