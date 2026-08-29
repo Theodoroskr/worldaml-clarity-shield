@@ -175,6 +175,7 @@ const BusinessSupport = lazyWithRetry(() => import("./pages/business/BusinessSup
 const BusinessProfile = lazyWithRetry(() => import("./pages/business/BusinessProfile"));
 const BusinessSecurity = lazyWithRetry(() => import("./pages/business/BusinessSecurity"));
 const BusinessBilling = lazyWithRetry(() => import("./pages/business/BusinessBilling"));
+const BusinessScreeningDemo = lazyWithRetry(() => import("./pages/business/BusinessScreeningDemo"));
 const BusinessQuotes = lazyWithRetry(() => import("./pages/business/BusinessQuotes"));
 const BusinessResources = lazyWithRetry(() => import("./pages/business/BusinessResources"));
 const AdminRecognition = lazyWithRetry(() => import("./pages/admin/AdminRecognition"));
@@ -337,6 +338,7 @@ const App = () => (
                   <Route path="profile" element={<BusinessProfile />} />
                   <Route path="security" element={<BusinessSecurity />} />
                   <Route path="billing" element={<BusinessBilling />} />
+                  <Route path="demo" element={<BusinessScreeningDemo />} />
                   <Route path="quotes" element={<BusinessQuotes />} />
                   <Route path="resources" element={<BusinessResources />} />
                 </Route>
