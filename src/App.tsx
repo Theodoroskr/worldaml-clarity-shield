@@ -217,6 +217,7 @@ const ScreeningActivate = lazyWithRetry(() => import("./pages/screening/Screenin
 const ScreeningModules = lazyWithRetry(() => import("./pages/screening/ScreeningModules"));
 const ScreeningTeam = lazyWithRetry(() => import("./pages/screening/ScreeningTeam"));
 const ScreeningMonitored = lazyWithRetry(() => import("./pages/screening/ScreeningMonitored"));
+const ScreeningRiskAlerts = lazyWithRetry(() => import("./pages/screening/ScreeningRiskAlerts"));
 
 
 
@@ -573,6 +574,7 @@ const App = () => (
                 <Route path="/screening" element={<ScreeningWorkspace />} />
                 <Route path="/screening/team" element={<ScreeningTeam />} />
                 <Route path="/screening/monitored" element={<ScreeningMonitored />} />
+                <Route path="/screening/risk-alerts" element={<ScreeningRiskAlerts />} />
 
                 <Route path="/screening/activate" element={<ScreeningActivate />} />
                 <Route path="/screening/modules" element={<ScreeningModules />} />
