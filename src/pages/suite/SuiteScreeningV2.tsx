@@ -893,9 +893,10 @@ function ResultsWorkspace({
                   onToggleSelect={() => toggleSelect(m.id)}
                   onReview={() => setSelected(m)}
                   onPrefetch={() => prefetchFullProfile(m.id)}
-                  onDecision={onDecision}
-                  fourEyes={fourEyes}
-                />
+                   onDecision={onDecision}
+                   fourEyes={fourEyes}
+                   subjectType={subject.subject_type}
+                 />
 
               ))}
             </div>
@@ -983,6 +984,7 @@ function ResultsWorkspace({
 
       <MatchReview
         match={selected}
+        subjectType={subject.subject_type}
         onClose={() => setSelected(null)}
         onSaved={async () => { setSelected(null); await load(); }}
       />
@@ -1034,6 +1036,7 @@ function MatchCard({
   onPrefetch,
   onDecision,
   fourEyes,
+  subjectType,
 }: {
   match: MatchRow;
   extra?: MatchExtra;
@@ -1044,14 +1047,21 @@ function MatchCard({
   onDecision: (id: string, decision: string, reason?: string) => Promise<void>;
   /** Escalation & Four-Eyes Review add-on active for the organisation. */
   fourEyes: boolean;
+  /** Type of the subject that was screened (drives entity-type conflict detection). */
+  subjectType?: SubjectType;
 
 }) {
-  const [falsePositiveOpen, setFalsePositiveOpen] = useState(false);
-  const [reason, setReason] = useState(FALSE_POSITIVE_REASONS[0]);
-  const [saving, setSaving] = useState(false);
-
   const entityType = (match.entity_type as SubjectType) ?? "person";
   const entityLabel = SUBJECT_TYPE_LABELS[entityType] ?? entityType;
+
+  // Flag when the provider profile's entity type doesn't match the screened
+  // subject (e.g. a person search hitting an organisation profile — a common
+  // adverse-media indexing artefact and a strong false-positive signal).
+  const entityTypeConflict = !!subjectType && !!match.entity_type && subjectType !== match.entity_type;
+
+  const [falsePositiveOpen, setFalsePositiveOpen] = useState(false);
+  const [reason, setReason] = useState(entityTypeConflict ? "Different entity type" : FALSE_POSITIVE_REASONS[0]);
+  const [saving, setSaving] = useState(false);
 
   const relevance = useMemo(() => {
     if (match.name_similarity === 100) return "Name matched exactly";
