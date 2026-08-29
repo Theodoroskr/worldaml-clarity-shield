@@ -1,5 +1,21 @@
 import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
+import type { FullEntityProfile } from "@/lib/suite/screeningV2";
+
+export type DecisionPdfAttribute = {
+  field_label: string;
+  subject_value: string | null;
+  match_value: string | null;
+  assessment: string | null;
+};
+
+export type DecisionPdfSource = {
+  source_name: string;
+  jurisdiction: string | null;
+  listing_date: string | null;
+  description: string | null;
+  category: string | null;
+};
 
 export type DecisionPdfInput = {
   matchedName?: string | null;
@@ -16,6 +32,12 @@ export type DecisionPdfInput = {
   decisionLabel: string;
   reason?: string | null;
   rationale?: string | null;
+  /** Full provider profile — when present, all profile details are appended. */
+  profile?: FullEntityProfile | null;
+  /** Side-by-side match attribute comparison rows. */
+  attributes?: DecisionPdfAttribute[];
+  /** Source listings attached to the match. */
+  sources?: DecisionPdfSource[];
 };
 
 type Reviewer = { name: string; email: string; userId: string; organisation?: string | null };
@@ -67,6 +89,7 @@ export async function exportMatchDecisionPdf(input: DecisionPdfInput) {
   let y = 56;
 
   const heading = (text: string) => {
+    if (y > 740) { doc.addPage(); y = 56; }
     y += 18;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
@@ -78,10 +101,14 @@ export async function exportMatchDecisionPdf(input: DecisionPdfInput) {
     y += 12;
   };
 
+  const ensure = (needed = 40) => {
+    if (y > 800 - needed) { doc.addPage(); y = 56; }
+  };
+
   const row = (label: string, value?: string | null) => {
     const text = value && String(value).trim() ? String(value) : "—";
     const lines = doc.splitTextToSize(text, contentWidth - 150);
-    if (y > 760) { doc.addPage(); y = 56; }
+    ensure(Math.max(14, lines.length * 12));
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9.5);
     doc.setTextColor(90, 100, 115);
@@ -91,6 +118,34 @@ export async function exportMatchDecisionPdf(input: DecisionPdfInput) {
     doc.text(lines, marginX + 150, y);
     y += Math.max(14, lines.length * 12);
   };
+
+  const bullet = (text: string) => {
+    const lines = doc.splitTextToSize(text, contentWidth - 14);
+    ensure(lines.length * 12);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(20, 26, 36);
+    doc.text("•", marginX, y);
+    doc.text(lines, marginX + 14, y);
+    y += lines.length * 12 + 2;
+  };
+
+  const subheading = (text: string) => {
+    ensure(28);
+    y += 8;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+    doc.setTextColor(15, 42, 68);
+    doc.text(text, marginX, y);
+    y += 13;
+  };
+
+  const fmtDate = (v?: string | null) => {
+    if (!v) return null;
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? v : d.toISOString().slice(0, 10);
+  };
+
 
   // Header band
   doc.setFillColor(15, 42, 68);
@@ -135,6 +190,86 @@ export async function exportMatchDecisionPdf(input: DecisionPdfInput) {
   row("Categories", input.categories?.length ? input.categories.join(", ") : null);
   row("Countries", input.countries);
   row("Match ID", input.matchId);
+
+  // ---- Full profile details (provider) ----
+  const p = input.profile;
+  if (p) {
+    heading("Profile details");
+    row("Primary name", p.primary_name);
+    row("Entity type", p.entity_type);
+    row("Aliases", p.aliases?.length ? p.aliases.join("; ") : null);
+    row("Countries", p.countries?.length ? p.countries.join(", ") : null);
+    row("Nationalities", p.nationalities?.length ? p.nationalities.join(", ") : null);
+    row("Dates of birth", p.dates_of_birth?.length ? p.dates_of_birth.join(", ") : null);
+    row("Places of birth", p.places_of_birth?.length ? p.places_of_birth.join(", ") : null);
+    row("Profile last updated", fmtDate(p.last_updated));
+    row("Photos on record", p.images?.length ? String(p.images.length) : null);
+
+    if (p.associates?.length) {
+      subheading("Associates");
+      p.associates.forEach((a) =>
+        bullet(`${a.name}${a.relationship ? ` — ${a.relationship}` : ""}`));
+    }
+
+    if (p.listings?.length) {
+      subheading("Listings");
+      p.listings.forEach((l) => {
+        const period = [fmtDate(l.listed_from), fmtDate(l.listed_to)].filter(Boolean).join(" → ");
+        bullet(
+          [
+            l.source_name,
+            l.category_label ?? l.category,
+            l.status !== "unknown" ? l.status : null,
+            period || null,
+            l.country_codes?.length ? l.country_codes.join(", ") : null,
+          ]
+            .filter(Boolean)
+            .join(" · "),
+        );
+        l.details?.forEach((d) => {
+          if (d.values?.length) bullet(`${d.label}: ${d.values.join(", ")}`);
+        });
+        l.urls?.forEach((u) => bullet(`Source: ${u}`));
+      });
+    }
+
+    if (p.media?.length) {
+      subheading("Adverse media");
+      p.media.forEach((m) => {
+        bullet([m.title, fmtDate(m.date), m.url].filter(Boolean).join(" · "));
+        if (m.snippet) bullet(m.snippet);
+      });
+    }
+  }
+
+  // ---- Match attribute comparison ----
+  if (input.attributes?.length) {
+    heading("Field-by-field comparison");
+    input.attributes.forEach((a) => {
+      subheading(a.field_label);
+      row("Screened value", a.subject_value);
+      row("Listed value", a.match_value);
+      if (a.assessment) row("Assessment", a.assessment);
+    });
+  }
+
+  // ---- Source listings ----
+  if (input.sources?.length) {
+    heading("Sources");
+    input.sources.forEach((s) => {
+      bullet(
+        [
+          s.source_name,
+          s.category,
+          s.jurisdiction,
+          fmtDate(s.listing_date),
+          s.description,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      );
+    });
+  }
 
   y += 24;
   if (y > 750) { doc.addPage(); y = 56; }

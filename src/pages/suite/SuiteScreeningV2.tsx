@@ -1575,6 +1575,9 @@ function MatchReview({
         decisionLabel: DECISIONS.find((d) => d.key === decision)?.label ?? decision,
         reason: needsReason ? reason : null,
         rationale: rationale.trim() || null,
+        profile,
+        attributes,
+        sources,
       });
       toast.success("Decision record exported");
     } catch (err) {
