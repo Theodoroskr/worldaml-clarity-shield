@@ -893,9 +893,10 @@ function ResultsWorkspace({
                   onToggleSelect={() => toggleSelect(m.id)}
                   onReview={() => setSelected(m)}
                   onPrefetch={() => prefetchFullProfile(m.id)}
-                  onDecision={onDecision}
-                  fourEyes={fourEyes}
-                />
+                   onDecision={onDecision}
+                   fourEyes={fourEyes}
+                   subjectType={caseDetail.subject.subject_type}
+                 />
 
               ))}
             </div>
@@ -983,6 +984,7 @@ function ResultsWorkspace({
 
       <MatchReview
         match={selected}
+        subjectType={caseDetail.subject.subject_type}
         onClose={() => setSelected(null)}
         onSaved={async () => { setSelected(null); await load(); }}
       />
@@ -1034,6 +1036,7 @@ function MatchCard({
   onPrefetch,
   onDecision,
   fourEyes,
+  subjectType,
 }: {
   match: MatchRow;
   extra?: MatchExtra;
@@ -1044,14 +1047,21 @@ function MatchCard({
   onDecision: (id: string, decision: string, reason?: string) => Promise<void>;
   /** Escalation & Four-Eyes Review add-on active for the organisation. */
   fourEyes: boolean;
+  /** Type of the subject that was screened (drives entity-type conflict detection). */
+  subjectType?: SubjectType;
 
 }) {
-  const [falsePositiveOpen, setFalsePositiveOpen] = useState(false);
-  const [reason, setReason] = useState(FALSE_POSITIVE_REASONS[0]);
-  const [saving, setSaving] = useState(false);
-
   const entityType = (match.entity_type as SubjectType) ?? "person";
   const entityLabel = SUBJECT_TYPE_LABELS[entityType] ?? entityType;
+
+  // Flag when the provider profile's entity type doesn't match the screened
+  // subject (e.g. a person search hitting an organisation profile — a common
+  // adverse-media indexing artefact and a strong false-positive signal).
+  const entityTypeConflict = !!subjectType && !!match.entity_type && subjectType !== match.entity_type;
+
+  const [falsePositiveOpen, setFalsePositiveOpen] = useState(false);
+  const [reason, setReason] = useState(entityTypeConflict ? "Different entity type" : FALSE_POSITIVE_REASONS[0]);
+  const [saving, setSaving] = useState(false);
 
   const relevance = useMemo(() => {
     if (match.name_similarity === 100) return "Name matched exactly";
@@ -1123,6 +1133,14 @@ function MatchCard({
               {ENTITY_ICONS[entityType] ?? <User className="h-3.5 w-3.5" />}
               {entityLabel}
             </span>
+            {entityTypeConflict && (
+              <span
+                className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 font-medium text-amber-800"
+                title={`You screened a ${SUBJECT_TYPE_LABELS[subjectType as SubjectType] ?? subjectType}, but this profile is an ${entityLabel.toLowerCase()}. Likely a false positive — reason pre-filled as "Different entity type".`}
+              >
+                <AlertTriangle className="h-3 w-3" /> Entity type conflict
+              </span>
+            )}
             {similarity != null && (
               <span className={`rounded-full border px-2 py-0.5 font-medium ${similarityTone}`}>
                 {Math.round(similarity)}% name match
@@ -1264,8 +1282,8 @@ function KeyInfo({ label, value }: { label: string; value: string | null }) {
 }
 
 function MatchReview({
-  match, onClose, onSaved,
-}: { match: MatchRow | null; onClose: () => void; onSaved: () => void }) {
+  match, subjectType, onClose, onSaved,
+}: { match: MatchRow | null; subjectType?: SubjectType; onClose: () => void; onSaved: () => void }) {
   const [attributes, setAttributes] = useState<AttributeRow[]>([]);
   const [sources, setSources] = useState<SourceRow[]>([]);
   const [decision, setDecision] = useState<string>("false_positive");
@@ -1293,6 +1311,13 @@ function MatchReview({
     setRationale("");
     setProfile(null);
     setProfileError(null);
+    // Pre-fill the false-positive reason when the profile's entity type
+    // conflicts with the screened subject (e.g. person → organisation hit).
+    setReason(
+      subjectType && match.entity_type && subjectType !== match.entity_type
+        ? "Different entity type"
+        : FALSE_POSITIVE_REASONS[0],
+    );
     (async () => {
       const [{ data: attrs }, { data: srcs }] = await Promise.all([
         supabase
@@ -1365,6 +1390,20 @@ function MatchReview({
             Compare the screened subject with the listed profile, then record your decision.
           </DialogDescription>
         </DialogHeader>
+
+        {match && subjectType && match.entity_type && subjectType !== match.entity_type && (
+          <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>
+              <span className="font-medium">Entity type conflict:</span> you screened a{" "}
+              {SUBJECT_TYPE_LABELS[subjectType]?.toLowerCase() ?? subjectType}, but this profile is an{" "}
+              {(SUBJECT_TYPE_LABELS[match.entity_type as SubjectType] ?? match.entity_type).toLowerCase()}.
+              This is a common adverse-media indexing artefact — the false-positive reason has been pre-filled as
+              “Different entity type”.
+            </p>
+          </div>
+        )}
+
 
         <ScrollArea className="max-h-[55vh]">
           <div className="space-y-6 pr-2">
