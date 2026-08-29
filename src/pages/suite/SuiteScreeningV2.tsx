@@ -4,9 +4,11 @@ import {
   Loader2, Search, ShieldCheck, Activity, FileText, ChevronRight,
   ArrowLeft, Copy, Check, X, Filter, Tag, MoreHorizontal,
   AlertTriangle, User, Building2, Ship, Plane, RefreshCw, ExternalLink, Users, Lock,
-  ArrowDownUp, Info, ImageOff,
+  ArrowDownUp, Info, ImageOff, FileDown,
 } from "lucide-react";
+import { exportMatchDecisionPdf } from "@/lib/screening/decisionPdf";
 import { cn } from "@/lib/utils";
+
 import { toast } from "sonner";
 import { useScreeningModules } from "@/hooks/useScreeningModules";
 import { UsageWidget } from "@/components/screening/UsageWidget";
@@ -1477,7 +1479,9 @@ function MatchReview({
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [confirmRefresh, setConfirmRefresh] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const quota = useScreeningQuota();
+
   // The quota hook returns a fresh object on every render, so keep a ref to
   // avoid re-creating loadProfile (which would re-trigger the load effect).
   const quotaRefreshRef = useRef(quota.refresh);
@@ -1553,6 +1557,33 @@ function MatchReview({
       setSaving(false);
     }
   };
+
+  const exportPdf = async () => {
+    if (!match) return;
+    setExporting(true);
+    try {
+      await exportMatchDecisionPdf({
+        matchId: match.id,
+        matchedName: match.matched_name,
+        entityType: match.entity_type,
+        subjectType: subjectType ? (SUBJECT_TYPE_LABELS[subjectType] ?? subjectType) : null,
+        matchStatus: MATCH_STATUS_LABELS[match.status] ?? match.status,
+        nameSimilarity: match.name_similarity,
+        matchBasisLabel: matchBasisLabel(inferMatchBasis(match.match_basis, match.name_similarity)),
+        categories: match.category_labels?.length ? match.category_labels : match.categories,
+        countries: match.country,
+        decisionLabel: DECISIONS.find((d) => d.key === decision)?.label ?? decision,
+        reason: needsReason ? reason : null,
+        rationale: rationale.trim() || null,
+      });
+      toast.success("Decision record exported");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "The PDF could not be generated");
+    } finally {
+      setExporting(false);
+    }
+  };
+
 
   const groupedAttributes = useMemo(() => {
     const identity = ["Name", "First name", "Last name", "Middle name", "Previous name", "AKA"];
@@ -1894,12 +1925,21 @@ function MatchReview({
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={save} disabled={!canSave || saving}>
-            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Record decision
+        <DialogFooter className="gap-2 sm:justify-between">
+          <Button variant="outline" onClick={exportPdf} disabled={exporting || !match}>
+            {exporting
+              ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              : <FileDown className="mr-2 h-4 w-4" />}
+            Export PDF
           </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
+            <Button onClick={save} disabled={!canSave || saving}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Record decision
+            </Button>
+          </div>
         </DialogFooter>
+
       </DialogContent>
     </Dialog>
   );
