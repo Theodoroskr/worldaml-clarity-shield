@@ -4,7 +4,7 @@ import {
   Loader2, Search, ShieldCheck, Activity, FileText, ChevronRight,
   ArrowLeft, Copy, Check, X, Filter, Tag, MoreHorizontal,
   AlertTriangle, User, Building2, Ship, Plane, RefreshCw, ExternalLink, Users, Lock,
-  ArrowDownUp, Info,
+  ArrowDownUp, Info, ImageOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
