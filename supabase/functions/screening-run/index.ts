@@ -70,12 +70,18 @@ Deno.serve(async (req) => {
   // ── resolve organisation ────────────────────────────────────────────────
   const { data: membership } = await admin
     .from("suite_org_members")
-    .select("organization_id")
+    .select("organization_id, role")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
   const orgId = membership?.organization_id as string | undefined;
   if (!orgId) return json({ error: "No organisation is linked to your account" }, 403);
+
+  // Debug output exposes internal scoring inputs: restricted to senior roles.
+  const DEBUG_ROLES = ["admin", "mlro", "compliance_officer", "analyst"];
+  const debugRequested = payload.debug === true;
+  const debugAllowed = debugRequested && DEBUG_ROLES.includes(String(membership?.role ?? ""));
+
 
   // ── quota enforcement ───────────────────────────────────────────────────
   const { data: quotaRows } = await admin.rpc("get_screening_org_quota", { _org_id: orgId });
