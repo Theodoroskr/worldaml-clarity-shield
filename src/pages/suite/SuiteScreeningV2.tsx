@@ -405,8 +405,16 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
 
                 <div className="flex flex-wrap items-center gap-6 rounded-lg border border-border bg-muted/30 p-4">
                   <label className="flex items-center gap-3 text-sm">
-                    <Switch checked={adverseMedia} onCheckedChange={setAdverseMedia} />
+                    <Switch
+                      checked={adverseMedia && adverseMediaAllowed}
+                      disabled={!adverseMediaAllowed}
+                      onCheckedChange={setAdverseMedia}
+                    />
                     Include adverse media
+                    {!adverseMediaAllowed && (
+                      <span className="text-xs text-muted-foreground">Not included in your plan</span>
+                    )}
+                  </label>
                   </label>
                   <label className="flex items-center gap-3 text-sm">
                     <Switch
