@@ -1627,7 +1627,7 @@ function MatchReview({
     // Pre-fill the false-positive reason when the profile's entity type
     // conflicts with the screened subject (e.g. person → organisation hit).
     setReason(
-      subjectType && match.entity_type && subjectType !== match.entity_type
+      subjectType && subjectType !== "any" && match.entity_type && subjectType !== match.entity_type
         ? "Different entity type"
         : FALSE_POSITIVE_REASONS[0],
     );
@@ -1735,7 +1735,7 @@ function MatchReview({
           </DialogDescription>
         </DialogHeader>
 
-        {match && subjectType && match.entity_type && subjectType !== match.entity_type && (
+        {match && subjectType && subjectType !== "any" && match.entity_type && subjectType !== match.entity_type && (
           <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <p>
