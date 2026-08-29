@@ -376,8 +376,9 @@ export default function ScreeningMonitored() {
                           </div>
                         </TableCell>
                         <TableCell className="text-sm">{memberName(row.assigned_to)}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-end gap-1.5">
+
                             {row.status === "active" ? (
                               <Button
                                 size="sm"
@@ -419,7 +420,16 @@ export default function ScreeningMonitored() {
         </CardContent>
       </Card>
 
+      <EntityDetailDrawer
+        entity={drawerRow}
+        onClose={() => setDrawerRow(null)}
+        onPauseResume={(e) => { void setStatus(e as MonitoredRow, e.status === "active" ? "paused" : "active"); setDrawerRow(null); }}
+        onTransfer={(e) => { setTransferTarget(e as MonitoredRow); setTransferTo(e.assigned_to ?? ""); setDrawerRow(null); }}
+        memberName={memberName}
+      />
+
       <Dialog open={!!transferTarget} onOpenChange={(o) => !o && setTransferTarget(null)}>
+
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Transfer access</DialogTitle>
