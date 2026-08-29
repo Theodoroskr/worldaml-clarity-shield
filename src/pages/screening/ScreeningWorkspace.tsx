@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useSearchParams } from "react-router-dom";
 import {
   Loader2, Lock, ArrowRight, Sparkles, CheckCircle2, ShieldCheck,
-  Search, Users, Puzzle, CreditCard, Gauge, Menu, X, Radar,
+  Search, Users, Puzzle, CreditCard, Gauge, Menu, X, Radar, BellPlus,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
