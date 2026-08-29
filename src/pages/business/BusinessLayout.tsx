@@ -156,10 +156,16 @@ export default function BusinessLayout() {
           ))}
         </nav>
 
-        <div className="p-2 border-t border-primary-foreground/10">
+        <div className="p-2 border-t border-primary-foreground/10 space-y-0.5">
           <NavLink to="/" className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs text-primary-foreground/60 hover:bg-primary-foreground/10 hover:text-primary-foreground transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to worldaml.com
           </NavLink>
+          <button
+            onClick={async () => { await signOut(); navigate("/business/login"); }}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs text-primary-foreground/60 hover:bg-primary-foreground/10 hover:text-primary-foreground transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5" /> Sign out
+          </button>
         </div>
       </aside>
 
