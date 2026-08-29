@@ -273,6 +273,8 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
         advanced: {
           ...(profileId ? { search_profile_id: profileId } : {}),
           ...(customiseSources && !profileId ? { source_types: sourceTypes } : {}),
+          // Provider portal view: fuzziness 50% == name threshold 0.5.
+          ...(portalView ? { name_threshold: 0.5 } : {}),
         },
       });
       toast.success(
@@ -397,7 +399,10 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
                     <Label>Entity type</Label>
                     <Select
                       value={subject.subject_type}
-                      onValueChange={(v) => setSubject({ ...emptySubject, subject_type: v as SubjectType })}
+                      onValueChange={(v) => {
+                        setSubject({ ...emptySubject, subject_type: v as SubjectType, full_name: subject.full_name });
+                        if (v !== "any") clearPortalView();
+                      }}
                     >
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
