@@ -42,6 +42,10 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   ALL_SOURCE_TYPES,
   ASSESSMENT_LABELS,
   assessmentTone,
@@ -1293,18 +1297,25 @@ function MatchReview({
   const [profile, setProfile] = useState<FullEntityProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [confirmRefresh, setConfirmRefresh] = useState(false);
+  const quota = useScreeningQuota();
 
   const loadProfile = useCallback(async (matchId: string, refresh = false) => {
     setProfileLoading(true);
     setProfileError(null);
     try {
       setProfile(await fetchFullProfile(matchId, refresh));
+      if (refresh) {
+        toast.success("Profile refreshed — 1 screening search used");
+        void quota.refresh();
+      }
     } catch (err) {
       setProfileError(err instanceof Error ? err.message : "The full profile could not be loaded");
+      if (refresh) toast.error(err instanceof Error ? err.message : "The profile could not be refreshed");
     } finally {
       setProfileLoading(false);
     }
-  }, []);
+  }, [quota]);
 
   useEffect(() => {
     if (!match) return;
@@ -1408,20 +1419,56 @@ function MatchReview({
         <ScrollArea className="max-h-[55vh]">
           <div className="space-y-6 pr-2">
             <section className="rounded-lg border border-border p-3">
-              <div className="mb-2 flex items-center justify-between">
+              <div className="mb-2 flex items-center justify-between gap-3">
                 <h4 className="text-sm font-semibold">Key information</h4>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={profileLoading || !match}
-                  onClick={() => match && loadProfile(match.id, true)}
-                >
-                  {profileLoading
-                    ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                    : <RefreshCw className="mr-1.5 h-3.5 w-3.5" />}
-                  Refresh profile
-                </Button>
+                <div className="flex items-center gap-2">
+                  <span className="hidden text-[11px] text-muted-foreground sm:inline">
+                    Uses 1 search
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={profileLoading || !match || quota.searchesExceeded}
+                    onClick={() => setConfirmRefresh(true)}
+                  >
+                    {profileLoading
+                      ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      : <RefreshCw className="mr-1.5 h-3.5 w-3.5" />}
+                    Refresh profile
+                  </Button>
+                </div>
               </div>
+
+              <AlertDialog open={confirmRefresh} onOpenChange={setConfirmRefresh}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Refresh uses one screening search</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Refreshing pulls a live, up-to-date profile from the data provider and is
+                      charged as <span className="font-medium">1 search</span> from your annual
+                      allowance.
+                      {quota.searchQuota != null && (
+                        <>
+                          {" "}You have used {quota.searchesUsed ?? 0} of {quota.searchQuota} searches
+                          this year.
+                        </>
+                      )}
+                      {" "}The cached profile stays available for free until you refresh again.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Keep cached profile</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => match && loadProfile(match.id, true)}>
+                      Refresh (1 search)
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              {quota.searchesExceeded && (
+                <p className="mb-2 text-xs text-amber-600">
+                  Annual search allowance reached — refreshes are paused until you upgrade.
+                </p>
+              )}
               {profileLoading && !profile && (
                 <p className="text-xs text-muted-foreground">Loading the full listed profile…</p>
               )}

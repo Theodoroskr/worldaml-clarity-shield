@@ -44,15 +44,48 @@ Deno.serve(async (req) => {
   // Authorisation: the caller must be able to read the match under RLS.
   const { data: visible } = await userClient
     .from("screening_matches")
-    .select("id, organisation_id, matched_name, profile")
+    .select("id, organisation_id, matched_name, profile, search_id")
     .eq("id", matchId)
     .maybeSingle();
   if (!visible) return json({ error: "Not found" }, 404);
 
   const cached = (visible.profile ?? {}) as Record<string, unknown>;
   const cachedFull = cached.full_profile as Record<string, unknown> | undefined;
-  if (cachedFull && body.refresh !== true) {
+  const isRefresh = body.refresh === true;
+  if (cachedFull && !isRefresh) {
     return json({ profile: cachedFull, cached: true });
+  }
+
+  // A refresh triggers a fresh, billable provider lookup, so it consumes one
+  // search from the organisation's annual allowance (the first, cached load
+  // does not — it is part of the original screening run).
+  const orgId = visible.organisation_id as string;
+  let periodStart: Date | null = null;
+  let periodEnd: Date | null = null;
+  if (isRefresh) {
+    const { data: quotaRows } = await admin.rpc("get_screening_org_quota", { _org_id: orgId });
+    const quota = Array.isArray(quotaRows) ? quotaRows[0] : null;
+    if (quota?.current_period_end) {
+      periodEnd = new Date(quota.current_period_end);
+      periodStart = new Date(periodEnd);
+      periodStart.setFullYear(periodStart.getFullYear() - 1);
+    }
+    if (quota?.search_quota_annual != null) {
+      const { count: usedSearches, error: countErr } = await admin
+        .from("screening_searches")
+        .select("id", { count: "exact", head: true })
+        .eq("organisation_id", orgId)
+        .eq("status", "completed")
+        .gte("created_at", periodStart ? periodStart.toISOString() : "1970-01-01")
+        .lte("created_at", periodEnd ? periodEnd.toISOString() : new Date().toISOString());
+      if (!countErr && (usedSearches ?? 0) >= quota.search_quota_annual) {
+        return json({
+          error:
+            "Annual screening search quota reached, so the profile cannot be refreshed. Upgrade your plan or contact sales.",
+          code: "search_quota_exceeded",
+        }, 403);
+      }
+    }
   }
 
   const { data: ref } = await admin
@@ -61,6 +94,7 @@ Deno.serve(async (req) => {
     .eq("entity_kind", "match")
     .eq("entity_id", matchId)
     .maybeSingle();
+
 
   const providerSearchId = String(
     (ref?.provider_ref as Record<string, unknown> | null)?.search_id ?? "",
@@ -83,22 +117,46 @@ Deno.serve(async (req) => {
       })
       .eq("id", matchId);
 
+    // Meter the billable refresh against the annual search allowance.
+    let searchSubjectId: string | null = null;
+    if (isRefresh) {
+      if (visible.search_id) {
+        const { data: parentSearch } = await admin
+          .from("screening_searches")
+          .select("subject_id")
+          .eq("id", visible.search_id)
+          .maybeSingle();
+        searchSubjectId = (parentSearch?.subject_id as string | null) ?? null;
+      }
+      await admin.from("screening_searches").insert({
+        organisation_id: orgId,
+        subject_id: searchSubjectId,
+        reference: `REFRESH-${Date.now()}-${matchId.slice(0, 8)}`,
+        search_parameters: { type: "profile_refresh", match_id: matchId },
+        status: "completed",
+        initiated_by: user.id,
+      });
+    }
+
     await admin.from("screening_audit_events").insert({
-      organisation_id: visible.organisation_id,
+      organisation_id: orgId,
       match_id: matchId,
       event_type: "profile_enriched",
-      description: `Full listed profile loaded for ${visible.matched_name}`,
+      description: isRefresh
+        ? `Listed profile refreshed for ${visible.matched_name} (1 search consumed)`
+        : `Full listed profile loaded for ${visible.matched_name}`,
       metadata: {
         listings: profile.listings.length,
         associates: profile.associates.length,
         media: profile.media.length,
-        refresh: body.refresh === true,
+        refresh: isRefresh,
+        billable: isRefresh,
         fetched_at: fetchedAt,
       },
       actor_id: user.id,
     });
 
-    return json({ profile, cached: false });
+    return json({ profile, cached: false, consumed_search: isRefresh });
   } catch (err) {
     return providerErrorResponse(err, corsHeaders);
   }
