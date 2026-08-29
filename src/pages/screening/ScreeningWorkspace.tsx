@@ -138,8 +138,8 @@ export default function ScreeningWorkspace() {
               </CardContent>
             </Card>
           )}
-        </main>
-      </div>
-    </div>
+      </>
+    </ScreeningLayout>
   );
+
 }
