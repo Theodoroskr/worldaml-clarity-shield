@@ -1391,6 +1391,20 @@ function MatchReview({
           </DialogDescription>
         </DialogHeader>
 
+        {match && subjectType && match.entity_type && subjectType !== match.entity_type && (
+          <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>
+              <span className="font-medium">Entity type conflict:</span> you screened a{" "}
+              {SUBJECT_TYPE_LABELS[subjectType]?.toLowerCase() ?? subjectType}, but this profile is an{" "}
+              {(SUBJECT_TYPE_LABELS[match.entity_type as SubjectType] ?? match.entity_type).toLowerCase()}.
+              This is a common adverse-media indexing artefact — the false-positive reason has been pre-filled as
+              “Different entity type”.
+            </p>
+          </div>
+        )}
+
+
         <ScrollArea className="max-h-[55vh]">
           <div className="space-y-6 pr-2">
             <section className="rounded-lg border border-border p-3">
