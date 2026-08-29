@@ -749,6 +749,59 @@ function ResultsWorkspace({
     setTagInput("");
   };
 
+  const exportCasePdf = async () => {
+    setExportingCase(true);
+    try {
+      const p =
+        typeof searchParams === "object" && searchParams !== null
+          ? (searchParams as Record<string, unknown>)
+          : {};
+      const thresholdPct =
+        typeof p.name_threshold === "number" ? Math.round(p.name_threshold * 100) : null;
+      await exportCaseReportPdf({
+        caseReference: caseDetail.case_reference,
+        caseStatusLabel: CASE_STATUS_LABELS[caseDetail.status] ?? caseDetail.status,
+        monitoringActive: caseDetail.monitoring_status === "active",
+        screenedAt: caseDetail.search?.screened_at ?? caseDetail.created_at,
+        searchReference: caseDetail.search?.reference ?? null,
+        categoriesScreened: (caseDetail.search?.categories_screened ?? []).map(
+          (c) => (CATEGORY_LABELS as Record<string, string>)[c] ?? c,
+        ),
+        adverseMediaRequested: caseDetail.search?.adverse_media_requested ?? false,
+        monitoringRequested: caseDetail.search?.monitoring_requested ?? false,
+        nameSimilarityThresholdPct: thresholdPct,
+        subject: caseDetail.subject
+          ? {
+              typeLabel:
+                SUBJECT_TYPE_LABELS[caseDetail.subject.subject_type] ??
+                caseDetail.subject.subject_type,
+              name: caseDetail.subject.full_name,
+              dateOfBirth: caseDetail.subject.date_of_birth ?? null,
+              countryOfResidence: caseDetail.subject.country_of_residence ?? null,
+              nationality: caseDetail.subject.nationality ?? null,
+              countryOfIncorporation: caseDetail.subject.country_of_incorporation ?? null,
+            }
+          : null,
+        matchTally,
+        matches: matches.map((m) => ({
+          matchedName: m.matched_name,
+          entityType: m.entity_type,
+          statusLabel: MATCH_STATUS_LABELS[m.status] ?? m.status,
+          matchBasisLabel: matchBasisLabel(inferMatchBasis(m.match_basis, m.name_similarity)),
+          nameSimilarity: m.name_similarity,
+          country: m.country,
+          categories: m.category_labels?.length ? m.category_labels : m.categories,
+        })),
+      });
+      toast.success("Screening report exported");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "The PDF could not be generated");
+    } finally {
+      setExportingCase(false);
+    }
+  };
+
+
   const searchParams = caseDetail.search?.search_parameters ?? {};
   const fuzziness = useMemo(() => {
     if (typeof searchParams !== "object" || searchParams === null) return undefined;
@@ -802,6 +855,19 @@ function ResultsWorkspace({
           {selectedIds.size > 0 && (
             <Badge variant="outline" className="bg-background">{selectedIds.size} selected</Badge>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-background"
+            onClick={exportCasePdf}
+            disabled={exportingCase || loading}
+            title="Download a PDF report of this case's screening results (works even with zero matches)"
+          >
+            {exportingCase
+              ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              : <FileDown className="mr-1.5 h-4 w-4" />}
+            Export results PDF
+          </Button>
         </div>
       </div>
 
