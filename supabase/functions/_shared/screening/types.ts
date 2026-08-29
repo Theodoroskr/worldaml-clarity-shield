@@ -116,6 +116,16 @@ export interface NormalisedMatch {
   categories: Category[];
   category_labels: string[];
   name_similarity: number | null;
+  /** Raw provider signals, e.g. "name_exact". */
+  match_types: string[];
+  /** Plain-English labels for `match_types`. */
+  match_type_labels: string[];
+  /** Displayed match status the similarity maps to. */
+  match_basis: MatchBasis;
+  /** Provider list-relevance (0-100); reference only, never shown as name match. */
+  provider_relevance: number | null;
+  /** Only populated when the caller requested debug output. */
+  similarity_debug?: NameMatchDebug | null;
   country: string | null;
   year_of_birth: number | null;
   matched_attribute_count: number;
