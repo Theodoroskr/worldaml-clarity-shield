@@ -387,7 +387,7 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
 
       const adverseMedia: NormalisedAdverseMediaItem[] = ((doc?.media as Array<Record<string, unknown>>) ?? []).map((m) => ({
         headline: String(m?.title ?? "Untitled article"),
-        publication: (m?.snippet ? null : null) ?? (m?.publisher as string) ?? null,
+        publication: (m?.publisher as string) ?? null,
         published_at: (m?.date as string) ?? null,
         media_category: "Other risk-related media",
         snippet: String(m?.snippet ?? "").slice(0, 400) || null,
