@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Loader2, Search, ShieldCheck, Activity, FileText, ChevronRight,
@@ -1305,6 +1305,10 @@ function MatchReview({
   const [profileError, setProfileError] = useState<string | null>(null);
   const [confirmRefresh, setConfirmRefresh] = useState(false);
   const quota = useScreeningQuota();
+  // The quota hook returns a fresh object on every render, so keep a ref to
+  // avoid re-creating loadProfile (which would re-trigger the load effect).
+  const quotaRefreshRef = useRef(quota.refresh);
+  quotaRefreshRef.current = quota.refresh;
 
   const loadProfile = useCallback(async (matchId: string, refresh = false) => {
     setProfileLoading(true);
@@ -1313,7 +1317,7 @@ function MatchReview({
       setProfile(await fetchFullProfile(matchId, refresh));
       if (refresh) {
         toast.success("Profile refreshed — 1 screening search used");
-        void quota.refresh();
+        void quotaRefreshRef.current();
       }
     } catch (err) {
       setProfileError(err instanceof Error ? err.message : "The full profile could not be loaded");
@@ -1321,7 +1325,7 @@ function MatchReview({
     } finally {
       setProfileLoading(false);
     }
-  }, [quota]);
+  }, []);
 
   useEffect(() => {
     if (!match) return;
@@ -1351,7 +1355,8 @@ function MatchReview({
       setSources((srcs as SourceRow[]) ?? []);
     })();
     loadProfile(match.id);
-  }, [match, loadProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [match?.id, subjectType, loadProfile]);
 
   const needsReason = decision === "false_positive";
   const canSave = useMemo(() => rationale.trim().length >= 10, [rationale]);
