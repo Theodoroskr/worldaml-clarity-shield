@@ -1556,6 +1556,33 @@ function MatchReview({
     }
   };
 
+  const exportPdf = async () => {
+    if (!match) return;
+    setExporting(true);
+    try {
+      await exportMatchDecisionPdf({
+        matchId: match.id,
+        matchedName: match.matched_name,
+        entityType: match.entity_type,
+        subjectType: subjectType ? (SUBJECT_TYPE_LABELS[subjectType] ?? subjectType) : null,
+        matchStatus: MATCH_STATUS_LABELS[match.status] ?? match.status,
+        nameSimilarity: match.name_similarity,
+        matchBasisLabel: matchBasisLabel(inferMatchBasis(match.match_basis, match.name_similarity)),
+        categories: match.category_labels?.length ? match.category_labels : match.categories,
+        countries: match.country,
+        decisionLabel: DECISIONS.find((d) => d.key === decision)?.label ?? decision,
+        reason: needsReason ? reason : null,
+        rationale: rationale.trim() || null,
+      });
+      toast.success("Decision record exported");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "The PDF could not be generated");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+
   const groupedAttributes = useMemo(() => {
     const identity = ["Name", "First name", "Last name", "Middle name", "Previous name", "AKA"];
     const countries = ["Country", "Nationality", "Country of residence", "Country of incorporation", "Countries"];
