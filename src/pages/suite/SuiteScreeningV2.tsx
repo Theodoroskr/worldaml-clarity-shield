@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Loader2, Search, ShieldCheck, Activity, FileText, ChevronRight,
@@ -1317,7 +1317,7 @@ function MatchReview({
       setProfile(await fetchFullProfile(matchId, refresh));
       if (refresh) {
         toast.success("Profile refreshed — 1 screening search used");
-        void quota.refresh();
+        void quotaRefreshRef.current();
       }
     } catch (err) {
       setProfileError(err instanceof Error ? err.message : "The full profile could not be loaded");
