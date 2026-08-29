@@ -381,6 +381,8 @@ Deno.serve(async (req) => {
         match_type_labels: m.match_type_labels ?? [],
         match_basis: m.match_basis ?? null,
         provider_relevance: m.provider_relevance ?? null,
+        winning_name: m.winning_name ?? null,
+        winning_name_kind: m.winning_name_kind ?? null,
         country: m.country,
         year_of_birth: m.year_of_birth,
         matched_attribute_count: m.matched_attribute_count,
@@ -492,6 +494,8 @@ Deno.serve(async (req) => {
       match_types: m.match_types,
       match_type_labels: m.match_type_labels,
       provider_relevance: m.provider_relevance,
+      winning_name: m.winning_name,
+      winning_name_kind: m.winning_name_kind,
     })),
     ...(debugAllowed
       ? {

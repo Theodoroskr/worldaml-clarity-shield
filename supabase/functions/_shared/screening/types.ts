@@ -127,6 +127,10 @@ export interface NormalisedMatch {
   match_basis: MatchBasis;
   /** Provider list-relevance (0-100); reference only, never shown as name match. */
   provider_relevance: number | null;
+  /** The listed name or alias that produced the winning name-similarity score. */
+  winning_name: string | null;
+  /** Whether the winning candidate was the primary listed name or an alias. */
+  winning_name_kind: "primary_name" | "alias" | null;
   /** Only populated when the caller requested debug output. */
   similarity_debug?: NameMatchDebug | null;
   country: string | null;
