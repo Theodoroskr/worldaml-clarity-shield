@@ -1480,7 +1480,7 @@ function MatchReview({
                                 )}
                               >
                                 {quota.searchesUsed ?? 0} of {quota.searchQuota} used
-                                {!quota.searchesExceeded && " → " + (quota.searchesUsed ?? 0) + 1 + " after refresh"}
+                                {!quota.searchesExceeded && ` → ${(quota.searchesUsed ?? 0) + 1} after refresh`}
                               </span>
                             </div>
                             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
