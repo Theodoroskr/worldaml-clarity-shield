@@ -895,7 +895,7 @@ function ResultsWorkspace({
                   onPrefetch={() => prefetchFullProfile(m.id)}
                    onDecision={onDecision}
                    fourEyes={fourEyes}
-                   subjectType={subject.subject_type}
+                   subjectType={caseDetail.subject.subject_type}
                  />
 
               ))}
@@ -984,7 +984,7 @@ function ResultsWorkspace({
 
       <MatchReview
         match={selected}
-        subjectType={subject.subject_type}
+        subjectType={caseDetail.subject.subject_type}
         onClose={() => setSelected(null)}
         onSaved={async () => { setSelected(null); await load(); }}
       />
@@ -1274,8 +1274,8 @@ function KeyInfo({ label, value }: { label: string; value: string | null }) {
 }
 
 function MatchReview({
-  match, onClose, onSaved,
-}: { match: MatchRow | null; onClose: () => void; onSaved: () => void }) {
+  match, subjectType, onClose, onSaved,
+}: { match: MatchRow | null; subjectType?: SubjectType; onClose: () => void; onSaved: () => void }) {
   const [attributes, setAttributes] = useState<AttributeRow[]>([]);
   const [sources, setSources] = useState<SourceRow[]>([]);
   const [decision, setDecision] = useState<string>("false_positive");
