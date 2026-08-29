@@ -159,6 +159,7 @@ const ENTITY_ICONS: Record<string, React.ReactNode> = {
   organisation: <Building2 className="h-3.5 w-3.5" />,
   vessel: <Ship className="h-3.5 w-3.5" />,
   aircraft: <Plane className="h-3.5 w-3.5" />,
+  any: <Users className="h-3.5 w-3.5" />,
 };
 
 function categoryCountKey(c: string): ScreeningCategory | null {
@@ -194,6 +195,18 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
   const [sourceTypes, setSourceTypes] = useState<string[]>(ALL_SOURCE_TYPES);
   const [searchProfileId, setSearchProfileId] = useState("");
   const [adverseMediaAllowed, setAdverseMediaAllowed] = useState(true);
+  // One-click "provider portal view" preset: broadest net (any entity type,
+  // all sources, fuzziness 50%) to reproduce the provider portal's results.
+  const [portalView, setPortalView] = useState(false);
+
+  const applyPortalView = () => {
+    setSubject((s) => ({ ...s, subject_type: "any" }));
+    setCustomiseSources(true);
+    setSourceTypes(ALL_SOURCE_TYPES);
+    setSearchProfileId("");
+    setPortalView(true);
+  };
+  const clearPortalView = () => setPortalView(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -260,6 +273,8 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
         advanced: {
           ...(profileId ? { search_profile_id: profileId } : {}),
           ...(customiseSources && !profileId ? { source_types: sourceTypes } : {}),
+          // Provider portal view: fuzziness 50% == name threshold 0.5.
+          ...(portalView ? { name_threshold: 0.5 } : {}),
         },
       });
       toast.success(
@@ -317,13 +332,16 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
   };
 
   const isPerson = subject.subject_type === "person";
+  const isAnyType = subject.subject_type === "any";
   const nameLabel =
     subject.subject_type === "person" ? "Full name"
+    : subject.subject_type === "any" ? "Name (person or organisation)"
     : subject.subject_type === "vessel" ? "Vessel name"
     : subject.subject_type === "aircraft" ? "Aircraft name / tail number"
     : "Registered name";
   const namePlaceholder =
     subject.subject_type === "person" ? "e.g. Maria Georgiou"
+    : subject.subject_type === "any" ? "e.g. Elena Udrea or Northwind Trading Ltd"
     : subject.subject_type === "vessel" ? "e.g. MV Aurora Borealis"
     : subject.subject_type === "aircraft" ? "e.g. N12345"
     : "e.g. Northwind Trading Ltd";
@@ -381,7 +399,10 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
                     <Label>Entity type</Label>
                     <Select
                       value={subject.subject_type}
-                      onValueChange={(v) => setSubject({ ...emptySubject, subject_type: v as SubjectType })}
+                      onValueChange={(v) => {
+                        setSubject({ ...emptySubject, subject_type: v as SubjectType, full_name: subject.full_name });
+                        if (v !== "any") clearPortalView();
+                      }}
                     >
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -412,7 +433,13 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
                   </div>
                 ) : (
                   <div className="grid gap-4 md:grid-cols-3">
-                    {subject.subject_type === "vessel" || subject.subject_type === "aircraft" ? (
+                    {isAnyType ? (
+                      <>
+                        <Field label="Previous name / also known as" value={subject.previous_name} onChange={(v) => set("previous_name", v)} />
+                        <Field label="Country" value={subject.country_of_incorporation} onChange={(v) => set("country_of_incorporation", v)} />
+                        <Field label="Customer reference" value={subject.customer_reference} onChange={(v) => set("customer_reference", v)} />
+                      </>
+                    ) : subject.subject_type === "vessel" || subject.subject_type === "aircraft" ? (
                       <>
                         <Field label="Registration / IMO / tail number" value={subject.registration_number} onChange={(v) => set("registration_number", v)} />
                         <Field label="Country of registration" value={subject.country_of_incorporation} onChange={(v) => set("country_of_incorporation", v)} />
@@ -515,6 +542,26 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
                       ))}
                     </div>
                   )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button
+                    type="button"
+                    variant={portalView ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={portalView ? clearPortalView : applyPortalView}
+                  >
+                    <Users className="mr-1.5 h-4 w-4" />
+                    {portalView ? "Exit provider portal view" : "Match provider portal view"}
+                  </Button>
+                  {portalView && (
+                    <Badge variant="outline" className="border-sky-200 bg-sky-50 text-sky-700">
+                      Broad search: any entity type · all sources · fuzziness 50%
+                    </Badge>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Reproduces the provider portal&apos;s default results (no entity-type restriction).
+                  </p>
                 </div>
 
                 {(quota.searchesExceeded || quota.monitorsExceeded) && (
@@ -999,6 +1046,8 @@ function ResultsWorkspace({
                   : new Date(caseDetail.created_at).toLocaleString()}
               />
               <Separator />
+              <ActiveFilters search={caseDetail.search} fuzziness={fuzziness} />
+              <Separator />
               <div className="space-y-2">
                 <Label className="text-xs">Tags</Label>
                 <div className="flex flex-wrap gap-1.5">
@@ -1107,6 +1156,104 @@ function SummaryRow({
   );
 }
 
+/**
+ * Shows which search parameters restricted the result set for this run:
+ * entity type, categories, fuzziness, countries and search profile.
+ */
+function ActiveFilters({
+  search,
+  fuzziness,
+}: {
+  search: CaseDetail["search"];
+  fuzziness: number | undefined;
+}) {
+  if (!search) return null;
+  const p = (search.search_parameters ?? {}) as Record<string, unknown>;
+
+  const entityType = typeof p.entity_type === "string" ? p.entity_type : null;
+  const entityLabel = entityType
+    ? (SUBJECT_TYPE_LABELS[entityType as SubjectType] ?? entityType)
+    : null;
+  const entityRestricts = !!entityType && entityType !== "any";
+
+  const screened = (search.categories_screened ?? []) as ScreeningCategory[];
+  const ALL_CATEGORIES: ScreeningCategory[] = ["sanctions", "pep_rca", "warnings", "adverse_media"];
+  const excludedCategories = ALL_CATEGORIES.filter((c) => !screened.includes(c));
+
+  const exactMatch = p.exact_match === true;
+  const fuzzPct = exactMatch ? 0 : fuzziness != null ? Math.round(fuzziness * 100) : null;
+  const fuzzRestricts = exactMatch || (fuzzPct != null && fuzzPct < 50);
+
+  const countries = Array.isArray(p.countries)
+    ? (p.countries as unknown[]).map(String).filter(Boolean)
+    : [];
+  const profileId = typeof p.search_profile_id === "string" && p.search_profile_id ? p.search_profile_id : null;
+  const sourceTypes = Array.isArray(p.source_types) ? (p.source_types as unknown[]).map(String) : [];
+
+  const Row = ({ label, children, restricts }: { label: string; children: React.ReactNode; restricts: boolean }) => (
+    <div className="flex items-start justify-between gap-3">
+      <span className="shrink-0 whitespace-nowrap text-muted-foreground">{label}</span>
+      <div className="flex flex-wrap items-center justify-end gap-1.5 text-right">
+        {children}
+        <Badge
+          variant="outline"
+          className={restricts
+            ? "border-amber-200 bg-amber-50 text-amber-700"
+            : "border-emerald-200 bg-emerald-50 text-emerald-700"}
+        >
+          {restricts ? "Restricting" : "No restriction"}
+        </Badge>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-1.5">
+        <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+        <Label className="text-xs">Active filters</Label>
+      </div>
+      <div className="space-y-2 text-sm">
+        <Row label="Entity type" restricts={entityRestricts}>
+          <span className="font-medium">
+            {entityType === "any" ? "Any — individuals & organisations" : entityLabel ?? "—"}
+          </span>
+        </Row>
+        <Row label="Fuzziness" restricts={fuzzRestricts}>
+          <span className="font-medium">
+            {fuzzPct != null ? `${fuzzPct}%${exactMatch ? " (exact only)" : ""}` : "—"}
+          </span>
+        </Row>
+        <Row label="Categories" restricts={excludedCategories.length > 0}>
+          <span className="font-medium">
+            {excludedCategories.length === 0
+              ? "All categories"
+              : screened.map((c) => CATEGORY_LABELS[c] ?? c).join(", ") || "—"}
+          </span>
+        </Row>
+        {excludedCategories.length > 0 && (
+          <p className="text-right text-xs text-muted-foreground">
+            Not screened: {excludedCategories.map((c) => CATEGORY_LABELS[c] ?? c).join(", ")}
+          </p>
+        )}
+        <Row label="Countries" restricts={countries.length > 0}>
+          <span className="font-medium">{countries.length ? countries.join(", ") : "Worldwide"}</span>
+        </Row>
+        {profileId && (
+          <Row label="Search profile" restricts>
+            <span className="break-all font-medium">{profileId}</span>
+          </Row>
+        )}
+        {!profileId && sourceTypes.length > 0 && (
+          <Row label="Source types" restricts>
+            <span className="font-medium">{sourceTypes.length} selected</span>
+          </Row>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function MatchCard({
   match,
   extra,
@@ -1137,7 +1284,7 @@ function MatchCard({
   // Flag when the provider profile's entity type doesn't match the screened
   // subject (e.g. a person search hitting an organisation profile — a common
   // adverse-media indexing artefact and a strong false-positive signal).
-  const entityTypeConflict = !!subjectType && !!match.entity_type && subjectType !== match.entity_type;
+  const entityTypeConflict = !!subjectType && subjectType !== "any" && !!match.entity_type && subjectType !== match.entity_type;
 
   const [falsePositiveOpen, setFalsePositiveOpen] = useState(false);
   const [reason, setReason] = useState(entityTypeConflict ? "Different entity type" : FALSE_POSITIVE_REASONS[0]);
@@ -1580,7 +1727,7 @@ function MatchReview({
     // Pre-fill the false-positive reason when the profile's entity type
     // conflicts with the screened subject (e.g. person → organisation hit).
     setReason(
-      subjectType && match.entity_type && subjectType !== match.entity_type
+      subjectType && subjectType !== "any" && match.entity_type && subjectType !== match.entity_type
         ? "Different entity type"
         : FALSE_POSITIVE_REASONS[0],
     );
@@ -1688,7 +1835,7 @@ function MatchReview({
           </DialogDescription>
         </DialogHeader>
 
-        {match && subjectType && match.entity_type && subjectType !== match.entity_type && (
+        {match && subjectType && subjectType !== "any" && match.entity_type && subjectType !== match.entity_type && (
           <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <p>

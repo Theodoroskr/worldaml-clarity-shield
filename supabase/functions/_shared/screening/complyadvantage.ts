@@ -196,7 +196,9 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
     idempotencyKey: string,
   ): Promise<NormalisedScreening> {
     // Subject type maps 1:1 onto the provider's filters.entity_type values.
-    const ENTITY_TYPE_MAP: Record<SubjectType, string> = {
+    // "any" omits the filter entirely so one search returns both Individuals
+    // and Organisations (matching the provider portal's default behaviour).
+    const ENTITY_TYPE_MAP: Partial<Record<SubjectType, string>> = {
       person: "person",
       company: "company",
       organisation: "organisation",
@@ -204,9 +206,9 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
       aircraft: "aircraft",
     };
 
-    const filters: Record<string, unknown> = {
-      entity_type: ENTITY_TYPE_MAP[subject.subject_type] ?? "person",
-    };
+    const filters: Record<string, unknown> = {};
+    const mappedEntityType = ENTITY_TYPE_MAP[subject.subject_type];
+    if (mappedEntityType) filters.entity_type = mappedEntityType;
     // When a search profile is selected the provider applies its own source
     // configuration — manual category/type filters must not be sent.
     if (!options.searchProfileId) {
@@ -362,7 +364,13 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
         attr("address", "Address", subject?.registered_address ?? null, address, 8),
         attr("identification_number", "Identification number", subject?.identification_number ?? null, idNumber, 9),
         attr("registration_number", "Registration number", subject?.registration_number ?? null, regNumber, 10),
-        attr("entity_type", "Entity type", subject?.subject_type ?? null, entityType, 11),
+        attr(
+          "entity_type",
+          "Entity type",
+          subject && subject.subject_type !== "any" ? subject.subject_type : null,
+          entityType,
+          11,
+        ),
       ];
 
       const sources: NormalisedSource[] = ((doc?.source_notes as Record<string, Record<string, unknown>>) ?? {}) &&
@@ -379,7 +387,7 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
 
       const adverseMedia: NormalisedAdverseMediaItem[] = ((doc?.media as Array<Record<string, unknown>>) ?? []).map((m) => ({
         headline: String(m?.title ?? "Untitled article"),
-        publication: (m?.snippet ? null : null) ?? (m?.publisher as string) ?? null,
+        publication: (m?.publisher as string) ?? null,
         published_at: (m?.date as string) ?? null,
         media_category: "Other risk-related media",
         snippet: String(m?.snippet ?? "").slice(0, 400) || null,

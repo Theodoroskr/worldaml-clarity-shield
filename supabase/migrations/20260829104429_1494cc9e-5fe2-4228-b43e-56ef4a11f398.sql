@@ -1,0 +1,1 @@
+ALTER TYPE public.screening_subject_type ADD VALUE IF NOT EXISTS 'any';
