@@ -1318,7 +1318,7 @@ function PhotoThumb({
       aria-label={label ? `View photo ${index + 1} of ${label}` : `View photo ${index + 1}`}
       aria-pressed={active}
       className={cn(
-        "relative h-10 w-10 shrink-0 overflow-hidden rounded-md border transition-shadow",
+        "relative h-12 w-12 shrink-0 overflow-hidden rounded-md border transition-shadow",
         active
           ? "border-teal-500 ring-2 ring-teal-500/60"
           : "border-border hover:ring-1 hover:ring-teal-500/40",
@@ -1369,23 +1369,23 @@ function ProfilePhotoGallery({ name, images }: { name: string | null; images: st
     <div
       aria-hidden
       className={cn(
-        "relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full border text-lg font-semibold",
+        "relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full border text-2xl font-semibold",
         tone,
       )}
     >
       {initials || "?"}
       {ordered.length > 0 && (
-        <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-amber-700">
-          <ImageOff className="h-3 w-3" />
+        <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-amber-700">
+          <ImageOff className="h-3.5 w-3.5" />
         </span>
       )}
     </div>
   );
 
   return (
-    <div className="flex shrink-0 flex-col items-center gap-2">
+    <div className="flex shrink-0 flex-col items-center gap-2.5">
       {main ? (
-        <div className="relative h-16 w-16 shrink-0">
+        <div className="relative h-24 w-24 shrink-0">
           {!mainLoaded && (
             <div
               aria-hidden
@@ -1399,7 +1399,7 @@ function ProfilePhotoGallery({ name, images }: { name: string | null; images: st
             onLoad={() => setMainLoaded(true)}
             onError={() => markFailed(main)}
             className={cn(
-              "h-16 w-16 shrink-0 rounded-full border border-border object-cover transition-opacity",
+              "h-24 w-24 shrink-0 rounded-full border border-border object-cover transition-opacity",
               mainLoaded ? "opacity-100" : "opacity-0",
             )}
             referrerPolicy="no-referrer"
@@ -1427,7 +1427,7 @@ function ProfilePhotoGallery({ name, images }: { name: string | null; images: st
         initialsAvatar
       )}
       {available.length > 1 && (
-        <div className="flex max-w-56 gap-1.5 overflow-x-auto pb-0.5" role="group" aria-label="Profile photos">
+        <div className="flex max-w-60 gap-2 overflow-x-auto pb-0.5" role="group" aria-label="Profile photos">
           {available.map((u, i) => (
             <PhotoThumb
               key={u}
