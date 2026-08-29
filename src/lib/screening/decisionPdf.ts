@@ -190,6 +190,86 @@ export async function exportMatchDecisionPdf(input: DecisionPdfInput) {
   row("Countries", input.countries);
   row("Match ID", input.matchId);
 
+  // ---- Full profile details (provider) ----
+  const p = input.profile;
+  if (p) {
+    heading("Profile details");
+    row("Primary name", p.primary_name);
+    row("Entity type", p.entity_type);
+    row("Aliases", p.aliases?.length ? p.aliases.join("; ") : null);
+    row("Countries", p.countries?.length ? p.countries.join(", ") : null);
+    row("Nationalities", p.nationalities?.length ? p.nationalities.join(", ") : null);
+    row("Dates of birth", p.dates_of_birth?.length ? p.dates_of_birth.join(", ") : null);
+    row("Places of birth", p.places_of_birth?.length ? p.places_of_birth.join(", ") : null);
+    row("Profile last updated", fmtDate(p.last_updated));
+    row("Photos on record", p.images?.length ? String(p.images.length) : null);
+
+    if (p.associates?.length) {
+      subheading("Associates");
+      p.associates.forEach((a) =>
+        bullet(`${a.name}${a.relationship ? ` — ${a.relationship}` : ""}`));
+    }
+
+    if (p.listings?.length) {
+      subheading("Listings");
+      p.listings.forEach((l) => {
+        const period = [fmtDate(l.listed_from), fmtDate(l.listed_to)].filter(Boolean).join(" → ");
+        bullet(
+          [
+            l.source_name,
+            l.category_label ?? l.category,
+            l.status !== "unknown" ? l.status : null,
+            period || null,
+            l.country_codes?.length ? l.country_codes.join(", ") : null,
+          ]
+            .filter(Boolean)
+            .join(" · "),
+        );
+        l.details?.forEach((d) => {
+          if (d.values?.length) bullet(`${d.label}: ${d.values.join(", ")}`);
+        });
+        l.urls?.forEach((u) => bullet(`Source: ${u}`));
+      });
+    }
+
+    if (p.media?.length) {
+      subheading("Adverse media");
+      p.media.forEach((m) => {
+        bullet([m.title, fmtDate(m.date), m.url].filter(Boolean).join(" · "));
+        if (m.snippet) bullet(m.snippet);
+      });
+    }
+  }
+
+  // ---- Match attribute comparison ----
+  if (input.attributes?.length) {
+    heading("Field-by-field comparison");
+    input.attributes.forEach((a) => {
+      subheading(a.field_label);
+      row("Screened value", a.subject_value);
+      row("Listed value", a.match_value);
+      if (a.assessment) row("Assessment", a.assessment);
+    });
+  }
+
+  // ---- Source listings ----
+  if (input.sources?.length) {
+    heading("Sources");
+    input.sources.forEach((s) => {
+      bullet(
+        [
+          s.source_name,
+          s.category,
+          s.jurisdiction,
+          fmtDate(s.listing_date),
+          s.description,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      );
+    });
+  }
+
   y += 24;
   if (y > 750) { doc.addPage(); y = 56; }
   doc.setFont("helvetica", "italic");
