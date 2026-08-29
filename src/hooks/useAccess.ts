@@ -52,7 +52,7 @@ export function useAccess(): AccessFlags {
           .maybeSingle(),
         supabase
           .from("product_access")
-          .select("product, has_access, status")
+          .select("product, status")
           .in("product", ["suite", "screening"]),
       ]);
 
@@ -60,7 +60,7 @@ export function useAccess(): AccessFlags {
       const isAdmin = !!roleRes.data;
       const hasProductAccess = (product: string) =>
         (productRes.data ?? []).some(
-          (row: any) => row.product === product && row.has_access && row.status !== "cancelled" && row.status !== "suspended"
+          (row: any) => row.product === product && (row.status === "active" || row.status === "trial")
         );
       const hasSuiteAccess = isAdmin || tier === "suite" || tier === "enterprise" || hasProductAccess("suite") || hasProductAccess("screening");
 
