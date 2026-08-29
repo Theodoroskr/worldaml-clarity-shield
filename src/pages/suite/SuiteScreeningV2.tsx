@@ -1318,7 +1318,7 @@ function PhotoThumb({
       aria-label={label ? `View photo ${index + 1} of ${label}` : `View photo ${index + 1}`}
       aria-pressed={active}
       className={cn(
-        "relative h-12 w-12 shrink-0 overflow-hidden rounded-md border transition-shadow",
+        "relative h-10 w-10 shrink-0 overflow-hidden rounded-md border transition-shadow sm:h-12 sm:w-12",
         active
           ? "border-teal-500 ring-2 ring-teal-500/60"
           : "border-border hover:ring-1 hover:ring-teal-500/40",
@@ -1369,7 +1369,7 @@ function ProfilePhotoGallery({ name, images }: { name: string | null; images: st
     <div
       aria-hidden
       className={cn(
-        "relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full border text-2xl font-semibold",
+        "relative flex h-20 w-20 shrink-0 items-center justify-center rounded-full border text-xl font-semibold sm:h-24 sm:w-24 sm:text-2xl",
         tone,
       )}
     >
@@ -1385,7 +1385,7 @@ function ProfilePhotoGallery({ name, images }: { name: string | null; images: st
   return (
     <div className="flex shrink-0 flex-col items-center gap-2.5">
       {main ? (
-        <div className="relative h-24 w-24 shrink-0">
+        <div className="relative h-20 w-20 shrink-0 sm:h-24 sm:w-24">
           {!mainLoaded && (
             <div
               aria-hidden
@@ -1399,7 +1399,7 @@ function ProfilePhotoGallery({ name, images }: { name: string | null; images: st
             onLoad={() => setMainLoaded(true)}
             onError={() => markFailed(main)}
             className={cn(
-              "h-24 w-24 shrink-0 rounded-full border border-border object-cover transition-opacity",
+              "h-20 w-20 shrink-0 rounded-full border border-border object-cover transition-opacity sm:h-24 sm:w-24",
               mainLoaded ? "opacity-100" : "opacity-0",
             )}
             referrerPolicy="no-referrer"
@@ -1427,7 +1427,7 @@ function ProfilePhotoGallery({ name, images }: { name: string | null; images: st
         initialsAvatar
       )}
       {available.length > 1 && (
-        <div className="flex max-w-60 gap-2 overflow-x-auto pb-0.5" role="group" aria-label="Profile photos">
+        <div className="flex max-w-[14rem] gap-2 overflow-x-auto pb-0.5 sm:max-w-60" role="group" aria-label="Profile photos">
           {available.map((u, i) => (
             <PhotoThumb
               key={u}
@@ -1697,7 +1697,7 @@ function MatchReview({
               )}
               {profileError && <p className="text-xs text-red-600">{profileError}</p>}
               {profile && (
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row">
                   <ProfilePhotoGallery name={profile.primary_name} images={profile.images} />
                   <dl className="grid flex-1 gap-x-6 gap-y-2 text-sm md:grid-cols-2">
                     <KeyInfo label="Full name" value={profile.primary_name} />
