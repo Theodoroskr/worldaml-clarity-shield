@@ -117,22 +117,46 @@ Deno.serve(async (req) => {
       })
       .eq("id", matchId);
 
+    // Meter the billable refresh against the annual search allowance.
+    let searchSubjectId: string | null = null;
+    if (isRefresh) {
+      if (visible.search_id) {
+        const { data: parentSearch } = await admin
+          .from("screening_searches")
+          .select("subject_id")
+          .eq("id", visible.search_id)
+          .maybeSingle();
+        searchSubjectId = (parentSearch?.subject_id as string | null) ?? null;
+      }
+      await admin.from("screening_searches").insert({
+        organisation_id: orgId,
+        subject_id: searchSubjectId,
+        reference: `REFRESH-${Date.now()}-${matchId.slice(0, 8)}`,
+        search_parameters: { type: "profile_refresh", match_id: matchId },
+        status: "completed",
+        initiated_by: user.id,
+      });
+    }
+
     await admin.from("screening_audit_events").insert({
-      organisation_id: visible.organisation_id,
+      organisation_id: orgId,
       match_id: matchId,
       event_type: "profile_enriched",
-      description: `Full listed profile loaded for ${visible.matched_name}`,
+      description: isRefresh
+        ? `Listed profile refreshed for ${visible.matched_name} (1 search consumed)`
+        : `Full listed profile loaded for ${visible.matched_name}`,
       metadata: {
         listings: profile.listings.length,
         associates: profile.associates.length,
         media: profile.media.length,
-        refresh: body.refresh === true,
+        refresh: isRefresh,
+        billable: isRefresh,
         fetched_at: fetchedAt,
       },
       actor_id: user.id,
     });
 
-    return json({ profile, cached: false });
+    return json({ profile, cached: false, consumed_search: isRefresh });
   } catch (err) {
     return providerErrorResponse(err, corsHeaders);
   }
