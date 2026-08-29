@@ -899,7 +899,7 @@ function ResultsWorkspace({
                   onPrefetch={() => prefetchFullProfile(m.id)}
                    onDecision={onDecision}
                    fourEyes={fourEyes}
-                   subjectType={caseDetail.subject.subject_type}
+                   subjectType={caseDetail.subject?.subject_type}
                  />
 
               ))}
@@ -988,7 +988,7 @@ function ResultsWorkspace({
 
       <MatchReview
         match={selected}
-        subjectType={caseDetail.subject.subject_type}
+        subjectType={caseDetail.subject?.subject_type}
         onClose={() => setSelected(null)}
         onSaved={async () => { setSelected(null); await load(); }}
       />
