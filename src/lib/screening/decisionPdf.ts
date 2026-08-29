@@ -89,6 +89,7 @@ export async function exportMatchDecisionPdf(input: DecisionPdfInput) {
   let y = 56;
 
   const heading = (text: string) => {
+    if (y > 740) { doc.addPage(); y = 56; }
     y += 18;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
