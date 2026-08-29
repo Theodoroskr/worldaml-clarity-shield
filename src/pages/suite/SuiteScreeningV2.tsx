@@ -1318,7 +1318,7 @@ function PhotoThumb({
       aria-label={label ? `View photo ${index + 1} of ${label}` : `View photo ${index + 1}`}
       aria-pressed={active}
       className={cn(
-        "relative h-10 w-10 shrink-0 overflow-hidden rounded-md border transition-shadow",
+        "relative h-12 w-12 shrink-0 overflow-hidden rounded-md border transition-shadow",
         active
           ? "border-teal-500 ring-2 ring-teal-500/60"
           : "border-border hover:ring-1 hover:ring-teal-500/40",
