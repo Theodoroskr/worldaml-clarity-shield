@@ -2,6 +2,7 @@ import { ComplyAdvantageAdapter } from "./complyadvantage.ts";
 import { ProviderError, ScreeningProviderAdapter } from "./types.ts";
 
 export * from "./types.ts";
+export * from "./nameMatch.ts";
 export { describeChange } from "./complyadvantage.ts";
 
 /**
