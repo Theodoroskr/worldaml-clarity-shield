@@ -1,6 +1,9 @@
 // WorldAML normalised screening model.
 // Nothing provider-specific may leave the edge functions in these shapes.
 
+import type { MatchBasis, NameMatchDebug } from "./nameMatch.ts";
+export type { MatchBasis, NameMatchDebug, NameMatchResult, NameMatchCandidate } from "./nameMatch.ts";
+
 export type SubjectType = "person" | "company" | "organisation" | "vessel" | "aircraft";
 export const SUBJECT_TYPES: SubjectType[] = ["person", "company", "organisation", "vessel", "aircraft"];
 export type Category = "sanctions" | "pep_rca" | "warnings" | "adverse_media";
