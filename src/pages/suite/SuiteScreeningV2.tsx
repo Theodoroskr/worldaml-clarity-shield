@@ -231,8 +231,8 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
       const profileId = searchProfileId.trim();
       const result = await runScreeningV2({
         subject,
-        include_adverse_media: adverseMedia ||
-          (customiseSources && sourceTypes.some((t) => t.startsWith("adverse-media"))),
+        include_adverse_media: adverseMediaAllowed &&
+          (adverseMedia || (customiseSources && sourceTypes.some((t) => t.startsWith("adverse-media")))),
         start_monitoring: monitoring,
         advanced: {
           ...(profileId ? { search_profile_id: profileId } : {}),
