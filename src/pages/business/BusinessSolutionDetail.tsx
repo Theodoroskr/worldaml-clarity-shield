@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SOLUTION_BY_KEY } from "@/lib/businessCatalogue";
 import { useBusinessWorkspace } from "@/hooks/useBusinessWorkspace";
+import { resolvePlanCta } from "@/lib/businessPlanCta";
 
 
 export default function BusinessSolutionDetail() {
@@ -123,24 +124,30 @@ export default function BusinessSolutionDetail() {
                   ))}
                 </ul>
                 <div className="mt-auto pt-2">
-                  {p.checkout ? (
-                    <Button className="w-full" variant="accent" disabled={loading === p.key}
-                      onClick={() => buy(p.key, p.checkout!.fn, p.checkout!.plan, p.checkout!.body)}>
-                      {loading === p.key && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {owned ? "Upgrade" : "Buy Now"}
-                    </Button>
-                  ) : p.configureUrl ? (
-                    <Button asChild className="w-full" variant="accent">
-                      <Link to={p.configureUrl}>{p.configureLabel ?? "Configure & Buy"}</Link>
-                    </Button>
-
-                  ) : (
-                    <Button asChild className="w-full" variant="outline">
-                      <Link to={`/business/quotes?product=${encodeURIComponent(solution.name)}&plan=${encodeURIComponent(p.name)}`}>
-                        Contact Sales
-                      </Link>
-                    </Button>
-                  )}
+                  {(() => {
+                    const cta = resolvePlanCta(p, solution.name, owned);
+                    if (cta.kind === "checkout") {
+                      return (
+                        <Button className="w-full" variant="accent" disabled={loading === p.key}
+                          onClick={() => buy(p.key, p.checkout!.fn, p.checkout!.plan, p.checkout!.body)}>
+                          {loading === p.key && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          {cta.label}
+                        </Button>
+                      );
+                    }
+                    if (cta.kind === "configure") {
+                      return (
+                        <Button asChild className="w-full" variant="accent">
+                          <Link to={cta.to}>{cta.label}</Link>
+                        </Button>
+                      );
+                    }
+                    return (
+                      <Button asChild className="w-full" variant="outline">
+                        <Link to={cta.to}>{cta.label}</Link>
+                      </Button>
+                    );
+                  })()}
                 </div>
               </CardContent>
             </Card>
