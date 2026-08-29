@@ -73,7 +73,7 @@ serve(async (req) => {
 
         return {
           id: s.id,
-          product: typeof product === "object" && product && "name" in product ? (product as any).name : "WorldAML plan",
+          product: product || "WorldAML plan",
           status: s.status,
           amount: money(price?.unit_amount ?? null, price?.currency ?? "eur"),
           interval: price?.recurring?.interval ?? null,
