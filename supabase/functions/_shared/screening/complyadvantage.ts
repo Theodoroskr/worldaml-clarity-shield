@@ -181,7 +181,9 @@ function bestNameSimilarity(
   const best = [matchedName, ...aliases]
     .filter(Boolean)
     .reduce((acc, candidate) => Math.max(acc, nameSimilarity(subjectName, candidate)), 0);
-  const score = exactFlag ? Math.max(best, 1) : best;
+  // Only trust the provider's "name matched exactly" flag when our own
+  // comparison agrees the names are effectively the same.
+  const score = exactFlag && best >= 0.9 ? 1 : best;
   return Math.round(Math.max(0, Math.min(1, score)) * 100);
 }
 
@@ -508,6 +510,7 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
           sanctions_programmes: fields.filter((f) => String(f?.name ?? "").toLowerCase().includes("program")).map((f) => f?.value),
           associates: (doc?.associates as unknown[]) ?? [],
           match_types: matchTypes,
+          provider_relevance: providerRelevance,
           last_updated: doc?.last_updated_utc ?? null,
         },
         last_data_update: (doc?.last_updated_utc as string) ?? null,
