@@ -207,6 +207,7 @@ Deno.serve(async (req) => {
     monitoring: startMonitoring,
     providerTypes: sourceTypes.length ? sourceTypes : undefined,
     searchProfileId,
+    debug: debugAllowed,
   };
 
   const excluded: Category[] = (["sanctions", "pep_rca", "warnings", "adverse_media"] as Category[])
