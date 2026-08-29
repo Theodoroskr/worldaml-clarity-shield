@@ -159,6 +159,7 @@ const ENTITY_ICONS: Record<string, React.ReactNode> = {
   organisation: <Building2 className="h-3.5 w-3.5" />,
   vessel: <Ship className="h-3.5 w-3.5" />,
   aircraft: <Plane className="h-3.5 w-3.5" />,
+  any: <Users className="h-3.5 w-3.5" />,
 };
 
 function categoryCountKey(c: string): ScreeningCategory | null {
@@ -317,13 +318,16 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
   };
 
   const isPerson = subject.subject_type === "person";
+  const isAnyType = subject.subject_type === "any";
   const nameLabel =
     subject.subject_type === "person" ? "Full name"
+    : subject.subject_type === "any" ? "Name (person or organisation)"
     : subject.subject_type === "vessel" ? "Vessel name"
     : subject.subject_type === "aircraft" ? "Aircraft name / tail number"
     : "Registered name";
   const namePlaceholder =
     subject.subject_type === "person" ? "e.g. Maria Georgiou"
+    : subject.subject_type === "any" ? "e.g. Elena Udrea or Northwind Trading Ltd"
     : subject.subject_type === "vessel" ? "e.g. MV Aurora Borealis"
     : subject.subject_type === "aircraft" ? "e.g. N12345"
     : "e.g. Northwind Trading Ltd";
