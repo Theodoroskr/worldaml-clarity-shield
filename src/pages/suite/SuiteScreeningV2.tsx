@@ -817,8 +817,54 @@ function ResultsWorkspace({
                 ))}
               </SelectContent>
             </Select>
-            {(statusFilter !== "all" || categoryFilter !== "all") && (
-              <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setCategoryFilter("all"); }}>
+            <Select value={basisFilter} onValueChange={setBasisFilter}>
+              <SelectTrigger className="h-8 w-[150px]">
+                <SelectValue placeholder="Match type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All match types</SelectItem>
+                <SelectItem value="exact">Exact name</SelectItem>
+                <SelectItem value="reordered_name">Reordered name</SelectItem>
+                <SelectItem value="partial_name">Partial name</SelectItem>
+                <SelectItem value="fuzzy_name">Fuzzy name</SelectItem>
+                <SelectItem value="provider_only">Provider only</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <ArrowDownUp className="h-4 w-4" /> Sort:
+            </div>
+            <Select value={sortMode} onValueChange={setSortMode}>
+              <SelectTrigger className="h-8 w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="similarity_desc">Similarity (high → low)</SelectItem>
+                <SelectItem value="similarity_asc">Similarity (low → high)</SelectItem>
+                <SelectItem value="name_az">Name (A → Z)</SelectItem>
+              </SelectContent>
+            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 gap-1.5">
+                  <Info className="h-3.5 w-3.5" /> Legend
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80" align="start">
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">Match status colours</p>
+                  {MATCH_BASIS_LEGEND.map((item) => (
+                    <div key={item.basis} className="flex items-start gap-2">
+                      <span className={cn("mt-0.5 inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-xs font-medium", item.tone)}>
+                        {item.label}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{item.description}</span>
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+            {(statusFilter !== "all" || categoryFilter !== "all" || basisFilter !== "all" || sortMode !== "similarity_desc") && (
+              <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setCategoryFilter("all"); setBasisFilter("all"); setSortMode("similarity_desc"); }}>
                 <X className="mr-1 h-3.5 w-3.5" /> Clear
               </Button>
             )}
