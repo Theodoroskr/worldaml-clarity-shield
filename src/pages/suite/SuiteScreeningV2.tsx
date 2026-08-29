@@ -1583,7 +1583,7 @@ function MatchReview({
               {profileError && <p className="text-xs text-red-600">{profileError}</p>}
               {profile && (
                 <div className="flex gap-4">
-                  <ProfileAvatar name={profile.primary_name} imageUrl={profile.images[0]} />
+                  <ProfileAvatar name={profile.primary_name} images={profile.images} />
                   <dl className="grid flex-1 gap-x-6 gap-y-2 text-sm md:grid-cols-2">
                     <KeyInfo label="Full name" value={profile.primary_name} />
                     <KeyInfo label="Entity type" value={profile.entity_type} />
