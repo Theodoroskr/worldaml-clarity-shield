@@ -4,7 +4,9 @@ import {
   Loader2, Search, ShieldCheck, Activity, FileText, ChevronRight,
   ArrowLeft, Copy, Check, X, Filter, Tag, MoreHorizontal,
   AlertTriangle, User, Building2, Ship, Plane, RefreshCw, ExternalLink, Users, Lock,
+  ArrowDownUp, Info,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useScreeningModules } from "@/hooks/useScreeningModules";
 import { UsageWidget } from "@/components/screening/UsageWidget";
@@ -30,6 +32,8 @@ import {
   matchBasisDescription,
   matchBasisLabel,
   matchBasisTone,
+  MATCH_BASIS_LEGEND,
+  type MatchBasis,
 } from "@/lib/screeningMatch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -105,6 +109,12 @@ interface MatchRow {
   categories: string[];
   category_labels: string[];
   name_similarity: number | null;
+  match_basis?: string | null;
+  match_types?: string[] | null;
+  match_type_labels?: string[] | null;
+  provider_relevance?: number | null;
+  winning_name?: string | null;
+  winning_name_kind?: string | null;
   country: string | null;
   year_of_birth: number | null;
   status: string;
@@ -604,6 +614,8 @@ function ResultsWorkspace({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [basisFilter, setBasisFilter] = useState<string>("all");
+  const [sortMode, setSortMode] = useState<string>("similarity_desc");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
 
@@ -611,7 +623,7 @@ function ResultsWorkspace({
     setLoading(true);
     const { data } = await supabase
       .from("screening_matches")
-      .select("id, matched_name, entity_type, categories, category_labels, name_similarity, match_basis, match_types, match_type_labels, provider_relevance, country, year_of_birth, status, matched_attribute_count, conflicting_attribute_count, last_data_update, profile")
+      .select("id, matched_name, entity_type, categories, category_labels, name_similarity, match_basis, match_types, match_type_labels, provider_relevance, winning_name, winning_name_kind, country, year_of_birth, status, matched_attribute_count, conflicting_attribute_count, last_data_update, profile")
       .eq("case_id", caseDetail.id)
       .order("name_similarity", { ascending: false });
     const rows = (data as MatchRow[]) ?? [];
@@ -655,12 +667,32 @@ function ResultsWorkspace({
   useEffect(() => { load(); }, [load]);
 
   const filteredMatches = useMemo(() => {
-    return matches.filter((m) => {
+    const filtered = matches.filter((m) => {
       if (statusFilter !== "all" && m.status !== statusFilter) return false;
       if (categoryFilter !== "all" && !m.categories.includes(categoryFilter)) return false;
+      if (basisFilter !== "all") {
+        const basis = inferMatchBasis(m.match_basis, m.name_similarity);
+        // Group exact_name + exact_alias under the "exact" filter option.
+        if (basisFilter === "exact" && basis !== "exact_name" && basis !== "exact_alias") return false;
+        if (basisFilter !== "exact" && basis !== basisFilter) return false;
+      }
       return true;
     });
-  }, [matches, statusFilter, categoryFilter]);
+    const sorted = [...filtered];
+    switch (sortMode) {
+      case "similarity_asc":
+        sorted.sort((a, b) => (a.name_similarity ?? -1) - (b.name_similarity ?? -1));
+        break;
+      case "name_az":
+        sorted.sort((a, b) => (a.matched_name ?? "").localeCompare(b.matched_name ?? ""));
+        break;
+      case "similarity_desc":
+      default:
+        sorted.sort((a, b) => (b.name_similarity ?? -1) - (a.name_similarity ?? -1));
+        break;
+    }
+    return sorted;
+  }, [matches, statusFilter, categoryFilter, basisFilter, sortMode]);
 
   // Headline tally used by the case header chips.
   const matchTally = useMemo(() => ({
@@ -787,8 +819,54 @@ function ResultsWorkspace({
                 ))}
               </SelectContent>
             </Select>
-            {(statusFilter !== "all" || categoryFilter !== "all") && (
-              <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setCategoryFilter("all"); }}>
+            <Select value={basisFilter} onValueChange={setBasisFilter}>
+              <SelectTrigger className="h-8 w-[150px]">
+                <SelectValue placeholder="Match type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All match types</SelectItem>
+                <SelectItem value="exact">Exact name</SelectItem>
+                <SelectItem value="reordered_name">Reordered name</SelectItem>
+                <SelectItem value="partial_name">Partial name</SelectItem>
+                <SelectItem value="fuzzy_name">Fuzzy name</SelectItem>
+                <SelectItem value="provider_only">Provider only</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <ArrowDownUp className="h-4 w-4" /> Sort:
+            </div>
+            <Select value={sortMode} onValueChange={setSortMode}>
+              <SelectTrigger className="h-8 w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="similarity_desc">Similarity (high → low)</SelectItem>
+                <SelectItem value="similarity_asc">Similarity (low → high)</SelectItem>
+                <SelectItem value="name_az">Name (A → Z)</SelectItem>
+              </SelectContent>
+            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 gap-1.5">
+                  <Info className="h-3.5 w-3.5" /> Legend
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80" align="start">
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">Match status colours</p>
+                  {MATCH_BASIS_LEGEND.map((item) => (
+                    <div key={item.basis} className="flex items-start gap-2">
+                      <span className={cn("mt-0.5 inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-xs font-medium", item.tone)}>
+                        {item.label}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{item.description}</span>
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+            {(statusFilter !== "all" || categoryFilter !== "all" || basisFilter !== "all" || sortMode !== "similarity_desc") && (
+              <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setCategoryFilter("all"); setBasisFilter("all"); setSortMode("similarity_desc"); }}>
                 <X className="mr-1 h-3.5 w-3.5" /> Clear
               </Button>
             )}
@@ -1069,6 +1147,14 @@ function MatchCard({
         >
           {match.matched_name}
         </h3>
+
+        {match.winning_name && match.winning_name !== match.matched_name && (
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Matched on{" "}
+            <span className="font-medium text-foreground">{match.winning_name}</span>
+            {match.winning_name_kind === "alias" ? " (alias)" : ""}
+          </p>
+        )}
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           {categoryBadges.map(({ cat, count }) => (

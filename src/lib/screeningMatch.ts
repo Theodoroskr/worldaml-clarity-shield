@@ -46,6 +46,23 @@ const TONES: Record<MatchBasis, string> = {
   unknown: "border-border bg-muted text-muted-foreground",
 };
 
+export interface MatchBasisLegendItem {
+  basis: MatchBasis;
+  label: string;
+  description: string;
+  tone: string;
+}
+
+/** Ordered legend entries for the match-status colour key shown in the UI. */
+export const MATCH_BASIS_LEGEND: MatchBasisLegendItem[] = [
+  { basis: "exact_name", label: MATCH_BASIS_LABELS.exact_name, description: MATCH_BASIS_DESCRIPTIONS.exact_name, tone: TONES.exact_name },
+  { basis: "exact_alias", label: MATCH_BASIS_LABELS.exact_alias, description: MATCH_BASIS_DESCRIPTIONS.exact_alias, tone: TONES.exact_alias },
+  { basis: "reordered_name", label: MATCH_BASIS_LABELS.reordered_name, description: MATCH_BASIS_DESCRIPTIONS.reordered_name, tone: TONES.reordered_name },
+  { basis: "partial_name", label: MATCH_BASIS_LABELS.partial_name, description: MATCH_BASIS_DESCRIPTIONS.partial_name, tone: TONES.partial_name },
+  { basis: "fuzzy_name", label: MATCH_BASIS_LABELS.fuzzy_name, description: MATCH_BASIS_DESCRIPTIONS.fuzzy_name, tone: TONES.fuzzy_name },
+  { basis: "provider_only", label: MATCH_BASIS_LABELS.provider_only, description: MATCH_BASIS_DESCRIPTIONS.provider_only, tone: TONES.provider_only },
+];
+
 export function normaliseMatchBasis(value: string | null | undefined): MatchBasis {
   return value && value in TONES ? (value as MatchBasis) : "unknown";
 }

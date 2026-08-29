@@ -42,6 +42,10 @@ export interface NameMatchResult {
   match_type_labels: string[];
   /** Provider list-relevance (0-100), kept for reference only. */
   provider_relevance: number | null;
+  /** The candidate (listed name or alias) that produced the winning score. */
+  winning_name: string | null;
+  /** Whether the winning candidate was the primary listed name or an alias. */
+  winning_name_kind: "primary_name" | "alias" | null;
   /** Present only when debug output was requested. */
   debug?: NameMatchDebug;
 }
@@ -212,6 +216,8 @@ export function computeNameMatch(input: ComputeNameMatchInput): NameMatchResult 
       match_types: matchTypes,
       match_type_labels: matchTypeLabels,
       provider_relevance: providerRelevance,
+      winning_name: null,
+      winning_name_kind: null,
     };
     if (input.debug) {
       result.debug = {
@@ -249,6 +255,8 @@ export function computeNameMatch(input: ComputeNameMatchInput): NameMatchResult 
     match_types: matchTypes,
     match_type_labels: matchTypeLabels,
     provider_relevance: providerRelevance,
+    winning_name: best?.value ?? null,
+    winning_name_kind: best?.kind ?? null,
   };
 
   if (input.debug) {

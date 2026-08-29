@@ -417,6 +417,8 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
         match_type_labels: nameMatch.match_type_labels,
         match_basis: nameMatch.match_basis,
         provider_relevance: providerRelevance,
+        winning_name: nameMatch.winning_name,
+        winning_name_kind: nameMatch.winning_name_kind,
         similarity_debug: nameMatch.debug ?? null,
 
 
