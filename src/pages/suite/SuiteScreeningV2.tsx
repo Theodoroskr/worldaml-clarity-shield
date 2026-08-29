@@ -1133,6 +1133,14 @@ function MatchCard({
               {ENTITY_ICONS[entityType] ?? <User className="h-3.5 w-3.5" />}
               {entityLabel}
             </span>
+            {entityTypeConflict && (
+              <span
+                className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 font-medium text-amber-800"
+                title={`You screened a ${SUBJECT_TYPE_LABELS[subjectType as SubjectType] ?? subjectType}, but this profile is an ${entityLabel.toLowerCase()}. Likely a false positive — reason pre-filled as "Different entity type".`}
+              >
+                <AlertTriangle className="h-3 w-3" /> Entity type conflict
+              </span>
+            )}
             {similarity != null && (
               <span className={`rounded-full border px-2 py-0.5 font-medium ${similarityTone}`}>
                 {Math.round(similarity)}% name match
@@ -1303,6 +1311,13 @@ function MatchReview({
     setRationale("");
     setProfile(null);
     setProfileError(null);
+    // Pre-fill the false-positive reason when the profile's entity type
+    // conflicts with the screened subject (e.g. person → organisation hit).
+    setReason(
+      subjectType && match.entity_type && subjectType !== match.entity_type
+        ? "Different entity type"
+        : FALSE_POSITIVE_REASONS[0],
+    );
     (async () => {
       const [{ data: attrs }, { data: srcs }] = await Promise.all([
         supabase
