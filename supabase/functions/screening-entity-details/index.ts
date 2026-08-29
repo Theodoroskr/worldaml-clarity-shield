@@ -112,7 +112,18 @@ Deno.serve(async (req) => {
   const cachedFull = cached.full_profile as Record<string, unknown> | undefined;
   const isRefresh = body.refresh === true;
   if (cachedFull && !isRefresh) {
-    return json({ profile: cachedFull, cached: true });
+    const shared = await borrowAliasImages(
+      admin,
+      visible.organisation_id as string,
+      (visible.search_id as string | null) ?? null,
+      matchId,
+      cachedFull as never,
+    );
+    return json({
+      profile: { ...cachedFull, images: shared.images },
+      cached: true,
+      images_shared_from_alias: shared.shared,
+    });
   }
 
   // A refresh triggers a fresh, billable provider lookup, so it consumes one
