@@ -6,8 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import ScreeningLayout from "@/components/screening/ScreeningLayout";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -160,26 +159,26 @@ export default function ScreeningTeam() {
 
   if (accessLoading || loading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+  <ScreeningLayout
+      head={
         <SEO title="Team & Access | WorldAML Screening" description="Manage Screening workspace members, roles and seat allocation." noindex />
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <div className="flex items-center gap-3 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" /> Loading team…
-          </div>
-        </main>
-        <Footer />
-      </div>
+      }
+    >
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" /> Loading team…
+        </div>
+      </ScreeningLayout>
     );
   }
 
   if (!hasAccess) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+  <ScreeningLayout
+      head={
         <SEO title="Team & Access | WorldAML Screening" description="Manage Screening workspace members, roles and seat allocation." noindex />
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <Card className="max-w-2xl mx-auto">
+      }
+    >
+        <Card className="max-w-2xl mx-auto">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Shield className="h-5 w-5 text-teal" /> Screening access required
@@ -193,18 +192,17 @@ export default function ScreeningTeam() {
                 <Link to="/screening-monitoring/pricing">View packages</Link>
               </Button>
             </CardContent>
-          </Card>
-        </main>
-        <Footer />
-      </div>
+        </Card>
+      </ScreeningLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <SEO title="Team & Access | WorldAML Screening" description="Manage Screening workspace members, roles and seat allocation." noindex />
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
+    <ScreeningLayout
+      head={
+        <SEO title="Team & Access | WorldAML Screening" description="Manage Screening workspace members, roles and seat allocation." noindex />
+      }
+    >
         <div className="mb-6 flex items-center gap-3">
           <Button asChild variant="ghost" size="sm">
             <Link to="/screening">
