@@ -3,6 +3,7 @@ import { LifeBuoy, Mail, MessageSquareQuote, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useBusinessWorkspace } from "@/hooks/useBusinessWorkspace";
+import { riskAlertHelp } from "@/lib/riskAlertHelp";
 
 export default function BusinessSupport() {
   const { account } = useBusinessWorkspace();
