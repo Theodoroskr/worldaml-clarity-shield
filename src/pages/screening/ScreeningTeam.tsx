@@ -348,7 +348,6 @@ export default function ScreeningTeam() {
             </Card>
           ))}
         </div>
-      <div />
 
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
         <DialogContent className="sm:max-w-md">
