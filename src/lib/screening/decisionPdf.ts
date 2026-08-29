@@ -1,5 +1,21 @@
 import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
+import type { FullEntityProfile } from "@/lib/suite/screeningV2";
+
+export type DecisionPdfAttribute = {
+  field_label: string;
+  subject_value: string | null;
+  match_value: string | null;
+  assessment: string | null;
+};
+
+export type DecisionPdfSource = {
+  source_name: string;
+  jurisdiction: string | null;
+  listing_date: string | null;
+  description: string | null;
+  category: string | null;
+};
 
 export type DecisionPdfInput = {
   matchedName?: string | null;
@@ -16,6 +32,12 @@ export type DecisionPdfInput = {
   decisionLabel: string;
   reason?: string | null;
   rationale?: string | null;
+  /** Full provider profile — when present, all profile details are appended. */
+  profile?: FullEntityProfile | null;
+  /** Side-by-side match attribute comparison rows. */
+  attributes?: DecisionPdfAttribute[];
+  /** Source listings attached to the match. */
+  sources?: DecisionPdfSource[];
 };
 
 type Reviewer = { name: string; email: string; userId: string; organisation?: string | null };
