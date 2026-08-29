@@ -73,7 +73,7 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
     faq: [
       { q: "How many lists are covered?", a: "1,900+ global sanctions, PEP, watchlist and adverse media sources." },
       { q: "Can we screen in bulk?", a: "Yes — batch screening and the REST API are included on all plans." },
-      { q: "Is there a free trial?", a: "Trials are arranged with our team. Use Contact Sales to request an evaluation." },
+      { q: "Is there a free trial?", a: "Yes — the Demo plan is free and self-serve. Activate it instantly for 5 screening searches, no card required." },
     ],
     plans: SCREENING_PLANS.map((p) => ({
       key: p.key,
@@ -85,6 +85,9 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
       checkout: isCheckoutEnabled(p)
         ? { fn: "create-worldaml-checkout", plan: p.checkoutPlan }
         : undefined,
+      // The free Demo plan is self-serve: activate it in-app, never via sales.
+      configureUrl: p.key === "demo" ? "/business/demo" : undefined,
+      configureLabel: p.key === "demo" ? "Start Free Demo" : undefined,
     })),
     pairsWith: ["worldid", "academy"],
     usageUnit: "monitored entities",
@@ -240,6 +243,9 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
       checkout: isCheckoutEnabled(p)
         ? { fn: "create-worldaml-checkout", plan: p.checkoutPlan }
         : undefined,
+      // The free Demo plan is self-serve: activate it in-app, never via sales.
+      configureUrl: p.key === "demo" ? "/business/demo" : undefined,
+      configureLabel: p.key === "demo" ? "Start Free Demo" : undefined,
     })),
     pairsWith: ["worldid", "academy"],
     usageUnit: "monitored entities",
