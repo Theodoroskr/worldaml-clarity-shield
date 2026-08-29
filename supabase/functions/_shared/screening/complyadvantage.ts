@@ -469,7 +469,18 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
       const conflictCount = attributes.filter((a) => a.assessment === "conflict").length;
       const score = typeof hit?.score === "number" ? Number(hit.score) : null;
       const matchTypes = (hit?.match_types as string[]) ?? [];
-      const similarity = score != null ? Math.max(0, Math.min(100, Math.round(score * 100) / 1)) : null;
+      const aliasNames = ((doc?.aka as Array<Record<string, unknown>>) ?? [])
+        .map((a) => String(a?.name ?? ""))
+        .filter(Boolean);
+      // Provider relevance (flat 0.7 for fuzzy hits) is kept for reference, but the
+      // displayed name match is our own Jaro-Winkler similarity.
+      const providerRelevance = score != null ? Math.max(0, Math.min(100, Math.round(score * 100))) : null;
+      const similarity = bestNameSimilarity(
+        subject?.full_name ?? null,
+        String(doc?.name ?? ""),
+        aliasNames,
+        matchTypes,
+      ) ?? providerRelevance;
 
       return {
         provider_id: String(doc?.id ?? ""),
@@ -478,6 +489,7 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
         categories,
         category_labels: Array.from(new Set(types.map(labelFor))),
         name_similarity: similarity != null ? Math.min(100, similarity) : null,
+
         country,
         year_of_birth: yearOf(dobValue) ? Number(yearOf(dobValue)) : null,
         matched_attribute_count: matchedCount,
