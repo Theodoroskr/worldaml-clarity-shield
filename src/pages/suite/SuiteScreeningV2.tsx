@@ -1355,7 +1355,8 @@ function MatchReview({
       setSources((srcs as SourceRow[]) ?? []);
     })();
     loadProfile(match.id);
-  }, [match, loadProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [match?.id, subjectType, loadProfile]);
 
   const needsReason = decision === "false_positive";
   const canSave = useMemo(() => rationale.trim().length >= 10, [rationale]);
