@@ -159,8 +159,8 @@ export default function ScreeningRiskAlerts() {
       enabled: form.enabled,
     };
     const { error } = editing
-      ? await supabase.from("screening_risk_alert_rules").update(payload).eq("id", editing.id)
-      : await supabase.from("screening_risk_alert_rules").insert(payload);
+      ? await (supabase.from as any)("screening_risk_alert_rules").update(payload).eq("id", editing.id)
+      : await (supabase.from as any)("screening_risk_alert_rules").insert(payload);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success(editing ? "Rule updated" : "Rule created");
@@ -169,14 +169,14 @@ export default function ScreeningRiskAlerts() {
   };
 
   const toggleEnabled = async (rule: Rule, enabled: boolean) => {
-    const { error } = await supabase.from("screening_risk_alert_rules").update({ enabled }).eq("id", rule.id);
+    const { error } = await (supabase.from as any)("screening_risk_alert_rules").update({ enabled }).eq("id", rule.id);
     if (error) { toast.error(error.message); return; }
     setRules((rs) => rs.map((r) => (r.id === rule.id ? { ...r, enabled } : r)));
   };
 
   const remove = async (rule: Rule) => {
     if (!confirm(`Delete rule "${rule.name}"? This cannot be undone.`)) return;
-    const { error } = await supabase.from("screening_risk_alert_rules").delete().eq("id", rule.id);
+    const { error } = await (supabase.from as any)("screening_risk_alert_rules").delete().eq("id", rule.id);
     if (error) { toast.error(error.message); return; }
     toast.success("Rule deleted");
     void load();
