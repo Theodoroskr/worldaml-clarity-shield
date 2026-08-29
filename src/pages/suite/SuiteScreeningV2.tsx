@@ -170,6 +170,27 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
   const [customiseSources, setCustomiseSources] = useState(false);
   const [sourceTypes, setSourceTypes] = useState<string[]>(ALL_SOURCE_TYPES);
   const [searchProfileId, setSearchProfileId] = useState("");
+  const [adverseMediaAllowed, setAdverseMediaAllowed] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("screening_policies")
+        .select("config, is_default")
+        .eq("is_active", true)
+        .order("is_default", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled) return;
+      const cfg = (data?.config ?? {}) as Record<string, unknown>;
+      const allowed = cfg.adverse_media === true;
+      setAdverseMediaAllowed(allowed);
+      if (!allowed) setAdverseMedia(false);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
 
   const toggleSourceType = (value: string, checked: boolean) =>
     setSourceTypes((prev) =>
@@ -210,8 +231,8 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
       const profileId = searchProfileId.trim();
       const result = await runScreeningV2({
         subject,
-        include_adverse_media: adverseMedia ||
-          (customiseSources && sourceTypes.some((t) => t.startsWith("adverse-media"))),
+        include_adverse_media: adverseMediaAllowed &&
+          (adverseMedia || (customiseSources && sourceTypes.some((t) => t.startsWith("adverse-media")))),
         start_monitoring: monitoring,
         advanced: {
           ...(profileId ? { search_profile_id: profileId } : {}),
@@ -384,8 +405,15 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
 
                 <div className="flex flex-wrap items-center gap-6 rounded-lg border border-border bg-muted/30 p-4">
                   <label className="flex items-center gap-3 text-sm">
-                    <Switch checked={adverseMedia} onCheckedChange={setAdverseMedia} />
+                    <Switch
+                      checked={adverseMedia && adverseMediaAllowed}
+                      disabled={!adverseMediaAllowed}
+                      onCheckedChange={setAdverseMedia}
+                    />
                     Include adverse media
+                    {!adverseMediaAllowed && (
+                      <span className="text-xs text-muted-foreground">Not included in your plan</span>
+                    )}
                   </label>
                   <label className="flex items-center gap-3 text-sm">
                     <Switch
