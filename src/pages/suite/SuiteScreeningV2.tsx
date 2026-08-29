@@ -1369,7 +1369,7 @@ function ProfilePhotoGallery({ name, images }: { name: string | null; images: st
     <div
       aria-hidden
       className={cn(
-        "relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full border text-2xl font-semibold",
+        "relative flex h-20 w-20 shrink-0 items-center justify-center rounded-full border text-xl font-semibold sm:h-24 sm:w-24 sm:text-2xl",
         tone,
       )}
     >
