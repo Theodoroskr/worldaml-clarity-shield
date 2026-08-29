@@ -291,6 +291,7 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
   };
 
   const openCase = async (row: CaseRow) => {
+    try {
     const [{ data: caseData }, { data: searchData }, { data: subjectData }] = await Promise.all([
       supabase.from("screening_cases").select("*").eq("id", row.id).maybeSingle(),
       row.search_id
@@ -301,10 +302,15 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
         : Promise.resolve({ data: null }),
     ]);
     setActiveCase({
-      ...(caseData as CaseRow),
-      search: searchData as CaseDetail["search"],
-      subject: subjectData as CaseDetail["subject"],
+      ...(row as CaseRow),
+      ...((caseData ?? {}) as CaseRow),
+      search: (searchData ?? null) as CaseDetail["search"],
+      subject: (subjectData ?? null) as CaseDetail["subject"],
     });
+    } catch (e) {
+      console.error("openCase failed", e);
+      toast.error("Could not open this case. Please try again.");
+    }
   };
 
   const isPerson = subject.subject_type === "person";
@@ -899,7 +905,7 @@ function ResultsWorkspace({
                   onPrefetch={() => prefetchFullProfile(m.id)}
                    onDecision={onDecision}
                    fourEyes={fourEyes}
-                   subjectType={caseDetail.subject.subject_type}
+                   subjectType={caseDetail.subject?.subject_type}
                  />
 
               ))}
@@ -988,7 +994,7 @@ function ResultsWorkspace({
 
       <MatchReview
         match={selected}
-        subjectType={caseDetail.subject.subject_type}
+        subjectType={caseDetail.subject?.subject_type}
         onClose={() => setSelected(null)}
         onSaved={async () => { setSelected(null); await load(); }}
       />
