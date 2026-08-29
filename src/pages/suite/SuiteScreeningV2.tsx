@@ -1156,6 +1156,104 @@ function SummaryRow({
   );
 }
 
+/**
+ * Shows which search parameters restricted the result set for this run:
+ * entity type, categories, fuzziness, countries and search profile.
+ */
+function ActiveFilters({
+  search,
+  fuzziness,
+}: {
+  search: CaseDetail["search"];
+  fuzziness: number | undefined;
+}) {
+  if (!search) return null;
+  const p = (search.search_parameters ?? {}) as Record<string, unknown>;
+
+  const entityType = typeof p.entity_type === "string" ? p.entity_type : null;
+  const entityLabel = entityType
+    ? (SUBJECT_TYPE_LABELS[entityType as SubjectType] ?? entityType)
+    : null;
+  const entityRestricts = !!entityType && entityType !== "any";
+
+  const screened = (search.categories_screened ?? []) as ScreeningCategory[];
+  const ALL_CATEGORIES: ScreeningCategory[] = ["sanctions", "pep_rca", "warnings", "adverse_media"];
+  const excludedCategories = ALL_CATEGORIES.filter((c) => !screened.includes(c));
+
+  const exactMatch = p.exact_match === true;
+  const fuzzPct = exactMatch ? 0 : fuzziness != null ? Math.round(fuzziness * 100) : null;
+  const fuzzRestricts = exactMatch || (fuzzPct != null && fuzzPct < 50);
+
+  const countries = Array.isArray(p.countries)
+    ? (p.countries as unknown[]).map(String).filter(Boolean)
+    : [];
+  const profileId = typeof p.search_profile_id === "string" && p.search_profile_id ? p.search_profile_id : null;
+  const sourceTypes = Array.isArray(p.source_types) ? (p.source_types as unknown[]).map(String) : [];
+
+  const Row = ({ label, children, restricts }: { label: string; children: React.ReactNode; restricts: boolean }) => (
+    <div className="flex items-start justify-between gap-3">
+      <span className="shrink-0 whitespace-nowrap text-muted-foreground">{label}</span>
+      <div className="flex flex-wrap items-center justify-end gap-1.5 text-right">
+        {children}
+        <Badge
+          variant="outline"
+          className={restricts
+            ? "border-amber-200 bg-amber-50 text-amber-700"
+            : "border-emerald-200 bg-emerald-50 text-emerald-700"}
+        >
+          {restricts ? "Restricting" : "No restriction"}
+        </Badge>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-1.5">
+        <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+        <Label className="text-xs">Active filters</Label>
+      </div>
+      <div className="space-y-2 text-sm">
+        <Row label="Entity type" restricts={entityRestricts}>
+          <span className="font-medium">
+            {entityType === "any" ? "Any — individuals & organisations" : entityLabel ?? "—"}
+          </span>
+        </Row>
+        <Row label="Fuzziness" restricts={fuzzRestricts}>
+          <span className="font-medium">
+            {fuzzPct != null ? `${fuzzPct}%${exactMatch ? " (exact only)" : ""}` : "—"}
+          </span>
+        </Row>
+        <Row label="Categories" restricts={excludedCategories.length > 0}>
+          <span className="font-medium">
+            {excludedCategories.length === 0
+              ? "All categories"
+              : screened.map((c) => CATEGORY_LABELS[c] ?? c).join(", ") || "—"}
+          </span>
+        </Row>
+        {excludedCategories.length > 0 && (
+          <p className="text-right text-xs text-muted-foreground">
+            Not screened: {excludedCategories.map((c) => CATEGORY_LABELS[c] ?? c).join(", ")}
+          </p>
+        )}
+        <Row label="Countries" restricts={countries.length > 0}>
+          <span className="font-medium">{countries.length ? countries.join(", ") : "Worldwide"}</span>
+        </Row>
+        {profileId && (
+          <Row label="Search profile" restricts>
+            <span className="break-all font-medium">{profileId}</span>
+          </Row>
+        )}
+        {!profileId && sourceTypes.length > 0 && (
+          <Row label="Source types" restricts>
+            <span className="font-medium">{sourceTypes.length} selected</span>
+          </Row>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function MatchCard({
   match,
   extra,
