@@ -4,7 +4,7 @@ import {
   Loader2, Search, ShieldCheck, Activity, FileText, ChevronRight,
   ArrowLeft, Copy, Check, X, Filter, Tag, MoreHorizontal,
   AlertTriangle, User, Building2, Ship, Plane, RefreshCw, ExternalLink, Users, Lock,
-  ArrowDownUp, Info,
+  ArrowDownUp, Info, ImageOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -1295,6 +1295,7 @@ function orderImages(images: string[]): string[] {
 function ProfileAvatar({ name, images }: { name: string | null; images: string[] }) {
   const ordered = useMemo(() => orderImages(images), [images]);
   const [idx, setIdx] = useState(0);
+  const [loaded, setLoaded] = useState(false);
   const label = (name ?? "?").trim();
   const initials = label
     .split(/\s+/)
@@ -1305,28 +1306,75 @@ function ProfileAvatar({ name, images }: { name: string | null; images: string[]
   const tone = AVATAR_TONES[hash % AVATAR_TONES.length];
 
   const current = ordered[idx];
+  const tried = ordered.slice(0, idx);
+
+  // Skeleton while the photo resolves — no initials flash before we know
+  // whether an image exists.
   if (current) {
     return (
-      <img
-        src={current}
-        alt={label ? `Profile photo of ${label}` : "Listed profile photo"}
-        onError={() => setIdx((i) => i + 1)}
-        className="h-16 w-16 shrink-0 rounded-full border border-border object-cover"
-        loading="lazy"
-        referrerPolicy="no-referrer"
-      />
+      <div className="relative h-16 w-16 shrink-0">
+        {!loaded && (
+          <div
+            aria-hidden
+            className="absolute inset-0 animate-pulse rounded-full border border-border bg-muted"
+          />
+        )}
+        <img
+          src={current}
+          alt={label ? `Profile photo of ${label}` : "Listed profile photo"}
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            setLoaded(false);
+            setIdx((i) => i + 1);
+          }}
+          className={cn(
+            "h-16 w-16 shrink-0 rounded-full border border-border object-cover transition-opacity",
+            loaded ? "opacity-100" : "opacity-0",
+          )}
+          loading="lazy"
+          referrerPolicy="no-referrer"
+        />
+      </div>
     );
   }
-  return (
+
+  const hadPhotos = ordered.length > 0;
+  const avatar = (
     <div
       aria-hidden
       className={cn(
-        "flex h-16 w-16 shrink-0 items-center justify-center rounded-full border text-lg font-semibold",
+        "relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full border text-lg font-semibold",
         tone,
       )}
     >
       {initials || "?"}
+      {hadPhotos && (
+        <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-amber-700">
+          <ImageOff className="h-3 w-3" />
+        </span>
+      )}
     </div>
+  );
+
+  if (!hadPhotos) return avatar;
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>{avatar}</TooltipTrigger>
+        <TooltipContent className="max-w-xs">
+          <p className="font-semibold">Photo unavailable</p>
+          <p className="mt-1 text-xs opacity-80">
+            The source photo could not be loaded (blocked or removed). Tried{" "}
+            {tried.length || ordered.length} URL{(tried.length || ordered.length) === 1 ? "" : "s"}:
+          </p>
+          <ul className="mt-1 space-y-0.5 text-xs">
+            {(tried.length ? tried : ordered).map((u) => (
+              <li key={u} className="truncate opacity-80">{u}</li>
+            ))}
+          </ul>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 

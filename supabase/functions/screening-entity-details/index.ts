@@ -12,6 +12,65 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
+const normName = (v: unknown) =>
+  String(v ?? "").toLowerCase().replace(/[^\p{L}\p{N} ]/gu, " ").replace(/\s+/g, " ").trim();
+
+/** When a profile has no photos of its own, borrow the photos of a sibling
+ *  profile for the same entity — matches from the same screening search first
+ *  (strongest alias signal), then any match in the organisation whose primary
+ *  name or aliases overlap this profile's names. */
+async function borrowAliasImages(
+  admin: ReturnType<typeof createClient>,
+  orgId: string,
+  searchId: string | null,
+  matchId: string,
+  profile: { images: string[]; primary_name: string | null; aliases: string[] },
+): Promise<{ images: string[]; shared: boolean }> {
+  if (profile.images.length > 0) return { images: profile.images, shared: false };
+
+  const names = new Set(
+    [profile.primary_name, ...profile.aliases].map(normName).filter(Boolean),
+  );
+  if (names.size === 0) return { images: [], shared: false };
+
+  const collect = (rows: Record<string, unknown>[] | null): string[] => {
+    for (const row of rows ?? []) {
+      if (String(row.id) === matchId) continue;
+      const fp = (row.profile as Record<string, unknown> | null)?.full_profile as
+        | Record<string, unknown>
+        | undefined;
+      const imgs = Array.isArray(fp?.images) ? (fp!.images as string[]).filter(Boolean) : [];
+      if (imgs.length === 0) continue;
+      const otherNames = [fp!.primary_name, ...((fp!.aliases as string[]) ?? []), row.matched_name]
+        .map(normName)
+        .filter(Boolean);
+      if (otherNames.some((n) => names.has(n))) return imgs;
+    }
+    return [];
+  };
+
+  if (searchId) {
+    const { data } = await admin
+      .from("screening_matches")
+      .select("id, matched_name, profile")
+      .eq("search_id", searchId)
+      .not("profile_fetched_at", "is", null)
+      .limit(50);
+    const imgs = collect(data as Record<string, unknown>[] | null);
+    if (imgs.length > 0) return { images: imgs, shared: true };
+  }
+
+  const { data } = await admin
+    .from("screening_matches")
+    .select("id, matched_name, profile")
+    .eq("organisation_id", orgId)
+    .not("profile_fetched_at", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  const imgs = collect(data as Record<string, unknown>[] | null);
+  return { images: imgs, shared: imgs.length > 0 };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -53,7 +112,18 @@ Deno.serve(async (req) => {
   const cachedFull = cached.full_profile as Record<string, unknown> | undefined;
   const isRefresh = body.refresh === true;
   if (cachedFull && !isRefresh) {
-    return json({ profile: cachedFull, cached: true });
+    const shared = await borrowAliasImages(
+      admin,
+      visible.organisation_id as string,
+      (visible.search_id as string | null) ?? null,
+      matchId,
+      cachedFull as never,
+    );
+    return json({
+      profile: { ...cachedFull, images: shared.images },
+      cached: true,
+      images_shared_from_alias: shared.shared,
+    });
   }
 
   // A refresh triggers a fresh, billable provider lookup, so it consumes one
@@ -108,11 +178,20 @@ Deno.serve(async (req) => {
     const content = await provider.retrieveFullDetails(providerSearchId, String(ref.provider_id));
     const profile = normaliseEntityProfile(content);
 
+    const shared = await borrowAliasImages(
+      admin,
+      orgId,
+      (visible.search_id as string | null) ?? null,
+      matchId,
+      profile,
+    );
+    const profileWithImages = { ...profile, images: shared.images };
+
     const fetchedAt = new Date().toISOString();
     await admin
       .from("screening_matches")
       .update({
-        profile: { ...cached, full_profile: profile, full_profile_loaded_at: fetchedAt },
+        profile: { ...cached, full_profile: profileWithImages, full_profile_loaded_at: fetchedAt },
         profile_fetched_at: fetchedAt,
       })
       .eq("id", matchId);
@@ -151,12 +230,18 @@ Deno.serve(async (req) => {
         media: profile.media.length,
         refresh: isRefresh,
         billable: isRefresh,
+        images_shared_from_alias: shared.shared,
         fetched_at: fetchedAt,
       },
       actor_id: user.id,
     });
 
-    return json({ profile, cached: false, consumed_search: isRefresh });
+    return json({
+      profile: profileWithImages,
+      cached: false,
+      consumed_search: isRefresh,
+      images_shared_from_alias: shared.shared,
+    });
   } catch (err) {
     return providerErrorResponse(err, corsHeaders);
   }

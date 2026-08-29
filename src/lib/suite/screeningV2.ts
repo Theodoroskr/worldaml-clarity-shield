@@ -260,6 +260,18 @@ export function fetchFullProfile(matchId: string, refresh = false): Promise<Full
     throw err;
   });
   profileCache.set(matchId, promise);
+  // Warm the profile photos as soon as the profile lands so the avatar never
+  // flashes initials before the image has had a chance to resolve.
+  void promise.then((profile) => {
+    const images = (profile?.images ?? []).filter(Boolean);
+    const secure = images.filter((u) => u.startsWith("https://"));
+    const src = secure[0] ?? images[0];
+    if (src) {
+      const img = new Image();
+      img.referrerPolicy = "no-referrer";
+      img.src = src;
+    }
+  }).catch(() => undefined);
   return promise;
 }
 
