@@ -4,8 +4,8 @@
 import type { MatchBasis, NameMatchDebug } from "./nameMatch.ts";
 export type { MatchBasis, NameMatchDebug, NameMatchResult, NameMatchCandidate } from "./nameMatch.ts";
 
-export type SubjectType = "person" | "company" | "organisation" | "vessel" | "aircraft";
-export const SUBJECT_TYPES: SubjectType[] = ["person", "company", "organisation", "vessel", "aircraft"];
+export type SubjectType = "person" | "company" | "organisation" | "vessel" | "aircraft" | "any";
+export const SUBJECT_TYPES: SubjectType[] = ["person", "company", "organisation", "vessel", "aircraft", "any"];
 export type Category = "sanctions" | "pep_rca" | "warnings" | "adverse_media";
 export type Assessment = "match" | "partial_match" | "conflict" | "unavailable";
 

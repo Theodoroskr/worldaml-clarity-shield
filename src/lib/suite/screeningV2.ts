@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type SubjectType = "person" | "company" | "organisation" | "vessel" | "aircraft";
+export type SubjectType = "person" | "company" | "organisation" | "vessel" | "aircraft" | "any";
 export type ScreeningCategory = "sanctions" | "pep_rca" | "warnings" | "adverse_media";
 
 export const SUBJECT_TYPE_LABELS: Record<SubjectType, string> = {
@@ -9,6 +9,7 @@ export const SUBJECT_TYPE_LABELS: Record<SubjectType, string> = {
   organisation: "Organization",
   vessel: "Vessel",
   aircraft: "Aircraft",
+  any: "Any (Individual & Organisation)",
 };
 
 /**
