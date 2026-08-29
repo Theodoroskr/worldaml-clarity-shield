@@ -61,7 +61,8 @@ const fmtDate = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "Never";
 
 export default function ScreeningRiskAlerts() {
-  const { orgId, loading: accessLoading, hasAccess, isAdmin } = useScreeningAccess();
+  const { isLoading: accessLoading, hasAccess, isAdmin } = useScreeningAccess();
+  const [orgId, setOrgId] = useState<string | null>(null);
   const [rules, setRules] = useState<Rule[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,31 +72,37 @@ export default function ScreeningRiskAlerts() {
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
-    if (!orgId) return;
-    const [rulesRes, membersRes] = await Promise.all([
-      supabase.from("screening_risk_alert_rules").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false }),
-      supabase.from("screening_org_members").select("user_id").eq("organisation_id", orgId),
+    const [orgRes, membersRes] = await Promise.all([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase.rpc as any)("current_user_screening_org") as Promise<{ data: string | null; error: unknown }>,
+      supabase.rpc("screening_team_members"),
     ]);
-    setRules((rulesRes.data as Rule[] | null) ?? []);
+    if (orgRes.error) {
+      toast.error("Could not resolve your organisation");
+      setLoading(false);
+      return;
+    }
+    setOrgId(orgRes.data ?? null);
 
-    const userIds = ((membersRes.data as { user_id: string }[] | null) ?? []).map((m) => m.user_id);
-    if (userIds.length) {
-      const { data: profiles } = await supabase
-        .from("profiles").select("user_id, full_name, email").in("user_id", userIds);
-      const byUser = new Map((profiles ?? []).map((p) => [p.user_id, p]));
-      setMembers(userIds.map((id) => ({
-        user_id: id,
-        full_name: byUser.get(id)?.full_name ?? null,
-        email: byUser.get(id)?.email ?? null,
-      })));
+    const team = (membersRes.data as unknown as { user_id: string | null; email: string | null; full_name: string | null }[] | null) ?? [];
+    setMembers(team.filter((m) => m.user_id).map((m) => ({ user_id: m.user_id as string, full_name: m.full_name, email: m.email })));
+
+    if (orgRes.data) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await (supabase.from as any)("screening_risk_alert_rules")
+        .select("*")
+        .eq("organisation_id", orgRes.data)
+        .order("created_at", { ascending: false }) as { data: Rule[] | null };
+      setRules(data ?? []);
     }
     setLoading(false);
-  }, [orgId]);
+  }, []);
 
   useEffect(() => {
     if (!accessLoading && hasAccess) void load();
     if (!accessLoading && !hasAccess) setLoading(false);
   }, [accessLoading, hasAccess, load]);
+
 
   const memberName = (id: string | null) => {
     if (!id) return "Any assignee";
