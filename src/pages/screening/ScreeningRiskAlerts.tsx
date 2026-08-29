@@ -192,11 +192,24 @@ export default function ScreeningRiskAlerts() {
     );
   }
 
+  const shell = (children: React.ReactNode) => (
+    <div className="min-h-screen bg-background flex flex-col">
+      <SEO
+        title="Risk Alerts | WorldAML Screening"
+        description="Configure risk-level alerts that notify you when a monitored entity crosses a risk threshold."
+        noindex
+      />
+      <Header />
+      <main className="flex-1">{children}</main>
+      <Footer />
+    </div>
+  );
+
   if (!hasAccess) {
-    return (
+    return shell(
       <div className="mx-auto max-w-lg py-24 text-center">
         <p className="text-muted-foreground">You need Screening access to manage risk alerts.</p>
-      </div>
+      </div>,
     );
   }
 
