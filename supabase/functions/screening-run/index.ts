@@ -11,6 +11,8 @@ import {
   ScreeningSubjectInput,
   SUBJECT_TYPES,
 } from "../_shared/screening/index.ts";
+import { evaluateRiskAlerts } from "../_shared/screening/riskAlerts.ts";
+
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
