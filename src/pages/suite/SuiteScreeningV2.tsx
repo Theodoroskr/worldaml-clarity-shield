@@ -1148,6 +1148,14 @@ function MatchCard({
           {match.matched_name}
         </h3>
 
+        {match.winning_name && match.winning_name !== match.matched_name && (
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Matched on{" "}
+            <span className="font-medium text-foreground">{match.winning_name}</span>
+            {match.winning_name_kind === "alias" ? " (alias)" : ""}
+          </p>
+        )}
+
         <div className="mt-3 flex flex-wrap gap-1.5">
           {categoryBadges.map(({ cat, count }) => (
             <Badge key={cat} variant="outline" className={riskTone([cat])}>
