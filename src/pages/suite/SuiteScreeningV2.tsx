@@ -1282,6 +1282,51 @@ function MatchCard({
   );
 }
 
+const AVATAR_TONES = [
+  "bg-teal-100 text-teal-800 border-teal-200",
+  "bg-indigo-100 text-indigo-800 border-indigo-200",
+  "bg-rose-100 text-rose-800 border-rose-200",
+  "bg-amber-100 text-amber-800 border-amber-200",
+  "bg-emerald-100 text-emerald-800 border-emerald-200",
+  "bg-sky-100 text-sky-800 border-sky-200",
+];
+
+function ProfileAvatar({ name, imageUrl }: { name: string | null; imageUrl?: string }) {
+  const [imgError, setImgError] = useState(false);
+  const label = (name ?? "?").trim();
+  const initials = label
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+  const hash = label.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  const tone = AVATAR_TONES[hash % AVATAR_TONES.length];
+
+  if (imageUrl && !imgError) {
+    return (
+      <img
+        src={imageUrl}
+        alt={label ? `Profile photo of ${label}` : "Listed profile photo"}
+        onError={() => setImgError(true)}
+        className="h-16 w-16 shrink-0 rounded-full border border-border object-cover"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    );
+  }
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "flex h-16 w-16 shrink-0 items-center justify-center rounded-full border text-lg font-semibold",
+        tone,
+      )}
+    >
+      {initials || "?"}
+    </div>
+  );
+}
+
 function KeyInfo({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
