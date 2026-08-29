@@ -1282,6 +1282,51 @@ function MatchCard({
   );
 }
 
+const AVATAR_TONES = [
+  "bg-teal-100 text-teal-800 border-teal-200",
+  "bg-indigo-100 text-indigo-800 border-indigo-200",
+  "bg-rose-100 text-rose-800 border-rose-200",
+  "bg-amber-100 text-amber-800 border-amber-200",
+  "bg-emerald-100 text-emerald-800 border-emerald-200",
+  "bg-sky-100 text-sky-800 border-sky-200",
+];
+
+function ProfileAvatar({ name, imageUrl }: { name: string | null; imageUrl?: string }) {
+  const [imgError, setImgError] = useState(false);
+  const label = (name ?? "?").trim();
+  const initials = label
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+  const hash = label.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  const tone = AVATAR_TONES[hash % AVATAR_TONES.length];
+
+  if (imageUrl && !imgError) {
+    return (
+      <img
+        src={imageUrl}
+        alt={label ? `Profile photo of ${label}` : "Listed profile photo"}
+        onError={() => setImgError(true)}
+        className="h-16 w-16 shrink-0 rounded-full border border-border object-cover"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    );
+  }
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "flex h-16 w-16 shrink-0 items-center justify-center rounded-full border text-lg font-semibold",
+        tone,
+      )}
+    >
+      {initials || "?"}
+    </div>
+  );
+}
+
 function KeyInfo({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
@@ -1433,7 +1478,8 @@ function MatchReview({
               <div className="mb-2 flex items-center justify-between gap-3">
                 <h4 className="text-sm font-semibold">Key information</h4>
                 <div className="flex items-center gap-2">
-                  <span className="hidden text-[11px] text-muted-foreground sm:inline">
+                  <span className="hidden items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800 sm:inline-flex">
+                    <RefreshCw className="h-3 w-3" />
                     Uses 1 search
                   </span>
                   <Button
@@ -1454,22 +1500,60 @@ function MatchReview({
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Refresh uses one screening search</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Refreshing pulls a live, up-to-date profile from the data provider and is
-                      charged as <span className="font-medium">1 search</span> from your annual
-                      allowance.
-                      {quota.searchQuota != null && (
-                        <>
-                          {" "}You have used {quota.searchesUsed ?? 0} of {quota.searchQuota} searches
-                          this year.
-                        </>
-                      )}
-                      {" "}The cached profile stays available for free until you refresh again.
+                    <AlertDialogDescription asChild>
+                      <div className="space-y-3 text-sm text-muted-foreground">
+                        <p>
+                          Refreshing pulls a live, up-to-date profile from the data provider and is
+                          charged as{" "}
+                          <span className="rounded bg-amber-100 px-1.5 py-0.5 font-semibold text-amber-800">
+                            1 search
+                          </span>{" "}
+                          from your annual allowance. The cached profile stays available for free
+                          until you refresh again.
+                        </p>
+                        {quota.searchQuota != null && (
+                          <div className="space-y-1.5 rounded-lg border border-border bg-muted/40 p-3">
+                            <div className="flex items-center justify-between text-xs font-medium">
+                              <span>Annual search usage</span>
+                              <span
+                                className={cn(
+                                  quota.searchesExceeded
+                                    ? "text-red-600"
+                                    : (quota.searchesUsed ?? 0) / quota.searchQuota > 0.8
+                                      ? "text-amber-700"
+                                      : "text-emerald-700",
+                                )}
+                              >
+                                {quota.searchesUsed ?? 0} of {quota.searchQuota} used
+                                {!quota.searchesExceeded && ` → ${(quota.searchesUsed ?? 0) + 1} after refresh`}
+                              </span>
+                            </div>
+                            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                              <div
+                                className={cn(
+                                  "h-full rounded-full transition-all",
+                                  quota.searchesExceeded ? "bg-red-500" : "bg-amber-500",
+                                )}
+                                style={{
+                                  width: `${Math.min(
+                                    100,
+                                    (((quota.searchesUsed ?? 0) + 1) / quota.searchQuota) * 100,
+                                  )}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Keep cached profile</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => match && loadProfile(match.id, true)}>
+                    <AlertDialogAction
+                      className="bg-amber-600 text-white hover:bg-amber-700"
+                      onClick={() => match && loadProfile(match.id, true)}
+                    >
+                      <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
                       Refresh (1 search)
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -1485,17 +1569,20 @@ function MatchReview({
               )}
               {profileError && <p className="text-xs text-red-600">{profileError}</p>}
               {profile && (
-                <dl className="grid gap-x-6 gap-y-2 text-sm md:grid-cols-2">
-                  <KeyInfo label="Full name" value={profile.primary_name} />
-                  <KeyInfo label="Entity type" value={profile.entity_type} />
-                  <KeyInfo label="Dates of birth" value={profile.dates_of_birth.join(", ")} />
-                  <KeyInfo label="Place of birth" value={profile.places_of_birth.join(", ")} />
-                  <KeyInfo label="Nationalities" value={profile.nationalities.join(", ")} />
-                  <KeyInfo label="Countries" value={profile.countries.join(", ")} />
-                  <div className="md:col-span-2">
-                    <KeyInfo label="Also known as" value={profile.aliases.join(", ")} />
-                  </div>
-                </dl>
+                <div className="flex gap-4">
+                  <ProfileAvatar name={profile.primary_name} imageUrl={profile.images[0]} />
+                  <dl className="grid flex-1 gap-x-6 gap-y-2 text-sm md:grid-cols-2">
+                    <KeyInfo label="Full name" value={profile.primary_name} />
+                    <KeyInfo label="Entity type" value={profile.entity_type} />
+                    <KeyInfo label="Dates of birth" value={profile.dates_of_birth.join(", ")} />
+                    <KeyInfo label="Place of birth" value={profile.places_of_birth.join(", ")} />
+                    <KeyInfo label="Nationalities" value={profile.nationalities.join(", ")} />
+                    <KeyInfo label="Countries" value={profile.countries.join(", ")} />
+                    <div className="md:col-span-2">
+                      <KeyInfo label="Also known as" value={profile.aliases.join(", ")} />
+                    </div>
+                  </dl>
+                </div>
               )}
             </section>
 
