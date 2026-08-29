@@ -185,10 +185,10 @@ export default function ScreeningRiskAlerts() {
   };
 
   if (accessLoading || loading) {
-    return (
+    return shell(
       <div className="flex items-center justify-center py-24 text-muted-foreground gap-2">
         <Loader2 className="h-5 w-5 animate-spin" /> Loading risk alerts…
-      </div>
+      </div>,
     );
   }
 
@@ -213,7 +213,7 @@ export default function ScreeningRiskAlerts() {
     );
   }
 
-  return (
+  return shell(
     <div className="mx-auto max-w-5xl px-4 py-8">
       <Button asChild variant="ghost" size="sm" className="mb-4 -ml-2">
         <Link to="/screening/monitored"><ArrowLeft className="mr-1.5 h-4 w-4" /> Back to Monitored entities</Link>
