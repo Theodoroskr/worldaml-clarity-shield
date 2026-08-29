@@ -178,11 +178,20 @@ Deno.serve(async (req) => {
     const content = await provider.retrieveFullDetails(providerSearchId, String(ref.provider_id));
     const profile = normaliseEntityProfile(content);
 
+    const shared = await borrowAliasImages(
+      admin,
+      orgId,
+      (visible.search_id as string | null) ?? null,
+      matchId,
+      profile,
+    );
+    const profileWithImages = { ...profile, images: shared.images };
+
     const fetchedAt = new Date().toISOString();
     await admin
       .from("screening_matches")
       .update({
-        profile: { ...cached, full_profile: profile, full_profile_loaded_at: fetchedAt },
+        profile: { ...cached, full_profile: profileWithImages, full_profile_loaded_at: fetchedAt },
         profile_fetched_at: fetchedAt,
       })
       .eq("id", matchId);
