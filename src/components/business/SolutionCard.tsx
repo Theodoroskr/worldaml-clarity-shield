@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BusinessSolution } from "@/lib/businessCatalogue";
+import { isFreeActivationPlan } from "@/lib/businessPlanCta";
 
 export function SolutionCard({
   solution,
@@ -16,6 +17,7 @@ export function SolutionCard({
 }) {
   const entry = solution.plans.find((p) => p.price);
   const buyable = solution.plans.some((p) => p.checkout || p.configureUrl);
+  const freePlan = solution.plans.find(isFreeActivationPlan);
   const Icon = solution.icon;
 
   const statusStyle =
@@ -63,7 +65,11 @@ export function SolutionCard({
             <Button asChild variant="outline" className="flex-1" onClick={onView}>
               <Link to={`/business/solutions/${solution.key}`}>View Solution</Link>
             </Button>
-            {buyable ? (
+            {freePlan ? (
+              <Button asChild variant="accent" className="flex-1">
+                <Link to={freePlan.configureUrl!}>{freePlan.configureLabel ?? "Start Free"}</Link>
+              </Button>
+            ) : buyable ? (
               <Button asChild variant="accent" className="flex-1">
                 <Link to={`/business/solutions/${solution.key}#plans`}>Buy</Link>
               </Button>
