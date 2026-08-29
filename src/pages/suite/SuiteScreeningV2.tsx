@@ -1427,7 +1427,7 @@ function ProfilePhotoGallery({ name, images }: { name: string | null; images: st
         initialsAvatar
       )}
       {available.length > 1 && (
-        <div className="flex max-w-60 gap-2 overflow-x-auto pb-0.5" role="group" aria-label="Profile photos">
+        <div className="flex max-w-[14rem] gap-2 overflow-x-auto pb-0.5 sm:max-w-60" role="group" aria-label="Profile photos">
           {available.map((u, i) => (
             <PhotoThumb
               key={u}
