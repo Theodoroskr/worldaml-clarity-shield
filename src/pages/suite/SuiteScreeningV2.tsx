@@ -611,7 +611,7 @@ function ResultsWorkspace({
     setLoading(true);
     const { data } = await supabase
       .from("screening_matches")
-      .select("id, matched_name, entity_type, categories, category_labels, name_similarity, country, year_of_birth, status, matched_attribute_count, conflicting_attribute_count, last_data_update, profile")
+      .select("id, matched_name, entity_type, categories, category_labels, name_similarity, match_basis, match_types, match_type_labels, provider_relevance, country, year_of_birth, status, matched_attribute_count, conflicting_attribute_count, last_data_update, profile")
       .eq("case_id", caseDetail.id)
       .order("name_similarity", { ascending: false });
     const rows = (data as MatchRow[]) ?? [];
