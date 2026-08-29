@@ -1282,17 +1282,19 @@ function MatchCard({
   );
 }
 
-const AVATAR_TONES = [
-  "bg-teal-100 text-teal-800 border-teal-200",
-  "bg-indigo-100 text-indigo-800 border-indigo-200",
-  "bg-rose-100 text-rose-800 border-rose-200",
-  "bg-amber-100 text-amber-800 border-amber-200",
-  "bg-emerald-100 text-emerald-800 border-emerald-200",
-  "bg-sky-100 text-sky-800 border-sky-200",
-];
+/** Prefer secure URLs first — plain-http provider images are blocked as
+ *  mixed content on an https page and would silently fall back. */
+function orderImages(images: string[]): string[] {
+  return [...images].sort((a, b) => {
+    const as = a.startsWith("https://") ? 0 : 1;
+    const bs = b.startsWith("https://") ? 0 : 1;
+    return as - bs;
+  });
+}
 
-function ProfileAvatar({ name, imageUrl }: { name: string | null; imageUrl?: string }) {
-  const [imgError, setImgError] = useState(false);
+function ProfileAvatar({ name, images }: { name: string | null; images: string[] }) {
+  const ordered = useMemo(() => orderImages(images), [images]);
+  const [idx, setIdx] = useState(0);
   const label = (name ?? "?").trim();
   const initials = label
     .split(/\s+/)
@@ -1302,12 +1304,13 @@ function ProfileAvatar({ name, imageUrl }: { name: string | null; imageUrl?: str
   const hash = label.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
   const tone = AVATAR_TONES[hash % AVATAR_TONES.length];
 
-  if (imageUrl && !imgError) {
+  const current = ordered[idx];
+  if (current) {
     return (
       <img
-        src={imageUrl}
+        src={current}
         alt={label ? `Profile photo of ${label}` : "Listed profile photo"}
-        onError={() => setImgError(true)}
+        onError={() => setIdx((i) => i + 1)}
         className="h-16 w-16 shrink-0 rounded-full border border-border object-cover"
         loading="lazy"
         referrerPolicy="no-referrer"
@@ -1326,6 +1329,16 @@ function ProfileAvatar({ name, imageUrl }: { name: string | null; imageUrl?: str
     </div>
   );
 }
+
+const AVATAR_TONES = [
+  "bg-teal-100 text-teal-800 border-teal-200",
+  "bg-indigo-100 text-indigo-800 border-indigo-200",
+  "bg-rose-100 text-rose-800 border-rose-200",
+  "bg-amber-100 text-amber-800 border-amber-200",
+  "bg-emerald-100 text-emerald-800 border-emerald-200",
+  "bg-sky-100 text-sky-800 border-sky-200",
+];
+
 
 function KeyInfo({ label, value }: { label: string; value: string | null }) {
   return (
@@ -1570,7 +1583,7 @@ function MatchReview({
               {profileError && <p className="text-xs text-red-600">{profileError}</p>}
               {profile && (
                 <div className="flex gap-4">
-                  <ProfileAvatar name={profile.primary_name} imageUrl={profile.images[0]} />
+                  <ProfileAvatar name={profile.primary_name} images={profile.images} />
                   <dl className="grid flex-1 gap-x-6 gap-y-2 text-sm md:grid-cols-2">
                     <KeyInfo label="Full name" value={profile.primary_name} />
                     <KeyInfo label="Entity type" value={profile.entity_type} />
