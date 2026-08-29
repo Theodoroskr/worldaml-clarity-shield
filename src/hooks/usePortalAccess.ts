@@ -80,14 +80,14 @@ export function usePortalAccess(): PortalAccess {
     queryKey: ["portal-access", "products", user?.id],
     enabled: !!user,
     staleTime: 60_000,
-    queryFn: async (): Promise<Record<string, { status: string; has_access: boolean }>> => {
+    queryFn: async (): Promise<Record<string, { status: string }>> => {
       const { data, error } = await supabase
         .from("product_access")
-        .select("product, status, has_access")
+        .select("product, status")
         .in("product", ["screening", "suite", "academy"]);
       if (error) return {};
       return Object.fromEntries(
-        (data ?? []).map((row: any) => [row.product, { status: row.status, has_access: row.has_access }])
+        (data ?? []).map((row: any) => [row.product, { status: row.status }])
       );
     },
   });
@@ -104,7 +104,7 @@ export function usePortalAccess(): PortalAccess {
 
   const products = productAccessQuery.data ?? {};
   const hasProduct = (product: string) =>
-    !!products[product]?.has_access && products[product]?.status !== "cancelled" && products[product]?.status !== "suspended";
+    products[product]?.status === "active" || products[product]?.status === "trial";
 
   const academyAccess = signedIn && (profile?.status !== "rejected" || hasProduct("academy"));
   const partnerAccess = signedIn && partnerQuery.data === true;
