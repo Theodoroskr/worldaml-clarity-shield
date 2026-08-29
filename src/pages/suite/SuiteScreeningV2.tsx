@@ -302,10 +302,15 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
         : Promise.resolve({ data: null }),
     ]);
     setActiveCase({
-      ...(caseData as CaseRow),
-      search: searchData as CaseDetail["search"],
-      subject: subjectData as CaseDetail["subject"],
+      ...(row as CaseRow),
+      ...((caseData ?? {}) as CaseRow),
+      search: (searchData ?? null) as CaseDetail["search"],
+      subject: (subjectData ?? null) as CaseDetail["subject"],
     });
+    } catch (e) {
+      console.error("openCase failed", e);
+      toast.error("Could not open this case. Please try again.");
+    }
   };
 
   const isPerson = subject.subject_type === "person";
