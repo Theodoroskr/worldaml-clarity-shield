@@ -544,6 +544,26 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
                   )}
                 </div>
 
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button
+                    type="button"
+                    variant={portalView ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={portalView ? clearPortalView : applyPortalView}
+                  >
+                    <Users className="mr-1.5 h-4 w-4" />
+                    {portalView ? "Exit provider portal view" : "Match provider portal view"}
+                  </Button>
+                  {portalView && (
+                    <Badge variant="outline" className="border-sky-200 bg-sky-50 text-sky-700">
+                      Broad search: any entity type · all sources · fuzziness 50%
+                    </Badge>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Reproduces the provider portal&apos;s default results (no entity-type restriction).
+                  </p>
+                </div>
+
                 {(quota.searchesExceeded || quota.monitorsExceeded) && (
                   <Alert variant="destructive">
                     <AlertTriangle className="h-4 w-4" />
@@ -1164,7 +1184,7 @@ function MatchCard({
   // Flag when the provider profile's entity type doesn't match the screened
   // subject (e.g. a person search hitting an organisation profile — a common
   // adverse-media indexing artefact and a strong false-positive signal).
-  const entityTypeConflict = !!subjectType && !!match.entity_type && subjectType !== match.entity_type;
+  const entityTypeConflict = !!subjectType && subjectType !== "any" && !!match.entity_type && subjectType !== match.entity_type;
 
   const [falsePositiveOpen, setFalsePositiveOpen] = useState(false);
   const [reason, setReason] = useState(entityTypeConflict ? "Different entity type" : FALSE_POSITIVE_REASONS[0]);
