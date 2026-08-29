@@ -4,9 +4,11 @@ import {
   Loader2, Search, ShieldCheck, Activity, FileText, ChevronRight,
   ArrowLeft, Copy, Check, X, Filter, Tag, MoreHorizontal,
   AlertTriangle, User, Building2, Ship, Plane, RefreshCw, ExternalLink, Users, Lock,
-  ArrowDownUp, Info, ImageOff,
+  ArrowDownUp, Info, ImageOff, FileDown,
 } from "lucide-react";
+import { exportMatchDecisionPdf } from "@/lib/screening/decisionPdf";
 import { cn } from "@/lib/utils";
+
 import { toast } from "sonner";
 import { useScreeningModules } from "@/hooks/useScreeningModules";
 import { UsageWidget } from "@/components/screening/UsageWidget";
