@@ -8946,6 +8946,7 @@ export type Database = {
           status: string
         }[]
       }
+      current_user_screening_org: { Args: never; Returns: string }
       dsar_execute_erasure: {
         Args: { _customer_id: string; _dsar_id?: string; _reason?: string }
         Returns: Json
