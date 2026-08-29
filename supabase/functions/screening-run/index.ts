@@ -432,8 +432,17 @@ Deno.serve(async (req) => {
         provider_id: result.provider_search_id,
         provider_ref: {},
       });
+
+      await evaluateRiskAlerts(admin, {
+        organisationId: orgId,
+        monitoringSubjectId: mon.id,
+        caseId: caseRow!.id,
+        entityName: subject.full_name,
+        counts,
+      });
     }
   }
+
 
   await admin.from("usage_transactions").insert({
     organisation_id: orgId,
