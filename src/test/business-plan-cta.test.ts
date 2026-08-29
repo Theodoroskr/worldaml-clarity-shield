@@ -28,6 +28,7 @@ describe("resolvePlanCta", () => {
   it("sends only custom-priced plans to Contact Sales", () => {
     const cta = resolvePlanCta({ ...base, price: null, name: "Enterprise" }, "Prod");
     expect(cta.kind).toBe("sales");
+    if (cta.kind !== "sales") throw new Error("expected sales");
     expect(cta.to).toContain("plan=Enterprise");
   });
 
