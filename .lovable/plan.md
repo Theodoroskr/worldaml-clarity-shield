@@ -44,6 +44,14 @@ match counts change ──► evaluate risk ──► level increased?
 - Evaluation lives in the existing screening-run and monitoring-poll edge functions; email dispatch reuses the existing transactional email path.
 - Drawer built with the existing sheet/drawer component, lazy-loading its data only when opened.
 
+## Client help content (seed now, reused by the help assistance module later)
+
+- In-app "?" info popovers on the Risk alerts panel explaining thresholds, suppression behaviour, and alert timing (as fresh as the monitoring poll, not real-time).
+- A concise help article section embedded in the Risk alerts settings page: what risk levels mean, how thresholds work, who gets notified, how to tune rules to reduce noise.
+- Chatbot knowledge entries so the rule-based assistant can answer "how do risk alerts work?" and "how do I get notified when an entity becomes high risk?", linking to `/screening/monitored`.
+- Business Support page card pointing Screening customers to risk alert setup.
+- Copy is written once as structured help content so the future help assistance module can surface the same text.
+
 ## Fit with the current setup
 
 - All drawer data already exists: screening searches, cases and match counts, monitoring alerts, adverse media items, and the screening audit trail. No provider call is needed to render it.
