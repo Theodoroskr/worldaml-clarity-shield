@@ -230,12 +230,18 @@ Deno.serve(async (req) => {
         media: profile.media.length,
         refresh: isRefresh,
         billable: isRefresh,
+        images_shared_from_alias: shared.shared,
         fetched_at: fetchedAt,
       },
       actor_id: user.id,
     });
 
-    return json({ profile, cached: false, consumed_search: isRefresh });
+    return json({
+      profile: profileWithImages,
+      cached: false,
+      consumed_search: isRefresh,
+      images_shared_from_alias: shared.shared,
+    });
   } catch (err) {
     return providerErrorResponse(err, corsHeaders);
   }
