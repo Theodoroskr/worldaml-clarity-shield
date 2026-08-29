@@ -40,19 +40,40 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
 
     const [subs, invoices] = await Promise.all([
-      stripe.subscriptions.list({ customer: customerId, status: "all", limit: 20, expand: ["data.items.data.price.product"] }),
+      stripe.subscriptions.list({ customer: customerId, status: "all", limit: 20 }),
       stripe.invoices.list({ customer: customerId, limit: 20 }),
     ]);
+
+    // Resolve product names separately (Stripe allows max 4 expand levels)
+    const productIds = new Set<string>();
+    for (const s of subs.data) {
+      const p = s.items.data[0]?.price?.product;
+      if (typeof p === "string") productIds.add(p);
+    }
+    const productNames = new Map<string, string>();
+    await Promise.all(
+      [...productIds].map(async (id) => {
+        try {
+          const prod = await stripe.products.retrieve(id);
+          if (!(prod as any).deleted && (prod as any).name) productNames.set(id, (prod as any).name);
+        } catch (_) { /* ignore */ }
+      }),
+    );
 
     const subscriptions = subs.data
       .filter((s) => ["active", "trialing", "past_due", "unpaid"].includes(s.status))
       .map((s) => {
         const item = s.items.data[0];
         const price = item?.price;
-        const product = price?.product;
+        const productRef = price?.product;
+        const product =
+          typeof productRef === "string"
+            ? productNames.get(productRef)
+            : (productRef as any)?.name;
+
         return {
           id: s.id,
-          product: typeof product === "object" && product && "name" in product ? (product as any).name : "WorldAML plan",
+          product: product || "WorldAML plan",
           status: s.status,
           amount: money(price?.unit_amount ?? null, price?.currency ?? "eur"),
           interval: price?.recurring?.interval ?? null,
