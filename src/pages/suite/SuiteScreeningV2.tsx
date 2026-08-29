@@ -1282,6 +1282,54 @@ function MatchCard({
   );
 }
 
+/** Prefer secure URLs first — plain-http provider images are blocked as
+ *  mixed content on an https page and would silently fall back. */
+function orderImages(images: string[]): string[] {
+  return [...images].sort((a, b) => {
+    const as = a.startsWith("https://") ? 0 : 1;
+    const bs = b.startsWith("https://") ? 0 : 1;
+    return as - bs;
+  });
+}
+
+function ProfileAvatar({ name, images }: { name: string | null; images: string[] }) {
+  const ordered = useMemo(() => orderImages(images), [images]);
+  const [idx, setIdx] = useState(0);
+  const label = (name ?? "?").trim();
+  const initials = label
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+  const hash = label.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  const tone = AVATAR_TONES[hash % AVATAR_TONES.length];
+
+  const current = ordered[idx];
+  if (current) {
+    return (
+      <img
+        src={current}
+        alt={label ? `Profile photo of ${label}` : "Listed profile photo"}
+        onError={() => setIdx((i) => i + 1)}
+        className="h-16 w-16 shrink-0 rounded-full border border-border object-cover"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    );
+  }
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "flex h-16 w-16 shrink-0 items-center justify-center rounded-full border text-lg font-semibold",
+        tone,
+      )}
+    >
+      {initials || "?"}
+    </div>
+  );
+}
+
 const AVATAR_TONES = [
   "bg-teal-100 text-teal-800 border-teal-200",
   "bg-indigo-100 text-indigo-800 border-indigo-200",
