@@ -30,6 +30,8 @@ import {
   matchBasisDescription,
   matchBasisLabel,
   matchBasisTone,
+  MATCH_BASIS_LEGEND,
+  type MatchBasis,
 } from "@/lib/screeningMatch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -105,6 +107,12 @@ interface MatchRow {
   categories: string[];
   category_labels: string[];
   name_similarity: number | null;
+  match_basis?: string | null;
+  match_types?: string[] | null;
+  match_type_labels?: string[] | null;
+  provider_relevance?: number | null;
+  winning_name?: string | null;
+  winning_name_kind?: string | null;
   country: string | null;
   year_of_birth: number | null;
   status: string;
@@ -611,7 +619,7 @@ function ResultsWorkspace({
     setLoading(true);
     const { data } = await supabase
       .from("screening_matches")
-      .select("id, matched_name, entity_type, categories, category_labels, name_similarity, match_basis, match_types, match_type_labels, provider_relevance, country, year_of_birth, status, matched_attribute_count, conflicting_attribute_count, last_data_update, profile")
+      .select("id, matched_name, entity_type, categories, category_labels, name_similarity, match_basis, match_types, match_type_labels, provider_relevance, winning_name, winning_name_kind, country, year_of_birth, status, matched_attribute_count, conflicting_attribute_count, last_data_update, profile")
       .eq("case_id", caseDetail.id)
       .order("name_similarity", { ascending: false });
     const rows = (data as MatchRow[]) ?? [];
