@@ -415,7 +415,6 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
                       <span className="text-xs text-muted-foreground">Not included in your plan</span>
                     )}
                   </label>
-                  </label>
                   <label className="flex items-center gap-3 text-sm">
                     <Switch
                       checked={monitoring && !quota.monitorsExceeded}
