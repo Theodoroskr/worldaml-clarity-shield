@@ -170,6 +170,27 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
   const [customiseSources, setCustomiseSources] = useState(false);
   const [sourceTypes, setSourceTypes] = useState<string[]>(ALL_SOURCE_TYPES);
   const [searchProfileId, setSearchProfileId] = useState("");
+  const [adverseMediaAllowed, setAdverseMediaAllowed] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("screening_policies")
+        .select("config, is_default")
+        .eq("is_active", true)
+        .order("is_default", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled) return;
+      const cfg = (data?.config ?? {}) as Record<string, unknown>;
+      const allowed = cfg.adverse_media === true;
+      setAdverseMediaAllowed(allowed);
+      if (!allowed) setAdverseMedia(false);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
 
   const toggleSourceType = (value: string, checked: boolean) =>
     setSourceTypes((prev) =>
