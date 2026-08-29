@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 import {
   ArrowLeft, BellPlus, HelpCircle, Loader2, Pencil, Plus, Trash2,
 } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import ScreeningLayout from "@/components/screening/ScreeningLayout";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -186,16 +185,17 @@ export default function ScreeningRiskAlerts() {
 
 
   const shell = (children: React.ReactNode) => (
-    <div className="min-h-screen bg-background flex flex-col">
-      <SEO
-        title="Risk Alerts | WorldAML Screening"
-        description="Configure risk-level alerts that notify you when a monitored entity crosses a risk threshold."
-        noindex
-      />
-      <Header />
-      <main className="flex-1">{children}</main>
-      <Footer />
-    </div>
+    <ScreeningLayout
+      head={
+        <SEO
+          title="Risk Alerts | WorldAML Screening"
+          description="Configure risk-level alerts that notify you when a monitored entity crosses a risk threshold."
+          noindex
+        />
+      }
+    >
+      {children}
+    </ScreeningLayout>
   );
 
   if (accessLoading || loading) {

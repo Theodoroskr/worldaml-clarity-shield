@@ -1,32 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, useSearchParams } from "react-router-dom";
-import {
-  Loader2, Lock, ArrowRight, Sparkles, CheckCircle2, ShieldCheck,
-  Search, Users, Puzzle, CreditCard, Gauge, Menu, X, Radar, BellPlus,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import Header from "@/components/Header";
+import { Link, useSearchParams } from "react-router-dom";
+import { Loader2, Lock, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
 import SEO from "@/components/SEO";
+import ScreeningLayout from "@/components/screening/ScreeningLayout";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import SuiteScreeningV2 from "@/pages/suite/SuiteScreeningV2";
 import { useScreeningAccess } from "@/hooks/useScreeningAccess";
 import { useScreeningQuota } from "@/hooks/useScreeningQuota";
 import { supabase } from "@/integrations/supabase/client";
-import { cn } from "@/lib/utils";
-
-const SIDE_NAV = [
-  { label: "Workspace", to: "/screening", icon: Search, end: true },
-  { label: "Monitored entities", to: "/screening/monitored", icon: Radar },
-  { label: "Risk alerts", to: "/screening/risk-alerts", icon: BellPlus },
-  { label: "Team & access", to: "/screening/team", icon: Users },
-  { label: "Add-on modules", to: "/screening/modules", icon: Puzzle },
-  { label: "Packages", to: "/screening-monitoring/pricing", icon: CreditCard },
-];
-
-
 
 /**
  * Standalone WorldAML Screening & Monitoring workspace.
@@ -39,7 +22,6 @@ export default function ScreeningWorkspace() {
   const [searchParams] = useSearchParams();
   const [claiming, setClaiming] = useState(false);
   const [justActivated, setJustActivated] = useState(false);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const claimedRef = useRef(false);
 
   useEffect(() => {
@@ -66,129 +48,19 @@ export default function ScreeningWorkspace() {
   const searchQuota = quota.searchQuota ?? 5;
   const used = quota.searchesUsed ?? 0;
   const remaining = Math.max(0, searchQuota - used);
-  const usagePct = searchQuota > 0 ? Math.min(100, (used / searchQuota) * 100) : 0;
-
-  const sidebar = (
-    <div className="flex h-full flex-col">
-      {/* Brand */}
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-white/10">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal/20">
-          <ShieldCheck className="h-5 w-5 text-teal" aria-hidden="true" />
-        </span>
-        <div className="leading-tight">
-          <p className="text-sm font-semibold text-white">WORLDAML</p>
-          <p className="text-[11px] text-white/60">Screening &amp; Monitoring</p>
-        </div>
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 space-y-1 px-3 py-4" aria-label="Screening workspace">
-        {SIDE_NAV.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            onClick={() => setMobileNavOpen(false)}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
-                isActive
-                  ? "bg-teal/15 text-teal font-medium"
-                  : "text-white/70 hover:bg-white/5 hover:text-white",
-              )
-            }
-          >
-            <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
-
-      {/* Plan & usage card */}
-      <div className="px-3 pb-4">
-        <div className="rounded-lg border border-white/10 bg-white/5 p-3.5 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-white">
-              <Gauge className="h-3.5 w-3.5 text-teal" aria-hidden="true" />
-              Usage
-            </span>
-            {plan && (
-              <Badge variant="outline" className="border-teal/40 text-teal uppercase text-[10px] tracking-wide">
-                {plan} plan
-              </Badge>
-            )}
-          </div>
-          {isDemo && !provisioning && (
-            <>
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] text-white/60">
-                  <span>Screenings</span>
-                  <span className="font-medium text-white">
-                    {remaining}/{searchQuota} left
-                  </span>
-                </div>
-                <Progress value={usagePct} className="h-1.5 bg-white/10" />
-              </div>
-              <Button
-                asChild
-                size="sm"
-                variant="accent"
-                className="w-full"
-              >
-                <Link to="/screening-monitoring/pricing">
-                  Upgrade <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <SEO
-        title="Screening & Monitoring | WorldAML"
-        description="Provider-independent sanctions, PEP, watchlist and adverse media screening workspace with case management and ongoing monitoring."
-        noindex
-      />
-      <Header />
+    <ScreeningLayout
+      head={
+        <SEO
+          title="Screening & Monitoring | WorldAML"
+          description="Provider-independent sanctions, PEP, watchlist and adverse media screening workspace with case management and ongoing monitoring."
+          noindex
+        />
+      }
+    >
+      <>
 
-      {/* Mobile product bar */}
-      <div className="lg:hidden border-b border-border bg-primary text-primary-foreground sticky top-0 z-30">
-        <div className="px-4 flex items-center gap-3 py-3">
-          <button
-            type="button"
-            aria-label={mobileNavOpen ? "Close workspace menu" : "Open workspace menu"}
-            onClick={() => setMobileNavOpen((v) => !v)}
-            className="rounded-md p-1.5 hover:bg-white/10"
-          >
-            {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-          <span className="inline-flex items-center gap-2 font-semibold">
-            <ShieldCheck className="h-4 w-4 text-teal" aria-hidden="true" />
-            Screening &amp; Monitoring
-          </span>
-          {isDemo && !provisioning && (
-            <Badge variant="outline" className="ml-auto border-teal/40 text-teal text-[10px]">
-              {remaining}/{searchQuota} left
-            </Badge>
-          )}
-        </div>
-        {mobileNavOpen && (
-          <div className="border-t border-white/10 max-h-[70vh] overflow-y-auto">{sidebar}</div>
-        )}
-      </div>
-
-      <div className="flex-1 flex min-h-0">
-        {/* Desktop sidebar */}
-        <aside className="hidden lg:block w-64 shrink-0 bg-primary text-primary-foreground border-r border-white/10 sticky top-0 h-[calc(100vh-4rem)] overflow-y-auto">
-          {sidebar}
-        </aside>
-
-        {/* Main */}
-        <main className="flex-1 min-w-0 px-4 sm:px-6 py-6">
           {busy ? (
             <div className="flex items-center gap-3 text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -266,8 +138,8 @@ export default function ScreeningWorkspace() {
               </CardContent>
             </Card>
           )}
-        </main>
-      </div>
-    </div>
+      </>
+    </ScreeningLayout>
   );
+
 }
