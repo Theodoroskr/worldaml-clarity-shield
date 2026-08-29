@@ -1399,7 +1399,7 @@ function ProfilePhotoGallery({ name, images }: { name: string | null; images: st
             onLoad={() => setMainLoaded(true)}
             onError={() => markFailed(main)}
             className={cn(
-              "h-24 w-24 shrink-0 rounded-full border border-border object-cover transition-opacity",
+              "h-20 w-20 shrink-0 rounded-full border border-border object-cover transition-opacity sm:h-24 sm:w-24",
               mainLoaded ? "opacity-100" : "opacity-0",
             )}
             referrerPolicy="no-referrer"
