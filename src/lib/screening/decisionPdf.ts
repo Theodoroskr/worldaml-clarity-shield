@@ -100,10 +100,14 @@ export async function exportMatchDecisionPdf(input: DecisionPdfInput) {
     y += 12;
   };
 
+  const ensure = (needed = 40) => {
+    if (y > 800 - needed) { doc.addPage(); y = 56; }
+  };
+
   const row = (label: string, value?: string | null) => {
     const text = value && String(value).trim() ? String(value) : "—";
     const lines = doc.splitTextToSize(text, contentWidth - 150);
-    if (y > 760) { doc.addPage(); y = 56; }
+    ensure(Math.max(14, lines.length * 12));
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9.5);
     doc.setTextColor(90, 100, 115);
@@ -113,6 +117,34 @@ export async function exportMatchDecisionPdf(input: DecisionPdfInput) {
     doc.text(lines, marginX + 150, y);
     y += Math.max(14, lines.length * 12);
   };
+
+  const bullet = (text: string) => {
+    const lines = doc.splitTextToSize(text, contentWidth - 14);
+    ensure(lines.length * 12);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(20, 26, 36);
+    doc.text("•", marginX, y);
+    doc.text(lines, marginX + 14, y);
+    y += lines.length * 12 + 2;
+  };
+
+  const subheading = (text: string) => {
+    ensure(28);
+    y += 8;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+    doc.setTextColor(15, 42, 68);
+    doc.text(text, marginX, y);
+    y += 13;
+  };
+
+  const fmtDate = (v?: string | null) => {
+    if (!v) return null;
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? v : d.toISOString().slice(0, 10);
+  };
+
 
   // Header band
   doc.setFillColor(15, 42, 68);
