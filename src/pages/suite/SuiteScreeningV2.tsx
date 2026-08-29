@@ -1297,18 +1297,25 @@ function MatchReview({
   const [profile, setProfile] = useState<FullEntityProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [confirmRefresh, setConfirmRefresh] = useState(false);
+  const quota = useScreeningQuota();
 
   const loadProfile = useCallback(async (matchId: string, refresh = false) => {
     setProfileLoading(true);
     setProfileError(null);
     try {
       setProfile(await fetchFullProfile(matchId, refresh));
+      if (refresh) {
+        toast.success("Profile refreshed — 1 screening search used");
+        void quota.refresh();
+      }
     } catch (err) {
       setProfileError(err instanceof Error ? err.message : "The full profile could not be loaded");
+      if (refresh) toast.error(err instanceof Error ? err.message : "The profile could not be refreshed");
     } finally {
       setProfileLoading(false);
     }
-  }, []);
+  }, [quota]);
 
   useEffect(() => {
     if (!match) return;
