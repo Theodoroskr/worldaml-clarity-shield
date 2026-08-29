@@ -1292,10 +1292,57 @@ function orderImages(images: string[]): string[] {
   });
 }
 
-function ProfileAvatar({ name, images }: { name: string | null; images: string[] }) {
+/** True when the browser already has the image decoded (warm preload cache),
+ *  so the skeleton can be skipped entirely. */
+function isImageDecoded(url: string): boolean {
+  const probe = new Image();
+  probe.src = url;
+  return probe.complete && probe.naturalWidth > 0;
+}
+
+function PhotoThumb({
+  url, index, label, active, onSelect, onError,
+}: {
+  url: string;
+  index: number;
+  label: string;
+  active: boolean;
+  onSelect: () => void;
+  onError: () => void;
+}) {
+  const [loaded, setLoaded] = useState(() => isImageDecoded(url));
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-label={label ? `View photo ${index + 1} of ${label}` : `View photo ${index + 1}`}
+      aria-pressed={active}
+      className={cn(
+        "relative h-10 w-10 shrink-0 overflow-hidden rounded-md border transition-shadow",
+        active
+          ? "border-teal-500 ring-2 ring-teal-500/60"
+          : "border-border hover:ring-1 hover:ring-teal-500/40",
+      )}
+    >
+      {!loaded && <div aria-hidden className="absolute inset-0 animate-pulse bg-muted" />}
+      <img
+        src={url}
+        alt=""
+        onLoad={() => setLoaded(true)}
+        onError={onError}
+        className={cn("h-full w-full object-cover transition-opacity", loaded ? "opacity-100" : "opacity-0")}
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    </button>
+  );
+}
+
+function ProfilePhotoGallery({ name, images }: { name: string | null; images: string[] }) {
   const ordered = useMemo(() => orderImages(images), [images]);
-  const [idx, setIdx] = useState(0);
-  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<string | null>(null);
+  const [mainLoaded, setMainLoaded] = useState(false);
   const label = (name ?? "?").trim();
   const initials = label
     .split(/\s+/)
@@ -1305,41 +1352,20 @@ function ProfileAvatar({ name, images }: { name: string | null; images: string[]
   const hash = label.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
   const tone = AVATAR_TONES[hash % AVATAR_TONES.length];
 
-  const current = ordered[idx];
-  const tried = ordered.slice(0, idx);
+  const markFailed = useCallback((url: string) => {
+    setFailed((prev) => (prev.has(url) ? prev : new Set(prev).add(url)));
+  }, []);
 
-  // Skeleton while the photo resolves — no initials flash before we know
-  // whether an image exists.
-  if (current) {
-    return (
-      <div className="relative h-16 w-16 shrink-0">
-        {!loaded && (
-          <div
-            aria-hidden
-            className="absolute inset-0 animate-pulse rounded-full border border-border bg-muted"
-          />
-        )}
-        <img
-          src={current}
-          alt={label ? `Profile photo of ${label}` : "Listed profile photo"}
-          onLoad={() => setLoaded(true)}
-          onError={() => {
-            setLoaded(false);
-            setIdx((i) => i + 1);
-          }}
-          className={cn(
-            "h-16 w-16 shrink-0 rounded-full border border-border object-cover transition-opacity",
-            loaded ? "opacity-100" : "opacity-0",
-          )}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-        />
-      </div>
-    );
-  }
+  const available = ordered.filter((u) => !failed.has(u));
+  const main = (selected && !failed.has(selected) ? selected : available[0]) ?? null;
 
-  const hadPhotos = ordered.length > 0;
-  const avatar = (
+  // Reset the skeleton per main photo, skipping it when the preload cache has
+  // the image already decoded (re-opening a previously viewed match).
+  useEffect(() => {
+    setMainLoaded(main ? isImageDecoded(main) : false);
+  }, [main]);
+
+  const initialsAvatar = (
     <div
       aria-hidden
       className={cn(
@@ -1348,7 +1374,7 @@ function ProfileAvatar({ name, images }: { name: string | null; images: string[]
       )}
     >
       {initials || "?"}
-      {hadPhotos && (
+      {ordered.length > 0 && (
         <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-amber-700">
           <ImageOff className="h-3 w-3" />
         </span>
@@ -1356,25 +1382,66 @@ function ProfileAvatar({ name, images }: { name: string | null; images: string[]
     </div>
   );
 
-  if (!hadPhotos) return avatar;
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>{avatar}</TooltipTrigger>
-        <TooltipContent className="max-w-xs">
-          <p className="font-semibold">Photo unavailable</p>
-          <p className="mt-1 text-xs opacity-80">
-            The source photo could not be loaded (blocked or removed). Tried{" "}
-            {tried.length || ordered.length} URL{(tried.length || ordered.length) === 1 ? "" : "s"}:
-          </p>
-          <ul className="mt-1 space-y-0.5 text-xs">
-            {(tried.length ? tried : ordered).map((u) => (
-              <li key={u} className="truncate opacity-80">{u}</li>
-            ))}
-          </ul>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <div className="flex shrink-0 flex-col items-center gap-2">
+      {main ? (
+        <div className="relative h-16 w-16 shrink-0">
+          {!mainLoaded && (
+            <div
+              aria-hidden
+              className="absolute inset-0 animate-pulse rounded-full border border-border bg-muted"
+            />
+          )}
+          <img
+            key={main}
+            src={main}
+            alt={label ? `Profile photo of ${label}` : "Listed profile photo"}
+            onLoad={() => setMainLoaded(true)}
+            onError={() => markFailed(main)}
+            className={cn(
+              "h-16 w-16 shrink-0 rounded-full border border-border object-cover transition-opacity",
+              mainLoaded ? "opacity-100" : "opacity-0",
+            )}
+            referrerPolicy="no-referrer"
+          />
+        </div>
+      ) : ordered.length > 0 ? (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>{initialsAvatar}</TooltipTrigger>
+            <TooltipContent className="max-w-xs">
+              <p className="font-semibold">Photo unavailable</p>
+              <p className="mt-1 text-xs opacity-80">
+                The source photo could not be loaded (blocked or removed). Tried{" "}
+                {ordered.length} URL{ordered.length === 1 ? "" : "s"}:
+              </p>
+              <ul className="mt-1 space-y-0.5 text-xs">
+                {ordered.map((u) => (
+                  <li key={u} className="truncate opacity-80">{u}</li>
+                ))}
+              </ul>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ) : (
+        initialsAvatar
+      )}
+      {available.length > 1 && (
+        <div className="flex max-w-56 gap-1.5 overflow-x-auto pb-0.5" role="group" aria-label="Profile photos">
+          {available.map((u, i) => (
+            <PhotoThumb
+              key={u}
+              url={u}
+              index={i}
+              label={label}
+              active={u === main}
+              onSelect={() => setSelected(u)}
+              onError={() => markFailed(u)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -1631,7 +1698,7 @@ function MatchReview({
               {profileError && <p className="text-xs text-red-600">{profileError}</p>}
               {profile && (
                 <div className="flex gap-4">
-                  <ProfileAvatar name={profile.primary_name} images={profile.images} />
+                  <ProfilePhotoGallery name={profile.primary_name} images={profile.images} />
                   <dl className="grid flex-1 gap-x-6 gap-y-2 text-sm md:grid-cols-2">
                     <KeyInfo label="Full name" value={profile.primary_name} />
                     <KeyInfo label="Entity type" value={profile.entity_type} />
