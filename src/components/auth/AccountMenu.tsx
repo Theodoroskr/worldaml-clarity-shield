@@ -67,10 +67,11 @@ export const WORKSPACES: WorkspaceDef[] = [
 /** Account / workspace switcher shown in the header when signed in. */
 export default function AccountMenu({ onNavigate }: { onNavigate?: () => void }) {
   const { user, profile, signOut } = useAuth();
-  const { has } = usePortalAccess();
+  const { has, adminAccess } = usePortalAccess();
   const location = useLocation();
 
-  const available = WORKSPACES.filter((w) => has(w.key));
+  // Compliance Suite is still in development — only visible to internal admins.
+  const available = WORKSPACES.filter((w) => has(w.key) && (w.key !== "suite" || adminAccess));
   const current = available.find((w) => w.match(location.pathname))?.key;
 
   return (

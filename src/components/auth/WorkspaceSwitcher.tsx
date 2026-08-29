@@ -10,8 +10,10 @@ import { usePortalAccess, PortalKey } from "@/hooks/usePortalAccess";
  * than one customer-facing entitlement. Admin is never advertised here.
  */
 export default function WorkspaceSwitcher({ current }: { current: PortalKey }) {
-  const { academyAccess, partnerAccess, businessAccess, suiteAccess, screeningAccess } = usePortalAccess();
-  const count = [academyAccess, partnerAccess, businessAccess, suiteAccess, screeningAccess].filter(Boolean).length;
+  const { academyAccess, partnerAccess, businessAccess, suiteAccess, screeningAccess, adminAccess } = usePortalAccess();
+  // Compliance Suite is still in development — only advertised to internal admins.
+  const showSuite = suiteAccess && adminAccess;
+  const count = [academyAccess, partnerAccess, businessAccess, showSuite, screeningAccess].filter(Boolean).length;
   if (count < 2) return null;
 
   const Row = ({ to, active, label, icon: Icon }: { to: string; active: boolean; label: string; icon: typeof Check }) => (
