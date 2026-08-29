@@ -249,6 +249,33 @@ async function requestFullProfile(matchId: string, refresh: boolean): Promise<Fu
   return (data as { profile: FullEntityProfile }).profile;
 }
 
+/** Session cache of photo URLs already preloaded — keyed by URL so alias
+ *  matches that share borrowed photos never trigger duplicate preloads. */
+const preloadedPhotoUrls = new Set<string>();
+
+/** True when the photo URL has already been warmed this session. */
+export function isPhotoPreloaded(url: string): boolean {
+  return preloadedPhotoUrls.has(url);
+}
+
+/** Preloads profile photos once per session per URL. Failed preloads are
+ *  evicted so a later open can retry a transiently failed photo. */
+export function preloadProfilePhotos(images: string[]): void {
+  const urls = images.filter(Boolean);
+  const ordered = [
+    ...urls.filter((u) => u.startsWith("https://")),
+    ...urls.filter((u) => !u.startsWith("https://")),
+  ];
+  for (const src of ordered) {
+    if (preloadedPhotoUrls.has(src)) continue;
+    preloadedPhotoUrls.add(src);
+    const img = new Image();
+    img.referrerPolicy = "no-referrer";
+    img.onerror = () => preloadedPhotoUrls.delete(src);
+    img.src = src;
+  }
+}
+
 /** Loads the complete listed-entity profile for a match (deduplicated per session). */
 export function fetchFullProfile(matchId: string, refresh = false): Promise<FullEntityProfile> {
   if (refresh) profileCache.delete(matchId);
@@ -263,14 +290,7 @@ export function fetchFullProfile(matchId: string, refresh = false): Promise<Full
   // Warm the profile photos as soon as the profile lands so the avatar never
   // flashes initials before the image has had a chance to resolve.
   void promise.then((profile) => {
-    const images = (profile?.images ?? []).filter(Boolean);
-    const secure = images.filter((u) => u.startsWith("https://"));
-    const src = secure[0] ?? images[0];
-    if (src) {
-      const img = new Image();
-      img.referrerPolicy = "no-referrer";
-      img.src = src;
-    }
+    preloadProfilePhotos(profile?.images ?? []);
   }).catch(() => undefined);
   return promise;
 }
