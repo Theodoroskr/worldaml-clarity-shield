@@ -1020,6 +1020,8 @@ function MatchCard({
     : similarity >= 95 ? "border-red-200 bg-red-50 text-red-700"
     : similarity >= 80 ? "border-amber-200 bg-amber-50 text-amber-700"
     : "border-sky-200 bg-sky-50 text-sky-700";
+  const basis = inferMatchBasis((match as { match_basis?: string | null }).match_basis, similarity);
+  const matchTypeLabels = ((match as { match_type_labels?: string[] | null }).match_type_labels) ?? [];
 
   return (
     <Card
@@ -1032,7 +1034,7 @@ function MatchCard({
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-muted-foreground">
               {ENTITY_ICONS[entityType] ?? <User className="h-3.5 w-3.5" />}
               {entityLabel}
@@ -1042,7 +1044,16 @@ function MatchCard({
                 {Math.round(similarity)}% name match
               </span>
             )}
+            <span
+              className={`rounded-full border px-2 py-0.5 font-medium ${matchBasisTone(basis)}`}
+              title={`${matchBasisDescription(basis)}${
+                matchTypeLabels.length ? ` Provider signals: ${matchTypeLabels.join(", ")}.` : ""
+              }`}
+            >
+              {matchBasisLabel(basis)}
+            </span>
           </div>
+
           <Checkbox checked={selected} onCheckedChange={onToggleSelect} aria-label="Select match" />
         </div>
 
