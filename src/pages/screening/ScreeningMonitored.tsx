@@ -2,8 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft, Radar, Loader2, Shield, Pause, Play, Search as SearchIcon,
-  UserCog, CalendarClock, AlertTriangle,
+  UserCog, CalendarClock, AlertTriangle, BellPlus,
 } from "lucide-react";
+import EntityDetailDrawer from "@/components/screening/EntityDetailDrawer";
+import { deriveRiskLevel, RISK_LEVEL_META, RISK_LEVEL_ORDER, type RiskLevel } from "@/lib/riskLevels";
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -28,23 +31,28 @@ type MonitoringStatus = "active" | "paused" | "stopped";
 
 interface MonitoredRow {
   id: string;
+  subject_id: string | null;
+  case_id: string | null;
   status: MonitoringStatus;
   frequency: string;
   started_at: string;
   last_checked_at: string | null;
   last_change_at: string | null;
+  risk_level: RiskLevel | null;
   assigned_to: string | null;
   categories: string[];
   subject: { full_name: string; subject_type: string; country_of_residence: string | null } | null;
   case: {
     case_reference: string;
     priority: string;
+    status?: string;
     sanctions_matches: number;
     pep_matches: number;
     warning_matches: number;
     adverse_media_matches: number;
   } | null;
 }
+
 
 interface TeamMember {
   user_id: string | null;
