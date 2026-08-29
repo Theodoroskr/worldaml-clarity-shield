@@ -1,21 +1,27 @@
-# Photo gallery in the match drawer
+# Photo gallery in the match drawer + photo URL caching
 
-Show a small photo gallery in the match detail drawer whenever a listed profile has more than one usable photo. Today only the first working photo is shown as the round avatar next to "Key information" in `SuiteScreeningV2.tsx`; the rest of `profile.images` is never displayed.
+Two related changes to the match detail drawer's Key information section in `SuiteScreeningV2.tsx`.
 
-## What the user sees
+## 1. Photo gallery (approved plan, unchanged)
 
 - The existing round avatar stays as the main photo (first photo that loads).
-- When the profile has 2+ photos, a row of small square thumbnails appears under the avatar (max ~5 visible, horizontal scroll for more).
+- When the profile has 2+ photos, a row of small square thumbnails appears under the avatar (horizontal scroll when more than ~5).
 - Clicking a thumbnail swaps the main photo; the active thumbnail gets a teal ring highlight.
-- Photos that fail to load are silently dropped from the gallery (same try-next logic as today); if only one photo survives, no gallery is shown.
-- Each thumbnail is keyboard-focusable with an accessible label ("View photo 2 of Elena Udrea").
-- Loading state: thumbnails render as small pulsing skeletons until each image resolves — no layout shift, no initials flash.
+- Photos that fail to load are dropped from both the avatar fallback chain and the thumbnail strip (shared failed-URL `Set`); if only one photo survives, no gallery shows.
+- Thumbnails are keyboard-focusable buttons with accessible labels ("View photo 2 of Elena Udrea") and render pulsing skeletons until each image resolves.
+- Implementation: extend `ProfileAvatar` into a `ProfilePhotoGallery` block (flex row of 40px thumbnails — lighter than `carousel.tsx` for a drawer). Keeps https-first `orderImages` ordering and `referrerPolicy="no-referrer"`. No backend or schema changes; alias-shared photos appear in the gallery automatically.
 
-## Technical details
+## 2. Photo URL preload cache (new requirement)
 
-- Extend `ProfileAvatar` in `src/pages/suite/SuiteScreeningV2.tsx` into a small `ProfilePhotoGallery` block (avatar + thumbnail strip) rendered in the same spot in the Key information section. No new shadcn carousel dependency needed — a flex row of 40px thumbnails with `overflow-x-auto` is lighter than `carousel.tsx` for a drawer.
-- Track failed URLs in a `Set` (shared with the avatar's try-next logic) so failed photos disappear from both the avatar fallback chain and the thumbnail strip.
-- Keep the https-first `orderImages` ordering and `referrerPolicy="no-referrer"`.
-- Extend the photo warm-up in `fetchFullProfile` (`src/lib/suite/screeningV2.ts`) to preload all https photos (not just the first) so thumbnails are instant.
-- Works automatically with the alias photo-sharing already deployed (borrowed photos appear in the gallery too).
-- No backend or schema changes.
+Repeated openings of the same match must never re-trigger photo preloads:
+
+- Add a module-level `preloadedPhotoUrls: Set<string>` in `src/lib/suite/screeningV2.ts`.
+- The warm-up in `fetchFullProfile` preloads all https photos of a profile, but skips any URL already in the set; each URL is added the moment its `Image()` preload is issued (and stays there for the session — the browser's own HTTP cache keeps the bytes warm).
+- Because the set is keyed by URL (not match ID), alias matches that share the same borrowed photos are also covered: opening "Udrea Elena Gabriela" after "Elena Udrea" issues zero new preloads.
+- Failed preloads are removed from the set so a later open can retry a transiently failed photo.
+- The gallery reuses the same set to know which photos are already warm (skips skeleton for instantly-cached images via `img.complete` check, which the URL cache makes reliably true).
+
+## Verification
+
+- TypeScript build passes.
+- Manual check in preview: open a multi-photo match drawer — gallery appears; close and reopen — no new network requests for photos (Network panel), no skeleton flash.
