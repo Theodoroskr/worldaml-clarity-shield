@@ -7,6 +7,7 @@ import {
   ArrowDownUp, Info, ImageOff, FileDown,
 } from "lucide-react";
 import { exportMatchDecisionPdf } from "@/lib/screening/decisionPdf";
+import { exportCaseReportPdf } from "@/lib/screening/caseReportPdf";
 import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";
@@ -619,6 +620,7 @@ function ResultsWorkspace({
   const { hasModule } = useScreeningModules();
   const fourEyes = hasModule("four_eyes");
   const [matches, setMatches] = useState<MatchRow[]>([]);
+  const [exportingCase, setExportingCase] = useState(false);
 
   const [extras, setExtras] = useState<Record<string, MatchExtra>>({});
   const [loading, setLoading] = useState(false);
