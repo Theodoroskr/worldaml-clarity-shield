@@ -438,6 +438,8 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
           sanctions_programmes: fields.filter((f) => String(f?.name ?? "").toLowerCase().includes("program")).map((f) => f?.value),
           associates: (doc?.associates as unknown[]) ?? [],
           match_types: matchTypes,
+          match_type_labels: nameMatch.match_type_labels,
+          match_basis: nameMatch.match_basis,
           provider_relevance: providerRelevance,
           last_updated: doc?.last_updated_utc ?? null,
         },
