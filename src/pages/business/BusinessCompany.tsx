@@ -40,7 +40,7 @@ export default function BusinessCompany() {
     if (!account) return;
     setSaving(true);
     try {
-      const { error } = await supabase.from("business_accounts").update({
+      const { data, error } = await supabase.from("business_accounts").update({
         company_name: values.company_name,
         website: values.website || null,
         country: values.country || null,
