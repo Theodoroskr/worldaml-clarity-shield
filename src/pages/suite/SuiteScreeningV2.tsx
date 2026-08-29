@@ -1385,7 +1385,7 @@ function ProfilePhotoGallery({ name, images }: { name: string | null; images: st
   return (
     <div className="flex shrink-0 flex-col items-center gap-2.5">
       {main ? (
-        <div className="relative h-24 w-24 shrink-0">
+        <div className="relative h-20 w-20 shrink-0 sm:h-24 sm:w-24">
           {!mainLoaded && (
             <div
               aria-hidden
