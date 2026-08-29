@@ -2044,6 +2044,8 @@ export type Database = {
           last_change_at: string | null
           last_checked_at: string | null
           organisation_id: string
+          risk_level: string
+          risk_level_changed_at: string | null
           started_at: string
           status: Database["public"]["Enums"]["monitoring_status"]
           stopped_at: string | null
@@ -2062,6 +2064,8 @@ export type Database = {
           last_change_at?: string | null
           last_checked_at?: string | null
           organisation_id: string
+          risk_level?: string
+          risk_level_changed_at?: string | null
           started_at?: string
           status?: Database["public"]["Enums"]["monitoring_status"]
           stopped_at?: string | null
@@ -2080,6 +2084,8 @@ export type Database = {
           last_change_at?: string | null
           last_checked_at?: string | null
           organisation_id?: string
+          risk_level?: string
+          risk_level_changed_at?: string | null
           started_at?: string
           status?: Database["public"]["Enums"]["monitoring_status"]
           stopped_at?: string | null
@@ -5301,6 +5307,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      screening_risk_alert_rules: {
+        Row: {
+          assigned_to: string | null
+          categories: string[]
+          created_at: string
+          created_by: string | null
+          email_recipients: string[]
+          enabled: boolean
+          id: string
+          last_triggered_at: string | null
+          name: string
+          notify_email: boolean
+          notify_in_app: boolean
+          organisation_id: string
+          threshold: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          categories?: string[]
+          created_at?: string
+          created_by?: string | null
+          email_recipients?: string[]
+          enabled?: boolean
+          id?: string
+          last_triggered_at?: string | null
+          name: string
+          notify_email?: boolean
+          notify_in_app?: boolean
+          organisation_id: string
+          threshold: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          categories?: string[]
+          created_at?: string
+          created_by?: string | null
+          email_recipients?: string[]
+          enabled?: boolean
+          id?: string
+          last_triggered_at?: string | null
+          name?: string
+          notify_email?: boolean
+          notify_in_app?: boolean
+          organisation_id?: string
+          threshold?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       screening_searches: {
         Row: {
@@ -8889,6 +8946,7 @@ export type Database = {
           status: string
         }[]
       }
+      current_user_screening_org: { Args: never; Returns: string }
       dsar_execute_erasure: {
         Args: { _customer_id: string; _dsar_id?: string; _reason?: string }
         Returns: Json

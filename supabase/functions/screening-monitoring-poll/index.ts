@@ -1,6 +1,8 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getProvider, providerErrorResponse } from "../_shared/screening/index.ts";
+import { evaluateRiskAlerts, type MatchCounts } from "../_shared/screening/riskAlerts.ts";
+
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -78,8 +80,48 @@ Deno.serve(async (req) => {
         description: change.change_description,
         metadata: { change_type: change.change_type },
       });
+
+      // Refresh match counts from the provider so stored risk levels and
+      // threshold alerts reflect the new data (the poll itself only delivers
+      // change notifications, not updated results).
+      try {
+        const latest = await getProvider().retrieveScreening(change.provider_monitor_id);
+        const counts: MatchCounts = { sanctions: 0, pep_rca: 0, warnings: 0, adverse_media: 0 };
+        for (const m of latest.matches) {
+          for (const c of m.categories) counts[c] = (counts[c] ?? 0) + 1;
+        }
+        await admin
+          .from("screening_cases")
+          .update({
+            sanctions_matches: counts.sanctions,
+            pep_matches: counts.pep_rca,
+            warning_matches: counts.warnings,
+            adverse_media_matches: counts.adverse_media,
+          })
+          .eq("id", subject.case_id);
+
+        let entityName = "Monitored entity";
+        const { data: subjRow } = await admin
+          .from("monitoring_subjects")
+          .select("subject:screening_subjects(full_name)")
+          .eq("id", subject.id)
+          .maybeSingle();
+        const subjName = (subjRow as { subject?: { full_name?: string } | null } | null)?.subject?.full_name;
+        if (subjName) entityName = subjName;
+
+        await evaluateRiskAlerts(admin, {
+          organisationId: ref.organisation_id,
+          monitoringSubjectId: subject.id,
+          caseId: subject.case_id,
+          entityName,
+          counts,
+        });
+      } catch (err) {
+        console.warn("Risk re-evaluation failed for monitor", change.provider_monitor_id, err);
+      }
     }
   }
+
 
   await admin
     .from("monitoring_subjects")

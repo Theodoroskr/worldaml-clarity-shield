@@ -3,6 +3,7 @@ import { LifeBuoy, Mail, MessageSquareQuote, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useBusinessWorkspace } from "@/hooks/useBusinessWorkspace";
+import { riskAlertHelp } from "@/lib/riskAlertHelp";
 
 export default function BusinessSupport() {
   const { account } = useBusinessWorkspace();
@@ -48,6 +49,20 @@ export default function BusinessSupport() {
             <Button asChild variant="outline"><Link to="/business/billing">Go to billing</Link></Button>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><BookOpen className="w-4 h-4 text-teal" /> Screening risk alerts guide</CardTitle></CardHeader>
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <p className="font-medium text-foreground">{riskAlertHelp.summary}</p>
+            <ul className="list-disc pl-5 space-y-1.5">
+              {riskAlertHelp.articles.map((a) => (
+                <li key={a.title}><span className="font-medium text-foreground">{a.title}.</span> {a.body}</li>
+              ))}
+            </ul>
+            <Button asChild variant="outline"><Link to="/screening/risk-alerts">Manage risk alert rules</Link></Button>
+          </CardContent>
+        </Card>
+
       </div>
     </div>
   );

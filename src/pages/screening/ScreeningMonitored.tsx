@@ -2,8 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft, Radar, Loader2, Shield, Pause, Play, Search as SearchIcon,
-  UserCog, CalendarClock, AlertTriangle,
+  UserCog, CalendarClock, AlertTriangle, BellPlus,
 } from "lucide-react";
+import EntityDetailDrawer from "@/components/screening/EntityDetailDrawer";
+import { deriveRiskLevel, RISK_LEVEL_META, RISK_LEVEL_ORDER, type RiskLevel } from "@/lib/riskLevels";
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -28,23 +31,28 @@ type MonitoringStatus = "active" | "paused" | "stopped";
 
 interface MonitoredRow {
   id: string;
+  subject_id: string | null;
+  case_id: string | null;
   status: MonitoringStatus;
   frequency: string;
   started_at: string;
   last_checked_at: string | null;
   last_change_at: string | null;
+  risk_level: RiskLevel | null;
   assigned_to: string | null;
   categories: string[];
   subject: { full_name: string; subject_type: string; country_of_residence: string | null } | null;
   case: {
     case_reference: string;
     priority: string;
+    status?: string;
     sanctions_matches: number;
     pep_matches: number;
     warning_matches: number;
     adverse_media_matches: number;
   } | null;
 }
+
 
 interface TeamMember {
   user_id: string | null;
@@ -72,16 +80,11 @@ function formatNextRun(d: Date | null): string {
 }
 
 function riskLevel(row: MonitoredRow): { label: string; className: string; score: number } {
-  const c = row.case;
-  const sanctions = c?.sanctions_matches ?? 0;
-  const pep = c?.pep_matches ?? 0;
-  const warnings = c?.warning_matches ?? 0;
-  const media = c?.adverse_media_matches ?? 0;
-  if (sanctions > 0) return { label: "High", className: "bg-destructive/15 text-destructive border-destructive/30", score: 3 };
-  if (pep > 0 || warnings > 0) return { label: "Medium", className: "bg-orange-500/15 text-orange-500 border-orange-500/30", score: 2 };
-  if (media > 0) return { label: "Elevated", className: "bg-amber-500/15 text-amber-600 border-amber-500/30", score: 1 };
-  return { label: "Low", className: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30", score: 0 };
+  const level = row.risk_level ?? deriveRiskLevel(row.case ?? {});
+  const meta = RISK_LEVEL_META[level];
+  return { label: meta.label, className: meta.badgeClass, score: RISK_LEVEL_ORDER[level] };
 }
+
 
 const STATUS_STYLES: Record<MonitoringStatus, string> = {
   active: "bg-teal/15 text-teal border-teal/30",
@@ -100,17 +103,19 @@ export default function ScreeningMonitored() {
   const [transferTarget, setTransferTarget] = useState<MonitoredRow | null>(null);
   const [transferTo, setTransferTo] = useState<string>("");
   const [transferBusy, setTransferBusy] = useState(false);
+  const [drawerRow, setDrawerRow] = useState<MonitoredRow | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("monitoring_subjects")
       .select(
-        "id,status,frequency,started_at,last_checked_at,last_change_at,assigned_to,categories," +
+        "id,subject_id,case_id,status,frequency,started_at,last_checked_at,last_change_at,risk_level,assigned_to,categories," +
           "subject:screening_subjects(full_name,subject_type,country_of_residence)," +
-          "case:screening_cases(case_reference,priority,sanctions_matches,pep_matches,warning_matches,adverse_media_matches)",
+          "case:screening_cases(case_reference,priority,status,sanctions_matches,pep_matches,warning_matches,adverse_media_matches)",
       )
       .order("started_at", { ascending: false });
+
 
     if (error) {
       toast.error("Could not load monitored entities: " + error.message);
@@ -249,9 +254,17 @@ export default function ScreeningMonitored() {
             Ongoing screening of subjects across sanctions, PEP, warnings and adverse media.
           </p>
         </div>
-        <Button asChild variant="accent">
-          <Link to="/screening">Run a new screening</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline">
+            <Link to="/screening/risk-alerts">
+              <BellPlus className="mr-1.5 h-4 w-4" /> Risk alerts
+            </Link>
+          </Button>
+          <Button asChild variant="accent">
+            <Link to="/screening">Run a new screening</Link>
+          </Button>
+        </div>
+
       </div>
 
       {/* Summary */}
@@ -335,7 +348,7 @@ export default function ScreeningMonitored() {
                   {filtered.map((row) => {
                     const risk = riskLevel(row);
                     return (
-                      <TableRow key={row.id}>
+                      <TableRow key={row.id} className="cursor-pointer" onClick={() => setDrawerRow(row)}>
                         <TableCell>
                           <div className="font-medium">{row.subject?.full_name ?? "Unknown subject"}</div>
                           <div className="text-xs text-muted-foreground">
@@ -343,6 +356,7 @@ export default function ScreeningMonitored() {
                             {row.subject?.subject_type ?? "subject"} · {row.frequency}
                           </div>
                         </TableCell>
+
                         <TableCell>
                           <Badge variant="outline" className={STATUS_STYLES[row.status]}>
                             {row.status}
@@ -362,8 +376,9 @@ export default function ScreeningMonitored() {
                           </div>
                         </TableCell>
                         <TableCell className="text-sm">{memberName(row.assigned_to)}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-end gap-1.5">
+
                             {row.status === "active" ? (
                               <Button
                                 size="sm"
@@ -405,7 +420,16 @@ export default function ScreeningMonitored() {
         </CardContent>
       </Card>
 
+      <EntityDetailDrawer
+        entity={drawerRow}
+        onClose={() => setDrawerRow(null)}
+        onPauseResume={(e) => { void setStatus(e as MonitoredRow, e.status === "active" ? "paused" : "active"); setDrawerRow(null); }}
+        onTransfer={(e) => { setTransferTarget(e as MonitoredRow); setTransferTo(e.assigned_to ?? ""); setDrawerRow(null); }}
+        memberName={memberName}
+      />
+
       <Dialog open={!!transferTarget} onOpenChange={(o) => !o && setTransferTarget(null)}>
+
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Transfer access</DialogTitle>

@@ -102,6 +102,18 @@ export const chatbotKnowledge: KnowledgeEntry[] = [
     answer: "Yes — our regulatory reporting module helps you generate and file SARs/STRs with the correct format for your jurisdiction.",
     link: "/platform/regulatory-reporting",
   },
+  {
+    keywords: ["risk alert", "risk threshold", "risk level", "notify risk", "alert rule", "risk notification"],
+    question: "How do I get notified when an entity's risk level changes?",
+    answer: "In the Screening workspace, open Risk alerts to create rules. Choose a threshold (Elevated, Medium or High), pick in-app and/or email notifications, and optionally scope the rule to specific categories or a team member. The rule fires whenever a monitored entity's risk level rises to or past that threshold.",
+    link: "/screening/risk-alerts",
+  },
+  {
+    keywords: ["monitored entity", "monitoring", "ongoing monitoring", "entity detail", "screening history"],
+    question: "How does ongoing monitoring work?",
+    answer: "When you enable ongoing monitoring on a screening, the entity is re-checked on your chosen schedule (daily, weekly or monthly). Open Monitored entities to see each subject's risk level, next run and full history — click any entity for its signals, screening history and monitoring timeline.",
+    link: "/screening/monitored",
+  },
 ];
 
 export const fallbackResponse = {
