@@ -348,7 +348,7 @@ export default function ScreeningTeam() {
             </Card>
           ))}
         </div>
-      </main>
+      <div />
 
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
         <DialogContent className="sm:max-w-md">
@@ -422,7 +422,6 @@ export default function ScreeningTeam() {
         </DialogContent>
       </Dialog>
 
-      <Footer />
-    </div>
+    </ScreeningLayout>
   );
 }
