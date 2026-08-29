@@ -80,16 +80,11 @@ function formatNextRun(d: Date | null): string {
 }
 
 function riskLevel(row: MonitoredRow): { label: string; className: string; score: number } {
-  const c = row.case;
-  const sanctions = c?.sanctions_matches ?? 0;
-  const pep = c?.pep_matches ?? 0;
-  const warnings = c?.warning_matches ?? 0;
-  const media = c?.adverse_media_matches ?? 0;
-  if (sanctions > 0) return { label: "High", className: "bg-destructive/15 text-destructive border-destructive/30", score: 3 };
-  if (pep > 0 || warnings > 0) return { label: "Medium", className: "bg-orange-500/15 text-orange-500 border-orange-500/30", score: 2 };
-  if (media > 0) return { label: "Elevated", className: "bg-amber-500/15 text-amber-600 border-amber-500/30", score: 1 };
-  return { label: "Low", className: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30", score: 0 };
+  const level = row.risk_level ?? deriveRiskLevel(row.case ?? {});
+  const meta = RISK_LEVEL_META[level];
+  return { label: meta.label, className: meta.badgeClass, score: RISK_LEVEL_ORDER[level] };
 }
+
 
 const STATUS_STYLES: Record<MonitoringStatus, string> = {
   active: "bg-teal/15 text-teal border-teal/30",
@@ -108,17 +103,19 @@ export default function ScreeningMonitored() {
   const [transferTarget, setTransferTarget] = useState<MonitoredRow | null>(null);
   const [transferTo, setTransferTo] = useState<string>("");
   const [transferBusy, setTransferBusy] = useState(false);
+  const [drawerRow, setDrawerRow] = useState<MonitoredRow | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("monitoring_subjects")
       .select(
-        "id,status,frequency,started_at,last_checked_at,last_change_at,assigned_to,categories," +
+        "id,subject_id,case_id,status,frequency,started_at,last_checked_at,last_change_at,risk_level,assigned_to,categories," +
           "subject:screening_subjects(full_name,subject_type,country_of_residence)," +
-          "case:screening_cases(case_reference,priority,sanctions_matches,pep_matches,warning_matches,adverse_media_matches)",
+          "case:screening_cases(case_reference,priority,status,sanctions_matches,pep_matches,warning_matches,adverse_media_matches)",
       )
       .order("started_at", { ascending: false });
+
 
     if (error) {
       toast.error("Could not load monitored entities: " + error.message);
