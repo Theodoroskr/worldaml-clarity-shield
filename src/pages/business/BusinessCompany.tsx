@@ -40,7 +40,7 @@ export default function BusinessCompany() {
     if (!account) return;
     setSaving(true);
     try {
-      const { error } = await supabase.from("business_accounts").update({
+      const { data, error } = await supabase.from("business_accounts").update({
         company_name: values.company_name,
         website: values.website || null,
         country: values.country || null,
@@ -53,8 +53,11 @@ export default function BusinessCompany() {
         address_line2: values.address_line2 || null,
         city: values.city || null,
         postal_code: values.postal_code || null,
-      }).eq("id", account.id);
+      }).eq("id", account.id).select("id");
       if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error("You don't have permission to edit this company profile.");
+      }
       toast({ title: "Company profile updated" });
       refresh();
     } catch (e) {
