@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { supabase } from "@/integrations/supabase/client";
 import type { FullEntityProfile } from "@/lib/suite/screeningV2";
 
