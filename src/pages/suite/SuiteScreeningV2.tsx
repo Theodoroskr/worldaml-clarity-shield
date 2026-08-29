@@ -1046,6 +1046,8 @@ function ResultsWorkspace({
                   : new Date(caseDetail.created_at).toLocaleString()}
               />
               <Separator />
+              <ActiveFilters search={caseDetail.search} fuzziness={fuzziness} />
+              <Separator />
               <div className="space-y-2">
                 <Label className="text-xs">Tags</Label>
                 <div className="flex flex-wrap gap-1.5">
