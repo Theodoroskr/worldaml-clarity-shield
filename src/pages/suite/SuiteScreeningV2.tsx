@@ -1524,17 +1524,20 @@ function MatchReview({
               )}
               {profileError && <p className="text-xs text-red-600">{profileError}</p>}
               {profile && (
-                <dl className="grid gap-x-6 gap-y-2 text-sm md:grid-cols-2">
-                  <KeyInfo label="Full name" value={profile.primary_name} />
-                  <KeyInfo label="Entity type" value={profile.entity_type} />
-                  <KeyInfo label="Dates of birth" value={profile.dates_of_birth.join(", ")} />
-                  <KeyInfo label="Place of birth" value={profile.places_of_birth.join(", ")} />
-                  <KeyInfo label="Nationalities" value={profile.nationalities.join(", ")} />
-                  <KeyInfo label="Countries" value={profile.countries.join(", ")} />
-                  <div className="md:col-span-2">
-                    <KeyInfo label="Also known as" value={profile.aliases.join(", ")} />
-                  </div>
-                </dl>
+                <div className="flex gap-4">
+                  <ProfileAvatar name={profile.primary_name} imageUrl={profile.images[0]} />
+                  <dl className="grid flex-1 gap-x-6 gap-y-2 text-sm md:grid-cols-2">
+                    <KeyInfo label="Full name" value={profile.primary_name} />
+                    <KeyInfo label="Entity type" value={profile.entity_type} />
+                    <KeyInfo label="Dates of birth" value={profile.dates_of_birth.join(", ")} />
+                    <KeyInfo label="Place of birth" value={profile.places_of_birth.join(", ")} />
+                    <KeyInfo label="Nationalities" value={profile.nationalities.join(", ")} />
+                    <KeyInfo label="Countries" value={profile.countries.join(", ")} />
+                    <div className="md:col-span-2">
+                      <KeyInfo label="Also known as" value={profile.aliases.join(", ")} />
+                    </div>
+                  </dl>
+                </div>
               )}
             </section>
 
