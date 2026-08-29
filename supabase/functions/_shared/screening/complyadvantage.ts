@@ -18,6 +18,7 @@ import {
   SUBJECT_TYPES,
   SubjectType,
 } from "./types.ts";
+import { computeNameMatch } from "./nameMatch.ts";
 
 const DEFAULT_BASE = "https://api.complyadvantage.com";
 const TIMEOUT_MS = 25_000;
