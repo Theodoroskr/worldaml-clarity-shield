@@ -3,7 +3,11 @@ import { Link } from "react-router-dom";
 import {
   ArrowLeft, BellPlus, HelpCircle, Loader2, Pencil, Plus, Trash2,
 } from "lucide-react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
+
 import { toast } from "sonner";
 import { useScreeningAccess } from "@/hooks/useScreeningAccess";
 import { riskAlertHelp } from "@/lib/riskAlertHelp";
