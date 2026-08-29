@@ -484,5 +484,34 @@ Deno.serve(async (req) => {
     categories_screened: categories,
     categories_excluded: excluded,
     match_count: result.matches.length,
+    // Per-match summary of how each displayed name match was derived.
+    matches: result.matches.map((m) => ({
+      matched_name: m.matched_name,
+      name_similarity: m.name_similarity,
+      match_basis: m.match_basis,
+      match_types: m.match_types,
+      match_type_labels: m.match_type_labels,
+      provider_relevance: m.provider_relevance,
+    })),
+    ...(debugAllowed
+      ? {
+        debug: {
+          subject_name: subject.full_name,
+          name_threshold: options.nameThreshold,
+          exact_match: options.exactMatch,
+          matches: result.matches.map((m) => ({
+            matched_name: m.matched_name,
+            name_similarity: m.name_similarity,
+            match_basis: m.match_basis,
+            match_types: m.match_types,
+            similarity: m.similarity_debug ?? null,
+          })),
+        },
+      }
+      : {}),
+    ...(debugRequested && !debugAllowed
+      ? { debug_error: "Debug output requires an analyst, compliance officer, MLRO or admin role" }
+      : {}),
   });
 });
+
