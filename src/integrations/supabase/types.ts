@@ -5116,6 +5116,8 @@ export type Database = {
           search_id: string | null
           status: Database["public"]["Enums"]["screening_match_status"]
           updated_at: string
+          winning_name: string | null
+          winning_name_kind: string | null
           year_of_birth: number | null
         }
         Insert: {
@@ -5143,6 +5145,8 @@ export type Database = {
           search_id?: string | null
           status?: Database["public"]["Enums"]["screening_match_status"]
           updated_at?: string
+          winning_name?: string | null
+          winning_name_kind?: string | null
           year_of_birth?: number | null
         }
         Update: {
@@ -5170,6 +5174,8 @@ export type Database = {
           search_id?: string | null
           status?: Database["public"]["Enums"]["screening_match_status"]
           updated_at?: string
+          winning_name?: string | null
+          winning_name_kind?: string | null
           year_of_birth?: number | null
         }
         Relationships: [
