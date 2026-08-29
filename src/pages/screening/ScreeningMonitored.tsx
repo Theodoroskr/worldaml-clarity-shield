@@ -254,9 +254,17 @@ export default function ScreeningMonitored() {
             Ongoing screening of subjects across sanctions, PEP, warnings and adverse media.
           </p>
         </div>
-        <Button asChild variant="accent">
-          <Link to="/screening">Run a new screening</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline">
+            <Link to="/screening/risk-alerts">
+              <BellPlus className="mr-1.5 h-4 w-4" /> Risk alerts
+            </Link>
+          </Button>
+          <Button asChild variant="accent">
+            <Link to="/screening">Run a new screening</Link>
+          </Button>
+        </div>
+
       </div>
 
       {/* Summary */}
@@ -340,7 +348,7 @@ export default function ScreeningMonitored() {
                   {filtered.map((row) => {
                     const risk = riskLevel(row);
                     return (
-                      <TableRow key={row.id}>
+                      <TableRow key={row.id} className="cursor-pointer" onClick={() => setDrawerRow(row)}>
                         <TableCell>
                           <div className="font-medium">{row.subject?.full_name ?? "Unknown subject"}</div>
                           <div className="text-xs text-muted-foreground">
@@ -348,6 +356,7 @@ export default function ScreeningMonitored() {
                             {row.subject?.subject_type ?? "subject"} · {row.frequency}
                           </div>
                         </TableCell>
+
                         <TableCell>
                           <Badge variant="outline" className={STATUS_STYLES[row.status]}>
                             {row.status}
