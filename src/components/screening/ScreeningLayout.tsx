@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useSearchParams } from "react-router-dom";
 import {
-  ArrowRight, BellPlus, CreditCard, Gauge, Menu, PanelLeftClose, PanelLeftOpen,
+  ArrowRight, BellPlus, CreditCard, Gauge, LifeBuoy, Menu, PanelLeftClose, PanelLeftOpen,
   Puzzle, Radar, Search, ShieldCheck, Users, X,
 } from "lucide-react";
 import Header from "@/components/Header";
@@ -9,9 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import HelpPanel from "@/components/screening/HelpPanel";
 import { useScreeningAccess } from "@/hooks/useScreeningAccess";
 import { useScreeningQuota } from "@/hooks/useScreeningQuota";
 import { cn } from "@/lib/utils";
+
 
 const STORAGE_KEY = "worldaml.screening.sidebarCollapsed";
 
