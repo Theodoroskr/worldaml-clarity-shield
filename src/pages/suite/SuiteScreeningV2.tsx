@@ -1254,6 +1254,80 @@ function ActiveFilters({
   );
 }
 
+/** Small photo shown on each result card. The full profile (and its photos) is
+ *  fetched lazily once the card scrolls into view, reusing the session-cached
+ *  fetchFullProfile — so matches already warmed by the list warm-up or hover
+ *  prefetch render instantly with no extra request. */
+function MatchCardAvatar({ matchId, name }: { matchId: string; name: string }) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [photo, setPhoto] = useState<string | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!visible) return;
+    let cancelled = false;
+    fetchFullProfile(matchId)
+      .then((profile) => {
+        if (cancelled) return;
+        const first = orderImages(profile?.images ?? [])[0];
+        if (first) setPhoto(first);
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [visible, matchId]);
+
+  const label = (name ?? "?").trim();
+  const initials = label
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+  const hash = label.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  const tone = AVATAR_TONES[hash % AVATAR_TONES.length];
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border text-sm font-semibold",
+        tone,
+      )}
+    >
+      {initials || "?"}
+      {photo && (
+        <img
+          src={photo}
+          alt={label ? `Profile photo of ${label}` : "Listed profile photo"}
+          onError={() => setPhoto(null)}
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+          referrerPolicy="no-referrer"
+        />
+      )}
+    </div>
+  );
+}
+
 function MatchCard({
   match,
   extra,
