@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     // A 403 here means the provider key is not entitled to the monitoring
     // updates feed. Log it loudly but report success so the daily cron job
     // doesn't record a permanent failure while the account is sorted out.
-    if (err instanceof ProviderError && err.httpStatus === 403) {
+    if (err instanceof ProviderError && err.detail.startsWith("HTTP 403")) {
       console.error("[screening] monitoring updates feed not enabled on provider account (HTTP 403)");
       return json({ ok: true, changes: 0, alerts: 0, warning: "provider_monitoring_unavailable" });
     }
