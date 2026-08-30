@@ -111,6 +111,18 @@ const ScreeningMonitoring = () => {
     });
   }, []);
 
+  // Checkout cancel deep link: /screening-monitoring?canceled=true#packages
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [cancelBanner, setCancelBanner] = useState(searchParams.get("canceled") === "true");
+
+  useEffect(() => {
+    if (searchParams.get("canceled") !== "true") return;
+    // Strip the query param so a refresh doesn't re-show the banner.
+    const next = new URLSearchParams(searchParams);
+    next.delete("canceled");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   // Deep links from the portal / checkout cancel land on #packages.
   useEffect(() => {
     if (window.location.hash !== "#packages") return;
