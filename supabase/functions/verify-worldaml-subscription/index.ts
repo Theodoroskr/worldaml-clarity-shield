@@ -22,10 +22,55 @@ const PLAN_QUOTA: Record<string, { search: number | null; monitor: number | null
   professional: { search: 2000, monitor: 500, seats: 5 },
   compliance: { search: 5000, monitor: 1000, seats: 10 },
   enterprise: { search: null, monitor: null, seats: null },
+  api_starter: { search: 1000, monitor: 200, seats: 3 },
+  api_professional: { search: 2000, monitor: 500, seats: 5 },
+  api_compliance: { search: 5000, monitor: 1000, seats: 10 },
   // Legacy monthly mapping retained for compatibility.
   starter_legacy: { search: 2000, monitor: 2000, seats: 3 },
   compliance_legacy: { search: 10000, monitor: 10000, seats: 10 },
+  essentials_legacy: { search: 500, monitor: 100, seats: 1 },
+  professional_legacy: { search: 2000, monitor: 500, seats: 5 },
+  starter_legacy_annual: { search: 1000, monitor: 200, seats: 3 },
+  compliance_legacy_annual: { search: 5000, monitor: 1000, seats: 10 },
 };
+
+// Human-readable plan names shown on the confirmation page and in the email.
+const PLAN_LABEL: Record<string, string> = {
+  demo: "Free Demo",
+  essentials: "Essentials",
+  starter: "Starter",
+  professional: "Professional",
+  compliance: "Compliance",
+  enterprise: "Enterprise",
+  api_starter: "API Starter",
+  api_professional: "API Professional",
+  api_compliance: "API Compliance",
+  essentials_legacy: "Essentials (legacy)",
+  starter_legacy: "Starter (legacy)",
+  starter_legacy_annual: "Starter (legacy annual)",
+  professional_legacy: "Professional (legacy)",
+  compliance_legacy: "Compliance (legacy)",
+  compliance_legacy_annual: "Compliance (legacy annual)",
+};
+
+const formatMoney = (cents: number | null | undefined, currency: string | null | undefined) => {
+  if (cents == null) return null;
+  try {
+    return new Intl.NumberFormat("en-IE", {
+      style: "currency",
+      currency: (currency ?? "eur").toUpperCase(),
+    }).format(cents / 100);
+  } catch {
+    return `${(cents / 100).toFixed(2)} ${(currency ?? "EUR").toUpperCase()}`;
+  }
+};
+
+const formatDate = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" }) : null;
+
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
