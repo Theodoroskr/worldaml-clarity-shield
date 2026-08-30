@@ -255,12 +255,23 @@ export default function ScreeningLayout({ children, head, contained = false }: S
               <ShieldCheck className="h-4 w-4 text-teal" aria-hidden="true" />
               Screening &amp; Monitoring
             </span>
-            {showUsage && (
-              <Badge variant="outline" className="ml-auto border-teal/40 text-teal text-[10px]">
-                {remaining}/{searchQuota} left
-              </Badge>
-            )}
+            <div className="ml-auto flex items-center gap-2">
+              {showUsage && (
+                <Badge variant="outline" className="border-teal/40 text-teal text-[10px]">
+                  {remaining}/{searchQuota} left
+                </Badge>
+              )}
+              <button
+                type="button"
+                aria-label="Help and support"
+                onClick={() => setHelpOpen(true)}
+                className="rounded-md p-1.5 hover:bg-white/10"
+              >
+                <LifeBuoy className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
           </div>
+
           {mobileNavOpen && (
             <div className="border-t border-white/10 max-h-[70vh] overflow-y-auto">
               {sidebar(false, false)}
