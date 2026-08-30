@@ -8,10 +8,15 @@
  * same-tab navigation.
  */
 export const openExternalCheckout = (url: string): void => {
-  const win = window.open(url, "_blank", "noopener,noreferrer");
-  if (!win) {
-    window.location.href = url;
+  // Note: passing "noopener" in the features string makes window.open return
+  // null per spec, so open without it and sever the opener manually.
+  const win = window.open(url, "_blank");
+  if (win) {
+    win.opener = null;
+    return;
   }
+  // Popup blocked — fall back to same-tab navigation.
+  window.location.href = url;
 };
 
 /**
