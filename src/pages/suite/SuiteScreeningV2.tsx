@@ -1460,20 +1460,25 @@ function MatchCard({
           <Checkbox checked={selected} onCheckedChange={onToggleSelect} aria-label="Select match" />
         </div>
 
-        <h3
-          className="mt-2 cursor-pointer text-base font-semibold text-foreground transition-colors hover:text-primary hover:underline"
-          onClick={onReview}
-        >
-          {match.matched_name}
-        </h3>
+        <div className="mt-2 flex items-center gap-3">
+          <MatchCardAvatar matchId={match.id} name={match.matched_name} />
+          <div className="min-w-0">
+            <h3
+              className="cursor-pointer text-base font-semibold text-foreground transition-colors hover:text-primary hover:underline"
+              onClick={onReview}
+            >
+              {match.matched_name}
+            </h3>
 
-        {match.winning_name && match.winning_name !== match.matched_name && (
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Matched on{" "}
-            <span className="font-medium text-foreground">{match.winning_name}</span>
-            {match.winning_name_kind === "alias" ? " (alias)" : ""}
-          </p>
-        )}
+            {match.winning_name && match.winning_name !== match.matched_name && (
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Matched on{" "}
+                <span className="font-medium text-foreground">{match.winning_name}</span>
+                {match.winning_name_kind === "alias" ? " (alias)" : ""}
+              </p>
+            )}
+          </div>
+        </div>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           {categoryBadges.map(({ cat, count }) => (
