@@ -66,6 +66,7 @@ import {
   ScreeningError,
   SOURCE_GROUPS,
   SUBJECT_TYPE_LABELS,
+  type DecisionResult,
   type FullEntityProfile,
   type ScreeningCategory,
   type SubjectInput,
@@ -842,7 +843,7 @@ function ResultsWorkspace({
       await exportCaseReportPdf({
         caseReference: caseDetail.case_reference,
         caseStatusLabel: CASE_STATUS_LABELS[caseDetail.status] ?? caseDetail.status,
-        monitoringActive: caseDetail.monitoring_status === "active",
+        monitoringActive: monitoringActive,
         screenedAt: caseDetail.search?.screened_at ?? caseDetail.created_at,
         searchReference: caseDetail.search?.reference ?? null,
         categoriesScreened: (caseDetail.search?.categories_screened ?? []).map(
@@ -906,7 +907,7 @@ function ResultsWorkspace({
             <h2 className="text-lg font-semibold tracking-tight">{caseDetail.case_reference}</h2>
             <p className="text-xs text-muted-foreground">
               {CASE_STATUS_LABELS[caseDetail.status] ?? caseDetail.status}
-              {caseDetail.monitoring_status === "active" && (
+              {monitoringActive && (
                 <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700">
                   <Activity className="h-3 w-3" /> Monitored
                 </span>
@@ -1149,7 +1150,11 @@ function ResultsWorkspace({
         match={selected}
         subjectType={caseDetail.subject?.subject_type}
         onClose={() => setSelected(null)}
-        onSaved={async () => { setSelected(null); await load(); }}
+        onSaved={async (result) => {
+          if (result) handleDecisionResult(result);
+          setSelected(null);
+          await load();
+        }}
       />
     </div>
   );
