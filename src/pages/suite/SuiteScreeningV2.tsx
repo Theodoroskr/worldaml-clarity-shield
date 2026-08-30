@@ -111,6 +111,14 @@ interface CaseDetail extends CaseRow {
   } | null;
 }
 
+interface MonitoringTimelineEvent {
+  id: string;
+  kind: "activated" | "provider_update";
+  date: string;
+  label: string;
+  requiresReview: boolean;
+}
+
 interface MatchRow {
   id: string;
   matched_name: string;
@@ -683,6 +691,10 @@ function ResultsWorkspace({
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [monitoringActive, setMonitoringActive] = useState(caseDetail.monitoring_status === "active");
+  const [monitorDialogOpen, setMonitorDialogOpen] = useState(false);
+  const [monitorRationale, setMonitorRationale] = useState("");
+  const [monitorSaving, setMonitorSaving] = useState(false);
+  const [monitoringEvents, setMonitoringEvents] = useState<MonitoringTimelineEvent[]>([]);
 
   useEffect(() => {
     setMonitoringActive(caseDetail.monitoring_status === "active");
@@ -730,6 +742,45 @@ function ResultsWorkspace({
       });
       setExtras(extraMap);
     }
+    // Monitoring timeline: activations + provider update alerts for this case.
+    const [{ data: monSubjects }, { data: monAlerts }] = await Promise.all([
+      supabase
+        .from("monitoring_subjects")
+        .select("id, created_at, status")
+        .eq("case_id", caseDetail.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("monitoring_alerts")
+        .select("id, change_type, change_description, status, detected_at, created_at")
+        .eq("case_id", caseDetail.id)
+        .order("detected_at", { ascending: false }),
+    ]);
+    const events: MonitoringTimelineEvent[] = [];
+    (monSubjects ?? []).forEach((s: { id: string; created_at: string; status: string }) => {
+      events.push({
+        id: `mon-${s.id}`,
+        kind: "activated",
+        date: s.created_at,
+        label: s.status === "active" ? "Ongoing monitoring activated" : `Monitoring ${s.status}`,
+        requiresReview: false,
+      });
+    });
+    (monAlerts ?? []).forEach((a: {
+      id: string; change_type: string | null; change_description: string | null;
+      status: string | null; detected_at: string | null; created_at: string;
+    }) => {
+      events.push({
+        id: `alert-${a.id}`,
+        kind: "provider_update",
+        date: a.detected_at ?? a.created_at,
+        label: a.change_description
+          ?? (a.change_type ? `Provider update: ${a.change_type.replace(/_/g, " ")}` : "Provider update detected"),
+        requiresReview: !["acknowledged", "resolved", "dismissed", "reviewed"].includes(a.status ?? ""),
+      });
+    });
+    events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    setMonitoringEvents(events);
+
     setLoading(false);
   }, [caseDetail.id]);
 
@@ -962,6 +1013,16 @@ function ResultsWorkspace({
           {selectedIds.size > 0 && (
             <Badge variant="outline" className="bg-background">{selectedIds.size} selected</Badge>
           )}
+          {!monitoringActive && (
+            <Button
+              size="sm"
+              onClick={() => setMonitorDialogOpen(true)}
+              disabled={monitorSaving}
+              title="Start ongoing monitoring for this case's subject"
+            >
+              <Activity className="mr-1.5 h-4 w-4" /> Monitor this subject
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -977,6 +1038,44 @@ function ResultsWorkspace({
           </Button>
         </div>
       </div>
+
+      <Dialog open={monitorDialogOpen} onOpenChange={setMonitorDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Monitor this subject</DialogTitle>
+            <DialogDescription>
+              Start ongoing monitoring for{" "}
+              <span className="font-medium">{caseDetail.subject?.full_name ?? "this subject"}</span>.
+              You will be alerted when the provider reports new or changed information.
+              This counts towards your monitored-entity quota.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="monitor-rationale">Rationale</Label>
+            <Textarea
+              id="monitor-rationale"
+              value={monitorRationale}
+              onChange={(e) => setMonitorRationale(e.target.value)}
+              placeholder="Why is this subject being placed under ongoing monitoring? (min 10 characters)"
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMonitorDialogOpen(false)} disabled={monitorSaving}>
+              Cancel
+            </Button>
+            <Button
+              onClick={activateCaseMonitoring}
+              disabled={monitorSaving || monitorRationale.trim().length < 10}
+            >
+              {monitorSaving
+                ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                : <Activity className="mr-1.5 h-4 w-4" />}
+              Activate monitoring
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-4">
@@ -1120,6 +1219,46 @@ function ResultsWorkspace({
         </div>
 
         <aside className="space-y-4">
+          {(monitoringActive || monitoringEvents.length > 0) && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                  <Activity className="h-4 w-4 text-emerald-600" /> Monitoring timeline
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {monitoringEvents.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Monitoring is active. No events recorded yet.</p>
+                ) : (
+                  <ol className="relative space-y-4 border-l border-border pl-4">
+                    {monitoringEvents.map((ev) => (
+                      <li key={ev.id} className="relative">
+                        <span
+                          className={cn(
+                            "absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full border-2 border-background",
+                            ev.kind === "activated"
+                              ? "bg-emerald-500"
+                              : ev.requiresReview
+                                ? "bg-amber-500"
+                                : "bg-slate-400",
+                          )}
+                        />
+                        <p className="text-xs font-medium leading-snug">{ev.label}</p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {new Date(ev.date).toLocaleString()}
+                        </p>
+                        {ev.requiresReview && (
+                          <Badge variant="outline" className="mt-1 border-amber-200 bg-amber-50 text-amber-700">
+                            Requires review
+                          </Badge>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium">Search summary</CardTitle>
