@@ -1807,7 +1807,12 @@ function KeyInfo({ label, value }: { label: string; value: string | null }) {
 
 function MatchReview({
   match, subjectType, onClose, onSaved,
-}: { match: MatchRow | null; subjectType?: SubjectType; onClose: () => void; onSaved: () => void }) {
+}: {
+  match: MatchRow | null;
+  subjectType?: SubjectType;
+  onClose: () => void;
+  onSaved: (result?: DecisionResult) => void;
+}) {
   const [attributes, setAttributes] = useState<AttributeRow[]>([]);
   const [sources, setSources] = useState<SourceRow[]>([]);
   const [decision, setDecision] = useState<string>("false_positive");
@@ -1881,17 +1886,28 @@ function MatchReview({
     if (!match) return;
     setSaving(true);
     try {
-      await recordDecision({
+      const result = await recordDecision({
         match_id: match.id,
         decision,
         rationale: rationale.trim(),
         reason_code: needsReason ? reason : decision,
         reason_label: needsReason ? reason : DECISIONS.find((d) => d.key === decision)?.label,
       });
-      toast.success("Decision recorded");
-      onSaved();
+      onSaved(result);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Decision could not be saved");
+      const code = err instanceof ScreeningError ? err.code : undefined;
+      const message = err instanceof Error ? err.message : "Decision could not be saved";
+      if (code === "monitor_quota_exceeded") {
+        toast.error(message, {
+          description: "Ongoing monitoring was not activated for this subject.",
+          action: {
+            label: "Upgrade",
+            onClick: () => { window.location.href = "/screening-monitoring/pricing"; },
+          },
+        });
+      } else {
+        toast.error(message);
+      }
     } finally {
       setSaving(false);
     }
