@@ -137,7 +137,9 @@ serve(async (req) => {
       allow_promotion_codes: true,
       billing_address_collection: "auto",
       success_url: `${origin}/screening/activate?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/platform/aml-screening?canceled=true#packages`,
+      // Direct deep link: /platform/aml-screening redirects via client-side <Navigate>
+      // which would drop the query string and hash.
+      cancel_url: `${origin}/screening-monitoring?canceled=true#packages`,
       metadata: { plan: normalizedPlan, product: "worldaml", guest: userEmail ? "0" : "1" },
     });
 
