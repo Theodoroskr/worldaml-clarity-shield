@@ -11,9 +11,19 @@ import { supabase } from "@/integrations/supabase/client";
 interface ActivationResult {
   status: string;
   plan?: string;
+  plan_label?: string;
   monitored_entity_quota?: number | null;
+  search_quota_annual?: number | null;
+  seat_quota?: number | null;
+  current_period_start?: string | null;
   current_period_end?: string | null;
+  billing_interval?: string | null;
+  amount_label?: string | null;
+  receipt_url?: string | null;
+  receipt_email?: string | null;
+  confirmation_email_sent?: boolean;
 }
+
 
 /**
  * Post-purchase access page: verifies the Stripe session server-side,
