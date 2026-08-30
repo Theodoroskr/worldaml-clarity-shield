@@ -1590,13 +1590,54 @@ function MatchCard({
         </div>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {categoryBadges.map(({ cat, count }) => (
             <Badge key={cat} variant="outline" className={riskTone([cat])}>
               {CATEGORY_LABELS[cat] ?? cat}
               {count > 1 && <span className="ml-1">{count}</span>}
             </Badge>
           ))}
+          {mergedListings && mergedListings.length > 1 && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-md border border-dashed px-2 py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <Users className="mr-1 h-3 w-3" />
+                  {mergedListings.length} listings merged
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-80">
+                <p className="mb-2 text-sm font-semibold">Underlying provider listings</p>
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Grouping is display-only — each listing is stored separately for audit.
+                </p>
+                <div className="space-y-1.5">
+                  {mergedListings.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => onOpenListing?.(m)}
+                      className="flex w-full items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-left text-xs hover:bg-muted"
+                    >
+                      <span className="min-w-0 truncate">
+                        {m.matched_name}
+                        <span className="ml-1 text-muted-foreground">
+                          {(m.category_labels ?? m.categories ?? []).slice(0, 2).join(", ")}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-muted-foreground">
+                        {m.name_similarity != null ? `${Math.round(m.name_similarity)}%` : "—"}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
+
 
         <dl className="mt-4 space-y-1.5 text-sm">
           <div className="flex gap-2">
