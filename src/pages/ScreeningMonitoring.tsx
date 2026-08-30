@@ -120,7 +120,9 @@ const ScreeningMonitoring = () => {
     // Strip the query param so a refresh doesn't re-show the banner.
     const next = new URLSearchParams(searchParams);
     next.delete("canceled");
+    const hash = window.location.hash;
     setSearchParams(next, { replace: true });
+    if (hash) window.history.replaceState(null, "", `${window.location.pathname}${next.size ? `?${next}` : ""}${hash}`);
   }, [searchParams, setSearchParams]);
 
   // Deep links from the portal / checkout cancel land on #packages.
