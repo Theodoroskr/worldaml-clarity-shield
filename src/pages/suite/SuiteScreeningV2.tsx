@@ -695,6 +695,7 @@ function ResultsWorkspace({
   const [monitorRationale, setMonitorRationale] = useState("");
   const [monitorSaving, setMonitorSaving] = useState(false);
   const [monitoringEvents, setMonitoringEvents] = useState<MonitoringTimelineEvent[]>([]);
+  const [ackBusy, setAckBusy] = useState(false);
 
   useEffect(() => {
     setMonitoringActive(caseDetail.monitoring_status === "active");
@@ -785,6 +786,32 @@ function ResultsWorkspace({
   }, [caseDetail.id]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Acknowledge one provider-update alert (or all) so the "Requires review"
+  // badges clear without a page reload.
+  const acknowledgeAlerts = useCallback(async (alertId?: string) => {
+    if (!caseDetail.id || ackBusy) return;
+    setAckBusy(true);
+    let query = supabase
+      .from("monitoring_alerts")
+      .update({ status: "acknowledged", acknowledged_at: new Date().toISOString() })
+      .eq("case_id", caseDetail.id);
+    query = alertId ? query.eq("id", alertId) : query.is("acknowledged_at", null);
+    const { error } = await query;
+    setAckBusy(false);
+    if (error) {
+      toast.error("Could not mark the alert as reviewed. Please try again.");
+      return;
+    }
+    setMonitoringEvents((prev) =>
+      prev.map((ev) =>
+        ev.kind === "provider_update" && (!alertId || ev.id === `alert-${alertId}`)
+          ? { ...ev, requiresReview: false }
+          : ev,
+      ),
+    );
+    toast.success(alertId ? "Alert marked as reviewed" : "All alerts marked as reviewed");
+  }, [caseDetail.id, ackBusy]);
 
   const filteredMatches = useMemo(() => {
     const filtered = matches.filter((m) => {
@@ -1246,6 +1273,17 @@ function ResultsWorkspace({
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-sm font-medium">
                   <Activity className="h-4 w-4 text-emerald-600" /> Monitoring timeline
+                  {monitoringEvents.some((ev) => ev.requiresReview) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-auto h-7 px-2 text-xs"
+                      disabled={ackBusy}
+                      onClick={() => void acknowledgeAlerts()}
+                    >
+                      Mark all reviewed
+                    </Button>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1270,9 +1308,20 @@ function ResultsWorkspace({
                           {new Date(ev.date).toLocaleString()}
                         </p>
                         {ev.requiresReview && (
-                          <Badge variant="outline" className="mt-1 border-amber-200 bg-amber-50 text-amber-700">
-                            Requires review
-                          </Badge>
+                          <div className="mt-1 flex items-center gap-2">
+                            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                              Requires review
+                            </Badge>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-6 px-2 text-[11px]"
+                              disabled={ackBusy}
+                              onClick={() => void acknowledgeAlerts(ev.id.replace(/^alert-/, ""))}
+                            >
+                              Mark reviewed
+                            </Button>
+                          </div>
                         )}
                       </li>
                     ))}

@@ -1,6 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getProvider, providerErrorResponse } from "../_shared/screening/index.ts";
+import { getProvider, ProviderError, providerErrorResponse } from "../_shared/screening/index.ts";
 import { evaluateRiskAlerts, type MatchCounts } from "../_shared/screening/riskAlerts.ts";
 
 
@@ -13,10 +13,14 @@ const json = (body: unknown, status = 200) =>
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  // Service-role only (scheduled job).
+  // Service-role (manual run) or shared cron secret (scheduled pg_cron job).
   const auth = req.headers.get("Authorization") ?? "";
   const token = auth.replace("Bearer ", "").trim();
-  if (!token || token !== Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")) {
+  const cronSecret = req.headers.get("x-cron-secret") ?? "";
+  const expectedCronSecret = Deno.env.get("SCREENING_CRON_SECRET") ?? "";
+  const serviceOk = !!token && token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const cronOk = !!expectedCronSecret && !!cronSecret && cronSecret === expectedCronSecret;
+  if (!serviceOk && !cronOk) {
     return json({ error: "Unauthorized" }, 401);
   }
 
@@ -30,6 +34,13 @@ Deno.serve(async (req) => {
   try {
     changes = await getProvider().retrieveMonitoringChanges(since);
   } catch (err) {
+    // A 403 here means the provider key is not entitled to the monitoring
+    // updates feed. Log it loudly but report success so the daily cron job
+    // doesn't record a permanent failure while the account is sorted out.
+    if (err instanceof ProviderError && err.httpStatus === 403) {
+      console.error("[screening] monitoring updates feed not enabled on provider account (HTTP 403)");
+      return json({ ok: true, changes: 0, alerts: 0, warning: "provider_monitoring_unavailable" });
+    }
     return providerErrorResponse(err, corsHeaders);
   }
 
