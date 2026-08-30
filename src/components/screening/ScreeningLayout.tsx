@@ -43,6 +43,21 @@ export default function ScreeningLayout({ children, head, contained = false }: S
   const quota = useScreeningQuota();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const helpOpen = searchParams.get("help") === "1";
+
+  const setHelpOpen = (open: boolean) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (open) next.set("help", "1");
+        else next.delete("help");
+        return next;
+      },
+      { replace: true },
+    );
+  };
+
 
   useEffect(() => {
     try {
