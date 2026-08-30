@@ -1437,6 +1437,9 @@ function MatchCard({
   onDecision,
   fourEyes,
   subjectType,
+  mergedCategories,
+  mergedListings,
+  onOpenListing,
 }: {
   match: MatchRow;
   extra?: MatchExtra;
@@ -1449,6 +1452,12 @@ function MatchCard({
   fourEyes: boolean;
   /** Type of the subject that was screened (drives entity-type conflict detection). */
   subjectType?: SubjectType;
+  /** Union of categories across every merged listing (display only). */
+  mergedCategories?: string[];
+  /** All provider listings merged onto this card, when duplicate grouping is on. */
+  mergedListings?: MatchRow[];
+  /** Open a specific underlying listing for review. */
+  onOpenListing?: (m: MatchRow) => void;
 
 }) {
   const entityType = (match.entity_type as SubjectType) ?? "person";
