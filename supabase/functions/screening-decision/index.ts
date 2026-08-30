@@ -35,6 +35,174 @@ const PROVIDER_STATUS: Record<string, string> = {
   review_required: "no_match",
 };
 
+interface MonitoringOutcome {
+  active: boolean;
+  already_active: boolean;
+  subject_id: string | null;
+  provider_registered: boolean;
+}
+
+interface CaseForMonitoring {
+  id: string;
+  subject_id: string | null;
+  search_id: string | null;
+}
+
+/**
+ * Full "add to ongoing monitoring" activation: idempotent reactivation,
+ * monitored-entity quota enforcement, monitoring_subjects row, provider
+ * registration (best effort), case flag and audit event. Shared by the
+ * match-level decision and the case-level "Monitor this subject" action.
+ */
+async function activateMonitoring(
+  admin: ReturnType<typeof createClient>,
+  userId: string,
+  organisationId: string,
+  caseRow: CaseForMonitoring,
+  matchId: string | null,
+  subjectLabel: string,
+): Promise<{ monitoring?: MonitoringOutcome; error?: Response }> {
+  if (!caseRow.subject_id) {
+    return {
+      error: json({
+        error: "This case has no screening subject, so ongoing monitoring cannot be activated.",
+        code: "monitoring_subject_missing",
+      }, 400),
+    };
+  }
+
+  // Already monitored? Make the action idempotent instead of erroring.
+  const { data: existing } = await admin
+    .from("monitoring_subjects")
+    .select("id, status")
+    .eq("organisation_id", organisationId)
+    .eq("subject_id", caseRow.subject_id)
+    .in("status", ["active", "paused"])
+    .maybeSingle();
+
+  if (existing) {
+    if (existing.status !== "active") {
+      await admin.from("monitoring_subjects").update({ status: "active" }).eq("id", existing.id);
+    }
+    await admin
+      .from("screening_cases")
+      .update({ monitoring_status: "active" })
+      .eq("id", caseRow.id);
+    return {
+      monitoring: {
+        active: true,
+        already_active: true,
+        subject_id: existing.id,
+        provider_registered: true,
+      },
+    };
+  }
+
+  // Monitored-entity quota enforcement (mirrors search-time monitoring).
+  const { data: quotaRows } = await admin.rpc("get_screening_org_quota", {
+    _org_id: organisationId,
+  });
+  const quota = Array.isArray(quotaRows) ? quotaRows[0] : null;
+  if (quota?.monitor_quota != null) {
+    const { count: usedMonitors, error: monitorCountErr } = await admin
+      .from("monitoring_subjects")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", organisationId)
+      .in("status", ["active", "paused"]);
+    if (!monitorCountErr && (usedMonitors ?? 0) >= quota.monitor_quota) {
+      return {
+        error: json({
+          error:
+            `Monitored entity quota reached — you are monitoring ${usedMonitors} of ${quota.monitor_quota} entities included in your ${
+              quota.plan ?? "current"
+            } plan. Stop monitoring a subject or upgrade your plan to add more.`,
+          code: "monitor_quota_exceeded",
+          monitors_used: usedMonitors ?? 0,
+          monitor_quota: quota.monitor_quota,
+        }, 403),
+      };
+    }
+  }
+
+  const { data: searchRow } = await admin
+    .from("screening_searches")
+    .select("categories_screened")
+    .eq("id", caseRow.search_id)
+    .maybeSingle();
+
+  const { data: mon, error: monErr } = await admin
+    .from("monitoring_subjects")
+    .insert({
+      organisation_id: organisationId,
+      subject_id: caseRow.subject_id,
+      case_id: caseRow.id,
+      categories: searchRow?.categories_screened ?? [],
+      frequency: "daily",
+      assigned_to: userId,
+      created_by: userId,
+    })
+    .select("id")
+    .single();
+
+  if (monErr || !mon) {
+    return {
+      error: json({
+        error: "Ongoing monitoring could not be activated. Please try again.",
+        code: "monitoring_activation_failed",
+      }, 500),
+    };
+  }
+
+  // Register the monitor with the provider (best effort).
+  let providerRegistered = false;
+  try {
+    const { data: providerSearch } = await admin
+      .from("provider_references")
+      .select("provider, provider_id")
+      .eq("entity_kind", "search")
+      .eq("entity_id", caseRow.search_id)
+      .maybeSingle();
+    if (providerSearch?.provider_id) {
+      await getProvider().startMonitoring(providerSearch.provider_id);
+      await admin.from("provider_references").insert({
+        organisation_id: organisationId,
+        entity_kind: "monitor",
+        entity_id: mon.id,
+        provider: providerSearch.provider,
+        provider_id: providerSearch.provider_id,
+        provider_ref: {},
+      });
+      providerRegistered = true;
+    }
+  } catch (_) {
+    // provider registration is non-blocking; the local monitor stays active
+  }
+
+  await admin
+    .from("screening_cases")
+    .update({ monitoring_status: "active" })
+    .eq("id", caseRow.id);
+
+  await admin.from("screening_audit_events").insert({
+    organisation_id: organisationId,
+    case_id: caseRow.id,
+    match_id: matchId,
+    event_type: "monitoring_activated",
+    description: `Ongoing monitoring activated for ${subjectLabel}`,
+    metadata: { provider_registered: providerRegistered, monitoring_subject_id: mon.id },
+    actor_id: userId,
+  });
+
+  return {
+    monitoring: {
+      active: true,
+      already_active: false,
+      subject_id: mon.id,
+      provider_registered: providerRegistered,
+    },
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
