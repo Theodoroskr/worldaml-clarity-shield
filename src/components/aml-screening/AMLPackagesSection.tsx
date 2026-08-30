@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Check, Loader2, ArrowRight, CreditCard, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,6 @@ const CHECKOUT_FN = "create-worldaml-checkout";
  * Checkout only appears once the matching annual Stripe price is mapped.
  */
 export default function AMLPackagesSection() {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const { isLoading, isAuthenticated, hasAccess, plan: activePlan } = useScreeningAccess();
   const [busy, setBusy] = useState<string | null>(null);
@@ -61,13 +60,11 @@ export default function AMLPackagesSection() {
   }, [isLoading, isAuthenticated]);
 
   const onBuy = (plan: ScreeningPlanDefinition) => {
-    if (!isAuthenticated) {
-      sessionStorage.setItem(INTENT_KEY, plan.key);
-      navigate(`/signup?redirect=${encodeURIComponent("/screening-monitoring/pricing")}`);
-      return;
-    }
+    // Guest checkout: no login gate. Stripe collects the email at checkout and
+    // the subscription is linked to the account on activation.
     void startCheckout(plan.key, plan.checkoutPlan);
   };
+
 
   const salesLink = (plan: ScreeningPlanDefinition) =>
     `/contact-sales?product=${encodeURIComponent("WorldAML Screening & Monitoring")}&plan=${encodeURIComponent(plan.name)}`;
