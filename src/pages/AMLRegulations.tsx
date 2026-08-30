@@ -249,12 +249,12 @@ const AMLRegulations = () => {
     name: "AML Regulations by Jurisdiction",
     description:
       "Key anti-money laundering regulations mapped across 12 jurisdictions — FATF, EU, UK, US, Japan, Switzerland, Luxembourg, Cyprus, Malta, South Korea, Cayman Islands, and Jersey.",
-    url: "https://www.worldaml.com/resources/aml-regulations",
+    url: "https://worldaml.com/resources/aml-regulations",
     itemListElement: amlRegulations.map((reg, i) => ({
       "@type": "ListItem",
       position: i + 1,
       name: reg.shortName,
-      url: `https://www.worldaml.com/resources/aml-regulations#${reg.id}`,
+      url: `https://worldaml.com/resources/aml-regulations#${reg.id}`,
       description: reg.scope,
     })),
   };

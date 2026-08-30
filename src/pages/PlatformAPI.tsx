@@ -18,16 +18,16 @@ const softwareData = {
   description:
     "RESTful compliance API providing AML screening, KYC/KYB onboarding, risk scoring, transaction monitoring, and regulatory reporting as granular microservices. Integrate compliance directly into your platform.",
   operatingSystem: "Web",
-  url: "https://www.worldaml.com/platform/api",
+  url: "https://worldaml.com/platform/api",
   offers: {
     "@type": "Offer",
     category: "SaaS",
-    url: "https://www.worldaml.com/pricing",
+    url: "https://worldaml.com/pricing",
   },
   provider: {
     "@type": "Organization",
     name: "WorldAML",
-    url: "https://www.worldaml.com",
+    url: "https://worldaml.com",
   },
 };
 

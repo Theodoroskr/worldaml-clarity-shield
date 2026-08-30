@@ -42,14 +42,14 @@ const MarketPage = ({ marketSlug, localeOverride }: MarketPageProps = {}) => {
     "@type": "WebPage",
     name: seoTitle,
     description: seoDescription,
-    url: `https://www.worldaml.com${seoCanonical}`,
+    url: `https://worldaml.com${seoCanonical}`,
     inLanguage: localeOverride?.lang ?? "en",
     breadcrumb: {
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: "https://www.worldaml.com/" },
-        { "@type": "ListItem", position: 2, name: "Markets", item: "https://www.worldaml.com/markets/uk" },
-        { "@type": "ListItem", position: 3, name: data.regionLabel, item: `https://www.worldaml.com${seoCanonical}` },
+        { "@type": "ListItem", position: 1, name: "Home", item: "https://worldaml.com/" },
+        { "@type": "ListItem", position: 2, name: "Markets", item: "https://worldaml.com/markets/uk" },
+        { "@type": "ListItem", position: 3, name: data.regionLabel, item: `https://worldaml.com${seoCanonical}` },
       ],
     },
     mainEntity: {

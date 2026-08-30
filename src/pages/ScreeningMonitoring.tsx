@@ -22,9 +22,9 @@ const softwareData = {
   applicationCategory: "FinancialApplication",
   description: "WORLDAML Screening & Monitoring software covering sanctions, PEPs, adverse media, and RCAs. FATF R.6, R.12, and R.16 aligned.",
   operatingSystem: "Web",
-  url: "https://www.worldaml.com/screening-monitoring",
-  offers: { "@type": "Offer", category: "SaaS", url: "https://www.worldaml.com/screening-monitoring/pricing" },
-  provider: { "@type": "Organization", name: "WorldAML", url: "https://www.worldaml.com" },
+  url: "https://worldaml.com/screening-monitoring",
+  offers: { "@type": "Offer", category: "SaaS", url: "https://worldaml.com/screening-monitoring/pricing" },
+  provider: { "@type": "Organization", name: "WorldAML", url: "https://worldaml.com" },
 };
 
 const faqData = {

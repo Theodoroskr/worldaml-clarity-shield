@@ -10,13 +10,13 @@ const structuredData = {
   "@type": "WebPage",
   name: "AML Compliance for Banks & EMIs | WorldAML",
   description: "AML compliance platform for banks and electronic money institutions. KYC/KYB onboarding, sanctions screening, PEP checks, and ongoing monitoring. FATF, AMLD6, and CRR2 aligned.",
-  url: "https://www.worldaml.com/industries/banking",
+  url: "https://worldaml.com/industries/banking",
   breadcrumb: {
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.worldaml.com/" },
-      { "@type": "ListItem", position: 2, name: "Industries", item: "https://www.worldaml.com/industries" },
-      { "@type": "ListItem", position: 3, name: "Banks & EMIs", item: "https://www.worldaml.com/industries/banking" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://worldaml.com/" },
+      { "@type": "ListItem", position: 2, name: "Industries", item: "https://worldaml.com/industries" },
+      { "@type": "ListItem", position: 3, name: "Banks & EMIs", item: "https://worldaml.com/industries/banking" },
     ],
   },
   mainEntity: {

@@ -16,9 +16,9 @@ const softwareData = {
   applicationCategory: "FinancialApplication",
   description: "KYC and KYB onboarding software for regulated institutions. Identity verification, sanctions and PEP screening, UBO mapping, and EDD workflows in a single compliance platform.",
   operatingSystem: "Web",
-  url: "https://www.worldaml.com/platform/kyc-kyb",
-  offers: { "@type": "Offer", category: "SaaS", url: "https://www.worldaml.com/pricing" },
-  provider: { "@type": "Organization", name: "WorldAML", url: "https://www.worldaml.com" },
+  url: "https://worldaml.com/platform/kyc-kyb",
+  offers: { "@type": "Offer", category: "SaaS", url: "https://worldaml.com/pricing" },
+  provider: { "@type": "Organization", name: "WorldAML", url: "https://worldaml.com" },
 };
 
 const faqData = {

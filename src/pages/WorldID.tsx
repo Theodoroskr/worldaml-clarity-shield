@@ -23,16 +23,16 @@ const softwareData = {
   description:
     "Digital identity verification with document authentication, biometric liveness detection, and face matching. Verify customers in seconds via API or platform UI. eIDAS-aligned and FATF-compliant.",
   operatingSystem: "Web",
-  url: "https://www.worldaml.com/products/worldid",
+  url: "https://worldaml.com/products/worldid",
   offers: {
     "@type": "Offer",
     category: "SaaS",
-    url: "https://www.worldaml.com/products/worldid#pricing",
+    url: "https://worldaml.com/products/worldid#pricing",
   },
   provider: {
     "@type": "Organization",
     name: "WorldAML",
-    url: "https://www.worldaml.com",
+    url: "https://worldaml.com",
   },
 };
 

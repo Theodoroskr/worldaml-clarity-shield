@@ -10,13 +10,13 @@ const structuredData = {
   "@type": "WebPage",
   name: "AML Compliance for Payment Providers & PSPs | WorldAML",
   description: "AML compliance platform for payment service providers and acquirers. Merchant KYB onboarding, sanctions screening, transaction monitoring, and PSD2/EMD2 compliance.",
-  url: "https://www.worldaml.com/industries/payments",
+  url: "https://worldaml.com/industries/payments",
   breadcrumb: {
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.worldaml.com/" },
-      { "@type": "ListItem", position: 2, name: "Industries", item: "https://www.worldaml.com/industries" },
-      { "@type": "ListItem", position: 3, name: "Payment Providers", item: "https://www.worldaml.com/industries/payments" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://worldaml.com/" },
+      { "@type": "ListItem", position: 2, name: "Industries", item: "https://worldaml.com/industries" },
+      { "@type": "ListItem", position: 3, name: "Payment Providers", item: "https://worldaml.com/industries/payments" },
     ],
   },
   mainEntity: {

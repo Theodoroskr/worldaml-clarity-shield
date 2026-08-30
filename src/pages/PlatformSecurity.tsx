@@ -48,16 +48,16 @@ const softwareData = {
   description:
     "WorldAML security architecture including ISO 27001-aligned controls, AES-256 encryption, TLS 1.3, role-based access controls, immutable audit trails, and GDPR-compliant data handling for regulated financial institutions.",
   operatingSystem: "Web",
-  url: "https://www.worldaml.com/platform/security",
+  url: "https://worldaml.com/platform/security",
   offers: {
     "@type": "Offer",
     category: "SaaS",
-    url: "https://www.worldaml.com/pricing",
+    url: "https://worldaml.com/pricing",
   },
   provider: {
     "@type": "Organization",
     name: "WorldAML",
-    url: "https://www.worldaml.com",
+    url: "https://worldaml.com",
   },
 };
 

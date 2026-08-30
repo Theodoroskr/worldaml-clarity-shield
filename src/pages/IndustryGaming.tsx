@@ -10,13 +10,13 @@ const structuredData = {
   "@type": "WebPage",
   name: "AML Compliance for Gaming & Gambling Operators | WorldAML",
   description: "AML and KYC compliance for licensed gaming and gambling operators. Player KYC verification, source of funds checks, ongoing monitoring, and SAR workflows. MGA, UKGC, and GRA aligned.",
-  url: "https://www.worldaml.com/industries/gaming",
+  url: "https://worldaml.com/industries/gaming",
   breadcrumb: {
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.worldaml.com/" },
-      { "@type": "ListItem", position: 2, name: "Industries", item: "https://www.worldaml.com/industries" },
-      { "@type": "ListItem", position: 3, name: "Gaming & Gambling", item: "https://www.worldaml.com/industries/gaming" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://worldaml.com/" },
+      { "@type": "ListItem", position: 2, name: "Industries", item: "https://worldaml.com/industries" },
+      { "@type": "ListItem", position: 3, name: "Gaming & Gambling", item: "https://worldaml.com/industries/gaming" },
     ],
   },
   mainEntity: {

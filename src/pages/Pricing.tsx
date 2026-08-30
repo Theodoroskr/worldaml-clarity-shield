@@ -116,7 +116,7 @@ const Pricing = () => {
           "lowPrice": "590",
           "highPrice": "5950",
           "offerCount": SCREENING_PLANS.length,
-          "url": "https://www.worldaml.com/screening-monitoring/pricing"
+          "url": "https://worldaml.com/screening-monitoring/pricing"
         }
       },
       {
@@ -130,7 +130,7 @@ const Pricing = () => {
           "priceCurrency": "EUR",
           "priceValidUntil": "2027-12-31",
           "availability": "https://schema.org/OnlineOnly",
-          "url": "https://www.worldaml.com/pricing"
+          "url": "https://worldaml.com/pricing"
         }
       },
       {
@@ -144,7 +144,7 @@ const Pricing = () => {
           "priceCurrency": "EUR",
           "priceValidUntil": "2027-12-31",
           "availability": "https://schema.org/OnlineOnly",
-          "url": "https://www.worldaml.com/pricing"
+          "url": "https://worldaml.com/pricing"
         }
       },
       {
@@ -158,7 +158,7 @@ const Pricing = () => {
           "priceCurrency": "EUR",
           "priceValidUntil": "2027-12-31",
           "availability": "https://schema.org/OnlineOnly",
-          "url": "https://www.worldaml.com/pricing"
+          "url": "https://worldaml.com/pricing"
         }
       }
     ]

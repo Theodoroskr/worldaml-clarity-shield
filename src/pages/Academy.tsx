@@ -948,7 +948,7 @@ const Academy = () => {
             name: "WorldAML Academy",
             description: "CPD-accredited compliance training courses with verifiable certificates. AML, KYC and sanctions screening for regulated firms in the US, UK, Europe and Middle East.",
             url: "https://academy.worldaml.com",
-            sameAs: ["https://www.worldaml.com/academy"],
+            sameAs: ["https://worldaml.com/academy"],
             areaServed: [
               { "@type": "Country", name: "United States" },
               { "@type": "Country", name: "United Kingdom" },
@@ -1742,7 +1742,7 @@ const Academy = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://www.worldaml.com/academy/${course.slug}`)}`;
+                            const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://worldaml.com/academy/${course.slug}`)}`;
                             window.open(url, "_blank", "noopener,noreferrer");
                           }}
                           className="p-1.5 rounded-md text-muted-foreground hover:text-[#0A66C2] hover:bg-[#0A66C2]/10 transition-colors"

@@ -15,7 +15,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { blogPosts } from "../src/data/blogPosts";
 
-const BASE_URL = "https://www.worldaml.com";
+const BASE_URL = "https://worldaml.com";
 const SITE_NAME = "WorldAML";
 // Supabase edge function that renders per-post OG images (1200x630 PNG)
 const OG_FUNCTION_URL =

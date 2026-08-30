@@ -24,7 +24,7 @@ const Index = () => {
             "@type": "WebPage",
             "name": "WorldAML - AML Screening Platform",
             "description": "Enterprise-grade financial crime screening infrastructure for regulated organisations in the US, UK, EU and UAE.",
-            "url": "https://www.worldaml.com/",
+            "url": "https://worldaml.com/",
             "mainEntity": {
               "@type": "SoftwareApplication",
               "name": "WorldAML",
