@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { exportMatchDecisionPdf } from "@/lib/screening/decisionPdf";
 import { exportCaseReportPdf } from "@/lib/screening/caseReportPdf";
+import { consolidateMatches } from "@/lib/screening/consolidateMatches";
 import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";
