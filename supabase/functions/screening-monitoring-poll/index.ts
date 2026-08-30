@@ -1,6 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getProvider, providerErrorResponse } from "../_shared/screening/index.ts";
+import { getProvider, ProviderError, providerErrorResponse } from "../_shared/screening/index.ts";
 import { evaluateRiskAlerts, type MatchCounts } from "../_shared/screening/riskAlerts.ts";
 
 
