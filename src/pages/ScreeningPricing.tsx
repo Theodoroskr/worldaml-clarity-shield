@@ -23,7 +23,7 @@ const structuredData = {
       name: p.name,
       price: (p.price ?? "").replace(/[^\d.]/g, ""),
       priceCurrency: "EUR",
-      url: "https://www.worldaml.com/screening-monitoring/pricing",
+      url: "https://worldaml.com/screening-monitoring/pricing",
       availability: "https://schema.org/InStock",
     })),
 };

@@ -46,11 +46,11 @@ const softwareStructuredData = {
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description: "RESTful API for automated AML screening including sanctions, PEPs, adverse media, and ongoing monitoring.",
-  url: "https://www.worldaml.com/aml-api",
+  url: "https://worldaml.com/aml-api",
   offers: {
     "@type": "Offer",
     category: "API Access",
-    url: "https://www.worldaml.com/contact-sales",
+    url: "https://worldaml.com/contact-sales",
   },
 };
 

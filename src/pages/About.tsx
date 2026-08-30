@@ -88,11 +88,11 @@ const About = () => {
           "@type": "AboutPage",
           "name": "About WorldAML",
           "description": "WorldAML is a financial crime screening platform operated by Infocredit Group, providing unified access to AML screening, KYC/KYB verification, and compliance management tools.",
-          "url": "https://www.worldaml.com/about",
+          "url": "https://worldaml.com/about",
           "mainEntity": {
             "@type": "Organization",
             "name": "WorldAML",
-            "url": "https://www.worldaml.com",
+            "url": "https://worldaml.com",
             "parentOrganization": {
               "@type": "Organization",
               "name": "Infocredit Group",

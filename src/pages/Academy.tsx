@@ -535,50 +535,6 @@ const Academy = () => {
         </section>
 
 
-        {/* Social proof — testimonials */}
-        <section className="bg-secondary/30 border-b border-border">
-          <div className="container-enterprise section-padding">
-            <div className="text-center mb-10">
-              <p className="text-caption uppercase tracking-wider text-muted-foreground font-semibold mb-2">
-                Trusted by compliance teams worldwide
-              </p>
-              <h2 className="text-headline text-foreground">What learners say</h2>
-            </div>
-            <div className="grid md:grid-cols-3 gap-5">
-              {[
-                {
-                  quote: "Crisp, practical, and aligned with what regulators actually expect. Our analysts use the regional courses as onboarding day one.",
-                  name: "MLRO",
-                  role: "EU-licensed payments firm",
-                },
-                {
-                  quote: "The crypto and sanctions modules saved us weeks of policy drafting. The certificate is a nice extra to put on LinkedIn.",
-                  name: "Compliance Lead",
-                  role: "VASP, MENA region",
-                },
-                {
-                  quote: "Finally, AML training that doesn't read like a textbook. The case studies are realistic and decision-driven.",
-                  name: "Senior Analyst",
-                  role: "Tier-1 retail bank",
-                },
-              ].map((t, i) => (
-                <div key={i} className="rounded-xl border border-border bg-card p-6 flex flex-col">
-                  <div className="flex gap-0.5 mb-3">
-                    {[...Array(5)].map((_, s) => (
-                      <Star key={s} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <p className="text-body-sm text-foreground mb-4 leading-relaxed flex-1">"{t.quote}"</p>
-                  <div className="border-t border-border pt-3">
-                    <p className="text-body-sm font-semibold text-foreground">{t.name}</p>
-                    <p className="text-caption text-muted-foreground">{t.role}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* What you get — Three-tier pricing */}
         <section className="bg-background border-b border-border">
           <div className="container-enterprise section-padding">
@@ -948,7 +904,7 @@ const Academy = () => {
             name: "WorldAML Academy",
             description: "CPD-accredited compliance training courses with verifiable certificates. AML, KYC and sanctions screening for regulated firms in the US, UK, Europe and Middle East.",
             url: "https://academy.worldaml.com",
-            sameAs: ["https://www.worldaml.com/academy"],
+            sameAs: ["https://worldaml.com/academy"],
             areaServed: [
               { "@type": "Country", name: "United States" },
               { "@type": "Country", name: "United Kingdom" },
@@ -1742,7 +1698,7 @@ const Academy = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://www.worldaml.com/academy/${course.slug}`)}`;
+                            const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://worldaml.com/academy/${course.slug}`)}`;
                             window.open(url, "_blank", "noopener,noreferrer");
                           }}
                           className="p-1.5 rounded-md text-muted-foreground hover:text-[#0A66C2] hover:bg-[#0A66C2]/10 transition-colors"

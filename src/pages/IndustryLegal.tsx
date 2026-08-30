@@ -10,13 +10,13 @@ const structuredData = {
   "@type": "WebPage",
   name: "AML Compliance for Law Firms & Fiduciary Services | WorldAML",
   description: "AML compliance platform for law firms, trust companies, and corporate service providers. Client KYC/KYB onboarding, sanctions screening, and audit trail. FATF DNFBP and AMLD aligned.",
-  url: "https://www.worldaml.com/industries/legal",
+  url: "https://worldaml.com/industries/legal",
   breadcrumb: {
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.worldaml.com/" },
-      { "@type": "ListItem", position: 2, name: "Industries", item: "https://www.worldaml.com/industries" },
-      { "@type": "ListItem", position: 3, name: "Legal & Fiduciary", item: "https://www.worldaml.com/industries/legal" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://worldaml.com/" },
+      { "@type": "ListItem", position: 2, name: "Industries", item: "https://worldaml.com/industries" },
+      { "@type": "ListItem", position: 3, name: "Legal & Fiduciary", item: "https://worldaml.com/industries/legal" },
     ],
   },
   mainEntity: {

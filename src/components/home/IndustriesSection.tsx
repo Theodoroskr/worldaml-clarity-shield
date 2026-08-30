@@ -6,31 +6,37 @@ const industries = [
   {
     icon: Building2,
     title: "Banks & EMIs",
+    path: "/industries/banking",
     description: "Full regulatory compliance for traditional banking and electronic money institutions.",
   },
   {
     icon: Wallet,
     title: "Fintechs",
+    path: "/industries/fintech",
     description: "Scalable AML solutions for fast-growing payment and financial technology companies.",
   },
   {
     icon: Bitcoin,
     title: "Crypto & Digital Assets",
+    path: "/industries/crypto",
     description: "VASP compliance with specialized cryptocurrency address screening and FATF travel rule support.",
   },
   {
     icon: Gamepad2,
     title: "Gaming & Gambling",
+    path: "/industries/gaming",
     description: "Player verification and ongoing monitoring for regulated gaming operators.",
   },
   {
     icon: Scale,
     title: "Legal & Fiduciary",
+    path: "/industries/legal",
     description: "Client due diligence for law firms, trust companies, and corporate service providers.",
   },
   {
     icon: CreditCard,
     title: "Payment Providers",
+    path: "/industries/payments",
     description: "Transaction monitoring and merchant screening for PSPs and acquirers.",
   },
 ];
@@ -60,7 +66,7 @@ export const IndustriesSection = () => {
           {industries.map((industry) => (
             <Link
               key={industry.title}
-              to={`/industries/${industry.title.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
+              to={industry.path}
               className="group p-6 rounded-lg border border-divider hover:border-slate-muted bg-card hover:bg-surface-subtle transition-all duration-200"
             >
               <div className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-secondary text-navy mb-4 group-hover:bg-navy group-hover:text-primary-foreground transition-colors">

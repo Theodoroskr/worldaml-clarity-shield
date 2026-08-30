@@ -17,16 +17,16 @@ const softwareData = {
   description:
     "Automated CRS, FATCA, and FINTRAC regulatory reporting module. Classify accounts, generate OECD XML, validate submissions, and file with relevant tax and financial intelligence authorities.",
   operatingSystem: "Web",
-  url: "https://www.worldaml.com/platform/regulatory-reporting",
+  url: "https://worldaml.com/platform/regulatory-reporting",
   offers: {
     "@type": "Offer",
     category: "SaaS",
-    url: "https://www.worldaml.com/pricing",
+    url: "https://worldaml.com/pricing",
   },
   provider: {
     "@type": "Organization",
     name: "WorldAML",
-    url: "https://www.worldaml.com",
+    url: "https://worldaml.com",
   },
 };
 

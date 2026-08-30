@@ -231,13 +231,13 @@ const Glossary = () => {
     name: "AML & Compliance Glossary",
     description:
       "Definitions of key terms used in anti-money laundering, KYC/KYB, sanctions screening, and financial crime compliance.",
-    url: "https://www.worldaml.com/resources/glossary",
+    url: "https://worldaml.com/resources/glossary",
     hasDefinedTerm: sortedGlossaryTerms.map((t) => ({
       "@type": "DefinedTerm",
       name: t.abbreviation ? `${t.term} (${t.abbreviation})` : t.term,
       description: t.definition,
-      inDefinedTermSet: "https://www.worldaml.com/resources/glossary",
-      url: `https://www.worldaml.com/resources/glossary#${t.term.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`,
+      inDefinedTermSet: "https://worldaml.com/resources/glossary",
+      url: `https://worldaml.com/resources/glossary#${t.term.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`,
     })),
   };
 

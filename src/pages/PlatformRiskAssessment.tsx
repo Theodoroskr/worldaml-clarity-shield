@@ -15,9 +15,9 @@ const softwareData = {
   applicationCategory: "FinancialApplication",
   description: "Customer risk assessment and categorisation software. Configurable risk matrix, automated scoring, Low/Medium/High tier assignment, and full audit trail. FATF RBA and AMLD aligned.",
   operatingSystem: "Web",
-  url: "https://www.worldaml.com/platform/risk-assessment",
-  offers: { "@type": "Offer", category: "SaaS", url: "https://www.worldaml.com/pricing" },
-  provider: { "@type": "Organization", name: "WorldAML", url: "https://www.worldaml.com" },
+  url: "https://worldaml.com/platform/risk-assessment",
+  offers: { "@type": "Offer", category: "SaaS", url: "https://worldaml.com/pricing" },
+  provider: { "@type": "Organization", name: "WorldAML", url: "https://worldaml.com" },
 };
 
 const faqData = {

@@ -109,7 +109,7 @@ const BlogPost = () => {
     "@type": "BlogPosting",
     headline: post.title,
     description: post.description,
-    url: `https://www.worldaml.com/blog/${post.slug}`,
+    url: `https://worldaml.com/blog/${post.slug}`,
     datePublished: post.date,
     dateModified: post.date,
     author: {
@@ -119,7 +119,7 @@ const BlogPost = () => {
     publisher: {
       "@type": "Organization",
       name: "WorldAML",
-      url: "https://www.worldaml.com",
+      url: "https://worldaml.com",
     },
     keywords: post.tags.join(", "),
   };

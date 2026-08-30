@@ -64,7 +64,7 @@ const Partners = () => (
           name: "WorldAML Partner Program",
           description:
             "Join the WorldAML Partner Program as a referral, affiliate, or reseller partner. Earn recurring commissions on every client you refer.",
-          url: "https://www.worldaml.com/partners",
+          url: "https://worldaml.com/partners",
           mainEntity: {
             "@type": "Offer",
             name: "WorldAML Partner Program",

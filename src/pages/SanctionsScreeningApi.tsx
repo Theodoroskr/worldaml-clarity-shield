@@ -45,11 +45,11 @@ const softwareStructuredData = {
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description: "Real-time sanctions screening API covering 200+ global watchlists with fuzzy matching, batch processing, and ongoing monitoring.",
-  url: "https://www.worldaml.com/sanctions-screening-api",
+  url: "https://worldaml.com/sanctions-screening-api",
   offers: {
     "@type": "Offer",
     category: "API Access",
-    url: "https://www.worldaml.com/contact-sales",
+    url: "https://worldaml.com/contact-sales",
   },
 };
 

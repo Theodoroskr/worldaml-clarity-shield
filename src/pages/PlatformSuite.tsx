@@ -20,16 +20,16 @@ const softwareData = {
   description:
     "Unified compliance platform combining KYC/KYB onboarding, AML screening, risk assessment, transaction monitoring, regulatory reporting, and audit trails in a single integrated suite.",
   operatingSystem: "Web",
-  url: "https://www.worldaml.com/platform/suite",
+  url: "https://worldaml.com/platform/suite",
   offers: {
     "@type": "Offer",
     category: "SaaS",
-    url: "https://www.worldaml.com/pricing",
+    url: "https://worldaml.com/pricing",
   },
   provider: {
     "@type": "Organization",
     name: "WorldAML",
-    url: "https://www.worldaml.com",
+    url: "https://worldaml.com",
   },
 };
 

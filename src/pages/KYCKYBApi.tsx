@@ -46,11 +46,11 @@ const softwareStructuredData = {
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description: "Programmatic KYC and KYB verification API with identity checks, UBO mapping, document verification, and AML screening.",
-  url: "https://www.worldaml.com/kyc-kyb-api",
+  url: "https://worldaml.com/kyc-kyb-api",
   offers: {
     "@type": "Offer",
     category: "API Access",
-    url: "https://www.worldaml.com/contact-sales",
+    url: "https://worldaml.com/contact-sales",
   },
 };
 

@@ -62,9 +62,9 @@ const articleStructuredData = {
   publisher: {
     "@type": "Organization",
     name: "WorldAML",
-    logo: { "@type": "ImageObject", url: "https://www.worldaml.com/og-image.png" },
+    logo: { "@type": "ImageObject", url: "https://worldaml.com/og-image.png" },
   },
-  mainEntityOfPage: "https://www.worldaml.com/resources/fatf-travel-rule-compliance-guide",
+  mainEntityOfPage: "https://worldaml.com/resources/fatf-travel-rule-compliance-guide",
 };
 
 const FATFTravelRuleGuide = () => {

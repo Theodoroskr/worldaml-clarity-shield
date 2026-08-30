@@ -10,13 +10,13 @@ const structuredData = {
   "@type": "WebPage",
   name: "AML Compliance for Crypto & VASPs | WorldAML",
   description: "VASP compliance platform for crypto exchanges, custodians, and digital asset businesses. KYC onboarding, wallet screening, FATF Travel Rule, and risk-based decisioning.",
-  url: "https://www.worldaml.com/industries/crypto",
+  url: "https://worldaml.com/industries/crypto",
   breadcrumb: {
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.worldaml.com/" },
-      { "@type": "ListItem", position: 2, name: "Industries", item: "https://www.worldaml.com/industries" },
-      { "@type": "ListItem", position: 3, name: "Crypto & Digital Assets", item: "https://www.worldaml.com/industries/crypto" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://worldaml.com/" },
+      { "@type": "ListItem", position: 2, name: "Industries", item: "https://worldaml.com/industries" },
+      { "@type": "ListItem", position: 3, name: "Crypto & Digital Assets", item: "https://worldaml.com/industries/crypto" },
     ],
   },
   mainEntity: {

@@ -10,13 +10,13 @@ const structuredData = {
   "@type": "WebPage",
   name: "AML Compliance for Fintechs | WorldAML",
   description: "Scalable AML compliance for fintech companies. API-first KYC/KYB onboarding, sanctions screening, and risk decisioning that grows with your product.",
-  url: "https://www.worldaml.com/industries/fintech",
+  url: "https://worldaml.com/industries/fintech",
   breadcrumb: {
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.worldaml.com/" },
-      { "@type": "ListItem", position: 2, name: "Industries", item: "https://www.worldaml.com/industries" },
-      { "@type": "ListItem", position: 3, name: "Fintechs", item: "https://www.worldaml.com/industries/fintech" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://worldaml.com/" },
+      { "@type": "ListItem", position: 2, name: "Industries", item: "https://worldaml.com/industries" },
+      { "@type": "ListItem", position: 3, name: "Fintechs", item: "https://worldaml.com/industries/fintech" },
     ],
   },
   mainEntity: {

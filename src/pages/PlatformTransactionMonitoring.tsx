@@ -17,9 +17,9 @@ const softwareData = {
   description:
     "Real-time AML transaction monitoring software for banks, VASPs, and payment processors. Configurable rule engine, typology detection, SAR workflow, and regulatory reporting aligned with FATF Recommendation 20.",
   operatingSystem: "Web",
-  url: "https://www.worldaml.com/platform/transaction-monitoring",
-  offers: { "@type": "Offer", category: "SaaS", url: "https://www.worldaml.com/pricing" },
-  provider: { "@type": "Organization", name: "WorldAML", url: "https://www.worldaml.com" },
+  url: "https://worldaml.com/platform/transaction-monitoring",
+  offers: { "@type": "Offer", category: "SaaS", url: "https://worldaml.com/pricing" },
+  provider: { "@type": "Organization", name: "WorldAML", url: "https://worldaml.com" },
 };
 
 const faqData = {

@@ -184,13 +184,10 @@ function extractRecordKeys(filePath: string): string[] {
 /* ------------------------------------------------------------------ */
 
 function buildSitemapXml(entries: SitemapEntry[], baseUrl: string = BASE_URL): string {
-  const today = new Date().toISOString().split("T")[0];
-
   const urls = entries
     .map(
       (e) => `  <url>
     <loc>${baseUrl}${e.path}</loc>
-    <lastmod>${today}</lastmod>
     <changefreq>${e.changefreq}</changefreq>
     <priority>${e.priority.toFixed(1)}</priority>
   </url>`

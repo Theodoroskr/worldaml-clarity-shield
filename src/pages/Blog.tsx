@@ -26,17 +26,17 @@ const Blog = () => {
     name: "WorldAML Compliance Insights",
     description:
       "Expert AML, KYC/KYB, sanctions screening, and regulatory compliance guides for financial institutions.",
-    url: "https://www.worldaml.com/blog",
+    url: "https://worldaml.com/blog",
     publisher: {
       "@type": "Organization",
       name: "WorldAML",
-      url: "https://www.worldaml.com",
+      url: "https://worldaml.com",
     },
     blogPost: blogPosts.map((p) => ({
       "@type": "BlogPosting",
       headline: p.title,
       description: p.description,
-      url: `https://www.worldaml.com/blog/${p.slug}`,
+      url: `https://worldaml.com/blog/${p.slug}`,
       datePublished: p.date,
       author: { "@type": "Organization", name: p.author },
     })),

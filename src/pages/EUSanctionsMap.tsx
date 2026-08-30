@@ -52,7 +52,7 @@ const EUSanctionsMap = () => {
       "@type": "ListItem",
       position: i + 1,
       name: r.country,
-      url: `https://www.worldaml.com/eu-sanctions/${r.slug}`,
+      url: `https://worldaml.com/eu-sanctions/${r.slug}`,
     })),
   };
 

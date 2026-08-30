@@ -51,8 +51,8 @@ const EUSanctionsCountry = () => {
       "@type": "Article",
       headline: `EU Sanctions on ${regime.country}`,
       description: regime.description,
-      url: `https://www.worldaml.com/eu-sanctions/${regime.slug}`,
-      publisher: { "@id": "https://www.worldaml.com/#organization" },
+      url: `https://worldaml.com/eu-sanctions/${regime.slug}`,
+      publisher: { "@id": "https://worldaml.com/#organization" },
       dateModified: "2026-03-28",
     },
     {
