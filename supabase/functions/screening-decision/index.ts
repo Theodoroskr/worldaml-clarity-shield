@@ -230,14 +230,56 @@ Deno.serve(async (req) => {
   }
 
   const matchId = String(body.match_id ?? "");
+  const caseIdInput = String(body.case_id ?? "");
   const decision = String(body.decision ?? "") as Decision;
   const rationale = String(body.rationale ?? "").trim();
 
-  if (!matchId || !DECISIONS.includes(decision)) return json({ error: "Invalid request" }, 400);
+  if (!DECISIONS.includes(decision)) return json({ error: "Invalid request" }, 400);
   if (rationale.length < 10) {
     return json({ error: "A rationale of at least 10 characters is required" }, 400);
   }
   if (rationale.length > 4000) return json({ error: "Rationale is too long" }, 400);
+
+  // ── Case-level "Monitor this subject" (no match required) ───────────────
+  if (!matchId) {
+    if (decision !== "add_to_monitoring" || !caseIdInput) {
+      return json({ error: "Invalid request" }, 400);
+    }
+    // Authorisation: the caller must be able to read the case under RLS.
+    const { data: caseVisible } = await userClient
+      .from("screening_cases")
+      .select("id, organisation_id, subject_id, search_id, status")
+      .eq("id", caseIdInput)
+      .maybeSingle();
+    if (!caseVisible) return json({ error: "Not found" }, 404);
+
+    let subjectLabel = "this subject";
+    if (caseVisible.subject_id) {
+      const { data: subjectRow } = await admin
+        .from("screening_subjects")
+        .select("full_name")
+        .eq("id", caseVisible.subject_id)
+        .maybeSingle();
+      if (subjectRow?.full_name) subjectLabel = subjectRow.full_name;
+    }
+
+    const outcome = await activateMonitoring(
+      admin,
+      user.id,
+      caseVisible.organisation_id,
+      caseVisible,
+      null,
+      subjectLabel,
+    );
+    if (outcome.error) return outcome.error;
+
+    return json({
+      ok: true,
+      case_status: caseVisible.status,
+      match_status: null,
+      monitoring: outcome.monitoring,
+    });
+  }
 
   // Authorisation: the caller must be able to read the match under RLS.
   const { data: visible } = await userClient
