@@ -10,7 +10,9 @@ import ScreeningPlanComparison from "@/components/aml-screening/ScreeningPlanCom
 import AMLCTASection from "@/components/aml-screening/AMLCTASection";
 import StickyDemoCTA from "@/components/StickyDemoCTA";
 import ScreeningProductNav from "@/components/screening/ScreeningProductNav";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const softwareData = {
@@ -109,6 +111,18 @@ const ScreeningMonitoring = () => {
     });
   }, []);
 
+  // Checkout cancel deep link: /screening-monitoring?canceled=true#packages
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [cancelBanner, setCancelBanner] = useState(searchParams.get("canceled") === "true");
+
+  useEffect(() => {
+    if (searchParams.get("canceled") !== "true") return;
+    // Strip the query param so a refresh doesn't re-show the banner.
+    const next = new URLSearchParams(searchParams);
+    next.delete("canceled");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   // Deep links from the portal / checkout cancel land on #packages.
   useEffect(() => {
     if (window.location.hash !== "#packages") return;
@@ -132,6 +146,21 @@ const ScreeningMonitoring = () => {
     />
     <Header />
     <ScreeningProductNav />
+    {cancelBanner && (
+      <div className="bg-amber-500/10 border-b border-amber-500/30">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-center gap-3 text-sm text-foreground">
+          <XCircle className="h-4 w-4 text-amber-500 shrink-0" />
+          <span>Checkout was canceled — no charge was made. Pick a plan below whenever you're ready.</span>
+          <button
+            type="button"
+            onClick={() => setCancelBanner(false)}
+            className="text-muted-foreground hover:text-foreground underline underline-offset-2"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    )}
     <main className="flex-1">
       <AMLHeroSection />
       <AMLWhatIsSection />
