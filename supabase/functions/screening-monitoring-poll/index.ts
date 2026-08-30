@@ -13,10 +13,14 @@ const json = (body: unknown, status = 200) =>
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  // Service-role only (scheduled job).
+  // Service-role (manual run) or shared cron secret (scheduled pg_cron job).
   const auth = req.headers.get("Authorization") ?? "";
   const token = auth.replace("Bearer ", "").trim();
-  if (!token || token !== Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")) {
+  const cronSecret = req.headers.get("x-cron-secret") ?? "";
+  const expectedCronSecret = Deno.env.get("SCREENING_CRON_SECRET") ?? "";
+  const serviceOk = !!token && token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const cronOk = !!expectedCronSecret && !!cronSecret && cronSecret === expectedCronSecret;
+  if (!serviceOk && !cronOk) {
     return json({ error: "Unauthorized" }, 401);
   }
 
