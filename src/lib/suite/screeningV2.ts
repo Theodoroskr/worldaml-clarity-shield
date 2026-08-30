@@ -186,17 +186,44 @@ export async function runScreeningV2(payload: {
   return data as RunScreeningResult;
 }
 
+export interface DecisionResult {
+  ok: boolean;
+  case_status: string;
+  match_status: string | null;
+  monitoring?: {
+    active: boolean;
+    already_active: boolean;
+    subject_id: string | null;
+    provider_registered: boolean;
+  } | null;
+}
+
 export async function recordDecision(payload: {
   match_id: string;
   decision: string;
   rationale: string;
   reason_code?: string;
   reason_label?: string;
-}) {
+}): Promise<DecisionResult> {
   const { data, error } = await supabase.functions.invoke("screening-decision", { body: payload });
-  if (error) throw new Error((data as { error?: string } | null)?.error || "Decision could not be saved");
-  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
-  return data as { ok: boolean; case_status: string; match_status: string | null };
+  if (error) {
+    // Non-2xx responses put the body on error.context, not on `data`.
+    let message = (data as { error?: string } | null)?.error;
+    let code = (data as { code?: string } | null)?.code;
+    const res = (error as unknown as { context?: Response }).context;
+    if (!message && res && typeof res.json === "function") {
+      try {
+        const body = await res.clone().json() as { error?: string; code?: string };
+        message = body?.error;
+        code = body?.code ?? code;
+      } catch { /* keep fallback message */ }
+    }
+    throw new ScreeningError(message || "Decision could not be saved", code);
+  }
+  if ((data as { error?: string })?.error) {
+    throw new ScreeningError((data as { error: string }).error, (data as { code?: string }).code);
+  }
+  return data as DecisionResult;
 }
 
 export interface ProfileListing {

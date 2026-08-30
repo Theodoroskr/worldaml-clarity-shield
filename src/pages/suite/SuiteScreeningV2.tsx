@@ -66,6 +66,7 @@ import {
   ScreeningError,
   SOURCE_GROUPS,
   SUBJECT_TYPE_LABELS,
+  type DecisionResult,
   type FullEntityProfile,
   type ScreeningCategory,
   type SubjectInput,
@@ -679,6 +680,11 @@ function ResultsWorkspace({
   const [sortMode, setSortMode] = useState<string>("similarity_desc");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [monitoringActive, setMonitoringActive] = useState(caseDetail.monitoring_status === "active");
+
+  useEffect(() => {
+    setMonitoringActive(caseDetail.monitoring_status === "active");
+  }, [caseDetail.id, caseDetail.monitoring_status]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -773,19 +779,48 @@ function ResultsWorkspace({
     });
   };
 
+  const handleDecisionResult = (result: DecisionResult) => {
+    if (result.monitoring?.active) {
+      setMonitoringActive(true);
+      toast.success(
+        result.monitoring.already_active
+          ? "This subject is already under ongoing monitoring"
+          : "Ongoing monitoring activated for this subject",
+      );
+    } else {
+      toast.success("Decision recorded");
+    }
+  };
+
+  const showDecisionError = (err: unknown) => {
+    const code = err instanceof ScreeningError ? err.code : undefined;
+    const message = err instanceof Error ? err.message : "Decision could not be saved";
+    if (code === "monitor_quota_exceeded") {
+      toast.error(message, {
+        description: "Ongoing monitoring was not activated for this subject.",
+        action: {
+          label: "Upgrade",
+          onClick: () => { window.location.href = "/screening-monitoring/pricing"; },
+        },
+      });
+      return;
+    }
+    toast.error(message);
+  };
+
   const onDecision = async (matchId: string, decision: string, reason?: string) => {
     try {
-      await recordDecision({
+      const result = await recordDecision({
         match_id: matchId,
         decision,
         rationale: reason || `${decision} from results workspace`,
         reason_code: decision === "false_positive" ? reason : undefined,
         reason_label: decision === "false_positive" ? reason : DECISIONS.find((d) => d.key === decision)?.label,
       });
-      toast.success("Decision recorded");
+      handleDecisionResult(result);
       await load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Decision could not be saved");
+      showDecisionError(err);
     }
   };
 
@@ -808,7 +843,7 @@ function ResultsWorkspace({
       await exportCaseReportPdf({
         caseReference: caseDetail.case_reference,
         caseStatusLabel: CASE_STATUS_LABELS[caseDetail.status] ?? caseDetail.status,
-        monitoringActive: caseDetail.monitoring_status === "active",
+        monitoringActive: monitoringActive,
         screenedAt: caseDetail.search?.screened_at ?? caseDetail.created_at,
         searchReference: caseDetail.search?.reference ?? null,
         categoriesScreened: (caseDetail.search?.categories_screened ?? []).map(
@@ -872,7 +907,7 @@ function ResultsWorkspace({
             <h2 className="text-lg font-semibold tracking-tight">{caseDetail.case_reference}</h2>
             <p className="text-xs text-muted-foreground">
               {CASE_STATUS_LABELS[caseDetail.status] ?? caseDetail.status}
-              {caseDetail.monitoring_status === "active" && (
+              {monitoringActive && (
                 <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700">
                   <Activity className="h-3 w-3" /> Monitored
                 </span>
@@ -1115,7 +1150,11 @@ function ResultsWorkspace({
         match={selected}
         subjectType={caseDetail.subject?.subject_type}
         onClose={() => setSelected(null)}
-        onSaved={async () => { setSelected(null); await load(); }}
+        onSaved={async (result) => {
+          if (result) handleDecisionResult(result);
+          setSelected(null);
+          await load();
+        }}
       />
     </div>
   );
@@ -1768,7 +1807,12 @@ function KeyInfo({ label, value }: { label: string; value: string | null }) {
 
 function MatchReview({
   match, subjectType, onClose, onSaved,
-}: { match: MatchRow | null; subjectType?: SubjectType; onClose: () => void; onSaved: () => void }) {
+}: {
+  match: MatchRow | null;
+  subjectType?: SubjectType;
+  onClose: () => void;
+  onSaved: (result?: DecisionResult) => void;
+}) {
   const [attributes, setAttributes] = useState<AttributeRow[]>([]);
   const [sources, setSources] = useState<SourceRow[]>([]);
   const [decision, setDecision] = useState<string>("false_positive");
@@ -1842,17 +1886,28 @@ function MatchReview({
     if (!match) return;
     setSaving(true);
     try {
-      await recordDecision({
+      const result = await recordDecision({
         match_id: match.id,
         decision,
         rationale: rationale.trim(),
         reason_code: needsReason ? reason : decision,
         reason_label: needsReason ? reason : DECISIONS.find((d) => d.key === decision)?.label,
       });
-      toast.success("Decision recorded");
-      onSaved();
+      onSaved(result);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Decision could not be saved");
+      const code = err instanceof ScreeningError ? err.code : undefined;
+      const message = err instanceof Error ? err.message : "Decision could not be saved";
+      if (code === "monitor_quota_exceeded") {
+        toast.error(message, {
+          description: "Ongoing monitoring was not activated for this subject.",
+          action: {
+            label: "Upgrade",
+            onClick: () => { window.location.href = "/screening-monitoring/pricing"; },
+          },
+        });
+      } else {
+        toast.error(message);
+      }
     } finally {
       setSaving(false);
     }
