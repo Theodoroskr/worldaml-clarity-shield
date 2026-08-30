@@ -194,7 +194,7 @@ export async function exportCaseReportPdf(input: CaseReportInput) {
       row("Match basis", m.matchBasisLabel);
       row(
         "Name similarity",
-        typeof m.nameSimilarity === "number" ? `${Math.round(m.nameSimilarity * 100)}%` : null,
+        typeof m.nameSimilarity === "number" ? `${Math.round(m.nameSimilarity)}%` : null,
       );
       row("Country", m.country);
       row("Categories", m.categories?.length ? m.categories.join(", ") : null);

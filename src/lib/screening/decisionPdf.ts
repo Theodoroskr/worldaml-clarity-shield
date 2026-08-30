@@ -185,7 +185,7 @@ export async function exportMatchDecisionPdf(input: DecisionPdfInput) {
   row("Match basis", input.matchBasisLabel);
   row(
     "Name similarity",
-    typeof input.nameSimilarity === "number" ? `${Math.round(input.nameSimilarity * 100)}%` : null,
+    typeof input.nameSimilarity === "number" ? `${Math.round(input.nameSimilarity)}%` : null,
   );
   row("Categories", input.categories?.length ? input.categories.join(", ") : null);
   row("Countries", input.countries);
