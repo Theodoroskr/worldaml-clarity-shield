@@ -293,7 +293,10 @@ export default function ScreeningLayout({ children, head, contained = false }: S
             {children}
           </main>
         </div>
+
+        <HelpPanel open={helpOpen} onOpenChange={setHelpOpen} />
       </div>
+
     </TooltipProvider>
   );
 }
