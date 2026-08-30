@@ -22,6 +22,7 @@ import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY } fro
 import CurrencyIndicator from "@/components/academy/CurrencyIndicator";
 import { useCart } from "@/contexts/CartContext";
 import { AcademyCartDrawerMount } from "@/components/academy/AcademyCartDrawer";
+import { openExternalCheckout } from "@/lib/openExternalCheckout";
 
 const PASS_THRESHOLD = 70;
 
@@ -75,7 +76,8 @@ const AcademyCourse = ({ embedded = false }: { embedded?: boolean } = {}) => {
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL returned");
-      window.location.href = data.url;
+      openExternalCheckout(data.url);
+      setExpressLoading(false);
     } catch (err) {
       console.error("Express checkout failed:", err);
       toast({

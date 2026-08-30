@@ -15,6 +15,7 @@ import {
   type ScreeningPlanDefinition,
 } from "@/lib/screeningPlans";
 import { useScreeningAccess } from "@/hooks/useScreeningAccess";
+import { openExternalCheckout, readEdgeFunctionError } from "@/lib/openExternalCheckout";
 
 const INTENT_KEY = "worldaml_screening_intent";
 const CHECKOUT_FN = "create-worldaml-checkout";
@@ -34,11 +35,15 @@ export default function AMLPackagesSection() {
     try {
       const { data, error } = await supabase.functions.invoke(CHECKOUT_FN, { body: { plan } });
       if (error) throw error;
-      if (data?.url) window.location.href = data.url as string;
+      // Open Stripe Checkout in a new top-level tab — inside the embedded
+      // preview iframe a same-tab redirect fails to render the payment page.
+      if (data?.url) openExternalCheckout(data.url as string);
     } catch (e) {
+      const serverMessage = await readEdgeFunctionError(e);
       toast({
         title: "Checkout unavailable",
-        description: e instanceof Error ? e.message : "Please try again in a moment.",
+        description:
+          serverMessage ?? (e instanceof Error ? e.message : "Please try again in a moment."),
         variant: "destructive",
       });
     } finally {

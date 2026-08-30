@@ -53,6 +53,7 @@ import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY, curr
 import CurrencyIndicator from "@/components/academy/CurrencyIndicator";
 import TeamQuoteBanner from "@/components/academy/TeamQuoteBanner";
 import { toast } from "sonner";
+import { openExternalCheckout } from "@/lib/openExternalCheckout";
 
 
 const difficultyColor: Record<string, string> = {
@@ -157,7 +158,9 @@ const Academy = () => {
       if (!data?.url || typeof data.url !== "string" || !data.url.startsWith("https://checkout.stripe.com/")) {
         throw new Error("Invalid checkout URL returned");
       }
-      window.location.href = data.url;
+      openExternalCheckout(data.url);
+      annualInFlightRef.current = false;
+      setAnnualLoading(false);
     } catch (err) {
       console.error("Annual checkout failed:", err);
       toast.error(err instanceof Error ? err.message : "Could not start checkout. Please try again.");
@@ -189,7 +192,9 @@ const Academy = () => {
       if (!data?.url || typeof data.url !== "string" || !data.url.startsWith("https://checkout.stripe.com/")) {
         throw new Error("Invalid checkout URL returned");
       }
-      window.location.href = data.url;
+      openExternalCheckout(data.url);
+      buyNowInFlight.current = false;
+      setBuyNowSlug(null);
     } catch (err) {
       console.error("Buy now checkout failed:", err);
       toast.error(err instanceof Error ? err.message : "Could not start checkout. Please try again.");

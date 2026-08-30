@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { openExternalCheckout } from "@/lib/openExternalCheckout";
 
 const sharedFeatures = [
   "Individual AML screening",
@@ -79,8 +80,10 @@ export const APICompanyPricingSection = () => {
       });
       if (error) throw error;
       if (data?.url) {
-        // Same-tab redirect avoids popup-blocker "silent failures" after await.
-        window.location.href = data.url;
+        // New top-level tab: same-tab redirect fails inside the embedded
+        // preview iframe; falls back to same-tab if the popup is blocked.
+        openExternalCheckout(data.url);
+        setLoadingPlan(null);
         return;
       }
       throw new Error("No checkout URL returned");

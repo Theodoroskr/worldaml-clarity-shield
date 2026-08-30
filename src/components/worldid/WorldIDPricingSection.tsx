@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { openExternalCheckout } from "@/lib/openExternalCheckout";
 
 const pricingPlans = [
   {
@@ -74,8 +75,10 @@ const WorldIDPricingSection = () => {
 
       if (error) throw error;
       if (data?.url) {
-        // Same-tab redirect — new-tab popups after await are commonly blocked.
-        window.location.href = data.url;
+        // New top-level tab: same-tab redirect fails inside the embedded
+        // preview iframe; falls back to same-tab if the popup is blocked.
+        openExternalCheckout(data.url);
+        setLoadingPlan(null);
         return;
       }
       throw new Error("No checkout URL returned");

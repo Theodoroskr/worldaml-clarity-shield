@@ -29,6 +29,7 @@ import { computeDiscount } from "@/lib/academyDiscount";
 import { Region, REGIONS } from "@/types/regions";
 import { TeamQuoteBanner } from "@/components/academy/TeamQuoteBanner";
 import { toast } from "sonner";
+import { openExternalCheckout } from "@/lib/openExternalCheckout";
 
 const FX_TOOLTIP =
   "Prices are converted from EUR using fixed reference rates (USD ×1.08, GBP ×0.86). The final charge is processed in your selected currency at Stripe Checkout, where VAT or sales tax is added based on your billing address.";
@@ -158,7 +159,7 @@ function AcademyCartDrawerContent() {
       if (!user && typeof window !== "undefined") {
         try { window.localStorage.setItem("academy_last_email", emailTrimmed); } catch { /* noop */ }
       }
-      window.location.href = data.url;
+      openExternalCheckout(data.url);
     } catch (err) {
       console.error("Checkout failed:", err);
       toast.error(err instanceof Error ? err.message : "Could not start checkout. Please try again.");
