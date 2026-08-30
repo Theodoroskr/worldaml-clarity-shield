@@ -1246,6 +1246,17 @@ function ResultsWorkspace({
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-sm font-medium">
                   <Activity className="h-4 w-4 text-emerald-600" /> Monitoring timeline
+                  {monitoringEvents.some((ev) => ev.requiresReview) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-auto h-7 px-2 text-xs"
+                      disabled={ackBusy}
+                      onClick={() => void acknowledgeAlerts()}
+                    >
+                      Mark all reviewed
+                    </Button>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1270,9 +1281,20 @@ function ResultsWorkspace({
                           {new Date(ev.date).toLocaleString()}
                         </p>
                         {ev.requiresReview && (
-                          <Badge variant="outline" className="mt-1 border-amber-200 bg-amber-50 text-amber-700">
-                            Requires review
-                          </Badge>
+                          <div className="mt-1 flex items-center gap-2">
+                            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                              Requires review
+                            </Badge>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-6 px-2 text-[11px]"
+                              disabled={ackBusy}
+                              onClick={() => void acknowledgeAlerts(ev.id.replace(/^alert-/, ""))}
+                            >
+                              Mark reviewed
+                            </Button>
+                          </div>
                         )}
                       </li>
                     ))}
