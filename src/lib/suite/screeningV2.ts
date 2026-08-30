@@ -199,7 +199,10 @@ export interface DecisionResult {
 }
 
 export async function recordDecision(payload: {
-  match_id: string;
+  /** Match-level decision. Omit (and pass case_id) for case-level monitoring activation. */
+  match_id?: string;
+  /** Case-level "add_to_monitoring" — activates monitoring for the whole case subject. */
+  case_id?: string;
   decision: string;
   rationale: string;
   reason_code?: string;
