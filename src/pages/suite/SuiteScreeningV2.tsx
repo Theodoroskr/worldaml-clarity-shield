@@ -679,6 +679,7 @@ function ResultsWorkspace({
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [basisFilter, setBasisFilter] = useState<string>("all");
   const [sortMode, setSortMode] = useState<string>("similarity_desc");
+  const [groupDuplicates, setGroupDuplicates] = useState(true);
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [monitoringActive, setMonitoringActive] = useState(caseDetail.monitoring_status === "active");
