@@ -61,13 +61,11 @@ export default function AMLPackagesSection() {
   }, [isLoading, isAuthenticated]);
 
   const onBuy = (plan: ScreeningPlanDefinition) => {
-    if (!isAuthenticated) {
-      sessionStorage.setItem(INTENT_KEY, plan.key);
-      navigate(`/signup?redirect=${encodeURIComponent("/screening-monitoring/pricing")}`);
-      return;
-    }
+    // Guest checkout: no login gate. Stripe collects the email at checkout and
+    // the subscription is linked to the account on activation.
     void startCheckout(plan.key, plan.checkoutPlan);
   };
+
 
   const salesLink = (plan: ScreeningPlanDefinition) =>
     `/contact-sales?product=${encodeURIComponent("WorldAML Screening & Monitoring")}&plan=${encodeURIComponent(plan.name)}`;
