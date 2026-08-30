@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { exportMatchDecisionPdf } from "@/lib/screening/decisionPdf";
 import { exportCaseReportPdf } from "@/lib/screening/caseReportPdf";
+import { consolidateMatches } from "@/lib/screening/consolidateMatches";
 import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";
@@ -678,6 +679,7 @@ function ResultsWorkspace({
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [basisFilter, setBasisFilter] = useState<string>("all");
   const [sortMode, setSortMode] = useState<string>("similarity_desc");
+  const [groupDuplicates, setGroupDuplicates] = useState(true);
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [monitoringActive, setMonitoringActive] = useState(caseDetail.monitoring_status === "active");
@@ -760,6 +762,29 @@ function ResultsWorkspace({
     }
     return sorted;
   }, [matches, statusFilter, categoryFilter, basisFilter, sortMode]);
+
+  // Presentation-only grouping: the provider returns one row per list entry, so
+  // the same person can appear several times. Raw rows stay intact for audit.
+  const displayGroups = useMemo(() => {
+    if (!groupDuplicates) {
+      return filteredMatches.map((m) => ({
+        key: m.id,
+        primary: m,
+        members: [m],
+        categories: m.categories ?? [],
+        categoryLabels: m.category_labels ?? [],
+        listingCount: 1,
+      }));
+    }
+    return consolidateMatches(filteredMatches);
+  }, [filteredMatches, groupDuplicates]);
+
+  const mergedListingCount = useMemo(
+    () => displayGroups.reduce((acc, g) => acc + (g.listingCount > 1 ? g.listingCount - 1 : 0), 0),
+    [displayGroups],
+  );
+
+
 
   // Headline tally used by the case header chips.
   const matchTally = useMemo(() => ({
@@ -1027,12 +1052,38 @@ function ResultsWorkspace({
                 </div>
               </PopoverContent>
             </Popover>
+            <div className="flex items-center gap-2 rounded-md border px-2.5 py-1">
+              <Switch
+                id="group-duplicates"
+                checked={groupDuplicates}
+                onCheckedChange={setGroupDuplicates}
+              />
+              <Label htmlFor="group-duplicates" className="cursor-pointer text-xs font-medium">
+                Group duplicate entities
+              </Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  Display only. Listings for the same person (same name, birth year and country)
+                  are shown on one card; every underlying listing is kept in the record for audit.
+                </TooltipContent>
+              </Tooltip>
+            </div>
             {(statusFilter !== "all" || categoryFilter !== "all" || basisFilter !== "all" || sortMode !== "similarity_desc") && (
               <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setCategoryFilter("all"); setBasisFilter("all"); setSortMode("similarity_desc"); }}>
                 <X className="mr-1 h-3.5 w-3.5" /> Clear
               </Button>
             )}
           </div>
+
+          {groupDuplicates && mergedListingCount > 0 && (
+            <p className="text-xs text-muted-foreground">
+              {displayGroups.length} entit{displayGroups.length === 1 ? "y" : "ies"} shown from {filteredMatches.length} provider listings
+              {" "}({mergedListingCount} merged).
+            </p>
+          )}
 
           {loading ? (
             <div className="flex items-center gap-3 p-6 text-sm text-muted-foreground">
@@ -1046,18 +1097,21 @@ function ResultsWorkspace({
             </Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
-              {filteredMatches.map((m) => (
+              {displayGroups.map((g) => (
                 <MatchCard
-                  key={m.id}
-                  match={m}
-                  extra={extras[m.id]}
-                  selected={selectedIds.has(m.id)}
-                  onToggleSelect={() => toggleSelect(m.id)}
-                  onReview={() => setSelected(m)}
-                  onPrefetch={() => prefetchFullProfile(m.id)}
+                  key={g.key}
+                  match={g.primary}
+                  extra={extras[g.primary.id]}
+                  selected={selectedIds.has(g.primary.id)}
+                  onToggleSelect={() => toggleSelect(g.primary.id)}
+                  onReview={() => setSelected(g.primary)}
+                  onPrefetch={() => prefetchFullProfile(g.primary.id)}
                    onDecision={onDecision}
                    fourEyes={fourEyes}
                    subjectType={caseDetail.subject?.subject_type}
+                   mergedCategories={g.categories}
+                   mergedListings={g.listingCount > 1 ? g.members : undefined}
+                   onOpenListing={(m) => setSelected(m)}
                  />
 
               ))}
@@ -1383,6 +1437,9 @@ function MatchCard({
   onDecision,
   fourEyes,
   subjectType,
+  mergedCategories,
+  mergedListings,
+  onOpenListing,
 }: {
   match: MatchRow;
   extra?: MatchExtra;
@@ -1395,6 +1452,12 @@ function MatchCard({
   fourEyes: boolean;
   /** Type of the subject that was screened (drives entity-type conflict detection). */
   subjectType?: SubjectType;
+  /** Union of categories across every merged listing (display only). */
+  mergedCategories?: string[];
+  /** All provider listings merged onto this card, when duplicate grouping is on. */
+  mergedListings?: MatchRow[];
+  /** Open a specific underlying listing for review. */
+  onOpenListing?: (m: MatchRow) => void;
 
 }) {
   const entityType = (match.entity_type as SubjectType) ?? "person";
@@ -1426,14 +1489,15 @@ function MatchCard({
         counts.adverse_media = (counts.adverse_media ?? 0) + extra.adverseMediaCount;
       }
     }
-    // Fallback to category flags when granular source rows haven't been loaded yet.
-    match.categories.forEach((c) => {
+    // Fallback to category flags when granular source rows haven't been loaded yet,
+    // plus categories contributed by any merged duplicate listings.
+    [...match.categories, ...(mergedCategories ?? [])].forEach((c) => {
       if (!(c in counts)) counts[c] = 1;
     });
     return Object.entries(counts)
       .filter(([cat]) => cat !== "unknown")
       .map(([cat, count]) => ({ cat: cat as ScreeningCategory, count }));
-  }, [match.categories, extra]);
+  }, [match.categories, mergedCategories, extra]);
 
   const handleFalsePositive = async () => {
     setSaving(true);
@@ -1532,7 +1596,47 @@ function MatchCard({
               {count > 1 && <span className="ml-1">{count}</span>}
             </Badge>
           ))}
+          {mergedListings && mergedListings.length > 1 && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-md border border-dashed px-2 py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <Users className="mr-1 h-3 w-3" />
+                  {mergedListings.length} listings merged
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-80">
+                <p className="mb-2 text-sm font-semibold">Underlying provider listings</p>
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Grouping is display-only — each listing is stored separately for audit.
+                </p>
+                <div className="space-y-1.5">
+                  {mergedListings.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => onOpenListing?.(m)}
+                      className="flex w-full items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-left text-xs hover:bg-muted"
+                    >
+                      <span className="min-w-0 truncate">
+                        {m.matched_name}
+                        <span className="ml-1 text-muted-foreground">
+                          {(m.category_labels ?? m.categories ?? []).slice(0, 2).join(", ")}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-muted-foreground">
+                        {m.name_similarity != null ? `${Math.round(m.name_similarity)}%` : "—"}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
+
 
         <dl className="mt-4 space-y-1.5 text-sm">
           <div className="flex gap-2">
