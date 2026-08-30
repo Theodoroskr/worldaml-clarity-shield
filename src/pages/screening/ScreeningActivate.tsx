@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { CheckCircle2, Loader2, ArrowRight, KeyRound, Users, Bell } from "lucide-react";
+import { CheckCircle2, Loader2, ArrowRight, KeyRound, Users, Bell, Receipt } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
@@ -25,6 +25,18 @@ interface ActivationResult {
 }
 
 
+const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-foreground text-right">{value}</span>
+    </div>
+  );
+}
+
 /**
  * Post-purchase access page: verifies the Stripe session server-side,
  * provisions the workspace and shows the buyer how to get started.
@@ -35,6 +47,9 @@ export default function ScreeningActivate() {
   const sessionId = params.get("session_id");
   const [state, setState] = useState<"loading" | "ready" | "pending" | "error" | "unauthenticated">("loading");
   const [result, setResult] = useState<ActivationResult | null>(null);
+  // Plan details always come from the server-verified CHECKOUT_SESSION_ID, never the URL.
+  const planLabel = result?.plan_label
+    ?? (result?.plan ? `${result.plan.charAt(0).toUpperCase()}${result.plan.slice(1).replace(/_/g, " ")}` : "Subscription");
 
   useEffect(() => {
     let cancelled = false;
