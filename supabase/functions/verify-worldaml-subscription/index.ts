@@ -149,14 +149,32 @@ serve(async (req) => {
 
     let periodEnd: string | null = null;
     let periodStart: string | null = null;
+    let receiptUrl: string | null = null;
+    let interval: string | null = null;
     if (subscriptionId) {
       try {
         const sub = await stripe.subscriptions.retrieve(subscriptionId);
-        const s = sub as unknown as { current_period_end?: number; current_period_start?: number };
+        const s = sub as unknown as {
+          current_period_end?: number;
+          current_period_start?: number;
+          latest_invoice?: string | { hosted_invoice_url?: string | null };
+          items?: { data?: Array<{ price?: { recurring?: { interval?: string } | null } }> };
+        };
         if (s.current_period_end) periodEnd = new Date(s.current_period_end * 1000).toISOString();
         if (s.current_period_start) periodStart = new Date(s.current_period_start * 1000).toISOString();
+        interval = s.items?.data?.[0]?.price?.recurring?.interval ?? null;
+        const latest = s.latest_invoice;
+        if (typeof latest === "string") {
+          try {
+            const inv = await stripe.invoices.retrieve(latest);
+            receiptUrl = inv.hosted_invoice_url ?? null;
+          } catch (_) { /* non-fatal */ }
+        } else if (latest?.hosted_invoice_url) {
+          receiptUrl = latest.hosted_invoice_url;
+        }
       } catch (_) { /* non-fatal */ }
     }
+
 
     // Idempotent: one row per Stripe subscription.
     const { data: existing } = await admin
