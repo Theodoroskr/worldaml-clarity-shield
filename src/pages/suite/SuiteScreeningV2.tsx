@@ -763,6 +763,29 @@ function ResultsWorkspace({
     return sorted;
   }, [matches, statusFilter, categoryFilter, basisFilter, sortMode]);
 
+  // Presentation-only grouping: the provider returns one row per list entry, so
+  // the same person can appear several times. Raw rows stay intact for audit.
+  const displayGroups = useMemo(() => {
+    if (!groupDuplicates) {
+      return filteredMatches.map((m) => ({
+        key: m.id,
+        primary: m,
+        members: [m],
+        categories: m.categories ?? [],
+        categoryLabels: m.category_labels ?? [],
+        listingCount: 1,
+      }));
+    }
+    return consolidateMatches(filteredMatches);
+  }, [filteredMatches, groupDuplicates]);
+
+  const mergedListingCount = useMemo(
+    () => displayGroups.reduce((acc, g) => acc + (g.listingCount > 1 ? g.listingCount - 1 : 0), 0),
+    [displayGroups],
+  );
+
+
+
   // Headline tally used by the case header chips.
   const matchTally = useMemo(() => ({
     confirmed: matches.filter((m) => m.status === "confirmed").length,
