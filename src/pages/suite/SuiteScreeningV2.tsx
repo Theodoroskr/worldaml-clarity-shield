@@ -1489,14 +1489,15 @@ function MatchCard({
         counts.adverse_media = (counts.adverse_media ?? 0) + extra.adverseMediaCount;
       }
     }
-    // Fallback to category flags when granular source rows haven't been loaded yet.
-    match.categories.forEach((c) => {
+    // Fallback to category flags when granular source rows haven't been loaded yet,
+    // plus categories contributed by any merged duplicate listings.
+    [...match.categories, ...(mergedCategories ?? [])].forEach((c) => {
       if (!(c in counts)) counts[c] = 1;
     });
     return Object.entries(counts)
       .filter(([cat]) => cat !== "unknown")
       .map(([cat, count]) => ({ cat: cat as ScreeningCategory, count }));
-  }, [match.categories, extra]);
+  }, [match.categories, mergedCategories, extra]);
 
   const handleFalsePositive = async () => {
     setSaving(true);
