@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Link, NavLink, useSearchParams } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import {
   ArrowRight, BellPlus, CreditCard, Gauge, LifeBuoy, Menu, PanelLeftClose, PanelLeftOpen,
   Puzzle, Radar, Search, ShieldCheck, Users, X,
@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import HelpPanel from "@/components/screening/HelpPanel";
 import { useScreeningAccess } from "@/hooks/useScreeningAccess";
 import { useScreeningQuota } from "@/hooks/useScreeningQuota";
 import { cn } from "@/lib/utils";
@@ -24,6 +23,7 @@ export const SCREENING_NAV = [
   { label: "Team & access", to: "/screening/team", icon: Users },
   { label: "Add-on modules", to: "/screening/modules", icon: Puzzle },
   { label: "Packages", to: "/screening-monitoring/pricing", icon: CreditCard },
+  { label: "Help & support", to: "/screening/help", icon: LifeBuoy },
 ];
 
 interface ScreeningLayoutProps {
