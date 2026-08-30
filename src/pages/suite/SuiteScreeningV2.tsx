@@ -1258,8 +1258,8 @@ function ActiveFilters({
  *  fetched lazily once the card scrolls into view, reusing the session-cached
  *  fetchFullProfile — so matches already warmed by the list warm-up or hover
  *  prefetch render instantly with no extra request. */
-function MatchCardAvatar({ matchId, name }: { matchId: string; name: string }) {
-  const ref = useRef<HTMLDivElement | null>(null);
+function MatchCardAvatar({ matchId, name, onOpen }: { matchId: string; name: string; onOpen?: () => void }) {
+  const ref = useRef<HTMLButtonElement | null>(null);
   const [visible, setVisible] = useState(false);
   const [photo, setPhoto] = useState<string | null>(null);
 
@@ -1306,11 +1306,17 @@ function MatchCardAvatar({ matchId, name }: { matchId: string; name: string }) {
   const tone = AVATAR_TONES[hash % AVATAR_TONES.length];
 
   return (
-    <div
+    <button
       ref={ref}
+      type="button"
+      onClick={onOpen}
+      disabled={!onOpen}
+      title={onOpen ? `Open full profile for ${label}` : undefined}
+      aria-label={onOpen ? `Open full profile for ${label}` : undefined}
       className={cn(
         "relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border text-sm font-semibold",
         tone,
+        onOpen && "cursor-pointer transition-transform hover:scale-105 hover:ring-2 hover:ring-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
       )}
     >
       {initials || "?"}
@@ -1324,7 +1330,7 @@ function MatchCardAvatar({ matchId, name }: { matchId: string; name: string }) {
           referrerPolicy="no-referrer"
         />
       )}
-    </div>
+    </button>
   );
 }
 
@@ -1461,7 +1467,7 @@ function MatchCard({
         </div>
 
         <div className="mt-2 flex items-center gap-3">
-          <MatchCardAvatar matchId={match.id} name={match.matched_name} />
+          <MatchCardAvatar matchId={match.id} name={match.matched_name} onOpen={onReview} />
           <div className="min-w-0">
             <h3
               className="cursor-pointer text-base font-semibold text-foreground transition-colors hover:text-primary hover:underline"
