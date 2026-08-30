@@ -146,6 +146,21 @@ const ScreeningMonitoring = () => {
     />
     <Header />
     <ScreeningProductNav />
+    {cancelBanner && (
+      <div className="bg-amber-500/10 border-b border-amber-500/30">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-center gap-3 text-sm text-foreground">
+          <XCircle className="h-4 w-4 text-amber-500 shrink-0" />
+          <span>Checkout was canceled — no charge was made. Pick a plan below whenever you're ready.</span>
+          <button
+            type="button"
+            onClick={() => setCancelBanner(false)}
+            className="text-muted-foreground hover:text-foreground underline underline-offset-2"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    )}
     <main className="flex-1">
       <AMLHeroSection />
       <AMLWhatIsSection />
