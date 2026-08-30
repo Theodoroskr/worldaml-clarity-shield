@@ -10,7 +10,9 @@ import ScreeningPlanComparison from "@/components/aml-screening/ScreeningPlanCom
 import AMLCTASection from "@/components/aml-screening/AMLCTASection";
 import StickyDemoCTA from "@/components/StickyDemoCTA";
 import ScreeningProductNav from "@/components/screening/ScreeningProductNav";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const softwareData = {
