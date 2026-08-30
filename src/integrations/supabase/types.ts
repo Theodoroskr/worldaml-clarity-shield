@@ -8507,6 +8507,51 @@ export type Database = {
           },
         ]
       }
+      support_tickets: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          message: string
+          organisation_id: string | null
+          page_path: string | null
+          product: string
+          reference: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          message: string
+          organisation_id?: string | null
+          page_path?: string | null
+          product?: string
+          reference?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string
+          organisation_id?: string | null
+          page_path?: string | null
+          product?: string
+          reference?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       usage_transactions: {
         Row: {
           created_at: string
