@@ -679,6 +679,11 @@ function ResultsWorkspace({
   const [sortMode, setSortMode] = useState<string>("similarity_desc");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [monitoringActive, setMonitoringActive] = useState(caseDetail.monitoring_status === "active");
+
+  useEffect(() => {
+    setMonitoringActive(caseDetail.monitoring_status === "active");
+  }, [caseDetail.id, caseDetail.monitoring_status]);
 
   const load = useCallback(async () => {
     setLoading(true);
