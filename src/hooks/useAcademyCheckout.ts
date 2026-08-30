@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useRegion } from "@/contexts/RegionContext";
 import { AcademyCurrency, REGION_TO_CURRENCY } from "@/lib/academyFx";
+import { openExternalCheckout } from "@/lib/openExternalCheckout";
 
 /**
  * Thin wrapper around the EXISTING create-academy-checkout / create-academy-annual-checkout
@@ -34,7 +35,7 @@ export function useAcademyCheckout() {
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL returned");
-      window.location.href = data.url;
+      openExternalCheckout(data.url);
     } catch (e) {
       fail(e);
     } finally {
@@ -56,7 +57,7 @@ export function useAcademyCheckout() {
       });
       if (error) throw error;
       if (!data?.url) throw new Error("No checkout URL returned");
-      window.location.href = data.url;
+      openExternalCheckout(data.url);
     } catch (e) {
       fail(e);
     } finally {
