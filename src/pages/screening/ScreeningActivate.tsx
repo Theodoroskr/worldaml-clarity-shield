@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { CheckCircle2, Loader2, ArrowRight, KeyRound, Users, Bell } from "lucide-react";
+import { CheckCircle2, Loader2, ArrowRight, KeyRound, Users, Bell, Receipt } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
@@ -11,8 +11,30 @@ import { supabase } from "@/integrations/supabase/client";
 interface ActivationResult {
   status: string;
   plan?: string;
+  plan_label?: string;
   monitored_entity_quota?: number | null;
+  search_quota_annual?: number | null;
+  seat_quota?: number | null;
+  current_period_start?: string | null;
   current_period_end?: string | null;
+  billing_interval?: string | null;
+  amount_label?: string | null;
+  receipt_url?: string | null;
+  receipt_email?: string | null;
+  confirmation_email_sent?: boolean;
+}
+
+
+const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-foreground text-right">{value}</span>
+    </div>
+  );
 }
 
 /**
@@ -25,6 +47,9 @@ export default function ScreeningActivate() {
   const sessionId = params.get("session_id");
   const [state, setState] = useState<"loading" | "ready" | "pending" | "error" | "unauthenticated">("loading");
   const [result, setResult] = useState<ActivationResult | null>(null);
+  // Plan details always come from the server-verified CHECKOUT_SESSION_ID, never the URL.
+  const planLabel = result?.plan_label
+    ?? (result?.plan ? `${result.plan.charAt(0).toUpperCase()}${result.plan.slice(1).replace(/_/g, " ")}` : "Subscription");
 
   useEffect(() => {
     let cancelled = false;
@@ -119,11 +144,57 @@ export default function ScreeningActivate() {
               <div>
                 <h1 className="text-2xl font-bold text-foreground">Your screening workspace is live</h1>
                 <p className="mt-1 text-muted-foreground">
-                  {result?.plan ? `${result.plan.charAt(0).toUpperCase()}${result.plan.slice(1)} plan` : "Subscription"} activated
+                  {planLabel} plan activated
                   {result?.monitored_entity_quota ? ` — up to ${result.monitored_entity_quota.toLocaleString()} monitored entities.` : "."}
                 </p>
               </div>
             </div>
+
+            <Card>
+              <CardHeader><CardTitle className="text-base">Order summary</CardTitle></CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <SummaryRow label="Plan" value={`WorldAML Screening & Monitoring — ${planLabel}`} />
+                {result?.amount_label && <SummaryRow label="Amount paid" value={result.amount_label} />}
+                {result?.billing_interval && (
+                  <SummaryRow label="Billing cycle" value={result.billing_interval === "year" ? "Annual" : "Monthly"} />
+                )}
+                {result?.current_period_start && (
+                  <SummaryRow label="Current period starts" value={formatDate(result.current_period_start)} />
+                )}
+                {result?.current_period_end && (
+                  <SummaryRow label="Next billing date" value={formatDate(result.current_period_end)} />
+                )}
+                {result?.search_quota_annual != null && (
+                  <SummaryRow label="Annual searches" value={result.search_quota_annual.toLocaleString()} />
+                )}
+                {result?.seat_quota != null && <SummaryRow label="Seats" value={String(result.seat_quota)} />}
+              </CardContent>
+            </Card>
+
+            <div className="rounded-lg border border-teal/30 bg-teal/5 p-4">
+              <div className="flex items-start gap-3">
+                <Receipt className="h-5 w-5 text-teal mt-0.5 shrink-0" />
+                <div className="text-sm">
+                  <p className="font-medium text-foreground">Receipt ready</p>
+                  <p className="text-muted-foreground mt-0.5">
+                    {result?.confirmation_email_sent && result?.receipt_email
+                      ? `A confirmation email with your plan and billing dates is on its way to ${result.receipt_email}.`
+                      : "Your confirmation and receipt are available below."}
+                  </p>
+                  {result?.receipt_url && (
+                    <a
+                      href={result.receipt_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-teal underline mt-2"
+                    >
+                      View or download receipt <ArrowRight className="h-3.5 w-3.5" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+
 
             <Card>
               <CardHeader><CardTitle className="text-base">Your access details</CardTitle></CardHeader>
