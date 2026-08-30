@@ -365,5 +365,5 @@ Deno.serve(async (req) => {
     }
   }
 
-  return json({ ok: true, case_status: caseStatus, match_status: newStatus });
+  return json({ ok: true, case_status: caseStatus, match_status: newStatus, monitoring });
 });
