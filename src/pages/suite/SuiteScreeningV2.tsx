@@ -1590,7 +1590,6 @@ function MatchCard({
         </div>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
-        <div className="mt-3 flex flex-wrap gap-1.5">
           {categoryBadges.map(({ cat, count }) => (
             <Badge key={cat} variant="outline" className={riskTone([cat])}>
               {CATEGORY_LABELS[cat] ?? cat}
