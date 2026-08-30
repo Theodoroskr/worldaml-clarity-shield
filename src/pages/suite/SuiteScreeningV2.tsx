@@ -778,19 +778,48 @@ function ResultsWorkspace({
     });
   };
 
+  const handleDecisionResult = (result: DecisionResult) => {
+    if (result.monitoring?.active) {
+      setMonitoringActive(true);
+      toast.success(
+        result.monitoring.already_active
+          ? "This subject is already under ongoing monitoring"
+          : "Ongoing monitoring activated for this subject",
+      );
+    } else {
+      toast.success("Decision recorded");
+    }
+  };
+
+  const showDecisionError = (err: unknown) => {
+    const code = err instanceof ScreeningError ? err.code : undefined;
+    const message = err instanceof Error ? err.message : "Decision could not be saved";
+    if (code === "monitor_quota_exceeded") {
+      toast.error(message, {
+        description: "Ongoing monitoring was not activated for this subject.",
+        action: {
+          label: "Upgrade",
+          onClick: () => { window.location.href = "/screening-monitoring/pricing"; },
+        },
+      });
+      return;
+    }
+    toast.error(message);
+  };
+
   const onDecision = async (matchId: string, decision: string, reason?: string) => {
     try {
-      await recordDecision({
+      const result = await recordDecision({
         match_id: matchId,
         decision,
         rationale: reason || `${decision} from results workspace`,
         reason_code: decision === "false_positive" ? reason : undefined,
         reason_label: decision === "false_positive" ? reason : DECISIONS.find((d) => d.key === decision)?.label,
       });
-      toast.success("Decision recorded");
+      handleDecisionResult(result);
       await load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Decision could not be saved");
+      showDecisionError(err);
     }
   };
 
