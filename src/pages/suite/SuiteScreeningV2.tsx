@@ -1052,12 +1052,38 @@ function ResultsWorkspace({
                 </div>
               </PopoverContent>
             </Popover>
+            <div className="flex items-center gap-2 rounded-md border px-2.5 py-1">
+              <Switch
+                id="group-duplicates"
+                checked={groupDuplicates}
+                onCheckedChange={setGroupDuplicates}
+              />
+              <Label htmlFor="group-duplicates" className="cursor-pointer text-xs font-medium">
+                Group duplicate entities
+              </Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  Display only. Listings for the same person (same name, birth year and country)
+                  are shown on one card; every underlying listing is kept in the record for audit.
+                </TooltipContent>
+              </Tooltip>
+            </div>
             {(statusFilter !== "all" || categoryFilter !== "all" || basisFilter !== "all" || sortMode !== "similarity_desc") && (
               <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setCategoryFilter("all"); setBasisFilter("all"); setSortMode("similarity_desc"); }}>
                 <X className="mr-1 h-3.5 w-3.5" /> Clear
               </Button>
             )}
           </div>
+
+          {groupDuplicates && mergedListingCount > 0 && (
+            <p className="text-xs text-muted-foreground">
+              {displayGroups.length} entit{displayGroups.length === 1 ? "y" : "ies"} shown from {filteredMatches.length} provider listings
+              {" "}({mergedListingCount} merged).
+            </p>
+          )}
 
           {loading ? (
             <div className="flex items-center gap-3 p-6 text-sm text-muted-foreground">
@@ -1071,18 +1097,21 @@ function ResultsWorkspace({
             </Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
-              {filteredMatches.map((m) => (
+              {displayGroups.map((g) => (
                 <MatchCard
-                  key={m.id}
-                  match={m}
-                  extra={extras[m.id]}
-                  selected={selectedIds.has(m.id)}
-                  onToggleSelect={() => toggleSelect(m.id)}
-                  onReview={() => setSelected(m)}
-                  onPrefetch={() => prefetchFullProfile(m.id)}
+                  key={g.key}
+                  match={g.primary}
+                  extra={extras[g.primary.id]}
+                  selected={selectedIds.has(g.primary.id)}
+                  onToggleSelect={() => toggleSelect(g.primary.id)}
+                  onReview={() => setSelected(g.primary)}
+                  onPrefetch={() => prefetchFullProfile(g.primary.id)}
                    onDecision={onDecision}
                    fourEyes={fourEyes}
                    subjectType={caseDetail.subject?.subject_type}
+                   mergedCategories={g.categories}
+                   mergedListings={g.listingCount > 1 ? g.members : undefined}
+                   onOpenListing={(m) => setSelected(m)}
                  />
 
               ))}
