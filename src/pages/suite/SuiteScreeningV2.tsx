@@ -900,6 +900,28 @@ function ResultsWorkspace({
     }
   };
 
+  /** Case-level activation: monitor the searched subject even with zero matches. */
+  const activateCaseMonitoring = async () => {
+    setMonitorSaving(true);
+    try {
+      const result = await recordDecision({
+        case_id: caseDetail.id,
+        decision: "add_to_monitoring",
+        rationale: monitorRationale.trim(),
+        reason_code: "add_to_monitoring",
+        reason_label: "Monitor this subject",
+      });
+      handleDecisionResult(result);
+      setMonitorDialogOpen(false);
+      setMonitorRationale("");
+      await load();
+    } catch (err) {
+      showDecisionError(err);
+    } finally {
+      setMonitorSaving(false);
+    }
+  };
+
   const addTag = () => {
     const t = tagInput.trim();
     if (!t) return;
