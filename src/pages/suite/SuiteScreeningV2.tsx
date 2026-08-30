@@ -695,6 +695,7 @@ function ResultsWorkspace({
   const [monitorRationale, setMonitorRationale] = useState("");
   const [monitorSaving, setMonitorSaving] = useState(false);
   const [monitoringEvents, setMonitoringEvents] = useState<MonitoringTimelineEvent[]>([]);
+  const [ackBusy, setAckBusy] = useState(false);
 
   useEffect(() => {
     setMonitoringActive(caseDetail.monitoring_status === "active");
@@ -785,6 +786,32 @@ function ResultsWorkspace({
   }, [caseDetail.id]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Acknowledge one provider-update alert (or all) so the "Requires review"
+  // badges clear without a page reload.
+  const acknowledgeAlerts = useCallback(async (alertId?: string) => {
+    if (!caseDetail.id || ackBusy) return;
+    setAckBusy(true);
+    let query = supabase
+      .from("monitoring_alerts")
+      .update({ status: "acknowledged", acknowledged_at: new Date().toISOString() })
+      .eq("case_id", caseDetail.id);
+    query = alertId ? query.eq("id", alertId) : query.is("acknowledged_at", null);
+    const { error } = await query;
+    setAckBusy(false);
+    if (error) {
+      toast.error("Could not mark the alert as reviewed. Please try again.");
+      return;
+    }
+    setMonitoringEvents((prev) =>
+      prev.map((ev) =>
+        ev.kind === "provider_update" && (!alertId || ev.id === `alert-${alertId}`)
+          ? { ...ev, requiresReview: false }
+          : ev,
+      ),
+    );
+    toast.success(alertId ? "Alert marked as reviewed" : "All alerts marked as reviewed");
+  }, [caseDetail.id, ackBusy]);
 
   const filteredMatches = useMemo(() => {
     const filtered = matches.filter((m) => {
