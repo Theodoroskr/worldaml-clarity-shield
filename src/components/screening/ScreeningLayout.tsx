@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Link, NavLink, useSearchParams } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import {
   ArrowRight, BellPlus, CreditCard, Gauge, LifeBuoy, Menu, PanelLeftClose, PanelLeftOpen,
   Puzzle, Radar, Search, ShieldCheck, Users, X,
@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import HelpPanel from "@/components/screening/HelpPanel";
 import { useScreeningAccess } from "@/hooks/useScreeningAccess";
 import { useScreeningQuota } from "@/hooks/useScreeningQuota";
 import { cn } from "@/lib/utils";
@@ -24,6 +23,7 @@ export const SCREENING_NAV = [
   { label: "Team & access", to: "/screening/team", icon: Users },
   { label: "Add-on modules", to: "/screening/modules", icon: Puzzle },
   { label: "Packages", to: "/screening-monitoring/pricing", icon: CreditCard },
+  { label: "Help & support", to: "/screening/help", icon: LifeBuoy },
 ];
 
 interface ScreeningLayoutProps {
@@ -43,20 +43,6 @@ export default function ScreeningLayout({ children, head, contained = false }: S
   const quota = useScreeningQuota();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const helpOpen = searchParams.get("help") === "1";
-
-  const setHelpOpen = (open: boolean) => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        if (open) next.set("help", "1");
-        else next.delete("help");
-        return next;
-      },
-      { replace: true },
-    );
-  };
 
 
   useEffect(() => {
@@ -121,33 +107,6 @@ export default function ScreeningLayout({ children, head, contained = false }: S
           </Tooltip>
         );
       })}
-
-      {(() => {
-        const helpButton = (
-          <button
-            type="button"
-            onClick={() => {
-              setMobileNavOpen(false);
-              setHelpOpen(true);
-            }}
-            className={cn(
-              "w-full flex items-center gap-2.5 rounded-md py-2 text-sm transition-colors text-white/70 hover:bg-white/5 hover:text-white",
-              isCollapsed ? "justify-center px-2" : "px-3",
-            )}
-          >
-            <LifeBuoy className="h-4 w-4 shrink-0" aria-hidden="true" />
-            {!isCollapsed && <span className="truncate">Help & support</span>}
-            {isCollapsed && <span className="sr-only">Help & support</span>}
-          </button>
-        );
-        if (!isCollapsed) return helpButton;
-        return (
-          <Tooltip delayDuration={100}>
-            <TooltipTrigger asChild>{helpButton}</TooltipTrigger>
-            <TooltipContent side="right">Help &amp; support</TooltipContent>
-          </Tooltip>
-        );
-      })()}
     </nav>
 
   );
@@ -261,14 +220,13 @@ export default function ScreeningLayout({ children, head, contained = false }: S
                   {remaining}/{searchQuota} left
                 </Badge>
               )}
-              <button
-                type="button"
+              <Link
+                to="/screening/help"
                 aria-label="Help and support"
-                onClick={() => setHelpOpen(true)}
                 className="rounded-md p-1.5 hover:bg-white/10"
               >
                 <LifeBuoy className="h-5 w-5" aria-hidden="true" />
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -293,8 +251,6 @@ export default function ScreeningLayout({ children, head, contained = false }: S
             {children}
           </main>
         </div>
-
-        <HelpPanel open={helpOpen} onOpenChange={setHelpOpen} />
       </div>
 
     </TooltipProvider>
