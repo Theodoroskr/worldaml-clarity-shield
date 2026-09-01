@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, full_name, subject, message, cta_text, cta_url } = await req.json() as NotificationRequest;
+    const { email, full_name, subject, message, cta_text, cta_url, cc } = await req.json() as NotificationRequest;
 
     if (!email || !subject || !message) {
       return new Response(JSON.stringify({ error: "Missing required fields: email, subject, message" }), {
