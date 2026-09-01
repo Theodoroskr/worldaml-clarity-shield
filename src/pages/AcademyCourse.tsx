@@ -275,14 +275,23 @@ const AcademyCourse = ({ embedded = false }: { embedded?: boolean } = {}) => {
   }, [searchParams, modules, completedModules, user]);
 
   const markModuleComplete = async (moduleId: string) => {
+    const previous = completedModules;
     const updated = [...new Set([...completedModules, moduleId])];
     setCompletedModules(updated);
 
     if (user && course) {
-      await supabase.from("academy_progress").upsert(
-        { user_id: user.id, course_id: course.id, completed_modules: updated },
-        { onConflict: "user_id,course_id" }
-      );
+      const { error } = await supabase.rpc("save_academy_module_progress", {
+        _course_id: course.id,
+        _completed_modules: updated,
+      });
+      if (error) {
+        setCompletedModules(previous);
+        toast({
+          title: "Progress not saved",
+          description: "We couldn't save your progress. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
