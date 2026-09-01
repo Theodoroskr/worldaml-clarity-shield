@@ -82,11 +82,14 @@ export function mapEntitlements(
   businessAccountId: string | null,
   access: ProductAccessRow[],
   screening: ScreeningSubscriptionRow[] = [],
+  members: ProductMemberRow[] = [],
 ): BusinessEntitlement[] {
   const accountId = businessAccountId ?? "";
   const sub = screening.find((s) => isActiveStatus(s.status)) ?? screening[0] ?? null;
+  // The Compliance Suite is not yet commercially available in the portal.
+  const visibleAccess = access.filter((a) => a.product !== "suite");
 
-  const rows: BusinessEntitlement[] = access.map((a) => {
+  const rows: BusinessEntitlement[] = visibleAccess.map((a) => {
     const productKey = PRODUCT_TO_SOLUTION_KEY[a.product] ?? a.product;
     const isScreening = a.product === "screening";
     const seats = a.seats ?? (isScreening ? sub?.seat_quota ?? null : null);
