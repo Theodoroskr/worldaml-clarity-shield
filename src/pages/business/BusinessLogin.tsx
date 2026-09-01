@@ -66,6 +66,7 @@ export default function BusinessLogin() {
               <div className="text-center text-sm text-muted-foreground space-y-1">
                 <p>No business account? <Link to="/business/signup" className="text-teal hover:underline">Create one</Link></p>
                 <p><Link to="/forgot-password" className="hover:underline">Forgot your password?</Link></p>
+                <p className="pt-2 border-t border-border mt-3">Looking for your courses? <Link to="/academy/login" className="text-teal hover:underline">Academy sign in</Link></p>
               </div>
             </form>
           </CardContent>

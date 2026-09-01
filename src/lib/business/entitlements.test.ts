@@ -155,3 +155,60 @@ describe("product_members as an entitlement source", () => {
     expect(rows).toHaveLength(0);
   });
 });
+
+describe("business_subscriptions as the highest-priority source", () => {
+  const bizSub = (over: Record<string, unknown> = {}) => ({
+    id: "bs-1",
+    business_account_id: "ba-1",
+    organisation_id: "org-1",
+    product: "screening",
+    plan_code: "growth",
+    seats: 5,
+    status: "active",
+    amount_cents: 49900,
+    currency: "EUR",
+    interval: "year",
+    current_period_start: "2026-01-01T00:00:00Z",
+    current_period_end: "2027-01-01T00:00:00Z",
+    cancel_at_period_end: false,
+    source: "self_serve",
+    created_at: "2026-01-01T00:00:00Z",
+    ...over,
+  });
+
+  it("maps a business subscription onto the catalogue key with seats and renewal", () => {
+    const [e] = mapEntitlements("ba-1", [], [], [], [bizSub()]);
+    expect(e.product_key).toBe("worldaml");
+    expect(e.plan).toBe("growth");
+    expect(e.seats).toBe(5);
+    expect(e.renews_at).toBe("2027-01-01T00:00:00Z");
+    expect(e.status).toBe("active");
+    expect(e.setup_complete).toBe(true);
+  });
+
+  it("takes precedence over product_access for the same product", () => {
+    const rows = mapEntitlements("ba-1", [access({ plan: "demo", seats: 1 })], [sub()], [], [bizSub()]);
+    const screening = rows.filter((r) => r.product_key === "worldaml");
+    expect(screening).toHaveLength(1);
+    expect(screening[0].plan).toBe("growth");
+    expect(screening[0].seats).toBe(5);
+  });
+
+  it("treats past_due as still active with access kept", () => {
+    const [e] = mapEntitlements("ba-1", [], [], [], [bizSub({ status: "past_due" })]);
+    expect(e.status).toBe("past_due");
+    expect(e.setup_complete).toBe(true);
+    expect(isActiveStatus(e.status)).toBe(true);
+  });
+
+  it("shows canceled subscriptions as inactive", () => {
+    const [e] = mapEntitlements("ba-1", [], [], [], [bizSub({ status: "canceled" })]);
+    expect(e.status).toBe("canceled");
+    expect(e.setup_complete).toBe(false);
+  });
+
+  it("hides suite subscriptions", () => {
+    const rows = mapEntitlements("ba-1", [], [], [], [bizSub({ product: "suite" })]);
+    expect(rows).toEqual([]);
+  });
+});

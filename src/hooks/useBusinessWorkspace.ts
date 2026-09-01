@@ -7,6 +7,7 @@ import {
   mapEntitlements,
   isActiveStatus,
   type BusinessEntitlement,
+  type BusinessSubscriptionRow,
   type ProductAccessRow,
   type ScreeningSubscriptionRow,
   type ProductMemberRow,
@@ -61,7 +62,17 @@ export function useBusinessWorkspace() {
       const members = (memberRes.data ?? []) as unknown as ProductMemberRow[];
 
       const orgId = storedOrgId ?? members[0]?.organisation_id ?? null;
-      if (!orgId) return mapEntitlements(accountId!, [], [], members);
+
+      // The commercial layer is keyed by business account, not organisation,
+      // so it is readable even when no organisation is linked yet.
+      const bizSubRes = await supabase
+        .from("business_subscriptions")
+        .select("id, business_account_id, organisation_id, product, plan_code, seats, status, amount_cents, currency, interval, current_period_start, current_period_end, cancel_at_period_end, source, created_at")
+        .eq("business_account_id", accountId!);
+      if (bizSubRes.error) throw bizSubRes.error;
+      const bizSubs = (bizSubRes.data ?? []) as unknown as BusinessSubscriptionRow[];
+
+      if (!orgId) return mapEntitlements(accountId!, [], [], members, bizSubs);
 
       const [accessRes, subRes] = await Promise.all([
         supabase
@@ -80,6 +91,7 @@ export function useBusinessWorkspace() {
         (accessRes.data ?? []) as unknown as ProductAccessRow[],
         (subRes.data ?? []) as unknown as ScreeningSubscriptionRow[],
         members.filter((m) => m.organisation_id === orgId),
+        bizSubs,
       );
     },
   });

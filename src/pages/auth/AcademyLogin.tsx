@@ -22,6 +22,10 @@ export default function AcademyLogin() {
               <Link to="/signup" className="mt-2 inline-block text-teal hover:underline font-medium">
                 Create Account
               </Link>
+              <div className="mt-3 pt-3 border-t border-border text-sm text-muted-foreground">
+                Manage company subscriptions instead?{" "}
+                <Link to="/business/login" className="text-teal hover:underline">Business sign in</Link>
+              </div>
             </>
           }
         />
