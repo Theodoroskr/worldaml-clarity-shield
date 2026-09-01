@@ -44,14 +44,25 @@ export function useBusinessWorkspace() {
   const { account, isLoading: accountLoading, refetch: refetchAccount } = useBusinessAccount();
   const queryClient = useQueryClient();
   const accountId = account?.id;
-  const orgId = (account as BusinessAccount & { organisation_id?: string | null })?.organisation_id ?? null;
+  const storedOrgId = (account as BusinessAccount & { organisation_id?: string | null })?.organisation_id ?? null;
 
   const entitlements = useQuery({
-    queryKey: ["business-entitlements", accountId, orgId],
+    queryKey: ["business-entitlements", accountId, storedOrgId, user?.id],
     enabled: !!accountId,
     staleTime: 30_000,
     queryFn: async (): Promise<BusinessEntitlement[]> => {
-      if (!orgId) return [];
+      // Membership rows are the source of truth for the signed-in user's access
+      // and also let us resolve the organisation when it was never linked.
+      const memberRes = await supabase
+        .from("product_members")
+        .select("id, organisation_id, product, role, created_at")
+        .eq("user_id", user!.id);
+      if (memberRes.error) throw memberRes.error;
+      const members = (memberRes.data ?? []) as unknown as ProductMemberRow[];
+
+      const orgId = storedOrgId ?? members[0]?.organisation_id ?? null;
+      if (!orgId) return mapEntitlements(accountId!, [], [], members);
+
       const [accessRes, subRes] = await Promise.all([
         supabase
           .from("product_access")
@@ -68,6 +79,7 @@ export function useBusinessWorkspace() {
         accountId!,
         (accessRes.data ?? []) as unknown as ProductAccessRow[],
         (subRes.data ?? []) as unknown as ScreeningSubscriptionRow[],
+        members.filter((m) => m.organisation_id === orgId),
       );
     },
   });
