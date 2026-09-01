@@ -1365,11 +1365,13 @@ export type Database = {
           created_at: string
           id: string
           industry: string | null
+          organisation_id: string | null
           phone: string | null
           postal_code: string | null
           products_of_interest: string[]
           registration_number: string | null
           status: string
+          stripe_customer_id: string | null
           updated_at: string
           user_id: string
           vat_number: string | null
@@ -1387,11 +1389,13 @@ export type Database = {
           created_at?: string
           id?: string
           industry?: string | null
+          organisation_id?: string | null
           phone?: string | null
           postal_code?: string | null
           products_of_interest?: string[]
           registration_number?: string | null
           status?: string
+          stripe_customer_id?: string | null
           updated_at?: string
           user_id: string
           vat_number?: string | null
@@ -1409,11 +1413,13 @@ export type Database = {
           created_at?: string
           id?: string
           industry?: string | null
+          organisation_id?: string | null
           phone?: string | null
           postal_code?: string | null
           products_of_interest?: string[]
           registration_number?: string | null
           status?: string
+          stripe_customer_id?: string | null
           updated_at?: string
           user_id?: string
           vat_number?: string | null
