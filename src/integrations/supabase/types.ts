@@ -9400,6 +9400,10 @@ export type Database = {
           signup_count: number
         }[]
       }
+      save_academy_module_progress: {
+        Args: { _completed_modules: Json; _course_id: string }
+        Returns: undefined
+      }
       screening_escalation_reviewers: {
         Args: { _organisation_id: string }
         Returns: {
