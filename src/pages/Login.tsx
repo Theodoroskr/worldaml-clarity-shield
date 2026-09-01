@@ -45,19 +45,33 @@ const Login = () => {
         const { data: authData } = await supabase.auth.getUser();
         const uid = authData.user?.id;
         if (uid) {
-          const [{ data: adminRole }, { data: partnerRow }, { data: prof }, { data: businessRow }] = await Promise.all([
-            supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle(),
-            supabase.from("partners").select("is_active").eq("user_id", uid).maybeSingle(),
-            supabase.from("profiles").select("subscription_tier").eq("user_id", uid).maybeSingle(),
-            supabase.from("business_accounts").select("id").eq("user_id", uid).maybeSingle(),
-          ]);
+        const [{ data: adminRole }, { data: partnerRow }, { data: prof }, { data: businessRow }, { data: productRows }] =
+            await Promise.all([
+              supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle(),
+              supabase.from("partners").select("is_active").eq("user_id", uid).maybeSingle(),
+              supabase.from("profiles").select("subscription_tier").eq("user_id", uid).maybeSingle(),
+              supabase.from("business_accounts").select("id").eq("user_id", uid).maybeSingle(),
+              supabase.from("product_members").select("product").eq("user_id", uid),
+            ]);
           const tier = (prof as any)?.subscription_tier;
           const hasSuite = tier === "suite" || tier === "enterprise";
           // Only redirect away from Academy when that is the user's single other workspace.
           if (!adminRole && !hasSuite && (partnerRow as any)?.is_active && !businessRow) {
             redirectTo = "/partner/dashboard";
           } else if (!adminRole && !hasSuite && businessRow && !(partnerRow as any)?.is_active) {
-            redirectTo = "/business/dashboard";
+            // Route by what the customer actually owns: a single product goes
+            // straight to its workspace, anything else to the business portal.
+            const owned = Array.from(
+              new Set(((productRows ?? []) as { product: string }[]).map((r) => r.product).filter((p) => p !== "suite")),
+            );
+            redirectTo =
+              owned.length === 1
+                ? owned[0] === "screening"
+                  ? "/screening"
+                  : owned[0] === "academy"
+                    ? "/dashboard"
+                    : "/business/dashboard"
+                : "/business/dashboard";
           }
         }
       }
