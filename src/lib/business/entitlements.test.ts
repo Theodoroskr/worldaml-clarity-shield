@@ -58,17 +58,17 @@ describe("mapEntitlements", () => {
     expect(rows[0]).toMatchObject({ product_key: "worldaml", plan: "growth", seats: 3, id: "sub-1" });
   });
 
-  it("maps suite and academy access", () => {
+  it("maps worldid and academy access", () => {
     const rows = mapEntitlements("ba-1", [
-      access({ id: "pa-2", product: "suite", plan: "pro" }),
+      access({ id: "pa-2", product: "worldid", plan: "pro" }),
       access({ id: "pa-3", product: "academy", plan: "team" }),
     ], []);
-    expect(rows.map((r) => r.product_key)).toEqual(["suite", "academy"]);
+    expect(rows.map((r) => r.product_key)).toEqual(["worldid", "academy"]);
   });
 
   it("treats trial as active and inactive plans as not set up", () => {
     const rows = mapEntitlements("ba-1", [
-      access({ id: "pa-4", product: "suite", status: "trial" }),
+      access({ id: "pa-4", product: "worldid", status: "trial" }),
       access({ id: "pa-5", product: "academy", status: "cancelled" }),
     ], []);
     expect(rows[0].status).toBe("trialing");
@@ -109,5 +109,49 @@ describe("status helpers", () => {
   });
   it("keeps the product key map stable", () => {
     expect(PRODUCT_TO_SOLUTION_KEY.screening).toBe("worldaml");
+  });
+});
+
+const member = (o: Partial<import("./entitlements").ProductMemberRow> = {}) => ({
+  id: "pm-1",
+  organisation_id: "org-1",
+  product: "screening",
+  role: "admin",
+  created_at: "2026-01-01T00:00:00Z",
+  ...o,
+});
+
+describe("product_members as an entitlement source", () => {
+  it("surfaces screening from membership alone", () => {
+    const rows = mapEntitlements("ba-1", [], [], [member()]);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].product_key).toBe("worldaml");
+    expect(rows[0].status).toBe("active");
+    expect(rows[0].setup_complete).toBe(true);
+  });
+
+  it("does not duplicate screening when product_access already covers it", () => {
+    const rows = mapEntitlements("ba-1", [access()], [sub()], [member()]);
+    expect(rows.filter((r) => r.product_key === "worldaml")).toHaveLength(1);
+  });
+
+  it("does not duplicate screening when only a subscription exists", () => {
+    const rows = mapEntitlements("ba-1", [], [sub()], [member()]);
+    expect(rows.filter((r) => r.product_key === "worldaml")).toHaveLength(1);
+  });
+
+  it("enriches a membership-only screening row from the subscription", () => {
+    const rows = mapEntitlements("ba-1", [], [], [member()]);
+    expect(rows[0].plan).toBeNull();
+  });
+
+  it("hides suite entirely", () => {
+    const rows = mapEntitlements(
+      "ba-1",
+      [access({ id: "pa-suite", product: "suite", plan: "suite" })],
+      [],
+      [member({ id: "pm-suite", product: "suite" })],
+    );
+    expect(rows).toHaveLength(0);
   });
 });

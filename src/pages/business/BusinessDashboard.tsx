@@ -254,33 +254,8 @@ export default function BusinessDashboard() {
       {/* NEWS + INSIGHTS */}
       <BusinessNewsFeed />
 
-      {/* SUITE + ACADEMY */}
+      {/* ACADEMY */}
       <section className="grid lg:grid-cols-2 gap-4">
-        <Card className="border-teal/30 bg-teal/[0.04] flex flex-col">
-          <CardContent className="pt-6 flex-1 flex flex-col gap-3">
-            <span className="w-9 h-9 rounded-lg bg-teal/10 flex items-center justify-center">
-              <ShieldCheck className="w-4.5 h-4.5 text-teal" />
-            </span>
-            <div className="flex-1">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">WorldAML Compliance Suite</p>
-              <p className="font-semibold text-foreground mt-1">One workspace for onboarding, screening, cases and reporting</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                See every Suite module, plans and pricing — then buy online or talk to our team.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2 pt-1">
-              <Button asChild variant="accent" size="sm"><Link to="/business/solutions/suite">View Suite plans &amp; buy</Link></Button>
-              <Button asChild variant="outline" size="sm">
-                <a href="/platform/suite" target="_blank" rel="noopener noreferrer">
-                  Suite Overview <ExternalLink className="ml-2 h-3.5 w-3.5" />
-                </a>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-
-
         <Card className="border-navy/20 bg-navy/[0.03] flex flex-col">
           <CardContent className="pt-6 flex-1 flex flex-col gap-3">
             <span className="w-9 h-9 rounded-lg bg-navy/5 flex items-center justify-center">

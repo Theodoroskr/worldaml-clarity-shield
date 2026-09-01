@@ -29,6 +29,14 @@ export interface ScreeningSubscriptionRow {
   created_at?: string | null;
 }
 
+export interface ProductMemberRow {
+  id: string;
+  organisation_id: string;
+  product: string;
+  role?: string | null;
+  created_at?: string | null;
+}
+
 export interface BusinessEntitlement {
   id: string;
   business_account_id: string;
@@ -74,11 +82,14 @@ export function mapEntitlements(
   businessAccountId: string | null,
   access: ProductAccessRow[],
   screening: ScreeningSubscriptionRow[] = [],
+  members: ProductMemberRow[] = [],
 ): BusinessEntitlement[] {
   const accountId = businessAccountId ?? "";
   const sub = screening.find((s) => isActiveStatus(s.status)) ?? screening[0] ?? null;
+  // The Compliance Suite is not yet commercially available in the portal.
+  const visibleAccess = access.filter((a) => a.product !== "suite");
 
-  const rows: BusinessEntitlement[] = access.map((a) => {
+  const rows: BusinessEntitlement[] = visibleAccess.map((a) => {
     const productKey = PRODUCT_TO_SOLUTION_KEY[a.product] ?? a.product;
     const isScreening = a.product === "screening";
     const seats = a.seats ?? (isScreening ? sub?.seat_quota ?? null : null);
@@ -99,7 +110,7 @@ export function mapEntitlements(
   });
 
   // A screening subscription with no matching product_access row still counts.
-  if (sub && !access.some((a) => a.product === "screening")) {
+  if (sub && !visibleAccess.some((a) => a.product === "screening")) {
     rows.push({
       id: sub.id,
       business_account_id: accountId,
@@ -113,6 +124,28 @@ export function mapEntitlements(
       usage_unit: sub.seat_quota != null ? "seats" : null,
       seats: sub.seat_quota ?? null,
       setup_complete: isActiveStatus(sub.status),
+    });
+  }
+
+  // Membership of a product (product_members) is also real access — this is how
+  // Screening is actually provisioned today.
+  for (const m of members) {
+    if (m.product === "suite") continue;
+    const productKey = PRODUCT_TO_SOLUTION_KEY[m.product] ?? m.product;
+    if (rows.some((r) => r.product_key === productKey)) continue;
+    rows.push({
+      id: m.id,
+      business_account_id: accountId,
+      product_key: productKey,
+      plan: m.product === "screening" ? sub?.plan ?? null : null,
+      status: "active",
+      activated_at: m.created_at ?? null,
+      renews_at: m.product === "screening" ? sub?.current_period_end ?? null : null,
+      usage_used: null,
+      usage_limit: null,
+      usage_unit: null,
+      seats: null,
+      setup_complete: true,
     });
   }
 

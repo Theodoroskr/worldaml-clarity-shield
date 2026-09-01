@@ -207,51 +207,6 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
     pairsWith: ["worldaml", "worldid"],
     publicUrl: "/academy",
   },
-  {
-    key: "suite",
-    name: "WorldAML Compliance Suite",
-    lane: "WorldAML Platform",
-    icon: ShieldCheck,
-    tagline: "The full compliance workspace: onboarding, screening, monitoring, cases and reporting.",
-    outcome: "Run your entire compliance programme in one regulator-ready workspace.",
-    solves: [
-      "Compliance work spread across spreadsheets and email",
-      "No single audit trail across onboarding, screening and reporting",
-      "Manual regulatory reporting and case handling",
-    ],
-    capabilities: [
-      "KYC/KYB onboarding forms and customer records",
-      "Sanctions, PEP and adverse media screening with alerts",
-      "Transaction monitoring rules and case management",
-      "Risk scoring, periodic reviews and audit logs",
-      "Regulatory reporting and exports",
-    ],
-    idealFor: "Compliance teams that need a full workspace, not just an API.",
-    included: ["Suite workspace access", "Case and alert management", "Audit-ready evidence", "Standard support"],
-    addOns: ["Additional users", "Regulator-specific reporting adapters"],
-    faq: [
-      { q: "How does the Suite relate to the API?", a: "The Suite is the workspace interface powered by the same WorldAML engine as the API. You can start with either." },
-      { q: "Can we buy it online?", a: "Suite plans start with the Screening & Monitoring subscription; larger deployments are scoped with our team." },
-    ],
-    plans: SCREENING_PLANS.map((p) => ({
-      key: p.key,
-      name: p.key === "enterprise" ? "Suite Enterprise" : `Suite ${p.name}`,
-      price: p.priceDisplay,
-      period: p.period,
-      summary: p.summary,
-      features: p.features,
-      checkout: isCheckoutEnabled(p)
-        ? { fn: "create-worldaml-checkout", plan: p.checkoutPlan }
-        : undefined,
-      // The free Demo plan is self-serve: activate it in-app, never via sales.
-      configureUrl: p.key === "demo" ? "/business/demo" : undefined,
-      configureLabel: p.key === "demo" ? "Start Free Demo" : undefined,
-    })),
-    pairsWith: ["worldid", "academy"],
-    usageUnit: "monitored entities",
-    openUrl: "/suite/dashboard",
-    publicUrl: "/platform/suite",
-  },
 ];
 
 export const SOLUTION_BY_KEY = Object.fromEntries(
@@ -262,7 +217,6 @@ export const CROSS_SELL_COPY: Record<string, string> = {
   worldaml: "Extend your compliance programme with ongoing screening and monitoring.",
   worldid: "Add identity verification so you know who you are onboarding.",
   academy: "Train your team on the controls you have just put in place.",
-  suite: "Run onboarding, screening, cases and reporting in one compliance workspace.",
 };
 
 /** Deterministic recommendations — no AI, no invented logic. */
