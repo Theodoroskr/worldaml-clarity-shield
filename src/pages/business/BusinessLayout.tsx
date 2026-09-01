@@ -66,7 +66,7 @@ const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: t
 export default function BusinessLayout() {
   const { user, isLoading: authLoading, signOut } = useAuth();
   const { account, isLoading, refetch } = useBusinessAccount();
-  const { academyAccess, partnerAccess } = usePortalAccess();
+  const { academyAccess, partnerAccess, screeningAccess } = usePortalAccess();
   const location = useLocation();
   const navigate = useNavigate();
   const [claiming, setClaiming] = useState(false);
