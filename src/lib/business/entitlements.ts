@@ -29,6 +29,14 @@ export interface ScreeningSubscriptionRow {
   created_at?: string | null;
 }
 
+export interface ProductMemberRow {
+  id: string;
+  organisation_id: string;
+  product: string;
+  role?: string | null;
+  created_at?: string | null;
+}
+
 export interface BusinessEntitlement {
   id: string;
   business_account_id: string;
