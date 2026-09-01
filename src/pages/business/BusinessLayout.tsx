@@ -26,6 +26,7 @@ const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: t
     items: [
       { label: "Explore Solutions", path: "/business/solutions", icon: Compass },
       { label: "My Products", path: "/business/products", icon: Boxes },
+      { label: "Screening & Monitoring", path: "/screening", icon: Radar, external: true, requiresScreening: true },
     ],
   },
   { label: "Academy for Business", items: [{ label: "Training & Academy", path: "/business/training", icon: GraduationCap }] },
