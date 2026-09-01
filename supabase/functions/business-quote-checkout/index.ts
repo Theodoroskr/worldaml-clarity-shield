@@ -73,21 +73,19 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    const { customerId: existingCustomer } = await resolveStripeCustomer({
-      storedCustomerId: (account?.stripe_customer_id as string | null) ?? null,
-      verifyCustomer: async (id) => {
-        const c = await stripe.customers.retrieve(id);
-        return !(c as { deleted?: boolean }).deleted;
-      },
-      findCustomerByEmail: async () => {
-        const list = await stripe.customers.list({ email: user.email!, limit: 1 });
-        return list.data[0]?.id ?? null;
-      },
-      persistCustomerId: async (id) => {
-        if (!account?.id) return;
-        await admin.from("business_accounts").update({ stripe_customer_id: id }).eq("id", account.id);
-      },
-    });
+    // Prefer the stored customer, fall back to an email match, then persist it.
+    let existingCustomer: string | null = (account?.stripe_customer_id as string | null) ?? null;
+    if (existingCustomer) {
+      const c = await stripe.customers.retrieve(existingCustomer).catch(() => null);
+      if (!c || (c as { deleted?: boolean }).deleted) existingCustomer = null;
+    }
+    if (!existingCustomer) {
+      const list = await stripe.customers.list({ email: user.email!, limit: 1 });
+      existingCustomer = list.data[0]?.id ?? null;
+      if (existingCustomer && account?.id) {
+        await admin.from("business_accounts").update({ stripe_customer_id: existingCustomer }).eq("id", account.id);
+      }
+    }
 
     const interval = (quote.quoted_interval as string) ?? "year";
     const recurring = interval === "month" || interval === "year";
