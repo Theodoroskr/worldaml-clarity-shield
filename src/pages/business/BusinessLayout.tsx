@@ -19,13 +19,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: typeof Building2; end?: boolean }[] }[] = [
+const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: typeof Building2; end?: boolean; external?: boolean; requiresScreening?: boolean }[] }[] = [
   { label: "Overview", items: [{ label: "Dashboard", path: "/business/dashboard", icon: LayoutDashboard }] },
   {
     label: "Solutions",
     items: [
       { label: "Explore Solutions", path: "/business/solutions", icon: Compass },
-      
       { label: "My Products", path: "/business/products", icon: Boxes },
     ],
   },
