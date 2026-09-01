@@ -9,6 +9,7 @@ import {
   type BusinessEntitlement,
   type ProductAccessRow,
   type ScreeningSubscriptionRow,
+  type ProductMemberRow,
 } from "@/lib/business/entitlements";
 
 export type { BusinessEntitlement } from "@/lib/business/entitlements";
