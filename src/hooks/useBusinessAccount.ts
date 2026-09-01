@@ -14,7 +14,10 @@ export interface BusinessAccount {
   company_size: string | null;
   products_of_interest: string[];
   status: string;
+  organisation_id?: string | null;
+  stripe_customer_id?: string | null;
   created_at: string;
+
 }
 
 /** Business (product buyer) workspace entitlement — one account per signed-in user. */

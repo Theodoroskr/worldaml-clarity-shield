@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { resolveStripeCustomer } from "./customer.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,14 +32,40 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    if (customers.data.length === 0) {
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } },
+    );
+    const { data: account } = await admin
+      .from("business_accounts")
+      .select("id, stripe_customer_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const { customerId } = await resolveStripeCustomer({
+      storedCustomerId: (account?.stripe_customer_id as string | null) ?? null,
+      verifyCustomer: async (id) => {
+        const c = await stripe.customers.retrieve(id);
+        return !(c as any).deleted;
+      },
+      findCustomerByEmail: async () => {
+        const list = await stripe.customers.list({ email: user.email!, limit: 1 });
+        return list.data[0]?.id ?? null;
+      },
+      persistCustomerId: async (id) => {
+        if (!account?.id) return;
+        await admin.from("business_accounts").update({ stripe_customer_id: id }).eq("id", account.id);
+      },
+    });
+
+    if (!customerId) {
       return new Response(JSON.stringify({ subscriptions: [], invoices: [] }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
-    const customerId = customers.data[0].id;
+
 
     const [subs, invoices] = await Promise.all([
       stripe.subscriptions.list({ customer: customerId, status: "all", limit: 20 }),

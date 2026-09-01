@@ -72,7 +72,15 @@ serve(async (req) => {
         .insert({ organization_id: orgId, user_id: user.id, role: "admin" });
     }
 
+    // Keep the business portal pointed at the organisation that owns the products.
+    await admin
+      .from("business_accounts")
+      .update({ organisation_id: orgId, updated_at: new Date().toISOString() })
+      .eq("user_id", user.id)
+      .is("organisation_id", null);
+
     // 2. Never downgrade or duplicate an existing subscription.
+
     const { data: existingSub } = await admin
       .from("screening_subscriptions")
       .select("id, plan, status")
@@ -142,6 +150,9 @@ serve(async (req) => {
       role: "admin",
       created_by: user.id,
     }, { onConflict: "organisation_id,product,user_id" });
+
+
+
 
     try {
       await admin.rpc("ensure_default_screening_policy", { _org: orgId });
