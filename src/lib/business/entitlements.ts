@@ -110,7 +110,7 @@ export function mapEntitlements(
   });
 
   // A screening subscription with no matching product_access row still counts.
-  if (sub && !access.some((a) => a.product === "screening")) {
+  if (sub && !visibleAccess.some((a) => a.product === "screening")) {
     rows.push({
       id: sub.id,
       business_account_id: accountId,
