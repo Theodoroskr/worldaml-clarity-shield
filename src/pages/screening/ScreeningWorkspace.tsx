@@ -53,7 +53,7 @@ export default function ScreeningWorkspace() {
     <ScreeningLayout
       head={
         <SEO
-          title="Screening & Monitoring | WorldAML"
+          title="Screening & Monitoring"
           description="Provider-independent sanctions, PEP, watchlist and adverse media screening workspace with case management and ongoing monitoring."
           noindex
         />

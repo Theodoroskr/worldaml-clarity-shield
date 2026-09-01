@@ -188,7 +188,7 @@ export default function ScreeningRiskAlerts() {
     <ScreeningLayout
       head={
         <SEO
-          title="Risk Alerts | WorldAML Screening"
+          title="Screening Risk Alerts"
           description="Configure risk-level alerts that notify you when a monitored entity crosses a risk threshold."
           noindex
         />

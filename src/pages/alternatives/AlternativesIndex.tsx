@@ -66,7 +66,7 @@ const AlternativesIndex = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="AML Software Alternatives Compared | WorldAML"
+        title="AML Software Alternatives Compared"
         description="Compare WorldAML against World-Check, ComplyAdvantage, Dow Jones Risk Center, Napier and Sanction Scanner — for procurement and compliance teams evaluating a switch."
         canonical="/alternatives"
         breadcrumbs={[

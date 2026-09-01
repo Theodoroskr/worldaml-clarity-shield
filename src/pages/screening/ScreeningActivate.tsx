@@ -88,7 +88,7 @@ export default function ScreeningActivate() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <SEO title="Activate Screening | WorldAML" description="Activate your WorldAML Screening & Monitoring subscription." noindex />
+      <SEO title="Activate Screening" description="Activate your WorldAML Screening & Monitoring subscription." noindex />
       <Header />
       <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
         {state === "loading" && (

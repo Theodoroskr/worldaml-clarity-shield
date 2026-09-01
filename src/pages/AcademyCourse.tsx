@@ -542,7 +542,7 @@ const AcademyCourse = ({ embedded = false }: { embedded?: boolean } = {}) => {
     return (
       <div className="min-h-screen flex flex-col">
         <SEO
-          title={`Unlock ${course.title} — WorldAML Academy`}
+          title={`Unlock ${course.title}`}
           description="Purchase this course to access modules, take the quiz, and earn your certificate."
           canonical={`/academy/${slug}`}
           noindex
@@ -665,7 +665,7 @@ const AcademyCourse = ({ embedded = false }: { embedded?: boolean } = {}) => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title={`${course.title} — WorldAML Academy`}
+        title={course.title}
         description={course.description.slice(0, 160)}
         canonical={`/academy/${course.slug}`}
         ogType="article"
