@@ -61,7 +61,11 @@ const SEO = ({ title, description, canonical, noindex = false, ogType = "website
   const OG_IMAGE = ogImage ?? `${BASE_URL}/og-image.png`;
   const OG_IMAGE_ALT = ogImageAlt ?? title;
 
-  const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
+  // Strip any brand suffix the page already added, so the site name is never duplicated.
+  const baseTitle = title
+    .replace(/\s*[|\-–—]\s*WorldAML(\s+(Academy|Screening|Partner Portal))?\s*$/i, "")
+    .trim() || title;
+  const fullTitle = baseTitle === SITE_NAME ? baseTitle : `${baseTitle} | ${SITE_NAME}`;
   const canonicalPath = canonical ? (onAcademy ? stripAcademyPrefix(canonical) : canonical) : undefined;
   const canonicalUrl = canonicalPath ? `${BASE_URL}${canonicalPath}` : undefined;
 
