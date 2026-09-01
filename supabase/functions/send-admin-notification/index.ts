@@ -147,9 +147,12 @@ Deno.serve(async (req) => {
       </div>
     `;
 
+    const ccList = Array.isArray(cc) ? cc.filter((a) => typeof a === "string" && a.includes("@")) : [];
+
     await sendEmailWithRetry(resend, {
       from: FROM_EMAIL,
       to: [email],
+      ...(ccList.length ? { cc: ccList } : {}),
       subject: safeSubject,
       html,
     });
