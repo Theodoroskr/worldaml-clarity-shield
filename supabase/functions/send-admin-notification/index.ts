@@ -52,6 +52,7 @@ interface NotificationRequest {
   message: string;
   cta_text?: string;
   cta_url?: string;
+  cc?: string[];
 }
 
 Deno.serve(async (req) => {
@@ -92,7 +93,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, full_name, subject, message, cta_text, cta_url } = await req.json() as NotificationRequest;
+    const { email, full_name, subject, message, cta_text, cta_url, cc } = await req.json() as NotificationRequest;
 
     if (!email || !subject || !message) {
       return new Response(JSON.stringify({ error: "Missing required fields: email, subject, message" }), {
@@ -146,9 +147,12 @@ Deno.serve(async (req) => {
       </div>
     `;
 
+    const ccList = Array.isArray(cc) ? cc.filter((a) => typeof a === "string" && a.includes("@")) : [];
+
     await sendEmailWithRetry(resend, {
       from: FROM_EMAIL,
       to: [email],
+      ...(ccList.length ? { cc: ccList } : {}),
       subject: safeSubject,
       html,
     });
