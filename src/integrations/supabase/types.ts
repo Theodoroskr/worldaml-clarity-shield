@@ -1586,6 +1586,7 @@ export type Database = {
       }
       business_quote_requests: {
         Row: {
+          accepted_at: string | null
           admin_notes: string | null
           business_account_id: string | null
           created_at: string
@@ -1593,12 +1594,23 @@ export type Database = {
           message: string | null
           plan: string | null
           product: string
+          quote_notes: string | null
+          quote_valid_until: string | null
+          quoted_amount_cents: number | null
+          quoted_at: string | null
+          quoted_currency: string
+          quoted_interval: string
+          quoted_price_id: string | null
+          quoted_product_key: string | null
           seats: number | null
           status: string
+          stripe_checkout_session_id: string | null
+          stripe_subscription_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          accepted_at?: string | null
           admin_notes?: string | null
           business_account_id?: string | null
           created_at?: string
@@ -1606,12 +1618,23 @@ export type Database = {
           message?: string | null
           plan?: string | null
           product: string
+          quote_notes?: string | null
+          quote_valid_until?: string | null
+          quoted_amount_cents?: number | null
+          quoted_at?: string | null
+          quoted_currency?: string
+          quoted_interval?: string
+          quoted_price_id?: string | null
+          quoted_product_key?: string | null
           seats?: number | null
           status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          accepted_at?: string | null
           admin_notes?: string | null
           business_account_id?: string | null
           created_at?: string
@@ -1619,8 +1642,18 @@ export type Database = {
           message?: string | null
           plan?: string | null
           product?: string
+          quote_notes?: string | null
+          quote_valid_until?: string | null
+          quoted_amount_cents?: number | null
+          quoted_at?: string | null
+          quoted_currency?: string
+          quoted_interval?: string
+          quoted_price_id?: string | null
+          quoted_product_key?: string | null
           seats?: number | null
           status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
         }
