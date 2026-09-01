@@ -125,7 +125,7 @@ export function useBusinessWorkspace() {
 
   return {
     account: account as BusinessAccount | null,
-    organisationId: orgId,
+    organisationId: storedOrgId,
     entitlements: entitlements.data ?? [],
     activeEntitlements: active,
     ownedKeys: active.map((e) => e.product_key),
