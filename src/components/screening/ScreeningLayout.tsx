@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
-  ArrowRight, BellPlus, CreditCard, Gauge, LifeBuoy, Menu, PanelLeftClose, PanelLeftOpen,
+  ArrowRight, BellPlus, Building2, CreditCard, Gauge, LifeBuoy, Menu, PanelLeftClose, PanelLeftOpen,
   Puzzle, Radar, Search, ShieldCheck, Users, X,
 } from "lucide-react";
 import Header from "@/components/Header";
