@@ -1428,68 +1428,6 @@ export type Database = {
         }
         Relationships: []
       }
-      business_entitlements: {
-        Row: {
-          activated_at: string | null
-          business_account_id: string
-          created_at: string
-          id: string
-          plan: string | null
-          product_key: string
-          renews_at: string | null
-          seats: number | null
-          setup_complete: boolean
-          status: string
-          stripe_subscription_id: string | null
-          updated_at: string
-          usage_limit: number | null
-          usage_unit: string | null
-          usage_used: number | null
-        }
-        Insert: {
-          activated_at?: string | null
-          business_account_id: string
-          created_at?: string
-          id?: string
-          plan?: string | null
-          product_key: string
-          renews_at?: string | null
-          seats?: number | null
-          setup_complete?: boolean
-          status?: string
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          usage_limit?: number | null
-          usage_unit?: string | null
-          usage_used?: number | null
-        }
-        Update: {
-          activated_at?: string | null
-          business_account_id?: string
-          created_at?: string
-          id?: string
-          plan?: string | null
-          product_key?: string
-          renews_at?: string | null
-          seats?: number | null
-          setup_complete?: boolean
-          status?: string
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          usage_limit?: number | null
-          usage_unit?: string | null
-          usage_used?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "business_entitlements_business_account_id_fkey"
-            columns: ["business_account_id"]
-            isOneToOne: false
-            referencedRelation: "business_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       business_events: {
         Row: {
           business_account_id: string | null
@@ -1524,6 +1462,91 @@ export type Database = {
             columns: ["business_account_id"]
             isOneToOne: false
             referencedRelation: "business_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_invoices: {
+        Row: {
+          amount_due_cents: number
+          amount_paid_cents: number
+          business_account_id: string
+          business_subscription_id: string | null
+          created_at: string
+          currency: string
+          due_at: string | null
+          hosted_invoice_url: string | null
+          id: string
+          invoice_pdf_url: string | null
+          number: string | null
+          organisation_id: string | null
+          paid_at: string | null
+          period_end: string | null
+          period_start: string | null
+          status: string
+          stripe_invoice_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_due_cents?: number
+          amount_paid_cents?: number
+          business_account_id: string
+          business_subscription_id?: string | null
+          created_at?: string
+          currency?: string
+          due_at?: string | null
+          hosted_invoice_url?: string | null
+          id?: string
+          invoice_pdf_url?: string | null
+          number?: string | null
+          organisation_id?: string | null
+          paid_at?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          stripe_invoice_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_due_cents?: number
+          amount_paid_cents?: number
+          business_account_id?: string
+          business_subscription_id?: string | null
+          created_at?: string
+          currency?: string
+          due_at?: string | null
+          hosted_invoice_url?: string | null
+          id?: string
+          invoice_pdf_url?: string | null
+          number?: string | null
+          organisation_id?: string | null
+          paid_at?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          stripe_invoice_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_invoices_business_account_id_fkey"
+            columns: ["business_account_id"]
+            isOneToOne: false
+            referencedRelation: "business_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_invoices_business_subscription_id_fkey"
+            columns: ["business_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "business_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_invoices_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1663,6 +1686,96 @@ export type Database = {
             columns: ["business_account_id"]
             isOneToOne: false
             referencedRelation: "business_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_subscriptions: {
+        Row: {
+          amount_cents: number | null
+          business_account_id: string
+          cancel_at_period_end: boolean
+          canceled_at: string | null
+          created_at: string
+          currency: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          interval: string
+          metadata: Json
+          organisation_id: string | null
+          plan_code: string
+          product: Database["public"]["Enums"]["product_key"]
+          seats: number
+          source: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_price_id: string | null
+          stripe_subscription_id: string | null
+          trial_end: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          business_account_id: string
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          currency?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          interval?: string
+          metadata?: Json
+          organisation_id?: string | null
+          plan_code: string
+          product: Database["public"]["Enums"]["product_key"]
+          seats?: number
+          source?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_end?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number | null
+          business_account_id?: string
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          currency?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          interval?: string
+          metadata?: Json
+          organisation_id?: string | null
+          plan_code?: string
+          product?: Database["public"]["Enums"]["product_key"]
+          seats?: number
+          source?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_end?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_subscriptions_business_account_id_fkey"
+            columns: ["business_account_id"]
+            isOneToOne: false
+            referencedRelation: "business_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_subscriptions_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -5964,6 +6077,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stripe_webhook_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          processed_at: string
+          stripe_event_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          processed_at?: string
+          stripe_event_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed_at?: string
+          stripe_event_id?: string
+        }
+        Relationships: []
       }
       suite_alert_rules: {
         Row: {

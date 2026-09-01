@@ -29,6 +29,24 @@ export interface ScreeningSubscriptionRow {
   created_at?: string | null;
 }
 
+export interface BusinessSubscriptionRow {
+  id: string;
+  business_account_id: string;
+  organisation_id: string | null;
+  product: string;
+  plan_code: string;
+  seats: number | null;
+  status: string | null;
+  amount_cents: number | null;
+  currency: string | null;
+  interval: string | null;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  cancel_at_period_end?: boolean | null;
+  source?: string | null;
+  created_at?: string | null;
+}
+
 export interface ProductMemberRow {
   id: string;
   organisation_id: string;
@@ -60,7 +78,7 @@ export const PRODUCT_TO_SOLUTION_KEY: Record<string, string> = {
   worldid: "worldid",
 };
 
-const ACTIVE_STATUSES = new Set(["active", "trial", "trialing"]);
+const ACTIVE_STATUSES = new Set(["active", "trial", "trialing", "past_due"]);
 
 /** Normalises platform statuses onto the portal's vocabulary. */
 export function normaliseStatus(status: string | null | undefined): string {
@@ -83,17 +101,43 @@ export function mapEntitlements(
   access: ProductAccessRow[],
   screening: ScreeningSubscriptionRow[] = [],
   members: ProductMemberRow[] = [],
+  subscriptions: BusinessSubscriptionRow[] = [],
 ): BusinessEntitlement[] {
   const accountId = businessAccountId ?? "";
   const sub = screening.find((s) => isActiveStatus(s.status)) ?? screening[0] ?? null;
   // The Compliance Suite is not yet commercially available in the portal.
   const visibleAccess = access.filter((a) => a.product !== "suite");
+  const visibleSubs = subscriptions.filter((s) => s.product !== "suite");
 
-  const rows: BusinessEntitlement[] = visibleAccess.map((a) => {
+  // The commercial layer (business_subscriptions) wins over the raw access
+  // registry whenever it covers a product: it carries price, period and the
+  // real billing status (e.g. past_due) that product_access lacks.
+  const rows: BusinessEntitlement[] = visibleSubs.map((s) => {
+    const productKey = PRODUCT_TO_SOLUTION_KEY[s.product] ?? s.product;
+    const isScreening = s.product === "screening";
+    const seats = s.seats ?? (isScreening ? sub?.seat_quota ?? null : null);
+    return {
+      id: s.id,
+      business_account_id: accountId,
+      product_key: productKey,
+      plan: s.plan_code ?? (isScreening ? sub?.plan ?? null : null),
+      status: normaliseStatus(s.status),
+      activated_at: s.current_period_start ?? s.created_at ?? null,
+      renews_at: s.current_period_end ?? (isScreening ? sub?.current_period_end ?? null : null),
+      usage_used: null,
+      usage_limit: seats,
+      usage_unit: seats != null ? "seats" : null,
+      seats,
+      setup_complete: isActiveStatus(s.status),
+    };
+  });
+
+  for (const a of visibleAccess) {
     const productKey = PRODUCT_TO_SOLUTION_KEY[a.product] ?? a.product;
+    if (rows.some((r) => r.product_key === productKey)) continue;
     const isScreening = a.product === "screening";
     const seats = a.seats ?? (isScreening ? sub?.seat_quota ?? null : null);
-    return {
+    rows.push({
       id: a.id,
       business_account_id: accountId,
       product_key: productKey,
@@ -106,11 +150,11 @@ export function mapEntitlements(
       usage_unit: seats != null ? "seats" : null,
       seats,
       setup_complete: isActiveStatus(a.status),
-    };
-  });
+    });
+  }
 
-  // A screening subscription with no matching product_access row still counts.
-  if (sub && !visibleAccess.some((a) => a.product === "screening")) {
+  // A screening subscription with no matching row above still counts.
+  if (sub && !rows.some((r) => r.product_key === "worldaml")) {
     rows.push({
       id: sub.id,
       business_account_id: accountId,

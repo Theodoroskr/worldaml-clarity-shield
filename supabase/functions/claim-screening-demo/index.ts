@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend";
+import { provisionEntitlement } from "../_shared/business/provision.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -96,60 +97,23 @@ serve(async (req) => {
     const periodEnd = new Date(periodStart);
     periodEnd.setFullYear(periodEnd.getFullYear() + 1);
 
-    // 3. Grant the demo.
-    const { error: insertErr } = await admin.from("screening_subscriptions").insert({
-      organisation_id: orgId,
-      user_id: user.id,
-      plan: "demo",
-      status: "active",
-      monitored_entity_quota: DEMO_QUOTA.monitor,
-      search_quota_annual: DEMO_QUOTA.search,
-      monitor_quota: DEMO_QUOTA.monitor,
-      seat_quota: DEMO_QUOTA.seats,
-      current_period_end: periodEnd.toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-    if (insertErr) throw insertErr;
-
-    // Keep the product_access registry in sync (source of truth for portal guards).
-    const { data: existingAccess } = await admin
-      .from("product_access")
-      .select("id")
-      .eq("organisation_id", orgId)
-      .eq("product", "screening")
-      .maybeSingle();
-
-    const accessPayload = {
-      organisation_id: orgId,
+    // 3. Grant the demo through the shared provisioning path so every
+    // access table (business_subscriptions, product_access,
+    // product_members, screening_subscriptions) stays in sync.
+    await provisionEntitlement(admin, {
+      userId: user.id,
+      organisationId: orgId,
       product: "screening",
-      plan: "demo",
-      status: "active",
+      planCode: "demo",
       seats: DEMO_QUOTA.seats,
-      seats_used: 1,
-      current_period_start: periodStart.toISOString(),
-      current_period_end: periodEnd.toISOString(),
-      started_at: periodStart.toISOString(),
-      metadata: {
-        search_quota_annual: DEMO_QUOTA.search,
-        monitor_quota: DEMO_QUOTA.monitor,
-        source: "hero_demo_signup",
-      },
-      updated_at: new Date().toISOString(),
-    };
+      source: "self_serve",
+      interval: "year",
+      currentPeriodStart: periodStart.toISOString(),
+      currentPeriodEnd: periodEnd.toISOString(),
+      metadata: { source: "hero_demo_signup" },
+      screeningQuotas: { searchQuotaAnnual: DEMO_QUOTA.search, monitorQuota: DEMO_QUOTA.monitor },
+    });
 
-    if (existingAccess) {
-      await admin.from("product_access").update(accessPayload).eq("id", existingAccess.id);
-    } else {
-      await admin.from("product_access").insert(accessPayload);
-    }
-
-    await admin.from("product_members").upsert({
-      organisation_id: orgId,
-      product: "screening",
-      user_id: user.id,
-      role: "admin",
-      created_by: user.id,
-    }, { onConflict: "organisation_id,product,user_id" });
 
 
 

@@ -254,6 +254,46 @@ serve(async (req) => {
       created_by: user.id,
     }, { onConflict: "organisation_id,product,user_id" });
 
+    // Record the commercial layer (business_subscriptions) when the buyer has
+    // a business account, so the portal shows plan, price and renewal.
+    try {
+      const { data: account } = await admin
+        .from("business_accounts")
+        .select("id, stripe_customer_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (account?.id) {
+        if (customerId && account.stripe_customer_id !== customerId) {
+          await admin.from("business_accounts").update({ stripe_customer_id: customerId }).eq("id", account.id);
+        }
+        const bizRow = {
+          business_account_id: account.id,
+          organisation_id: orgId,
+          product: "screening",
+          plan_code: plan,
+          seats: quota.seats ?? 1,
+          amount_cents: session.amount_total ?? null,
+          currency: (session.currency ?? "eur").toUpperCase(),
+          interval: interval === "month" ? "month" : "year",
+          stripe_customer_id: customerId,
+          stripe_subscription_id: subscriptionId,
+          status: "active",
+          current_period_start: periodStart,
+          current_period_end: periodEnd,
+          source: "self_serve",
+          metadata: { stripe_session_id: session.id },
+          updated_at: new Date().toISOString(),
+        };
+        if (subscriptionId) {
+          await admin.from("business_subscriptions").upsert(bizRow, { onConflict: "stripe_subscription_id" });
+        } else {
+          await admin.from("business_subscriptions").insert(bizRow);
+        }
+      }
+    } catch (e) {
+      console.error("[verify-worldaml-subscription] business_subscriptions sync failed", e);
+    }
+
     try {
       await admin.rpc("ensure_default_screening_policy", { _org: orgId });
     } catch (_) { /* non-fatal */ }

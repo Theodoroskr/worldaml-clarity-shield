@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2.57.2";
+import { provisionEntitlement } from "../_shared/business/provision.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -133,64 +134,20 @@ serve(async (req) => {
       const orgId = await resolveOrganisation(admin, user.id, account, user.email);
       const seats = Math.max(1, Number(quote.seats) || 1);
 
-      const { data: existingAccess } = await admin
-        .from("product_access")
-        .select("id")
-        .eq("organisation_id", orgId)
-        .eq("product", product)
-        .maybeSingle();
-
-      const accessRow = {
-        organisation_id: orgId,
-        product,
-        plan: quote.plan ?? null,
-        status: "active",
+      await provisionEntitlement(admin, {
+        userId: user.id,
+        businessAccountId: account?.id ?? null,
+        organisationId: orgId,
+        product: product as "screening" | "suite" | "academy",
+        planCode: quote.plan ?? "enterprise",
         seats,
-        started_at: new Date().toISOString(),
-        current_period_end: periodEnd,
-        metadata: { source: "quote", quote_id: quote.id, stripe_session_id: session.id },
-      };
-      if (existingAccess) {
-        await admin.from("product_access").update(accessRow).eq("id", existingAccess.id);
-      } else {
-        const { error } = await admin.from("product_access").insert(accessRow);
-        if (error) throw error;
-      }
-
-      const { data: existingMember } = await admin
-        .from("product_members")
-        .select("id")
-        .eq("organisation_id", orgId)
-        .eq("product", product)
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (!existingMember) {
-        const { error } = await admin
-          .from("product_members")
-          .insert({ organisation_id: orgId, product, user_id: user.id, role: "admin", created_by: user.id });
-        if (error) throw error;
-      }
-
-      if (product === "screening") {
-        const { data: existingSub } = await admin
-          .from("screening_subscriptions")
-          .select("id")
-          .eq("organisation_id", orgId)
-          .maybeSingle();
-        const subRow = {
-          organisation_id: orgId,
-          plan: quote.plan ?? "enterprise",
-          status: "active",
-          seat_quota: seats,
-          current_period_end: periodEnd,
-          stripe_subscription_id: subscriptionId,
-        };
-        if (existingSub) {
-          await admin.from("screening_subscriptions").update(subRow).eq("id", existingSub.id);
-        } else {
-          await admin.from("screening_subscriptions").insert(subRow);
-        }
-      }
+        source: "quote",
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: subscriptionId,
+        interval: quote.quoted_interval === "month" ? "month" : "year",
+        currentPeriodEnd: periodEnd,
+        metadata: { quote_id: quote.id, stripe_session_id: session.id },
+      });
       log("Entitlement provisioned", { org: orgId, product, quote: quote.id });
     } else {
       log("Quote has no provisionable product key", { quote: quote.id, product });
