@@ -127,5 +127,27 @@ export function mapEntitlements(
     });
   }
 
+  // Membership of a product (product_members) is also real access — this is how
+  // Screening is actually provisioned today.
+  for (const m of members) {
+    if (m.product === "suite") continue;
+    const productKey = PRODUCT_TO_SOLUTION_KEY[m.product] ?? m.product;
+    if (rows.some((r) => r.product_key === productKey)) continue;
+    rows.push({
+      id: m.id,
+      business_account_id: accountId,
+      product_key: productKey,
+      plan: m.product === "screening" ? sub?.plan ?? null : null,
+      status: "active",
+      activated_at: m.created_at ?? null,
+      renews_at: m.product === "screening" ? sub?.current_period_end ?? null : null,
+      usage_used: null,
+      usage_limit: null,
+      usage_unit: null,
+      seats: null,
+      setup_complete: true,
+    });
+  }
+
   return rows;
 }
