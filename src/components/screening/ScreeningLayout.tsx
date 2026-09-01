@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
-  ArrowRight, BellPlus, CreditCard, Gauge, LifeBuoy, Menu, PanelLeftClose, PanelLeftOpen,
+  ArrowRight, BellPlus, Building2, CreditCard, Gauge, LifeBuoy, Menu, PanelLeftClose, PanelLeftOpen,
   Puzzle, Radar, Search, ShieldCheck, Users, X,
 } from "lucide-react";
 import Header from "@/components/Header";
@@ -107,6 +107,32 @@ export default function ScreeningLayout({ children, head, contained = false }: S
           </Tooltip>
         );
       })}
+
+      {/* Way back to the buyer-facing portal. */}
+      <div className="mt-3 border-t border-white/10 pt-3">
+        {(() => {
+          const back = (
+            <Link
+              to="/business/dashboard"
+              onClick={() => setMobileNavOpen(false)}
+              className={cn(
+                "flex items-center gap-2.5 rounded-md py-2 text-sm text-white/70 transition-colors hover:bg-white/5 hover:text-white",
+                isCollapsed ? "justify-center px-2" : "px-3",
+              )}
+            >
+              <Building2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {!isCollapsed ? <span className="truncate">WorldAML Business</span> : <span className="sr-only">WorldAML Business</span>}
+            </Link>
+          );
+          if (!isCollapsed) return back;
+          return (
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>{back}</TooltipTrigger>
+              <TooltipContent side="right">WorldAML Business</TooltipContent>
+            </Tooltip>
+          );
+        })()}
+      </div>
     </nav>
 
   );
