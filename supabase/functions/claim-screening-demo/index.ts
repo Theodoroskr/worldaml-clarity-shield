@@ -143,6 +143,14 @@ serve(async (req) => {
       created_by: user.id,
     }, { onConflict: "organisation_id,product,user_id" });
 
+    // Keep the business portal pointed at the organisation that owns the products.
+    await admin
+      .from("business_accounts")
+      .update({ organisation_id: orgId, updated_at: new Date().toISOString() })
+      .eq("user_id", user.id)
+      .is("organisation_id", null);
+
+
     try {
       await admin.rpc("ensure_default_screening_policy", { _org: orgId });
     } catch (_) { /* non-fatal */ }
