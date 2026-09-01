@@ -27,6 +27,7 @@ const FIELDS: { key: string; label: string; placeholder?: string }[] = [
 export default function BusinessCompany() {
   const { account, isBusinessAdmin, refresh } = useBusinessWorkspace();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [values, setValues] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
@@ -60,10 +61,10 @@ export default function BusinessCompany() {
         throw new Error("You don't have permission to edit this company profile.");
       }
       toast({ title: "Company profile updated" });
-      refresh();
+      await refresh();
+      navigate("/business");
     } catch (e) {
       toast({ title: "Could not save", description: e instanceof Error ? e.message : "Try again", variant: "destructive" });
-    } finally {
       setSaving(false);
     }
   };
