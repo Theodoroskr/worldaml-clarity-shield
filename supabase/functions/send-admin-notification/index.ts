@@ -52,6 +52,7 @@ interface NotificationRequest {
   message: string;
   cta_text?: string;
   cta_url?: string;
+  cc?: string[];
 }
 
 Deno.serve(async (req) => {
