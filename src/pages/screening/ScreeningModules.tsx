@@ -42,7 +42,7 @@ export default function ScreeningModules() {
     <ScreeningLayout
       head={
         <SEO
-          title="Screening Add-on Modules | WorldAML"
+          title="Screening Add-on Modules"
           description="Optional, separately priced modules for the WorldAML Screening & Monitoring workspace."
           noindex
         />

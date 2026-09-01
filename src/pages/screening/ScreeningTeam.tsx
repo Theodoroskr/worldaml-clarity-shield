@@ -161,7 +161,7 @@ export default function ScreeningTeam() {
     return (
   <ScreeningLayout
       head={
-        <SEO title="Team & Access | WorldAML Screening" description="Manage Screening workspace members, roles and seat allocation." noindex />
+        <SEO title="Screening Team & Access" description="Manage Screening workspace members, roles and seat allocation." noindex />
       }
     >
         <div className="flex items-center gap-3 text-muted-foreground">
@@ -175,7 +175,7 @@ export default function ScreeningTeam() {
     return (
   <ScreeningLayout
       head={
-        <SEO title="Team & Access | WorldAML Screening" description="Manage Screening workspace members, roles and seat allocation." noindex />
+        <SEO title="Screening Team & Access" description="Manage Screening workspace members, roles and seat allocation." noindex />
       }
     >
         <Card className="max-w-2xl mx-auto">
@@ -200,7 +200,7 @@ export default function ScreeningTeam() {
   return (
     <ScreeningLayout
       head={
-        <SEO title="Team & Access | WorldAML Screening" description="Manage Screening workspace members, roles and seat allocation." noindex />
+        <SEO title="Screening Team & Access" description="Manage Screening workspace members, roles and seat allocation." noindex />
       }
     >
         <div className="mb-6 flex items-center gap-3">

@@ -162,7 +162,7 @@ const AcademyAnnualSuccess = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Annual Pass Active — WorldAML Academy"
+        title="Annual Pass Active"
         description="Your WorldAML Academy annual all-access pass is now active. View your expiry date and all the courses included."
         noindex
       />

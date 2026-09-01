@@ -69,7 +69,7 @@ const RssPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="RSS Feed — WorldAML Compliance Insights"
+        title="RSS Feed — Compliance Insights"
         description="Subscribe to the WorldAML RSS feed for AML, KYC/KYB, sanctions and regulatory compliance analysis. Ingest into your reader, intranet, Slack, or Teams."
         canonical="/rss"
         breadcrumbs={[

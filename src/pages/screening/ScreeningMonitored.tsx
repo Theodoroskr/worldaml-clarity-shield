@@ -200,7 +200,7 @@ export default function ScreeningMonitored() {
     <ScreeningLayout
       head={
         <SEO
-          title="Monitored Entities | WorldAML Screening"
+          title="Monitored Entities"
           description="Manage ongoing monitoring: active entities, next monitoring run, risk level and access."
           noindex
         />

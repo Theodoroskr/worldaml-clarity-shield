@@ -57,7 +57,7 @@ const PartnersDirectory = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Partner Directory | WorldAML"
+        title="Partner Directory"
         description="Find WorldAML certified partners — compliance consultancies, RegTech integrators, and resellers across every major market. Verified Bronze, Silver, and Gold badges."
         canonical="/partners/directory"
         breadcrumbs={[
