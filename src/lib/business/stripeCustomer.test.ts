@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { resolveStripeCustomer } from "./customer";
+import { resolveStripeCustomer } from "../../../supabase/functions/business-billing/customer";
 
 const deps = (o: Partial<Parameters<typeof resolveStripeCustomer>[0]> = {}) => ({
   storedCustomerId: null,
