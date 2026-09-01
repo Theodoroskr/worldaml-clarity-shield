@@ -24,7 +24,7 @@ const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: t
     label: "Solutions",
     items: [
       { label: "Explore Solutions", path: "/business/solutions", icon: Compass },
-      { label: "Suite Overview", path: "/business/solutions/suite", icon: ShieldCheck },
+      
       { label: "My Products", path: "/business/products", icon: Boxes },
     ],
   },
