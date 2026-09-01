@@ -137,7 +137,7 @@ export function useBusinessWorkspace() {
     track,
     refresh: () => {
       refetchAccount();
-      queryClient.invalidateQueries({ queryKey: ["business-entitlements", accountId, orgId] });
+      queryClient.invalidateQueries({ queryKey: ["business-entitlements", accountId, storedOrgId, user?.id] });
       queryClient.invalidateQueries({ queryKey: ["business-members", accountId] });
     },
   };
