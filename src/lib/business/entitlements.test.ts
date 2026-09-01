@@ -58,17 +58,17 @@ describe("mapEntitlements", () => {
     expect(rows[0]).toMatchObject({ product_key: "worldaml", plan: "growth", seats: 3, id: "sub-1" });
   });
 
-  it("maps suite and academy access", () => {
+  it("maps worldid and academy access", () => {
     const rows = mapEntitlements("ba-1", [
-      access({ id: "pa-2", product: "suite", plan: "pro" }),
+      access({ id: "pa-2", product: "worldid", plan: "pro" }),
       access({ id: "pa-3", product: "academy", plan: "team" }),
     ], []);
-    expect(rows.map((r) => r.product_key)).toEqual(["suite", "academy"]);
+    expect(rows.map((r) => r.product_key)).toEqual(["worldid", "academy"]);
   });
 
   it("treats trial as active and inactive plans as not set up", () => {
     const rows = mapEntitlements("ba-1", [
-      access({ id: "pa-4", product: "suite", status: "trial" }),
+      access({ id: "pa-4", product: "worldid", status: "trial" }),
       access({ id: "pa-5", product: "academy", status: "cancelled" }),
     ], []);
     expect(rows[0].status).toBe("trialing");
