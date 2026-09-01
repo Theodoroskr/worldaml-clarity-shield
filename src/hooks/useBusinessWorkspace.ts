@@ -48,7 +48,7 @@ export function useBusinessWorkspace() {
 
   const entitlements = useQuery({
     queryKey: ["business-entitlements", accountId, storedOrgId, user?.id],
-    enabled: !!accountId,
+    enabled: !!accountId && !!user,
     staleTime: 30_000,
     queryFn: async (): Promise<BusinessEntitlement[]> => {
       // Membership rows are the source of truth for the signed-in user's access
