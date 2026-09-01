@@ -4,6 +4,7 @@ import {
   Loader2, Building2, LayoutDashboard, Compass, Boxes, GraduationCap, Users,
   Building, CreditCard, LifeBuoy, UserCircle, ShieldCheck, ArrowLeft, ChevronDown, LogOut,
   Library, Newspaper, BookOpenCheck, ListChecks, FileText, BookA, Scale, Globe2, Map, HelpCircle,
+  Radar,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessAccount } from "@/hooks/useBusinessAccount";
