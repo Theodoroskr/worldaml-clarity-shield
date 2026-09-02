@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: typeof Building2; end?: boolean; external?: boolean; requiresScreening?: boolean }[] }[] = [
+const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: typeof Building2; end?: boolean; external?: boolean; requiresScreening?: boolean; newTab?: boolean }[] }[] = [
   { label: "Overview", items: [{ label: "Dashboard", path: "/business/dashboard", icon: LayoutDashboard }] },
   {
     label: "Solutions",
