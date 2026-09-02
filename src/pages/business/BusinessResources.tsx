@@ -40,6 +40,8 @@ export default function BusinessResources() {
               </div>
               <Link
                 to={r.path}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center text-sm font-medium text-teal hover:underline"
               >
                 Open <ArrowUpRight className="ml-1 h-3.5 w-3.5" />

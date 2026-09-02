@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: typeof Building2; end?: boolean; external?: boolean; requiresScreening?: boolean }[] }[] = [
+const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: typeof Building2; end?: boolean; external?: boolean; requiresScreening?: boolean; newTab?: boolean }[] }[] = [
   { label: "Overview", items: [{ label: "Dashboard", path: "/business/dashboard", icon: LayoutDashboard }] },
   {
     label: "Solutions",
@@ -42,15 +42,15 @@ const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: t
     label: "Resources",
     items: [
       { label: "Resource Hub", path: "/business/resources", icon: Library, end: true },
-      { label: "News", path: "/news", icon: Newspaper },
-      { label: "Best Practices", path: "/resources/best-practices", icon: BookOpenCheck },
-      { label: "Sanctions Lists", path: "/resources/sanctions-lists", icon: ListChecks },
-      { label: "Blog", path: "/blog", icon: FileText },
-      { label: "Compliance Glossary", path: "/resources/glossary", icon: BookA },
-      { label: "AML Regulations", path: "/resources/aml-regulations", icon: Scale },
-      { label: "Data Coverage", path: "/data-coverage", icon: Globe2 },
-      { label: "EU Sanctions Map", path: "/eu-sanctions-map", icon: Map },
-      { label: "FAQ", path: "/faq", icon: HelpCircle },
+      { label: "News", path: "/news", icon: Newspaper, newTab: true },
+      { label: "Best Practices", path: "/resources/best-practices", icon: BookOpenCheck, newTab: true },
+      { label: "Sanctions Lists", path: "/resources/sanctions-lists", icon: ListChecks, newTab: true },
+      { label: "Blog", path: "/blog", icon: FileText, newTab: true },
+      { label: "Compliance Glossary", path: "/resources/glossary", icon: BookA, newTab: true },
+      { label: "AML Regulations", path: "/resources/aml-regulations", icon: Scale, newTab: true },
+      { label: "Data Coverage", path: "/data-coverage", icon: Globe2, newTab: true },
+      { label: "EU Sanctions Map", path: "/eu-sanctions-map", icon: Map, newTab: true },
+      { label: "FAQ", path: "/faq", icon: HelpCircle, newTab: true },
     ],
   },
   { label: "Support", items: [{ label: "Help & Support", path: "/business/support", icon: LifeBuoy }] },
@@ -155,6 +155,8 @@ export default function BusinessLayout() {
                       key={n.path}
                       to={n.path}
                       end={n.end}
+                      target={n.newTab ? "_blank" : undefined}
+                      rel={n.newTab ? "noopener noreferrer" : undefined}
                       className={({ isActive }) => cn(
                         "w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors",
                         isActive
@@ -174,7 +176,7 @@ export default function BusinessLayout() {
         </nav>
 
         <div className="p-2 border-t border-primary-foreground/10 space-y-0.5">
-          <NavLink to="/" className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs text-primary-foreground/60 hover:bg-primary-foreground/10 hover:text-primary-foreground transition-colors">
+          <NavLink to="/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs text-primary-foreground/60 hover:bg-primary-foreground/10 hover:text-primary-foreground transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to worldaml.com
           </NavLink>
           <button
