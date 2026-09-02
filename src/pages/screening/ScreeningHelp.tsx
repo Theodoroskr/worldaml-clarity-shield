@@ -165,7 +165,7 @@ export default function ScreeningHelp() {
                   <Link to="/screening-monitoring/pricing">Packages</Link>
                 </Button>
                 <Button asChild size="sm" variant="outline">
-                  <Link to="/platform/api">API documentation</Link>
+                  <Link to="/platform/api" target="_blank" rel="noopener noreferrer">API documentation</Link>
                 </Button>
                 <Button asChild size="sm" variant="outline">
                   <a href="mailto:info@worldaml.com">
