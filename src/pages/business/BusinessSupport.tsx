@@ -38,7 +38,7 @@ export default function BusinessSupport() {
           <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><BookOpen className="w-4 h-4 text-teal" /> API documentation</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">Integration guides and endpoint reference for the WorldAML API.</p>
-            <Button asChild variant="outline"><Link to="/platform/api">Open documentation</Link></Button>
+            <Button asChild variant="outline"><Link to="/platform/api" target="_blank" rel="noopener noreferrer">Open documentation</Link></Button>
           </CardContent>
         </Card>
 
