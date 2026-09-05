@@ -464,7 +464,7 @@ const App = () => (
                 <Route path="/resources/aml-compliance-checklist" element={<AMLComplianceChecklist />} />
                 <Route path="/resources/fatf-travel-rule-compliance-guide" element={<FATFTravelRuleGuide />} />
                 <Route path="/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones" element={<Navigate to="/alternatives" replace />} />
-                <Route path="/sanctions-check" element={<Navigate to="/?demo=1" replace />} />
+                <Route path="/sanctions-check" element={<SanctionsCheck />} />
                 <Route path="/free-aml-check" element={<Navigate to="/?demo=1" replace />} />
                 <Route path="/data-coverage" element={<Navigate to="/screening-monitoring" replace />} />
                 <Route path="/data-coverage/:country" element={<Navigate to="/screening-monitoring" replace />} />
