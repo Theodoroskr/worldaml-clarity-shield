@@ -54,6 +54,10 @@ const stripAcademyPrefix = (path: string): string => {
   return cleaned === "" ? "/" : cleaned;
 };
 
+/** Join a path onto the base URL only when it is relative — absolute URLs pass through unchanged so the domain is never doubled. */
+const absolutize = (baseUrl: string, path: string): string =>
+  /^https?:\/\//i.test(path) ? path : `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+
 const SEO = ({ title, description, canonical, noindex = false, ogType = "website", ogLocale, breadcrumbs, structuredData, alternateLocales, ogImage, ogImageAlt }: SEOProps) => {
   const onAcademy = isAcademyHost();
   const SITE_NAME = onAcademy ? ACADEMY_SITE_NAME : MAIN_SITE_NAME;
