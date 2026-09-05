@@ -91,6 +91,17 @@ function attributeCompatible<V>(a: V | null | undefined, b: V | null | undefined
 }
 
 const NAME_THRESHOLD = 0.94;
+const TOKEN_THRESHOLD = 0.95;
+
+/** Every token of the shorter name has a near-exact counterpart in the other. */
+function tokenSubset(keyA: string, keyB: string): boolean {
+  const tokensA = keyA.split(" ").filter(Boolean);
+  const tokensB = keyB.split(" ").filter(Boolean);
+  if (!tokensA.length || !tokensB.length) return false;
+  const [shorter, longer] = tokensA.length <= tokensB.length ? [tokensA, tokensB] : [tokensB, tokensA];
+  if (shorter.length === longer.length) return false; // same length handled by JW threshold
+  return shorter.every((t) => longer.some((u) => jaroWinkler(t, u) >= TOKEN_THRESHOLD));
+}
 
 export function isSameEntity(a: ConsolidatableMatch, b: ConsolidatableMatch): boolean {
   if (!attributeCompatible(a.year_of_birth ?? null, b.year_of_birth ?? null)) return false;
@@ -103,6 +114,7 @@ export function isSameEntity(a: ConsolidatableMatch, b: ConsolidatableMatch): bo
   const keyB = nameSortKey(b.matched_name);
   if (!keyA || !keyB) return false;
   if (keyA === keyB) return true;
+  if (tokenSubset(keyA, keyB)) return true; // e.g. "Elena Udrea" vs "Udrea Elena Gabriela"
   return jaroWinkler(keyA, keyB) >= NAME_THRESHOLD;
 }
 
