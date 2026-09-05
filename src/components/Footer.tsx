@@ -57,6 +57,7 @@ const footerLinks = {
     { href: "/resources/aml-regulations", label: "AML Regulations" },
     { href: "/resources/best-practices", label: "Best Practices" },
     { href: "/resources/sanctions-lists", label: "Sanctions Lists" },
+    { href: "/sanctions-check", label: "Free Sanctions Check" },
     { href: "/eu-sanctions-map", label: "EU Sanctions Map" },
     { href: "/demo", label: "Request Demo" },
     { href: "/rss", label: "RSS Feed" },
