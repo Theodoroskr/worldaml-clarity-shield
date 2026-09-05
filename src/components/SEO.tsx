@@ -70,8 +70,10 @@ const SEO = ({ title, description, canonical, noindex = false, ogType = "website
     .replace(/\s*[|\-–—]\s*WorldAML(\s+(Academy|Screening|Partner Portal))?\s*$/i, "")
     .trim() || title;
   const fullTitle = baseTitle === SITE_NAME ? baseTitle : `${baseTitle} | ${SITE_NAME}`;
-  const canonicalPath = canonical ? (onAcademy ? stripAcademyPrefix(canonical) : canonical) : undefined;
-  const canonicalUrl = canonicalPath ? `${BASE_URL}${canonicalPath}` : undefined;
+  const canonicalPath = canonical && !/^https?:\/\//i.test(canonical)
+    ? (onAcademy ? stripAcademyPrefix(canonical) : canonical)
+    : canonical;
+  const canonicalUrl = canonicalPath ? absolutize(BASE_URL, canonicalPath) : undefined;
 
   // On the academy subdomain, the main marketing home is not the
   // hierarchical parent. Drop the "Home → /" crumb and rewrite
@@ -90,7 +92,7 @@ const SEO = ({ title, description, canonical, noindex = false, ogType = "website
           "@type": "ListItem",
           position: index + 1,
           name: item.name,
-          item: `${BASE_URL}${item.url}`,
+          item: absolutize(BASE_URL, item.url),
         })),
       }
     : null;
@@ -109,7 +111,7 @@ const SEO = ({ title, description, canonical, noindex = false, ogType = "website
 
       {/* Extra hreflang alternates for localized variants */}
       {alternateLocales?.map(({ hreflang, path }) => (
-        <link key={`alt-${hreflang}`} rel="alternate" hrefLang={hreflang} href={`${BASE_URL}${path}`} data-rh="true" />
+        <link key={`alt-${hreflang}`} rel="alternate" hrefLang={hreflang} href={absolutize(BASE_URL, path)} data-rh="true" />
       ))}
 
       {/* Open Graph */}
