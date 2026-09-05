@@ -93,8 +93,18 @@ const SanctionsCheck = () => {
         body: { name: trimmed, type: entityType, session_id: getSessionId() },
       });
       if (fnError) {
-        // Try to surface the function's own error body (e.g. quota_exceeded)
-        const body = data as SearchResponse | null;
+        // Surface the function's own error body (e.g. quota_exceeded on 429)
+        let body: SearchResponse | null = data as SearchResponse | null;
+        if (!body?.error) {
+          const ctx = (fnError as { context?: Response }).context;
+          if (ctx && typeof ctx.json === "function") {
+            try {
+              body = (await ctx.json()) as SearchResponse;
+            } catch {
+              body = null;
+            }
+          }
+        }
         if (body?.error === "quota_exceeded") {
           setQuotaExceeded(true);
         } else {
