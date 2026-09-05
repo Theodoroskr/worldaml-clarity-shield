@@ -947,7 +947,7 @@ const Academy = () => {
               </span>
 
               <h1 className="text-white font-bold leading-[0.92] tracking-tighter mb-8 text-[3rem] sm:text-6xl lg:text-[6.5rem]">
-                AML{" "}
+                Free AML{" "}
                 <span
                   className="text-slate-light/70 italic font-normal"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
