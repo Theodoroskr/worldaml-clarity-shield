@@ -170,6 +170,21 @@ export const GUIDE_LINKS: Record<string, RelatedGuideLink> = {
     title: "AML Screening Platform",
     description: "Product overview of the WorldAML screening orchestration layer.",
   },
+  kycVerification: {
+    to: "/kyc-verification",
+    title: "KYC Verification",
+    description: "Document checks, biometrics and liveness — verify customers in seconds across 190+ countries.",
+  },
+  identityVerificationService: {
+    to: "/identity-verification-service",
+    title: "Identity Verification Service",
+    description: "White-label, API-first identity verification with certified liveness and AML screening.",
+  },
+  amlKycCompliance: {
+    to: "/aml-kyc-compliance",
+    title: "AML KYC Compliance",
+    description: "One platform for KYC, KYB, screening, monitoring and regulatory reporting.",
+  },
 };
 
 export default RelatedGuidesSection;
