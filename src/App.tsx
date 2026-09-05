@@ -77,6 +77,7 @@ const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
 const WorldID = lazyWithRetry(() => import("./pages/WorldID"));
 const BestPractices = lazyWithRetry(() => import("./pages/BestPractices"));
 const SanctionsLists = lazyWithRetry(() => import("./pages/SanctionsLists"));
+const SanctionsCheck = lazyWithRetry(() => import("./pages/SanctionsCheck"));
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
 const RcmLayout = lazyWithRetry(() => import("./pages/rcm/RcmLayout"));
 const RcmDashboard = lazyWithRetry(() => import("./pages/rcm/RcmDashboard"));
