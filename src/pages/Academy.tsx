@@ -890,8 +890,8 @@ const Academy = () => {
   return (
     <div className="min-h-screen flex flex-col">
        <SEO
-        title="Free AML Courses with Certificate — CPD Accredited"
-        description="Take free AML courses with a certificate. CPD-accredited AML, KYC and sanctions training for compliance professionals in the US, UK, EU and UAE — start free and earn a verifiable certificate."
+        title="AML Certification Online — CPD Accredited, Start Free"
+        description="Get AML certified online. CPD-accredited AML, KYC and sanctions certification courses for compliance professionals in the US, UK, EU and UAE — start free and earn a verifiable certificate."
         canonical="/academy"
         breadcrumbs={[
           { name: "Home", url: "/" },
@@ -947,20 +947,22 @@ const Academy = () => {
               </span>
 
               <h1 className="text-white font-bold leading-[0.92] tracking-tighter mb-8 text-[3rem] sm:text-6xl lg:text-[6.5rem]">
-                Exceptional{" "}
+                AML{" "}
                 <span
                   className="text-slate-light/70 italic font-normal"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
-                  compliance
+                  certification
                 </span>{" "}
-                training.
+                online.
               </h1>
 
               <p className="max-w-2xl text-lg lg:text-xl text-slate-light/75 leading-relaxed mb-10">
-                AML, KYC and sanctions courses written by working MLROs. Pass the quiz, download a verifiable
-                certificate, and walk into your next audit with the evidence in hand.
+                Earn a CPD-accredited AML certification online — start free. AML, KYC and sanctions courses written by
+                working MLROs. Pass the quiz, download a verifiable certificate, and walk into your next audit with the
+                evidence in hand.
               </p>
+
 
               <div className="flex flex-col sm:flex-row gap-3 mb-9">
                 <Button asChild size="lg" className="bg-teal-light hover:bg-teal-light/90 text-navy font-semibold px-8 py-6 rounded-none transition-all duration-300">
