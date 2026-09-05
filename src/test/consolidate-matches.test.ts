@@ -52,6 +52,18 @@ describe("isSameEntity", () => {
   it("keeps clearly different names apart", () => {
     expect(isSameEntity(m({ id: "a" }), m({ id: "b", matched_name: "Marian Vanghelie" }))).toBe(false);
   });
+  it("merges names with an extra middle name (Elena Udrea / Udrea Elena Gabriela)", () => {
+    expect(isSameEntity(m({ id: "a" }), m({ id: "b", matched_name: "Udrea Elena Gabriela" }))).toBe(true);
+  });
+  it("merges names with a near-identical extra token", () => {
+    expect(isSameEntity(m({ id: "a" }), m({ id: "b", matched_name: "Elena Gabriela Udrea" }))).toBe(true);
+  });
+  it("does not merge when the longer name shares no full token set", () => {
+    expect(isSameEntity(m({ id: "a" }), m({ id: "b", matched_name: "Elena Popescu Ionescu" }))).toBe(false);
+  });
+  it("does not merge same-length names via the token-subset rule", () => {
+    expect(isSameEntity(m({ id: "a" }), m({ id: "b", matched_name: "Elena Popescu" }))).toBe(false);
+  });
 });
 
 describe("consolidateMatches", () => {
