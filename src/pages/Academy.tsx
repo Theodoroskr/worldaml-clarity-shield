@@ -890,8 +890,8 @@ const Academy = () => {
   return (
     <div className="min-h-screen flex flex-col">
        <SEO
-        title="AML Certification Online — CPD Accredited, Start Free"
-        description="Get AML certified online. CPD-accredited AML, KYC and sanctions certification courses for compliance professionals in the US, UK, EU and UAE — start free and earn a verifiable certificate."
+        title="Anti-Money Laundering (AML) Certification Online — CPD Accredited"
+        description="Earn your CPD-accredited AML certification online with our free and professional courses in AML, KYC and sanctions — built for compliance professionals, with verifiable certificates."
         canonical="/academy"
         breadcrumbs={[
           { name: "Home", url: "/" },
@@ -1161,7 +1161,7 @@ const Academy = () => {
         <section id="courses-grid" className="section-padding bg-background scroll-mt-20">
           <div className="container-enterprise">
             <div className="text-center mb-8">
-              <h2 className="text-headline text-foreground mb-3">Available Courses</h2>
+              <h2 className="text-headline text-foreground mb-3">AML Certification for Compliance Professionals</h2>
               <p className="text-body-lg text-muted-foreground max-w-xl mx-auto">
                 Choose a course, work through the material, then take the quiz to earn your certificate.
               </p>
