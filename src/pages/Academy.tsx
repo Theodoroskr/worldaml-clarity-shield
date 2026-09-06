@@ -890,8 +890,9 @@ const Academy = () => {
   return (
     <div className="min-h-screen flex flex-col">
        <SEO
-        title="Anti-Money Laundering (AML) Certification Online — CPD Accredited"
-        description="Earn your CPD-accredited AML certification online with our free and professional courses in AML, KYC and sanctions — built for compliance professionals, with verifiable certificates."
+        title="Free AML Certification Online — CPD Accredited Courses"
+        description="Get AML certified online for free. CPD-accredited AML, KYC and sanctions screening courses with verifiable certificates — start free, no payment required."
+
         canonical="/academy"
         breadcrumbs={[
           { name: "Home", url: "/" },
