@@ -352,10 +352,10 @@ const routes: Record<string, RouteMeta> = {
     h1: "WorldAML Partner Programme",
   },
   "/sanctions-check": {
-    title: "Free Sanctions Check",
+    title: "Free Sanctions Search & OFAC Check — Instant, No Signup",
     description:
-      "Screen individuals and entities against global sanctions lists for free. Instant results from OFAC, EU, UN, HMT and more.",
-    h1: "Free Sanctions Check",
+      "Run a free sanctions search on any person or company. Instant OFAC, EU, UN and HMT results across 1,900+ global sanctions, PEP and watchlists — no signup required.",
+    h1: "Free Sanctions Search — check OFAC, EU, UN & 1,900+ lists instantly",
   },
   "/free-aml-check": {
     title: "Free AML Check",
