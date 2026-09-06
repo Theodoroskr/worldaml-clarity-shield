@@ -304,11 +304,12 @@ const routes: Record<string, RouteMeta> = {
     h1: "WorldAML Compliance Blog",
   },
   "/academy": {
-    title: "Compliance Academy — Free CPD Courses",
+    title: "Free AML Certification Online — CPD Accredited Courses",
     description:
-      "Free online AML compliance courses with CPD certification. Learn sanctions screening, KYC, risk assessment and more.",
-    h1: "WorldAML Compliance Academy",
+      "Get AML certified online for free. CPD-accredited AML, KYC and sanctions screening courses with verifiable certificates — start free, no payment required.",
+    h1: "Free AML Certification Online",
   },
+
   "/academy/aml-fundamentals": {
     title: "AML Fundamentals — WorldAML Academy",
     description:
