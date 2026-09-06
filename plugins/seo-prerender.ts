@@ -354,8 +354,8 @@ const routes: Record<string, RouteMeta> = {
   "/sanctions-check": {
     title: "Free Sanctions Search & OFAC Check — Instant, No Signup",
     description:
-      "Run a free sanctions search on any person or company. Instant OFAC, EU, UN and HMT results across 1,900+ global sanctions, PEP and watchlists — no signup required.",
-    h1: "Free Sanctions Search — check OFAC, EU, UN & 1,900+ lists instantly",
+      "Screen any person or company against 1,900+ global sanctions, PEP and watchlists. Instant OFAC, EU, UN and HMT results — free, no signup required.",
+    h1: "Free Sanctions Search — instant results across OFAC, EU, UN & 1,900+ lists",
   },
   "/free-aml-check": {
     title: "Free AML Check",
