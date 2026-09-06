@@ -133,8 +133,8 @@ const SanctionsCheck = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Free Sanctions Check — Screen Names & Companies | WorldAML"
-        description="Run a free sanctions check on any person or company. Screen against global sanctions, PEP and watchlist data covering 1,900+ lists. Instant results, no signup required."
+        title="Free Sanctions Search & OFAC Check — Instant, No Signup | WorldAML"
+        description="Run a free sanctions search on any person or company. Instant OFAC, EU, UN and HMT results across 1,900+ global sanctions, PEP and watchlists — no signup required."
         canonical="/sanctions-check"
         structuredData={jsonLd}
       />
