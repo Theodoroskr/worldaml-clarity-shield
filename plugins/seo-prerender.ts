@@ -69,6 +69,66 @@ const routes: Record<string, RouteMeta> = {
       "Enterprise-grade financial crime screening infrastructure. KYC, KYB, AML sanctions screening, PEP checks, adverse media monitoring for regulated organisations.",
     h1: "WorldAML — AML Sanctions, PEP & Adverse Media Screening Platform",
   },
+  "/compliance-software/us": {
+    title: "Compliance Software for US Banks & Fintechs",
+    description:
+      "Compliance software for US financial institutions — BSA/AML, OFAC sanctions, KYC/CIP, transaction monitoring and SAR/CTR e-filing in one FFIEC- and NYDFS Part 504-ready platform.",
+    h1: "Compliance software built for US banks, fintechs and MSBs",
+  },
+  "/compliance-software/uk": {
+    title: "Compliance Software for UK Banks & EMIs",
+    description:
+      "AML compliance software for UK financial institutions — MLR 2017, OFSI sanctions, KYC/CDD, FCA-ready transaction monitoring and SAR/DAML submissions in one JMLSG-aligned platform.",
+    h1: "Compliance software built for UK banks, EMIs and crypto firms",
+  },
+  "/compliance-software/ch": {
+    title: "Compliance Software for Swiss Banks, Fintechs & VASPs",
+    description:
+      "AML compliance software for Swiss financial institutions — GwG, GwV-FINMA, SECO sanctions, KYC/CDD, transaction monitoring and MROS reporting in one FINMA- and SRO-ready platform.",
+    h1: "Compliance software built for Swiss banks, fintechs and VASPs",
+  },
+  "/compliance-software/it": {
+    title: "Compliance Software for Italian Banks, IPs & Crypto Firms",
+    description:
+      "AML compliance software for Italian financial institutions — D.Lgs. 231/2007, Banca d'Italia and UIF obligations, KYC/adeguata verifica, transaction monitoring and SOS reporting to UIF.",
+    h1: "Compliance software built for Italian banks, payment institutions and crypto firms",
+  },
+  "/compliance-software/nl": {
+    title: "Compliance Software for Dutch Banks, PSPs & Crypto Firms",
+    description:
+      "AML compliance software for Dutch financial institutions — Wwft, Sanctiewet 1977, DNB and AFM obligations, KYC/CDD, transaction monitoring and unusual-transaction reporting to FIU-Nederland.",
+    h1: "Compliance software built for Dutch banks, PSPs and crypto firms",
+  },
+  "/compliance-software/us/banks": {
+    title: "BSA/AML Software for US Banks & Credit Unions",
+    description:
+      "FFIEC-aligned BSA/AML software for US banks and credit unions — CDD/beneficial ownership, CTR and SAR filing, OFAC screening, transaction monitoring and exam-ready audit trails.",
+    h1: "BSA/AML compliance software for US banks and credit unions",
+  },
+  "/compliance-software/us/casinos": {
+    title: "Casino AML Compliance Software (Title 31, US)",
+    description:
+      "Title 31 casino AML software for US casinos, tribal gaming, sportsbooks and iGaming — MTL, CTRC and SARC filing, OFAC screening and gaming-specific transaction monitoring.",
+    h1: "Casino AML compliance software built for Title 31",
+  },
+  "/compliance-software/us/crypto": {
+    title: "Crypto & VASP AML Compliance Software (US)",
+    description:
+      "AML compliance software for US crypto exchanges, custodians and VASPs — FinCEN MSB program, Travel Rule, OFAC wallet screening, SAR filing and on-chain transaction monitoring.",
+    h1: "Crypto AML compliance software for US exchanges and VASPs",
+  },
+  "/compliance-software/us/fintechs": {
+    title: "Fintech & MSB AML Compliance Software (US)",
+    description:
+      "FinCEN MSB-ready AML software for US fintechs, neobanks, payments firms and money transmitters — KYC, OFAC screening, SAR and CTR filing, monitoring and sponsor-bank reporting.",
+    h1: "AML compliance software for US fintechs, payments and MSBs",
+  },
+  "/compliance-software/us/legal": {
+    title: "AML & Client Due Diligence Software for US Law Firms",
+    description:
+      "Client due diligence, sanctions screening and risk software for US law firms — ABA-aligned intake CDD, OFAC checks, beneficial ownership, IOLTA payment risk and matter-level audit trails.",
+    h1: "Client due diligence and sanctions screening software for US law firms",
+  },
   "/pricing": {
     title: "Pricing — Transparent Plans for Every Organisation",
     description:
