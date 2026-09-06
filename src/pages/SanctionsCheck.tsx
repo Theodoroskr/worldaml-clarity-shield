@@ -149,7 +149,7 @@ const SanctionsCheck = () => {
               Free tool — no signup required
             </span>
             <h1 className="mt-6 text-3xl md:text-5xl font-bold leading-tight">
-              Free Sanctions Check
+              Free Sanctions Search — check OFAC, EU, UN &amp; 1,900+ lists instantly
             </h1>
             <p className="mt-4 text-base md:text-lg text-primary-foreground/80 max-w-2xl mx-auto">
               Screen any person or company against global sanctions, PEP and watchlist data.
