@@ -1791,7 +1791,49 @@ const Academy = () => {
         {isReturningLearner && marketingSections}
 
 
-        {/* FAQ */}
+        {/* Curriculum & learning outcomes */}
+        <section className="section-padding bg-secondary/30">
+          <div className="container-enterprise max-w-4xl">
+            <div className="text-center mb-12">
+              <h2 className="text-headline text-foreground mb-3">AML Training Curriculum &amp; Learning Outcomes</h2>
+              <p className="text-body-lg text-muted-foreground max-w-2xl mx-auto">
+                Every course is CPD-accredited, written by working MLROs, and built around real case studies — short focused modules, a scored quiz, and a verifiable certificate.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6 mb-10">
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <h3 className="text-body font-semibold text-foreground mb-2">Free AML Certification Courses</h3>
+                <p className="text-body-sm text-muted-foreground leading-relaxed">
+                  Start with a free AML certification: AML Fundamentals and Sanctions Screening Essentials cost nothing. Pass the end-of-course quiz and download a verifiable certificate — no payment required.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <h3 className="text-body font-semibold text-foreground mb-2">Regional AML Programmes</h3>
+                <p className="text-body-sm text-muted-foreground leading-relaxed">
+                  Jurisdiction-specific AML training for Europe, the GCC &amp; MENA, Asia-Pacific, the Americas, Africa and the CIS — covering each region's regulators, reporting duties and red flags.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <h3 className="text-body font-semibold text-foreground mb-2">Specialist CPD-Accredited AML Training</h3>
+                <p className="text-body-sm text-muted-foreground leading-relaxed">
+                  Deep-dive specialisations: KYC &amp; customer due diligence, PEP screening and enhanced due diligence, adverse media, beneficial ownership &amp; UBO transparency, transaction monitoring &amp; SAR reporting, the risk-based approach, international sanctions and crypto AML.
+                </p>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h3 className="text-body font-semibold text-foreground mb-3">What you will learn</h3>
+              <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-2 text-body-sm text-muted-foreground list-disc pl-5">
+                <li>How money laundering and terrorist financing work — placement, layering and integration</li>
+                <li>How to run KYC and customer due diligence checks that satisfy regulators</li>
+                <li>How to screen customers against sanctions, PEP and adverse-media lists</li>
+                <li>How to spot red flags in transactions and escalate suspicious activity</li>
+                <li>How to apply a risk-based approach across your customer base</li>
+                <li>How to evidence training for audits with CPD-accredited, verifiable certificates</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
         <section className="section-padding bg-background">
           <div className="container-enterprise max-w-3xl">
             <h2 className="text-headline text-foreground text-center mb-12">Frequently Asked Questions</h2>
