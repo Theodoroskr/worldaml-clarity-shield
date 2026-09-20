@@ -1791,6 +1791,38 @@ const Academy = () => {
         {isReturningLearner && marketingSections}
 
 
+        {/* FAQ */}
+        <section className="section-padding bg-background">
+          <div className="container-enterprise max-w-3xl">
+            <h2 className="text-headline text-foreground text-center mb-12">Frequently Asked Questions</h2>
+            <div className="space-y-6">
+              {[
+                {
+                  q: "Is there a free AML KYC certification course?",
+                  a: "Yes. The WorldAML Academy includes a free AML KYC certification course — start with AML Fundamentals at no cost, pass the end-of-course quiz, and download a verifiable certificate with a unique verification token.",
+                },
+                {
+                  q: "Are the AML certificates verifiable?",
+                  a: "Every certificate carries a unique verification token, so employers, auditors and regulators can confirm it is genuine. Certificates are issued as a PDF you can download and share.",
+                },
+                {
+                  q: "Is the training CPD accredited?",
+                  a: "Yes. Academy courses are CPD-accredited and written by working MLROs, covering AML, KYC and sanctions screening with practical case studies.",
+                },
+                {
+                  q: "Who is the Academy for?",
+                  a: "Compliance professionals, MLROs, risk teams and anyone who needs AML certification for their role — from onboarding analysts to senior compliance officers preparing for audits.",
+                },
+              ].map((item) => (
+                <div key={item.q} className="rounded-2xl border border-border bg-card p-6">
+                  <h3 className="text-body font-semibold text-foreground mb-2">{item.q}</h3>
+                  <p className="text-body-sm text-muted-foreground leading-relaxed">{item.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* How it works */}
         <section className="section-padding bg-secondary/30">
           <div className="container-enterprise">
