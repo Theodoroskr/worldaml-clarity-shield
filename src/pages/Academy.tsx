@@ -891,7 +891,7 @@ const Academy = () => {
     <div className="min-h-screen flex flex-col">
        <SEO
         title="Free AML Certification Online — CPD Accredited Courses"
-        description="Get AML certified online for free. CPD-accredited AML, KYC and sanctions screening courses with verifiable certificates — start free, no payment required."
+        description="Free AML certification and compliance training online. CPD-accredited AML, KYC and sanctions screening courses with verifiable certificates — start free, no payment required."
 
         canonical="/academy"
         breadcrumbs={[

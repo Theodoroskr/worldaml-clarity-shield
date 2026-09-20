@@ -306,7 +306,7 @@ const routes: Record<string, RouteMeta> = {
   "/academy": {
     title: "Free AML Certification Online — CPD Accredited Courses",
     description:
-      "Get AML certified online for free. CPD-accredited AML, KYC and sanctions screening courses with verifiable certificates — start free, no payment required.",
+      "Free AML certification and compliance training online. CPD-accredited AML, KYC and sanctions screening courses with verifiable certificates — start free, no payment required.",
     h1: "Free AML Certification Online",
   },
 
