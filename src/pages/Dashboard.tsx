@@ -15,6 +15,7 @@ import {
 import { MemberLevelCard, LevelUpMoment } from "@/components/dashboard/RecognitionSections";
 import NewLearnerWelcome from "@/components/dashboard/NewLearnerWelcome";
 import SuggestedForYou from "@/components/dashboard/SuggestedForYou";
+import NewCoursesBanner from "@/components/academy/NewCoursesBanner";
 
 export default function Dashboard() {
   const { firstName } = useEntitlements();
@@ -75,6 +76,8 @@ export default function Dashboard() {
           </div>
         </div>
       </section>
+
+      <NewCoursesBanner to="/dashboard/courses" className="mb-6" />
 
       <LevelUpMoment />
 
