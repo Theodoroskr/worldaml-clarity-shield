@@ -13,6 +13,14 @@ import path from "path";
 const BASE_URL = "https://worldaml.com";
 const ACADEMY_BASE_URL = "https://academy.worldaml.com";
 
+// Course slugs derive from the academy pricing map (keys MUST match
+// academy_courses.slug) plus the free courses, so new courses are
+// picked up automatically.
+import { ACADEMY_PRICING, FREE_ACADEMY_COURSES } from "../src/data/academyPricing";
+
+const academyCourseSlugs = (): string[] =>
+  [...FREE_ACADEMY_COURSES, ...Object.keys(ACADEMY_PRICING)].sort();
+
 /* ------------------------------------------------------------------ */
 /*  Route registry — single source of truth for the sitemap           */
 /* ------------------------------------------------------------------ */
@@ -217,19 +225,7 @@ const ACADEMY_STATIC_ROUTES: SitemapEntry[] = [
 
 function generateAcademySitemap(): string {
   const entries: SitemapEntry[] = [...ACADEMY_STATIC_ROUTES];
-  const knownAcademyCourses = [
-    "aml-fundamentals",
-    "kyc-essentials",
-    "international-sanctions-compliance",
-    "transaction-monitoring-fundamentals",
-    "risk-based-approach",
-    "ubo-identification",
-    "pep-screening-essentials",
-    "adverse-media-monitoring",
-    "regulatory-reporting-essentials",
-    "edd-procedures",
-  ];
-  for (const slug of knownAcademyCourses) {
+  for (const slug of academyCourseSlugs()) {
     entries.push({ path: `/${slug}`, changefreq: "monthly", priority: 0.7 });
   }
   return buildSitemapXml(entries, ACADEMY_BASE_URL);
@@ -266,20 +262,8 @@ function generateSitemap(root: string): string {
     entries.push({ path: `/data-coverage/${key}`, changefreq: "monthly", priority: 0.5 });
   }
 
-  // Dynamic: academy courses (read from academy data or hard-coded known slugs)
-  const knownAcademyCourses = [
-    "aml-fundamentals",
-    "kyc-essentials",
-    "international-sanctions-compliance",
-    "transaction-monitoring-fundamentals",
-    "risk-based-approach",
-    "ubo-identification",
-    "pep-screening-essentials",
-    "adverse-media-monitoring",
-    "regulatory-reporting-essentials",
-    "edd-procedures",
-  ];
-  for (const slug of knownAcademyCourses) {
+  // Dynamic: academy courses (derived from the pricing map + free courses)
+  for (const slug of academyCourseSlugs()) {
     entries.push({ path: `/academy/${slug}`, changefreq: "monthly", priority: 0.6 });
   }
 

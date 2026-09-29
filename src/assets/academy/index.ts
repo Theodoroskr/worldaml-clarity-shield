@@ -17,6 +17,9 @@ import txMonitoring from "./covers/transaction-monitoring-sar.jpg";
 import cryptoAml from "./covers/crypto-aml.jpg";
 import riskBased from "./covers/risk-based-approach.jpg";
 import intlSanctions from "./covers/international-sanctions-compliance.jpg";
+import tbmlCover from "./covers/tbml-export-controls.jpg";
+import fintechsCover from "./covers/aml-fintechs-payments.jpg";
+import sofSowCover from "./covers/source-of-funds-wealth.jpg";
 
 // In-lesson hero diagrams (rendered above lesson 1 content)
 import dAmlFundamentals from "./diagrams/aml-fundamentals-cycle.jpg";
@@ -37,6 +40,10 @@ import dRiskMatrix from "./diagrams/risk-matrix.jpg";
 import dIntlSanctions from "./diagrams/international-sanctions-globe.jpg";
 import dCryptoAml from "./diagrams/crypto-aml-flow.jpg";
 
+import dTbml from "./diagrams/tbml-trade-flow.jpg";
+import dFintechs from "./diagrams/fintech-mule-network.jpg";
+import dSofSow from "./diagrams/sof-sow-evidence.jpg";
+
 export const COURSE_COVERS: Record<string, string> = {
   "aml-fundamentals": amlFundamentals,
   "kyc-customer-due-diligence": kycCdd,
@@ -56,6 +63,9 @@ export const COURSE_COVERS: Record<string, string> = {
   "crypto-aml": cryptoAml,
   "risk-based-approach": riskBased,
   "international-sanctions-compliance": intlSanctions,
+  "tbml-export-controls": tbmlCover,
+  "aml-fintechs-payments": fintechsCover,
+  "source-of-funds-wealth": sofSowCover,
   "aml-law-firms": "/__l5e/assets-v1/cf51afea-01dc-4cbf-a365-8a643df47c43/course-aml-law-firms.jpg",
   "aml-accountancy": "/__l5e/assets-v1/59b8e586-6c7e-453f-8f8c-aa9f16de56bd/course-aml-accountancy.jpg",
   "aml-real-estate": "/__l5e/assets-v1/f5159f07-f984-4fc6-8644-f8bb8a6fcffa/course-aml-real-estate.jpg",
@@ -84,6 +94,9 @@ export const COURSE_DIAGRAMS: Record<string, string> = {
   "risk-based-approach": dRiskMatrix,
   "international-sanctions-compliance": dIntlSanctions,
   "crypto-aml": dCryptoAml,
+  "tbml-export-controls": dTbml,
+  "aml-fintechs-payments": dFintechs,
+  "source-of-funds-wealth": dSofSow,
 };
 
 export const getCourseCover = (slug?: string | null) =>

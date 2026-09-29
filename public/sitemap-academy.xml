@@ -26,12 +26,67 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://academy.worldaml.com/adverse-media-intelligence</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/aml-africa</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/aml-americas</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/aml-asia-pacific</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/aml-cis</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/aml-europe</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/aml-fintechs-payments</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://academy.worldaml.com/aml-fundamentals</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://academy.worldaml.com/kyc-essentials</loc>
+    <loc>https://academy.worldaml.com/aml-gcc-mena</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/beneficial-ownership</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/beneficial-ownership-ubo-transparency</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/crypto-aml</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/crypto-aml-essentials</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -41,7 +96,12 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://academy.worldaml.com/transaction-monitoring-fundamentals</loc>
+    <loc>https://academy.worldaml.com/kyc-customer-due-diligence</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/pep-screening-edd</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -51,27 +111,22 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://academy.worldaml.com/ubo-identification</loc>
+    <loc>https://academy.worldaml.com/sanctions-screening-essentials</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://academy.worldaml.com/pep-screening-essentials</loc>
+    <loc>https://academy.worldaml.com/source-of-funds-wealth</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://academy.worldaml.com/adverse-media-monitoring</loc>
+    <loc>https://academy.worldaml.com/tbml-export-controls</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://academy.worldaml.com/regulatory-reporting-essentials</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://academy.worldaml.com/edd-procedures</loc>
+    <loc>https://academy.worldaml.com/transaction-monitoring-sar</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
