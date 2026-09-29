@@ -49,3 +49,9 @@ export const isPaidCourse = (slug: string): boolean =>
 
 export const getCoursePrice = (slug: string): AcademyCoursePrice | null =>
   ACADEMY_PRICING[slug] ?? null;
+
+/** Newly launched courses — shown with a "New" tag until NEW_COURSE_PROMO_END. */
+export const NEW_COURSE_SLUGS = new Set(["tbml-export-controls", "aml-fintechs-payments", "source-of-funds-wealth"]);
+export const NEW_COURSE_PROMO_END = new Date("2026-10-29T23:59:59Z");
+export const isNewCoursePromoActive = () => Date.now() < NEW_COURSE_PROMO_END.getTime();
+export const isNewCourse = (slug: string) => NEW_COURSE_SLUGS.has(slug) && isNewCoursePromoActive();

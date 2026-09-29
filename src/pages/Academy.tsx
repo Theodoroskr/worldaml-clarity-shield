@@ -46,7 +46,8 @@ import LearnerLogos from "@/components/academy/LearnerLogos";
 import StickyMobileCTA from "@/components/academy/StickyMobileCTA";
 import { useCart } from "@/contexts/CartContext";
 import { useAcademyPurchases } from "@/hooks/useAcademyPurchases";
-import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/academyPricing";
+import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES, isNewCourse } from "@/data/academyPricing";
+import NewCoursesBanner from "@/components/academy/NewCoursesBanner";
 import { computeDiscount, applyDiscount } from "@/lib/academyDiscount";
 import { useRegion } from "@/contexts/RegionContext";
 import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY, currencyCode } from "@/lib/academyFx";
@@ -929,6 +930,9 @@ const Academy = () => {
       />
       <Header />
       <main className="flex-1">
+        <div className="container-enterprise pt-4">
+          <NewCoursesBanner to="/academy#courses-grid" />
+        </div>
         {/* Hero — bold typographic, editorial */}
         <section className="relative bg-navy overflow-hidden border-b border-white/5">
           {/* ambient teal glow */}
@@ -1443,6 +1447,9 @@ const Academy = () => {
                       {/* Content */}
                       <div className={`p-5 flex-1 flex flex-col ${featured ? "md:p-7" : ""}`}>
                         <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                          {isNewCourse(course.slug) && (
+                            <Badge className="bg-accent text-accent-foreground text-[10px] uppercase tracking-wide font-semibold">New</Badge>
+                          )}
                           <Badge variant="outline" className={`${difficultyColor[course.difficulty] || ""} text-[10px] uppercase tracking-wide font-semibold border`}>
                             {course.difficulty}
                           </Badge>
@@ -1546,6 +1553,9 @@ const Academy = () => {
                     {/* Content */}
                     <div className={`p-5 flex-1 flex flex-col ${featured ? "md:p-7" : ""}`}>
                       <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                        {isNewCourse(course.slug) && (
+                          <Badge className="bg-accent text-accent-foreground text-[10px] uppercase tracking-wide font-semibold">New</Badge>
+                        )}
                         <Badge variant="outline" className={`${difficultyColor[course.difficulty] || ""} text-[10px] uppercase tracking-wide font-semibold border`}>
                           {course.difficulty}
                         </Badge>
