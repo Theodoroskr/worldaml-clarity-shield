@@ -48,6 +48,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAcademyPurchases } from "@/hooks/useAcademyPurchases";
 import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES, isNewCourse } from "@/data/academyPricing";
 import NewCoursesBanner from "@/components/academy/NewCoursesBanner";
+import ScreeningPromoBanner from "@/components/academy/ScreeningPromoBanner";
 import { computeDiscount, applyDiscount } from "@/lib/academyDiscount";
 import { useRegion } from "@/contexts/RegionContext";
 import { AcademyCurrency, convertEurCents, formatPrice, REGION_TO_CURRENCY, currencyCode } from "@/lib/academyFx";
