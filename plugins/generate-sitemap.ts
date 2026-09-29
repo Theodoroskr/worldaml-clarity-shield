@@ -262,20 +262,8 @@ function generateSitemap(root: string): string {
     entries.push({ path: `/data-coverage/${key}`, changefreq: "monthly", priority: 0.5 });
   }
 
-  // Dynamic: academy courses (read from academy data or hard-coded known slugs)
-  const knownAcademyCourses = [
-    "aml-fundamentals",
-    "kyc-essentials",
-    "international-sanctions-compliance",
-    "transaction-monitoring-fundamentals",
-    "risk-based-approach",
-    "ubo-identification",
-    "pep-screening-essentials",
-    "adverse-media-monitoring",
-    "regulatory-reporting-essentials",
-    "edd-procedures",
-  ];
-  for (const slug of knownAcademyCourses) {
+  // Dynamic: academy courses (derived from the pricing map + free courses)
+  for (const slug of academyCourseSlugs()) {
     entries.push({ path: `/academy/${slug}`, changefreq: "monthly", priority: 0.6 });
   }
 
