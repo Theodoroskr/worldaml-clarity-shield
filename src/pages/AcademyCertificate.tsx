@@ -66,8 +66,29 @@ const AcademyCertificate = () => {
     }
   };
 
-  const downloadCertificatePDF = () => {
+  const downloadCertificatePDF = async () => {
     const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+    // Built-in PDF fonts lack characters like ł, ś, ž, ő — embed Unicode fonts.
+    let nameFont: [string, string] = ["times", "bolditalic"];
+    let textFont: [string, string] = ["helvetica", "normal"];
+    try {
+      const load = async (url: string) => {
+        const buf = new Uint8Array(await (await fetch(url)).arrayBuffer());
+        let bin = "";
+        for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+        return btoa(bin);
+      };
+      const [serif, sans] = await Promise.all([
+        load("/fonts/NotoSerif-BoldItalic.ttf"),
+        load("/fonts/NotoSans-Regular.ttf"),
+      ]);
+      doc.addFileToVFS("NotoSerif-BoldItalic.ttf", serif);
+      doc.addFont("NotoSerif-BoldItalic.ttf", "NotoSerif", "bolditalic");
+      doc.addFileToVFS("NotoSans-Regular.ttf", sans);
+      doc.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
+      nameFont = ["NotoSerif", "bolditalic"];
+      textFont = ["NotoSans", "normal"];
+    } catch { /* fall back to built-in fonts */ }
     const w = 297, h = 210;
     const title = course?.title || "Course";
     const score = cert?.score || 0;
@@ -127,13 +148,13 @@ const AcademyCertificate = () => {
     doc.text("This certifies that", w / 2, 90, { align: "center" });
 
     // Holder name
-    doc.setFont("times", "bolditalic");
+    doc.setFont(...nameFont);
     doc.setFontSize(28);
     doc.setTextColor(13, 148, 136);
     doc.text(cert?.holder_name || "", w / 2, 104, { align: "center" });
 
     // Description
-    doc.setFont("helvetica", "normal");
+    doc.setFont(...textFont);
     doc.setFontSize(11);
     doc.setTextColor(80, 80, 80);
     const desc = `has successfully completed the "${title}" course at WorldAML Academy with a score of ${score}%.`;
