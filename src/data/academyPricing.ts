@@ -31,6 +31,11 @@ export const ACADEMY_PRICING: Record<string, AcademyCoursePrice> = {
   "international-sanctions-compliance": { eurCents: 2900, stripeProductId: "prod_URCdkCCDtRRWyC" },
   "crypto-aml": { eurCents: 4900, stripeProductId: "prod_URCdSqTbYEbrFg" },
   "crypto-aml-essentials": { eurCents: 4900, stripeProductId: "prod_URCdNRdfGf9gXK" },
+
+  // ── New specialisations & sector track ─────────────────────────────
+  "tbml-export-controls": { eurCents: 4900, stripeProductId: "prod_VLoEdXgfdF6RTL" },
+  "aml-fintechs-payments": { eurCents: 2900, stripeProductId: "prod_VLoFa18DoYwiLo" },
+  "source-of-funds-wealth": { eurCents: 2900, stripeProductId: "prod_VLoFjW0gAlFhxY" },
 };
 
 // Free course slugs — not purchasable, never blocked by paywall.
