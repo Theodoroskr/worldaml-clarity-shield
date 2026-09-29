@@ -1790,6 +1790,42 @@ const Academy = () => {
         {/* Marketing sections for returning learners (moved from top) */}
         {isReturningLearner && marketingSections}
 
+        {/* Free AML courses with certificate */}
+        <section className="section-padding bg-background">
+          <div className="container-enterprise max-w-4xl">
+            <div className="text-center mb-12">
+              <h2 className="text-headline text-foreground mb-3">Free AML Courses with Certificate</h2>
+              <p className="text-body-lg text-muted-foreground max-w-2xl mx-auto">
+                Looking for free AML courses with a certificate you can actually show an employer or auditor?
+                Two Academy courses are completely free — learn at your own pace, pass the quiz, and download
+                a verifiable certificate instantly.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <h3 className="text-body font-semibold text-foreground mb-2">AML Fundamentals — Free with Certificate</h3>
+                <p className="text-body-sm text-muted-foreground leading-relaxed">
+                  Our most popular free AML course with certificate: how money laundering and terrorist financing
+                  work, KYC and customer due diligence, red flags, and the risk-based approach. Pass the
+                  end-of-course quiz and your free AML certificate is issued immediately with a unique
+                  verification token.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <h3 className="text-body font-semibold text-foreground mb-2">Sanctions Screening Essentials — Free with Certificate</h3>
+                <p className="text-body-sm text-muted-foreground leading-relaxed">
+                  A free sanctions screening course with certificate covering OFAC, EU, UN and UK sanctions
+                  lists, PEP screening, fuzzy name matching and false-positive handling. Ideal for analysts
+                  who need a free AML certification to evidence screening competence.
+                </p>
+              </div>
+            </div>
+            <p className="text-body-sm text-muted-foreground text-center mt-8">
+              Both free courses include the full learning material, the scored quiz and the downloadable
+              certificate — no credit card, no trial period, no hidden fees.
+            </p>
+          </div>
+        </section>
 
         {/* Curriculum & learning outcomes */}
         <section className="section-padding bg-secondary/30">
@@ -1839,6 +1875,10 @@ const Academy = () => {
             <h2 className="text-headline text-foreground text-center mb-12">Frequently Asked Questions</h2>
             <div className="space-y-6">
               {[
+                {
+                  q: "Are there free AML courses with a certificate?",
+                  a: "Yes. AML Fundamentals and Sanctions Screening Essentials are free AML courses with a certificate included — the full course material, the quiz and the verifiable PDF certificate all cost nothing.",
+                },
                 {
                   q: "Is there a free AML KYC certification course?",
                   a: "Yes. The WorldAML Academy includes a free AML KYC certification course — start with AML Fundamentals at no cost, pass the end-of-course quiz, and download a verifiable certificate with a unique verification token.",
