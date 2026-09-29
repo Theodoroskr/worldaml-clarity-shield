@@ -346,6 +346,24 @@ const routes: Record<string, RouteMeta> = {
       "Advanced course on beneficial ownership identification, UBO verification, and corporate transparency requirements.",
     h1: "Beneficial Ownership & UBO Transparency",
   },
+  "/academy/tbml-export-controls": {
+    title: "Trade-Based Money Laundering Course — TBML & Export Controls Training",
+    description:
+      "Advanced TBML training: over- and under-invoicing, phantom shipments, shell trading networks, dual-use goods and sanctions evasion. CPD-accredited certificate.",
+    h1: "Trade-Based Money Laundering & Export Controls",
+  },
+  "/academy/aml-fintechs-payments": {
+    title: "AML for Fintechs & Payment Providers — Compliance Training Course",
+    description:
+      "Build a scalable fintech AML programme: PSP and EMI regulation, onboarding at volume, instant-payment monitoring, mule detection and sponsor-bank risk. CPD-accredited.",
+    h1: "AML for Fintechs & Payment Providers",
+  },
+  "/academy/source-of-funds-wealth": {
+    title: "Source of Funds & Source of Wealth — EDD Training Course",
+    description:
+      "Verify source of funds and source of wealth with confidence: evidence standards, corroboration, PEP-linked wealth, third-party funding and defensible records. CPD-accredited.",
+    h1: "Source of Funds & Source of Wealth",
+  },
   "/partners": {
     title: "Partner Programme",
     description:
