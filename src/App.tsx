@@ -123,6 +123,7 @@ const ComplianceSoftwareNL = lazyWithRetry(() => import("./pages/ComplianceSoftw
 const ComplianceSoftwareCH = lazyWithRetry(() => import("./pages/ComplianceSoftwareCH"));
 const ComplianceSoftwareIT = lazyWithRetry(() => import("./pages/ComplianceSoftwareIT"));
 const SanctionsScreeningSoftware = lazyWithRetry(() => import("./pages/SanctionsScreeningSoftware"));
+const EnterpriseAMLScreening = lazyWithRetry(() => import("./pages/EnterpriseAMLScreening"));
 const USAMLKYCComplianceGuide = lazyWithRetry(() => import("./pages/USAMLKYCComplianceGuide"));
 const WorldCheckAlternative = lazyWithRetry(() => import("./pages/WorldCheckAlternative"));
 const AlternativesIndex = lazyWithRetry(() => import("./pages/alternatives/AlternativesIndex"));
@@ -564,6 +565,7 @@ const App = () => (
                 <Route path="/aml-kyc-compliance" element={<AmlKycCompliance />} />
                 <Route path="/resources/us-aml-kyc-compliance-guide" element={<USAMLKYCComplianceGuide />} />
                 <Route path="/sanctions-screening-software" element={<SanctionsScreeningSoftware />} />
+                <Route path="/enterprise-aml-screening" element={<EnterpriseAMLScreening />} />
 
                 {/* Comparison landing pages */}
                 <Route path="/world-check-alternative" element={<WorldCheckAlternative />} />
