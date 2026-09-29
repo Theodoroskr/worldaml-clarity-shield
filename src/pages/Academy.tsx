@@ -930,8 +930,9 @@ const Academy = () => {
       />
       <Header />
       <main className="flex-1">
-        <div className="container-enterprise pt-4">
+        <div className="container-enterprise pt-4 space-y-3">
           <NewCoursesBanner to="/academy#courses-grid" />
+          <ScreeningPromoBanner />
         </div>
         {/* Hero — bold typographic, editorial */}
         <section className="relative bg-navy overflow-hidden border-b border-white/5">
