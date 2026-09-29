@@ -274,9 +274,9 @@ const routes: Record<string, RouteMeta> = {
     h1: "Get Started with WorldAML",
   },
   "/enterprise-aml-screening": {
-    title: "Enterprise AML Screening — Powered by LexisNexis Data",
+    title: "Enterprise AML Screening — LexisNexis® Data | WorldAML",
     description:
-      "Enterprise AML screening on the WorldAML platform, powered by LexisNexis® risk data. Sanctions, PEP and adverse-media screening across 1,900+ lists with case management and audit trail.",
+      "Enterprise AML screening across 1,900+ global lists, powered by LexisNexis® data. Sanctions, PEP and adverse-media checks via API, batch and daily monitoring.",
     h1: "Enterprise AML screening — the WorldAML platform, powered by LexisNexis® data",
   },
   "/contact-sales": {

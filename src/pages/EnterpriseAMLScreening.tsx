@@ -63,8 +63,11 @@ const enterpriseItems = [
 ];
 
 const faqs = [
-  { q: "What makes this enterprise AML screening?", a: "Enterprise-grade data from LexisNexis Risk Solutions, combined with the WorldAML platform's case management, four-eyes review, SSO, multi-entity setup and audit trail — at volume pricing built for regulated firms." },
-  { q: "Who provides the screening data?", a: "Watchlist, PEP and adverse-media data is supplied by LexisNexis Risk Solutions. WorldAML provides the screening platform, workflow and integration layer." },
+  { q: "What is enterprise AML screening?", a: "Screening customers and transactions against sanctions, PEP and adverse-media lists as part of an anti-money-laundering programme. Enterprise AML screening adds the volume, controls and audit evidence regulated firms need: case management, four-eyes review, SSO and full audit trails." },
+  { q: "Which data and lists does it screen against?", a: "1,900+ global lists supplied by LexisNexis Risk Solutions — OFAC, OFSI, EU, UN and national regimes, PEPs, relatives & close associates, enforcement and adverse-media profiles — refreshed within minutes of publication." },
+  { q: "What are the best AML screening tools for enterprises?", a: "Look for tier-one data coverage, tunable fuzzy matching, API plus batch screening, daily monitoring, case management and regulator-ready audit logs. WorldAML Enterprise combines all of these on one platform, powered by LexisNexis® data." },
+  { q: "How do you reduce false positives in AML screening?", a: "Tunable name-matching thresholds, screening against the right list set for your risk profile, and workflow that surfaces only real hits for review. The WorldAML platform lets compliance teams tune matching per entity type and monitor only what changes." },
+  { q: "Can we screen at scale — API, batch or both?", a: "Yes: real-time API screening for onboarding and payments, SFTP/file batch screening for large portfolios, and daily rescreening against list changes — all on one contract." },
   { q: "How fast can we go live?", a: "Most teams start screening through the web platform within days. API and batch integrations typically take two to four weeks, including threshold tuning." },
   { q: "Can we try it first?", a: "Yes — run a free sanctions search today, then request a demo for a guided trial on your own sample data." },
 ];
@@ -148,15 +151,15 @@ const EnterpriseAMLScreening = () => {
     name: "WorldAML Enterprise AML Screening",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
-    description: "Enterprise AML screening on the WorldAML platform, powered by LexisNexis Risk Solutions data — sanctions, PEP and adverse-media screening across 1,900+ global lists.",
+    description: "Enterprise AML screening across 1,900+ global lists, powered by LexisNexis Risk Solutions data. Sanctions, PEP and adverse-media checks via API, batch and daily monitoring.",
     url: "https://worldaml.com/enterprise-aml-screening",
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Enterprise AML Screening — Powered by LexisNexis Data"
-        description="Enterprise AML screening on the WorldAML platform, powered by LexisNexis® risk data. Sanctions, PEP and adverse-media screening across 1,900+ lists with case management and audit trail."
+        title="Enterprise AML Screening — LexisNexis® Data | WorldAML"
+        description="Enterprise AML screening across 1,900+ global lists, powered by LexisNexis® data. Sanctions, PEP and adverse-media checks via API, batch and daily monitoring."
         canonical="/enterprise-aml-screening"
         breadcrumbs={[
           { name: "Home", url: "/" },
