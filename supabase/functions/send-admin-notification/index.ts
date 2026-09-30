@@ -1,5 +1,6 @@
 import { Resend } from "npm:resend";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { isInternalEmail, isKnownRecipient, isSafeLink } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -116,6 +117,18 @@ Deno.serve(async (req) => {
     const safeMessage = escapeHtml(message).replace(/\n/g, "<br/>");
     const safeSubject = subject;
 
+    // Recipients limited to registered accounts; CCs to internal mailboxes; links to our sites.
+    if (!(await isKnownRecipient(supabase, String(email)))) {
+      return new Response(JSON.stringify({ error: "Recipient must be a registered WorldAML user" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (cta_url && !isSafeLink(cta_url)) {
+      return new Response(JSON.stringify({ error: "Button link must point to worldaml.com" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const ctaBlock = cta_text && cta_url ? `
       <a href="${escapeHtml(cta_url)}"
          style="display:inline-block;background:#0d9488;color:#fff;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:600;font-size:14px;margin-top:8px;">
@@ -147,7 +160,7 @@ Deno.serve(async (req) => {
       </div>
     `;
 
-    const ccList = Array.isArray(cc) ? cc.filter((a) => typeof a === "string" && a.includes("@")) : [];
+    const ccList = Array.isArray(cc) ? cc.filter((a) => typeof a === "string" && a.includes("@") && isInternalEmail(a)) : [];
 
     await sendEmailWithRetry(resend, {
       from: FROM_EMAIL,
