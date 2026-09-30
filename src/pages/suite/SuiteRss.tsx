@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { RefreshCw, Trash2, ExternalLink, Rss, Loader2 } from "lucide-react";
 import { z } from "zod";
+import DOMPurify from "dompurify";
 import SEO from "@/components/SEO";
 
 interface RssFeed {
@@ -211,7 +212,7 @@ export default function SuiteRss() {
                   </div>
                   {it.summary && (
                     <p className="text-sm text-muted-foreground mt-2 line-clamp-3"
-                       dangerouslySetInnerHTML={{ __html: it.summary.replace(/<script[\s\S]*?<\/script>/gi, "") }} />
+                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(it.summary, { FORBID_TAGS: ["style", "form", "iframe"], FORBID_ATTR: ["style"] }) }} />
                   )}
                 </div>
                 {it.link && (
