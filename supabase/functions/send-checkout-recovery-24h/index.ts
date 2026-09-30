@@ -18,6 +18,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { Resend } from "npm:resend";
+import { escapeHtml, isAuthorizedScheduledCall } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,9 +73,9 @@ function buildHtml(p: {
   return `
 <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a;background:#ffffff;">
   <h2 style="margin:0 0 12px;color:#0f172a;">Your WorldAML Academy seat is still saved</h2>
-  <p style="margin:0 0 16px;line-height:1.55;">Hi ${p.greetingName},</p>
+  <p style="margin:0 0 16px;line-height:1.55;">Hi ${escapeHtml(p.greetingName)},</p>
   <p style="margin:0 0 16px;line-height:1.55;">
-    Yesterday you started checking out <strong>${p.courseList}</strong>${p.amountFmt ? ` (${p.amountFmt})` : ""}
+    Yesterday you started checking out <strong>${escapeHtml(p.courseList)}</strong>${p.amountFmt ? ` (${p.amountFmt})` : ""}
     but didn't quite finish. No card was charged.
   </p>
   ${p.remintNotice
@@ -105,6 +106,10 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+
+  if (!(await isAuthorizedScheduledCall(req, supabase))) {
+    return json({ error: "Unauthorized" }, 401);
+  }
 
   const resendKey = Deno.env.get("RESEND_API_KEY");
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");

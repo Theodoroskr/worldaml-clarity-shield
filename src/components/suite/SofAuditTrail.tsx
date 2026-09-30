@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { csvCell } from "@/lib/csvSafe";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -83,7 +84,7 @@ export function SofAuditTrail({ declarationId, refreshKey }: { declarationId: st
         JSON.stringify(e.details || {}),
       ]),
     ];
-    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const csv = rows.map(r => r.map(c => csvCell(c)).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { Resend } from "npm:resend";
+import { safeOrigin } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,7 +46,7 @@ Deno.serve(async (req) => {
     if (rpcErr) return json({ error: rpcErr.message }, 403);
 
     // Send invite via Supabase Auth (creates auth user if new, or emails magic link if exists)
-    const redirectTo = `${req.headers.get("origin") ?? "https://worldaml.com"}/portal/callback`;
+    const redirectTo = `${safeOrigin(req)}/portal/callback`;
 
     const { error: inviteErr } = await admin.auth.admin.inviteUserByEmail(email, {
       redirectTo,

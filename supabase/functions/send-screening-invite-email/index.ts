@@ -1,4 +1,5 @@
 import { Resend } from "npm:resend";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -86,9 +87,27 @@ export default {
     }
 
     try {
+      const deny = (msg: string, status: number) =>
+        new Response(JSON.stringify({ error: msg }), {
+          status, headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+
+      // Caller must be signed in.
+      const authHeader = request.headers.get("Authorization") ?? "";
+      if (!authHeader.startsWith("Bearer ")) return deny("Unauthorized", 401);
+      const url = Deno.env.get("SUPABASE_URL")!;
+      const userClient = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: userData } = await userClient.auth.getUser();
+      const caller = userData?.user;
+      if (!caller) return deny("Unauthorized", 401);
+      const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
       const resend = new Resend(Deno.env.get("RESEND_API_KEY") ?? "");
       const body = await request.json().catch(() => ({}));
-      const { email, inviter_name, role, is_new_user } = body;
+      const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+      const role = typeof body?.role === "string" ? body.role.slice(0, 60) : "Analyst";
 
       if (!email || !isValidEmail(email)) {
         return new Response(JSON.stringify({ error: "Valid email is required" }), {
@@ -96,6 +115,31 @@ export default {
           headers: { "Content-Type": "application/json", ...corsHeaders },
         });
       }
+
+      // Only send for an invite the caller actually created in an org they administer.
+      const { data: adminOrgs } = await admin
+        .from("product_members")
+        .select("organisation_id")
+        .eq("user_id", caller.id)
+        .eq("product", "screening")
+        .eq("role", "admin");
+      const orgIds = (adminOrgs ?? []).map((r: any) => r.organisation_id);
+      if (!orgIds.length) return deny("Not authorised", 403);
+
+      const { data: prof } = await admin
+        .from("profiles").select("user_id").ilike("email", email).maybeSingle();
+      let q = admin.from("product_members").select("id, user_id")
+        .in("organisation_id", orgIds).eq("product", "screening");
+      q = prof?.user_id
+        ? q.or(`invited_email.eq.${email},user_id.eq.${prof.user_id}`)
+        : q.eq("invited_email", email);
+      const { data: inviteRows } = await q.limit(1);
+      if (!inviteRows?.length) return deny("No matching invitation", 403);
+      const is_new_user = !inviteRows[0].user_id;
+
+      const { data: callerProfile } = await admin
+        .from("profiles").select("full_name, email").eq("user_id", caller.id).maybeSingle();
+      const inviter_name = callerProfile?.full_name || callerProfile?.email || caller.email || "";
 
       const { error } = await resend.emails.send({
         from: FROM_EMAIL,

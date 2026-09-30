@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { csvRow } from "@/lib/csvSafe";
 import { cn } from "@/lib/utils";
 import { Search, Download } from "lucide-react";
 import { Timeline, TimelineEvent } from "@/components/ui/timeline";
@@ -36,7 +37,7 @@ export default function SuiteAudit() {
   );
 
   const exportCSV = () => {
-    const rows = filtered.map(e => `"${e.timestamp}","${e.actor}","${e.action}","${e.type}","${e.detail || ""}"`);
+    const rows = filtered.map(e => csvRow([e.timestamp, e.actor, e.action, e.type, e.detail || ""]));
     const csv = `Timestamp,Actor,Action,Type,Detail\n${rows.join("\n")}`;
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);

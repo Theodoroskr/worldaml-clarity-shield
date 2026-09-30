@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { csvCell } from "@/lib/csvSafe";
 
 export interface UserExportRow {
   [key: string]: string | number | null;
@@ -7,10 +8,7 @@ export interface UserExportRow {
 const toCsv = (rows: UserExportRow[]): string => {
   if (!rows.length) return "";
   const headers = Object.keys(rows[0]);
-  const escape = (v: unknown) => {
-    const s = v === null || v === undefined ? "" : String(v);
-    return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  };
+  const escape = (v: unknown) => csvCell(v);
   return [headers.join(","), ...rows.map((r) => headers.map((h) => escape(r[h])).join(","))].join("\n");
 };
 

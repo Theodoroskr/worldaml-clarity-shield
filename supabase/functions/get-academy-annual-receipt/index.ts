@@ -25,6 +25,14 @@ serve(async (req) => {
       expand: ["payment_intent", "payment_intent.latest_charge", "invoice"],
     });
 
+    // Only Academy annual-pass sessions are served here, and only once paid.
+    if (session.metadata?.kind !== "annual_pass") {
+      return json({ error: "Not found" }, 404);
+    }
+    if (session.payment_status !== "paid") {
+      return json({ error: "Payment not completed" }, 404);
+    }
+
     const pi: any = session.payment_intent;
     const charge: any = pi?.latest_charge ?? null;
     const invoice: any = session.invoice ?? null;
@@ -43,11 +51,10 @@ serve(async (req) => {
       invoice_number: invoice?.number ?? null,
       invoice_hosted_url: invoice?.hosted_invoice_url ?? null,
       invoice_pdf: invoice?.invoice_pdf ?? null,
-      customer_email: session.customer_details?.email ?? null,
     });
   } catch (err: any) {
     console.error("get-academy-annual-receipt error:", err);
-    return json({ error: err?.message ?? "Internal error" }, 500);
+    return json({ error: "Could not load receipt" }, 500);
   }
 });
 

@@ -2,6 +2,7 @@
 // Triggered hourly by pg_cron. Supports manual test mode via { test: true, to: "..." }.
 // CC'd to compliance@infocreditgroup.com for visibility.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { escapeHtml, isAuthorizedScheduledCall } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,7 +28,7 @@ const buildHtml = (firstName: string) => `
           <p style="margin:6px 0 0;color:#5eead4;font-size:13px;">Your first course awaits</p>
         </td></tr>
         <tr><td style="padding:32px;">
-          <p style="margin:0 0 14px;font-size:15px;color:#374151;">Hi ${firstName || "there"},</p>
+          <p style="margin:0 0 14px;font-size:15px;color:#374151;">Hi ${escapeHtml(firstName || "there")},</p>
           <h2 style="margin:0 0 16px;font-size:20px;color:#1e3a5f;line-height:1.35;">You signed up yesterday — ready to earn your first compliance certificate?</h2>
           <p style="margin:0 0 18px;font-size:15px;line-height:1.65;color:#374151;">
             Most of our learners complete their first course in under 30 minutes and walk away with a shareable CPD certificate. We've curated a few starting points for you:
@@ -172,6 +173,11 @@ Deno.serve(async (req) => {
     // Find profiles 24-48h old who have NEVER created an academy_progress row AND
     // haven't already received a nudge (tracked via signup_followups_sent with status='nudge_sent').
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+    if (!(await isAuthorizedScheduledCall(req, supabase))) {
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const lowerCutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
     const upperCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 

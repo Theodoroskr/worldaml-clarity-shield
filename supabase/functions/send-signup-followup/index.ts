@@ -1,6 +1,7 @@
 // Send 1-day follow-up email to new signups (signed by Evgenios Georgiou)
 // Triggered hourly by pg_cron, also supports manual test mode via { test: true, to: "..." }
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { escapeHtml } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,7 +17,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const buildHtml = (firstName: string) => `
 <div style="font-family: Arial, sans-serif; font-size: 14px; color: #1a1a2e; line-height: 1.6; max-width: 600px;">
-  <p>Dear ${firstName ? firstName : ""},</p>
+  <p>Dear ${escapeHtml(firstName)},</p>
   <p>Thank you for registering your interest in the WorldAML platform by Infocredit Group.</p>
   <p>My name is <strong>Evgenios Georgiou</strong> from our Compliance Advisory team, and I will be your point of contact moving forward.</p>
   <p>WorldAML is a modular compliance platform designed to support organizations with AML/CFT requirements across <strong>onboarding, screening, risk scoring, and transaction monitoring</strong> — all within a single, configurable environment.</p>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { csvCell } from "@/lib/csvSafe";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -366,7 +367,7 @@ export default function AdminAcademyUsers() {
       }),
     ];
     return rows
-      .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+      .map((r) => r.map((v) => csvCell(v)).join(","))
       .join("\n");
   };
 

@@ -2077,6 +2077,24 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_cron_secrets: {
+        Row: {
+          created_at: string
+          name: string
+          secret: string
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          secret: string
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          secret?: string
+        }
+        Relationships: []
+      }
       match_attributes: {
         Row: {
           assessment: Database["public"]["Enums"]["attribute_assessment"]

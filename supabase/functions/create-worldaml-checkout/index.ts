@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { safeOrigin } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,11 +73,13 @@ serve(async (req) => {
   try {
     // Guest checkout: auth optional. Stripe collects email when no session.
     let userEmail: string | undefined;
+    let userId: string | undefined;
     const authHeader = req.headers.get("Authorization");
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.replace("Bearer ", "");
       const { data } = await supabaseClient.auth.getUser(token);
       if (data.user?.email) userEmail = data.user.email;
+      if (data.user?.id) userId = data.user.id;
     }
 
     let body: unknown;
@@ -126,7 +129,7 @@ serve(async (req) => {
       if (customers.data.length > 0) customerId = customers.data[0].id;
     }
 
-    const origin = req.headers.get("origin") ?? "https://www.worldaml.com";
+    const origin = safeOrigin(req, "https://www.worldaml.com");
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: !customerId && userEmail ? userEmail : undefined,
@@ -140,7 +143,7 @@ serve(async (req) => {
       // Direct deep link: /platform/aml-screening redirects via client-side <Navigate>
       // which would drop the query string and hash.
       cancel_url: `${origin}/screening-monitoring?canceled=true#packages`,
-      metadata: { plan: normalizedPlan, product: "worldaml", guest: userEmail ? "0" : "1" },
+      metadata: { plan: normalizedPlan, product: "worldaml", guest: userEmail ? "0" : "1", ...(userId ? { user_id: userId } : {}) },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {

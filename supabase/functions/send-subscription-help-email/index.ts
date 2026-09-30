@@ -13,6 +13,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { isKnownRecipient, isSafeLink } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -148,6 +149,18 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "'productName' is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const recipientCheck = createClient(supabaseUrl, serviceKey);
+    if (!(await isKnownRecipient(recipientCheck, to))) {
+      return new Response(JSON.stringify({ error: "Recipient must be a registered WorldAML user" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (ctaUrl && !isSafeLink(ctaUrl)) {
+      return new Response(JSON.stringify({ error: "Link must point to worldaml.com" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 

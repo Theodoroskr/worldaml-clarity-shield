@@ -23,8 +23,20 @@ serve(async (req) => {
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) throw new Error("Unauthorized");
 
-    const { regulator, reportType, reportTitle, periodYear, currentContent } = await req.json();
+    const raw = await req.json();
+    // Sanitise caller-supplied values before they reach the AI instructions:
+    // short plain labels only, no line breaks or instruction-like markup.
+    const clean = (v: unknown, max: number) =>
+      typeof v === "string"
+        ? v.replace(/[\r\n\t`<>{}\[\]]/g, " ").replace(/\s+/g, " ").trim().slice(0, max)
+        : "";
+    const regulator = clean(raw?.regulator, 40);
+    const reportType = clean(raw?.reportType, 60);
+    const reportTitle = clean(raw?.reportTitle, 120);
+    const periodYear = /^\d{4}$/.test(String(raw?.periodYear ?? "")) ? Number(raw.periodYear) : new Date().getFullYear();
+    const currentContent = raw?.currentContent && typeof raw.currentContent === "object" ? raw.currentContent : {};
     if (!regulator || !reportType) throw new Error("Missing regulator or reportType");
+    if (!/^[A-Za-z0-9 ._()\/&-]+$/.test(regulator)) throw new Error("Invalid regulator");
 
     // Fetch stats from DB
     const [customers, screenings, alerts, transactions, cases, strs, profile] = await Promise.all([
