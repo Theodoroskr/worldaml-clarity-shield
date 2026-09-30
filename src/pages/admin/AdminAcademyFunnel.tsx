@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { csvCell } from "@/lib/csvSafe";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, TrendingUp, Download, RefreshCw, Filter, ChevronRight, Search, TrendingDown } from "lucide-react";
@@ -301,7 +302,7 @@ export default function AdminAcademyFunnel() {
 
   const exportCsv = (filename: string, rows: (string | number)[][]) => {
     const csv = rows
-      .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
+      .map(r => r.map(v => csvCell(v)).join(","))
       .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -742,7 +743,7 @@ function DrillDownDialog({ drill, onClose, profileById, purchasesByUser, signups
         r.lastActivity,
       ]),
     ]
-      .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
+      .map(r => r.map(v => csvCell(v)).join(","))
       .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);

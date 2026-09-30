@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from "react";
+import { csvCell } from "@/lib/csvSafe";
 import AdminActionRequired from "@/components/admin/AdminActionRequired";
 import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
@@ -261,7 +262,7 @@ export default function AdminPurchaseStatus() {
         r.expires_at || "",
       ]),
     ]
-      .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+      .map((r) => r.map((v) => csvCell(v)).join(","))
       .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
