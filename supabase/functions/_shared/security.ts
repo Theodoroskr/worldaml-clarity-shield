@@ -63,3 +63,30 @@ export async function isAuthorizedScheduledCall(req: Request, admin: any): Promi
     .maybeSingle();
   return !!data?.secret && data.secret === provided;
 }
+
+const INTERNAL_DOMAINS = ["worldaml.com", "infocreditgroup.com"];
+
+/** True when the address is an internal WorldAML / Infocredit mailbox. */
+export function isInternalEmail(email: string): boolean {
+  const d = email.trim().toLowerCase().split("@")[1] ?? "";
+  return INTERNAL_DOMAINS.some((x) => d === x || d.endsWith("." + x));
+}
+
+/** True when the address belongs to a registered WorldAML account (or internal mailbox). */
+export async function isKnownRecipient(admin: any, email: string): Promise<boolean> {
+  const e = email.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return false;
+  if (isInternalEmail(e)) return true;
+  const { data } = await admin.from("profiles").select("user_id").ilike("email", e).limit(1);
+  return !!data?.length;
+}
+
+/** Only allow links to our own sites in outbound emails. */
+export function isSafeLink(url: unknown): boolean {
+  if (typeof url !== "string" || !url) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" &&
+      (u.hostname === "worldaml.com" || u.hostname.endsWith(".worldaml.com"));
+  } catch { return false; }
+}
