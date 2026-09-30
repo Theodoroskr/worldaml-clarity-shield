@@ -1,9 +1,10 @@
 import { Resend } from "npm:resend";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { isAuthorizedScheduledCall } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
 const FROM_EMAIL = "WorldAML Admin <forms@worldaml.com>";
@@ -44,6 +45,12 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+
+  if (!(await isAuthorizedScheduledCall(req, supabase))) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   try {
     // Keep derived notifications in sync (creates new ones, auto-resolves completed ones).
