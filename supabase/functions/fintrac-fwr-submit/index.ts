@@ -37,12 +37,39 @@ Deno.serve(async (req) => {
     return json({ error: "Invalid JSON body" }, 400);
   }
 
-  const { submissionId, payload } = body;
-  if (!submissionId || typeof submissionId !== "string") {
+  const { submissionId } = body;
+  if (!submissionId || typeof submissionId !== "string" || !/^[0-9a-f-]{36}$/i.test(submissionId)) {
     return json({ error: "submissionId is required" }, 400);
   }
+
+  // Load the queued submission with the caller's own permissions (row-level
+  // security limits this to their organisation). The payload sent to FINTRAC
+  // is always the stored one, never caller-supplied data.
+  const { data: submission, error: subErr } = await supabase
+    .from("suite_regulator_submissions")
+    .select("id, organisation_id, adapter, status, request_payload")
+    .eq("id", submissionId)
+    .maybeSingle();
+  if (subErr || !submission) return json({ error: "Submission not found" }, 404);
+  if (submission.adapter !== "fintrac_fwr_api") {
+    return json({ error: "Submission is not a FINTRAC FWR submission" }, 400);
+  }
+  if (["submitted", "acknowledged", "accepted"].includes(String(submission.status))) {
+    return json({ error: "Submission has already been filed" }, 409);
+  }
+  // Only compliance roles in the owning organisation may file with the regulator.
+  const { data: member } = await supabase
+    .from("suite_org_members")
+    .select("role")
+    .eq("organization_id", submission.organisation_id)
+    .eq("user_id", userData.user.id)
+    .maybeSingle();
+  if (!member || !["admin", "mlro", "compliance_officer"].includes(String(member.role))) {
+    return json({ error: "Only an admin, MLRO or compliance officer can file with FINTRAC" }, 403);
+  }
+  const payload = submission.request_payload as Record<string, unknown> | null;
   if (!payload || typeof payload !== "object") {
-    return json({ error: "payload is required" }, 400);
+    return json({ error: "Stored payload is missing" }, 400);
   }
   if ((payload as { schemaVersion?: string }).schemaVersion !== "1.0") {
     return json({ error: "payload must be an FWR v1.0 package" }, 400);
@@ -101,7 +128,7 @@ Deno.serve(async (req) => {
     return json({
       configured: true,
       accepted: false,
-      message: `FINTRAC FWR API call failed: ${(e as Error).message}`,
+      message: "FINTRAC FWR API call failed",
     });
   }
 });
