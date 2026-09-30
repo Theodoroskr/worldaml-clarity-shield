@@ -113,6 +113,25 @@ serve(async (req) => {
       return json({ error: "Invalid request" }, 400);
     }
 
+    // Bind the paid session to the signed-in caller: the checkout must have been
+    // started by this user, or paid with this user's email address.
+    const buyerId = session.metadata?.user_id ?? null;
+    const buyerEmail = (session.customer_details?.email ?? session.customer_email ?? "").toLowerCase();
+    const callerEmail = (user.email ?? "").toLowerCase();
+    const ownsSession = buyerId ? buyerId === user.id : (!!buyerEmail && buyerEmail === callerEmail);
+    if (!ownsSession) {
+      return json({ error: "This payment belongs to a different account. Sign in with the email used at checkout." }, 403);
+    }
+    // A session can only be claimed once, by the account that first activated it.
+    const { data: claimed } = await admin
+      .from("screening_subscriptions")
+      .select("user_id")
+      .eq("stripe_session_id", session.id)
+      .maybeSingle();
+    if (claimed && claimed.user_id && claimed.user_id !== user.id) {
+      return json({ error: "This payment has already been activated." }, 409);
+    }
+
     const plan = (session.metadata?.plan ?? "starter").toLowerCase();
     const quota = PLAN_QUOTA[plan] ?? PLAN_QUOTA.starter;
 
