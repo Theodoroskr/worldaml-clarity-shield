@@ -73,6 +73,7 @@ serve(async (req) => {
   try {
     // Guest checkout: auth optional. Stripe collects email when no session.
     let userEmail: string | undefined;
+    let userId: string | undefined;
     const authHeader = req.headers.get("Authorization");
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.replace("Bearer ", "");
