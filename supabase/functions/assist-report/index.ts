@@ -33,8 +33,8 @@ serve(async (req) => {
     const regulator = clean(raw?.regulator, 40);
     const reportType = clean(raw?.reportType, 60);
     const reportTitle = clean(raw?.reportTitle, 120);
-    const periodYear = /^\d{4}$/.test(String(raw?.periodYear ?? "")) ? String(raw.periodYear) : "";
-    const currentContent = typeof raw?.currentContent === "string" ? raw.currentContent.slice(0, 20000) : "";
+    const periodYear = /^\d{4}$/.test(String(raw?.periodYear ?? "")) ? Number(raw.periodYear) : new Date().getFullYear();
+    const currentContent = raw?.currentContent && typeof raw.currentContent === "object" ? raw.currentContent : {};
     if (!regulator || !reportType) throw new Error("Missing regulator or reportType");
     if (!/^[A-Za-z0-9 ._()\/&-]+$/.test(regulator)) throw new Error("Invalid regulator");
 
