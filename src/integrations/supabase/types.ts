@@ -9542,6 +9542,7 @@ export type Database = {
       sweep_regulator_submission_sla: { Args: never; Returns: number }
       sweep_retention: { Args: never; Returns: Json }
       sweep_sanctions_search_retention: { Args: never; Returns: number }
+      user_can_use_module: { Args: { _module: string }; Returns: boolean }
     }
     Enums: {
       adverse_media_status:
