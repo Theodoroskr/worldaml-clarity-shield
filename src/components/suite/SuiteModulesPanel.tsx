@@ -14,6 +14,7 @@ type ModuleRow = {
   module: string; status: string | null; purchased: boolean;
   enabled: boolean; member_allowed: boolean; ends_at: string | null;
 };
+type CatalogRow = { module: string; name: string; description: string; status: string; acquisition: string; price_label: string | null };
 type Member = { user_id: string; email?: string; full_name?: string; invited_email: string | null };
 
 const MODULE_META: Record<string, { label: string; description: string }> = {
@@ -26,7 +27,13 @@ export default function SuiteModulesPanel({ isAdmin, members }: { isAdmin: boole
   const [rows, setRows] = useState<ModuleRow[]>([]);
   const [memberMods, setMemberMods] = useState<Record<string, string[]>>({});
   const [busy, setBusy] = useState(false);
+  const [catalog, setCatalog] = useState<Record<string, CatalogRow>>({});
+  const [pending, setPending] = useState<string[]>([]);
   const qc = useQueryClient();
+  const meta = (m: string) => ({
+    label: catalog[m]?.name ?? MODULE_META[m]?.label ?? m,
+    description: catalog[m]?.description ?? MODULE_META[m]?.description ?? "",
+  });
 
   const load = async () => {
     const { data, error } = await supabase.rpc("current_user_suite_modules");
@@ -36,6 +43,12 @@ export default function SuiteModulesPanel({ isAdmin, members }: { isAdmin: boole
     const map: Record<string, string[]> = {};
     (mm ?? []).forEach((r) => { (map[r.user_id] ||= []).push(r.module); });
     setMemberMods(map);
+    const { data: cat } = await supabase.from("suite_module_catalog").select("module, name, description, status, acquisition, price_label");
+    const cm: Record<string, CatalogRow> = {};
+    (cat ?? []).forEach((c) => { cm[c.module] = c as CatalogRow; });
+    setCatalog(cm);
+    const { data: reqs } = await supabase.from("suite_module_requests").select("module").eq("status", "pending");
+    setPending((reqs ?? []).map((r) => r.module));
     qc.invalidateQueries({ queryKey: SUITE_MODULES_KEY });
   };
   useEffect(() => { load(); }, []);
@@ -48,7 +61,14 @@ export default function SuiteModulesPanel({ isAdmin, members }: { isAdmin: boole
   };
 
   const setMember = async (userId: string, module: string, allowed: boolean) => {
-    const purchased = rows.filter((r) => r.purchased).map((r) => r.module);
+    const request = async (module: string) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("org_request_module", { _module: module as never });
+    setBusy(false);
+    if (error) toast.error(error.message); else { toast.success("Request sent to WorldAML"); load(); }
+  };
+
+  const purchased = rows.filter((r) => r.purchased).map((r) => r.module);
     const current = memberMods[userId] ?? purchased; // no rows = all modules
     const next = allowed ? Array.from(new Set([...current, module])) : current.filter((m) => m !== module);
     const { error } = await supabase.rpc("org_set_member_modules", {
@@ -70,11 +90,11 @@ export default function SuiteModulesPanel({ isAdmin, members }: { isAdmin: boole
           <div key={r.module} className="flex items-start justify-between gap-4 rounded-lg border border-border p-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-medium text-foreground">{MODULE_META[r.module]?.label ?? r.module}</span>
+                <span className="font-medium text-foreground">{meta(r.module).label}</span>
                 {r.status === "trial" && <Badge variant="secondary">Trial</Badge>}
                 {r.ends_at && <span className="text-xs text-muted-foreground">until {new Date(r.ends_at).toLocaleDateString()}</span>}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">{MODULE_META[r.module]?.description}</p>
+              <p className="text-xs text-muted-foreground mt-1">{meta(r.module).description}</p>
             </div>
             <Switch checked={r.enabled} disabled={!isAdmin || busy} onCheckedChange={(v) => toggle(r.module, v)} aria-label={`Switch ${r.module}`} />
           </div>
@@ -95,7 +115,7 @@ export default function SuiteModulesPanel({ isAdmin, members }: { isAdmin: boole
                     return (
                       <label key={r.module} className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Switch checked={allowed} onCheckedChange={(v) => setMember(m.user_id, r.module, v)} />
-                        {MODULE_META[r.module]?.label ?? r.module}
+                        {meta(r.module).label}
                       </label>
                     );
                   })}
@@ -112,12 +132,20 @@ export default function SuiteModulesPanel({ isAdmin, members }: { isAdmin: boole
           {available.map((r) => (
             <div key={r.module} className="flex items-start justify-between gap-4 rounded-lg border border-dashed border-border p-4">
               <div>
-                <span className="font-medium text-foreground">{MODULE_META[r.module]?.label ?? r.module}</span>
-                <p className="text-xs text-muted-foreground mt-1">{MODULE_META[r.module]?.description}</p>
+                <span className="font-medium text-foreground">{meta(r.module).label}</span>
+                <p className="text-xs text-muted-foreground mt-1">{meta(r.module).description}</p>
               </div>
-              <Button asChild size="sm" variant="outline">
-                <a href={`/contact-sales?product=${r.module}`}>Request module</a>
-              </Button>
+              {catalog[r.module]?.status === "coming_soon" ? (
+                <Badge variant="outline">Coming soon</Badge>
+              ) : pending.includes(r.module) ? (
+                <Badge variant="secondary">Request pending</Badge>
+              ) : !isAdmin ? null : catalog[r.module]?.acquisition === "checkout" ? (
+                <Button asChild size="sm" variant="outline">
+                  <a href={`/contact-sales?product=${r.module}`}>Buy{catalog[r.module]?.price_label ? ` · ${catalog[r.module]?.price_label}` : ""}</a>
+                </Button>
+              ) : (
+                <Button size="sm" variant="outline" disabled={busy} onClick={() => request(r.module)}>Request module</Button>
+              )}
             </div>
           ))}
         </section>
