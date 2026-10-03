@@ -116,22 +116,32 @@ export default {
         });
       }
 
-      // Only send for an invite the caller actually created in an org they administer.
-      const { data: adminOrgs } = await admin
-        .from("product_members")
-        .select("organisation_id")
-        .eq("user_id", caller.id)
-        .eq("product", "screening")
-        .eq("role", "admin");
-      const orgIds = (adminOrgs ?? []).map((r: any) => r.organisation_id);
-      if (!orgIds.length) return deny("Not authorised", 403);
+      // Only send for an invite in an org the caller administers (platform admins: any org).
+      const { data: isPlatformAdmin } = await admin.rpc("has_role", { _user_id: caller.id, _role: "admin" });
+      let orgIds: string[] = [];
+      if (!isPlatformAdmin) {
+        const { data: adminOrgs } = await admin
+          .from("product_members")
+          .select("organisation_id")
+          .eq("user_id", caller.id)
+          .eq("product", "screening")
+          .eq("role", "admin");
+        orgIds = (adminOrgs ?? []).map((r: any) => r.organisation_id);
+        if (!orgIds.length) return deny("Not authorised", 403);
+      }
 
+      // Resolve an existing account by profile or auth email.
       const { data: prof } = await admin
         .from("profiles").select("user_id").ilike("email", email).maybeSingle();
-      let q = admin.from("product_members").select("id, user_id")
-        .in("organisation_id", orgIds).eq("product", "screening");
-      q = prof?.user_id
-        ? q.or(`invited_email.eq.${email},user_id.eq.${prof.user_id}`)
+      let inviteeUserId: string | null = prof?.user_id ?? null;
+      if (!inviteeUserId) {
+        const { data: uid } = await admin.rpc("get_user_id_by_email", { _email: email }).maybeSingle?.() ?? { data: null };
+        if (typeof uid === "string") inviteeUserId = uid;
+      }
+      let q = admin.from("product_members").select("id, user_id").eq("product", "screening");
+      if (!isPlatformAdmin) q = q.in("organisation_id", orgIds);
+      q = inviteeUserId
+        ? q.or(`invited_email.eq.${email},user_id.eq.${inviteeUserId}`)
         : q.eq("invited_email", email);
       const { data: inviteRows } = await q.limit(1);
       if (!inviteRows?.length) return deny("No matching invitation", 403);
