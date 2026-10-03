@@ -743,6 +743,39 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_module_audit: {
+        Row: {
+          action: string
+          actor_id: string
+          after: Json | null
+          before: Json | null
+          created_at: string
+          id: string
+          module: Database["public"]["Enums"]["suite_module_key"] | null
+          organisation_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          id?: string
+          module?: Database["public"]["Enums"]["suite_module_key"] | null
+          organisation_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          id?: string
+          module?: Database["public"]["Enums"]["suite_module_key"] | null
+          organisation_id?: string | null
+        }
+        Relationships: []
+      }
       admin_notification_email_log: {
         Row: {
           created_at: string
@@ -7494,6 +7527,95 @@ export type Database = {
           },
         ]
       }
+      suite_module_catalog: {
+        Row: {
+          acquisition: string
+          default_trial_days: number
+          description: string
+          icon: string
+          module: Database["public"]["Enums"]["suite_module_key"]
+          name: string
+          price_label: string | null
+          sort_order: number
+          status: string
+          stripe_price_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          acquisition?: string
+          default_trial_days?: number
+          description?: string
+          icon?: string
+          module: Database["public"]["Enums"]["suite_module_key"]
+          name: string
+          price_label?: string | null
+          sort_order?: number
+          status?: string
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          acquisition?: string
+          default_trial_days?: number
+          description?: string
+          icon?: string
+          module?: Database["public"]["Enums"]["suite_module_key"]
+          name?: string
+          price_label?: string | null
+          sort_order?: number
+          status?: string
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      suite_module_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          module: Database["public"]["Enums"]["suite_module_key"]
+          note: string | null
+          organisation_id: string
+          requested_by: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          module: Database["public"]["Enums"]["suite_module_key"]
+          note?: string | null
+          organisation_id: string
+          requested_by: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          module?: Database["public"]["Enums"]["suite_module_key"]
+          note?: string | null
+          organisation_id?: string
+          requested_by?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_module_requests_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_notification_log: {
         Row: {
           alert_ids: string[]
@@ -9044,12 +9166,31 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_bulk_set_org_module: {
+        Args: {
+          _ends_at?: string
+          _module: Database["public"]["Enums"]["suite_module_key"]
+          _orgs: string[]
+          _status: Database["public"]["Enums"]["product_status"]
+        }
+        Returns: number
+      }
       admin_client_access_overview: { Args: never; Returns: Json }
       admin_company_360: {
         Args: { _business_account_id?: string; _domain?: string }
         Returns: Json
       }
       admin_data_quality: { Args: never; Returns: Json }
+      admin_decide_module_request: {
+        Args: {
+          _approve: boolean
+          _ends_at?: string
+          _id: string
+          _note?: string
+          _status?: Database["public"]["Enums"]["product_status"]
+        }
+        Returns: undefined
+      }
       admin_grant_suite_access:
         | { Args: { target_email: string }; Returns: undefined }
         | {
@@ -9206,6 +9347,19 @@ export type Database = {
       }
       admin_suspend_internal: {
         Args: { _email: string; _suspend: boolean }
+        Returns: undefined
+      }
+      admin_update_module_catalog: {
+        Args: {
+          _acquisition: string
+          _default_trial_days: number
+          _description: string
+          _module: Database["public"]["Enums"]["suite_module_key"]
+          _name: string
+          _price_label: string
+          _status: string
+          _stripe_price_id: string
+        }
         Returns: undefined
       }
       admin_user_360: { Args: { _user_id: string }; Returns: Json }
@@ -9407,6 +9561,13 @@ export type Database = {
           _schema: Json
         }
         Returns: string
+      }
+      org_request_module: {
+        Args: {
+          _module: Database["public"]["Enums"]["suite_module_key"]
+          _note?: string
+        }
+        Returns: undefined
       }
       org_set_member_modules: {
         Args: {

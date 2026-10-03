@@ -43,6 +43,13 @@
       "when": 1791056445434,
       "tag": "0005_suite_modules_kyc_backfill_and_check",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791056866975,
+      "tag": "0006_suite_module_catalog_requests_audit",
+      "breakpoints": true
     }
   ]
 }
