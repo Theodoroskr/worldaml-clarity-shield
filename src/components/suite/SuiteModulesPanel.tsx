@@ -60,15 +60,15 @@ export default function SuiteModulesPanel({ isAdmin, members }: { isAdmin: boole
     if (error) toast.error(error.message); else { toast.success(enabled ? "Module switched on" : "Module switched off"); load(); }
   };
 
-  const setMember = async (userId: string, module: string, allowed: boolean) => {
-    const request = async (module: string) => {
+  const request = async (module: string) => {
     setBusy(true);
     const { error } = await supabase.rpc("org_request_module", { _module: module as never });
     setBusy(false);
     if (error) toast.error(error.message); else { toast.success("Request sent to WorldAML"); load(); }
   };
 
-  const purchased = rows.filter((r) => r.purchased).map((r) => r.module);
+  const setMember = async (userId: string, module: string, allowed: boolean) => {
+    const purchased = rows.filter((r) => r.purchased).map((r) => r.module);
     const current = memberMods[userId] ?? purchased; // no rows = all modules
     const next = allowed ? Array.from(new Set([...current, module])) : current.filter((m) => m !== module);
     const { error } = await supabase.rpc("org_set_member_modules", {
