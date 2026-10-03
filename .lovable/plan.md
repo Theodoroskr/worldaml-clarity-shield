@@ -38,6 +38,7 @@ Yes, but keep selling them as two products. They already sit on the same organis
 4. **Shared audit trail.** Record Screening decisions, invites and monitoring changes in the Suite audit log, labelled "Screening".
 5. **One access rule.** Make both areas use the same "who has access" check, so they can't disagree.
 6. **Demo setup.** If setting up the free demo fails or takes more than about 10 seconds, show a clear message with a retry button.
+7. **Modules with admin on/off.** Today Screening add-ons (like Four-Eyes Review) can only be switched on when a customer asks and an admin approves the request. Suite module access is set on separate admin pages. Add one "Modules" panel per company in the admin portal that lists every Screening add-on and Suite module. Admins can switch each one on or off directly, optionally with an end date. Customers only see menu items for modules that are on; switched-off ones show "Ask your admin" instead.
 
 Later, not in this plan: merging cases and alerts into one system. It's a bigger change and should be decided on its own.
 
