@@ -1,3 +1,4 @@
+import { useSuiteModules } from "@/hooks/useSuiteModules";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   ChevronRight, CalendarClock, RefreshCw, Users, AlertTriangle,
@@ -44,6 +45,7 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent
 };
 
 export default function SuiteDashboard() {
+  const { canOpen } = useSuiteModules();
   const { orgId, org, isLoading: orgLoading } = useOrganisation();
   const [regulator, setRegulator] = useState<string | null>(null);
   const [riskDistribution, setRiskDistribution] = useState([
@@ -390,6 +392,7 @@ export default function SuiteDashboard() {
           <Activity className="h-4.5 w-4.5 text-primary" /> Live Overview
         </h2>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          {canOpen("/suite/onboarding") && (
           <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/onboarding")}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
@@ -406,7 +409,9 @@ export default function SuiteDashboard() {
               </p>
             </CardContent>
           </Card>
+          )}
 
+          {canOpen("/suite/alerts") && (
           <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/alerts")}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
@@ -424,7 +429,9 @@ export default function SuiteDashboard() {
               </div>
             </CardContent>
           </Card>
+          )}
 
+          {canOpen("/suite/screening") && (
           <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/screening")}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
@@ -441,7 +448,9 @@ export default function SuiteDashboard() {
               </p>
             </CardContent>
           </Card>
+          )}
 
+          {canOpen("/suite/case-queue") && (
           <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/case-queue?status=open")}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
@@ -456,7 +465,9 @@ export default function SuiteDashboard() {
               <p className="text-xs text-muted-foreground mt-2">of {kpi.totalCases} total cases</p>
             </CardContent>
           </Card>
+          )}
 
+          {canOpen("/suite/transactions") && (
           <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/transactions")}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
@@ -473,7 +484,9 @@ export default function SuiteDashboard() {
               </p>
             </CardContent>
           </Card>
+          )}
 
+          {canOpen("/suite/transactions") && (
           <Card className="group hover:shadow-md transition-all cursor-pointer border-border" onClick={() => navigate("/suite/transactions")}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
@@ -491,6 +504,7 @@ export default function SuiteDashboard() {
               </div>
             </CardContent>
           </Card>
+          )}
         </div>
       </div>
 

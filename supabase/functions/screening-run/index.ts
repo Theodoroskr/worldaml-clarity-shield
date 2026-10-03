@@ -77,6 +77,16 @@ Deno.serve(async (req) => {
   const orgId = membership?.organization_id as string | undefined;
   if (!orgId) return json({ error: "No organisation is linked to your account" }, 403);
 
+  // Screening module must be purchased, switched on by the Suite admin and
+  // given to this team member (platform admins bypass inside the function).
+  const { data: canScreen, error: moduleErr } = await userClient.rpc("user_can_use_module", { _module: "screening" });
+  if (moduleErr || canScreen !== true) {
+    return json({
+      error: "The Screening module isn't available to you. Ask your Suite admin for access.",
+      code: "module_not_enabled",
+    }, 403);
+  }
+
   // Debug output exposes internal scoring inputs: restricted to senior roles.
   const DEBUG_ROLES = ["admin", "mlro", "compliance_officer", "analyst"];
   const debugRequested = payload.debug === true;

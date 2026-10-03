@@ -2,6 +2,8 @@
 // on/off and chooses which team members can use each module. What the company
 // has bought is set by WorldAML (admin_set_org_module), never from here.
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { SUITE_MODULES_KEY } from "@/hooks/useSuiteModules";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -24,6 +26,7 @@ export default function SuiteModulesPanel({ isAdmin, members }: { isAdmin: boole
   const [rows, setRows] = useState<ModuleRow[]>([]);
   const [memberMods, setMemberMods] = useState<Record<string, string[]>>({});
   const [busy, setBusy] = useState(false);
+  const qc = useQueryClient();
 
   const load = async () => {
     const { data, error } = await supabase.rpc("current_user_suite_modules");
@@ -33,6 +36,7 @@ export default function SuiteModulesPanel({ isAdmin, members }: { isAdmin: boole
     const map: Record<string, string[]> = {};
     (mm ?? []).forEach((r) => { (map[r.user_id] ||= []).push(r.module); });
     setMemberMods(map);
+    qc.invalidateQueries({ queryKey: SUITE_MODULES_KEY });
   };
   useEffect(() => { load(); }, []);
 

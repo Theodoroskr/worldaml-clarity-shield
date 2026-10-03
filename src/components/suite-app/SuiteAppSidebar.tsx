@@ -8,6 +8,7 @@ import {
   LogOut, ArrowLeft, Wallet, BookOpen, ListChecks, Rss, Network, CalendarClock, ShieldAlert, FileClock, Trash2, Grid3X3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSuiteModules } from "@/hooks/useSuiteModules";
 
 interface NavItem {
   icon: React.ElementType;
@@ -105,6 +106,15 @@ export default function SuiteAppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { canOpen, isLoading: modulesLoading } = useSuiteModules();
+  const visibleGroups = navGroups
+    .map((g) => ({
+      ...g,
+      items: g.items
+        .map((it) => it.children ? { ...it, children: it.children.filter((c) => canOpen(c.path)) } : it)
+        .filter((it) => it.children ? it.children.length > 0 : !it.path || canOpen(it.path)),
+    }))
+    .filter((g) => g.items.length > 0);
 
   const toggleExpand = (label: string) => {
     setExpandedItems((prev) =>
@@ -153,7 +163,7 @@ export default function SuiteAppSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-3">
-        {navGroups.map((group, gi) => (
+        {(modulesLoading ? [] : visibleGroups).map((group, gi) => (
           <div key={gi}>
             {group.title && (
               <div className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
