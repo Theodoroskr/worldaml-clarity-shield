@@ -154,8 +154,9 @@ export default function SuiteUBO() {
       const top = live[0];
       let newStatus = "clear";
       if (top) {
-        if (top.confidence >= 85 && /OFAC|EU Sanctions|UN|HMT/.test(top.listType)) newStatus = "sanctions";
-        else if (top.confidence >= 60 && /OFAC|EU|UN|HMT/.test(top.listType)) newStatus = "potential_match";
+        if (top.confidence >= 85 && /Sanctions|OFAC|UN|HMT/.test(top.listType)) newStatus = "sanctions";
+        else if (top.confidence >= 60 && /Sanctions|Warnings|OFAC|EU|UN|HMT/.test(top.listType)) newStatus = "potential_match";
+        else if (top.confidence >= 60) newStatus = "potential_match";
         else if (top.listType.startsWith("PEP")) newStatus = "pep";
         else if (top.listType === "Adverse Media") newStatus = "adverse_media";
       }
