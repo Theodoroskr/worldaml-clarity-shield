@@ -9,7 +9,11 @@
 
 ## Direction
 
-The Suite becomes the one workspace, and clients choose their modules. Screening & Monitoring is one of them. Screening-only customers keep their pricing and land in the Suite with only that module switched on.
+The Suite becomes the one workspace, renamed **WorldAML Suite** (was "Compliance Suite"). Clients choose their modules, and Screening & Monitoring is one of them. Screening-only customers keep their pricing and land in WorldAML Suite with only that module switched on.
+
+It stays in this project as its own walled-off area. It shares login, billing, the website and the WorldAML admin portal, but keeps all client data, teams and module settings separate from Academy, Partners and Business.
+
+**Rename:** "Compliance Suite" is replaced with "WorldAML Suite" across the app, menus, page titles, emails and marketing pages (13 files today). Web addresses (/suite) stay the same, so existing links keep working.
 
 ## Plan (in this order)
 
@@ -75,6 +79,7 @@ On every path (manual, UBO, manual client add, onboarding form):
 ## Questions to confirm
 
 - Should the free trial need a click (recommended) or keep starting automatically?
+- Name spelling: I've used "WorldAML Suite" to match your other brand names. Tell me if you want exactly "Worldamlsuite".
 - Which privacy wording should onboarding forms use? I'll draft a default line.
 
 ## Technical details
