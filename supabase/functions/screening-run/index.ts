@@ -489,6 +489,10 @@ Deno.serve(async (req) => {
     // Per-match summary of how each displayed name match was derived.
     matches: result.matches.map((m) => ({
       matched_name: m.matched_name,
+      categories: m.categories,
+      category_labels: m.category_labels,
+      country: m.country,
+      year_of_birth: m.year_of_birth,
       name_similarity: m.name_similarity,
       match_basis: m.match_basis,
       match_types: m.match_types,

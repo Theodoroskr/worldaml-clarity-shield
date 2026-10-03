@@ -1,12 +1,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // src/services/screeningProvider.ts
 //
-// Provider abstraction for AML / sanctions / PEP screening.
-// Switch provider by changing SCREENING_PROVIDER in .env:
-//   VITE_SCREENING_PROVIDER=mock          ← default, deterministic test data
-//   VITE_SCREENING_PROVIDER=worldcompliance
-//   VITE_SCREENING_PROVIDER=dowjones
+// Compatibility wrapper used by Suite pages (AML Screening, UBO, onboarding
+// submissions). Always calls the real WorldAML screening engine
+// (`screening-run`). There is NO mock fallback in the live app: if the engine
+// fails, the call throws so callers can record "failed" — never "clear".
 // ─────────────────────────────────────────────────────────────────────────────
+
+import { runScreeningV2 } from "@/lib/suite/screeningV2";
 
 export type ListType =
   | "OFAC SDN"
@@ -19,7 +20,10 @@ export type ListType =
   | "PEP Class 4"
   | "Adverse Media"
   | "Interpol"
-  | "FATF High-Risk";
+  | "FATF High-Risk"
+  | "Sanctions"
+  | "PEP"
+  | "Warnings";
 
 export interface ScreeningResult {
   id: string;
@@ -54,170 +58,69 @@ interface ScreeningProvider {
   search(req: ScreeningRequest): Promise<ScreeningResponse>;
 }
 
-const MOCK_DATABASE: ScreeningResult[] = [
-  {
-    id: "mock-001",
-    name: "Aleksandr Volkov",
-    confidence: 96,
-    listType: "OFAC SDN",
-    aliases: ["A. Volkov", "Sasha Volkov"],
-    countries: ["RU", "BY"],
-    dob: "12/03/1968",
-    position: "Sanctioned oligarch — energy sector",
-    dataSource: "OFAC SDN List",
-    lastUpdated: "2025-11-01",
-  },
-  {
-    id: "mock-002",
-    name: "Elena Kravchenko",
-    confidence: 78,
-    listType: "EU Sanctions",
-    aliases: ["E. Kravchenko"],
-    countries: ["UA", "RU"],
-    dob: "ca. 1975",
-    position: "EU-designated individual",
-    dataSource: "EU Consolidated Sanctions List",
-    lastUpdated: "2025-09-15",
-  },
-  {
-    id: "mock-003",
-    name: "Yusuf Al-Rashid",
-    confidence: 88,
-    listType: "UN Consolidated",
-    aliases: ["Y. Al Rashid", "Abu Yusuf"],
-    countries: ["YE", "SA"],
-    dob: "Unknown",
-    position: "UN-designated — terrorism financing",
-    dataSource: "UN Security Council Consolidated List",
-    lastUpdated: "2025-10-20",
-  },
-  {
-    id: "mock-004",
-    name: "Maria Petrakis",
-    confidence: 62,
-    listType: "PEP Class 2",
-    aliases: ["M. Petrakis"],
-    countries: ["GR", "CY"],
-    dob: "04/07/1980",
-    position: "Member of Parliament — Greece",
-    dataSource: "WorldCompliance PEP Database",
-    lastUpdated: "2025-12-01",
-  },
-  {
-    id: "mock-005",
-    name: "Dmitri Sokolov",
-    confidence: 45,
-    listType: "Adverse Media",
-    aliases: [],
-    countries: ["RU"],
-    dob: "1972",
-    position: "Investigated — money laundering allegations",
-    dataSource: "Adverse Media Monitor",
-    lastUpdated: "2025-08-30",
-  },
-  {
-    id: "mock-006",
-    name: "James Thornton",
-    confidence: 31,
-    listType: "HMT UK",
-    aliases: ["J. Thornton"],
-    countries: ["GB"],
-    dob: "Unknown",
-    position: "HM Treasury designated person",
-    dataSource: "OFSI UK Sanctions List",
-    lastUpdated: "2025-07-10",
-  },
-];
+const CATEGORY_TO_LIST: Record<string, ListType> = {
+  sanctions: "Sanctions",
+  pep_rca: "PEP",
+  warnings: "Warnings",
+  adverse_media: "Adverse Media",
+};
 
-const LISTS_SEARCHED = [
-  "OFAC SDN",
-  "EU Consolidated",
-  "UN Security Council",
-  "HMT UK / OFSI",
-  "PEP Class 1–4",
-  "Adverse Media",
-  "Interpol Notices",
-];
+const LIST_PRIORITY: ListType[] = ["Sanctions", "Warnings", "PEP", "Adverse Media"];
 
-class MockProvider implements ScreeningProvider {
-  name = "mock";
+/** Real WorldAML engine (LexisNexis-powered), via the `screening-run` function. */
+class WorldAmlProvider implements ScreeningProvider {
+  name = "worldaml";
 
   async search(req: ScreeningRequest): Promise<ScreeningResponse> {
-    await new Promise((r) => setTimeout(r, 600 + Math.random() * 400));
-
-    const query = req.query.toLowerCase().trim();
-    const minConf = req.minConfidence ?? 20;
-
-    const scored = MOCK_DATABASE.map((record) => {
-      const haystack = [record.name, ...record.aliases, record.position]
-        .join(" ")
-        .toLowerCase();
-
-      const queryTokens = query.split(/\s+/);
-      const matchTokens = queryTokens.filter(
-        (t) => t.length > 2 && haystack.includes(t)
-      );
-
-      const overlap = matchTokens.length / Math.max(queryTokens.length, 1);
-      const adjusted = Math.round(record.confidence * (0.4 + 0.6 * overlap));
-
-      return { ...record, confidence: adjusted };
+    const query = req.query.trim();
+    if (!query) throw new Error("A name is required to screen");
+    const types = req.types ?? ["sanctions", "pep", "adverse_media"];
+    const res = await runScreeningV2({
+      subject: { subject_type: "any", full_name: query },
+      include_adverse_media: types.includes("adverse_media"),
+      start_monitoring: false,
+    }) as Awaited<ReturnType<typeof runScreeningV2>> & {
+      matches?: Array<{
+        matched_name: string;
+        categories?: string[];
+        country?: string | null;
+        year_of_birth?: number | null;
+        name_similarity?: number | null;
+        provider_relevance?: number | null;
+      }>;
+    };
+    const minConf = req.minConfidence ?? 0;
+    const results: ScreeningResult[] = (res.matches ?? []).map((m, i) => {
+      const lists = (m.categories ?? []).map((c) => CATEGORY_TO_LIST[c]).filter(Boolean);
+      const listType = LIST_PRIORITY.find((l) => lists.includes(l)) ?? "Warnings";
+      return {
+        id: `${res.search_id}-${i}`,
+        name: m.matched_name,
+        confidence: Math.round(m.name_similarity ?? m.provider_relevance ?? 0),
+        listType,
+        aliases: [],
+        countries: m.country ? [m.country] : [],
+        dob: m.year_of_birth ? String(m.year_of_birth) : "",
+        position: "",
+        dataSource: `WorldAML case ${res.case_reference}`,
+        lastUpdated: new Date().toISOString().slice(0, 10),
+      };
     })
       .filter((r) => r.confidence >= minConf)
-      .sort((a, b) => b.confidence - a.confidence)
-      .slice(0, 8);
+      .sort((a, b) => b.confidence - a.confidence);
 
     return {
-      results: scored,
-      queryId: `mock-${Date.now()}`,
-      provider: "mock",
+      results,
+      queryId: res.search_id,
+      provider: "worldaml",
       searchedAt: new Date().toISOString(),
-      listsSearched: LISTS_SEARCHED,
+      listsSearched: res.categories_screened.map((c) => CATEGORY_TO_LIST[c] ?? c),
     };
   }
 }
 
-class WorldComplianceProvider implements ScreeningProvider {
-  name = "worldcompliance";
+const provider: ScreeningProvider = new WorldAmlProvider();
 
-  async search(_req: ScreeningRequest): Promise<ScreeningResponse> {
-    throw new Error(
-      "WorldCompliance credentials not configured. Set VITE_SCREENING_PROVIDER=mock."
-    );
-  }
-}
-
-class DowJonesProvider implements ScreeningProvider {
-  name = "dowjones";
-
-  async search(_req: ScreeningRequest): Promise<ScreeningResponse> {
-    throw new Error(
-      "Dow Jones credentials not configured. Set VITE_SCREENING_PROVIDER=mock."
-    );
-  }
-}
-
-function getProvider(): ScreeningProvider {
-  const name = import.meta.env.VITE_SCREENING_PROVIDER ?? "mock";
-  switch (name) {
-    case "worldcompliance":
-      return new WorldComplianceProvider();
-    case "dowjones":
-      return new DowJonesProvider();
-    default:
-      return new MockProvider();
-  }
-}
-
-const provider = getProvider();
-
-export async function runScreening(
-  req: ScreeningRequest
-): Promise<ScreeningResponse> {
-  if (!req.query.trim()) {
-    throw new Error("Search query cannot be empty");
-  }
+export async function runScreening(req: ScreeningRequest): Promise<ScreeningResponse> {
   return provider.search(req);
 }
-
-export const activeProvider = provider.name;
