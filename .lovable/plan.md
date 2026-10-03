@@ -1,56 +1,77 @@
-# Screening workspace and Compliance Suite: assessment and fix plan
+# Screening as a Suite module: revised plan
 
-## What I found
+## Where things stand (checked)
 
-**Biggest problem: the Suite checks names against made-up data.**
-The Suite's "AML Screening" page, its ownership (UBO) checks and its onboarding-submission checks all use a built-in test list of six fake sanctioned people. Nothing switches them to real data, so the Suite can show staff fake "hits" or false "all clear" results. The separate Screening workspace already uses the real LexisNexis-powered checks.
+- **Fake screening data:** the Suite's AML Screening page, its owner (UBO) checks and its onboarding-form checks all fall back to a built-in list of six fake people, because nothing tells them to use real data. The Screening workspace already uses the real LexisNexis-powered checks.
+- **No fake results were ever saved.** The Suite's screening records are empty: 0 rows, 0 companies. So nothing needs re-screening and no clients need to be told. A record of this check will be kept for compliance.
+- **Access disagreement:** one access check lets in anyone on the "suite"/"enterprise" plan level, or with Screening only. Today that only affects which menu links show. Entry to the Suite and the data itself are protected by other checks. It's not a data leak, but it gets fixed early.
+- **Two separate workspaces** with duplicated team, case, alert and audit screens, and no way to move between them.
 
-**Duplicated features that don't share data**
-| Area | Screening workspace | Compliance Suite |
-|---|---|---|
-| Name screening | Real checks | Test data (above) |
-| Cases | Its own decision records | Separate case system |
-| Alerts | Risk alert rules | Separate alerts and rules |
-| Team | Its own invite screen | Separate members screen in Settings |
-| Audit trail | None | Full audit log, but it doesn't see Screening actions |
+## Direction
 
-**Moving between them is hard**
-- There's no switcher between the two. From the Suite there are only three small links into Screening, and none going back.
-- They look like two different apps: Screening is dark with a flat menu, the Suite is light with grouped menus.
-- The Suite's "AML Screening" and the Screening workspace look like the same feature, but they run on separate systems.
+The Suite becomes the one workspace, and clients choose their modules. Screening & Monitoring is one of them. Screening-only customers keep their pricing and land in the Suite with only that module switched on.
 
-**Smaller issues**
-- The Suite and Screening use different rules to decide who gets in. Two separate access checks disagree in one case: users on the "suite" or "enterprise" plan level.
-- Signed-in users get the free 5-screening demo automatically. While it's being set up, the page shows "Preparing your workspace…", which can stick.
+## Plan (in this order)
 
-## Direction: Screening becomes a module of the Suite
+**1. Make screening safe (urgent)**
+- Switch the Suite's AML Screening page, UBO checks and onboarding-form checks to the real engine.
+- If the screening provider is missing or misconfigured, show a clear error instead of quietly using fake data. An automatic test stops any live release that contains the fake data.
+- Until this ships, the Suite's AML Screening page is hidden and the UBO and onboarding checks are blocked.
 
-There will be one workspace, the Suite, and clients pick the modules they want: Screening & Monitoring, KYC/KYB, Transactions, Cases, Compliance Manager (RCM) and so on. Screening-only customers buy just the Screening module. Their pricing stays the same, but they land in the Suite with only Screening switched on. Behind the scenes both already share the same company and team setup, so this mainly changes the menus and access, not the data.
+**2. One access rule**
+- Both access checks follow the same rule, and plan level alone no longer grants Suite access.
 
-## Fix plan (in order)
+**3. Modules, without locking anyone out**
+- Every company that already has Screening (paid, demo or add-on) gets the Screening module first, before anything moves.
+- Then the Suite opens for anyone with at least one module and only shows the modules that company has. Locked ones show "Ask your admin" or "Add module".
 
-1. **Stop the fake results (urgent).** The Suite's AML Screening page uses the real engine, the same one that runs the Screening workspace today. Ownership and onboarding checks switch to it too, and the test data is removed from the live app.
-2. **Screening moves into the Suite.** Screening, Monitored entities, Risk alerts, Team and Add-ons become a "Screening & Monitoring" group in the Suite menu. Old /screening links redirect to their matching Suite pages, so emails, bookmarks and the pricing page keep working.
-3. **Module-based access.** The Suite opens for anyone with at least one module and shows only the modules that company has. Modules they don't have show as locked with "Ask your admin" or "Add module".
-4. **Admin module controls.** One "Modules" panel per company in the admin portal lists every module and Screening add-on (like Four-Eyes Review). Admins switch each on or off directly, with an optional end date. Customer add-on requests show there for approval.
-5. **One team, one audit trail.** Team members are managed in one place, Suite Settings, and the separate Screening team screen redirects there. Screening decisions and monitoring changes go into the Suite audit log.
-6. **Signup and buying.** Screening checkout and the free demo switch on the Screening module for the company, then send the user to the Suite. If setup fails or takes more than about 10 seconds, the user sees a clear message with a retry button.
-7. **Screening inside the client workflow.** With the Screening module on, screening happens two ways:
-   - **Manual:** staff type a name and screen it on the Screening page.
-   - **Automatic:** a new client is screened as soon as staff add one by hand, or as soon as a prospect sends in one of our client's onboarding forms. Owners and directors (UBOs) are screened too.
-   The result goes on the client's profile (clear, possible match, or match). Matches open a review case and, where set up, add the client to ongoing monitoring. Today, onboarding-form screening only runs when staff approve the form, and it uses the test data. It will run as soon as the form arrives, using real data.
-8. **Tidy up.** Remove the Screening workspace's separate dark menu, and make the Suite and Screening use the same access check so they can't disagree.
+**4. Screening moves into the Suite, plus admin controls**
+- A "Screening & Monitoring" group in the Suite menu holds Screening, Monitored, Risk alerts and Add-ons.
+- Old /screening links redirect to the matching Suite page and keep their filters and record links.
+- A "Modules" panel per company in the admin portal lets admins switch each module and add-on on or off, with an optional end date. Customer requests show there for approval.
 
-Later, not in this plan: merging Screening's cases and alerts with the Suite's. It's a bigger change and should be decided on its own.
+**5. One team, one audit trail**
+- Team members are managed in Suite Settings, and the old Screening team screen redirects there.
+- Screening decisions are recorded in the Suite audit log. Past Screening decisions are copied in, and the start date is noted for auditors.
+
+**6. Signup and buying**
+- Buying Screening switches on the Screening module, then opens the Suite.
+- The free demo needs a "Start free trial" click instead of starting automatically. This also removes the "Preparing your workspace…" screen that can get stuck.
+
+**7. One place to review matches**
+- All matches, manual and automatic, go to the Suite's case queue. The Screening page's own decision records feed into it, so there's one review queue.
+
+**8. Automatic screening in the client workflow**
+- Screening runs when staff add a client by hand, when a prospect sends in an onboarding form, and for every owner and director.
+- Clients are screened again when their name, date of birth or nationality changes.
+- Each client shows a clear status: Pending, Clear, Possible match, Match, Not screened (with the reason: module off, quota used up or skipped) or Failed. Never a blank that looks like "clear".
+- Spam protection on public forms (rate limits and basic checks) so junk forms can't use up quota.
+- Each record version is screened only once, so retries don't double-charge.
+- When the module is switched on, existing clients are not screened automatically. Admins get a "Screen existing clients" button instead.
+- Data protection: you confirm the privacy notice on onboarding forms covers screening. I'll add a standard line you can edit.
+
+**9. Tidy up**
+- Remove the old separate Screening menu and leftover code.
+
+## How we'll know it works
+
+On every path (manual, UBO, manual client add, onboarding form):
+- A known sanctioned name shows as a match and opens a case.
+- A known clean name shows as clear.
+- With the provider switched off, it shows "Failed" or "Not screened", never "Clear".
+- An existing Screening customer still gets in after the move, and old links still open.
+
+## Questions to confirm
+
+- Should the free trial need a click (recommended) or keep starting automatically?
+- Which privacy wording should onboarding forms use? I'll draft a default line.
 
 ## Technical details
 
-- `src/services/screeningProvider.ts` falls back to `MockProvider` when `VITE_SCREENING_PROVIDER` isn't set, and the project never sets it. It's used by `SuiteScreening.tsx` (route `/suite/screening`), `SuiteUBO.tsx:151` and `SuiteOnboardingSubmissions.tsx:167`. That last one only runs on staff approval, inside the browser.
-- Step 1: `/suite/screening` renders `SuiteScreeningV2`. UBO and Submissions call `screening-run` through `src/lib/suite/screeningV2.ts`. The mock is kept only for tests.
-- Step 2: move the pages under `/suite/screening/*` inside `SuiteAppLayout`, and turn the `/screening/*` routes into `<Navigate>` redirects. Update links in `SuiteScreeningV2.tsx` and in emails, for example `SCREENING_URL` in `send-screening-invite-email`.
-- Step 3: add `screening` to `suite_module_key` (additive enum value). `PortalGuard`/`SuiteAppLayout` allow entry with any active module. `SuiteAppSidebar` filters groups by module.
-- Step 4: an admin RPC writes to `suite_module_access` and `screening_org_modules`, guarded by `has_role(admin)`. A new panel goes in AdminOrganizations.
-- Step 5: `ScreeningTeam` redirects to Suite Settings members. `invite_screening_member` and `screening-decision` write to `suite_audit_log`.
-- Step 6: `claim-screening-demo` and the screening webhook grant the `screening` module. Add a timeout and error state to the activation screen.
-- Step 7: a new `auto-screen-subject` function, run server-side for new `suite_customers` rows (manual add) and new `suite_onboarding_submissions` rows (public form), plus UBO rows. It calls the shared screening engine, links the search to the customer, writes `suite_screenings`, and uses the existing `trigger_workflow_screening_match` for cases and workflows. It applies the screening whitelist and counts against the screening quota, and is skipped when the module is off.
-- Step 8: delete `ScreeningLayout`. `useAccess` uses the same rule as `usePortalAccess`.
+- Mock: `screeningProvider.ts` `getProvider()` defaults to `MockProvider`. Used by `SuiteScreening.tsx`, `SuiteUBO.tsx:151`, `SuiteOnboardingSubmissions.tsx:167`. `suite_screenings` row count = 0 (queried). Replace these with `screeningV2` → `screening-run`. `getProvider` throws when the provider isn't configured. Add a vitest/CI check that greps `dist/` for `MOCK_DATABASE`. Temporary kill switch: hide the sidebar entry and redirect the route.
+- Access: `useAccess.ts:65` drops the `tier` branch and is derived from `usePortalAccess`.
+- Enum: `ALTER TYPE suite_module_key ADD VALUE 'screening'` goes in its own migration. The backfill (from `product_access`/`screening_subscriptions`/`screening_org_modules`) goes in the next one, before the route changes.
+- Redirects: `<Navigate>` keeps `location.search`/hash and IDs.
+- Admin RPC `admin_set_org_module` (with a `has_role` admin check) writes to `suite_module_access`/`screening_org_modules`.
+- Audit: `screening-decision` and `invite_screening_member` write to `suite_audit_log`, and past decisions are copied in.
+- Auto-screen: a new `auto-screen-subject` function, triggered from inserts and updates of the relevant fields on `suite_customers`, `suite_onboarding_submissions` and `suite_ubo` via `pg_net`, behind a cron-secret check. An idempotency key (record id + hash of the screened fields) is stored in a new `screening_runs` table with a status enum. It applies the whitelist and quota, and the existing `trigger_workflow_screening_match` raises cases. The public form gets a per-form/IP rate limit in `get_public_onboarding_form`'s submit path.
