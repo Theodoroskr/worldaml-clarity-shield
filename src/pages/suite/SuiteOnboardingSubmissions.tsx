@@ -176,6 +176,7 @@ export default function SuiteOnboardingSubmissions() {
           await supabase.from("suite_screenings").insert({
             customer_id: linkedId,
             user_id: user.id,
+            organisation_id: orgId,
             screening_type: "sanctions_pep",
             result,
             match_count: matchCount,
@@ -186,6 +187,7 @@ export default function SuiteOnboardingSubmissions() {
             await supabase.from("suite_alerts").insert({
               customer_id: linkedId,
               user_id: user.id,
+              organisation_id: orgId,
               alert_type: "screening_match",
               severity: highConfidence.length >= 2 ? "high" : "medium",
               title: `Onboarding screening match — ${screenQuery}`,
