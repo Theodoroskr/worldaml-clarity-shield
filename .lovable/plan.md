@@ -57,9 +57,16 @@ It stays in this project as its own walled-off area. It shares login, billing, t
 - Spam protection on public forms (rate limits and basic checks) so junk forms can't use up quota.
 - Each record version is screened only once, so retries don't double-charge.
 - When the module is switched on, existing clients are not screened automatically. Admins get a "Screen existing clients" button instead.
-- Data protection: you confirm the privacy notice on onboarding forms covers screening. I'll add a standard line you can edit.
+- Data protection: every onboarding form gets a default notice that each client can edit: "By submitting this form, you agree that [Company] may check the information you provide against sanctions, politically exposed person (PEP) and adverse media sources to meet its anti-money laundering obligations. Your data is processed in line with [Company]'s privacy policy." [Company] fills in automatically, and the privacy policy is a link the client provides.
 
-**9. Tidy up**
+**9. Branded onboarding forms for each client**
+Clients can already build forms with their own fields and set a logo link, one colour and a company name. This adds:
+- **A personal web address for each client,** such as worldaml.com/onboard/acme-bank/individual. It replaces the current long code link, and old links keep working.
+- **Upload a logo** instead of pasting a link, plus colour choices for the main colour, buttons and background, with a live preview.
+- **Custom fields** in the existing builder: text, date, dropdown, yes/no, file upload, country. Fields can be marked as required or as the name used for screening.
+- Each client edits only their own forms and branding. Prospects see the client's brand, with an optional small "Powered by WorldAML" line.
+
+**10. Tidy up**
 - Remove the old separate Screening menu and leftover code.
 
 ## Client separation (applies to every step)
@@ -76,11 +83,11 @@ On every path (manual, UBO, manual client add, onboarding form):
 - With the provider switched off, it shows "Failed" or "Not screened", never "Clear".
 - An existing Screening customer still gets in after the move, and old links still open.
 
-## Questions to confirm
+## Decisions confirmed
 
-- Should the free trial need a click (recommended) or keep starting automatically?
-- Name spelling: I've used "WorldAML Suite" to match your other brand names. Tell me if you want exactly "Worldamlsuite".
-- Which privacy wording should onboarding forms use? I'll draft a default line.
+- The free trial starts only when the user clicks "Start free trial".
+- Name: WorldAML Suite.
+- Default privacy line as drafted in step 8, editable for each client.
 
 ## Technical details
 
