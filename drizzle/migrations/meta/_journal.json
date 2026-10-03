@@ -50,6 +50,20 @@
       "when": 1791056866975,
       "tag": "0006_suite_module_catalog_requests_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791057189453,
+      "tag": "0007_suite_security_audit_and_immutable_logs",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791057281920,
+      "tag": "0008_suite_revoke_anon_table_access",
+      "breakpoints": true
     }
   ]
 }

@@ -14,3 +14,11 @@
 - [ ] 8. Automatic screening in client workflow
 - [ ] 9. Branded onboarding forms + personal URLs
 - [ ] 10. Rename to "WorldAML Suite" (confirm spelling) + tidy
+
+## Suite security (plan 2026-10-03)
+- [x] Live Suite audit + go-live badge (Admin → Security), append-only audit trails, anon locked out of Suite tables, 30-min idle sign-out
+- [x] Two-company separation test run (client user saw 0 rows of other companies on all 54 tables)
+- [ ] Extra encryption for ID/passport, DOB, tax, bank fields + masking
+- [ ] Two-step sign-in: required for WorldAML admins (3 without), optional per-company requirement
+- [ ] Nightly automatic separation test + email on red badge
+- [ ] Shared company check in every Suite server function

@@ -5896,6 +5896,36 @@ export type Database = {
           },
         ]
       }
+      security_audit_runs: {
+        Row: {
+          created_at: string
+          high_count: number
+          id: string
+          kind: string
+          passed: boolean
+          results: Json
+          run_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          high_count?: number
+          id?: string
+          kind?: string
+          passed: boolean
+          results?: Json
+          run_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          high_count?: number
+          id?: string
+          kind?: string
+          passed?: boolean
+          results?: Json
+          run_by?: string | null
+        }
+        Relationships: []
+      }
       signup_followups_sent: {
         Row: {
           email: string
@@ -9698,6 +9728,24 @@ export type Database = {
       suite_provision_baseline_rules: {
         Args: { _org: string }
         Returns: number
+      }
+      suite_security_audit_run: {
+        Args: never
+        Returns: {
+          created_at: string
+          high_count: number
+          id: string
+          kind: string
+          passed: boolean
+          results: Json
+          run_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "security_audit_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       sweep_customer_document_expiry: { Args: never; Returns: Json }
       sweep_regulator_submission_sla: { Args: never; Returns: number }

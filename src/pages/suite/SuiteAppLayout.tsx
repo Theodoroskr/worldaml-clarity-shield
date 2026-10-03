@@ -7,6 +7,7 @@ import SuiteAppTopbar from "@/components/suite-app/SuiteAppTopbar";
 import SEO from "@/components/SEO";
 import { Lock, Loader2 } from "lucide-react";
 import { useSuiteModules } from "@/hooks/useSuiteModules";
+import { useIdleSignOut } from "@/hooks/useIdleSignOut";
 import { requirementFor, MODULE_LABELS } from "@/lib/suite/moduleRoutes";
 
 export default function SuiteAppLayout() {
@@ -18,6 +19,7 @@ export default function SuiteAppLayout() {
   const { org, orgId, isLoading: orgLoading, isAdmin: isOrgAdmin } = useOrganisation();
   const location = useLocation();
   const modules = useSuiteModules();
+  useIdleSignOut(30);
 
 
   if (isLoading) {

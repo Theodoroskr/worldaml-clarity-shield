@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import SuiteGoLiveAudit from "@/components/admin/SuiteGoLiveAudit";
 import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -153,6 +154,8 @@ export default function AdminSecurityAudit() {
       </div>
 
       <AdminActionRequired path="/admin/security" />
+
+      <SuiteGoLiveAudit />
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
