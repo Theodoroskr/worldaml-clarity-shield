@@ -35,17 +35,22 @@ There will be one workspace, the Suite, and clients pick the modules they want: 
 4. **Admin module controls.** One "Modules" panel per company in the admin portal lists every module and Screening add-on (like Four-Eyes Review). Admins switch each on or off directly, with an optional end date. Customer add-on requests show there for approval.
 5. **One team, one audit trail.** Team members are managed in one place, Suite Settings, and the separate Screening team screen redirects there. Screening decisions and monitoring changes go into the Suite audit log.
 6. **Signup and buying.** Screening checkout and the free demo switch on the Screening module for the company, then send the user to the Suite. If setup fails or takes more than about 10 seconds, the user sees a clear message with a retry button.
-7. **Tidy up.** Remove the Screening workspace's separate dark menu, and make the Suite and Screening use the same access check so they can't disagree.
+7. **Screening inside the client workflow.** With the Screening module on, screening happens two ways:
+   - **Manual:** staff type a name and screen it on the Screening page.
+   - **Automatic:** a new client is screened as soon as staff add one by hand, or as soon as a prospect sends in one of our client's onboarding forms. Owners and directors (UBOs) are screened too.
+   The result goes on the client's profile (clear, possible match, or match). Matches open a review case and, where set up, add the client to ongoing monitoring. Today, onboarding-form screening only runs when staff approve the form, and it uses the test data. It will run as soon as the form arrives, using real data.
+8. **Tidy up.** Remove the Screening workspace's separate dark menu, and make the Suite and Screening use the same access check so they can't disagree.
 
 Later, not in this plan: merging Screening's cases and alerts with the Suite's. It's a bigger change and should be decided on its own.
 
 ## Technical details
 
-- `src/services/screeningProvider.ts` falls back to `MockProvider` when `VITE_SCREENING_PROVIDER` isn't set, and the project never sets it. It's used by `SuiteScreening.tsx` (route `/suite/screening`), `SuiteUBO.tsx:151` and `SuiteOnboardingSubmissions.tsx:167`.
+- `src/services/screeningProvider.ts` falls back to `MockProvider` when `VITE_SCREENING_PROVIDER` isn't set, and the project never sets it. It's used by `SuiteScreening.tsx` (route `/suite/screening`), `SuiteUBO.tsx:151` and `SuiteOnboardingSubmissions.tsx:167`. That last one only runs on staff approval, inside the browser.
 - Step 1: `/suite/screening` renders `SuiteScreeningV2`. UBO and Submissions call `screening-run` through `src/lib/suite/screeningV2.ts`. The mock is kept only for tests.
 - Step 2: move the pages under `/suite/screening/*` inside `SuiteAppLayout`, and turn the `/screening/*` routes into `<Navigate>` redirects. Update links in `SuiteScreeningV2.tsx` and in emails, for example `SCREENING_URL` in `send-screening-invite-email`.
-- Step 3: add `screening` to `suite_module_key` (additive enum value). `PortalGuard`/`SuiteAppLayout` allow entry with any active module (Suite access or screening entitlement). `SuiteAppSidebar` filters groups by module.
+- Step 3: add `screening` to `suite_module_key` (additive enum value). `PortalGuard`/`SuiteAppLayout` allow entry with any active module. `SuiteAppSidebar` filters groups by module.
 - Step 4: an admin RPC writes to `suite_module_access` and `screening_org_modules`, guarded by `has_role(admin)`. A new panel goes in AdminOrganizations.
-- Step 4: write to `suite_audit_log` from `screening-decision`, `invite_screening_member` and the monitoring add/remove actions, using the caller's `organisation_id`.
-- Step 5: `useAccess` uses the same suite rule as `usePortalAccess`, and the duplicate rule is removed.
-- Step 6: add a timeout and error state in `ScreeningWorkspace.tsx`.
+- Step 5: `ScreeningTeam` redirects to Suite Settings members. `invite_screening_member` and `screening-decision` write to `suite_audit_log`.
+- Step 6: `claim-screening-demo` and the screening webhook grant the `screening` module. Add a timeout and error state to the activation screen.
+- Step 7: a new `auto-screen-subject` function, run server-side for new `suite_customers` rows (manual add) and new `suite_onboarding_submissions` rows (public form), plus UBO rows. It calls the shared screening engine, links the search to the customer, writes `suite_screenings`, and uses the existing `trigger_workflow_screening_match` for cases and workflows. It applies the screening whitelist and counts against the screening quota, and is skipped when the module is off.
+- Step 8: delete `ScreeningLayout`. `useAccess` uses the same rule as `usePortalAccess`.
