@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useOrganisation, type OrgRole } from "@/hooks/useOrganisation";
+import SuiteModulesPanel from "@/components/suite/SuiteModulesPanel";
 
 interface Member {
   id: string;
@@ -36,7 +37,7 @@ export default function SuiteSettings() {
   const { org, orgId, role: myRole, isAdmin, isLoading: orgLoading, refetch } = useOrganisation();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"team" | "organisation" | "roles">("team");
+  const [activeTab, setActiveTab] = useState<"team" | "organisation" | "roles" | "modules">("team");
   const [copied, setCopied] = useState(false);
 
   // Invite form
@@ -189,6 +190,7 @@ export default function SuiteSettings() {
     { id: "team" as const, label: "Team Members", Icon: Users },
     { id: "organisation" as const, label: "Organisation", Icon: Building2 },
     { id: "roles" as const, label: "Role Permissions", Icon: Shield },
+    { id: "modules" as const, label: "Modules", Icon: Settings },
   ];
 
   if (orgLoading) return <div className="flex items-center justify-center h-full text-sm text-muted-foreground">Loading…</div>;
@@ -443,6 +445,8 @@ export default function SuiteSettings() {
       )}
 
       {/* ── ROLES TAB ─────────────────────────────────────────────────── */}
+      {activeTab === "modules" && <SuiteModulesPanel isAdmin={isAdmin} members={members} />}
+
       {activeTab === "roles" && (
         <div className="space-y-3 max-w-2xl">
           <p className="text-xs text-muted-foreground mb-4">
