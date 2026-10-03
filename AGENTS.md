@@ -1,0 +1,1 @@
+- Sensitive Suite fields (DOB, ID/passport, tax, bank) are encrypted by database triggers into *_enc columns with masked copies; read full values only via suite_reveal_pii (logged). Why: plaintext never rests in client tables.

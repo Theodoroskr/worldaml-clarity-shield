@@ -18,7 +18,7 @@
 ## Suite security (plan 2026-10-03)
 - [x] Live Suite audit + go-live badge (Admin → Security), append-only audit trails, anon locked out of Suite tables, 30-min idle sign-out
 - [x] Two-company separation test run (client user saw 0 rows of other companies on all 54 tables)
-- [ ] Extra encryption for ID/passport, DOB, tax, bank fields + masking
+- [x] Extra encryption for ID/passport, DOB, tax, bank fields + masking (reveal logged, admins + permitted members only)
 - [ ] Two-step sign-in: required for WorldAML admins (3 without), optional per-company requirement
 - [x] Nightly audit (02:00 UTC) + admin email when badge turns red
 - [ ] Shared company check in every Suite server function
