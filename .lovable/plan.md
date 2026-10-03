@@ -23,30 +23,29 @@ The Suite's "AML Screening" page, its ownership (UBO) checks and its onboarding-
 - The Suite and Screening use different rules to decide who gets in. Two separate access checks disagree in one case: users on the "suite" or "enterprise" plan level.
 - Signed-in users get the free 5-screening demo automatically. While it's being set up, the page shows "Preparing your workspace…", which can stick.
 
-## Should you combine them?
+## Direction: Screening becomes a module of the Suite
 
-Yes, but keep selling them as two products. They already sit on the same organisation and team setup behind the scenes. Combine the engine and the look; keep the separate plans and pricing:
-- One screening engine: the Suite uses the Screening workspace's real checks.
-- One audit trail that covers both.
-- The same layout for both, with a switcher between Screening and Suite for people who have both.
+There will be one workspace, the Suite, and clients pick the modules they want: Screening & Monitoring, KYC/KYB, Transactions, Cases, Compliance Manager (RCM) and so on. Screening-only customers buy just the Screening module. Their pricing stays the same, but they land in the Suite with only Screening switched on. Behind the scenes both already share the same company and team setup, so this mainly changes the menus and access, not the data.
 
 ## Fix plan (in order)
 
-1. **Stop the fake results (urgent).** Point the Suite's AML Screening page at the real Screening workspace, the way its old "screening-v2" link already does. Switch the ownership and onboarding checks to the real engine. Remove the test data from the live app.
-2. **Workspace switcher.** Add a "Switch to Suite / Switch to Screening" control to both menus, shown only to people with access to both.
-3. **One look.** Restyle the Screening menu to match the Suite's (light, grouped). Keep each product's own menu items.
-4. **Shared audit trail.** Record Screening decisions, invites and monitoring changes in the Suite audit log, labelled "Screening".
-5. **One access rule.** Make both areas use the same "who has access" check, so they can't disagree.
-6. **Demo setup.** If setting up the free demo fails or takes more than about 10 seconds, show a clear message with a retry button.
-7. **Modules with admin on/off.** Today Screening add-ons (like Four-Eyes Review) can only be switched on when a customer asks and an admin approves the request. Suite module access is set on separate admin pages. Add one "Modules" panel per company in the admin portal that lists every Screening add-on and Suite module. Admins can switch each one on or off directly, optionally with an end date. Customers only see menu items for modules that are on; switched-off ones show "Ask your admin" instead.
+1. **Stop the fake results (urgent).** The Suite's AML Screening page uses the real engine, the same one that runs the Screening workspace today. Ownership and onboarding checks switch to it too, and the test data is removed from the live app.
+2. **Screening moves into the Suite.** Screening, Monitored entities, Risk alerts, Team and Add-ons become a "Screening & Monitoring" group in the Suite menu. Old /screening links redirect to their matching Suite pages, so emails, bookmarks and the pricing page keep working.
+3. **Module-based access.** The Suite opens for anyone with at least one module and shows only the modules that company has. Modules they don't have show as locked with "Ask your admin" or "Add module".
+4. **Admin module controls.** One "Modules" panel per company in the admin portal lists every module and Screening add-on (like Four-Eyes Review). Admins switch each on or off directly, with an optional end date. Customer add-on requests show there for approval.
+5. **One team, one audit trail.** Team members are managed in one place, Suite Settings, and the separate Screening team screen redirects there. Screening decisions and monitoring changes go into the Suite audit log.
+6. **Signup and buying.** Screening checkout and the free demo switch on the Screening module for the company, then send the user to the Suite. If setup fails or takes more than about 10 seconds, the user sees a clear message with a retry button.
+7. **Tidy up.** Remove the Screening workspace's separate dark menu, and make the Suite and Screening use the same access check so they can't disagree.
 
-Later, not in this plan: merging cases and alerts into one system. It's a bigger change and should be decided on its own.
+Later, not in this plan: merging Screening's cases and alerts with the Suite's. It's a bigger change and should be decided on its own.
 
 ## Technical details
 
 - `src/services/screeningProvider.ts` falls back to `MockProvider` when `VITE_SCREENING_PROVIDER` isn't set, and the project never sets it. It's used by `SuiteScreening.tsx` (route `/suite/screening`), `SuiteUBO.tsx:151` and `SuiteOnboardingSubmissions.tsx:167`.
-- Step 1: route `/suite/screening` to `Navigate to="/screening"` (or render `SuiteScreeningV2`). Replace `runScreening` in UBO and Submissions with `src/lib/suite/screeningV2.ts`, which calls the `screening-run` function. Leave the mock only for tests.
-- Step 2: a new `WorkspaceSwitcher` in `ScreeningLayout.tsx` and `SuiteAppSidebar.tsx`, based on `usePortalAccess` (suite) and `useScreeningAccess`.
+- Step 1: `/suite/screening` renders `SuiteScreeningV2`. UBO and Submissions call `screening-run` through `src/lib/suite/screeningV2.ts`. The mock is kept only for tests.
+- Step 2: move the pages under `/suite/screening/*` inside `SuiteAppLayout`, and turn the `/screening/*` routes into `<Navigate>` redirects. Update links in `SuiteScreeningV2.tsx` and in emails, for example `SCREENING_URL` in `send-screening-invite-email`.
+- Step 3: add `screening` to `suite_module_key` (additive enum value). `PortalGuard`/`SuiteAppLayout` allow entry with any active module (Suite access or screening entitlement). `SuiteAppSidebar` filters groups by module.
+- Step 4: an admin RPC writes to `suite_module_access` and `screening_org_modules`, guarded by `has_role(admin)`. A new panel goes in AdminOrganizations.
 - Step 4: write to `suite_audit_log` from `screening-decision`, `invite_screening_member` and the monitoring add/remove actions, using the caller's `organisation_id`.
 - Step 5: `useAccess` uses the same suite rule as `usePortalAccess`, and the duplicate rule is removed.
 - Step 6: add a timeout and error state in `ScreeningWorkspace.tsx`.
