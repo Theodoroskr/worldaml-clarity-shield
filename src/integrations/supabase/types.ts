@@ -7409,9 +7409,46 @@ export type Database = {
           },
         ]
       }
+      suite_member_module_access: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          module: Database["public"]["Enums"]["suite_module_key"]
+          organisation_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          module: Database["public"]["Enums"]["suite_module_key"]
+          organisation_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          module?: Database["public"]["Enums"]["suite_module_key"]
+          organisation_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_member_module_access_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "suite_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_module_access: {
         Row: {
           created_at: string
+          enabled: boolean
+          ends_at: string | null
           id: string
           metadata: Json
           module: Database["public"]["Enums"]["suite_module_key"]
@@ -7423,6 +7460,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          enabled?: boolean
+          ends_at?: string | null
           id?: string
           metadata?: Json
           module: Database["public"]["Enums"]["suite_module_key"]
@@ -7434,6 +7473,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          enabled?: boolean
+          ends_at?: string | null
           id?: string
           metadata?: Json
           module?: Database["public"]["Enums"]["suite_module_key"]
@@ -9130,6 +9171,15 @@ export type Database = {
         Args: { _access_role: string; _department: string; _email: string }
         Returns: undefined
       }
+      admin_set_org_module: {
+        Args: {
+          _ends_at?: string
+          _module: Database["public"]["Enums"]["suite_module_key"]
+          _org: string
+          _status: Database["public"]["Enums"]["product_status"]
+        }
+        Returns: undefined
+      }
       admin_set_partner_portal_access: {
         Args: { _access: string; _partner_id: string; _reason?: string }
         Returns: undefined
@@ -9207,6 +9257,17 @@ export type Database = {
         }[]
       }
       current_user_screening_org: { Args: never; Returns: string }
+      current_user_suite_modules: {
+        Args: never
+        Returns: {
+          enabled: boolean
+          ends_at: string
+          member_allowed: boolean
+          module: string
+          purchased: boolean
+          status: string
+        }[]
+      }
       dsar_execute_erasure: {
         Args: { _customer_id: string; _dsar_id?: string; _reason?: string }
         Returns: Json
@@ -9313,6 +9374,7 @@ export type Database = {
         Returns: Json
       }
       is_portal_user_of: { Args: { _customer_id: string }; Returns: boolean }
+      is_suite_org_admin: { Args: { _org: string }; Returns: boolean }
       log_admin_access_event: {
         Args: {
           _action: string
@@ -9345,6 +9407,20 @@ export type Database = {
           _schema: Json
         }
         Returns: string
+      }
+      org_set_member_modules: {
+        Args: {
+          _modules: Database["public"]["Enums"]["suite_module_key"][]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      org_set_module_enabled: {
+        Args: {
+          _enabled: boolean
+          _module: Database["public"]["Enums"]["suite_module_key"]
+        }
+        Returns: undefined
       }
       partner_audit: {
         Args: {
@@ -9549,7 +9625,7 @@ export type Database = {
         | "vessel"
         | "aircraft"
         | "any"
-      suite_module_key: "kyc_kyb" | "rcm"
+      suite_module_key: "kyc_kyb" | "rcm" | "screening"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -9768,7 +9844,7 @@ export const Constants = {
         "aircraft",
         "any",
       ],
-      suite_module_key: ["kyc_kyb", "rcm"],
+      suite_module_key: ["kyc_kyb", "rcm", "screening"],
     },
   },
 } as const

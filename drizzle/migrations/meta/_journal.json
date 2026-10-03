@@ -22,6 +22,20 @@
       "when": 1791052390631,
       "tag": "0002_fix_admin_analytics_and_quiz_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791055147663,
+      "tag": "0003_suite_module_key_add_screening",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791055187102,
+      "tag": "0004_suite_modules_backfill_and_admin_controls",
+      "breakpoints": true
     }
   ]
 }

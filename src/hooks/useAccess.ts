@@ -62,7 +62,10 @@ export function useAccess(): AccessFlags {
         (productRes.data ?? []).some(
           (row: any) => row.product === product && (row.status === "active" || row.status === "trial")
         );
-      const hasSuiteAccess = isAdmin || tier === "suite" || tier === "enterprise" || hasProductAccess("suite") || hasProductAccess("screening");
+      // Same rule as usePortalAccess: Suite access comes from an active Suite
+      // product (or the server-side suite access check), never plan level alone.
+      const { data: serverSuite } = await supabase.rpc("current_user_has_suite_access" as never);
+      const hasSuiteAccess = isAdmin || serverSuite === true || hasProductAccess("suite");
 
       if (mounted) {
         setFlags({
