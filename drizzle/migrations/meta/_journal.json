@@ -64,6 +64,13 @@
       "when": 1791057281920,
       "tag": "0008_suite_revoke_anon_table_access",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791057573043,
+      "tag": "0009_suite_security_audit_nightly",
+      "breakpoints": true
     }
   ]
 }

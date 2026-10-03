@@ -20,5 +20,5 @@
 - [x] Two-company separation test run (client user saw 0 rows of other companies on all 54 tables)
 - [ ] Extra encryption for ID/passport, DOB, tax, bank fields + masking
 - [ ] Two-step sign-in: required for WorldAML admins (3 without), optional per-company requirement
-- [ ] Nightly automatic separation test + email on red badge
+- [x] Nightly audit (02:00 UTC) + admin email when badge turns red
 - [ ] Shared company check in every Suite server function

@@ -43,7 +43,7 @@ export default function SuiteGoLiveAudit() {
           <div>
             <h2 className="font-semibold text-foreground">WorldAML Suite go-live check</h2>
             <p className="text-xs text-muted-foreground">
-              Client separation, private file areas and admin sign-in. {run ? `Last run ${new Date(run.created_at).toLocaleString()}.` : "Not run yet."}
+              Client separation, private file areas and admin sign-in. Runs every night at 02:00 UTC; admins are emailed if it turns red. {run ? `Last run ${new Date(run.created_at).toLocaleString()}.` : "Not run yet."}
             </p>
           </div>
           {run && (

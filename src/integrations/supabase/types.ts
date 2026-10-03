@@ -9729,6 +9729,24 @@ export type Database = {
         Args: { _org: string }
         Returns: number
       }
+      suite_security_audit_core: {
+        Args: { _kind?: string; _run_by: string }
+        Returns: {
+          created_at: string
+          high_count: number
+          id: string
+          kind: string
+          passed: boolean
+          results: Json
+          run_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "security_audit_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       suite_security_audit_run: {
         Args: never
         Returns: {
