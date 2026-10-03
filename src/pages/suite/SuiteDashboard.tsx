@@ -1,3 +1,4 @@
+import { useSuiteModules } from "@/hooks/useSuiteModules";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   ChevronRight, CalendarClock, RefreshCw, Users, AlertTriangle,
@@ -44,6 +45,7 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent
 };
 
 export default function SuiteDashboard() {
+  const { canOpen } = useSuiteModules();
   const { orgId, org, isLoading: orgLoading } = useOrganisation();
   const [regulator, setRegulator] = useState<string | null>(null);
   const [riskDistribution, setRiskDistribution] = useState([
