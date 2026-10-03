@@ -9549,7 +9549,7 @@ export type Database = {
         | "vessel"
         | "aircraft"
         | "any"
-      suite_module_key: "kyc_kyb" | "rcm"
+      suite_module_key: "kyc_kyb" | "rcm" | "screening"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -9768,7 +9768,7 @@ export const Constants = {
         "aircraft",
         "any",
       ],
-      suite_module_key: ["kyc_kyb", "rcm"],
+      suite_module_key: ["kyc_kyb", "rcm", "screening"],
     },
   },
 } as const

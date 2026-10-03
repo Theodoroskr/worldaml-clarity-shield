@@ -1,0 +1,1 @@
+ALTER TYPE public.suite_module_key ADD VALUE IF NOT EXISTS 'screening';
