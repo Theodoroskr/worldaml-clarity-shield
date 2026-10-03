@@ -9798,6 +9798,10 @@ export type Database = {
       }
       suite_bootstrap_org: { Args: { _name: string }; Returns: string }
       suite_can_view_pii: { Args: { _org: string }; Returns: boolean }
+      suite_copy_submission_pii: {
+        Args: { _customer: string; _submission: string }
+        Returns: undefined
+      }
       suite_find_subjects_by_identifier: {
         Args: { _org: string; _value: string }
         Returns: string[]
