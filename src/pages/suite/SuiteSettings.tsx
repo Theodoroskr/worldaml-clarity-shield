@@ -37,7 +37,9 @@ export default function SuiteSettings() {
   const { org, orgId, role: myRole, isAdmin, isLoading: orgLoading, refetch } = useOrganisation();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"team" | "organisation" | "roles" | "modules">("team");
+  const [activeTab, setActiveTab] = useState<"team" | "organisation" | "roles" | "modules">(
+    new URLSearchParams(window.location.search).get("tab") === "modules" ? "modules" : "team",
+  );
   const [copied, setCopied] = useState(false);
 
   // Invite form
