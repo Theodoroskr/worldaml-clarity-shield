@@ -45,6 +45,7 @@ const NAV: NavItem[] = [
 
   // Screening & Monitoring product
   { label: "Screening Product", path: "/admin/screening-product", icon: ShieldCheck, section: "Screening" },
+  { label: "Suite Modules", path: "/admin/suite-modules", icon: ShieldCheck, section: "Screening" },
   { label: "Profile Enrichment Audit", path: "/admin/screening-profile-audit", icon: FileSearch, section: "Screening" },
 
   // Suite (compliance product)
