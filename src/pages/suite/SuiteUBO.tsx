@@ -156,7 +156,6 @@ export default function SuiteUBO() {
       if (top) {
         if (top.confidence >= 85 && /Sanctions|OFAC|UN|HMT/.test(top.listType)) newStatus = "sanctions";
         else if (top.confidence >= 60 && /Sanctions|Warnings|OFAC|EU|UN|HMT/.test(top.listType)) newStatus = "potential_match";
-        else if (top.confidence >= 60) newStatus = "potential_match";
         else if (top.listType.startsWith("PEP")) newStatus = "pep";
         else if (top.listType === "Adverse Media") newStatus = "adverse_media";
       }
