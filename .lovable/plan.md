@@ -73,6 +73,18 @@ Clients can already build forms with their own fields and set a logo link, one c
 
 Each client company is fully separate. Customers, screenings, matches, cases, team members, modules, quotas, false-positive lists and audit logs all belong to one company only. The only things shared are public reference lists, such as sanctions lists and country risk ratings. Every new table and function in this plan is tied to the company. A user in company A gets nothing back for company B, even with a direct link or ID. A Suite admin can only manage their own company's modules and team.
 
+## Security (a release gate for every step)
+
+No step goes live until it passes these checks:
+- **Separation check:** every WorldAML Suite table, file and function is tied to one client company and checked on the server. Nothing relies on the screen hiding data. All existing Suite tables are reviewed once at the start, and every new one is checked before release.
+- **Least access:** within a company, staff only see the modules the Suite admin gave them. Only Suite admins can change modules, team members, branding or forms.
+- **Files:** logos, client documents and evidence are stored in folders tied to each company. Only signed-in members of that company can open private files, through short-lived links.
+- **Public forms:** they can only submit, never read, other data. Spam limits and size and type checks apply to file uploads.
+- **Audit trail:** module changes, team changes, form edits, screening decisions and data exports are recorded with who did it and when. Suite admins can't edit or delete these records.
+- **Secrets:** screening provider keys stay on the server, never in the browser.
+- **Sign-in:** two-step sign-in (a code from an authenticator app) is available, and each Suite admin can make it required for their team.
+- **Before each release:** a full security scan and a two-company separation test. Any high-risk finding blocks the release.
+
 ## How we'll know it works
 
 - Separation test: two test companies. Each one's screenings, cases, onboarding forms, modules and audit log are invisible to the other, including through direct links.
