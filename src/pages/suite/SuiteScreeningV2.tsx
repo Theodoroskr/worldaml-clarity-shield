@@ -326,7 +326,7 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
         ? supabase.from("screening_searches").select("reference, screened_at, search_parameters, categories_screened, adverse_media_requested, monitoring_requested").eq("id", row.search_id).maybeSingle()
         : Promise.resolve({ data: null }),
       row.subject_id
-        ? supabase.from("screening_subjects").select("subject_type, full_name, date_of_birth, year_of_birth, country_of_residence, nationality, country_of_incorporation, incorporation_date, registration_number").eq("id", row.subject_id).maybeSingle()
+        ? supabase.from("screening_subjects").select("subject_type, full_name, date_of_birth:date_of_birth_masked, year_of_birth, country_of_residence, nationality, country_of_incorporation, incorporation_date, registration_number").eq("id", row.subject_id).maybeSingle()
         : Promise.resolve({ data: null }),
     ]);
     setActiveCase({

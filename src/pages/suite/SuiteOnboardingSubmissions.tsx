@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { RevealPiiButton } from "@/components/suite/RevealPiiButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganisation } from "@/hooks/useOrganisation";
 import { Button } from "@/components/ui/button";
@@ -143,6 +144,8 @@ export default function SuiteOnboardingSubmissions() {
         linkedId = cust.id;
         patch.linked_customer_id = cust.id;
         createdCustomer = true;
+        // Carry the encrypted sensitive answers over server-side (never via the browser).
+        await supabase.rpc("suite_copy_submission_pii" as never, { _submission: selected.id, _customer: cust.id } as never);
       }
     }
 
@@ -372,6 +375,9 @@ export default function SuiteOnboardingSubmissions() {
               {/* Field-level data */}
               <div>
                 <h3 className="text-sm font-semibold mb-2">Submitted fields</h3>
+                {(selected as any).data_pii_enc && (
+                  <div className="mb-3"><RevealPiiButton table="suite_onboarding_submissions" id={selected.id} purpose="Review submission" /></div>
+                )}
                 <div className="border border-border rounded-lg divide-y divide-border">
                   {Object.keys(selected.data || {}).length === 0 && (
                     <div className="p-4 text-sm text-muted-foreground">No field data captured.</div>

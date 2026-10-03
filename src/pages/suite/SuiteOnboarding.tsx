@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { RevealPiiButton } from "@/components/suite/RevealPiiButton";
 import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle, Trash2, Loader2, Fingerprint, CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -468,8 +469,11 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
                 </Select>
               ) : <p className="text-sm font-mono">{customer.country || "—"}</p>}
             </div>
-            {customer.date_of_birth && (
-              <div><span className="text-xs text-muted-foreground block mb-0.5">Date of Birth</span><p className="text-sm">{customer.date_of_birth}</p></div>
+            {(customer as any).date_of_birth_masked && (
+              <div><span className="text-xs text-muted-foreground block mb-0.5">Date of Birth</span><p className="text-sm font-mono">{(customer as any).date_of_birth_masked}</p></div>
+            )}
+            {((customer as any).date_of_birth_enc || (customer as any).onboarding_pii_enc) && (
+              <RevealPiiButton table="suite_customers" id={customer.id} purpose="Customer detail" />
             )}
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { withRevealedCustomer } from "@/lib/suite/pii";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { FileText, ChevronRight, Search, Plus, MessageSquare, Download, Flag, MapPin, AlertTriangle, Shield, CheckCircle2, XCircle, Info, X, ClipboardCheck } from "lucide-react";
@@ -478,7 +479,7 @@ export default function SuiteCases() {
     let customer = null;
     if (selectedCase.customer_id) {
       const { data } = await supabase.from("suite_customers").select("*").eq("id", selectedCase.customer_id).single();
-      customer = data;
+      customer = await withRevealedCustomer(data, "Regulatory report");
     }
 
     await exportSAR({
@@ -588,7 +589,7 @@ export default function SuiteCases() {
       let customer = null;
       if (selectedCase.customer_id) {
         const { data } = await supabase.from("suite_customers").select("*").eq("id", selectedCase.customer_id).single();
-        customer = data;
+        customer = await withRevealedCustomer(data, "Regulatory report");
       }
 
       // Use only selected transactions
@@ -656,7 +657,7 @@ export default function SuiteCases() {
       let customer = null;
       if (selectedCase.customer_id) {
         const { data } = await supabase.from("suite_customers").select("*").eq("id", selectedCase.customer_id).single();
-        customer = data;
+        customer = await withRevealedCustomer(data, "Regulatory report");
       }
       const transactions = caseTransactions.filter(t => selectedTxIds.has(t.id));
 
@@ -738,7 +739,7 @@ export default function SuiteCases() {
       let customer = null;
       if (selectedCase.customer_id) {
         const { data } = await supabase.from("suite_customers").select("*").eq("id", selectedCase.customer_id).single();
-        customer = data;
+        customer = await withRevealedCustomer(data, "Regulatory report");
       }
 
       const transactions = caseTransactions.filter(t => selectedTxIds.has(t.id));
@@ -823,7 +824,7 @@ export default function SuiteCases() {
       let customer = null;
       if (selectedCase.customer_id) {
         const { data } = await supabase.from("suite_customers").select("*").eq("id", selectedCase.customer_id).single();
-        customer = data;
+        customer = await withRevealedCustomer(data, "Regulatory report");
       }
       const transactions = caseTransactions.filter(t => selectedTxIds.has(t.id));
 
