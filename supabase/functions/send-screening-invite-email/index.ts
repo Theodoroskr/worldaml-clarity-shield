@@ -133,11 +133,7 @@ export default {
       // Resolve an existing account by profile or auth email.
       const { data: prof } = await admin
         .from("profiles").select("user_id").ilike("email", email).maybeSingle();
-      let inviteeUserId: string | null = prof?.user_id ?? null;
-      if (!inviteeUserId) {
-        const { data: uid } = await admin.rpc("get_user_id_by_email", { _email: email }).maybeSingle?.() ?? { data: null };
-        if (typeof uid === "string") inviteeUserId = uid;
-      }
+      const inviteeUserId: string | null = prof?.user_id ?? null;
       let q = admin.from("product_members").select("id, user_id").eq("product", "screening");
       if (!isPlatformAdmin) q = q.in("organisation_id", orgIds);
       q = inviteeUserId

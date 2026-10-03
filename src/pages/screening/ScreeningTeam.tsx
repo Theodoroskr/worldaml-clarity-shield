@@ -103,9 +103,10 @@ export default function ScreeningTeam() {
     }
 
     // Notify the invited user by email (best-effort; don't block UI on failure)
+    let emailSent = false;
     try {
       const existing = members.find((m) => m.email.toLowerCase() === inviteEmail.trim().toLowerCase());
-      await supabase.functions.invoke("send-screening-invite-email", {
+      const { error: fnError } = await supabase.functions.invoke("send-screening-invite-email", {
         body: {
           email: inviteEmail.trim(),
           inviter_name: profile?.full_name || profile?.email || "Your organisation",
@@ -113,12 +114,15 @@ export default function ScreeningTeam() {
           is_new_user: !existing?.user_id,
         },
       });
+      if (fnError) throw fnError;
+      emailSent = true;
     } catch (err: any) {
       console.warn("Failed to send screening invite email:", err);
     }
 
     setInviteBusy(false);
-    toast.success("Invitation sent");
+    if (emailSent) toast.success("Invitation sent");
+    else toast.warning("Teammate added, but the invitation email couldn't be sent. Please let them know directly.");
     setInviteEmail("");
     setInviteOpen(false);
     load();
