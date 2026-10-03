@@ -58,7 +58,13 @@ The Suite becomes the one workspace, and clients choose their modules. Screening
 **9. Tidy up**
 - Remove the old separate Screening menu and leftover code.
 
+## Client separation (applies to every step)
+
+Each client company is fully separate. Customers, screenings, matches, cases, team members, modules, quotas, false-positive lists and audit logs all belong to one company only. The only things shared are public reference lists, such as sanctions lists and country risk ratings. Every new table and function in this plan is tied to the company. A user in company A gets nothing back for company B, even with a direct link or ID. A Suite admin can only manage their own company's modules and team.
+
 ## How we'll know it works
+
+- Separation test: two test companies. Each one's screenings, cases, onboarding forms, modules and audit log are invisible to the other, including through direct links.
 
 On every path (manual, UBO, manual client add, onboarding form):
 - A known sanctioned name shows as a match and opens a case.
