@@ -5767,10 +5767,16 @@ export type Database = {
           created_by: string | null
           customer_reference: string | null
           date_of_birth: string | null
+          date_of_birth_bidx: string | null
+          date_of_birth_enc: string | null
+          date_of_birth_masked: string | null
           first_name: string | null
           full_name: string
           id: string
           identification_number: string | null
+          identification_number_bidx: string | null
+          identification_number_enc: string | null
+          identification_number_masked: string | null
           incorporation_date: string | null
           last_name: string | null
           middle_name: string | null
@@ -5791,10 +5797,16 @@ export type Database = {
           created_by?: string | null
           customer_reference?: string | null
           date_of_birth?: string | null
+          date_of_birth_bidx?: string | null
+          date_of_birth_enc?: string | null
+          date_of_birth_masked?: string | null
           first_name?: string | null
           full_name: string
           id?: string
           identification_number?: string | null
+          identification_number_bidx?: string | null
+          identification_number_enc?: string | null
+          identification_number_masked?: string | null
           incorporation_date?: string | null
           last_name?: string | null
           middle_name?: string | null
@@ -5815,10 +5827,16 @@ export type Database = {
           created_by?: string | null
           customer_reference?: string | null
           date_of_birth?: string | null
+          date_of_birth_bidx?: string | null
+          date_of_birth_enc?: string | null
+          date_of_birth_masked?: string | null
           first_name?: string | null
           full_name?: string
           id?: string
           identification_number?: string | null
+          identification_number_bidx?: string | null
+          identification_number_enc?: string | null
+          identification_number_masked?: string | null
           incorporation_date?: string | null
           last_name?: string | null
           middle_name?: string | null
@@ -6990,11 +7008,15 @@ export type Database = {
           country: string | null
           created_at: string
           date_of_birth: string | null
+          date_of_birth_bidx: string | null
+          date_of_birth_enc: string | null
+          date_of_birth_masked: string | null
           email: string | null
           id: string
           kyc_status: string
           name: string
           onboarding_data: Json
+          onboarding_pii_enc: string | null
           organisation_id: string | null
           pep_status: string | null
           registration_number: string | null
@@ -7020,11 +7042,15 @@ export type Database = {
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
+          date_of_birth_bidx?: string | null
+          date_of_birth_enc?: string | null
+          date_of_birth_masked?: string | null
           email?: string | null
           id?: string
           kyc_status?: string
           name: string
           onboarding_data?: Json
+          onboarding_pii_enc?: string | null
           organisation_id?: string | null
           pep_status?: string | null
           registration_number?: string | null
@@ -7050,11 +7076,15 @@ export type Database = {
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
+          date_of_birth_bidx?: string | null
+          date_of_birth_enc?: string | null
+          date_of_birth_masked?: string | null
           email?: string | null
           id?: string
           kyc_status?: string
           name?: string
           onboarding_data?: Json
+          onboarding_pii_enc?: string | null
           organisation_id?: string | null
           pep_status?: string | null
           registration_number?: string | null
@@ -7843,6 +7873,7 @@ export type Database = {
           applicant_type: string
           created_at: string
           data: Json
+          data_pii_enc: string | null
           documents: Json
           form_id: string
           form_version_id: string | null
@@ -7865,6 +7896,7 @@ export type Database = {
           applicant_type?: string
           created_at?: string
           data?: Json
+          data_pii_enc?: string | null
           documents?: Json
           form_id: string
           form_version_id?: string | null
@@ -7887,6 +7919,7 @@ export type Database = {
           applicant_type?: string
           created_at?: string
           data?: Json
+          data_pii_enc?: string | null
           documents?: Json
           form_id?: string
           form_version_id?: string | null
@@ -7936,6 +7969,7 @@ export type Database = {
       }
       suite_org_members: {
         Row: {
+          can_view_pii: boolean
           created_at: string
           id: string
           invited_email: string | null
@@ -7945,6 +7979,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          can_view_pii?: boolean
           created_at?: string
           id?: string
           invited_email?: string | null
@@ -7954,6 +7989,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          can_view_pii?: boolean
           created_at?: string
           id?: string
           invited_email?: string | null
@@ -8117,6 +8153,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      suite_pii_access_log: {
+        Row: {
+          created_at: string
+          id: string
+          organisation_id: string
+          purpose: string | null
+          record_id: string
+          record_table: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organisation_id: string
+          purpose?: string | null
+          record_id: string
+          record_table: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organisation_id?: string
+          purpose?: string | null
+          record_id?: string
+          record_table?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       suite_regulator_adapters: {
         Row: {
@@ -8808,6 +8874,8 @@ export type Database = {
           created_at: string
           customer_id: string
           dob: string | null
+          dob_enc: string | null
+          dob_masked: string | null
           entity_type: string
           id: string
           is_pep: boolean
@@ -8832,6 +8900,8 @@ export type Database = {
           created_at?: string
           customer_id: string
           dob?: string | null
+          dob_enc?: string | null
+          dob_masked?: string | null
           entity_type?: string
           id?: string
           is_pep?: boolean
@@ -8856,6 +8926,8 @@ export type Database = {
           created_at?: string
           customer_id?: string
           dob?: string | null
+          dob_enc?: string | null
+          dob_masked?: string | null
           entity_type?: string
           id?: string
           is_pep?: boolean
@@ -9725,9 +9797,18 @@ export type Database = {
         Returns: Json
       }
       suite_bootstrap_org: { Args: { _name: string }; Returns: string }
+      suite_can_view_pii: { Args: { _org: string }; Returns: boolean }
+      suite_find_subjects_by_identifier: {
+        Args: { _org: string; _value: string }
+        Returns: string[]
+      }
       suite_provision_baseline_rules: {
         Args: { _org: string }
         Returns: number
+      }
+      suite_reveal_pii: {
+        Args: { _id: string; _purpose?: string; _table: string }
+        Returns: Json
       }
       suite_security_audit_core: {
         Args: { _kind?: string; _run_by: string }

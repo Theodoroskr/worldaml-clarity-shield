@@ -71,6 +71,13 @@
       "when": 1791057573043,
       "tag": "0009_suite_security_audit_nightly",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791058836869,
+      "tag": "0010_suite_pii_encryption_at_rest",
+      "breakpoints": true
     }
   ]
 }
