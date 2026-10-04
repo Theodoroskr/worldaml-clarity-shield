@@ -17,6 +17,7 @@ vi.mock("@/contexts/AuthContext", () => ({
 
 import { Header } from "./Header";
 import { RegionProvider } from "@/contexts/RegionContext";
+import { CartProvider } from "@/contexts/CartContext";
 
 /**
  * Visual regression test for the desktop header layout.
@@ -46,7 +47,7 @@ const renderHeader = () =>
       <HelmetProvider>
         <MemoryRouter>
           <RegionProvider>
-            <Header />
+            <CartProvider><Header /></CartProvider>
           </RegionProvider>
         </MemoryRouter>
       </HelmetProvider>
