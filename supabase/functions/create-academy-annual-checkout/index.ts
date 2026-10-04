@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { safeOrigin } from "../_shared/security.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -100,7 +101,8 @@ serve(async (req) => {
     }
 
     // Already has an active annual pass? Block duplicate purchase.
-    const { data: existing } = await serviceClient
+    // Guests are not verified owners of the email, so never reveal their purchases.
+    const { data: existing } = isGuest ? { data: [] as any[] } : await serviceClient
       .from("academy_course_purchases")
       .select("expires_at")
       .eq("user_id", userId)
@@ -126,7 +128,7 @@ serve(async (req) => {
     }
 
     const unitAmount = convert(ANNUAL_EUR_CENTS, currency);
-    const origin = req.headers.get("origin") ?? "https://www.worldaml.com";
+    const origin = safeOrigin(req, "https://www.worldaml.com");
 
     // Optional in-portal return path (dashboard checkout). Only same-origin
     // /dashboard paths are honoured to avoid open-redirects.

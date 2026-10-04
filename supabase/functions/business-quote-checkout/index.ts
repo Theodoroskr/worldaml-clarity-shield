@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { safeOrigin } from "../_shared/security.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
@@ -105,7 +106,7 @@ serve(async (req) => {
           },
         };
 
-    const origin = req.headers.get("origin") ?? "https://www.worldaml.com";
+    const origin = safeOrigin(req, "https://www.worldaml.com");
     const session = await stripe.checkout.sessions.create({
       customer: existingCustomer ?? undefined,
       customer_email: existingCustomer ? undefined : user.email,

@@ -63,7 +63,12 @@ Deno.serve(async (req) => {
     }
 
     // Ownership check: verify caller belongs to the declaration's organisation
-    if (decl.organisation_id) {
+    if (!decl.organisation_id) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    {
       const { data: membership } = await supabase
         .from("suite_org_members")
         .select("id")

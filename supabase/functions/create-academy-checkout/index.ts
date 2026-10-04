@@ -172,7 +172,8 @@ serve(async (req) => {
     }
 
     // Drop courses the user already has active access to
-    const { data: existing } = await serviceClient
+    // Guests are not verified owners of the email, so never reveal their purchases.
+    const { data: existing } = isGuest ? { data: [] as any[] } : await serviceClient
       .from("academy_course_purchases")
       .select("course_slug, expires_at")
       .eq("user_id", userId)

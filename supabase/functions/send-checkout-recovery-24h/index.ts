@@ -284,7 +284,7 @@ serve(async (req) => {
       await markSent(supabase, group);
       sent += 1;
     } catch (err: any) {
-      console.error("24h recovery email failed for", email, err?.message ?? err);
+      console.error("24h recovery email failed", err?.message ?? err);
       failed += 1;
     }
   }
