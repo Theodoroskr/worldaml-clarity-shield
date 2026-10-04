@@ -12,6 +12,7 @@ import { usePortalAccess } from "@/hooks/usePortalAccess";
 import { supabase } from "@/integrations/supabase/client";
 import { PENDING_BUSINESS_KEY } from "@/pages/business/BusinessSignup";
 import SEO from "@/components/SEO";
+import WorkspaceSwitcher from "@/components/auth/WorkspaceSwitcher";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
@@ -196,27 +197,7 @@ export default function BusinessLayout() {
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate("/business/profile")}>My Profile</DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/business/security")}>Security</DropdownMenuItem>
-              {(academyAccess || partnerAccess) && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                    Switch Workspace
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => navigate("/business/dashboard")}>
-                    <Building2 className="w-4 h-4 mr-2 text-teal" /> Business — {account.company_name}
-                  </DropdownMenuItem>
-                  {academyAccess && (
-                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                      <GraduationCap className="w-4 h-4 mr-2 opacity-60" /> WorldAML Academy
-                    </DropdownMenuItem>
-                  )}
-                  {partnerAccess && (
-                    <DropdownMenuItem onClick={() => navigate("/partner/dashboard")}>
-                      <Users className="w-4 h-4 mr-2 opacity-60" /> Partner Portal
-                    </DropdownMenuItem>
-                  )}
-                </>
-              )}
+              <WorkspaceSwitcher current="business" />
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={async () => { await signOut(); navigate("/business/login"); }}>
                 <LogOut className="w-4 h-4 mr-2" /> Sign out
