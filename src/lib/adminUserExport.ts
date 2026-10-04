@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import { csvCell } from "@/lib/csvSafe";
+import { csvCell, safeSheetValue } from "@/lib/csvSafe";
 
 export interface UserExportRow {
   [key: string]: string | number | null;
@@ -28,7 +28,9 @@ export function exportRowsAsCsv(rows: UserExportRow[], filename: string) {
 }
 
 export function exportRowsAsXlsx(rows: UserExportRow[], filename: string, sheetName = "Users") {
-  const ws = XLSX.utils.json_to_sheet(rows);
+  const ws = XLSX.utils.json_to_sheet(
+    rows.map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, safeSheetValue(v)]))),
+  );
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31));
   const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });

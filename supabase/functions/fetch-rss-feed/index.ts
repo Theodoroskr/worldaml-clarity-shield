@@ -132,8 +132,10 @@ function isPrivateIp(host: string): boolean {
 async function assertSafeFeedUrl(raw: string): Promise<URL> {
   let u: URL;
   try { u = new URL(raw); } catch { throw new Error("Invalid URL"); }
-  if (u.protocol !== "http:" && u.protocol !== "https:") {
-    throw new Error("Only http(s) feed URLs are allowed");
+  if (u.port && u.port !== "443") throw new Error("Only the standard https port is allowed");
+  if (u.username || u.password) throw new Error("Credentials in feed URLs are not allowed");
+  if (u.protocol !== "https:") {
+    throw new Error("Only https feed URLs are allowed");
   }
   const host = u.hostname.toLowerCase().replace(/\.$/, "");
   if (
@@ -158,7 +160,7 @@ async function assertSafeFeedUrl(raw: string): Promise<URL> {
           if (Array.isArray(r)) addrs.push(...r);
         } catch { /* record type missing */ }
       }
-      if (addrs.length && addrs.every((ip) => isPrivateIp(ip))) {
+      if (addrs.length && addrs.some((ip) => isPrivateIp(ip))) {
         throw new Error("Feed host resolves to a private address");
       }
       if (addrs.some((ip) => isPrivateIp(ip))) {

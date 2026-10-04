@@ -124,7 +124,7 @@ serve(async (req) => {
         });
         return json({ sent: 1, to: body.email });
       } catch (err: any) {
-        console.error("manual recovery email failed", body.email, err);
+        console.error("manual recovery email failed", err);
         return json({ error: err?.message ?? String(err) }, 500);
       }
     }
@@ -255,7 +255,7 @@ serve(async (req) => {
         .in("id", group.map((r) => r.id));
       sent += 1;
     } catch (err) {
-      console.error("recovery email failed for", email, err);
+      console.error("recovery email failed", err);
       failed += 1;
     }
   }

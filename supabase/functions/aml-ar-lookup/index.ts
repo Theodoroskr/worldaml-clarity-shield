@@ -122,6 +122,22 @@ Deno.serve(async (req) => {
     const organisationId = orgRow.organization_id;
 
     const body: LookupBody = await req.json();
+
+    // Only allow linking a customer that belongs to the caller's organisation.
+    if (body.customer_id) {
+      const { data: owned } = await supabaseUser
+        .from("suite_customers")
+        .select("id")
+        .eq("id", body.customer_id)
+        .eq("organisation_id", organisationId)
+        .maybeSingle();
+      if (!owned) {
+        return new Response(JSON.stringify({ error: "Customer not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
     const rawPan = (body.pan ?? "").replace(/[^0-9]/g, "");
 
     if (rawPan.length < 12 || rawPan.length > 19) {
