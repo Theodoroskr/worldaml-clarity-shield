@@ -11,7 +11,7 @@ import { usePortalAccess, PortalKey } from "@/hooks/usePortalAccess";
  */
 export default function WorkspaceSwitcher({ current }: { current: PortalKey }) {
   const { academyAccess, partnerAccess, businessAccess, suiteAccess, screeningAccess, adminAccess } = usePortalAccess();
-  // Compliance Suite is still in development — only advertised to internal admins.
+  // WorldAML Suite is still in development — only advertised to internal admins.
   const showSuite = suiteAccess;
   const count = [academyAccess, partnerAccess, businessAccess, showSuite].filter(Boolean).length;
   if (count < 2) return null;
@@ -32,7 +32,7 @@ export default function WorkspaceSwitcher({ current }: { current: PortalKey }) {
         Switch Workspace
       </DropdownMenuLabel>
       {businessAccess && <Row to="/business/dashboard" active={current === "business"} label="WorldAML Business" icon={Building2} />}
-      {showSuite && <Row to="/suite" active={current === "suite"} label="Compliance Suite" icon={Shield} />}
+      {showSuite && <Row to="/suite" active={current === "suite"} label="WorldAML Suite" icon={Shield} />}
       {academyAccess && <Row to="/dashboard" active={current === "academy"} label="WorldAML Academy" icon={GraduationCap} />}
       {partnerAccess && <Row to="/partner/dashboard" active={current === "partner"} label="WorldAML Partner Portal" icon={Handshake} />}
     </>

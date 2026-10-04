@@ -48,7 +48,7 @@ export function recommendUpsell(s: UpsellSignals): UpsellRecommendation {
   if (s.academyPurchases > 0 || s.subscription_tier === "academy") {
     return {
       template: "suite-upsell",
-      title: "Academy learner → Compliance Suite",
+      title: "Academy learner → WorldAML Suite",
       rationale: `Engaged learner${s.revenueCents > 0 ? ` with €${(s.revenueCents / 100).toFixed(0)} lifetime spend` : ""} — strong fit for the operational Suite (KYC, screening, monitoring).`,
       nextSteps: [
         "Send the Suite upsell email",

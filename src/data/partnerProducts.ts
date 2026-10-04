@@ -15,7 +15,7 @@ export type PartnerProduct = {
 export const PARTNER_PRODUCTS: PartnerProduct[] = [
   {
     id: "suite",
-    name: "WorldAML Compliance Suite",
+    name: "WorldAML Suite",
     positioning: "End-to-end AML operations: onboarding, screening, monitoring and reporting in one platform.",
     idealFor: "Regulated firms (fintech, banking, gaming, payments) with 5–200 compliance users.",
     problem: "Compliance teams stitch together spreadsheets, screening tools and manual filings — with no audit trail.",

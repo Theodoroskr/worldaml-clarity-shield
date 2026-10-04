@@ -44,7 +44,7 @@ const money = (cents: number, currency: string | null) =>
 const PRODUCT_LABEL: Record<string, string> = {
   screening: "WorldAML Screening",
   academy: "Academy",
-  suite: "Compliance Suite",
+  suite: "WorldAML Suite",
 };
 
 const statusVariant = (status: string) =>
