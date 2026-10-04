@@ -892,7 +892,7 @@ const Academy = () => {
   return (
     <div className="min-h-screen flex flex-col">
        <SEO
-        title="Free AML Certification Online — CPD Accredited Courses"
+        title="Free AML Certification & AML Compliance Training Online"
         description="Free AML certification and compliance training online. CPD-accredited AML, KYC and sanctions screening courses with verifiable certificates — start free, no payment required."
 
         canonical="/academy"
@@ -1843,7 +1843,7 @@ const Academy = () => {
         <section className="section-padding bg-secondary/30">
           <div className="container-enterprise max-w-4xl">
             <div className="text-center mb-12">
-              <h2 className="text-headline text-foreground mb-3">AML Training Curriculum &amp; Learning Outcomes</h2>
+              <h2 className="text-headline text-foreground mb-3">AML Compliance Training Curriculum &amp; Learning Outcomes</h2>
               <p className="text-body-lg text-muted-foreground max-w-2xl mx-auto">
                 Every course is CPD-accredited, written by working MLROs, and built around real case studies — short focused modules, a scored quiz, and a verifiable certificate.
               </p>
