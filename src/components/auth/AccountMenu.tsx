@@ -67,7 +67,7 @@ export const WORKSPACES: WorkspaceDef[] = [
 /** Account / workspace switcher shown in the header when signed in. */
 export default function AccountMenu({ onNavigate }: { onNavigate?: () => void }) {
   const { user, profile, signOut } = useAuth();
-  const { has, adminAccess } = usePortalAccess();
+  const { has } = usePortalAccess();
   const location = useLocation();
 
   // Compliance Suite is still in development — only visible to internal admins.

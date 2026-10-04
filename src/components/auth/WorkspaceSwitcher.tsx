@@ -12,7 +12,7 @@ import { usePortalAccess, PortalKey } from "@/hooks/usePortalAccess";
 export default function WorkspaceSwitcher({ current }: { current: PortalKey }) {
   const { academyAccess, partnerAccess, businessAccess, suiteAccess, screeningAccess, adminAccess } = usePortalAccess();
   // Compliance Suite is still in development — only advertised to internal admins.
-  const showSuite = suiteAccess && adminAccess;
+  const showSuite = suiteAccess;
   const count = [academyAccess, partnerAccess, businessAccess, showSuite].filter(Boolean).length;
   if (count < 2) return null;
 

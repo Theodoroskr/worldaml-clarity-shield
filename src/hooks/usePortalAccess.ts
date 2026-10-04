@@ -109,7 +109,7 @@ export function usePortalAccess(): PortalAccess {
   const academyAccess = signedIn && (profile?.status !== "rejected" || hasProduct("academy"));
   const partnerAccess = signedIn && partnerQuery.data === true;
   const businessAccess = signedIn && businessQuery.data === true;
-  const suiteAccess = signedIn && (suiteQuery.data === true || hasProduct("suite"));
+  const suiteAccess = signedIn && (suiteQuery.data === true || hasProduct("suite") || hasProduct("screening"));
   const screeningAccess = signedIn && hasProduct("screening");
   const adminAccess = signedIn && isAdmin;
 
