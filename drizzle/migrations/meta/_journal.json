@@ -92,6 +92,13 @@
       "when": 1791086871685,
       "tag": "0012_suite_unified_team_and_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791094193041,
+      "tag": "0013_suite_member_modules_default_deny",
+      "breakpoints": true
     }
   ]
 }
