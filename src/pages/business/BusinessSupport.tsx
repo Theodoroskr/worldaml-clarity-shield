@@ -59,7 +59,7 @@ export default function BusinessSupport() {
                 <li key={a.title}><span className="font-medium text-foreground">{a.title}.</span> {a.body}</li>
               ))}
             </ul>
-            <Button asChild variant="outline"><Link to="/screening/risk-alerts">Manage risk alert rules</Link></Button>
+            <Button asChild variant="outline"><Link to="/suite/alerts">Manage risk alert rules</Link></Button>
           </CardContent>
         </Card>
 

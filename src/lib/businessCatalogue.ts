@@ -91,7 +91,7 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
     })),
     pairsWith: ["worldid", "academy"],
     usageUnit: "monitored entities",
-    openUrl: "/screening",
+    openUrl: "/suite/screening",
     publicUrl: "/screening-monitoring",
   },
   {
