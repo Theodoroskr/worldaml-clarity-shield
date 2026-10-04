@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type PortalKey = "academy" | "partner" | "business" | "suite" | "screening" | "admin";
+export type PortalKey = "academy" | "partner" | "business" | "suite" | "admin";
 
 export interface PortalAccess {
   isLoading: boolean;
@@ -118,7 +118,6 @@ export function usePortalAccess(): PortalAccess {
   if (partnerAccess) portals.push("partner");
   if (businessAccess) portals.push("business");
   if (suiteAccess) portals.push("suite");
-  if (screeningAccess) portals.push("screening");
   if (adminAccess) portals.push("admin");
 
   return {
@@ -138,8 +137,7 @@ export function usePortalAccess(): PortalAccess {
         : portal === "partner" ? partnerAccess
           : portal === "business" ? businessAccess
             : portal === "suite" ? suiteAccess
-              : portal === "screening" ? screeningAccess
-                : false,
+              : false,
   };
 }
 
@@ -148,7 +146,6 @@ export const PORTAL_HOME: Record<PortalKey, string> = {
   partner: "/partner/dashboard",
   business: "/business/dashboard",
   suite: "/suite",
-  screening: "/screening",
   admin: "/admin/dashboard",
 };
 
@@ -157,7 +154,6 @@ export const PORTAL_LOGIN: Record<PortalKey, string> = {
   partner: "/partner/login",
   business: "/business/login",
   suite: "/login",
-  screening: "/login",
   admin: "/admin/login",
 };
 
