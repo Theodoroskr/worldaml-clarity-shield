@@ -42,7 +42,14 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
   {
     title: "Compliance",
     items: [
-      { icon: Shield, label: "AML Screening", path: "/suite/screening" },
+      {
+        icon: Shield, label: "AML Screening",
+        children: [
+          { label: "Screening Console", path: "/suite/screening" },
+          { label: "Monitored Entities", path: "/suite/screening/monitored" },
+          { label: "Risk Alert Rules", path: "/suite/screening/risk-alerts" },
+        ],
+      },
       {
         icon: CreditCard, label: "Transactions",
         children: [
