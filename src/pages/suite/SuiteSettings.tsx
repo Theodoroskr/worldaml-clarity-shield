@@ -23,7 +23,10 @@ interface Member {
   created_at: string;
   email?: string;
   full_name?: string;
+  modules?: string[];
 }
+
+const MODULE_LABELS: Record<string, string> = { screening: "Screening", kyc_kyb: "KYC / KYB", rcm: "Regulatory Compliance" };
 
 const ROLE_META: Record<OrgRole, { label: string; description: string; color: string; Icon: React.ElementType }> = {
   admin:              { label: "Admin",              description: "Full access — manage team, settings, and all data", color: "bg-purple-50 text-purple-700 border-purple-200", Icon: Crown },
@@ -47,6 +50,7 @@ export default function SuiteSettings() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<OrgRole>("analyst");
   const [inviting, setInviting] = useState(false);
+  const [inviteModules, setInviteModules] = useState<string[]>(["screening"]);
 
   // Org name edit
   const [editingName, setEditingName] = useState(false);
@@ -59,34 +63,12 @@ export default function SuiteSettings() {
   const fetchMembers = async () => {
     if (!orgId) return;
     setLoading(true);
-    const { data: memberships } = await supabase
-      .from("suite_org_members")
-      .select("*")
-      .eq("organization_id", orgId)
-      .order("created_at", { ascending: true });
-
-    if (!memberships) { setLoading(false); return; }
-
-    // Enrich with profile data
-    const userIds = memberships.map(m => m.user_id).filter(Boolean);
-    let profiles: Record<string, { email: string; full_name: string }> = {};
-
-    if (userIds.length > 0) {
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("user_id, email, full_name")
-        .in("user_id", userIds);
-
-      (profileData ?? []).forEach(p => {
-        profiles[p.user_id] = { email: p.email ?? "", full_name: p.full_name ?? "" };
-      });
-    }
-
-    setMembers(memberships.map(m => ({
-      ...m,
-      role: m.role as OrgRole,
-      email: profiles[m.user_id]?.email ?? m.invited_email ?? "—",
-      full_name: profiles[m.user_id]?.full_name ?? "",
+    const { data, error } = await supabase.rpc("suite_team_members");
+    if (error) toast.error("Could not load team: " + error.message);
+    setMembers(((data ?? []) as any[]).map(m => ({
+      id: m.id, user_id: m.user_id, role: m.role as OrgRole, invited_email: null,
+      joined_at: m.joined_at, created_at: m.created_at, email: m.email ?? "—",
+      full_name: m.full_name ?? "", modules: m.modules ?? [],
     })));
     setLoading(false);
   };
@@ -98,72 +80,35 @@ export default function SuiteSettings() {
   const inviteMember = async () => {
     if (!inviteEmail.trim() || !orgId) return;
     setInviting(true);
-
-    // Check if user exists by email
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("user_id")
-      .eq("email", inviteEmail.trim().toLowerCase())
-      .maybeSingle();
-
-    if (!profile) {
-      toast.error("No WorldAML account found for this email. They need to sign up first.");
-      setInviting(false);
-      return;
-    }
-
-    // Check not already a member
-    const existing = members.find(m => m.user_id === profile.user_id);
-    if (existing) {
-      toast.error("This person is already a member of your organisation.");
-      setInviting(false);
-      return;
-    }
-
-    const { error } = await supabase.from("suite_org_members").insert({
-      organization_id: orgId,
-      user_id: profile.user_id,
-      role: inviteRole,
-      invited_email: inviteEmail.trim().toLowerCase(),
-      joined_at: new Date().toISOString(),
+    const email = inviteEmail.trim().toLowerCase();
+    const { error } = await supabase.rpc("suite_invite_member", {
+      _email: email, _role: inviteRole, _modules: inviteModules as any,
     });
-
     if (error) { toast.error(error.message); setInviting(false); return; }
-
-    await supabase.from("suite_audit_log").insert({
-      user_id: profile.user_id,
-      organisation_id: orgId,
-      action: `Team member invited: ${inviteEmail} as ${inviteRole}`,
-      entity_type: "organisation",
-    });
-
-    toast.success(`${inviteEmail} added as ${ROLE_META[inviteRole].label}`);
+    try {
+      await supabase.functions.invoke("send-screening-invite-email", {
+        body: { email, inviter_name: org?.name || "Your organisation", role: ROLE_META[inviteRole].label, is_new_user: false },
+      });
+    } catch { /* best effort */ }
+    toast.success(`${email} added as ${ROLE_META[inviteRole].label}`);
     setInviteEmail("");
     setInviteRole("analyst");
+    setInviteModules(["screening"]);
     setShowInvite(false);
     fetchMembers();
     setInviting(false);
   };
 
-  const changeRole = async (memberId: string, newRole: OrgRole) => {
-    const { error } = await supabase
-      .from("suite_org_members")
-      .update({ role: newRole })
-      .eq("id", memberId);
+  const changeRole = async (member: Member, newRole: OrgRole) => {
+    const { error } = await supabase.rpc("suite_set_member_role", { _user_id: member.user_id, _role: newRole });
     if (error) { toast.error(error.message); return; }
     toast.success("Role updated");
     fetchMembers();
   };
 
   const removeMember = async (member: Member) => {
-    if (member.role === "admin" && members.filter(m => m.role === "admin").length <= 1) {
-      toast.error("Cannot remove the last admin. Promote another member first.");
-      return;
-    }
-    const { error } = await supabase
-      .from("suite_org_members")
-      .delete()
-      .eq("id", member.id);
+    if (!window.confirm(`Remove ${member.email} from your team? They lose access immediately.`)) return;
+    const { error } = await supabase.rpc("suite_remove_member", { _user_id: member.user_id });
     if (error) { toast.error(error.message); return; }
     toast.success("Member removed");
     fetchMembers();
