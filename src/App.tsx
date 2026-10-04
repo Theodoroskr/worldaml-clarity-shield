@@ -585,14 +585,14 @@ const App = () => (
                 <Route path="/suite-layout-preview" element={<SuiteLayout />} />
 
                 {/* WorldAML Screening & Monitoring — standalone product workspace (separate from Suite) */}
-                <Route path="/screening" element={<ScreeningWorkspace />} />
-                <Route path="/screening/team" element={<ScreeningTeam />} />
-                <Route path="/screening/monitored" element={<ScreeningMonitored />} />
-                <Route path="/screening/risk-alerts" element={<ScreeningRiskAlerts />} />
-                <Route path="/screening/help" element={<ScreeningHelp />} />
+                <Route path="/screening" element={<Navigate to="/suite/screening" replace />} />
+                <Route path="/screening/team" element={<Navigate to="/suite/settings" replace />} />
+                <Route path="/screening/monitored" element={<Navigate to="/suite/screening" replace />} />
+                <Route path="/screening/risk-alerts" element={<Navigate to="/suite/alerts" replace />} />
+                <Route path="/screening/help" element={<Navigate to="/suite/help" replace />} />
 
                 <Route path="/screening/activate" element={<ScreeningActivate />} />
-                <Route path="/screening/modules" element={<ScreeningModules />} />
+                <Route path="/screening/modules" element={<Navigate to="/suite/settings" replace />} />
 
 
 
@@ -607,7 +607,7 @@ const App = () => (
                   <Route path="onboarding-submissions" element={<SuiteOnboardingSubmissions />} />
                   <Route path="idv" element={<SuiteIDV />} />
                   <Route path="screening" element={<SuiteScreening />} />
-                  <Route path="screening-v2" element={<Navigate to="/screening" replace />} />
+                  <Route path="screening-v2" element={<Navigate to="/suite/screening" replace />} />
 
                   <Route path="transactions" element={<SuiteTransactions />} />
                   <Route path="monitoring" element={<SuiteMonitoring />} />
