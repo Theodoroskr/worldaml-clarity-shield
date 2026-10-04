@@ -584,8 +584,8 @@ const App = () => (
                 {/* Legacy Screening workspace links now open the Suite module. */}
                 <Route path="/screening" element={<Navigate to="/suite/screening" replace />} />
                 <Route path="/screening/team" element={<Navigate to="/suite/settings" replace />} />
-                <Route path="/screening/monitored" element={<Navigate to="/suite/screening" replace />} />
-                <Route path="/screening/risk-alerts" element={<Navigate to="/suite/alerts" replace />} />
+                <Route path="/screening/monitored" element={<Navigate to="/suite/screening/monitored" replace />} />
+                <Route path="/screening/risk-alerts" element={<Navigate to="/suite/screening/risk-alerts" replace />} />
                 <Route path="/screening/help" element={<Navigate to="/suite/help" replace />} />
 
                 <Route path="/screening/activate" element={<ScreeningActivate />} />
@@ -605,6 +605,8 @@ const App = () => (
                   <Route path="idv" element={<SuiteIDV />} />
                   <Route path="screening" element={<div className="p-4 md:p-6"><SuiteScreeningV2 /></div>} />
                   <Route path="screening-v2" element={<Navigate to="/suite/screening" replace />} />
+                  <Route path="screening/monitored" element={<div className="p-4 md:p-6"><ScreeningMonitored /></div>} />
+                  <Route path="screening/risk-alerts" element={<div className="p-4 md:p-6"><ScreeningRiskAlerts /></div>} />
 
                   <Route path="transactions" element={<SuiteTransactions />} />
                   <Route path="monitoring" element={<SuiteMonitoring />} />
