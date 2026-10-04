@@ -15,3 +15,10 @@ export function csvCell(value: unknown): string {
 export function csvRow(values: unknown[]): string {
   return values.map(csvCell).join(",");
 }
+
+/** Neutralise spreadsheet formulas in a raw (unquoted) cell value, e.g. for XLSX. */
+export function safeSheetValue<T>(value: T): T | string {
+  if (typeof value !== "string") return value;
+  if (/^[=+\-@\t\r]/.test(value) && !/^[-+]?\d+(\.\d+)?$/.test(value)) return `'${value}`;
+  return value;
+}

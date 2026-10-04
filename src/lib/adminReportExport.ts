@@ -1,3 +1,4 @@
+import { csvCell } from "@/lib/csvSafe";
 import jsPDF from "jspdf";
 import { format } from "date-fns";
 import type { AdminAnalytics } from "./adminAnalytics";
@@ -56,7 +57,7 @@ export function exportSummaryCsv(a: AdminAnalytics, label: string) {
     ...a.marketing.by_referrer.map((r) => `"${r.label}",${r.n}`),
     "",
     "Top partners,Deals,Pipeline EUR",
-    ...a.partners.top_partners.map((p) => `"${p.name}",${p.deals},${p.pipeline_eur}`),
+    ...a.partners.top_partners.map((p) => `${csvCell(p.name)},${p.deals},${p.pipeline_eur}`),
   ].join("\n");
   download(new Blob([csv], { type: "text/csv;charset=utf-8" }), `worldaml-admin-${format(new Date(), "yyyyMMdd-HHmm")}.csv`);
 }
