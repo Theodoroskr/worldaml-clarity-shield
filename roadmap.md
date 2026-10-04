@@ -4,6 +4,7 @@
 - [x] Add a link from WorldAML Screening back to WorldAML Business (sidebar tab / button)
 
 ## WorldAML Suite modules (plan steps)
+- [x] Fix Suite Screening opening the basic page instead of the merged Screening console; signed-in console and existing Cases tab verified
 - [x] 1. Real screening engine in Suite (mock removed, fail-closed, CI guard test)
 - [x] 2. One Suite access rule (useAccess = usePortalAccess)
 - [x] 3. Screening module added + backfilled (41 companies) + auto-sync from purchases

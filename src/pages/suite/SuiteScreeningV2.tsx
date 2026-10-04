@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Loader2, Search, ShieldCheck, Activity, FileText, ChevronRight,
   ArrowLeft, Copy, Check, X, Filter, Tag, MoreHorizontal,
@@ -191,8 +191,10 @@ function categoryFromSourceType(t: string): ScreeningCategory | null {
 }
 
 export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: string } = {}) {
+  const [searchParams] = useSearchParams();
+  const query = initialQuery ?? searchParams.get("q") ?? "";
   const [subject, setSubject] = useState<SubjectInput>(
-    initialQuery?.trim() ? { ...emptySubject, full_name: initialQuery.trim() } : emptySubject,
+    query.trim() ? { ...emptySubject, full_name: query.trim() } : emptySubject,
   );
   const [adverseMedia, setAdverseMedia] = useState(false);
   const [monitoring, setMonitoring] = useState(false);
@@ -376,7 +378,7 @@ export default function SuiteScreeningV2({ initialQuery }: { initialQuery?: stri
               <Activity className="mr-1 h-3 w-3" /> Monitoring
             </Badge>
             <Button asChild variant="outline" size="sm" className="shrink-0">
-              <Link to="/screening/team">
+              <Link to="/suite/settings">
                 <Users className="mr-1.5 h-4 w-4" /> Team &amp; Access
               </Link>
             </Button>
