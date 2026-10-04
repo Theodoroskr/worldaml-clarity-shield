@@ -217,6 +217,21 @@ export default function SuiteSettings() {
               <p className="text-xs text-muted-foreground mt-2">
                 {ROLE_META[inviteRole].description}
               </p>
+              <div className="mt-3">
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Modules they can use</label>
+                <div className="flex flex-wrap gap-3">
+                  {Object.entries(MODULE_LABELS).map(([k, label]) => (
+                    <label key={k} className="flex items-center gap-1.5 text-xs text-foreground">
+                      <input type="checkbox" checked={inviteModules.includes(k)}
+                        onChange={e => setInviteModules(prev => e.target.checked ? [...prev, k] : prev.filter(x => x !== k))} />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-2">
+                They need a WorldAML account with this email. Modules your company hasn't bought stay hidden.
+              </p>
               <div className="flex justify-end gap-2 mt-4">
                 <button onClick={() => setShowInvite(false)} className="text-xs px-3 py-1.5 border border-border rounded-lg text-muted-foreground hover:bg-muted">
                   Cancel
@@ -237,7 +252,7 @@ export default function SuiteSettings() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    {["Member", "Role", "Joined", isAdmin ? "Actions" : ""].map(h => (
+                    {["Member", "Role", "Modules", "Joined", isAdmin ? "Actions" : ""].map(h => (
                       <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold text-muted-foreground uppercase">{h}</th>
                     ))}
                   </tr>
@@ -263,7 +278,7 @@ export default function SuiteSettings() {
                           {isAdmin && m.user_id !== members[0]?.user_id ? (
                             <select
                               value={m.role}
-                              onChange={e => changeRole(m.id, e.target.value as OrgRole)}
+                              onChange={e => changeRole(m, e.target.value as OrgRole)}
                               className="text-[10px] px-2 py-1 rounded border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                             >
                               {(Object.keys(ROLE_META) as OrgRole[]).map(r => (
@@ -275,6 +290,9 @@ export default function SuiteSettings() {
                               <Icon className="w-2.5 h-2.5" />{Meta.label}
                             </span>
                           )}
+                        </td>
+                        <td className="px-4 py-3 text-[10px] text-muted-foreground">
+                          {m.role === "admin" ? "All modules" : (m.modules?.length ? m.modules.map(x => MODULE_LABELS[x] ?? x).join(", ") : "None yet")}
                         </td>
                         <td className="px-4 py-3 text-[10px] font-mono text-muted-foreground">
                           {m.joined_at ? new Date(m.joined_at).toLocaleDateString("en-GB") : "Pending"}
