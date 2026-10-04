@@ -3,7 +3,7 @@ import { AlertTriangle, ArrowRight, EyeOff, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAdminNotifications } from "@/hooks/useAdminNotifications";
-import { EVENT_MAP, priorityColour } from "@/lib/adminNotifications";
+import { EVENT_MAP, notificationActionUrl, priorityColour } from "@/lib/adminNotifications";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,7 +78,7 @@ export default function AdminActionRequired({ path, eventTypes, variant = "panel
                 <p className="text-sm text-foreground truncate">{n.title}</p>
                 {n.message && <p className="text-xs text-muted-foreground truncate">{n.message}</p>}
               </div>
-              <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => navigate(n.action_url ?? meta?.navPath ?? "#")}>
+              <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => navigate(notificationActionUrl(n))}>
                 {meta?.actionLabel ?? "Review"} <ArrowRight className="ml-1 h-3 w-3" />
               </Button>
               {!meta?.notDismissible && (

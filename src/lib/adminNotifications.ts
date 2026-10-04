@@ -82,6 +82,14 @@ export const EVENT_MAP: Record<string, EventTypeMeta> = Object.fromEntries(
   EVENT_TYPES.map((e) => [e.eventType, e]),
 );
 
+/** Enquiry notifications must open their record, not reload the dashboard. */
+export function notificationActionUrl(n: AdminNotification): string {
+  if (n.entity_type === "form_submission" && n.entity_id) {
+    return `/admin/dashboard?enquiry=${encodeURIComponent(n.entity_id)}`;
+  }
+  return n.action_url || EVENT_MAP[n.event_type]?.navPath || "/admin/notifications";
+}
+
 /** Role-based defaults — used when an admin has no saved preference for an event type. */
 export const ROLE_CATEGORY_DEFAULTS: Record<string, string[]> = {
   marketing: ["marketing", "academy", "business", "partners"],

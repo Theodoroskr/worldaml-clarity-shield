@@ -10,6 +10,7 @@ import {
   CATEGORY_LABELS,
   DecoratedNotification,
   EVENT_MAP,
+  notificationActionUrl,
   groupByAge,
   priorityColour,
   timeAgo,
@@ -47,7 +48,7 @@ function Row({ n, onClose }: { n: DecoratedNotification; onClose: () => void }) 
                   onClick={() => {
                     markRead(n.id);
                     onClose();
-                    navigate(n.action_url ?? meta?.navPath ?? "/admin/notifications");
+                    navigate(notificationActionUrl(n));
                   }}
                 >
                   {meta?.actionLabel ?? "View"} <ArrowRight className="ml-1 h-3 w-3" />

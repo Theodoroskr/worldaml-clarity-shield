@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import AdminActionRequired from "@/components/admin/AdminActionRequired";
+import AdminEnquiryDialog from "@/components/admin/AdminEnquiryDialog";
 import AdminPageAttention from "@/components/admin/AdminPageAttention";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -130,6 +131,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-6 space-y-6">
+      <AdminEnquiryDialog />
       {/* Header + global controls */}
       <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
         <div>
