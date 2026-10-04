@@ -217,7 +217,6 @@ const SuiteOnboarding = lazyWithRetry(() => import("./pages/suite/SuiteOnboardin
 const SuiteOnboardingForms = lazyWithRetry(() => import("./pages/suite/SuiteOnboardingForms"));
 const SuiteOnboardingSubmissions = lazyWithRetry(() => import("./pages/suite/SuiteOnboardingSubmissions"));
 const SuiteIDV = lazyWithRetry(() => import("./pages/suite/SuiteIDV"));
-const SuiteScreening = lazyWithRetry(() => import("./pages/suite/SuiteScreening"));
 const SuiteScreeningV2 = lazyWithRetry(() => import("./pages/suite/SuiteScreeningV2"));
 const ScreeningWorkspace = lazyWithRetry(() => import("./pages/screening/ScreeningWorkspace"));
 const ScreeningActivate = lazyWithRetry(() => import("./pages/screening/ScreeningActivate"));
@@ -584,7 +583,7 @@ const App = () => (
 
                 <Route path="/suite-layout-preview" element={<SuiteLayout />} />
 
-                {/* WorldAML Screening & Monitoring — standalone product workspace (separate from Suite) */}
+                {/* Legacy Screening workspace links now open the Suite module. */}
                 <Route path="/screening" element={<Navigate to="/suite/screening" replace />} />
                 <Route path="/screening/team" element={<Navigate to="/suite/settings" replace />} />
                 <Route path="/screening/monitored" element={<Navigate to="/suite/screening" replace />} />
@@ -606,7 +605,7 @@ const App = () => (
                   <Route path="onboarding-forms/:id" element={<SuiteOnboardingForms />} />
                   <Route path="onboarding-submissions" element={<SuiteOnboardingSubmissions />} />
                   <Route path="idv" element={<SuiteIDV />} />
-                  <Route path="screening" element={<SuiteScreening />} />
+                  <Route path="screening" element={<div className="p-4 md:p-6"><SuiteScreeningV2 /></div>} />
                   <Route path="screening-v2" element={<Navigate to="/suite/screening" replace />} />
 
                   <Route path="transactions" element={<SuiteTransactions />} />

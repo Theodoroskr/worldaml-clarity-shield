@@ -1,1 +1,2 @@
 - Sensitive Suite fields (DOB, ID/passport, tax, bank) are encrypted by database triggers into *_enc columns with masked copies; read full values only via suite_reveal_pii (logged). Why: plaintext never rests in client tables.
+- The Suite Screening route renders the shared Screening console inside Suite access/module gates, not the standalone workspace or basic search page. Why: consolidation must retain existing screening cases and controls without automatic trial activation.
