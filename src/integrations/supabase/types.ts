@@ -9721,6 +9721,10 @@ export type Database = {
         }
         Returns: string
       }
+      product_role_from_suite: {
+        Args: { _r: Database["public"]["Enums"]["org_member_role"] }
+        Returns: Database["public"]["Enums"]["product_role"]
+      }
       rcm_can_edit: { Args: { _org: string }; Returns: boolean }
       rcm_can_manage: { Args: { _org: string }; Returns: boolean }
       rcm_is_org_admin: { Args: { _org: string }; Returns: boolean }
@@ -9796,6 +9800,19 @@ export type Database = {
         Args: { _answers: Json; _course_id: string; _holder_name: string }
         Returns: Json
       }
+      suite_audit_feed: {
+        Args: { _limit?: number; _offset?: number }
+        Returns: {
+          action: string
+          actor_id: string
+          actor_name: string
+          created_at: string
+          details: Json
+          entity_id: string
+          entity_type: string
+          id: string
+        }[]
+      }
       suite_bootstrap_org: { Args: { _name: string }; Returns: string }
       suite_can_view_pii: { Args: { _org: string }; Returns: boolean }
       suite_copy_submission_pii: {
@@ -9806,13 +9823,26 @@ export type Database = {
         Args: { _org: string; _value: string }
         Returns: string[]
       }
+      suite_invite_member: {
+        Args: {
+          _email: string
+          _modules?: Database["public"]["Enums"]["suite_module_key"][]
+          _role: Database["public"]["Enums"]["org_member_role"]
+        }
+        Returns: string
+      }
       suite_provision_baseline_rules: {
         Args: { _org: string }
         Returns: number
       }
+      suite_remove_member: { Args: { _user_id: string }; Returns: undefined }
       suite_reveal_pii: {
         Args: { _id: string; _purpose?: string; _table: string }
         Returns: Json
+      }
+      suite_role_from_product: {
+        Args: { _r: Database["public"]["Enums"]["product_role"] }
+        Returns: Database["public"]["Enums"]["org_member_role"]
       }
       suite_security_audit_core: {
         Args: { _kind?: string; _run_by: string }
@@ -9849,6 +9879,26 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      suite_set_member_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["org_member_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      suite_team_members: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          joined_at: string
+          modules: Database["public"]["Enums"]["suite_module_key"][]
+          role: Database["public"]["Enums"]["org_member_role"]
+          user_id: string
+        }[]
       }
       sweep_customer_document_expiry: { Args: never; Returns: Json }
       sweep_regulator_submission_sla: { Args: never; Returns: number }
