@@ -205,7 +205,7 @@ export default function BusinessSignup() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO title="Create a Business Account" description="Create a WorldAML business account to buy WorldAML API, WorldID and LexisNexis screening data." noindex />
+      <SEO title="Create a Business Account" description="Create a WorldAML business account to buy WorldAML screening, WorldID identity verification and compliance training." noindex />
       <Header />
       <main className="flex-1 flex items-center justify-center px-4 py-16 bg-muted/20">
         <Card className="w-full max-w-xl">
