@@ -27,7 +27,7 @@ const COPY: Record<PortalKey, { title: string; body: string; primary?: { label: 
   },
   suite: {
     title: "No Suite access",
-    body: "Your account does not currently have access to the WorldAML Compliance Suite.",
+    body: "Your account does not currently have access to the WorldAML Suite.",
     primary: { label: "View Suite plans", to: "/pricing" },
     secondary: { label: "Return to WorldAML", to: "/" },
   },

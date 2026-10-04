@@ -45,7 +45,7 @@ export default function SuiteAppLayout() {
             <h1 className="text-xl font-bold text-foreground">Suite access required</h1>
             <p className="text-sm text-muted-foreground mt-2">
               Your current plan is <span className="font-semibold capitalize">{subscriptionTier}</span>.
-              Upgrade to access the WorldAML Compliance Suite.
+              Upgrade to access the WorldAML Suite.
             </p>
           </div>
           <div className="flex flex-col gap-2">
@@ -80,7 +80,7 @@ export default function SuiteAppLayout() {
     <div className="flex h-screen w-full overflow-hidden bg-background">
       <SEO
         title="Suite"
-        description="WorldAML Compliance Suite — manage onboarding, screening, alerts, and cases."
+        description="WorldAML Suite — manage onboarding, screening, alerts, and cases."
         noindex
       />
       <SuiteAppSidebar />

@@ -15,7 +15,7 @@ import StickyDemoCTA from "@/components/StickyDemoCTA";
 const softwareData = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "WorldAML Compliance Suite",
+  name: "WorldAML Suite",
   applicationCategory: "FinancialApplication",
   description:
     "Unified compliance platform combining KYC/KYB onboarding, AML screening, risk assessment, transaction monitoring, regulatory reporting, and audit trails in a single integrated suite.",
@@ -110,13 +110,13 @@ const PlatformSuite = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Compliance Suite — KYC, AML, Risk & Reporting"
+        title="WorldAML Suite — KYC, AML, Risk & Reporting"
         description="WorldAML Suite: KYC/KYB onboarding, AML screening, risk decisioning, transaction monitoring, and regulatory reporting in one platform."
         canonical="/platform/suite"
         breadcrumbs={[
           { name: "Home", url: "/" },
           { name: "Platform", url: "/platform" },
-          { name: "Compliance Suite", url: "/platform/suite" },
+          { name: "WorldAML Suite", url: "/platform/suite" },
         ]}
         structuredData={structuredData}
       />

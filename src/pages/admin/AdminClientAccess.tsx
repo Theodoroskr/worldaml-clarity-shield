@@ -25,7 +25,7 @@ import {
 
 const PRODUCTS = [
   { key: "screening", label: "Screening & Monitoring", colour: "bg-sky-500/70" },
-  { key: "suite", label: "Compliance Suite", colour: "bg-violet-500/70" },
+  { key: "suite", label: "WorldAML Suite", colour: "bg-violet-500/70" },
   { key: "academy", label: "WorldAML Academy", colour: "bg-emerald-500/70" },
 ] as const;
 

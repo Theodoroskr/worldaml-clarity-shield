@@ -251,7 +251,7 @@ export default function AdminBusiness() {
                 <SelectContent>
                   <SelectItem value="screening">WorldAML Screening</SelectItem>
                   <SelectItem value="academy">Academy</SelectItem>
-                  <SelectItem value="suite">Compliance Suite</SelectItem>
+                  <SelectItem value="suite">WorldAML Suite</SelectItem>
                 </SelectContent>
               </Select>
             </div>

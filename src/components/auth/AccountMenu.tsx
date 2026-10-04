@@ -49,7 +49,7 @@ export const WORKSPACES: WorkspaceDef[] = [
   },
   {
     key: "suite",
-    label: "Compliance Suite",
+    label: "WorldAML Suite",
     description: "Onboarding, screening, cases & monitoring",
     icon: Shield,
     match: (p) => p.startsWith("/suite"),
@@ -70,7 +70,7 @@ export default function AccountMenu({ onNavigate }: { onNavigate?: () => void })
   const { has } = usePortalAccess();
   const location = useLocation();
 
-  // Compliance Suite is still in development — only visible to internal admins.
+  // WorldAML Suite is still in development — only visible to internal admins.
   const available = WORKSPACES.filter((w) => w.key !== "screening" && (has(w.key) || (w.key === "suite" && has("screening"))));
   const current = available.find((w) => w.match(location.pathname))?.key;
 
