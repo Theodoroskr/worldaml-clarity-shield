@@ -12,6 +12,7 @@ import { useAdminNotifications } from "@/hooks/useAdminNotifications";
 import {
   CATEGORY_LABELS,
   EVENT_MAP,
+  notificationActionUrl,
   priorityColour,
   priorityLabel,
   timeAgo,
@@ -127,7 +128,7 @@ export default function AdminNotificationCentre() {
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 {(n.action_url || meta?.navPath) && (
-                  <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { markRead(n.id); navigate(n.action_url ?? meta!.navPath); }}>
+                  <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { markRead(n.id); navigate(notificationActionUrl(n)); }}>
                     {meta?.actionLabel ?? "View"} <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>
                 )}
