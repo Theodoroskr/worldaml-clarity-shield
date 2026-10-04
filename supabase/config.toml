@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.send-admin-report]
 verify_jwt = false
+
+[functions.stripe-worldaml-webhook]
+verify_jwt = false

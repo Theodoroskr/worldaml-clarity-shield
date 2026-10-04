@@ -247,6 +247,20 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
+  // Only the scheduled job may run this: it sends a secret stored in a locked table.
+  const provided = req.headers.get("x-cron-secret") ?? "";
+  const { data: secretRow } = await supabase
+    .from("internal_cron_secrets")
+    .select("secret")
+    .eq("name", "refresh-news")
+    .maybeSingle();
+  if (!provided || !secretRow?.secret || provided !== secretRow.secret) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const perFeed: Record<string, number | string> = {};
   let stored = 0;
 

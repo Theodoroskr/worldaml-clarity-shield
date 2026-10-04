@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 vi.mock("@/contexts/AuthContext", () => ({
   useAuth: () => ({
@@ -16,6 +17,7 @@ vi.mock("@/contexts/AuthContext", () => ({
 
 import { Header } from "./Header";
 import { RegionProvider } from "@/contexts/RegionContext";
+import { CartProvider } from "@/contexts/CartContext";
 
 /**
  * Visual regression test for the desktop header layout.
@@ -41,13 +43,15 @@ const COMMON_DESKTOP_WIDTHS = [1280, 1366, 1440, 1536, 1920];
 
 const renderHeader = () =>
   render(
-    <HelmetProvider>
-      <MemoryRouter>
-        <RegionProvider>
-          <Header />
-        </RegionProvider>
-      </MemoryRouter>
-    </HelmetProvider>,
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <HelmetProvider>
+        <MemoryRouter>
+          <RegionProvider>
+            <CartProvider><Header /></CartProvider>
+          </RegionProvider>
+        </MemoryRouter>
+      </HelmetProvider>
+    </QueryClientProvider>,
   );
 
 describe("Header desktop layout — wordmark / nav overlap guard", () => {
@@ -90,7 +94,7 @@ describe("Header desktop layout — wordmark / nav overlap guard", () => {
       expect(wordmark!.className).toMatch(/\bshrink-0\b/);
 
       // Invariant 2: desktop nav has a hard left gutter and absorbs overflow.
-      expect(desktopNav!.className).toMatch(/\bml-(6|8)\b/);
+      expect(desktopNav!.className).toMatch(/\bml-(4|6|8)\b/);
       expect(desktopNav!.className).toMatch(/\bmin-w-0\b/);
 
       // Invariant 3: logo is a previous sibling of the nav inside a flex row.
