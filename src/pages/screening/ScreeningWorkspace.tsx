@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SuiteScreeningV2 from "@/pages/suite/SuiteScreeningV2";
 import { useScreeningAccess } from "@/hooks/useScreeningAccess";
 import { useScreeningQuota } from "@/hooks/useScreeningQuota";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -19,13 +20,16 @@ import { supabase } from "@/integrations/supabase/client";
 export default function ScreeningWorkspace() {
   const { isLoading, isAuthenticated, hasAccess, plan, refresh } = useScreeningAccess();
   const quota = useScreeningQuota();
+  const { user } = useAuth();
+  // Only people who signed up through the screening demo form get the demo automatically.
+  const demoIntent = user?.user_metadata?.demo_intent === "screening";
   const [searchParams] = useSearchParams();
   const [claiming, setClaiming] = useState(false);
   const [justActivated, setJustActivated] = useState(false);
   const claimedRef = useRef(false);
 
   useEffect(() => {
-    if (isLoading || !isAuthenticated || hasAccess || claimedRef.current) return;
+    if (isLoading || !isAuthenticated || hasAccess || !demoIntent || claimedRef.current) return;
     claimedRef.current = true;
     setClaiming(true);
     void (async () => {
@@ -39,7 +43,7 @@ export default function ScreeningWorkspace() {
         setClaiming(false);
       }
     })();
-  }, [isLoading, isAuthenticated, hasAccess, refresh]);
+  }, [isLoading, isAuthenticated, hasAccess, demoIntent, refresh]);
 
   const busy = isLoading || claiming;
   const isDemo = plan === "demo";
@@ -132,7 +136,7 @@ export default function ScreeningWorkspace() {
                     </Link>
                   </Button>
                   <Button asChild variant="outline">
-                    <Link to="/contact-sales?product=WorldAML%20Screening%20%26%20Monitoring">Talk to sales</Link>
+                    <Link to="/contact-sales?product=WorldAML%20Screening%20%26%20Monitoring">Request a company demo</Link>
                   </Button>
                 </div>
               </CardContent>
