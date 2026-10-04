@@ -105,9 +105,8 @@ export function mapEntitlements(
 ): BusinessEntitlement[] {
   const accountId = businessAccountId ?? "";
   const sub = screening.find((s) => isActiveStatus(s.status)) ?? screening[0] ?? null;
-  // The Compliance Suite is not yet commercially available in the portal.
-  const visibleAccess = access.filter((a) => a.product !== "suite");
-  const visibleSubs = subscriptions.filter((s) => s.product !== "suite");
+  const visibleAccess = access;
+  const visibleSubs = subscriptions;
 
   // The commercial layer (business_subscriptions) wins over the raw access
   // registry whenever it covers a product: it carries price, period and the
@@ -174,7 +173,6 @@ export function mapEntitlements(
   // Membership of a product (product_members) is also real access — this is how
   // Screening is actually provisioned today.
   for (const m of members) {
-    if (m.product === "suite") continue;
     const productKey = PRODUCT_TO_SOLUTION_KEY[m.product] ?? m.product;
     if (rows.some((r) => r.product_key === productKey)) continue;
     rows.push({
