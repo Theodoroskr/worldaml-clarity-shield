@@ -220,8 +220,6 @@ const SuiteIDV = lazyWithRetry(() => import("./pages/suite/SuiteIDV"));
 const SuiteScreeningV2 = lazyWithRetry(() => import("./pages/suite/SuiteScreeningV2"));
 const ScreeningWorkspace = lazyWithRetry(() => import("./pages/screening/ScreeningWorkspace"));
 const ScreeningActivate = lazyWithRetry(() => import("./pages/screening/ScreeningActivate"));
-const ScreeningModules = lazyWithRetry(() => import("./pages/screening/ScreeningModules"));
-const ScreeningTeam = lazyWithRetry(() => import("./pages/screening/ScreeningTeam"));
 const ScreeningMonitored = lazyWithRetry(() => import("./pages/screening/ScreeningMonitored"));
 const ScreeningRiskAlerts = lazyWithRetry(() => import("./pages/screening/ScreeningRiskAlerts"));
 const ScreeningHelp = lazyWithRetry(() => import("./pages/screening/ScreeningHelp"));

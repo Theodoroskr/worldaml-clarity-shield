@@ -13,27 +13,40 @@ export default function SuiteAudit() {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [moduleFilter, setModuleFilter] = useState("All");
+  const [limit, setLimit] = useState(200);
+  const [modules, setModules] = useState<Record<string, string>>({});
+
   useEffect(() => {
     if (orgLoading || !orgId) return;
     const load = async () => {
-      const { data } = await supabase.from("suite_audit_log").select("*").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(100);
-      setEvents((data || []).map(a => ({
-        id: a.id,
-        timestamp: new Date(a.created_at).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }),
-        actor: "You",
-        action: a.action,
-        type: a.entity_type as any,
-        detail: typeof a.details === "object" && a.details !== null ? (a.details as any).detail || "" : "",
-      })));
+      const { data, error } = await supabase.rpc("suite_audit_feed", { _limit: limit, _offset: 0 });
+      if (error) console.warn(error);
+      const mods: Record<string, string> = {};
+      setEvents(((data ?? []) as any[]).map(a => {
+        const d = (a.details ?? {}) as any;
+        mods[a.id] = d.module || a.entity_type || "other";
+        return {
+          id: a.id,
+          timestamp: new Date(a.created_at).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+          actor: a.actor_name || "System",
+          action: a.action,
+          type: a.entity_type as any,
+          detail: typeof d.detail === "string" ? d.detail : "",
+        };
+      }));
+      setModules(mods);
       setLoading(false);
     };
     load();
-  }, [orgId, orgLoading]);
+  }, [orgId, orgLoading, limit]);
 
   const types = ["All", ...Array.from(new Set(events.map(e => e.type)))];
+  const moduleOpts = ["All", ...Array.from(new Set(Object.values(modules)))];
   const filtered = events.filter(e =>
     (typeFilter === "All" || e.type === typeFilter) &&
-    (!search || e.action.toLowerCase().includes(search.toLowerCase()))
+    (moduleFilter === "All" || modules[e.id] === moduleFilter) &&
+    (!search || `${e.action} ${e.actor} ${e.detail}`.toLowerCase().includes(search.toLowerCase()))
   );
 
   const exportCSV = () => {
@@ -55,9 +68,15 @@ export default function SuiteAudit() {
 
       <div className="flex items-center gap-2">
         <div className="relative"><Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search audit log…" className="pl-7 py-1.5 text-xs rounded border border-border bg-background text-foreground w-60 focus:outline-none focus:ring-1 focus:ring-primary" /></div>
-        <div className="flex gap-1">
+        <select value={moduleFilter} onChange={e => setModuleFilter(e.target.value)} className="py-1.5 px-2 text-xs rounded border border-border bg-background text-foreground capitalize">
+          {moduleOpts.map(m => <option key={m} value={m}>{m === "All" ? "All modules" : m}</option>)}
+        </select>
+        <div className="flex gap-1 flex-wrap">
           {types.map(t => <button key={t} onClick={() => setTypeFilter(t)} className={cn("text-xs px-2.5 py-1 rounded-full border font-medium transition-colors capitalize", typeFilter === t ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary")}>{t}</button>)}
         </div>
+        {events.length >= limit && limit < 1000 && (
+          <button onClick={() => setLimit(l => Math.min(l + 200, 1000))} className="ml-auto text-xs text-primary hover:underline">Load older</button>
+        )}
       </div>
 
       <div className="bg-card rounded-xl border border-border p-6">

@@ -1,2 +1,3 @@
 - Sensitive Suite fields (DOB, ID/passport, tax, bank) are encrypted by database triggers into *_enc columns with masked copies; read full values only via suite_reveal_pii (logged). Why: plaintext never rests in client tables.
 - The Suite Screening route renders the shared Screening console inside Suite access/module gates, not the standalone workspace or basic search page. Why: consolidation must retain existing screening cases and controls without automatic trial activation.
+- Suite team is managed only via suite_* team RPCs on suite_org_members (product_members kept in sync by trigger); screening_audit_events are mirrored into suite_audit_log, read via suite_audit_feed. Why: one team list and one immutable audit trail per company.
