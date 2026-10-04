@@ -68,9 +68,15 @@ export default function SuiteAudit() {
 
       <div className="flex items-center gap-2">
         <div className="relative"><Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search audit log…" className="pl-7 py-1.5 text-xs rounded border border-border bg-background text-foreground w-60 focus:outline-none focus:ring-1 focus:ring-primary" /></div>
-        <div className="flex gap-1">
+        <select value={moduleFilter} onChange={e => setModuleFilter(e.target.value)} className="py-1.5 px-2 text-xs rounded border border-border bg-background text-foreground capitalize">
+          {moduleOpts.map(m => <option key={m} value={m}>{m === "All" ? "All modules" : m}</option>)}
+        </select>
+        <div className="flex gap-1 flex-wrap">
           {types.map(t => <button key={t} onClick={() => setTypeFilter(t)} className={cn("text-xs px-2.5 py-1 rounded-full border font-medium transition-colors capitalize", typeFilter === t ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary")}>{t}</button>)}
         </div>
+        {events.length >= limit && limit < 1000 && (
+          <button onClick={() => setLimit(l => Math.min(l + 200, 1000))} className="ml-auto text-xs text-primary hover:underline">Load older</button>
+        )}
       </div>
 
       <div className="bg-card rounded-xl border border-border p-6">
