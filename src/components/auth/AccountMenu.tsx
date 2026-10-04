@@ -41,13 +41,6 @@ export const WORKSPACES: WorkspaceDef[] = [
     match: (p) => p.startsWith("/partner"),
   },
   {
-    key: "screening",
-    label: "WorldAML Screening",
-    description: "Sanctions, PEP & adverse media screening",
-    icon: Radar,
-    match: (p) => p.startsWith("/screening") || p.startsWith("/screening-monitoring"),
-  },
-  {
     key: "suite",
     label: "WorldAML Suite",
     description: "Onboarding, screening, cases & monitoring",
@@ -71,7 +64,7 @@ export default function AccountMenu({ onNavigate }: { onNavigate?: () => void })
   const location = useLocation();
 
   // WorldAML Suite is still in development — only visible to internal admins.
-  const available = WORKSPACES.filter((w) => w.key !== "screening" && (has(w.key) || (w.key === "suite" && has("screening"))));
+  const available = WORKSPACES.filter((w) => has(w.key));
   const current = available.find((w) => w.match(location.pathname))?.key;
 
   return (

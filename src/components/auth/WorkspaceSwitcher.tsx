@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Check, GraduationCap, Handshake, Building2, Shield, Radar } from "lucide-react";
+import { Check, GraduationCap, Handshake, Building2, Shield } from "lucide-react";
 import {
   DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -10,8 +10,7 @@ import { usePortalAccess, PortalKey } from "@/hooks/usePortalAccess";
  * than one customer-facing entitlement. Admin is never advertised here.
  */
 export default function WorkspaceSwitcher({ current }: { current: PortalKey }) {
-  const { academyAccess, partnerAccess, businessAccess, suiteAccess, screeningAccess, adminAccess } = usePortalAccess();
-  // WorldAML Suite is still in development — only advertised to internal admins.
+  const { academyAccess, partnerAccess, businessAccess, suiteAccess } = usePortalAccess();
   const showSuite = suiteAccess;
   const count = [academyAccess, partnerAccess, businessAccess, showSuite].filter(Boolean).length;
   if (count < 2) return null;
