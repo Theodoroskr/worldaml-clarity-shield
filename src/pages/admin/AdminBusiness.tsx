@@ -32,6 +32,49 @@ export default function AdminBusiness() {
   const [grantPlan, setGrantPlan] = useState("starter");
   const [grantSeats, setGrantSeats] = useState("1");
   const [granting, setGranting] = useState(false);
+  const [priceQuote, setPriceQuote] = useState<any | null>(null);
+  const [qProduct, setQProduct] = useState("suite");
+  const [qAmount, setQAmount] = useState("");
+  const [qInterval, setQInterval] = useState("year");
+  const [qValid, setQValid] = useState("");
+  const [qNotes, setQNotes] = useState("");
+  const [savingQuote, setSavingQuote] = useState(false);
+
+  const guessKey = (name: string) => /suite/i.test(name) ? "suite" : /academy/i.test(name) ? "academy" : /screen|api|worldaml/i.test(name) ? "screening" : "suite";
+  const openPricing = (qr: any) => {
+    setPriceQuote(qr);
+    setQProduct(qr.quoted_product_key || guessKey(qr.product || ""));
+    setQAmount(qr.quoted_amount_cents != null ? String(qr.quoted_amount_cents / 100) : "");
+    setQInterval(qr.quoted_interval || "year");
+    setQValid(qr.quote_valid_until ? String(qr.quote_valid_until).slice(0, 10) : "");
+    setQNotes(qr.quote_notes || "");
+  };
+  const saveQuote = async () => {
+    const amount = Math.round(parseFloat(qAmount) * 100);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast({ title: "Enter a price above zero", variant: "destructive" });
+      return;
+    }
+    setSavingQuote(true);
+    const { error } = await supabase.from("business_quote_requests").update({
+      quoted_product_key: qProduct,
+      quoted_amount_cents: amount,
+      quoted_currency: "eur",
+      quoted_interval: qInterval,
+      quote_valid_until: qValid ? new Date(qValid + "T23:59:59Z").toISOString() : null,
+      quote_notes: qNotes.trim().slice(0, 1000) || null,
+      quoted_at: new Date().toISOString(),
+      status: "quoted",
+    } as any).eq("id", priceQuote.id);
+    setSavingQuote(false);
+    if (error) {
+      toast({ title: "Could not send quote", description: error.message, variant: "destructive" });
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["admin-business-quotes"] });
+    setPriceQuote(null);
+    toast({ title: "Quote sent", description: "The customer can now accept and pay it in their Business portal." });
+  };
 
   const { data: accounts, isLoading: accountsLoading } = useQuery({
     queryKey: ["admin-business-accounts"],
@@ -207,7 +250,7 @@ export default function AdminBusiness() {
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow><TableHead>Company</TableHead><TableHead>Product</TableHead><TableHead>Plan</TableHead><TableHead>Volume</TableHead><TableHead>Details</TableHead><TableHead>Raised</TableHead><TableHead>Status</TableHead></TableRow>
+                    <TableRow><TableHead>Company</TableHead><TableHead>Product</TableHead><TableHead>Plan</TableHead><TableHead>Volume</TableHead><TableHead>Details</TableHead><TableHead>Raised</TableHead><TableHead>Price</TableHead><TableHead>Status</TableHead></TableRow>
                   </TableHeader>
                   <TableBody>
                     {(quotes || []).map((qr: any) => (
@@ -218,6 +261,14 @@ export default function AdminBusiness() {
                         <TableCell>{qr.seats ?? "—"}</TableCell>
                         <TableCell className="max-w-xs truncate text-muted-foreground">{qr.message || "—"}</TableCell>
                         <TableCell>{new Date(qr.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <span className="mr-2">{money(qr.quoted_amount_cents, qr.quoted_currency)}</span>
+                          {!["won", "closed"].includes(qr.status) && (
+                            <Button size="sm" variant="outline" onClick={() => openPricing(qr)}>
+                              {qr.quoted_amount_cents != null ? "Edit quote" : "Send quote"}
+                            </Button>
+                          )}
+                        </TableCell>
                         <TableCell>
                           <Select value={qr.status} onValueChange={(v) => updateStatus(qr.id, v)}>
                             <SelectTrigger className="w-[130px] h-8"><SelectValue /></SelectTrigger>
@@ -227,7 +278,7 @@ export default function AdminBusiness() {
                       </TableRow>
                     ))}
                     {!quotes?.length && (
-                      <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No quote requests yet.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No quote requests yet.</TableCell></TableRow>
                     )}
                   </TableBody>
                 </Table>
@@ -236,6 +287,59 @@ export default function AdminBusiness() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!priceQuote} onOpenChange={(open) => !open && setPriceQuote(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send quote — {priceQuote?.product}{priceQuote?.plan ? ` (${priceQuote.plan})` : ""}</DialogTitle>
+            <DialogDescription>The customer sees this price in their Business portal and can accept and pay by card. Payment switches the product on automatically.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Product to switch on after payment</Label>
+              <Select value={qProduct} onValueChange={setQProduct}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="suite">WorldAML Suite</SelectItem>
+                  <SelectItem value="screening">WorldAML Screening</SelectItem>
+                  <SelectItem value="academy">Academy</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Price (EUR)</Label>
+                <Input type="number" min={1} step="0.01" value={qAmount} onChange={(e) => setQAmount(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Billing</Label>
+                <Select value={qInterval} onValueChange={setQInterval}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="year">Per year</SelectItem>
+                    <SelectItem value="month">Per month</SelectItem>
+                    <SelectItem value="one_time">One-off</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Valid until (optional)</Label>
+              <Input type="date" value={qValid} onChange={(e) => setQValid(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Notes for the customer (optional)</Label>
+              <Input value={qNotes} maxLength={1000} onChange={(e) => setQNotes(e.target.value)} placeholder="e.g. Screening + KYC/KYB modules, 5 seats" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPriceQuote(null)}>Cancel</Button>
+            <Button disabled={savingQuote} onClick={saveQuote}>
+              {savingQuote && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Send quote
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!grantAccount} onOpenChange={(open) => !open && setGrantAccount(null)}>
         <DialogContent>
