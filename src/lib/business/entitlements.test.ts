@@ -145,14 +145,15 @@ describe("product_members as an entitlement source", () => {
     expect(rows[0].plan).toBeNull();
   });
 
-  it("hides suite entirely", () => {
+  it("shows suite once", () => {
     const rows = mapEntitlements(
       "ba-1",
-      [access({ id: "pa-suite", product: "suite", plan: "suite" })],
+      [access({ id: "pa-suite", product: "suite", plan: "annual" })],
       [],
       [member({ id: "pm-suite", product: "suite" })],
     );
-    expect(rows).toHaveLength(0);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].product_key).toBe("suite");
   });
 });
 
@@ -207,8 +208,8 @@ describe("business_subscriptions as the highest-priority source", () => {
     expect(e.setup_complete).toBe(false);
   });
 
-  it("hides suite subscriptions", () => {
+  it("shows suite subscriptions", () => {
     const rows = mapEntitlements("ba-1", [], [], [], [bizSub({ product: "suite" })]);
-    expect(rows).toEqual([]);
+    expect(rows[0].product_key).toBe("suite");
   });
 });

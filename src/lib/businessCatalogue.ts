@@ -95,6 +95,54 @@ export const BUSINESS_SOLUTIONS: BusinessSolution[] = [
     publicUrl: "/screening-monitoring",
   },
   {
+    key: "suite",
+    name: "WorldAML Suite",
+    lane: "WorldAML Platform",
+    icon: ShieldCheck,
+    tagline: "The full compliance stack: onboarding, screening, risk, cases and reporting in one place.",
+    outcome: "Run your whole AML programme from one platform with one customer record and one audit trail.",
+    solves: [
+      "Compliance spread across disconnected point tools",
+      "No single view of a customer's risk and history",
+      "Manual regulatory reporting and weak audit evidence",
+    ],
+    capabilities: [
+      "KYC & KYB onboarding with branded client forms",
+      "Sanctions, PEP and adverse media screening with monitoring",
+      "Risk scoring, transaction monitoring and alert rules",
+      "Case management, SAR/STR drafting and regulatory exports",
+      "Team roles, per-module access and an immutable audit trail",
+    ],
+    idealFor: "Banks, payment and e-money firms, fintechs, gaming operators and regulated professional firms.",
+    included: ["Modules agreed in your quote", "Team seats", "Onboarding & setup support", "Encrypted, client-isolated data"],
+    addOns: ["Extra modules", "Additional seats", "Regulator-specific reporting packs"],
+    faq: [
+      { q: "How is the Suite priced?", a: "On the modules, seats and volumes you need. Request a quote and we send a fixed annual price you can accept and pay online." },
+      { q: "Can we start with a pilot?", a: "Yes. Ask for the Pilot plan in your quote request and we'll scope a time-limited pilot." },
+      { q: "Is Screening included?", a: "Screening runs as a Suite module, so it can be part of your Suite order." },
+    ],
+    plans: [
+      {
+        key: "pilot",
+        name: "Pilot",
+        price: null,
+        summary: "Time-limited pilot for your team on agreed modules.",
+        features: ["Selected modules", "Guided setup", "Converts to an annual plan"],
+      },
+      {
+        key: "annual",
+        name: "Annual",
+        price: null,
+        summary: "Full Suite subscription billed annually.",
+        features: ["Modules and seats of your choice", "Onboarding support", "Accept and pay your quote online"],
+      },
+    ],
+    pairsWith: ["academy", "worldid"],
+    usageUnit: "seats",
+    openUrl: "/suite",
+    publicUrl: "/platform/suite",
+  },
+  {
     key: "worldid",
     name: "WorldID Identity Verification",
     lane: "WorldAML Platform",
@@ -217,6 +265,7 @@ export const CROSS_SELL_COPY: Record<string, string> = {
   worldaml: "Extend your compliance programme with ongoing screening and monitoring.",
   worldid: "Add identity verification so you know who you are onboarding.",
   academy: "Train your team on the controls you have just put in place.",
+  suite: "Bring onboarding, screening, risk and reporting together in the WorldAML Suite.",
 };
 
 /** Deterministic recommendations — no AI, no invented logic. */
