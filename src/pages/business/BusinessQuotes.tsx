@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { openExternalCheckout } from "@/lib/openExternalCheckout";
 import { Loader2, Plus, CheckCircle2 } from "lucide-react";
 
-const PRODUCTS = ["WorldAML API", "WorldID", "LexisNexis Data", "WorldAML Suite", "Other"];
+const PRODUCTS = ["WorldAML API", "WorldID", "WorldAML Suite", "Other"];
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "outline"> = {
   new: "default", in_review: "secondary", quoted: "secondary", accepted: "secondary", won: "default", closed: "outline",

@@ -26,7 +26,7 @@ const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: t
     items: [
       { label: "Explore Solutions", path: "/business/solutions", icon: Compass },
       { label: "My Products", path: "/business/products", icon: Boxes },
-      { label: "Screening & Monitoring", path: "/screening", icon: Radar, external: true, requiresScreening: true },
+      { label: "Screening & Monitoring", path: "/suite/screening", icon: Radar, external: true, requiresScreening: true },
     ],
   },
   { label: "Academy for Business", items: [{ label: "Training & Academy", path: "/business/training", icon: GraduationCap }] },
@@ -38,21 +38,7 @@ const NAV_GROUPS: { label: string; items: { label: string; path: string; icon: t
     ],
   },
   { label: "Billing", items: [{ label: "Plans & Billing", path: "/business/billing", icon: CreditCard }] },
-  {
-    label: "Resources",
-    items: [
-      { label: "Resource Hub", path: "/business/resources", icon: Library, end: true },
-      { label: "News", path: "/news", icon: Newspaper, newTab: true },
-      { label: "Best Practices", path: "/resources/best-practices", icon: BookOpenCheck, newTab: true },
-      { label: "Sanctions Lists", path: "/resources/sanctions-lists", icon: ListChecks, newTab: true },
-      { label: "Blog", path: "/blog", icon: FileText, newTab: true },
-      { label: "Compliance Glossary", path: "/resources/glossary", icon: BookA, newTab: true },
-      { label: "AML Regulations", path: "/resources/aml-regulations", icon: Scale, newTab: true },
-      { label: "Data Coverage", path: "/data-coverage", icon: Globe2, newTab: true },
-      { label: "EU Sanctions Map", path: "/eu-sanctions-map", icon: Map, newTab: true },
-      { label: "FAQ", path: "/faq", icon: HelpCircle, newTab: true },
-    ],
-  },
+  { label: "Resources", items: [{ label: "Resource Hub", path: "/business/resources", icon: Library, end: true }] },
   { label: "Support", items: [{ label: "Help & Support", path: "/business/support", icon: LifeBuoy }] },
   {
     label: "Account",

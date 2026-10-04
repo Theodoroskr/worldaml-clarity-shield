@@ -106,7 +106,7 @@ export default function BusinessScreeningDemo() {
                   </p>
                 </div>
                 <Button asChild variant="accent">
-                  <Link to="/screening">
+                  <Link to="/suite/screening">
                     <Search className="mr-2 h-4 w-4" /> Start screening
                   </Link>
                 </Button>

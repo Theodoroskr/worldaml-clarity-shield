@@ -22,7 +22,7 @@ const fmtDate = (d?: string | null) =>
 
 export default function BusinessDashboard() {
   const { account, activeEntitlements, ownedKeys, hasProducts, members, track } = useBusinessWorkspace();
-  const { academyAccess } = usePortalAccess();
+  const { academyAccess, suiteAccess } = usePortalAccess();
   const { hasAccess: hasScreeningAccess } = useScreeningAccess();
 
   useEffect(() => { track("dashboard_viewed"); }, [track]);
@@ -106,6 +106,30 @@ export default function BusinessDashboard() {
         ))}
       </section>
 
+      {/* SUITE LAUNCHER */}
+      {suiteAccess && (
+        <Card className="border-teal/40 bg-teal/[0.05]">
+          <CardContent className="pt-6 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <span className="w-10 h-10 rounded-lg bg-teal/15 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-teal" />
+              </span>
+              <div>
+                <p className="font-semibold text-foreground">WorldAML Suite</p>
+                <p className="text-sm text-muted-foreground">Open your compliance console — screening, cases and alerts.</p>
+                <div className="flex flex-wrap gap-3 mt-1.5 text-xs">
+                  <Link to="/suite/screening" className="text-teal hover:underline">Screening</Link>
+                  <Link to="/suite/cases" className="text-teal hover:underline">Cases</Link>
+                  <Link to="/suite/alerts" className="text-teal hover:underline">Alerts</Link>
+                </div>
+              </div>
+            </div>
+            <Button asChild variant="accent"><Link to="/suite">Launch WorldAML Suite <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+          </CardContent>
+        </Card>
+      )}
+
+
       {/* ACTION CENTRE */}
       {actions.length > 0 && (
         <Card className="border-amber-500/30 bg-amber-500/[0.04]">
@@ -179,7 +203,7 @@ export default function BusinessDashboard() {
           {/* QUICK ACTIONS */}
           <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[
-              { label: "AML Screening", to: hasScreeningAccess ? "/screening" : "/screening-monitoring/pricing", icon: ShieldCheck },
+              { label: "AML Screening", to: hasScreeningAccess ? "/suite/screening" : "/screening-monitoring/pricing", icon: ShieldCheck },
               { label: "Explore Solutions", to: "/business/solutions", icon: Compass },
               { label: "Manage Team", to: "/business/team", icon: Users },
               { label: "View Billing", to: "/business/billing", icon: CreditCard },
