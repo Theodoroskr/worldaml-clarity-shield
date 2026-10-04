@@ -57,6 +57,15 @@ serve(async (req) => {
     let orgId = membership?.organization_id as string | undefined;
 
     if (!orgId) {
+      // Only create a company for people who deliberately asked for the demo:
+      // the homepage demo signup (demo_intent) or an explicit button click.
+      // Academy or other visitors must never spawn a company silently.
+      let body: { confirm?: boolean } = {};
+      try { body = await req.json(); } catch { /* empty body */ }
+      const intended = user.user_metadata?.demo_intent === "screening" || body?.confirm === true;
+      if (!intended) {
+        return json({ error: "access_required", granted: false }, 403);
+      }
       const orgName =
         (user.user_metadata?.company_name as string | undefined)?.trim() ||
         (user.email ? user.email.split("@")[1] : "") ||

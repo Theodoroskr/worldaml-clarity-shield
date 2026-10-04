@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Search, Sparkles, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,12 +22,11 @@ export default function BusinessScreeningDemo() {
   const { toast } = useToast();
   const [activating, setActivating] = useState(false);
   const [justActivated, setJustActivated] = useState(false);
-  const started = useRef(false);
 
   const activate = async () => {
     setActivating(true);
     try {
-      const { error } = await supabase.functions.invoke("claim-screening-demo", { body: {} });
+      const { error } = await supabase.functions.invoke("claim-screening-demo", { body: { confirm: true } });
       if (error) throw error;
       await refresh();
       await quota.refresh();
@@ -42,14 +41,6 @@ export default function BusinessScreeningDemo() {
       setActivating(false);
     }
   };
-
-  // Activate on first visit when the account has no screening entitlement yet.
-  useEffect(() => {
-    if (isLoading || hasAccess || started.current) return;
-    started.current = true;
-    void activate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, hasAccess]);
 
   const isDemo = plan === "demo";
   const searchQuota = quota.searchQuota ?? 5;
@@ -77,7 +68,7 @@ export default function BusinessScreeningDemo() {
         </div>
         <p className="mt-1 text-primary-foreground/75 max-w-2xl">
           Five screening searches against sanctions, PEP and watchlist data. No payment card, no
-          sales call — activated instantly on your business account.
+          sales call — activated when you click Start Free Demo.
         </p>
       </header>
 

@@ -26,21 +26,21 @@ export default function ScreeningPromoBanner({ className = "" }: { className?: s
         <div className="flex items-start gap-2 min-w-0">
           <ShieldCheck className="h-4 w-4 mt-0.5 text-accent shrink-0" />
           <p className="text-sm text-foreground">
-            <span className="font-semibold">Put your training into practice</span> — screen customers
-            against 1,900+ sanctions, PEP and adverse media lists with WorldAML Screening &amp; Monitoring.
+            <span className="font-semibold">Bring WorldAML to your compliance team</span> — screen customers
+            against 1,900+ sanctions, PEP and adverse media lists. Request a company demo or pilot.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Button asChild size="sm" variant="accent">
-            <Link to="/screening-monitoring">
-              See screening plans <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+            <Link to="/contact-sales?product=WorldAML%20Screening%20%26%20Monitoring&ref=academy-banner">
+              Request a company demo <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
             </Link>
           </Button>
           <Link
-            to="/sanctions-check"
+            to="/screening-monitoring"
             className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
           >
-            Try the free sanctions check
+            See what the platform does
           </Link>
         </div>
       </div>
