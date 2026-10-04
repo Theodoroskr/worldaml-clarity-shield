@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 vi.mock("@/contexts/AuthContext", () => ({
   useAuth: () => ({
@@ -41,13 +42,15 @@ const COMMON_DESKTOP_WIDTHS = [1280, 1366, 1440, 1536, 1920];
 
 const renderHeader = () =>
   render(
-    <HelmetProvider>
-      <MemoryRouter>
-        <RegionProvider>
-          <Header />
-        </RegionProvider>
-      </MemoryRouter>
-    </HelmetProvider>,
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <HelmetProvider>
+        <MemoryRouter>
+          <RegionProvider>
+            <Header />
+          </RegionProvider>
+        </MemoryRouter>
+      </HelmetProvider>
+    </QueryClientProvider>,
   );
 
 describe("Header desktop layout — wordmark / nav overlap guard", () => {
