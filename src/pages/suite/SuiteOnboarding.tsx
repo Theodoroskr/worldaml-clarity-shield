@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { RevealPiiButton } from "@/components/suite/RevealPiiButton";
-import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle, Trash2, Loader2, Fingerprint, CheckCircle2, XCircle } from "lucide-react";
+import { MrzDocumentCheck } from "@/components/suite/MrzDocumentCheck";
+import { User, Building2, Plus, ChevronRight, ArrowLeft, Search, Eye, Pencil, Save, X, Settings2, Shield, FileText, AlertTriangle, Trash2, Loader2, Fingerprint, CheckCircle2, XCircle, ScanLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganisation } from "@/hooks/useOrganisation";
@@ -316,6 +317,7 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
   }, [customer.id]);
 
   const [idvLoading, setIdvLoading] = useState(false);
+  const [mrzOpen, setMrzOpen] = useState(false);
   const [kycNote, setKycNote] = useState("");
   const [kycSaving, setKycSaving] = useState(false);
 
@@ -475,6 +477,17 @@ function CustomerDetailPanel({ customer, onClose, onUpdated }: {
             {((customer as any).date_of_birth_enc || (customer as any).onboarding_pii_enc) && (
               <RevealPiiButton table="suite_customers" id={customer.id} purpose="Customer detail" />
             )}
+            {customer.type !== "business" && (
+              <Button variant="outline" size="sm" className="h-8 text-xs w-full" onClick={() => setMrzOpen(true)}>
+                <ScanLine className="w-3.5 h-3.5 mr-1" />MRZ Document Check
+              </Button>
+            )}
+            <MrzDocumentCheck
+              customer={customer as any}
+              open={mrzOpen}
+              onOpenChange={setMrzOpen}
+              onUpdated={(patch) => onUpdated({ ...customer, ...patch })}
+            />
           </div>
         </div>
 

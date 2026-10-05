@@ -1,0 +1,1 @@
+-- MRZ document checks (applied via run_sql 2026-10-05): suite_mrz_checks + suite_record_mrz_check RPC
