@@ -119,10 +119,11 @@ export function parseMrzDate(raw: string, kind: "birth" | "expiry", today = new 
   const in2000 = new Date(iso(2000)) <= today;
   const age1900 = nowY - (1900 + yy);
   if (!in2000) return { raw, iso: iso(1900), ambiguous: false };
-  if (age1900 > 100) return { raw, iso: iso(2000), ambiguous: false };
+  // Both centuries are possible: default to 2000s, flag when a 1900s birth is still plausible.
+  if (age1900 > 110) return { raw, iso: iso(2000), ambiguous: false };
   return {
     raw,
-    iso: iso(1900),
+    iso: iso(2000),
     ambiguous: true,
     note: `The century can't be read from the MRZ: ${iso(1900)} or ${iso(2000)}. Confirm against the document.`,
   };

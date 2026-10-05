@@ -35,7 +35,7 @@ describe("ICAO 9303 MRZ", () => {
   });
 
   it("flags ambiguous birth centuries", () => {
-    expect(parseMrzDate("150101", "birth", TODAY).ambiguous).toBe(true);
+    expect(parseMrzDate("200101", "birth", TODAY).ambiguous).toBe(true);
     expect(parseMrzDate("800101", "birth", TODAY).ambiguous).toBe(false);
     expect(parseMrzDate("991301", "birth", TODAY).iso).toBeNull();
   });
