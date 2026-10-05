@@ -42,7 +42,7 @@ describe("ICAO 9303 MRZ", () => {
 
   it("rejects bad characters and lengths", () => {
     expect(parseMrz("P<UTO0O\nabc").format).toBeNull();
-    expect(parseMrz(TD3.replace("ERIKSSON", "ERIKSS0N").replace("<", "a")).ok).toBe(false);
+    expect(parseMrz(TD3.replace("ERIKSSON", "ERIKSS0N").replace("<", "*")).ok).toBe(false);
   });
 
   it("marks OCR-sourced failures for review", () => {
