@@ -7676,6 +7676,62 @@ export type Database = {
           },
         ]
       }
+      suite_mrz_checks: {
+        Row: {
+          confirmed_changes: Json
+          created_at: string
+          customer_id: string
+          document_format: string | null
+          document_number_masked: string | null
+          extraction_method: string
+          id: string
+          operator_id: string
+          organisation_id: string
+          raw_mrz_enc: string | null
+          results: Json
+          reviewer_decision: string | null
+          reviewer_note: string | null
+        }
+        Insert: {
+          confirmed_changes?: Json
+          created_at?: string
+          customer_id: string
+          document_format?: string | null
+          document_number_masked?: string | null
+          extraction_method: string
+          id?: string
+          operator_id: string
+          organisation_id: string
+          raw_mrz_enc?: string | null
+          results?: Json
+          reviewer_decision?: string | null
+          reviewer_note?: string | null
+        }
+        Update: {
+          confirmed_changes?: Json
+          created_at?: string
+          customer_id?: string
+          document_format?: string | null
+          document_number_masked?: string | null
+          extraction_method?: string
+          id?: string
+          operator_id?: string
+          organisation_id?: string
+          raw_mrz_enc?: string | null
+          results?: Json
+          reviewer_decision?: string | null
+          reviewer_note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suite_mrz_checks_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "suite_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suite_notification_log: {
         Row: {
           alert_ids: string[]
@@ -9834,6 +9890,20 @@ export type Database = {
       suite_provision_baseline_rules: {
         Args: { _org: string }
         Returns: number
+      }
+      suite_record_mrz_check: {
+        Args: {
+          _changes: Json
+          _customer: string
+          _decision: string
+          _doc_masked: string
+          _format: string
+          _method: string
+          _note: string
+          _raw: string
+          _results: Json
+        }
+        Returns: string
       }
       suite_remove_member: { Args: { _user_id: string }; Returns: undefined }
       suite_reveal_pii: {
