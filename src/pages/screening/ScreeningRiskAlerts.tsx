@@ -63,7 +63,7 @@ const EMPTY_FORM = {
 const fmtDate = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "Never";
 
-export default function ScreeningRiskAlerts() {
+export default function ScreeningRiskAlerts({ embedded = false }: { embedded?: boolean } = {}) {
   const { isLoading: accessLoading, hasAccess, isAdmin } = useScreeningAccess();
   const [orgId, setOrgId] = useState<string | null>(null);
   const [rules, setRules] = useState<Rule[]>([]);
@@ -184,7 +184,12 @@ export default function ScreeningRiskAlerts() {
   };
 
 
-  const shell = (children: React.ReactNode) => (
+  const shell = (children: React.ReactNode) => embedded ? (
+    <>
+      <SEO title="Screening Risk Alerts" description="Configure risk-level alerts." noindex />
+      {children}
+    </>
+  ) : (
     <ScreeningLayout
       head={
         <SEO
@@ -209,7 +214,7 @@ export default function ScreeningRiskAlerts() {
   if (!hasAccess) {
     return shell(
       <div className="mx-auto max-w-lg py-24 text-center">
-        <p className="text-muted-foreground">You need Screening access to manage risk alerts.</p>
+        <p className="text-muted-foreground">You need Screening access to manage risk alerts. Ask your Suite admin to grant the Screening module.</p>
       </div>,
     );
   }
@@ -217,7 +222,7 @@ export default function ScreeningRiskAlerts() {
   return shell(
     <div className="mx-auto max-w-5xl px-4 py-8">
       <Button asChild variant="ghost" size="sm" className="mb-4 -ml-2">
-        <Link to="/screening/monitored"><ArrowLeft className="mr-1.5 h-4 w-4" /> Back to Monitored entities</Link>
+        <Link to={embedded ? "/suite/screening/monitored" : "/screening/monitored"}><ArrowLeft className="mr-1.5 h-4 w-4" /> Back to Monitored entities</Link>
       </Button>
 
       <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">

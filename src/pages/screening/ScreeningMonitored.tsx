@@ -91,7 +91,7 @@ const STATUS_STYLES: Record<MonitoringStatus, string> = {
   stopped: "bg-destructive/10 text-destructive border-destructive/25",
 };
 
-export default function ScreeningMonitored() {
+export default function ScreeningMonitored({ embedded = false }: { embedded?: boolean } = {}) {
   const { isLoading: accessLoading, hasAccess, monitoredEntityQuota } = useScreeningAccess();
   const [rows, setRows] = useState<MonitoredRow[]>([]);
   const [members, setMembers] = useState<TeamMember[]>([]);
@@ -196,7 +196,13 @@ export default function ScreeningMonitored() {
     return m?.full_name || m?.email || "Team member";
   };
 
-  const shell = (children: React.ReactNode) => (
+  const base = embedded ? "/suite/screening" : "/screening";
+  const shell = (children: React.ReactNode) => embedded ? (
+    <>
+      <SEO title="Monitored Entities" description="Manage ongoing monitoring." noindex />
+      {children}
+    </>
+  ) : (
     <ScreeningLayout
       head={
         <SEO
@@ -231,7 +237,7 @@ export default function ScreeningMonitored() {
             Ongoing monitoring is available on active WorldAML Screening & Monitoring packages.
           </p>
           <Button asChild variant="accent">
-            <Link to="/screening-monitoring/pricing">View packages</Link>
+            <Link to={embedded ? "/suite/settings" : "/screening-monitoring/pricing"}>{embedded ? "Ask your Suite admin to grant Screening" : "View packages"}</Link>
           </Button>
         </CardContent>
       </Card>,
@@ -243,7 +249,7 @@ export default function ScreeningMonitored() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Button asChild variant="ghost" size="sm" className="-ml-2 mb-1">
-            <Link to="/screening">
+            <Link to={base}>
               <ArrowLeft className="mr-1.5 h-4 w-4" /> Back to workspace
             </Link>
           </Button>
@@ -256,12 +262,12 @@ export default function ScreeningMonitored() {
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline">
-            <Link to="/screening/risk-alerts">
+            <Link to={`${base}/risk-alerts`}>
               <BellPlus className="mr-1.5 h-4 w-4" /> Risk alerts
             </Link>
           </Button>
           <Button asChild variant="accent">
-            <Link to="/screening">Run a new screening</Link>
+            <Link to={base}>Run a new screening</Link>
           </Button>
         </div>
 
