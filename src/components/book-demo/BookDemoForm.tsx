@@ -11,12 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { calculateLeadScore, isFreeEmail, type BookDemoLead } from "@/lib/leadScoring";
 import { getWebAttribution } from "@/lib/webAttribution";
+import { isWorkEmail, WORK_EMAIL_ERROR } from "@/lib/workEmail";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 const schema = z.object({
   first_name: z.string().trim().min(1, "Required").max(100),
   last_name: z.string().trim().min(1, "Required").max(100),
-  email: z.string().trim().email("Invalid email").max(255),
+  email: z.string().trim().email("Invalid email").max(255).refine((v) => isWorkEmail(v), WORK_EMAIL_ERROR),
   company: z.string().trim().min(1, "Required").max(200),
   jurisdiction: z.string().trim().min(1, "Required").max(100),
   message: z.string().trim().max(1000).optional(),
@@ -178,7 +179,7 @@ const BookDemoForm = () => {
         />
         {emailWarning && (
           <p className="mt-1 text-xs text-destructive">
-            Please use a work email — we prioritize demos for company addresses.
+            {WORK_EMAIL_ERROR}
           </p>
         )}
       </div>
