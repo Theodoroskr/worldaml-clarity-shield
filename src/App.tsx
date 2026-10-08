@@ -605,8 +605,8 @@ const App = () => (
                   <Route path="idv" element={<SuiteIDV />} />
                   <Route path="screening" element={<div className="p-4 md:p-6"><SuiteScreeningV2 /></div>} />
                   <Route path="screening-v2" element={<Navigate to="/suite/screening" replace />} />
-                  <Route path="screening/monitored" element={<div className="p-4 md:p-6"><ScreeningMonitored /></div>} />
-                  <Route path="screening/risk-alerts" element={<div className="p-4 md:p-6"><ScreeningRiskAlerts /></div>} />
+                  <Route path="screening/monitored" element={<div className="p-4 md:p-6"><ScreeningMonitored embedded /></div>} />
+                  <Route path="screening/risk-alerts" element={<div className="p-4 md:p-6"><ScreeningRiskAlerts embedded /></div>} />
 
                   <Route path="transactions" element={<SuiteTransactions />} />
                   <Route path="monitoring" element={<SuiteMonitoring />} />
