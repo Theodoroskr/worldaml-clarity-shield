@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { getWebAttribution } from "@/lib/webAttribution";
+import { isWorkEmail, WORK_EMAIL_ERROR } from "@/lib/workEmail";
 
 /**
  * Enterprise AML Screening — landing page + inline lead form.
@@ -35,7 +36,7 @@ import { getWebAttribution } from "@/lib/webAttribution";
 const leadSchema = z.object({
   firstName: z.string().trim().min(1, "Enter your first name").max(100),
   lastName: z.string().trim().min(1, "Enter your last name").max(100),
-  email: z.string().trim().email("Enter a valid work email").max(255),
+  email: z.string().trim().email("Enter a valid work email").max(255).refine((v) => isWorkEmail(v), WORK_EMAIL_ERROR),
   company: z.string().trim().min(1, "Enter your company").max(150),
   jobTitle: z.string().trim().max(100).optional(),
   volume: z.string().max(50).optional(),

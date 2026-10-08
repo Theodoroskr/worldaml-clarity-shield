@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { getWebAttribution } from "@/lib/webAttribution";
+import { isWorkEmail, WORK_EMAIL_ERROR } from "@/lib/workEmail";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -56,7 +57,8 @@ const schema = z.object({
     .trim()
     .min(1, "Work email is required")
     .email("Please enter a valid work email address")
-    .max(255, "Email must be less than 255 characters"),
+    .max(255, "Email must be less than 255 characters")
+    .refine((v) => isWorkEmail(v), WORK_EMAIL_ERROR),
   phone: z
     .string()
     .trim()

@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { getWebAttribution } from "@/lib/webAttribution";
+import { isWorkEmail, WORK_EMAIL_ERROR } from "@/lib/workEmail";
 
 
 const products = [
@@ -188,6 +189,11 @@ Preferred start date and number of seats below.`,
         description: "Please enter a valid email address.",
         variant: "destructive",
       });
+      return;
+    }
+
+    if (!isWorkEmail(formData.email)) {
+      toast({ title: "Company email required", description: WORK_EMAIL_ERROR, variant: "destructive" });
       return;
     }
 

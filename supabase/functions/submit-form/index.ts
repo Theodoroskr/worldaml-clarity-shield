@@ -9,6 +9,85 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const FREE_EMAIL_DOMAINS = new Set<string>([
+  "gmail.com",
+  "googlemail.com",
+  "yahoo.com",
+  "yahoo.co.uk",
+  "yahoo.fr",
+  "yahoo.de",
+  "yahoo.es",
+  "yahoo.it",
+  "ymail.com",
+  "rocketmail.com",
+  "hotmail.com",
+  "hotmail.co.uk",
+  "hotmail.fr",
+  "hotmail.de",
+  "hotmail.es",
+  "hotmail.it",
+  "outlook.com",
+  "outlook.co.uk",
+  "outlook.fr",
+  "outlook.de",
+  "outlook.es",
+  "outlook.it",
+  "live.com",
+  "live.co.uk",
+  "msn.com",
+  "icloud.com",
+  "me.com",
+  "mac.com",
+  "aol.com",
+  "aim.com",
+  "protonmail.com",
+  "proton.me",
+  "pm.me",
+  "tutanota.com",
+  "tuta.io",
+  "tutamail.com",
+  "gmx.com",
+  "gmx.de",
+  "gmx.net",
+  "gmx.us",
+  "mail.com",
+  "yandex.com",
+  "yandex.ru",
+  "ya.ru",
+  "zoho.com",
+  "zohomail.com",
+  "fastmail.com",
+  "fastmail.fm",
+  "hey.com",
+  "qq.com",
+  "163.com",
+  "126.com",
+  "sina.com",
+  "sina.cn",
+  "naver.com",
+  "daum.net",
+  "hanmail.net",
+  "rediffmail.com",
+  "inbox.com",
+  "hushmail.com",
+  "lavabit.com",
+  "cock.li",
+  "mailinator.com",
+  "guerrillamail.com",
+  "10minutemail.com",
+  "tempmail.com",
+  "temp-mail.org",
+  "trashmail.com",
+  "yopmail.com",
+  "throwawaymail.com",
+  "maildrop.cc",
+  "getnada.com",
+  "sharklasers.com",
+  "dispostable.com",
+  "fakemail.net",
+  "mintemail.com",
+]);
+
 const NOTIFY_EMAIL = "info@worldaml.com";
 const FROM_EMAIL = "WorldAML Forms <forms@worldaml.com>";
 
@@ -164,6 +243,16 @@ Deno.serve(async (req) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return new Response(JSON.stringify({ error: "Invalid email address" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Lead / demo forms accept company emails only (partner forms excluded).
+    const ftKey = String(form_type).toLowerCase();
+    const emailDomain = String(email).trim().toLowerCase().split("@").pop() ?? "";
+    if (!ftKey.startsWith("partner") && FREE_EMAIL_DOMAINS.has(emailDomain)) {
+      return new Response(JSON.stringify({ error: "Please use your company email address. Free providers are not accepted." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
