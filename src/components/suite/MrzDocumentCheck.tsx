@@ -348,8 +348,42 @@ export function MrzDocumentCheck({ customer, open, onOpenChange, onUpdated }: {
           <div className="space-y-4">
             <div>
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Raw MRZ ({method === "manual" ? "pasted" : method === "camera" ? "camera" : "uploaded image"})</p>
-              <pre className="rounded-md bg-muted p-2 text-[11px] font-mono overflow-x-auto">{result.raw}</pre>
+              <div className="rounded-md bg-muted p-2 text-[11px] font-mono overflow-x-auto space-y-0.5">
+                {result.lines.map((line, i) => {
+                  const badChars = !/^[A-Z0-9<]+$/.test(line);
+                  const expected = result.format === "TD1" ? 30 : result.format === "TD2" ? 36 : result.format === "TD3" ? 44 : null;
+                  const badLen = expected !== null && line.length !== expected;
+                  const bad = badChars || badLen;
+                  return (
+                    <div key={i} className={cn("flex gap-2 rounded px-1", bad && "bg-destructive/15 ring-1 ring-destructive/30")}>
+                      <span className="select-none text-muted-foreground/60 w-4 text-right shrink-0">{i + 1}</span>
+                      <span className={cn(bad && "text-destructive")}>{line}</span>
+                      {bad && (
+                        <span className="ml-auto text-[10px] font-sans text-destructive shrink-0">
+                          {badChars ? "invalid characters" : `length ${line.length}, expected ${expected}`}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
+
+            {result.checks.length > 0 && (
+              <div className="rounded-md border border-border divide-y divide-border">
+                <p className="px-3 py-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">Check digit breakdown</p>
+                {result.checks.map((c, i) => (
+                  <div key={i} className="flex items-center gap-2 px-3 py-1.5 text-[11px]">
+                    {c.status === "passed" ? <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
+                      : c.status === "failed" ? <XCircle className="w-3 h-3 text-destructive shrink-0" />
+                      : <MinusCircle className="w-3 h-3 text-muted-foreground shrink-0" />}
+                    <span className="font-medium shrink-0">{c.field}</span>
+                    <span className="text-muted-foreground truncate">{c.message}</span>
+                    <StatusBadge s={c.status} />
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="grid sm:grid-cols-2 gap-2">
               <Section title="MRZ structure & check digits" r={sections.structure} />
