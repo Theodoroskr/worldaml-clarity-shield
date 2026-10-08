@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Camera, ClipboardPaste, Info, Loader2, RefreshCcw, ScanLine, Search, Upload } from "lucide-react";
+import { AlertTriangle, Camera, CheckCircle2, ClipboardPaste, Info, Loader2, MinusCircle, RefreshCcw, ScanLine, Search, Upload, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { revealPii } from "@/lib/suite/pii";
 import {
@@ -41,17 +41,46 @@ function StatusBadge({ s }: { s: CheckStatus }) {
   return <Badge variant="outline" className={cn("text-[10px]", STATUS_CLASS[s])}>{STATUS_LABEL[s]}</Badge>;
 }
 
+const SECTION_STYLE: Record<CheckStatus, string> = {
+  passed: "border-emerald-500/40 bg-emerald-500/5",
+  failed: "border-destructive/40 bg-destructive/5",
+  needs_review: "border-amber-500/40 bg-amber-500/5",
+  not_checked: "border-border bg-muted/30",
+};
+const SECTION_ICON: Record<CheckStatus, typeof CheckCircle2> = {
+  passed: CheckCircle2, failed: XCircle, needs_review: AlertTriangle, not_checked: MinusCircle,
+};
+const SECTION_ICON_CLASS: Record<CheckStatus, string> = {
+  passed: "text-emerald-600", failed: "text-destructive", needs_review: "text-amber-600", not_checked: "text-muted-foreground",
+};
+
 function Section({ title, r }: { title: string; r: SectionResult }) {
+  const Icon = SECTION_ICON[r.status];
   return (
-    <div className="rounded-md border border-border p-3 space-y-1.5">
+    <div className={cn("rounded-md border-l-4 border p-3 space-y-1.5", SECTION_STYLE[r.status])}>
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold">{title}</p>
+        <p className="text-xs font-semibold flex items-center gap-1.5">
+          <Icon className={cn("w-3.5 h-3.5", SECTION_ICON_CLASS[r.status])} />{title}
+        </p>
         <StatusBadge s={r.status} />
       </div>
       <p className="text-xs text-muted-foreground">{r.summary}</p>
       {r.details.filter(Boolean).length > 0 && (
-        <ul className="text-[11px] text-muted-foreground list-disc pl-4 space-y-0.5">
-          {r.details.filter(Boolean).map((d, i) => <li key={i}>{d}</li>)}
+        <ul className="space-y-1">
+          {r.details.filter(Boolean).map((d, i) => {
+            const bad = /fail|mismatch|does not match|expired|not allowed|problem|misread|altered|missing|malformed/i.test(d);
+            const warn = !bad && /review|ambiguous|truncated|uncertain|confirm|soon|not checked|not compared/i.test(d);
+            return (
+              <li key={i} className={cn(
+                "text-[11px] rounded px-2 py-1 flex items-start gap-1.5",
+                bad ? "bg-destructive/10 text-destructive" : warn ? "bg-amber-500/10 text-amber-700 dark:text-amber-500" : "text-muted-foreground",
+              )}>
+                {bad && <XCircle className="w-3 h-3 mt-0.5 shrink-0" />}
+                {warn && <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" />}
+                <span>{d}</span>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
