@@ -379,7 +379,7 @@ export function MrzDocumentCheck({ customer, open, onOpenChange, onUpdated }: {
                       : <MinusCircle className="w-3 h-3 text-muted-foreground shrink-0" />}
                     <span className="font-medium shrink-0">{c.field}</span>
                     <span className="text-muted-foreground truncate">{c.message}</span>
-                    <StatusBadge s={c.status} />
+                    <span className="ml-auto shrink-0"><StatusBadge s={c.status} /></span>
                   </div>
                 ))}
               </div>
