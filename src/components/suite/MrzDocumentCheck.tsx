@@ -423,6 +423,23 @@ export function MrzDocumentCheck({ customer, open, onOpenChange, onUpdated }: {
               </div>
             )}
 
+            {(() => {
+              const failedCount = [sections.structure, sections.expiry, sections.extraction, sections.consistency]
+                .filter((s) => s.status === "failed").length;
+              if (decision === "accepted" && failedCount > 0) {
+                return (
+                  <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-2.5 text-xs text-amber-700 dark:text-amber-500">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <p>
+                      You are about to <strong>accept</strong> a document with {failedCount} failed check{failedCount > 1 ? "s" : ""}.
+                      This override is recorded in the audit trail — add a reviewer note explaining why.
+                    </p>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
             <div className="grid sm:grid-cols-[200px_1fr] gap-2">
               <Select value={decision} onValueChange={(v) => setDecision(v as any)} disabled={saved}>
                 <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
