@@ -303,9 +303,10 @@ const SanctionsLists = () => {
             {/* Stats strip */}
             <div className="flex flex-wrap gap-6 mt-10 pt-8 border-t border-divider">
               {[
-                { label: "Official sources", value: `${allSources.length}+` },
-                { label: "Jurisdictions covered", value: "35+" },
-                { label: "Categories", value: "7" },
+                { label: "Global lists screened", value: "1,900+" },
+                { label: "Sanctions lists", value: "156" },
+                { label: "Warning & enforcement lists", value: "1,128" },
+                { label: "Fitness & probity lists", value: "164" },
                 { label: "Updated", value: "Continuously" },
               ].map((stat) => (
                 <div key={stat.label}>
