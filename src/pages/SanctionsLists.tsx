@@ -12,6 +12,11 @@ import {
   type SanctionTag,
   type SanctionUrl,
 } from "@/data/sanctionsLists";
+import {
+  coverageCategories,
+  coverageRegionTotals,
+  coverageGrandTotal,
+} from "@/data/coverageStats";
 
 // ─── Tag colour map (inline style approach to avoid purge issues) ─────────────
 const tagColorMap: Record<SanctionTag | "All", { bg: string; color: string; border: string }> = {
@@ -122,6 +127,22 @@ const faqLd = {
       acceptedAnswer: {
         "@type": "Answer",
         text: "Sanctions screening checks whether a customer, counterparty, or transaction involves a designated individual or entity on a government watchlist — it is a binary compliance obligation. AML screening is broader and includes sanctions, PEP screening, adverse media checks, and transaction monitoring to detect suspicious activity that may indicate money laundering or terrorist financing, even if no formal designation exists.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How many sanctions and watchlists does WorldAML screen against?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "WorldAML screens against 1,900+ global lists spanning three categories: 156 sanctions lists from 64 countries and international bodies (UN, EU, OFAC, UK OFSI and national programmes), 1,128 warning and enforcement lists from 111 countries (regulator enforcement actions, most-wanted notices and debarments), and 164 fitness and probity lists from 36 countries (licence withdrawals, disqualifications and disciplinary findings). Coverage spans every major region including North America, Europe, Asia, the Middle East, Oceania, Africa and the Americas.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the difference between a sanctions list, a warning list and a fitness and probity list?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "A sanctions list names persons and entities subject to legal restrictive measures — dealing with them is prohibited. A warning or enforcement list records regulator actions, most-wanted notices and debarments that signal elevated risk but are not always legal prohibitions. A fitness and probity list records individuals and firms judged not fit and proper, such as disqualified directors or firms that lost their licence. A complete screening programme checks all three categories, not sanctions alone.",
       },
     },
   ],
