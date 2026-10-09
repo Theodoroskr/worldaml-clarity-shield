@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { Resend } from "npm:resend";
+import { isKnownRecipient } from "../_shared/security.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +24,8 @@ function safeUrl(v: unknown): string | null {
   try {
     const u = new URL(String(v));
     if (u.protocol !== "https:") return null;
+    // Only genuine Stripe checkout / payment links may be sent.
+    if (!["checkout.stripe.com", "buy.stripe.com"].includes(u.hostname)) return null;
     return u.toString();
   } catch {
     return null;
@@ -66,6 +69,12 @@ serve(async (req) => {
     const url = safeUrl(paymentUrl);
     if (!to || typeof to !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to) || !url || !courseTitle) {
       return json({ error: "missing or invalid fields" }, 400);
+    }
+
+    // Only email people who hold a WorldAML account (recovery is for existing buyers).
+    const admin = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey, { auth: { persistSession: false } });
+    if (!(await isKnownRecipient(admin, to))) {
+      return json({ error: "Recipient is not a registered account" }, 400);
     }
 
     const apiKey = Deno.env.get("RESEND_API_KEY");
