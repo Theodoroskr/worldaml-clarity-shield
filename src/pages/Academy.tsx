@@ -47,6 +47,7 @@ import StickyMobileCTA from "@/components/academy/StickyMobileCTA";
 import { useCart } from "@/contexts/CartContext";
 import { useAcademyPurchases } from "@/hooks/useAcademyPurchases";
 import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES, isNewCourse } from "@/data/academyPricing";
+import { ACADEMY_SEO } from "@/data/academySeo";
 import NewCoursesBanner from "@/components/academy/NewCoursesBanner";
 import ScreeningPromoBanner from "@/components/academy/ScreeningPromoBanner";
 import { computeDiscount, applyDiscount } from "@/lib/academyDiscount";
@@ -892,10 +893,10 @@ const Academy = () => {
   return (
     <div className="min-h-screen flex flex-col">
        <SEO
-        title="Free AML Certification & AML Compliance Training Online"
-        description="Free AML certification and compliance training online. CPD-accredited AML, KYC and sanctions screening courses with verifiable certificates — start free, no payment required."
-
+        title={ACADEMY_SEO.title}
+        description={ACADEMY_SEO.description}
         canonical="/academy"
+
         breadcrumbs={[
           { name: "Home", url: "/" },
           { name: "Academy", url: "/academy" },
@@ -950,8 +951,9 @@ const Academy = () => {
 
             <div className="max-w-4xl">
               <span className="inline-block py-1 px-3 rounded-full border border-teal-light/30 bg-teal-light/5 text-teal-light text-[11px] font-medium tracking-[0.22em] uppercase mb-8">
-                WorldAML Academy · CPD-Accredited
+                WorldAML Academy · CPD-Accredited · Verifiable Certificates
               </span>
+
 
               <h1 className="text-white font-bold leading-[0.92] tracking-tighter mb-8 text-[3rem] sm:text-6xl lg:text-[6.5rem]">
                 Free AML{" "}
@@ -1006,7 +1008,13 @@ const Academy = () => {
                 <span className="flex items-center gap-2"><Globe className="h-4 w-4 text-teal-light" /> Regulator-aligned</span>
               </div>
 
+              <p className="mt-5 max-w-2xl text-body-sm text-slate-light/60 leading-relaxed">
+                Every certificate is a PDF carrying your name, score, CPD hours and a unique verification token, so an
+                auditor or employer can confirm it is genuine.
+              </p>
+
               <div className="mt-6">
+
                 <AcademyCartButton />
               </div>
             </div>
