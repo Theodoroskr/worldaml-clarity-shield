@@ -319,6 +319,93 @@ const SanctionsLists = () => {
         </div>
       </section>
 
+      {/* ── Coverage at a glance ────────────────────────────────────────────── */}
+      <section className="bg-background border-b border-divider">
+        <div className="container-enterprise py-12 md:py-16">
+          <div className="mb-10 max-w-3xl">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-caption font-semibold px-3 py-1.5 rounded-full mb-4">
+              <Globe className="w-4 h-4" />
+              Screening Data Coverage
+            </div>
+            <h2 className="text-h2 font-bold text-navy mb-3">
+              {coverageGrandTotal.toLocaleString()}+ lists across three risk categories
+            </h2>
+            <p className="text-body text-text-secondary leading-relaxed">
+              WorldAML's screening data covers sanctions, regulatory enforcement and
+              fitness &amp; probity sources from every major region — continuously
+              updated as regulators publish. Below is the coverage profile by
+              category and geography; the full list directory is available inside
+              the platform.
+            </p>
+          </div>
+
+          {/* Category cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+            {coverageCategories.map((cat) => (
+              <div
+                key={cat.key}
+                className="bg-card border border-border rounded-xl p-6 flex flex-col gap-4"
+              >
+                <div>
+                  <div className="text-h2 font-bold text-navy">
+                    {cat.total.toLocaleString()}
+                  </div>
+                  <h3 className="text-body font-semibold text-navy">{cat.label}</h3>
+                  <p className="text-body-sm text-muted-foreground mt-1">
+                    {cat.countries} countries &amp; bodies
+                  </p>
+                </div>
+                <p className="text-body-sm text-text-secondary leading-relaxed flex-1">
+                  {cat.description}
+                </p>
+                <ul className="border-t border-border pt-3 space-y-1.5">
+                  {cat.examples.map((ex) => (
+                    <li
+                      key={ex}
+                      className="flex items-start gap-2 text-xs text-text-secondary"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-accent mt-0.5 flex-shrink-0" />
+                      {ex}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Regional distribution */}
+          <div className="bg-surface-subtle border border-border rounded-xl p-6 md:p-8">
+            <h3 className="text-h3 font-bold text-navy mb-1">
+              Coverage by region
+            </h3>
+            <p className="text-body-sm text-text-secondary mb-6">
+              Number of lists per region across all three categories.
+            </p>
+            <div className="space-y-3">
+              {Object.entries(coverageRegionTotals).map(([region, count]) => {
+                const pct = Math.round((count / coverageGrandTotal) * 100);
+                return (
+                  <div key={region} className="flex items-center gap-4">
+                    <span className="w-48 flex-shrink-0 text-body-sm font-medium text-navy truncate">
+                      {region}
+                    </span>
+                    <div className="flex-1 h-2.5 bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-accent rounded-full"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="w-16 text-right text-body-sm font-semibold text-navy">
+                      {count}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Filter bar ──────────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b border-divider">
         <div className="container-enterprise py-3 flex items-center gap-2 flex-wrap">
