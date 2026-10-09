@@ -12,6 +12,11 @@ import {
   type SanctionTag,
   type SanctionUrl,
 } from "@/data/sanctionsLists";
+import {
+  coverageCategories,
+  coverageRegionTotals,
+  coverageGrandTotal,
+} from "@/data/coverageStats";
 
 // ─── Tag colour map (inline style approach to avoid purge issues) ─────────────
 const tagColorMap: Record<SanctionTag | "All", { bg: string; color: string; border: string }> = {
@@ -124,6 +129,22 @@ const faqLd = {
         text: "Sanctions screening checks whether a customer, counterparty, or transaction involves a designated individual or entity on a government watchlist — it is a binary compliance obligation. AML screening is broader and includes sanctions, PEP screening, adverse media checks, and transaction monitoring to detect suspicious activity that may indicate money laundering or terrorist financing, even if no formal designation exists.",
       },
     },
+    {
+      "@type": "Question",
+      name: "How many sanctions and watchlists does WorldAML screen against?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "WorldAML screens against 1,900+ global lists spanning three categories: 156 sanctions lists from 64 countries and international bodies (UN, EU, OFAC, UK OFSI and national programmes), 1,128 warning and enforcement lists from 111 countries (regulator enforcement actions, most-wanted notices and debarments), and 164 fitness and probity lists from 36 countries (licence withdrawals, disqualifications and disciplinary findings). Coverage spans every major region including North America, Europe, Asia, the Middle East, Oceania, Africa and the Americas.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the difference between a sanctions list, a warning list and a fitness and probity list?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "A sanctions list names persons and entities subject to legal restrictive measures — dealing with them is prohibited. A warning or enforcement list records regulator actions, most-wanted notices and debarments that signal elevated risk but are not always legal prohibitions. A fitness and probity list records individuals and firms judged not fit and proper, such as disqualified directors or firms that lost their licence. A complete screening programme checks all three categories, not sanctions alone.",
+      },
+    },
   ],
 };
 
@@ -227,8 +248,8 @@ const SanctionsLists = () => {
   return (
     <>
       <SEO
-        title="Global Sanctions Lists & AML Data Sources"
-        description="Reference of OFAC, EU, UN, OFSI, FATF and 30+ official sanctions lists and AML data sources used in compliance screening worldwide."
+        title="Global Sanctions Lists & AML Screening Data Coverage"
+        description="WorldAML screens 1,900+ global lists: 156 sanctions lists, 1,128 warning & enforcement lists and 164 fitness & probity lists across 100+ countries — OFAC, EU, UN, OFSI, FATF and more."
         canonical="/resources/sanctions-lists"
         breadcrumbs={[
           { name: "Home", url: "/" },
@@ -282,9 +303,10 @@ const SanctionsLists = () => {
             {/* Stats strip */}
             <div className="flex flex-wrap gap-6 mt-10 pt-8 border-t border-divider">
               {[
-                { label: "Official sources", value: `${allSources.length}+` },
-                { label: "Jurisdictions covered", value: "35+" },
-                { label: "Categories", value: "7" },
+                { label: "Global lists screened", value: "1,900+" },
+                { label: "Sanctions lists", value: "156" },
+                { label: "Warning & enforcement lists", value: "1,128" },
+                { label: "Fitness & probity lists", value: "164" },
                 { label: "Updated", value: "Continuously" },
               ].map((stat) => (
                 <div key={stat.label}>
@@ -292,6 +314,93 @@ const SanctionsLists = () => {
                   <div className="text-body-sm text-text-tertiary">{stat.label}</div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Coverage at a glance ────────────────────────────────────────────── */}
+      <section className="bg-background border-b border-divider">
+        <div className="container-enterprise py-12 md:py-16">
+          <div className="mb-10 max-w-3xl">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-caption font-semibold px-3 py-1.5 rounded-full mb-4">
+              <Globe className="w-4 h-4" />
+              Screening Data Coverage
+            </div>
+            <h2 className="text-h2 font-bold text-navy mb-3">
+              {coverageGrandTotal.toLocaleString()}+ lists across three risk categories
+            </h2>
+            <p className="text-body text-text-secondary leading-relaxed">
+              WorldAML's screening data covers sanctions, regulatory enforcement and
+              fitness &amp; probity sources from every major region — continuously
+              updated as regulators publish. Below is the coverage profile by
+              category and geography; the full list directory is available inside
+              the platform.
+            </p>
+          </div>
+
+          {/* Category cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+            {coverageCategories.map((cat) => (
+              <div
+                key={cat.key}
+                className="bg-card border border-border rounded-xl p-6 flex flex-col gap-4"
+              >
+                <div>
+                  <div className="text-h2 font-bold text-navy">
+                    {cat.total.toLocaleString()}
+                  </div>
+                  <h3 className="text-body font-semibold text-navy">{cat.label}</h3>
+                  <p className="text-body-sm text-muted-foreground mt-1">
+                    {cat.countries} countries &amp; bodies
+                  </p>
+                </div>
+                <p className="text-body-sm text-text-secondary leading-relaxed flex-1">
+                  {cat.description}
+                </p>
+                <ul className="border-t border-border pt-3 space-y-1.5">
+                  {cat.examples.map((ex) => (
+                    <li
+                      key={ex}
+                      className="flex items-start gap-2 text-xs text-text-secondary"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-accent mt-0.5 flex-shrink-0" />
+                      {ex}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Regional distribution */}
+          <div className="bg-surface-subtle border border-border rounded-xl p-6 md:p-8">
+            <h3 className="text-h3 font-bold text-navy mb-1">
+              Coverage by region
+            </h3>
+            <p className="text-body-sm text-text-secondary mb-6">
+              Number of lists per region across all three categories.
+            </p>
+            <div className="space-y-3">
+              {Object.entries(coverageRegionTotals).map(([region, count]) => {
+                const pct = Math.round((count / coverageGrandTotal) * 100);
+                return (
+                  <div key={region} className="flex items-center gap-4">
+                    <span className="w-48 flex-shrink-0 text-body-sm font-medium text-navy truncate">
+                      {region}
+                    </span>
+                    <div className="flex-1 h-2.5 bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-accent rounded-full"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="w-16 text-right text-body-sm font-semibold text-navy">
+                      {count}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
