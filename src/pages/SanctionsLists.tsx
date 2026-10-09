@@ -248,8 +248,8 @@ const SanctionsLists = () => {
   return (
     <>
       <SEO
-        title="Global Sanctions Lists & AML Data Sources"
-        description="Reference of OFAC, EU, UN, OFSI, FATF and 30+ official sanctions lists and AML data sources used in compliance screening worldwide."
+        title="Global Sanctions Lists & AML Screening Data Coverage"
+        description="WorldAML screens 1,900+ global lists: 156 sanctions lists, 1,128 warning & enforcement lists and 164 fitness & probity lists across 100+ countries — OFAC, EU, UN, OFSI, FATF and more."
         canonical="/resources/sanctions-lists"
         breadcrumbs={[
           { name: "Home", url: "/" },
