@@ -305,9 +305,14 @@ serve(async (req) => {
       };
     });
 
-    const { error: insertErr } = await serviceClient
-      .from("academy_course_purchases")
-      .insert(rows);
+    // Guests have not proven they own the email, so no purchase record is
+    // written against that account until Stripe confirms payment (the webhook
+    // creates the paid rows from session metadata).
+    const { error: insertErr } = isGuest
+      ? { error: null }
+      : await serviceClient
+          .from("academy_course_purchases")
+          .insert(rows);
     if (insertErr) {
       console.error("Failed to insert pending rows:", insertErr);
       // Don't block — webhook will reconcile via session.id, but log loudly

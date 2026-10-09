@@ -166,7 +166,8 @@ serve(async (req) => {
       },
     });
 
-    const { error: insertErr } = await serviceClient
+    // Guests: no pending row until Stripe confirms payment (webhook inserts it).
+    const { error: insertErr } = isGuest ? { error: null } : await serviceClient
       .from("academy_course_purchases")
       .insert([{
         user_id: userId,

@@ -358,7 +358,7 @@ serve(async (req) => {
       // Fallback: no pending rows existed for this session (e.g. Payment Link or
       // reissued checkout). Use session metadata to insert paid rows so the
       // buyer still gets access without manual reconciliation.
-      if (!isAnnualPass && (!updatedRows || updatedRows.length === 0)) {
+      if (!updatedRows || updatedRows.length === 0) {
         const metaUserId = session.metadata?.user_id ?? null;
         const metaSlugs = (session.metadata?.course_slugs ?? "")
           .split(",")
