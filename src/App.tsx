@@ -119,6 +119,7 @@ const ComplianceSoftwareUK = lazyWithRetry(() => import("./pages/ComplianceSoftw
 const KycVerification = lazyWithRetry(() => import("./pages/KycVerification"));
 const IdentityVerificationService = lazyWithRetry(() => import("./pages/IdentityVerificationService"));
 const AmlKycCompliance = lazyWithRetry(() => import("./pages/AmlKycCompliance"));
+const AmlComplianceSoftware = lazyWithRetry(() => import("./pages/AmlComplianceSoftware"));
 const ComplianceSoftwareNL = lazyWithRetry(() => import("./pages/ComplianceSoftwareNL"));
 const ComplianceSoftwareCH = lazyWithRetry(() => import("./pages/ComplianceSoftwareCH"));
 const ComplianceSoftwareIT = lazyWithRetry(() => import("./pages/ComplianceSoftwareIT"));
@@ -562,6 +563,7 @@ const App = () => (
                 <Route path="/kyc-verification" element={<KycVerification />} />
                 <Route path="/identity-verification-service" element={<IdentityVerificationService />} />
                 <Route path="/aml-kyc-compliance" element={<AmlKycCompliance />} />
+                <Route path="/aml-compliance-software" element={<AmlComplianceSoftware />} />
                 <Route path="/resources/us-aml-kyc-compliance-guide" element={<USAMLKYCComplianceGuide />} />
                 <Route path="/sanctions-screening-software" element={<SanctionsScreeningSoftware />} />
                 <Route path="/enterprise-aml-screening" element={<EnterpriseAMLScreening />} />
