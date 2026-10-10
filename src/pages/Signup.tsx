@@ -100,8 +100,8 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Create your WorldAML account"
-        description="Join WorldAML Academy and start building your compliance expertise with expert-led AML, KYC and KYB courses."
+        title="Sign Up for WorldAML Academy & Platform"
+        description="Create one WorldAML login for free AML, KYC and KYB courses in the Academy, then add business screening and compliance tools when you need them."
         noindex
       />
       <Header />

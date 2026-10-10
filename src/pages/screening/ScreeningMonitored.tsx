@@ -199,7 +199,7 @@ export default function ScreeningMonitored({ embedded = false }: { embedded?: bo
   const base = embedded ? "/suite/screening" : "/screening";
   const shell = (children: React.ReactNode) => embedded ? (
     <>
-      <SEO title="Monitored Entities" description="Manage ongoing monitoring." noindex />
+      <SEO title="Suite Monitored Entities" description="Pause, transfer and review entities under ongoing monitoring in WorldAML Suite." noindex />
       {children}
     </>
   ) : (

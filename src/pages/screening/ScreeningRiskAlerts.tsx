@@ -186,7 +186,7 @@ export default function ScreeningRiskAlerts({ embedded = false }: { embedded?: b
 
   const shell = (children: React.ReactNode) => embedded ? (
     <>
-      <SEO title="Screening Risk Alerts" description="Configure risk-level alerts." noindex />
+      <SEO title="Suite Risk Alert Rules" description="Create and manage risk-threshold alert rules for monitored entities in WorldAML Suite." noindex />
       {children}
     </>
   ) : (
