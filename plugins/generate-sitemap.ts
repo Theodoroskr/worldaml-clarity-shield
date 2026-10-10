@@ -71,6 +71,7 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/sanctions-screening-software", changefreq: "monthly", priority: 0.9 },
   { path: "/enterprise-aml-screening", changefreq: "monthly", priority: 0.9 },
   { path: "/resources/us-aml-kyc-compliance-guide", changefreq: "monthly", priority: 0.8 },
+  { path: "/aml-compliance-software", changefreq: "monthly", priority: 0.8 },
   { path: "/world-check-alternative", changefreq: "monthly", priority: 0.9 },
   { path: "/alternatives", changefreq: "monthly", priority: 0.85 },
   { path: "/alternatives/comply-advantage", changefreq: "monthly", priority: 0.85 },
