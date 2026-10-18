@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend";
 import { provisionEntitlement } from "../_shared/business/provision.ts";
+import { enterpriseOrgNameFor } from "../_shared/orgCreationPolicy.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,19 +58,23 @@ serve(async (req) => {
     let orgId = membership?.organization_id as string | undefined;
 
     if (!orgId) {
-      // Only create a company for people who deliberately asked for the demo:
-      // the homepage demo signup (demo_intent) or an explicit button click.
-      // Academy or other visitors must never spawn a company silently.
+      // Only a deliberate enterprise demo request may create a company:
+      // explicit intent + company email + a real company name.
+      // Academy learners, personal emails and public signups never do.
       let body: { confirm?: boolean } = {};
       try { body = await req.json(); } catch { /* empty body */ }
       const intended = user.user_metadata?.demo_intent === "screening" || body?.confirm === true;
       if (!intended) {
         return json({ error: "access_required", granted: false }, 403);
       }
-      const orgName =
-        (user.user_metadata?.company_name as string | undefined)?.trim() ||
-        (user.email ? user.email.split("@")[1] : "") ||
-        "My Organisation";
+      const orgName = enterpriseOrgNameFor(user.email, user.user_metadata?.company_name);
+      if (!orgName) {
+        return json({
+          error: "enterprise_demo_required",
+          message: "Demo workspaces are set up for companies. Request a demo with your company email at worldaml.com/contact-sales.",
+          granted: false,
+        }, 403);
+      }
       const { data: org, error: orgErr } = await admin
         .from("suite_organizations")
         .insert({ name: orgName, status: "active", subscription_tier: "screening", created_by: user.id })

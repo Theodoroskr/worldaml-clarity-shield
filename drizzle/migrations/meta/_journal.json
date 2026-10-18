@@ -99,6 +99,13 @@
       "when": 1791094193041,
       "tag": "0013_suite_member_modules_default_deny",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792349363548,
+      "tag": "0014_block_junk_suite_orgs",
+      "breakpoints": true
     }
   ]
 }
