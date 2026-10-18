@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock, BarChart3, Stethoscope, FileSearch, Briefcase } from "lucide-react";
+import { Loader2, Users, FileText, GitBranch, CreditCard, ArrowLeft, Shield, Bell, Building2, ScrollText, Landmark, ShieldCheck, RefreshCw, Receipt, Handshake, Globe, GraduationCap, TrendingUp, Send, ImageIcon, Lock, BarChart3, Stethoscope, FileSearch, Briefcase, Award, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { AdminNotificationProvider, useAdminNotifications } from "@/hooks/useAdminNotifications";
 import AdminNotificationBell from "@/components/admin/AdminNotificationBell";
@@ -11,39 +12,11 @@ import AdminNotificationBell from "@/components/admin/AdminNotificationBell";
 type NavItem = { label: string; path: string; icon: any; section?: string };
 
 const NAV: NavItem[] = [
-  // Platform-wide
-  { label: "Dashboard", path: "/admin/dashboard", icon: Shield, section: "Platform" },
-  { label: "Analytics", path: "/admin/analytics", icon: TrendingUp, section: "Platform" },
-  { label: "Reports", path: "/admin/reports", icon: BarChart3, section: "Platform" },
-  { label: "Users", path: "/admin/users", icon: Users, section: "Platform" },
-  { label: "Clients & Access", path: "/admin/clients-access", icon: Briefcase, section: "Platform" },
-  { label: "Identities & Profiles", path: "/admin/identities", icon: GitBranch, section: "Platform" },
-  { label: "Regulatory Hub", path: "/admin/regulatory", icon: Landmark, section: "Platform" },
-  { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Platform" },
-  { label: "Data Quality", path: "/admin/data-quality", icon: Stethoscope, section: "Platform" },
+  { label: "Dashboard", path: "/admin/dashboard", icon: Shield, section: "Overview" },
+  { label: "Analytics", path: "/admin/analytics", icon: TrendingUp, section: "Overview" },
+  { label: "Reports", path: "/admin/reports", icon: BarChart3, section: "Overview" },
+  { label: "Notifications", path: "/admin/notifications", icon: Bell, section: "Overview" },
 
-  { label: "Internal Access", path: "/admin/internal-access", icon: Lock, section: "Platform" },
-  { label: "Notifications", path: "/admin/notifications", icon: Bell, section: "Platform" },
-
-  // Marketing site + lead capture
-  { label: "Forms", path: "/admin/forms", icon: FileText, section: "Marketing" },
-  { label: "Outreach Queue", path: "/admin/outreach-queue", icon: Send, section: "Marketing" },
-  { label: "Domains", path: "/admin/domains", icon: Globe, section: "Marketing" },
-
-  // Academy
-  { label: "Academy Signups", path: "/admin/academy-users", icon: GraduationCap, section: "Academy" },
-  { label: "Funnel Metrics", path: "/admin/academy-funnel", icon: TrendingUp, section: "Academy" },
-  { label: "Purchase Status", path: "/admin/purchase-status", icon: Receipt, section: "Academy" },
-  { label: "Reconcile Purchases", path: "/admin/reconcile-purchases", icon: RefreshCw, section: "Academy" },
-
-  // Partners
-  { label: "Business Buyers", path: "/admin/business", icon: Building2, section: "Business" },
-
-  // Partners
-  { label: "Partners", path: "/admin/partners", icon: Handshake, section: "Partners" },
-  { label: "Partner Assets", path: "/admin/partner-assets", icon: ImageIcon, section: "Partners" },
-
-  // Suite and its modules share one administration group.
   { label: "Organizations", path: "/admin/organizations", icon: Building2, section: "WorldAML Suite" },
   { label: "Suite Modules", path: "/admin/suite-modules", icon: ShieldCheck, section: "WorldAML Suite" },
   { label: "Screening & Monitoring", path: "/admin/screening-product", icon: ShieldCheck, section: "WorldAML Suite" },
@@ -51,7 +24,29 @@ const NAV: NavItem[] = [
   { label: "Alert Rules", path: "/admin/alert-rules", icon: Bell, section: "WorldAML Suite" },
   { label: "Workflows", path: "/admin/workflows", icon: GitBranch, section: "WorldAML Suite" },
   { label: "Pricing", path: "/admin/pricing", icon: CreditCard, section: "WorldAML Suite" },
-  { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText, section: "WorldAML Suite" },
+
+  { label: "Users", path: "/admin/users", icon: Users, section: "Users & Access" },
+  { label: "Clients & Access", path: "/admin/clients-access", icon: Briefcase, section: "Users & Access" },
+  { label: "Identities & Profiles", path: "/admin/identities", icon: GitBranch, section: "Users & Access" },
+  { label: "Internal Access", path: "/admin/internal-access", icon: Lock, section: "Users & Access" },
+
+  { label: "Forms & Leads", path: "/admin/forms", icon: FileText, section: "Commercial & Growth" },
+  { label: "Outreach Queue", path: "/admin/outreach-queue", icon: Send, section: "Commercial & Growth" },
+  { label: "Business Buyers", path: "/admin/business", icon: Building2, section: "Commercial & Growth" },
+  { label: "Partners", path: "/admin/partners", icon: Handshake, section: "Commercial & Growth" },
+  { label: "Partner Assets", path: "/admin/partner-assets", icon: ImageIcon, section: "Commercial & Growth" },
+  { label: "Domains", path: "/admin/domains", icon: Globe, section: "Commercial & Growth" },
+
+  { label: "Academy Signups", path: "/admin/academy-users", icon: GraduationCap, section: "Academy" },
+  { label: "Funnel Metrics", path: "/admin/academy-funnel", icon: TrendingUp, section: "Academy" },
+  { label: "Purchase Status", path: "/admin/purchase-status", icon: Receipt, section: "Academy" },
+  { label: "Reconcile Purchases", path: "/admin/reconcile-purchases", icon: RefreshCw, section: "Academy" },
+  { label: "Recognition & Badges", path: "/admin/recognition", icon: Award, section: "Academy" },
+
+  { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Security & Governance" },
+  { label: "Regulatory Hub", path: "/admin/regulatory", icon: Landmark, section: "Security & Governance" },
+  { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText, section: "Security & Governance" },
+  { label: "Data Quality", path: "/admin/data-quality", icon: Stethoscope, section: "Security & Governance" },
 ];
 
 
@@ -61,6 +56,7 @@ function AdminShell() {
   const location = useLocation();
 
   const { countsByPath } = useAdminNotifications();
+  const [closed, setClosed] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!isLoading && !user) navigate("/login");
@@ -83,10 +79,15 @@ function AdminShell() {
         <nav className="flex-1 p-2 space-y-3 overflow-y-auto">
           {Array.from(new Set(NAV.map(n => n.section || "Main"))).map(section => (
             <div key={section} className="space-y-0.5">
-              <div className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+              <button
+                type="button"
+                onClick={() => setClosed(c => ({ ...c, [section]: !c[section] }))}
+                className="w-full flex items-center gap-1 px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 hover:text-foreground"
+              >
+                <ChevronRight className={cn("w-3 h-3 transition-transform", !closed[section] && "rotate-90")} />
                 {section}
-              </div>
-              {NAV.filter(n => (n.section || "Main") === section).map(n => (
+              </button>
+              {!closed[section] && NAV.filter(n => (n.section || "Main") === section).map(n => (
                 <button
                   key={n.path}
                   onClick={() => navigate(n.path)}
