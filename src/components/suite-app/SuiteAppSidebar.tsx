@@ -24,85 +24,74 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
     ],
   },
   {
-    title: "Onboarding",
+    title: "Onboarding & Clients",
     items: [
+      { icon: Users, label: "Customers", path: "/suite/onboarding" },
       {
-        icon: Users, label: "Customers",
+        icon: ListChecks, label: "Intake",
         children: [
-          { label: "Onboarding", path: "/suite/onboarding" },
           { label: "Onboarding Forms", path: "/suite/onboarding-forms" },
           { label: "Submissions Inbox", path: "/suite/onboarding-submissions" },
-          { label: "IDV & Liveness", path: "/suite/idv" },
-          { label: "Ownership & UBO", path: "/suite/ubo" },
-          { label: "Documents & Expiry", path: "/suite/customer-documents" },
         ],
       },
+      { icon: Fingerprint, label: "IDV & Document Check", path: "/suite/idv" },
+      { icon: Network, label: "Ownership & UBO", path: "/suite/ubo" },
+      { icon: FileClock, label: "Documents & Expiry", path: "/suite/customer-documents" },
     ],
   },
   {
-    title: "Compliance",
+    title: "Detection & Screening",
     items: [
       {
         icon: Shield, label: "AML Screening",
         children: [
           { label: "Screening Console", path: "/suite/screening" },
-          { label: "Monitored Entities", path: "/suite/screening/monitored" },
-          { label: "Risk Alert Rules", path: "/suite/screening/risk-alerts" },
+          { label: "Monitored Watchlists", path: "/suite/screening/monitored" },
+          { label: "Watchlist Alert Rules", path: "/suite/screening/risk-alerts" },
         ],
       },
+      { icon: CreditCard, label: "Transactions", path: "/suite/transactions" },
+      { icon: Activity, label: "Transaction Alert Rules", path: "/suite/monitoring" },
       {
-        icon: CreditCard, label: "Transactions",
+        icon: BarChart3, label: "Risk & Reviews",
         children: [
-          { label: "Live Monitor", path: "/suite/transactions" },
+          { label: "Risk Scoring", path: "/suite/risk" },
+          { label: "Risk Heat-Map", path: "/suite/risk-heatmap" },
+          { label: "Account Risk (AML-AR)", path: "/suite/aml-ar" },
+          { label: "Source of Funds", path: "/suite/source-of-funds" },
+          { label: "Periodic Reviews", path: "/suite/periodic-reviews" },
         ],
       },
-      { icon: Activity, label: "Monitoring", path: "/suite/monitoring" },
-      { icon: BarChart3, label: "Risk Assessment", path: "/suite/risk" },
-      { icon: Grid3X3, label: "Risk Heat-Map", path: "/suite/risk-heatmap" },
-
-      { icon: CalendarClock, label: "Periodic Reviews", path: "/suite/periodic-reviews" },
-      { icon: Wallet, label: "Source of Funds", path: "/suite/source-of-funds" },
-      { icon: CreditCard, label: "AML Account Risk", path: "/suite/aml-ar" },
     ],
   },
   {
     title: "Investigations",
     items: [
+      {
+        icon: ClipboardList, label: "Case Management",
+        children: [
+          { label: "Case Queue (SLA)", path: "/suite/case-queue" },
+          { label: "Cases & SAR Dossiers", path: "/suite/cases" },
+        ],
+      },
       { icon: ShieldAlert, label: "Enhanced DD (EDD)", path: "/suite/edd" },
-      { icon: ClipboardList, label: "Case Queue", path: "/suite/case-queue" },
-      { icon: ClipboardList, label: "Cases & SAR", path: "/suite/cases" },
-      { icon: FileText, label: "Audit Trail", path: "/suite/audit" },
     ],
   },
-  // RCM section hidden — product not yet finished
-  // {
-  //   title: "RCM",
-  //   items: [
-  //     {
-  //       icon: BookOpen, label: "Reg. Compliance",
-  //       children: [
-  //         { label: "Dashboard", path: "/rcm" },
-  //         { label: "Library", path: "/rcm/library" },
-  //         { label: "Obligations", path: "/rcm/obligations" },
-  //         { label: "Controls", path: "/rcm/controls" },
-  //         { label: "Assessments", path: "/rcm/assessments" },
-  //         { label: "Tasks", path: "/rcm/tasks" },
-  //         { label: "Evidence", path: "/rcm/evidence" },
-  //         { label: "Reports", path: "/rcm/reports" },
-  //       ],
-  //     },
-  //   ],
-  // },
   {
-    title: "System",
+    title: "Regulatory & Reporting",
     items: [
       { icon: Scale, label: "Regulatory Hub", path: "/suite/regulatory" },
-      { icon: FileClock, label: "Regulator Submissions", path: "/suite/regulator-submissions" },
+      { icon: FileText, label: "SAR / STR Filings", path: "/suite/regulator-submissions" },
+      { icon: Rss, label: "Regulatory News", path: "/suite/rss" },
+    ],
+  },
+  {
+    title: "Governance",
+    items: [
+      { icon: UserCheck, label: "Audit Trail", path: "/suite/audit" },
       { icon: Trash2, label: "DSAR & Retention", path: "/suite/dsar" },
-
-      { icon: Rss, label: "RSS Feeds", path: "/suite/rss" },
       { icon: Settings, label: "Settings", path: "/suite/settings" },
-      { icon: HelpCircle, label: "Help — SAR/STR", path: "/suite/help" },
+      { icon: HelpCircle, label: "Help & SAR Guidance", path: "/suite/help" },
     ],
   },
 ];
