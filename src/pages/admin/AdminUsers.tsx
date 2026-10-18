@@ -21,7 +21,7 @@ import UserIntelExportDialog, { ExportScope } from "@/components/admin/UserIntel
 import {
   COLUMN_DEFS, EMPTY_FILTERS, EnrichedUser, FilterState, LIFECYCLE_LABELS, SavedSegment, SortKey,
   USER_TYPE_LABELS, applyIntelFilters, deleteSegment as deleteSegmentFn, enrichUser, formatAge, formatDate,
-  loadColumns, loadSavedSegments, newCondition, persistColumns, saveSegment as saveSegmentFn, sortUsers,
+  isFreeLearner, loadColumns, loadSavedSegments, newCondition, persistColumns, saveSegment as saveSegmentFn, sortUsers,
 } from "@/lib/adminUserIntel";
 
 
@@ -131,7 +131,7 @@ export default function AdminUsers() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [savedSegments, setSavedSegments] = useState<SavedSegment[]>(loadSavedSegments());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("corporate");
 
 
 
@@ -571,8 +571,14 @@ export default function AdminUsers() {
   const partnerCategory = profiles.filter((p) => typesOf(p).includes("partner"));
   const suiteCategory = profiles.filter((p) => typesOf(p).includes("suite"));
 
+  const freeLearnerCategory = profiles.filter((p) => isFreeLearner(typesOf(p), p.email, purchaseAgg[p.user_id]?.paid || 0));
+  const freeLearnerIds = new Set(freeLearnerCategory.map((p) => p.id));
+  const corporateCategory = profiles.filter((p) => !freeLearnerIds.has(p.id));
+
   const tabList = (tab: string): Profile[] =>
-    tab === "academy" ? academyCategory
+    tab === "corporate" ? corporateCategory
+    : tab === "learners" ? freeLearnerCategory
+    : tab === "academy" ? academyCategory
       : tab === "business" ? businessCategory
         : tab === "partners" ? partnerCategory
           : tab === "suite" ? suiteCategory
@@ -1014,15 +1020,32 @@ export default function AdminUsers() {
       ) : (
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSelectedIds(new Set()); }} className="space-y-4">
           <TabsList className="flex-wrap">
-            <TabsTrigger value="all">All Users ({profiles.length})</TabsTrigger>
-            <TabsTrigger value="academy">Academy ({academyCategory.length})</TabsTrigger>
+            <TabsTrigger value="corporate">Corporate &amp; Leads ({corporateCategory.length})</TabsTrigger>
+            <TabsTrigger value="learners">Free Learners ({freeLearnerCategory.length})</TabsTrigger>
             <TabsTrigger value="business">Business ({businessCategory.length})</TabsTrigger>
             <TabsTrigger value="partners" className="gap-1.5">
               <Handshake className="w-3.5 h-3.5" />
               Partners ({partnerCategory.length})
             </TabsTrigger>
             <TabsTrigger value="suite">Suite Users ({suiteCategory.length})</TabsTrigger>
+            <TabsTrigger value="academy">All Academy ({academyCategory.length})</TabsTrigger>
+            <TabsTrigger value="all">All Users ({profiles.length})</TabsTrigger>
           </TabsList>
+          <TabsContent value="corporate">
+            <div className="mb-3 rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+              Business, Suite and Partner accounts, paying learners, and Academy learners on company email (possible leads). Free learners on personal email are in the Free Learners tab.
+            </div>
+            {renderTable(corporateCategory, false)}
+          </TabsContent>
+          <TabsContent value="learners">
+            <div className="mb-3 flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+              <span>Academy-only accounts on personal email with no paid purchase.</span>
+              <Link to="/admin/academy-users" className="inline-flex items-center gap-1 text-primary hover:underline">
+                Open Learner Signups <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
+            {renderTable(freeLearnerCategory, false)}
+          </TabsContent>
           <TabsContent value="all">{renderTable(profiles, false)}</TabsContent>
           <TabsContent value="academy">{renderTable(academyCategory, false)}</TabsContent>
           <TabsContent value="business">{renderTable(businessCategory, false)}</TabsContent>
