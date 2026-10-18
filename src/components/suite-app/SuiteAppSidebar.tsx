@@ -98,7 +98,13 @@ const navGroups: { title?: string; items: NavItem[] }[] = [
 
 export default function SuiteAppSidebar() {
   const { isAdmin } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Customers", "Transactions", "Reg. Compliance"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(() => {
+    const p = window.location.pathname;
+    const open = navGroups.flatMap((g) => g.items)
+      .filter((it) => it.children?.some((c) => p === c.path))
+      .map((it) => it.label);
+    return open.length ? open : ["AML Screening", "Case Management"];
+  });
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
