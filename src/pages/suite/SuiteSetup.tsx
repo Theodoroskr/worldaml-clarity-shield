@@ -84,7 +84,7 @@ export default function SuiteSetup() {
     const { error } = await supabase
       .from("suite_organizations")
       .update({
-        name: merged.name || "My Organisation",
+        ...(merged.name?.trim() ? { name: merged.name.trim() } : {}),
         industry: merged.industry || null,
         country: merged.country || null,
         website: merged.website || null,
