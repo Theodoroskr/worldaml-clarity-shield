@@ -692,3 +692,14 @@ export const topCounts = (users: EnrichedUser[], pick: (u: EnrichedUser) => stri
   });
   return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit).map(([label, count]) => ({ label, count }));
 };
+
+// ---------------------------------------------------------------- audience split
+
+/**
+ * A "free learner" is an Academy-only account on a personal mailbox with no paid
+ * Academy purchase. They are kept out of the main corporate directory view.
+ */
+export const isFreeLearner = (types: UserType[], email: string | null | undefined, paidPurchases: number): boolean => {
+  const onlyAcademy = types.length > 0 && types.every((t) => t === "academy" || t === "platform") && types.includes("academy");
+  return onlyAcademy && isPersonalDomain(emailDomain(email)) && paidPurchases === 0;
+};
