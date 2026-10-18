@@ -56,6 +56,7 @@ function AdminShell() {
   const location = useLocation();
 
   const { countsByPath } = useAdminNotifications();
+  const [closed, setClosed] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!isLoading && !user) navigate("/login");
@@ -78,10 +79,15 @@ function AdminShell() {
         <nav className="flex-1 p-2 space-y-3 overflow-y-auto">
           {Array.from(new Set(NAV.map(n => n.section || "Main"))).map(section => (
             <div key={section} className="space-y-0.5">
-              <div className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+              <button
+                type="button"
+                onClick={() => setClosed(c => ({ ...c, [section]: !c[section] }))}
+                className="w-full flex items-center gap-1 px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 hover:text-foreground"
+              >
+                <ChevronRight className={cn("w-3 h-3 transition-transform", !closed[section] && "rotate-90")} />
                 {section}
-              </div>
-              {NAV.filter(n => (n.section || "Main") === section).map(n => (
+              </button>
+              {!closed[section] && NAV.filter(n => (n.section || "Main") === section).map(n => (
                 <button
                   key={n.path}
                   onClick={() => navigate(n.path)}
