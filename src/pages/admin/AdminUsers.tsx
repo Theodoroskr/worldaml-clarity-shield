@@ -1040,7 +1040,7 @@ export default function AdminUsers() {
           <TabsContent value="learners">
             <div className="mb-3 flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
               <span>Academy-only accounts on personal email with no paid purchase.</span>
-              <Link to="/admin/academy/users" className="inline-flex items-center gap-1 text-primary hover:underline">
+              <Link to="/admin/academy-users" className="inline-flex items-center gap-1 text-primary hover:underline">
                 Open Learner Signups <ExternalLink className="w-3 h-3" />
               </Link>
             </div>
