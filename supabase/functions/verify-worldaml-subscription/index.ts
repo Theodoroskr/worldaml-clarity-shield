@@ -147,10 +147,12 @@ serve(async (req) => {
     let orgId = membership?.organization_id as string | undefined;
 
     if (!orgId) {
+      // Paying customers get a workspace; never name it after an email domain.
       const orgName =
         (user.user_metadata?.company_name as string | undefined)?.trim() ||
-        (user.email ? user.email.split("@")[1] : "") ||
-        "My Organisation";
+        (session.customer_details?.name as string | undefined)?.trim() ||
+        user.email ||
+        "New customer";
       const { data: org, error: orgErr } = await admin
         .from("suite_organizations")
         .insert({ name: orgName, status: "active", subscription_tier: "screening", created_by: user.id })
