@@ -154,6 +154,7 @@ const AdminScreeningProfileAudit = lazyWithRetry(() => import("./pages/admin/Adm
 const AdminScreeningProduct = lazyWithRetry(() => import("./pages/admin/AdminScreeningProduct"));
 const AdminSuiteModules = lazyWithRetry(() => import("./pages/admin/AdminSuiteModules"));
 const AdminSecurityAudit = lazyWithRetry(() => import("./pages/admin/AdminSecurityAudit"));
+const AdminTwoStep = lazyWithRetry(() => import("./pages/admin/AdminTwoStep"));
 const AdminDataQuality = lazyWithRetry(() => import("./pages/admin/AdminDataQuality"));
 
 const AdminReconcilePurchases = lazyWithRetry(() => import("./pages/admin/AdminReconcilePurchases"));
@@ -387,6 +388,7 @@ const App = () => (
                   <Route path="clients-access" element={<AdminClientAccess />} />
                   <Route path="regulatory" element={<AdminRegulatoryHub />} />
                   <Route path="security" element={<AdminSecurityAudit />} />
+                  <Route path="two-step" element={<AdminTwoStep />} />
                   <Route path="data-quality" element={<AdminDataQuality />} />
 
                   <Route path="reconcile-purchases" element={<AdminReconcilePurchases />} />

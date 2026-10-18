@@ -44,6 +44,7 @@ const NAV: NavItem[] = [
   { label: "Recognition & Badges", path: "/admin/recognition", icon: Award, section: "Academy" },
 
   { label: "Security Audit", path: "/admin/security", icon: ShieldCheck, section: "Security & Governance" },
+  { label: "Two-step Sign-in", path: "/admin/two-step", icon: Lock, section: "Security & Governance" },
   { label: "Regulatory Hub", path: "/admin/regulatory", icon: Landmark, section: "Security & Governance" },
   { label: "Audit Log", path: "/admin/audit-log", icon: ScrollText, section: "Security & Governance" },
   { label: "Data Quality", path: "/admin/data-quality", icon: Stethoscope, section: "Security & Governance" },
