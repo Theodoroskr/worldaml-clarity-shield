@@ -5,6 +5,7 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import WorkspaceSwitcher from "@/components/auth/WorkspaceSwitcher";
+import SuiteAlertBell from "./SuiteAlertBell";
 
 interface SuiteAppTopbarProps {
   title?: string;
@@ -38,10 +39,7 @@ export default function SuiteAppTopbar({ title }: SuiteAppTopbarProps) {
           <span className="text-xs text-muted-foreground">EN</span>
         </div>
 
-        <div className="relative">
-          <Bell className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-foreground" />
-          <span className="absolute -top-1 -right-1 w-2 h-2 bg-destructive rounded-full" />
-        </div>
+        <SuiteAlertBell />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
