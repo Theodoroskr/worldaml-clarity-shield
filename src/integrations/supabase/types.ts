@@ -578,6 +578,24 @@ export type Database = {
         }
         Relationships: []
       }
+      account_email_bans: {
+        Row: {
+          created_at: string
+          email: string
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          reason?: string
+        }
+        Relationships: []
+      }
       admin_access_audit: {
         Row: {
           action: string

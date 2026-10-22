@@ -113,6 +113,13 @@
       "when": 1792349983397,
       "tag": "0015_revoke_anon_pii_mrz",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792668099576,
+      "tag": "0016_account_email_bans",
+      "breakpoints": true
     }
   ]
 }
