@@ -389,6 +389,7 @@ export default function AdminOrganizations() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Search */}
