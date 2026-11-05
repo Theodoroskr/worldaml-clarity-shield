@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { ProvisionClientDialog } from "@/components/admin/ProvisionClientDialog";
 import { Building2, Plus, Users, Search, ChevronRight, ChevronLeft, Check, Loader2, Eye, Trash2 } from "lucide-react";
 
 const REGULATORS = [
@@ -204,6 +205,8 @@ export default function AdminOrganizations() {
           <h1 className="text-2xl font-bold text-foreground">Organizations</h1>
           <p className="text-sm text-muted-foreground">Manage company-level Suite customers</p>
         </div>
+        <div className="flex items-center gap-2">
+        <ProvisionClientDialog orgs={orgs.map(o => ({ id: o.id, name: o.name }))} onDone={fetchOrgs} />
         <Dialog open={wizardOpen} onOpenChange={o => { setWizardOpen(o); if (!o) { setStep(0); setForm({ ...emptyForm }); } }}>
           <DialogTrigger asChild>
             <Button><Plus className="w-4 h-4 mr-2" /> Onboard Organization</Button>
