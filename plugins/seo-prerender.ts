@@ -16,6 +16,7 @@ import * as path from "path";
 import { blogPosts } from "../src/data/blogPosts";
 import { ACADEMY_COURSE_SEO } from "../src/data/academyCourseSeo";
 import { ACADEMY_SEO } from "../src/data/academySeo";
+import { SANCTIONS_CHECK_SEO, SANCTIONS_LISTS_SEO } from "../src/data/searchSnippets";
 import { allEUSanctionsRegimes } from "../src/data/euSanctionsRegimes";
 import { coverageData } from "../src/data/worldComplianceSources";
 
@@ -302,10 +303,9 @@ const routes: Record<string, RouteMeta> = {
     h1: "WorldAML Partner Programme",
   },
   "/sanctions-check": {
-    title: "Free Sanctions Search & OFAC Check — Instant, No Signup",
-    description:
-      "Screen any person or company against 1,900+ global sanctions, PEP and watchlists. Instant OFAC, EU, UN and HMT results — free, no signup required.",
-    h1: "Free Sanctions Search — instant results across OFAC, EU, UN & 1,900+ lists",
+    title: SANCTIONS_CHECK_SEO.title,
+    description: SANCTIONS_CHECK_SEO.description,
+    h1: SANCTIONS_CHECK_SEO.h1,
   },
   "/resources/best-practices": {
     title: "AML Best Practices",
@@ -314,10 +314,9 @@ const routes: Record<string, RouteMeta> = {
     h1: "AML Compliance Best Practices",
   },
   "/resources/sanctions-lists": {
-    title: "Global Sanctions Lists Directory",
-    description:
-      "Comprehensive directory of global sanctions lists: OFAC SDN, EU Consolidated, UN Security Council, HMT, and 1,400+ more.",
-    h1: "Global Sanctions Lists Directory",
+    title: SANCTIONS_LISTS_SEO.title,
+    description: SANCTIONS_LISTS_SEO.description,
+    h1: SANCTIONS_LISTS_SEO.h1,
   },
   "/resources/glossary": {
     title: "AML & Compliance Glossary",

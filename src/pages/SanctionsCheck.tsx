@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Search, Shield, AlertTriangle, CheckCircle2, Loader2, Globe, ArrowRight } from "lucide-react";
 import SEO from "@/components/SEO";
+import { SANCTIONS_CHECK_SEO } from "@/data/searchSnippets";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,7 @@ const jsonLd = {
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description:
-    "Free sanctions screening tool. Check names and companies against global sanctions, PEP and watchlists covering 1,900+ lists worldwide.",
+    "Free sanctions check. Search names and companies against OFAC, EU, UN and UK sanctions lists with fuzzy matching and a confidence score for each match.",
   offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
   provider: { "@type": "Organization", name: "WorldAML", url: "https://worldaml.com" },
 };
@@ -133,8 +134,8 @@ const SanctionsCheck = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Free Sanctions Search & OFAC Check — Instant, No Signup | WorldAML"
-        description="Screen any person or company against 1,900+ global sanctions, PEP and watchlists. Instant OFAC, EU, UN and HMT results — free, no signup required."
+        title={SANCTIONS_CHECK_SEO.title}
+        description={SANCTIONS_CHECK_SEO.description}
         canonical="/sanctions-check"
         structuredData={jsonLd}
       />
@@ -149,12 +150,12 @@ const SanctionsCheck = () => {
               Free tool — no signup required
             </span>
             <h1 className="mt-6 text-3xl md:text-5xl font-bold leading-tight">
-              Free Sanctions Search — instant results across OFAC, EU, UN &amp; 1,900+ lists
+              Free sanctions check — search OFAC, EU, UN &amp; UK sanctions lists
             </h1>
             <p className="mt-4 text-base md:text-lg text-primary-foreground/80 max-w-2xl mx-auto">
-              Screen any person or company against global sanctions, PEP and watchlist data.
-              WorldAML's full platform screens across <strong className="text-accent">1,900+ global lists</strong> with
-              fuzzy name matching and continuous monitoring.
+              Type a person or company name to check it against OFAC, EU, UN and UK sanctions data
+              in seconds — no account needed. For ongoing screening, WorldAML's full platform covers{" "}
+              <strong className="text-accent">1,900+ global lists</strong> with continuous monitoring.
             </p>
 
             {/* Search box */}
@@ -327,6 +328,49 @@ const SanctionsCheck = () => {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* Common questions — what people searching for a free check want to know */}
+        <section className="container mx-auto px-4 pb-16 max-w-3xl">
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center">
+            Free sanctions check: common questions
+          </h2>
+          <div className="mt-10 space-y-4">
+            {[
+              {
+                q: "Is this OFAC check really free?",
+                a: "Yes. You can run sanctions checks here without an account or payment. There is a small daily limit per visitor so the tool stays fast for everyone.",
+              },
+              {
+                q: "Which sanctions lists does the free check search?",
+                a: "It searches OFAC (including the SDN list), EU, UN Security Council and UK sanctions data. The paid WorldAML platform adds PEP, adverse media and watchlist data from 1,900+ sources.",
+              },
+              {
+                q: "Is a free sanctions check enough for compliance?",
+                a: "It is useful for a quick one-off look. Regulated firms usually need to screen every customer at onboarding, re-screen when lists change, and keep a record of each decision — that needs ongoing screening with an audit trail.",
+              },
+              {
+                q: "What does a match mean?",
+                a: "A match means a name on a sanctions list is similar to the one you entered. Check date of birth, nationality and other details before concluding it is the same person or company.",
+              },
+            ].map((item) => (
+              <div key={item.q} className="rounded-xl border border-border bg-card p-6">
+                <h3 className="font-semibold text-foreground">{item.q}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{item.a}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-8 text-sm text-muted-foreground text-center">
+            Want to know what each list covers? Browse the{" "}
+            <Link to="/resources/sanctions-lists" className="text-primary underline underline-offset-4">
+              global sanctions lists database
+            </Link>{" "}
+            or read{" "}
+            <Link to="/resources/what-is-sanctions-screening" className="text-primary underline underline-offset-4">
+              what sanctions screening is
+            </Link>
+            .
+          </p>
         </section>
 
         {/* Upsell CTA */}
