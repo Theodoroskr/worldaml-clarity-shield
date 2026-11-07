@@ -15,6 +15,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { blogPosts } from "../src/data/blogPosts";
 import { ACADEMY_COURSE_SEO } from "../src/data/academyCourseSeo";
+import { ACADEMY_SEO } from "../src/data/academySeo";
 import { allEUSanctionsRegimes } from "../src/data/euSanctionsRegimes";
 import { coverageData } from "../src/data/worldComplianceSources";
 
@@ -289,9 +290,8 @@ const routes: Record<string, RouteMeta> = {
     h1: "WorldAML Compliance Blog",
   },
   "/academy": {
-    title: "Free AML Certification Online — CPD Accredited Courses",
-    description:
-      "Free AML certification and compliance training online. CPD-accredited AML, KYC and sanctions screening courses with verifiable certificates — start free, no payment required.",
+    title: ACADEMY_SEO.title,
+    description: ACADEMY_SEO.description,
     h1: "Free AML Certification Online",
   },
 
