@@ -195,24 +195,6 @@ const routes: Record<string, RouteMeta> = {
       "Automated risk scoring and assessment with configurable risk models, country risk indices, and dynamic risk profiling.",
     h1: "Risk Assessment",
   },
-  "/data-sources": {
-    title: "Data Sources & Coverage",
-    description:
-      "Access 1,400+ sanctions lists, PEP databases, adverse media sources and corporate registries across 200+ jurisdictions.",
-    h1: "Data Sources & Coverage",
-  },
-  "/data-sources/worldcompliance": {
-    title: "WorldCompliance® by LexisNexis",
-    description:
-      "WorldCompliance® data platform by LexisNexis Risk Solutions — comprehensive sanctions, PEP, and adverse media screening data.",
-    h1: "WorldCompliance® by LexisNexis",
-  },
-  "/data-sources/bridger-xg": {
-    title: "Bridger Insight® XG by LexisNexis",
-    description:
-      "Bridger Insight® XG screening engine by LexisNexis Risk Solutions — real-time AML screening with configurable matching.",
-    h1: "Bridger Insight® XG by LexisNexis",
-  },
   "/products/worldid": {
     title: "WorldID — Identity Verification",
     description:
@@ -267,12 +249,6 @@ const routes: Record<string, RouteMeta> = {
       "Get help with WorldAML products: documentation, API guides, FAQs and contact our support team.",
     h1: "Support & Help Centre",
   },
-  "/get-started": {
-    title: "Get Started with WorldAML",
-    description:
-      "Start your free trial of WorldAML — AML screening, KYC verification, and compliance automation in minutes.",
-    h1: "Get Started with WorldAML",
-  },
   "/enterprise-aml-screening": {
     title: "Enterprise AML Screening — LexisNexis® Data | WorldAML",
     description:
@@ -316,60 +292,6 @@ const routes: Record<string, RouteMeta> = {
     h1: "Free AML Certification Online",
   },
 
-  "/academy/aml-fundamentals": {
-    title: "AML Fundamentals — WorldAML Academy",
-    description:
-      "Learn the essentials of Anti-Money Laundering compliance, including key regulations, red flags, and reporting obligations.",
-    h1: "AML Fundamentals",
-  },
-  "/academy/kyc-essentials": {
-    title: "KYC Essentials — WorldAML Academy",
-    description:
-      "Master Know Your Customer procedures: identity verification, customer due diligence, and ongoing monitoring.",
-    h1: "KYC Essentials",
-  },
-  "/academy/sanctions-screening-fundamentals": {
-    title: "Sanctions Screening Fundamentals — WorldAML Academy",
-    description:
-      "Understand global sanctions regimes, list screening techniques, and compliance best practices.",
-    h1: "Sanctions Screening Fundamentals",
-  },
-  "/academy/risk-based-approach": {
-    title: "Risk-Based Approach — WorldAML Academy",
-    description:
-      "Learn to implement a risk-based approach to AML compliance with risk assessment frameworks and methodologies.",
-    h1: "Risk-Based Approach to AML",
-  },
-  "/academy/international-sanctions-compliance": {
-    title: "International Sanctions Compliance — WorldAML Academy",
-    description:
-      "Advanced course on international sanctions regimes, cross-border compliance, and enforcement actions.",
-    h1: "International Sanctions Compliance",
-  },
-  "/academy/beneficial-ownership-ubo-transparency": {
-    title: "Beneficial Ownership & UBO Transparency — WorldAML Academy",
-    description:
-      "Advanced course on beneficial ownership identification, UBO verification, and corporate transparency requirements.",
-    h1: "Beneficial Ownership & UBO Transparency",
-  },
-  "/academy/tbml-export-controls": {
-    title: "Trade-Based Money Laundering Course — TBML & Export Controls Training",
-    description:
-      "Advanced TBML training: over- and under-invoicing, phantom shipments, shell trading networks, dual-use goods and sanctions evasion. CPD-accredited certificate.",
-    h1: "Trade-Based Money Laundering & Export Controls",
-  },
-  "/academy/aml-fintechs-payments": {
-    title: "AML for Fintechs & Payment Providers — Compliance Training Course",
-    description:
-      "Build a scalable fintech AML programme: PSP and EMI regulation, onboarding at volume, instant-payment monitoring, mule detection and sponsor-bank risk. CPD-accredited.",
-    h1: "AML for Fintechs & Payment Providers",
-  },
-  "/academy/source-of-funds-wealth": {
-    title: "Source of Funds & Source of Wealth — EDD Training Course",
-    description:
-      "Verify source of funds and source of wealth with confidence: evidence standards, corroboration, PEP-linked wealth, third-party funding and defensible records. CPD-accredited.",
-    h1: "Source of Funds & Source of Wealth",
-  },
   "/partners": {
     title: "Partner Programme",
     description:
@@ -381,12 +303,6 @@ const routes: Record<string, RouteMeta> = {
     description:
       "Screen any person or company against 1,900+ global sanctions, PEP and watchlists. Instant OFAC, EU, UN and HMT results — free, no signup required.",
     h1: "Free Sanctions Search — instant results across OFAC, EU, UN & 1,900+ lists",
-  },
-  "/free-aml-check": {
-    title: "Free AML Check",
-    description:
-      "Run a free AML screening check against global sanctions, PEP, and adverse media databases. Instant results.",
-    h1: "Free AML Check",
   },
   "/resources/best-practices": {
     title: "AML Best Practices",
@@ -411,12 +327,6 @@ const routes: Record<string, RouteMeta> = {
     description:
       "Country-by-country guide to AML regulations, supervisory authorities, and compliance requirements worldwide.",
     h1: "AML Regulations by Country",
-  },
-  "/data-coverage": {
-    title: "Data Coverage Index",
-    description:
-      "Explore WorldAML data coverage across 200+ countries and territories. Sanctions, PEP, corporate registry and adverse media sources.",
-    h1: "Data Coverage Index",
   },
   "/aml-api": {
     title: "AML Screening API",
