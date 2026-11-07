@@ -59,7 +59,7 @@ const jsonLd = {
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description:
-    "Free sanctions check. Search names and companies against OFAC, EU, UN and UK sanctions lists with fuzzy matching and a confidence score for each match.",
+    "Free sanctions check. Try fuzzy name matching against sample OFAC, EU, UN and UK sanctions entries, with a confidence score for each match.",
   offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
   provider: { "@type": "Organization", name: "WorldAML", url: "https://worldaml.com" },
 };
@@ -150,11 +150,11 @@ const SanctionsCheck = () => {
               Free tool — no signup required
             </span>
             <h1 className="mt-6 text-3xl md:text-5xl font-bold leading-tight">
-              Free sanctions check — search OFAC, EU, UN &amp; UK sanctions lists
+              Free sanctions check — try instant OFAC, EU, UN &amp; UK name matching
             </h1>
             <p className="mt-4 text-base md:text-lg text-primary-foreground/80 max-w-2xl mx-auto">
-              Type a person or company name to check it against OFAC, EU, UN and UK sanctions data
-              in seconds — no account needed. For ongoing screening, WorldAML's full platform covers{" "}
+              Type a person or company name to see how sanctions matching works against sample OFAC, EU,
+              UN and UK entries — no account needed. For real screening, WorldAML's full platform covers{" "}
               <strong className="text-accent">1,900+ global lists</strong> with continuous monitoring.
             </p>
 
@@ -343,11 +343,11 @@ const SanctionsCheck = () => {
               },
               {
                 q: "Which sanctions lists does the free check search?",
-                a: "It searches OFAC (including the SDN list), EU, UN Security Council and UK sanctions data. The paid WorldAML platform adds PEP, adverse media and watchlist data from 1,900+ sources.",
+                a: "The free check matches against a sample of public OFAC, EU, UN and UK sanctions entries to show how name screening works. It is not a complete list search. WorldAML Screening covers 1,900+ sanctions, PEP and watchlist sources in full.",
               },
               {
                 q: "Is a free sanctions check enough for compliance?",
-                a: "It is useful for a quick one-off look. Regulated firms usually need to screen every customer at onboarding, re-screen when lists change, and keep a record of each decision — that needs ongoing screening with an audit trail.",
+                a: "No. Because it uses sample data, a 'no match' here does not clear a name. Regulated firms need to screen every customer against complete, current lists at onboarding, re-screen when lists change, and keep a record of each decision.",
               },
               {
                 q: "What does a match mean?",

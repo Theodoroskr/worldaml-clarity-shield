@@ -18,12 +18,13 @@ export const SANCTIONS_LISTS_SEO = {
 
 /**
  * /sanctions-check — searchers are ready to run a check now. The free tool
- * searches OFAC, EU, UN and UK sanctions data (not the full 1,900+ lists of
- * the paid platform), so the snippet promises only that.
+ * matches against a small sample of OFAC, EU, UN and UK entries (not the
+ * paid platform's 1,900+ lists), so the snippet must not promise a full
+ * list search.
  */
 export const SANCTIONS_CHECK_SEO = {
   title: "Free Sanctions Check & OFAC Search — No Signup",
   description:
-    "Free sanctions check: search any person or company against OFAC, EU, UN and UK sanctions lists. Instant results with a match score — no signup needed.",
-  h1: "Free sanctions check — search OFAC, EU, UN and UK sanctions lists",
+    "Try a free sanctions check with no signup: instant name matching against sample OFAC, EU, UN and UK entries, with a match score and source for each hit.",
+  h1: "Free sanctions check — try instant OFAC, EU, UN and UK name matching",
 } as const;
