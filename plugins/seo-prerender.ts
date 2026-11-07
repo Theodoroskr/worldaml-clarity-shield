@@ -14,6 +14,11 @@ import type { Plugin } from "vite";
 import * as fs from "fs";
 import * as path from "path";
 import { blogPosts } from "../src/data/blogPosts";
+import { ACADEMY_COURSE_SEO } from "../src/data/academyCourseSeo";
+import { ACADEMY_SEO } from "../src/data/academySeo";
+import { SANCTIONS_CHECK_SEO, SANCTIONS_LISTS_SEO } from "../src/data/searchSnippets";
+import { allEUSanctionsRegimes } from "../src/data/euSanctionsRegimes";
+import { coverageData } from "../src/data/worldComplianceSources";
 
 const BASE_URL = "https://worldaml.com";
 const SITE_NAME = "WorldAML";
@@ -195,24 +200,6 @@ const routes: Record<string, RouteMeta> = {
       "Automated risk scoring and assessment with configurable risk models, country risk indices, and dynamic risk profiling.",
     h1: "Risk Assessment",
   },
-  "/data-sources": {
-    title: "Data Sources & Coverage",
-    description:
-      "Access 1,400+ sanctions lists, PEP databases, adverse media sources and corporate registries across 200+ jurisdictions.",
-    h1: "Data Sources & Coverage",
-  },
-  "/data-sources/worldcompliance": {
-    title: "WorldCompliance® by LexisNexis",
-    description:
-      "WorldCompliance® data platform by LexisNexis Risk Solutions — comprehensive sanctions, PEP, and adverse media screening data.",
-    h1: "WorldCompliance® by LexisNexis",
-  },
-  "/data-sources/bridger-xg": {
-    title: "Bridger Insight® XG by LexisNexis",
-    description:
-      "Bridger Insight® XG screening engine by LexisNexis Risk Solutions — real-time AML screening with configurable matching.",
-    h1: "Bridger Insight® XG by LexisNexis",
-  },
   "/products/worldid": {
     title: "WorldID — Identity Verification",
     description:
@@ -267,12 +254,6 @@ const routes: Record<string, RouteMeta> = {
       "Get help with WorldAML products: documentation, API guides, FAQs and contact our support team.",
     h1: "Support & Help Centre",
   },
-  "/get-started": {
-    title: "Get Started with WorldAML",
-    description:
-      "Start your free trial of WorldAML — AML screening, KYC verification, and compliance automation in minutes.",
-    h1: "Get Started with WorldAML",
-  },
   "/enterprise-aml-screening": {
     title: "Enterprise AML Screening — LexisNexis® Data | WorldAML",
     description:
@@ -310,66 +291,11 @@ const routes: Record<string, RouteMeta> = {
     h1: "WorldAML Compliance Blog",
   },
   "/academy": {
-    title: "Free AML Certification Online — CPD Accredited Courses",
-    description:
-      "Free AML certification and compliance training online. CPD-accredited AML, KYC and sanctions screening courses with verifiable certificates — start free, no payment required.",
+    title: ACADEMY_SEO.title,
+    description: ACADEMY_SEO.description,
     h1: "Free AML Certification Online",
   },
 
-  "/academy/aml-fundamentals": {
-    title: "AML Fundamentals — WorldAML Academy",
-    description:
-      "Learn the essentials of Anti-Money Laundering compliance, including key regulations, red flags, and reporting obligations.",
-    h1: "AML Fundamentals",
-  },
-  "/academy/kyc-essentials": {
-    title: "KYC Essentials — WorldAML Academy",
-    description:
-      "Master Know Your Customer procedures: identity verification, customer due diligence, and ongoing monitoring.",
-    h1: "KYC Essentials",
-  },
-  "/academy/sanctions-screening-fundamentals": {
-    title: "Sanctions Screening Fundamentals — WorldAML Academy",
-    description:
-      "Understand global sanctions regimes, list screening techniques, and compliance best practices.",
-    h1: "Sanctions Screening Fundamentals",
-  },
-  "/academy/risk-based-approach": {
-    title: "Risk-Based Approach — WorldAML Academy",
-    description:
-      "Learn to implement a risk-based approach to AML compliance with risk assessment frameworks and methodologies.",
-    h1: "Risk-Based Approach to AML",
-  },
-  "/academy/international-sanctions-compliance": {
-    title: "International Sanctions Compliance — WorldAML Academy",
-    description:
-      "Advanced course on international sanctions regimes, cross-border compliance, and enforcement actions.",
-    h1: "International Sanctions Compliance",
-  },
-  "/academy/beneficial-ownership-ubo-transparency": {
-    title: "Beneficial Ownership & UBO Transparency — WorldAML Academy",
-    description:
-      "Advanced course on beneficial ownership identification, UBO verification, and corporate transparency requirements.",
-    h1: "Beneficial Ownership & UBO Transparency",
-  },
-  "/academy/tbml-export-controls": {
-    title: "Trade-Based Money Laundering Course — TBML & Export Controls Training",
-    description:
-      "Advanced TBML training: over- and under-invoicing, phantom shipments, shell trading networks, dual-use goods and sanctions evasion. CPD-accredited certificate.",
-    h1: "Trade-Based Money Laundering & Export Controls",
-  },
-  "/academy/aml-fintechs-payments": {
-    title: "AML for Fintechs & Payment Providers — Compliance Training Course",
-    description:
-      "Build a scalable fintech AML programme: PSP and EMI regulation, onboarding at volume, instant-payment monitoring, mule detection and sponsor-bank risk. CPD-accredited.",
-    h1: "AML for Fintechs & Payment Providers",
-  },
-  "/academy/source-of-funds-wealth": {
-    title: "Source of Funds & Source of Wealth — EDD Training Course",
-    description:
-      "Verify source of funds and source of wealth with confidence: evidence standards, corroboration, PEP-linked wealth, third-party funding and defensible records. CPD-accredited.",
-    h1: "Source of Funds & Source of Wealth",
-  },
   "/partners": {
     title: "Partner Programme",
     description:
@@ -377,16 +303,9 @@ const routes: Record<string, RouteMeta> = {
     h1: "WorldAML Partner Programme",
   },
   "/sanctions-check": {
-    title: "Free Sanctions Search & OFAC Check — Instant, No Signup",
-    description:
-      "Screen any person or company against 1,900+ global sanctions, PEP and watchlists. Instant OFAC, EU, UN and HMT results — free, no signup required.",
-    h1: "Free Sanctions Search — instant results across OFAC, EU, UN & 1,900+ lists",
-  },
-  "/free-aml-check": {
-    title: "Free AML Check",
-    description:
-      "Run a free AML screening check against global sanctions, PEP, and adverse media databases. Instant results.",
-    h1: "Free AML Check",
+    title: SANCTIONS_CHECK_SEO.title,
+    description: SANCTIONS_CHECK_SEO.description,
+    h1: SANCTIONS_CHECK_SEO.h1,
   },
   "/resources/best-practices": {
     title: "AML Best Practices",
@@ -395,10 +314,9 @@ const routes: Record<string, RouteMeta> = {
     h1: "AML Compliance Best Practices",
   },
   "/resources/sanctions-lists": {
-    title: "Global Sanctions Lists Directory",
-    description:
-      "Comprehensive directory of global sanctions lists: OFAC SDN, EU Consolidated, UN Security Council, HMT, and 1,400+ more.",
-    h1: "Global Sanctions Lists Directory",
+    title: SANCTIONS_LISTS_SEO.title,
+    description: SANCTIONS_LISTS_SEO.description,
+    h1: SANCTIONS_LISTS_SEO.h1,
   },
   "/resources/glossary": {
     title: "AML & Compliance Glossary",
@@ -411,12 +329,6 @@ const routes: Record<string, RouteMeta> = {
     description:
       "Country-by-country guide to AML regulations, supervisory authorities, and compliance requirements worldwide.",
     h1: "AML Regulations by Country",
-  },
-  "/data-coverage": {
-    title: "Data Coverage Index",
-    description:
-      "Explore WorldAML data coverage across 200+ countries and territories. Sanctions, PEP, corporate registry and adverse media sources.",
-    h1: "Data Coverage Index",
   },
   "/aml-api": {
     title: "AML Screening API",
@@ -478,121 +390,248 @@ const routes: Record<string, RouteMeta> = {
       "Learn about WorldAML, the trusted provider of AML screening, KYC/KYB verification, and compliance automation for regulated businesses worldwide.",
     h1: "About WorldAML",
   },
+  // ── Pages that render but had no build-time entry (fell back to the homepage head) ──
+  "/aml-screening/eu": {
+    title: "EU AML Screening & Sanctions Compliance Software",
+    description:
+      "EU AML screening & sanctions compliance software — AMLR, 6AMLD, AMLA, EU consolidated sanctions and goAML reporting across all 27 Member States.",
+    h1: "EU AML screening & sanctions compliance software",
+  },
+  "/aml-screening/uk": {
+    title: "UK AML Screening & OFSI Sanctions Software",
+    description:
+      "AML, sanctions and PEP screening built for the UK — MLR 2017, FCA supervision, JMLSG guidance, OFSI consolidated list and NCA SAR Online reporting for banks, fintechs and crypto-asset firms.",
+    h1: "UK AML screening & OFSI sanctions software",
+  },
+  "/sanctions-screening-software": {
+    title: "Sanctions Screening Software — OFAC & OFSI",
+    description:
+      "Real-time sanctions screening software for OFAC, OFSI, EU, UN and 40+ national regimes. 50% Rule ownership resolution, sub-100ms payment screening, PEP and adverse-media data in one API.",
+    h1: "Sanctions screening software",
+  },
+  "/aml-compliance-software": {
+    title: "What Is AML Compliance Software? Best AML Software for Banks",
+    description:
+      "What AML compliance software does, the core features to expect, and how banks should choose the best AML software: coverage, false positives, monitoring and evidence.",
+    h1: "What is AML compliance software?",
+  },
+  "/world-check-alternative": {
+    title: "World-Check vs WorldCompliance Alternative",
+    description:
+      "World-Check vs WorldCompliance: compare Refinitiv World-Check and LexisNexis WorldCompliance on data coverage, pricing and workflow. See why compliance teams switch to WorldAML.",
+    h1: "World-Check alternative",
+  },
+  "/alternatives": {
+    title: "AML Software Alternatives Compared",
+    description:
+      "Compare WorldAML against World-Check, ComplyAdvantage, Dow Jones Risk Center, Napier and Sanction Scanner — for procurement and compliance teams evaluating a switch.",
+    h1: "AML software alternatives compared",
+  },
+  "/alternatives/comply-advantage": {
+    title: "ComplyAdvantage Alternative",
+    description:
+      "Compare WorldAML vs ComplyAdvantage: sanctions, PEP and adverse media coverage, case management, monitoring, pricing and EU data residency. See why teams switch.",
+    h1: "ComplyAdvantage alternative",
+  },
+  "/alternatives/dow-jones-risk-center": {
+    title: "Dow Jones Risk Center Alternative",
+    description:
+      "Compare WorldAML vs Dow Jones Risk Center on sanctions and PEP coverage, workflow, transaction monitoring, pricing and EU delivery. See why teams switch.",
+    h1: "Dow Jones Risk Center alternative",
+  },
+  "/alternatives/napier": {
+    title: "Napier Alternative",
+    description:
+      "Compare WorldAML vs Napier on sanctions and PEP screening, transaction monitoring, case management, pricing and Tier-1 data inclusion. See why teams switch.",
+    h1: "Napier alternative",
+  },
+  "/alternatives/sanction-scanner": {
+    title: "Sanction Scanner Alternative",
+    description:
+      "Compare WorldAML vs Sanction Scanner on data provenance, EU residency, case management, transaction monitoring and pricing. See why regulated teams switch.",
+    h1: "Sanction Scanner alternative",
+  },
+  "/resources/us-aml-kyc-compliance-guide": {
+    title: "US AML, KYC & Monitoring Guide (2026)",
+    description:
+      "A US buyer's guide to BSA/AML, KYC/CIP/CDD, OFAC sanctions and transaction monitoring — five program pillars, SAR/CTR filing rules, CTA beneficial ownership, and NYDFS Part 504.",
+    h1: "US AML, KYC & transaction monitoring guide",
+  },
+  "/resources/what-is-sanctions-screening": {
+    title: "What is Sanctions Screening? (2026 Guide)",
+    description:
+      "Sanctions screening explained: how it works, OFAC/UN/EU/HMT lists, regulatory obligations, and how compliance teams build an effective screening programme.",
+    h1: "What is sanctions screening?",
+  },
+  "/resources/uae-aml-compliance-guide": {
+    title: "UAE AML Compliance Guide (DIFC & ADGM)",
+    description:
+      "Practical AML/CFT guide for UAE Free Zone firms: DIFC, ADGM, DMCC obligations, sanctions screening, goAML reporting and FATF alignment.",
+    h1: "UAE AML compliance guide",
+  },
+  "/resources/aml-compliance-checklist": {
+    title: "AML Compliance Checklist — Key Controls",
+    description:
+      "Practical AML compliance and audit checklist for banks, fintechs, crypto, gaming and DNFBPs. Governance, CDD, sanctions screening, monitoring, SAR filing, training and record-keeping.",
+    h1: "AML compliance checklist",
+  },
+  "/resources/fatf-travel-rule-compliance-guide": {
+    title: "FATF Travel Rule Guide for VASPs (2026)",
+    description:
+      "Technical guide to FATF Recommendation 16 for VASPs: data requirements, thresholds, IVMS 101, self-hosted wallets, EU TFR and multi-jurisdictional obligations.",
+    h1: "FATF Travel Rule guide for VASPs",
+  },
+  "/screening-monitoring": {
+    title: "WorldAML Screening & Monitoring — Sanctions & PEP",
+    description:
+      "WorldAML Screening & Monitoring software covering sanctions, PEPs, adverse media, and RCAs. Real-time and batch screening across 1,900+ global lists.",
+    h1: "WorldAML Screening & Monitoring",
+  },
+  "/screening-monitoring/pricing": {
+    title: "Screening & Monitoring Pricing & Packages",
+    description:
+      "Annual pricing for WorldAML Screening & Monitoring. Platform plans from €590/year and API-only plans from €1,950/year with monitoring and audit-ready evidence.",
+    h1: "Screening & Monitoring pricing",
+  },
+  "/book-demo": {
+    title: "Book a Suite Demo — AML, KYC & Monitoring",
+    description:
+      "See WorldAML Suite live in 30 minutes. AML screening, KYC/KYB, transaction monitoring & regulatory reporting tailored to your regulator.",
+    h1: "Book a WorldAML Suite demo",
+  },
+  "/kyc-verification": {
+    title: "KYC Verification — Verify Customers in Seconds",
+    description:
+      "KYC verification with document checks, biometric face match, liveness detection and sanctions screening across 190+ countries. Onboard customers compliantly in under 60 seconds.",
+    h1: "KYC verification",
+  },
+  "/identity-verification-service": {
+    title: "Identity Verification Service — Document, Biometric & Liveness",
+    description:
+      "Identity verification service combining document authentication, biometric face match and certified liveness detection across 190+ countries. White-label, API-first, audit-ready.",
+    h1: "Identity verification service",
+  },
+  "/aml-kyc-compliance": {
+    title: "AML KYC Compliance — One Platform for the Whole Programme",
+    description:
+      "AML KYC compliance software uniting identity verification, sanctions & PEP screening, ongoing monitoring, case management and regulatory reporting — FATF-aligned and audit-ready.",
+    h1: "AML KYC compliance",
+  },
+  "/advisory": {
+    title: "MLRO & AML Compliance Consulting",
+    description:
+      "Advisory services from WorldAML MLROs: EWRA, AML & Sanctions policies, AMLCO reports, regulator questionnaires, internal audit, inspection preparation, and VMLRO support.",
+    h1: "MLRO & AML compliance consulting",
+  },
+  "/advisory/ewra": {
+    title: "EWRA Advisory — AML-FWRA & Sanctions FWRA",
+    description:
+      "Regulator-ready Enterprise-Wide Risk Assessment: AML-FWRA and Sanctions FWRA methodology, models, report, and board pack — typically delivered in 5–7 weeks.",
+    h1: "EWRA advisory",
+  },
+  "/academy/templates": {
+    title: "Free MLRO Templates — Board Report & SAR Log",
+    description:
+      "Download regulator-ready MLRO templates: board reports, enterprise risk assessment, suspicious activity log. Unlock the Pro Toolkit by completing any Academy course.",
+    h1: "Free MLRO templates",
+  },
+  "/partners/apply": {
+    title: "Apply to Partner Program",
+    description:
+      "Submit your partner application to join the WorldAML partner program. Choose from referral, affiliate, or reseller tiers.",
+    h1: "Apply to the WorldAML partner program",
+  },
+  "/partners/directory": {
+    title: "Partner Directory",
+    description:
+      "Find WorldAML certified partners — compliance consultancies, RegTech integrators, and resellers across every major market. Verified Bronze, Silver, and Gold badges.",
+    h1: "WorldAML partner directory",
+  },
 };
 
 /* ------------------------------------------------------------------ */
-/*  All sitemap URLs (static routes + dynamic pages)                  */
+/*  Dynamic routes — course, market and EU-sanctions pages            */
+/*  The sitemap itself is written by plugins/generate-sitemap.ts; this */
+/*  plugin only makes sure every listed URL serves its own head.       */
 /* ------------------------------------------------------------------ */
-interface SitemapEntry {
-  loc: string;
-  priority: string;
-  changefreq: string;
+
+// Academy course pages — same snippet the page sets at runtime.
+for (const [slug, seo] of Object.entries(ACADEMY_COURSE_SEO)) {
+  routes[`/academy/${slug}`] = { title: seo.title, description: seo.description, h1: seo.title };
 }
 
-// Routes that are redirects — prerender them but exclude from sitemap
+// EU sanctions regime pages — mirrors src/pages/EUSanctionsCountry.tsx.
+for (const regime of allEUSanctionsRegimes) {
+  routes[`/eu-sanctions/${regime.slug}`] = {
+    title: `EU Sanctions on ${regime.country} – Restrictive Measures Guide`,
+    description: regime.description,
+    h1: `EU sanctions on ${regime.country}`,
+  };
+}
+
+// Market pages — read from the data file as text (it imports icon
+// components, which can't load in the build config).
+function extractMarketSeo(): Array<{ slug: string; title: string; description: string }> {
+  try {
+    const candidates = [
+      typeof __dirname !== "undefined" ? path.resolve(__dirname, "../src/data/marketPages.ts") : "",
+      path.resolve(process.cwd(), "src/data/marketPages.ts"),
+    ].filter(Boolean);
+    const file = candidates.find((f) => fs.existsSync(f));
+    if (!file) throw new Error("marketPages.ts not found");
+    const src = fs.readFileSync(file, "utf-8");
+    const str = String.raw`"((?:[^"\\]|\\.)*)"`;
+    const re = new RegExp(
+      String.raw`slug:\s*` + str + String.raw`[\s\S]*?seo:\s*\{\s*title:\s*` + str +
+        String.raw`,\s*description:\s*` + str,
+      "g",
+    );
+    const out: Array<{ slug: string; title: string; description: string }> = [];
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(src)) !== null) {
+      out.push({ slug: m[1], title: m[2], description: m[3] });
+    }
+    return out;
+  } catch {
+    console.warn("[seo-prerender] Could not read marketPages.ts");
+    return [];
+  }
+}
+for (const market of extractMarketSeo()) {
+  routes[`/markets/${market.slug}`] = {
+    title: market.title.replace(/\s*\|\s*WorldAML\s*$/i, ""),
+    description: market.description,
+    h1: market.title.replace(/\s*\|\s*WorldAML\s*$/i, ""),
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Retired addresses — the app redirects these client-side. Serve a   */
+/*  noindex page that points crawlers at the live destination so the   */
+/*  old URL drops out of the index instead of showing a copy.          */
+/* ------------------------------------------------------------------ */
 const REDIRECT_ROUTES: Record<string, string> = {
   "/about-us": "/about",
+  "/get-started": "/contact-sales",
+  "/free-aml-check": "/",
+  "/platform/aml-screening": "/screening-monitoring",
+  "/data-sources": "/screening-monitoring",
+  "/data-sources/worldcompliance": "/screening-monitoring",
+  "/data-sources/worldcompliance/pricing": "/pricing",
+  "/data-sources/bridger-xg": "/screening-monitoring",
+  "/data-coverage": "/screening-monitoring",
+  "/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones": "/alternatives",
 };
-
-function buildSitemapEntries(): SitemapEntry[] {
-  const entries: SitemapEntry[] = [];
-
-  // Static routes from the prerender map (exclude redirects)
-  for (const route of Object.keys(routes)) {
-    if (REDIRECT_ROUTES[route]) continue; // skip redirects from sitemap
-    const priority =
-      route === "/" ? "1.0" :
-      route.startsWith("/platform") || route === "/pricing" ? "0.9" :
-      route.startsWith("/industries") || route.startsWith("/products") ? "0.8" :
-      route.startsWith("/resources") || route.startsWith("/data-sources") || route.startsWith("/blog") ? "0.7" :
-      "0.6";
-    entries.push({ loc: `${BASE_URL}${route}`, priority, changefreq: "weekly" });
-  }
-
-  // Blog posts
-  const blogSlugs = [
-    "aml-compliance-checklist-2025", "kyc-vs-kyb-differences", "sanctions-screening-best-practices",
-    "risk-based-approach-aml", "beneficial-ownership-guide", "pep-screening-guide",
-    "aml-compliance-crypto-vasp", "igaming-aml-obligations", "mlro-responsibilities-obligations",
-    "edd-vs-sdd-enhanced-simplified-due-diligence", "fatf-travel-rule-explained",
-    "transaction-monitoring-red-flags", "adverse-media-screening-guide", "fatca-crs-reporting-guide",
-    "aml-real-estate-property-transactions", "psd2-open-banking-aml-obligations",
-    "dora-regulation-compliance-financial-institutions",
-  ];
-  for (const slug of blogSlugs) {
-    entries.push({ loc: `${BASE_URL}/blog/${slug}`, priority: "0.7", changefreq: "monthly" });
-  }
-
-  // EU Sanctions country pages
-  const euSanctionsSlugs = [
-    "afghanistan", "belarus", "bosnia-herzegovina", "burundi", "central-african-republic",
-    "chemical-weapons", "china", "cyber-attacks", "democratic-republic-congo", "guatemala",
-    "guinea", "guinea-bissau", "haiti", "human-rights", "iran", "iraq", "lebanon", "libya",
-    "mali", "moldova", "montenegro", "myanmar", "nicaragua", "niger", "north-korea", "russia",
-    "serbia", "somalia", "south-sudan", "sudan", "syria", "terrorism", "tunisia", "turkiye",
-    "ukraine", "united-states", "venezuela", "yemen", "zimbabwe",
-  ];
-  for (const slug of euSanctionsSlugs) {
-    entries.push({ loc: `${BASE_URL}/eu-sanctions/${slug}`, priority: "0.6", changefreq: "monthly" });
-  }
-
-  // Market pages
-  const marketSlugs = [
-    "cyprus", "germany", "greece", "ireland", "malta", "netherlands", "nigeria",
-    "romania", "singapore", "south-africa", "uae", "uk", "usa",
-  ];
-  for (const slug of marketSlugs) {
-    entries.push({ loc: `${BASE_URL}/markets/${slug}`, priority: "0.7", changefreq: "monthly" });
-  }
-
-  // Data source regional pages
-  for (const ds of ["worldcompliance", "bridger-xg"]) {
-    for (const region of ["eu-me", "uk-ie", "na"]) {
-      if (!entries.some(e => e.loc === `${BASE_URL}/data-sources/${ds}/${region}`)) {
-        entries.push({ loc: `${BASE_URL}/data-sources/${ds}/${region}`, priority: "0.6", changefreq: "monthly" });
-      }
-    }
-  }
-  if (!entries.some(e => e.loc === `${BASE_URL}/data-sources/worldcompliance/demo`)) {
-    entries.push({ loc: `${BASE_URL}/data-sources/worldcompliance/demo`, priority: "0.5", changefreq: "monthly" });
-  }
-  if (!entries.some(e => e.loc === `${BASE_URL}/data-sources/worldcompliance/pricing`)) {
-    entries.push({ loc: `${BASE_URL}/data-sources/worldcompliance/pricing`, priority: "0.6", changefreq: "monthly" });
-  }
-  if (!entries.some(e => e.loc === `${BASE_URL}/data-sources/resources`)) {
-    entries.push({ loc: `${BASE_URL}/data-sources/resources`, priority: "0.6", changefreq: "monthly" });
-  }
-
-  // Deduplicate
-  const seen = new Set<string>();
-  return entries.filter(e => {
-    if (seen.has(e.loc)) return false;
-    seen.add(e.loc);
-    return true;
-  });
+for (const sub of ["resources", "worldcompliance/demo", "worldcompliance/eu-me", "worldcompliance/uk-ie", "worldcompliance/na", "bridger-xg/eu-me", "bridger-xg/uk-ie", "bridger-xg/na"]) {
+  REDIRECT_ROUTES[`/data-sources/${sub}`] = "/screening-monitoring";
+}
+for (const country of Object.keys(coverageData)) {
+  REDIRECT_ROUTES[`/data-coverage/${country}`] = "/screening-monitoring";
 }
 
-function generateSitemapXml(): string {
-  const today = new Date().toISOString().split("T")[0];
-  const entries = buildSitemapEntries();
-
-  const urls = entries
-    .map(
-      (e) => `  <url>
-    <loc>${e.loc}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>${e.changefreq}</changefreq>
-    <priority>${e.priority}</priority>
-  </url>`
-    )
-    .join("\n");
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls}
-</urlset>
-`;
-}
+/** Every path that gets its own build-time HTML (for tests and logging). */
+export const PRERENDERED_PATHS = (): string[] => [...Object.keys(routes), ...blogPosts.map((p) => `/blog/${p.slug}`)];
+export const RETIRED_PATHS = (): string[] => Object.keys(REDIRECT_ROUTES);
 
 /* ------------------------------------------------------------------ */
 /*  Plugin                                                            */
@@ -607,36 +646,36 @@ export function seoPrerender(): Plugin {
       const distDir = path.resolve(process.cwd(), "dist");
       const indexHtml = fs.readFileSync(path.join(distDir, "index.html"), "utf-8");
 
-      // --- Generate per-route HTML files ---
-      for (const [route, meta] of Object.entries(routes)) {
-        if (route === "/") continue;
-
-        // Check if this route is a redirect
-        const redirectTarget = REDIRECT_ROUTES[route];
-
-        if (redirectTarget) {
-          // Generate a redirect HTML page with meta refresh + canonical pointing to target
-          const targetUrl = `${BASE_URL}${redirectTarget}`;
-          const redirectHtml = `<!DOCTYPE html>
+      // --- Retired addresses: noindex page pointing at the live destination ---
+      for (const [route, redirectTarget] of Object.entries(REDIRECT_ROUTES)) {
+        const targetUrl = `${BASE_URL}${redirectTarget}`;
+        const label = escapeHtmlAttr(routes[route]?.title ?? "Page moved");
+        const redirectHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="refresh" content="0;url=${targetUrl}" />
   <link rel="canonical" href="${targetUrl}" />
-  <title>${meta.title} | ${SITE_NAME}</title>
+  <title>${label} | ${SITE_NAME}</title>
   <meta name="robots" content="noindex, follow" />
-  <meta name="description" content="${meta.description}" />
 </head>
 <body>
-  <h1 style="position:absolute;left:-9999px">${meta.h1}</h1>
   <p>This page has moved to <a href="${targetUrl}">${targetUrl}</a>.</p>
 </body>
 </html>`;
-          const routeDir = path.join(distDir, route);
-          fs.mkdirSync(routeDir, { recursive: true });
-          fs.writeFileSync(path.join(routeDir, "index.html"), redirectHtml, "utf-8");
-          continue;
-        }
+        const routeDir = path.join(distDir, route);
+        fs.mkdirSync(routeDir, { recursive: true });
+        fs.writeFileSync(path.join(routeDir, "index.html"), redirectHtml, "utf-8");
+      }
+
+      // --- Generate per-route HTML files ---
+      for (const [route, rawMeta] of Object.entries(routes)) {
+        if (route === "/" || REDIRECT_ROUTES[route]) continue;
+        const meta: RouteMeta = {
+          title: escapeHtmlAttr(rawMeta.title),
+          description: escapeHtmlAttr(rawMeta.description),
+          h1: escapeHtmlAttr(rawMeta.h1),
+        };
 
         const fullTitle =
           meta.title === SITE_NAME ? meta.title : `${meta.title} | ${SITE_NAME}`;
@@ -772,13 +811,9 @@ export function seoPrerender(): Plugin {
         fs.writeFileSync(path.join(postDir, "index.html"), html, "utf-8");
       }
 
-      // --- Generate fresh sitemap.xml ---
-      const sitemapXml = generateSitemapXml();
-      fs.writeFileSync(path.join(distDir, "sitemap.xml"), sitemapXml, "utf-8");
-
-      const entryCount = buildSitemapEntries().length;
+      // sitemap.xml comes from plugins/generate-sitemap.ts (copied from public/).
       console.log(
-        `[seo-prerender] Generated ${Object.keys(routes).length} static + ${blogPosts.length} blog HTML files + sitemap.xml (${entryCount} URLs)`
+        `[seo-prerender] Generated ${Object.keys(routes).length} page + ${blogPosts.length} blog + ${Object.keys(REDIRECT_ROUTES).length} retired-address HTML files`
       );
     },
   };

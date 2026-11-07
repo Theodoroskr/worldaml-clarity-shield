@@ -23,3 +23,10 @@
 - [ ] Two-step sign-in: required for WorldAML admins (3 without), optional per-company requirement
 - [x] Nightly audit (02:00 UTC) + admin email when badge turns red
 - [ ] Shared company check in every Suite server function
+
+## Search traffic plan (7 Nov 2026)
+- [x] 1. Pages Google can't see: full sitemap, own title per page, public course overviews
+- [x] 2. Academy page 1 for "aml courses online", "aml certification", "aml training"
+- [x] 3. Sanctions lists page title + intro
+- [~] 4. Free sanctions check onto page 1 (copy + links done; blocked: tool searches 30 sample entries, needs real list data — owner decision)
+- [ ] 5. Class Central + G2 listings (drafts ready; owner must send/submit)

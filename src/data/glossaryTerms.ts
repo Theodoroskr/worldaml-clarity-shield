@@ -13,14 +13,14 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition:
       "A set of laws, regulations, and procedures designed to prevent criminals from disguising illegally obtained funds as legitimate income. AML frameworks require financial institutions to implement controls including customer due diligence, transaction monitoring, and suspicious activity reporting.",
     relatedTerms: ["CDD", "SAR", "TM", "FATF", "MLR"],
-    relatedLinks: [{ label: "AML Screening Module", href: "/platform/aml-screening" }],
+    relatedLinks: [{ label: "AML Screening Module", href: "/screening-monitoring" }],
   },
   {
     term: "Adverse Media Screening",
     definition:
       "The process of searching publicly available news sources, databases, and online content for negative information about a customer, beneficial owner, or counterparty. Adverse media checks look for associations with financial crime, corruption, fraud, or other serious misconduct.",
     relatedTerms: ["CDD", "EDD", "PEP", "KYC"],
-    relatedLinks: [{ label: "AML Screening Module", href: "/platform/aml-screening" }],
+    relatedLinks: [{ label: "AML Screening Module", href: "/screening-monitoring" }],
   },
   {
     term: "Beneficial Ownership",
@@ -50,7 +50,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition:
       "A unified list that aggregates multiple sanctions measures issued by a single authority. For example, the EU Consolidated Sanctions List combines all sanctions regimes adopted by the European Union. Financial institutions are required to screen against these lists to prevent prohibited transactions.",
     relatedTerms: ["OFAC", "SDN", "AML", "Sanctions"],
-    relatedLinks: [{ label: "Sanctions Lists Reference", href: "/resources/sanctions-lists" }, { label: "Free Sanctions Check", href: "/?demo=1" }],
+    relatedLinks: [{ label: "Sanctions Lists Reference", href: "/resources/sanctions-lists" }, { label: "Free Sanctions Check", href: "/sanctions-check" }],
   },
   {
     term: "Correspondent Banking",
@@ -175,7 +175,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition:
       "The continuous review of customer activity and circumstances throughout the duration of a business relationship. Ongoing monitoring includes transaction surveillance against expected behaviour profiles, periodic CDD reviews, and re-screening against updated sanctions and PEP lists. The frequency and intensity of monitoring is calibrated to customer risk.",
     relatedTerms: ["CDD", "TM", "AML", "Risk-Based Approach"],
-    relatedLinks: [{ label: "AML Screening Module", href: "/platform/aml-screening" }],
+    relatedLinks: [{ label: "AML Screening Module", href: "/screening-monitoring" }],
   },
   {
     term: "Placement",
@@ -189,7 +189,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition:
       "A natural person who holds, or has held, a prominent public function. PEPs are subject to Enhanced Due Diligence because their positions make them potentially vulnerable to bribery and corruption. Categories include foreign heads of state, senior government officials, judicial officers, military leadership, and senior executives of state-owned enterprises — along with their immediate family members and known close associates.",
     relatedTerms: ["EDD", "CDD", "KYC", "Adverse Media", "AML"],
-    relatedLinks: [{ label: "PEP Screening Guide", href: "/blog/pep-screening-guide" }, { label: "AML Screening Module", href: "/platform/aml-screening" }],
+    relatedLinks: [{ label: "PEP Screening Guide", href: "/blog/pep-screening-guide" }, { label: "AML Screening Module", href: "/screening-monitoring" }],
   },
   {
     term: "Proliferation Financing",
@@ -211,7 +211,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition:
       "Coercive economic and political measures imposed by governments or international bodies against countries, entities, or individuals to achieve foreign policy or national security objectives. Financial sanctions prohibit doing business with designated parties and are enforced by bodies such as OFAC, the EU, UN Security Council, and HM Treasury.",
     relatedTerms: ["OFAC", "SDN", "Consolidated Sanctions List", "Sanctions Screening"],
-    relatedLinks: [{ label: "Sanctions Lists Reference", href: "/resources/sanctions-lists" }, { label: "Free Sanctions Check", href: "/?demo=1" }],
+    relatedLinks: [{ label: "Sanctions Lists Reference", href: "/resources/sanctions-lists" }, { label: "Free Sanctions Check", href: "/sanctions-check" }],
   },
   {
     term: "Shell Company",
@@ -284,7 +284,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition:
       "The process of checking individuals, entities, or transactions against published lists of sanctioned parties, designated terrorists, PEPs, and other high-risk subjects. Watchlist screening is typically automated and performed at onboarding, on a periodic basis, and in real-time whenever monitored lists are updated.",
     relatedTerms: ["Sanctions", "PEP", "Adverse Media", "Fuzzy Matching"],
-    relatedLinks: [{ label: "AML Screening Module", href: "/platform/aml-screening" }, { label: "Free Sanctions Check", href: "/?demo=1" }],
+    relatedLinks: [{ label: "AML Screening Module", href: "/screening-monitoring" }, { label: "Free Sanctions Check", href: "/sanctions-check" }],
   },
 ];
 

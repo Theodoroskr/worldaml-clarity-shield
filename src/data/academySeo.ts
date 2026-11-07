@@ -14,5 +14,5 @@
 export const ACADEMY_SEO = {
   title: "Free AML Certification Online — CPD Certificate",
   description:
-    "Free AML certification online. CPD-accredited AML, KYC and sanctions courses with a verifiable certificate — no credit card, no trial, no hidden fees.",
+    "Free AML certification and AML training courses online. CPD-accredited AML, KYC and sanctions courses with a verifiable certificate — no credit card.",
 } as const;

@@ -11,22 +11,12 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://academy.worldaml.com/annual-pass-active</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://academy.worldaml.com/login</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://academy.worldaml.com/signup</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
     <loc>https://academy.worldaml.com/adverse-media-intelligence</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/aml-accountancy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -66,7 +56,27 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://academy.worldaml.com/aml-gaming-gambling</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://academy.worldaml.com/aml-gcc-mena</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/aml-law-firms</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/aml-real-estate</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/aml-uk</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -101,6 +111,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://academy.worldaml.com/mlro-masterclass</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://academy.worldaml.com/pep-screening-edd</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -122,6 +137,11 @@
   </url>
   <url>
     <loc>https://academy.worldaml.com/tbml-export-controls</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://academy.worldaml.com/terrorist-financing-essentials</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
