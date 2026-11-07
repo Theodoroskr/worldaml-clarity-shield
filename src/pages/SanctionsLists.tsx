@@ -36,6 +36,30 @@ function tagStyle(tag: SanctionTag | "All") {
   return { backgroundColor: c.bg, color: c.color, border: `1px solid ${c.border}` };
 }
 
+const categoryByKey = (key: string) => {
+  const c = coverageCategories.find((cat) => cat.key === key);
+  if (!c) throw new Error(`Missing coverage category: ${key}`);
+  return c;
+};
+const sanctionsCategory = categoryByKey("sanctions");
+const warningsCategory = categoryByKey("warnings");
+const probityCategory = categoryByKey("fitnessProbity");
+
+/** Quick answer: which list applies where (wording mirrors the FAQ below). */
+const keyListScope: Record<string, string> = {
+  "un-sc": "Every UN member state — the global baseline",
+  "ofac-sdn": "US persons and any business with a US nexus",
+  "eu-consolidated": "EU firms and EU-regulated institutions",
+  "uk-ofsi": "UK firms and business under UK jurisdiction",
+};
+const keyLists = ["un-sc", "ofac-sdn", "eu-consolidated", "uk-ofsi"]
+  .map((id) => allSources.find((s) => s.id === id))
+  .filter((s): s is SanctionSource => Boolean(s));
+
+function firstUrl(u: SanctionUrl): string {
+  return Array.isArray(u) ? u[0].url : u;
+}
+
 const filterTabs: (SanctionTag | "All")[] = [
   "All",
   "Sanctions",
@@ -185,7 +209,7 @@ function renderLinks(officialUrl: SanctionUrl) {
 // ─── Source Card ─────────────────────────────────────────────────────────────
 function SourceCard({ source }: { source: SanctionSource }) {
   return (
-    <div className="bg-card border border-border rounded-xl p-5 flex flex-col gap-4 hover:shadow-md transition-shadow duration-200 h-full">
+    <div id={source.id} className="scroll-mt-20 bg-card border border-border rounded-xl p-5 flex flex-col gap-4 hover:shadow-md transition-shadow duration-200 h-full">
       {/* Top row: tag + jurisdiction */}
       <div className="flex items-start justify-between gap-2 flex-wrap">
         <span
@@ -284,13 +308,16 @@ const SanctionsLists = () => {
             </h1>
 
             <p className="text-body-lg text-text-secondary mb-4 max-w-2xl leading-relaxed">
-              A free directory of international sanctions lists — OFAC SDN, EU consolidated,
-              UN Security Council, UK OFSI and national regimes — with a plain-English summary
-              and the official source link for each one.
+              A free directory of {allSources.length} sanctions and AML lists — OFAC SDN, EU
+              consolidated, UN Security Council, UK OFSI, counter-terrorism, development-bank
+              debarment and FATF high-risk lists — with a plain-English summary and the
+              official source link for each one.
             </p>
             <p className="text-body text-text-secondary mb-8 max-w-2xl leading-relaxed">
-              Behind it sits WorldAML's sanctions data: 156 sanctions lists, 1,128 warning and
-              enforcement lists and 164 fitness and probity lists that you can screen any name
+              Behind it sits WorldAML's screening data: {sanctionsCategory.total} sanctions
+              lists from {sanctionsCategory.countries} countries and bodies, plus{" "}
+              {warningsCategory.total.toLocaleString()} warning and enforcement lists and{" "}
+              {probityCategory.total} fitness and probity lists that you can screen any name
               against.
             </p>
 
@@ -321,6 +348,56 @@ const SanctionsLists = () => {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Key lists quick answer ──────────────────────────────────────────── */}
+      <section className="bg-background border-b border-divider" aria-labelledby="key-lists-heading">
+        <div className="container-enterprise py-12 md:py-16">
+          <div className="mb-6 max-w-3xl">
+            <h2 id="key-lists-heading" className="text-h2 font-bold text-navy mb-3">
+              The four sanctions lists most firms screen first
+            </h2>
+            <p className="text-body text-text-secondary leading-relaxed">
+              Start with the UN Security Council list, which binds every UN member state,
+              then add OFAC, EU and UK lists for the places you do business. Most compliance
+              programmes screen all four at once.
+            </p>
+          </div>
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <table className="w-full text-left text-body-sm">
+              <thead className="bg-surface-subtle text-navy">
+                <tr>
+                  <th scope="col" className="px-4 py-3 font-semibold">List</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Jurisdiction</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Applies to</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Official source</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {keyLists.map((s) => (
+                  <tr key={s.id} className="bg-card">
+                    <th scope="row" className="px-4 py-3 font-medium text-navy">
+                      <a href={`#${s.id}`} className="hover:underline">{s.name}</a>
+                    </th>
+                    <td className="px-4 py-3 text-text-secondary">{s.jurisdiction}</td>
+                    <td className="px-4 py-3 text-text-secondary">{keyListScope[s.id]}</td>
+                    <td className="px-4 py-3">
+                      <a
+                        href={firstUrl(s.officialUrl)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-accent hover:underline"
+                      >
+                        Open <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+                        <span className="sr-only">{s.name} official source</span>
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </section>

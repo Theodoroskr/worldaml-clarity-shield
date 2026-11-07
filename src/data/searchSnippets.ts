@@ -11,8 +11,10 @@
 /** /resources/sanctions-lists — searchers want a list directory with sources. */
 export const SANCTIONS_LISTS_SEO = {
   title: "Global Sanctions Lists Database: OFAC, EU, UN, UK",
+  // The "33" must equal allSources.length and "156 … 64" must match the
+  // sanctions category in coverageStats.ts (enforced by search-snippets.test.ts).
   description:
-    "Free directory of international sanctions lists — OFAC SDN, EU, UN, UK OFSI and national regimes — with a summary and official source link for each list.",
+    "Free directory of 33 sanctions and AML lists — OFAC SDN, UN, EU, UK OFSI and more — with official sources. We screen 156 sanctions lists in 64 countries.",
   h1: "Global Sanctions Lists Database",
 } as const;
 
