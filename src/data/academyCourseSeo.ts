@@ -47,7 +47,7 @@ export const ACADEMY_COURSE_SEO: Record<string, AcademyCourseSeo> = {
   "aml-uk": {
     title: "UK AML Training Course — MLR 2017 & POCA",
     description:
-      "UK AML compliance course for regulated firms: MLR 2017, POCA, JMLSG guidance, FCA expectations and SAR reporting to the NCA. CPD-accredited certificate.",
+      "UK AML compliance course: MLR 2017, POCA 2002, FCA and HMRC supervision, SARs, source of funds checks and post-Brexit sanctions screening. CPD certificate.",
   },
   "aml-gcc-mena": {
     title: "GCC & MENA AML Training Course (UAE, KSA)",
@@ -139,7 +139,7 @@ export const ACADEMY_COURSE_SEO: Record<string, AcademyCourseSeo> = {
   "terrorist-financing-essentials": {
     title: "Terrorist Financing Training Course",
     description:
-      "Counter-terrorist financing training: how terrorism is funded, CFT obligations, red flags, targeted sanctions and reporting duties. CPD-accredited certificate.",
+      "Counter-terrorist financing training: how it differs from money laundering, FATF Recommendations 5–8, NPO risk, hawala and crowdfunding abuse. CPD certificate.",
   },
   "mlro-masterclass": {
     title: "MLRO Training Course — The MLRO Masterclass",
@@ -151,22 +151,22 @@ export const ACADEMY_COURSE_SEO: Record<string, AcademyCourseSeo> = {
   "aml-law-firms": {
     title: "AML Training Course for Law Firms",
     description:
-      "AML training for solicitors and law firms: client due diligence, source of funds, conveyancing and trust risks, and SAR reporting. CPD-accredited certificate.",
+      "AML training for solicitors and law firms: SRA expectations, which work is regulated, source of funds checks and tipping-off risk. CPD-accredited certificate.",
   },
   "aml-accountancy": {
     title: "AML Training Course for Accountants",
     description:
-      "AML training for accountancy firms: client risk assessment, CDD, tax-evasion red flags and suspicious activity reporting. CPD-accredited certificate.",
+      "AML training for accountants, auditors and bookkeepers: MLR 2017, AAT, ICAEW and ACCA guidance and practice-wide risk assessments. CPD-accredited certificate.",
   },
   "aml-real-estate": {
     title: "AML Training Course for Real Estate Agents",
     description:
-      "AML training for estate agencies: buyer and seller due diligence, cash and source-of-funds risk and property laundering red flags. CPD-accredited certificate.",
+      "AML training for estate agents: high-value dealer rules, beneficial ownership, third-party payments and red flags in property sales and lettings. CPD certificate.",
   },
   "aml-gaming-gambling": {
     title: "AML Training for Gaming & Gambling Operators",
     description:
-      "AML training for casinos and online gambling operators: player due diligence, chip dumping, bonus abuse and MGA/UKGC reporting. CPD-accredited certificate.",
+      "AML training for casinos, sportsbooks and iGaming: UKGC, MGA and FATF expectations, customer interaction, chip dumping and bonus abuse. CPD-accredited certificate.",
   },
 };
 
