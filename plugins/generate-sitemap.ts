@@ -13,13 +13,12 @@ import path from "path";
 const BASE_URL = "https://worldaml.com";
 const ACADEMY_BASE_URL = "https://academy.worldaml.com";
 
-// Course slugs derive from the academy pricing map (keys MUST match
-// academy_courses.slug) plus the free courses, so new courses are
-// picked up automatically.
-import { ACADEMY_PRICING, FREE_ACADEMY_COURSES } from "../src/data/academyPricing";
+// Course slugs come from the per-course search snippets, which list every
+// course a visitor can start or buy (a test keeps them in step with the
+// pricing map), so each listed course URL also has its own title.
+import { PUBLIC_ACADEMY_COURSE_SLUGS } from "../src/data/academyCourseSeo";
 
-const academyCourseSlugs = (): string[] =>
-  [...FREE_ACADEMY_COURSES, ...Object.keys(ACADEMY_PRICING)].sort();
+const academyCourseSlugs = (): string[] => [...PUBLIC_ACADEMY_COURSE_SLUGS];
 
 /* ------------------------------------------------------------------ */
 /*  Route registry — single source of truth for the sitemap           */
@@ -41,12 +40,8 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/pricing", changefreq: "monthly", priority: 0.9 },
   { path: "/demo", changefreq: "monthly", priority: 0.9 },
   { path: "/contact-sales", changefreq: "monthly", priority: 0.8 },
-  { path: "/get-started", changefreq: "monthly", priority: 0.8 },
 
-  // Auth entry points (public; /admin, /dashboard, /pending-approval are intentionally
-  // excluded — they are noindex / user-gated and should not appear in the sitemap)
-  { path: "/login", changefreq: "yearly", priority: 0.3 },
-  { path: "/signup", changefreq: "yearly", priority: 0.3 },
+  // Sign-in/sign-up pages are noindex and blocked in robots.txt, so they stay out.
 
   // Platform (Lane 1)
   { path: "/platform", changefreq: "monthly", priority: 0.9 },
@@ -56,7 +51,6 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/platform/transaction-monitoring", changefreq: "monthly", priority: 0.8 },
   { path: "/platform/regulatory-reporting", changefreq: "monthly", priority: 0.8 },
   { path: "/platform/kyc-kyb", changefreq: "monthly", priority: 0.8 },
-  { path: "/platform/aml-screening", changefreq: "monthly", priority: 0.8 },
   { path: "/platform/risk-assessment", changefreq: "monthly", priority: 0.8 },
 
   // Regional AML landing pages
@@ -64,6 +58,10 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/aml-screening/uk", changefreq: "monthly", priority: 0.9 },
   { path: "/compliance-software/us", changefreq: "monthly", priority: 0.9 },
   { path: "/compliance-software/us/casinos", changefreq: "monthly", priority: 0.9 },
+  { path: "/compliance-software/us/banks", changefreq: "monthly", priority: 0.85 },
+  { path: "/compliance-software/us/fintechs", changefreq: "monthly", priority: 0.85 },
+  { path: "/compliance-software/us/crypto", changefreq: "monthly", priority: 0.85 },
+  { path: "/compliance-software/us/legal", changefreq: "monthly", priority: 0.85 },
   { path: "/compliance-software/uk", changefreq: "monthly", priority: 0.9 },
   { path: "/compliance-software/nl", changefreq: "monthly", priority: 0.85 },
   { path: "/compliance-software/ch", changefreq: "monthly", priority: 0.85 },
@@ -79,22 +77,19 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/alternatives/napier", changefreq: "monthly", priority: 0.8 },
   { path: "/alternatives/sanction-scanner", changefreq: "monthly", priority: 0.8 },
 
-  // Data Sources (Lane 2)
-  { path: "/data-sources", changefreq: "monthly", priority: 0.9 },
-  { path: "/data-sources/resources", changefreq: "monthly", priority: 0.7 },
-  { path: "/data-sources/worldcompliance", changefreq: "monthly", priority: 0.8 },
-  { path: "/data-sources/worldcompliance/demo", changefreq: "monthly", priority: 0.7 },
-  { path: "/data-sources/worldcompliance/pricing", changefreq: "monthly", priority: 0.7 },
-  { path: "/data-sources/worldcompliance/eu-me", changefreq: "monthly", priority: 0.6 },
-  { path: "/data-sources/worldcompliance/uk-ie", changefreq: "monthly", priority: 0.6 },
-  { path: "/data-sources/worldcompliance/na", changefreq: "monthly", priority: 0.6 },
-  { path: "/data-sources/bridger-xg", changefreq: "monthly", priority: 0.8 },
-  { path: "/data-sources/bridger-xg/eu-me", changefreq: "monthly", priority: 0.6 },
-  { path: "/data-sources/bridger-xg/uk-ie", changefreq: "monthly", priority: 0.6 },
-  { path: "/data-sources/bridger-xg/na", changefreq: "monthly", priority: 0.6 },
+  // Retired addresses (/data-sources/*, /data-coverage/*, /get-started,
+  // /free-aml-check, /platform/aml-screening) redirect and stay out.
 
   // Products
+  { path: "/screening-monitoring", changefreq: "monthly", priority: 0.9 },
+  { path: "/screening-monitoring/pricing", changefreq: "monthly", priority: 0.8 },
   { path: "/products/worldid", changefreq: "monthly", priority: 0.9 },
+  { path: "/kyc-verification", changefreq: "monthly", priority: 0.8 },
+  { path: "/identity-verification-service", changefreq: "monthly", priority: 0.8 },
+  { path: "/aml-kyc-compliance", changefreq: "monthly", priority: 0.8 },
+  { path: "/advisory", changefreq: "monthly", priority: 0.7 },
+  { path: "/advisory/ewra", changefreq: "monthly", priority: 0.7 },
+  { path: "/book-demo", changefreq: "monthly", priority: 0.7 },
 
   // API Landing Pages
   { path: "/aml-api", changefreq: "monthly", priority: 0.9 },
@@ -109,7 +104,7 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/resources/what-is-sanctions-screening", changefreq: "monthly", priority: 0.8 },
   { path: "/resources/uae-aml-compliance-guide", changefreq: "monthly", priority: 0.8 },
   { path: "/resources/aml-compliance-checklist", changefreq: "monthly", priority: 0.8 },
-  { path: "/resources/comparison/world-check-vs-worldcompliance-vs-dow-jones", changefreq: "monthly", priority: 0.8 },
+  { path: "/resources/fatf-travel-rule-compliance-guide", changefreq: "monthly", priority: 0.8 },
 
   // Company
   { path: "/about", changefreq: "monthly", priority: 0.6 },
@@ -122,11 +117,10 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { path: "/academy/templates", changefreq: "monthly", priority: 0.7 },
   { path: "/partners", changefreq: "monthly", priority: 0.6 },
   { path: "/partners/apply", changefreq: "monthly", priority: 0.5 },
+  { path: "/partners/directory", changefreq: "monthly", priority: 0.5 },
 
   // Tools
   { path: "/sanctions-check", changefreq: "monthly", priority: 0.8 },
-  { path: "/free-aml-check", changefreq: "monthly", priority: 0.8 },
-  { path: "/data-coverage", changefreq: "monthly", priority: 0.7 },
   { path: "/eu-sanctions-map", changefreq: "monthly", priority: 0.8 },
 
   // Industries
@@ -221,8 +215,6 @@ const ACADEMY_STATIC_ROUTES: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: 1.0 },
   { path: "/templates", changefreq: "monthly", priority: 0.7 },
   { path: "/annual-pass-active", changefreq: "yearly", priority: 0.3 },
-  { path: "/login", changefreq: "yearly", priority: 0.3 },
-  { path: "/signup", changefreq: "yearly", priority: 0.3 },
 ];
 
 function generateAcademySitemap(): string {
@@ -256,12 +248,6 @@ function generateSitemap(root: string): string {
   const euSlugs = extractSlugs(path.join(root, "src/data/euSanctionsRegimes.ts"));
   for (const slug of euSlugs) {
     entries.push({ path: `/eu-sanctions/${slug}`, changefreq: "monthly", priority: 0.6 });
-  }
-
-  // Dynamic: data coverage country pages → /data-coverage/:country
-  const countryKeys = extractRecordKeys(path.join(root, "src/data/worldComplianceSources.ts"));
-  for (const key of countryKeys) {
-    entries.push({ path: `/data-coverage/${key}`, changefreq: "monthly", priority: 0.5 });
   }
 
   // Dynamic: academy courses (derived from the pricing map + free courses)
