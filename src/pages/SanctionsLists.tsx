@@ -209,7 +209,7 @@ function renderLinks(officialUrl: SanctionUrl) {
 // ─── Source Card ─────────────────────────────────────────────────────────────
 function SourceCard({ source }: { source: SanctionSource }) {
   return (
-    <div className="bg-card border border-border rounded-xl p-5 flex flex-col gap-4 hover:shadow-md transition-shadow duration-200 h-full">
+    <div id={source.id} className="scroll-mt-20 bg-card border border-border rounded-xl p-5 flex flex-col gap-4 hover:shadow-md transition-shadow duration-200 h-full">
       {/* Top row: tag + jurisdiction */}
       <div className="flex items-start justify-between gap-2 flex-wrap">
         <span
