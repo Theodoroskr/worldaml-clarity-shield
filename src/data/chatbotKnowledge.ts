@@ -28,7 +28,7 @@ export const chatbotKnowledge: KnowledgeEntry[] = [
     keywords: ["aml", "screening", "check", "sanctions", "free check"],
     question: "Can I run a free AML check?",
     answer: "Absolutely — try our free AML sanctions check tool to screen individuals and entities against global watchlists instantly.",
-    link: "/?demo=1",
+    link: "/sanctions-check",
   },
   {
     keywords: ["suite", "platform", "product", "solution", "overview"],
