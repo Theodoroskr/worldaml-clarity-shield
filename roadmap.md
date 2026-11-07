@@ -26,7 +26,7 @@
 
 ## Search traffic plan (7 Nov 2026)
 - [x] 1. Pages Google can't see: full sitemap, own title per page, public course overviews
-- [ ] 2. Academy page 1 for "aml courses online", "aml certification", "aml training"
-- [ ] 3. Sanctions lists page title + intro
-- [ ] 4. Free sanctions check onto page 1
-- [ ] 5. Class Central + G2 listings (owner submits; drafts provided)
+- [x] 2. Academy page 1 for "aml courses online", "aml certification", "aml training"
+- [x] 3. Sanctions lists page title + intro
+- [~] 4. Free sanctions check onto page 1 (copy + links done; blocked: tool searches 30 sample entries, needs real list data — owner decision)
+- [ ] 5. Class Central + G2 listings (drafts ready; owner must send/submit)
