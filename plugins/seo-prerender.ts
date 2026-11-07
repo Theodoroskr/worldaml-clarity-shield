@@ -641,36 +641,36 @@ export function seoPrerender(): Plugin {
       const distDir = path.resolve(process.cwd(), "dist");
       const indexHtml = fs.readFileSync(path.join(distDir, "index.html"), "utf-8");
 
-      // --- Generate per-route HTML files ---
-      for (const [route, meta] of Object.entries(routes)) {
-        if (route === "/") continue;
-
-        // Check if this route is a redirect
-        const redirectTarget = REDIRECT_ROUTES[route];
-
-        if (redirectTarget) {
-          // Generate a redirect HTML page with meta refresh + canonical pointing to target
-          const targetUrl = `${BASE_URL}${redirectTarget}`;
-          const redirectHtml = `<!DOCTYPE html>
+      // --- Retired addresses: noindex page pointing at the live destination ---
+      for (const [route, redirectTarget] of Object.entries(REDIRECT_ROUTES)) {
+        const targetUrl = `${BASE_URL}${redirectTarget}`;
+        const label = escapeHtmlAttr(routes[route]?.title ?? "Page moved");
+        const redirectHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="refresh" content="0;url=${targetUrl}" />
   <link rel="canonical" href="${targetUrl}" />
-  <title>${meta.title} | ${SITE_NAME}</title>
+  <title>${label} | ${SITE_NAME}</title>
   <meta name="robots" content="noindex, follow" />
-  <meta name="description" content="${meta.description}" />
 </head>
 <body>
-  <h1 style="position:absolute;left:-9999px">${meta.h1}</h1>
   <p>This page has moved to <a href="${targetUrl}">${targetUrl}</a>.</p>
 </body>
 </html>`;
-          const routeDir = path.join(distDir, route);
-          fs.mkdirSync(routeDir, { recursive: true });
-          fs.writeFileSync(path.join(routeDir, "index.html"), redirectHtml, "utf-8");
-          continue;
-        }
+        const routeDir = path.join(distDir, route);
+        fs.mkdirSync(routeDir, { recursive: true });
+        fs.writeFileSync(path.join(routeDir, "index.html"), redirectHtml, "utf-8");
+      }
+
+      // --- Generate per-route HTML files ---
+      for (const [route, rawMeta] of Object.entries(routes)) {
+        if (route === "/" || REDIRECT_ROUTES[route]) continue;
+        const meta: RouteMeta = {
+          title: escapeHtmlAttr(rawMeta.title),
+          description: escapeHtmlAttr(rawMeta.description),
+          h1: escapeHtmlAttr(rawMeta.h1),
+        };
 
         const fullTitle =
           meta.title === SITE_NAME ? meta.title : `${meta.title} | ${SITE_NAME}`;
@@ -806,13 +806,9 @@ export function seoPrerender(): Plugin {
         fs.writeFileSync(path.join(postDir, "index.html"), html, "utf-8");
       }
 
-      // --- Generate fresh sitemap.xml ---
-      const sitemapXml = generateSitemapXml();
-      fs.writeFileSync(path.join(distDir, "sitemap.xml"), sitemapXml, "utf-8");
-
-      const entryCount = buildSitemapEntries().length;
+      // sitemap.xml comes from plugins/generate-sitemap.ts (copied from public/).
       console.log(
-        `[seo-prerender] Generated ${Object.keys(routes).length} static + ${blogPosts.length} blog HTML files + sitemap.xml (${entryCount} URLs)`
+        `[seo-prerender] Generated ${Object.keys(routes).length} page + ${blogPosts.length} blog + ${Object.keys(REDIRECT_ROUTES).length} retired-address HTML files`
       );
     },
   };
