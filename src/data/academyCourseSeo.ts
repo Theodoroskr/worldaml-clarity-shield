@@ -72,7 +72,7 @@ export const ACADEMY_COURSE_SEO: Record<string, AcademyCourseSeo> = {
   "aml-cis": {
     title: "CIS AML & Sanctions Training Course",
     description:
-      "AML and sanctions compliance in CIS countries: Eurasian Group standards, Rosfinmonitoring, Kazakhstan, correspondent banking and evasion risk. CPD certificate.",
+      "AML and sanctions compliance in CIS countries: Eurasian Group standards, Rosfinmonitoring, Kazakhstan, correspondent banking and evasion. CPD certificate.",
   },
 
   // ── Specialisations ───────────────────────────────────────────────
@@ -84,7 +84,7 @@ export const ACADEMY_COURSE_SEO: Record<string, AcademyCourseSeo> = {
   "adverse-media-intelligence": {
     title: "Adverse Media Screening Training Course",
     description:
-      "Adverse media screening training: news feeds and open-source intelligence, judging relevance, severity and recency, and documenting decisions. CPD certificate.",
+      "Adverse media screening training: news feeds and open-source intelligence, judging relevance, severity and recency, and recording decisions. CPD-accredited.",
   },
   "beneficial-ownership": {
     title: "Beneficial Ownership & UBO Training Course",
@@ -139,7 +139,7 @@ export const ACADEMY_COURSE_SEO: Record<string, AcademyCourseSeo> = {
   "terrorist-financing-essentials": {
     title: "Terrorist Financing Training Course",
     description:
-      "Counter-terrorist financing training: how it differs from money laundering, FATF Recommendations 5–8, NPO risk, hawala and crowdfunding abuse. CPD certificate.",
+      "Counter-terrorist financing training: how it differs from money laundering, FATF Recommendations 5–8, NPO risk, hawala and crowdfunding abuse. CPD-accredited.",
   },
   "mlro-masterclass": {
     title: "MLRO Training Course — The MLRO Masterclass",
@@ -161,12 +161,12 @@ export const ACADEMY_COURSE_SEO: Record<string, AcademyCourseSeo> = {
   "aml-real-estate": {
     title: "AML Training Course for Real Estate Agents",
     description:
-      "AML training for estate agents: high-value dealer rules, beneficial ownership, third-party payments and red flags in property sales and lettings. CPD certificate.",
+      "AML training for estate agents: high-value dealer rules, beneficial ownership, third-party payments and red flags in sales and lettings. CPD-accredited.",
   },
   "aml-gaming-gambling": {
     title: "AML Training for Gaming & Gambling Operators",
     description:
-      "AML training for casinos, sportsbooks and iGaming: UKGC, MGA and FATF expectations, customer interaction, chip dumping and bonus abuse. CPD-accredited certificate.",
+      "AML training for casinos, sportsbooks and iGaming: UKGC, MGA and FATF expectations, customer interaction, chip dumping and bonus abuse. CPD-accredited.",
   },
 };
 

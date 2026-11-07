@@ -15,7 +15,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { blogPosts } from "../src/data/blogPosts";
 import { ACADEMY_COURSE_SEO } from "../src/data/academyCourseSeo";
-import { euSanctionsRegimes } from "../src/data/euSanctionsRegimes";
+import { allEUSanctionsRegimes } from "../src/data/euSanctionsRegimes";
 import { coverageData } from "../src/data/worldComplianceSources";
 
 const BASE_URL = "https://worldaml.com";
@@ -562,7 +562,7 @@ for (const [slug, seo] of Object.entries(ACADEMY_COURSE_SEO)) {
 }
 
 // EU sanctions regime pages — mirrors src/pages/EUSanctionsCountry.tsx.
-for (const regime of euSanctionsRegimes) {
+for (const regime of allEUSanctionsRegimes) {
   routes[`/eu-sanctions/${regime.slug}`] = {
     title: `EU Sanctions on ${regime.country} – Restrictive Measures Guide`,
     description: regime.description,
