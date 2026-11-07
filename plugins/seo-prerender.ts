@@ -574,7 +574,13 @@ for (const regime of allEUSanctionsRegimes) {
 // components, which can't load in the build config).
 function extractMarketSeo(): Array<{ slug: string; title: string; description: string }> {
   try {
-    const src = fs.readFileSync(path.resolve(process.cwd(), "src/data/marketPages.ts"), "utf-8");
+    const candidates = [
+      typeof __dirname !== "undefined" ? path.resolve(__dirname, "../src/data/marketPages.ts") : "",
+      path.resolve(process.cwd(), "src/data/marketPages.ts"),
+    ].filter(Boolean);
+    const file = candidates.find((f) => fs.existsSync(f));
+    if (!file) throw new Error("marketPages.ts not found");
+    const src = fs.readFileSync(file, "utf-8");
     const str = String.raw`"((?:[^"\\]|\\.)*)"`;
     const re = new RegExp(
       String.raw`slug:\s*` + str + String.raw`[\s\S]*?seo:\s*\{\s*title:\s*` + str +
