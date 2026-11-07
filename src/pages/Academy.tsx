@@ -48,6 +48,8 @@ import { useCart } from "@/contexts/CartContext";
 import { useAcademyPurchases } from "@/hooks/useAcademyPurchases";
 import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES, isNewCourse } from "@/data/academyPricing";
 import { ACADEMY_SEO } from "@/data/academySeo";
+import { ACADEMY_COURSE_SEO } from "@/data/academyCourseSeo";
+import { isAcademyHost } from "@/lib/academyHost";
 import NewCoursesBanner from "@/components/academy/NewCoursesBanner";
 import ScreeningPromoBanner from "@/components/academy/ScreeningPromoBanner";
 import { computeDiscount, applyDiscount } from "@/lib/academyDiscount";
@@ -923,7 +925,9 @@ const Academy = () => {
                 itemListElement: courses.map((c, idx) => ({
                   "@type": "ListItem",
                   position: idx + 1,
-                  url: `https://academy.worldaml.com/${c.slug}`,
+                  url: isAcademyHost()
+                    ? `https://academy.worldaml.com/${c.slug}`
+                    : `https://worldaml.com/academy/${c.slug}`,
                   name: c.title,
                 })),
               }]
@@ -1890,6 +1894,55 @@ const Academy = () => {
           </div>
         </section>
 
+        {/* AML training & certification explainer — answers the broad searches */}
+        <section className="section-padding bg-background border-b border-border">
+          <div className="container-enterprise max-w-4xl">
+            <div className="mb-10">
+              <h2 className="text-headline text-foreground mb-3">AML Training Courses Online</h2>
+              <p className="text-body-lg text-muted-foreground">
+                WorldAML Academy is online AML training for people who work in compliance. Each course takes about
+                20–30 minutes, ends with a scored quiz and gives you a CPD certificate you can verify online. Two
+                courses are free; the rest are paid one-off, with no subscription.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6 mb-10">
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <h3 className="text-body font-semibold text-foreground mb-2">What is AML certification?</h3>
+                <p className="text-body-sm text-muted-foreground leading-relaxed">
+                  An AML certification is proof that you completed anti-money laundering training and passed an
+                  assessment. Regulators expect firms to train staff and keep records of it, so a certificate with a
+                  verification link is the evidence auditors and employers ask for.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <h3 className="text-body font-semibold text-foreground mb-2">Who needs AML training?</h3>
+                <p className="text-body-sm text-muted-foreground leading-relaxed">
+                  Anyone at a regulated firm who onboards customers, screens names, reviews transactions or signs off
+                  on risk: banks, payment firms, crypto businesses, casinos, law and accountancy firms, and estate
+                  agents. Sector courses cover each of these.
+                </p>
+              </div>
+            </div>
+            <h3 className="text-body font-semibold text-foreground mb-4">All AML training courses</h3>
+            <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-2">
+              {Object.entries(ACADEMY_COURSE_SEO).map(([slug, seo]) => (
+                <li key={slug}>
+                  <Link
+                    to={`/academy/${slug}`}
+                    className="text-body-sm text-foreground hover:text-primary underline-offset-4 hover:underline inline-flex items-center gap-2"
+                  >
+                    <ArrowRight className="h-3.5 w-3.5 text-accent flex-shrink-0" />
+                    {seo.title.replace(/\s+—\s+.*$/, "")}
+                    {FREE_ACADEMY_COURSES.has(slug) && (
+                      <span className="text-[11px] uppercase tracking-widest font-semibold text-accent">Free</span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
         <section className="section-padding bg-background">
           <div className="container-enterprise max-w-3xl">
             <h2 className="text-headline text-foreground text-center mb-12">Frequently Asked Questions</h2>
@@ -1910,6 +1963,14 @@ const Academy = () => {
                 {
                   q: "Is the training CPD accredited?",
                   a: "Yes. Academy courses are CPD-accredited and written by working MLROs, covering AML, KYC and sanctions screening with practical case studies.",
+                },
+                {
+                  q: "How long does AML training take?",
+                  a: "Most Academy courses take 20–30 minutes, split into short modules, followed by a scored quiz. You can stop and pick up where you left off, and your certificate is issued as soon as you pass.",
+                },
+                {
+                  q: "How much does AML certification cost?",
+                  a: "AML Fundamentals and Sanctions Screening Essentials are free, including the certificate. Specialist, regional and sector courses are a one-off payment per course, with discounts when you buy several or choose the annual pass.",
                 },
                 {
                   q: "Who is the Academy for?",
