@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { SANCTIONS_LISTS_SEO } from "@/data/searchSnippets";
 import { Link } from "react-router-dom";
 import { ExternalLink, CheckCircle2, Search, Shield, Globe } from "lucide-react";
 import SEO from "@/components/SEO";
@@ -248,8 +249,8 @@ const SanctionsLists = () => {
   return (
     <>
       <SEO
-        title="Global Sanctions Lists & AML Screening Data Coverage"
-        description="WorldAML screens 1,900+ global lists: 156 sanctions lists, 1,128 warning & enforcement lists and 164 fitness & probity lists across 100+ countries — OFAC, EU, UN, OFSI, FATF and more."
+        title={SANCTIONS_LISTS_SEO.title}
+        description={SANCTIONS_LISTS_SEO.description}
         canonical="/resources/sanctions-lists"
         breadcrumbs={[
           { name: "Home", url: "/" },
@@ -279,24 +280,29 @@ const SanctionsLists = () => {
             </div>
 
             <h1 className="text-h1 font-bold text-navy mb-5">
-              Global Sanctions Lists &amp; AML Data Sources
+              Global Sanctions Lists Database
             </h1>
 
-            <p className="text-body-lg text-text-secondary mb-8 max-w-2xl leading-relaxed">
-              WorldAML aggregates authoritative sanctions, enforcement, and compliance lists
-              from regulators and international organizations worldwide to support AML
-              screening, sanctions monitoring, and due diligence.
+            <p className="text-body-lg text-text-secondary mb-4 max-w-2xl leading-relaxed">
+              A free directory of international sanctions lists — OFAC SDN, EU consolidated,
+              UN Security Council, UK OFSI and national regimes — with a plain-English summary
+              and the official source link for each one.
+            </p>
+            <p className="text-body text-text-secondary mb-8 max-w-2xl leading-relaxed">
+              Behind it sits WorldAML's sanctions data: 156 sanctions lists, 1,128 warning and
+              enforcement lists and 164 fitness and probity lists that you can screen any name
+              against.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
               <Button size="lg" asChild>
-                <Link to="/?demo=1">
+                <Link to="/sanctions-check">
                   <Search className="w-4 h-4 mr-2" />
-                  Run a Sanctions Check
+                  Run a Free Sanctions Check
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link to="/data-sources/worldcompliance">Explore Data Sources</Link>
+                <Link to="/screening-monitoring">Explore Screening &amp; Monitoring</Link>
               </Button>
             </div>
 
