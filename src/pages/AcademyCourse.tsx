@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import ModuleContent, { computeReadingMinutes } from "@/components/academy/ModuleContent";
 import ModuleTOC from "@/components/academy/ModuleTOC";
 import ContentProtection from "@/components/academy/ContentProtection";
+import CourseOverview, { buildCourseSeo } from "@/components/academy/CourseOverview";
 import { getCourseDiagram } from "@/assets/academy";
 import { useCourseGate } from "@/hooks/useCourseGate";
 import { ACADEMY_PRICING, isPaidCourse, FREE_ACADEMY_COURSES } from "@/data/academyPricing";
@@ -463,6 +464,9 @@ const AcademyCourse = ({ embedded = false }: { embedded?: boolean } = {}) => {
   };
 
   const allModulesComplete = modules ? completedModules.length >= modules.length : false;
+  const moduleTitles = (modules ?? [])
+    .map((m) => (m as { title?: string | null }).title ?? "")
+    .filter((t) => t.trim() !== "");
   const progressPercent = modules?.length ? (completedModules.length / modules.length) * 100 : 0;
 
   if (!course || gate.loading) {
@@ -482,21 +486,12 @@ const AcademyCourse = ({ embedded = false }: { embedded?: boolean } = {}) => {
   if (gate.requiresLogin && !gate.isPaid) {
     const redirectTo = encodeURIComponent(`/academy/${slug}`);
     return (
-      <div className="min-h-screen flex flex-col">
-        <SEO
-          title={`Sign in to start — ${course.title}`}
-          description="Create a free account to start this WorldAML Academy course."
-          canonical={`/academy/${slug}`}
-          noindex
-        />
-        {!embedded && <Header />}
-        <main className="flex-1 bg-background">
-          <div className="container-enterprise py-16">
-            <div className="max-w-lg mx-auto rounded-xl border border-border bg-card p-8 text-center">
+      <CourseOverview course={course} moduleTitles={moduleTitles} priceLabel="Free" embedded={embedded}>
+            <div className="rounded-xl border border-border bg-card p-8 text-center">
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <LogIn className="h-6 w-6 text-primary" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">Sign in to start this course</h1>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Start this course free</h2>
               <p className="text-muted-foreground mb-6">
                 Create a free account to access course modules, take the quiz, and earn your certificate for{" "}
                 <span className="font-semibold text-foreground">{course.title}</span>.
@@ -518,10 +513,7 @@ const AcademyCourse = ({ embedded = false }: { embedded?: boolean } = {}) => {
                 Two foundational courses are free with any account. Other courses unlock after purchase.
               </p>
             </div>
-          </div>
-        </main>
-        {!embedded && <Footer />}
-      </div>
+      </CourseOverview>
     );
   }
 
@@ -540,21 +532,18 @@ const AcademyCourse = ({ embedded = false }: { embedded?: boolean } = {}) => {
     const inCart = cart.has(course.slug);
 
     return (
-      <div className="min-h-screen flex flex-col">
-        <SEO
-          title={`Unlock ${course.title}`}
-          description="Purchase this course to access modules, take the quiz, and earn your certificate."
-          canonical={`/academy/${slug}`}
-          noindex
-        />
-        {!embedded && <Header />}
-        <main className="flex-1 bg-background">
-          <div className="container-enterprise py-16">
-            <div className="max-w-lg mx-auto rounded-xl border border-border bg-card p-8 text-center">
+      <CourseOverview
+        course={course}
+        moduleTitles={moduleTitles}
+        priceLabel={purchasable && displayCents > 0 ? formatPrice(displayCents, currency) : undefined}
+        embedded={embedded}
+        after={<AcademyCartDrawerMount />}
+      >
+            <div className="rounded-xl border border-border bg-card p-8 text-center">
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <Lock className="h-6 w-6 text-primary" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">Unlock this course</h1>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Unlock this course</h2>
               <p className="text-muted-foreground mb-6">
                 Purchase <span className="font-semibold text-foreground">{course.title}</span> to access all modules,
                 take the certified quiz, and earn your shareable WorldAML certificate.
@@ -654,60 +643,21 @@ const AcademyCourse = ({ embedded = false }: { embedded?: boolean } = {}) => {
                 Buy 2+ courses for 5% off, 3+ for 10% off — applied automatically at checkout.
               </p>
             </div>
-          </div>
-        </main>
-        {!embedded && <Footer />}
-        <AcademyCartDrawerMount />
-      </div>
+      </CourseOverview>
     );
   }
+
+  const courseSeo = buildCourseSeo(course);
 
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title={course.title}
-        description={course.description.slice(0, 160)}
-        canonical={`/academy/${course.slug}`}
+        title={courseSeo.title}
+        description={courseSeo.description}
+        canonical={courseSeo.canonical}
         ogType="article"
-        breadcrumbs={[
-          { name: "Home", url: "/" },
-          { name: "Academy", url: "/academy" },
-          { name: course.title, url: `/academy/${course.slug}` },
-        ]}
-        structuredData={{
-          "@context": "https://schema.org",
-          "@type": "Course",
-          name: course.title,
-          description: course.description,
-          provider: {
-            "@type": "Organization",
-            name: "WorldAML Academy",
-            sameAs: "https://academy.worldaml.com",
-          },
-          url: `https://academy.worldaml.com/${course.slug}`,
-          ...(course.image_url ? { image: course.image_url } : {}),
-          inLanguage: "en",
-          timeRequired: `PT${course.duration_minutes}M`,
-          educationalLevel: course.difficulty,
-          ...(course.learning_outcomes && Array.isArray(course.learning_outcomes) && course.learning_outcomes.length
-            ? { teaches: course.learning_outcomes }
-            : {}),
-          hasCourseInstance: {
-            "@type": "CourseInstance",
-            courseMode: "online",
-            courseWorkload: `PT${course.duration_minutes}M`,
-          },
-          offers: {
-            "@type": "Offer",
-            category: isPaidCourse(course.slug) ? "Paid" : "Free",
-            price: isPaidCourse(course.slug)
-              ? (ACADEMY_PRICING[course.slug].eurCents / 100).toFixed(2)
-              : "0",
-            priceCurrency: "EUR",
-            availability: "https://schema.org/InStock",
-            url: `https://academy.worldaml.com/${course.slug}`,
-          },
-        }}
+        breadcrumbs={courseSeo.breadcrumbs}
+        structuredData={courseSeo.structuredData}
       />
       {!embedded && <Header />}
       <main className="flex-1">
