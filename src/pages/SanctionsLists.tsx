@@ -284,13 +284,16 @@ const SanctionsLists = () => {
             </h1>
 
             <p className="text-body-lg text-text-secondary mb-4 max-w-2xl leading-relaxed">
-              A free directory of international sanctions lists — OFAC SDN, EU consolidated,
-              UN Security Council, UK OFSI and national regimes — with a plain-English summary
-              and the official source link for each one.
+              A free directory of {allSources.length} sanctions and AML lists — OFAC SDN, EU
+              consolidated, UN Security Council, UK OFSI, counter-terrorism, development-bank
+              debarment and FATF high-risk lists — with a plain-English summary and the
+              official source link for each one.
             </p>
             <p className="text-body text-text-secondary mb-8 max-w-2xl leading-relaxed">
-              Behind it sits WorldAML's sanctions data: 156 sanctions lists, 1,128 warning and
-              enforcement lists and 164 fitness and probity lists that you can screen any name
+              Behind it sits WorldAML's screening data: {sanctionsCategory.total} sanctions
+              lists from {sanctionsCategory.countries} countries and bodies, plus{" "}
+              {warningsCategory.total.toLocaleString()} warning and enforcement lists and{" "}
+              {probityCategory.total} fitness and probity lists that you can screen any name
               against.
             </p>
 
