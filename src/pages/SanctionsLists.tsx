@@ -370,7 +370,7 @@ const SanctionsLists = () => {
               <thead className="bg-surface-subtle text-navy">
                 <tr>
                   <th scope="col" className="px-4 py-3 font-semibold">List</th>
-                  <th scope="col" className="px-4 py-3 font-semibold">Issued by</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Jurisdiction</th>
                   <th scope="col" className="px-4 py-3 font-semibold">Applies to</th>
                   <th scope="col" className="px-4 py-3 font-semibold">Official source</th>
                 </tr>
