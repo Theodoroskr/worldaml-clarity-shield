@@ -159,30 +159,6 @@ function extractSlugs(filePath: string): string[] {
   }
 }
 
-/**
- * Extract top-level keys from a Record-style TypeScript data file.
- * Matches patterns like:  `keyname: {`  inside `coverageData = {`
- */
-function extractRecordKeys(filePath: string): string[] {
-  try {
-    const content = fs.readFileSync(filePath, "utf-8");
-    // Match keys after the opening `= {` of coverageData
-    const dataStart = content.indexOf("coverageData");
-    if (dataStart === -1) return [];
-    const rest = content.slice(dataStart);
-    const keyRegex = /^\s{2}(\w[\w-]*):\s*\{/gm;
-    const keys: string[] = [];
-    let match: RegExpExecArray | null;
-    while ((match = keyRegex.exec(rest)) !== null) {
-      keys.push(match[1]);
-    }
-    return keys;
-  } catch {
-    console.warn(`[sitemap] Could not read ${filePath}`);
-    return [];
-  }
-}
-
 /* ------------------------------------------------------------------ */
 /*  XML builder                                                       */
 /* ------------------------------------------------------------------ */
@@ -214,10 +190,9 @@ ${urls}
 const ACADEMY_STATIC_ROUTES: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: 1.0 },
   { path: "/templates", changefreq: "monthly", priority: 0.7 },
-  { path: "/annual-pass-active", changefreq: "yearly", priority: 0.3 },
 ];
 
-function generateAcademySitemap(): string {
+export function generateAcademySitemap(): string {
   const entries: SitemapEntry[] = [...ACADEMY_STATIC_ROUTES];
   for (const slug of academyCourseSlugs()) {
     entries.push({ path: `/${slug}`, changefreq: "monthly", priority: 0.7 });
@@ -229,7 +204,7 @@ function generateAcademySitemap(): string {
 /*  Main generator                                                    */
 /* ------------------------------------------------------------------ */
 
-function generateSitemap(root: string): string {
+export function generateSitemap(root: string): string {
   const entries: SitemapEntry[] = [...STATIC_ROUTES];
 
   // Dynamic: blog posts → /blog/:slug

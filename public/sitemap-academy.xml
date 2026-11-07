@@ -11,11 +11,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://academy.worldaml.com/annual-pass-active</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
     <loc>https://academy.worldaml.com/adverse-media-intelligence</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
