@@ -31,7 +31,6 @@ export interface CourseRow {
 }
 
 const SITE = "https://worldaml.com";
-const ACADEMY = "https://academy.worldaml.com";
 
 /** Products & services promoted to company / business buyers. */
 export const PRODUCT_CATALOG: UpsellItem[] = [

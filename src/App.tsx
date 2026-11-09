@@ -19,6 +19,7 @@ import {
   AcademyRootRedirect,
   AcademyCourseRedirect,
   AcademyCertificateRedirect,
+  LegacyCertificateRedirect,
 } from "@/components/academy/AcademyPathRedirect";
 
 
