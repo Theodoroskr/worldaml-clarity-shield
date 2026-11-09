@@ -628,6 +628,13 @@ for (const sub of ["resources", "worldcompliance/demo", "worldcompliance/eu-me",
 for (const country of Object.keys(coverageData)) {
   REDIRECT_ROUTES[`/data-coverage/${country}`] = "/screening-monitoring";
 }
+// Old academy.worldaml.com addresses: hosting redirects that subdomain to
+// worldaml.com keeping the path, so /<course> and /templates arrive here.
+// Point them at the real Academy pages instead of showing the homepage.
+for (const slug of Object.keys(ACADEMY_COURSE_SEO)) {
+  if (!routes[`/${slug}`]) REDIRECT_ROUTES[`/${slug}`] = `/academy/${slug}`;
+}
+if (!routes["/templates"]) REDIRECT_ROUTES["/templates"] = "/academy/templates";
 
 /** Every path that gets its own build-time HTML (for tests and logging). */
 export const PRERENDERED_PATHS = (): string[] => [...Object.keys(routes), ...blogPosts.map((p) => `/blog/${p.slug}`)];

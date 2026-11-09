@@ -11,7 +11,6 @@ import fs from "fs";
 import path from "path";
 
 const BASE_URL = "https://worldaml.com";
-const ACADEMY_BASE_URL = "https://academy.worldaml.com";
 
 // Course slugs come from the per-course search snippets, which list every
 // course a visitor can start or buy (a test keeps them in step with the
@@ -182,25 +181,6 @@ ${urls}
 }
 
 /* ------------------------------------------------------------------ */
-/*  Academy subdomain generator                                       */
-/*  academy.worldaml.com serves a learner-only experience. Course     */
-/*  URLs live at the subdomain root (no /academy prefix).             */
-/* ------------------------------------------------------------------ */
-
-const ACADEMY_STATIC_ROUTES: SitemapEntry[] = [
-  { path: "/", changefreq: "weekly", priority: 1.0 },
-  { path: "/templates", changefreq: "monthly", priority: 0.7 },
-];
-
-export function generateAcademySitemap(): string {
-  const entries: SitemapEntry[] = [...ACADEMY_STATIC_ROUTES];
-  for (const slug of academyCourseSlugs()) {
-    entries.push({ path: `/${slug}`, changefreq: "monthly", priority: 0.7 });
-  }
-  return buildSitemapXml(entries, ACADEMY_BASE_URL);
-}
-
-/* ------------------------------------------------------------------ */
 /*  Main generator                                                    */
 /* ------------------------------------------------------------------ */
 
@@ -250,11 +230,6 @@ export function sitemapGenerator(): Plugin {
       const outPath = path.join(projectRoot, "public/sitemap.xml");
       fs.writeFileSync(outPath, xml, "utf-8");
       console.log(`[sitemap] Generated ${outPath}`);
-
-      const academyXml = generateAcademySitemap();
-      const academyOutPath = path.join(projectRoot, "public/sitemap-academy.xml");
-      fs.writeFileSync(academyOutPath, academyXml, "utf-8");
-      console.log(`[sitemap] Generated ${academyOutPath}`);
     },
     handleHotUpdate({ file }) {
       if (
@@ -266,10 +241,6 @@ export function sitemapGenerator(): Plugin {
         const xml = generateSitemap(projectRoot);
         const outPath = path.join(projectRoot, "public/sitemap.xml");
         fs.writeFileSync(outPath, xml, "utf-8");
-
-        const academyXml = generateAcademySitemap();
-        const academyOutPath = path.join(projectRoot, "public/sitemap-academy.xml");
-        fs.writeFileSync(academyOutPath, academyXml, "utf-8");
         console.log(`[sitemap] Regenerated after data file change`);
       }
     },

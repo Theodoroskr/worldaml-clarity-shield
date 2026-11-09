@@ -519,6 +519,9 @@ const App = () => (
                 <Route path="/academy/annual-pass-active" element={<AcademyAnnualSuccess />} />
                 <Route path="/academy/certificate/:token" element={<AcademyCertificate />} />
                 <Route path="/academy/:slug" element={<AcademyCourse />} />
+                {/* Old academy.worldaml.com paths arrive here with the path kept */}
+                <Route path="/templates" element={<Navigate to="/academy/templates" replace />} />
+                <Route path="/certificate/:token" element={<LegacyCertificateRedirect />} />
 
                 {/* Markets */}
                 <Route path="/markets/:market" element={<MarketPage />} />

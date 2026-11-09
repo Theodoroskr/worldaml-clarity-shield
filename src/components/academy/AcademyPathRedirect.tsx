@@ -15,6 +15,12 @@ export const AcademyCertificateRedirect = () => {
   return <Navigate to={`/certificate/${token ?? ""}`} replace />;
 };
 
+/** On the main site, send an old subdomain certificate path to /academy/certificate/:token. */
+export const LegacyCertificateRedirect = () => {
+  const { token } = useParams();
+  return <Navigate to={`/academy/certificate/${token ?? ""}`} replace />;
+};
+
 export const AcademyRootRedirect = () => {
   const { pathname, search, hash } = useLocation();
   const stripped = pathname.replace(/^\/academy/, "") || "/";

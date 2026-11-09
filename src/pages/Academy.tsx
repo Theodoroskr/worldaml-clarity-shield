@@ -909,8 +909,7 @@ const Academy = () => {
             "@type": "EducationalOrganization",
             name: "WorldAML Academy",
             description: "CPD-accredited compliance training courses with verifiable certificates. AML, KYC and sanctions screening for regulated firms in the US, UK, Europe and Middle East.",
-            url: "https://academy.worldaml.com",
-            sameAs: ["https://worldaml.com/academy"],
+            url: "https://worldaml.com/academy",
             areaServed: [
               { "@type": "Country", name: "United States" },
               { "@type": "Country", name: "United Kingdom" },

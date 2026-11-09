@@ -103,7 +103,7 @@ export function courseToItem(c: CourseRow): UpsellItem {
   return {
     name: c.title,
     description: (c.description || "").replace(/\s+/g, " ").slice(0, 180),
-    url: `${ACADEMY}/academy/${c.slug}`,
+    url: `${SITE}/academy/${c.slug}`,
     meta: [c.category, c.difficulty, c.cpd_hours ? `${c.cpd_hours} CPD h` : null, money(c.price_eur_cents)]
       .filter(Boolean)
       .join(" · "),
