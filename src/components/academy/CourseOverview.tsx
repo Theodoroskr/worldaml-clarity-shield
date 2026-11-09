@@ -59,7 +59,7 @@ export const buildCourseSeo = (course: CourseOverviewCourse) => {
       provider: {
         "@type": "Organization",
         name: "WorldAML Academy",
-        sameAs: "https://academy.worldaml.com",
+        url: "https://worldaml.com/academy",
       },
       url: `https://worldaml.com/academy/${course.slug}`,
       ...(course.image_url ? { image: course.image_url } : {}),
