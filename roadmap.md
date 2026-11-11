@@ -30,3 +30,8 @@
 - [x] 3. Sanctions lists page title + intro
 - [~] 4. Free sanctions check onto page 1 (copy + links done; blocked: tool searches 30 sample entries, needs real list data — owner decision)
 - [ ] 5. Class Central + G2 listings (drafts ready; owner must send/submit)
+
+## Blog & feed (11 Nov 2026)
+- [x] Full article text in the RSS feed (for Make auto-posting)
+- [ ] New articles twice a week (waiting: owner choice of how articles are created)
+- [ ] Soft 404 fix: unknown addresses return the homepage head with 200
