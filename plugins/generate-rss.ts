@@ -7,6 +7,7 @@
 import { Plugin } from "vite";
 import fs from "fs";
 import path from "path";
+import { blogPosts, type BlogSection } from "../src/data/blogPosts";
 
 const BASE_URL = "https://worldaml.com";
 const FEED_TITLE = "WorldAML Insights";
@@ -23,6 +24,47 @@ interface RssItem {
   author: string;
   category: string;
   tags: string[];
+  /** Full article body as HTML, for <content:encoded>. */
+  contentHtml: string;
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/** Renders a post's sections as simple HTML (same order as the article page). */
+export function sectionsToHtml(sections: BlogSection[]): string {
+  return sections
+    .map((s) => {
+      const t = escapeHtml(s.text ?? "");
+      switch (s.type) {
+        case "intro":
+        case "p":
+          return `<p>${t}</p>`;
+        case "h2":
+          return `<h2>${t}</h2>`;
+        case "h3":
+          return `<h3>${t}</h3>`;
+        case "callout":
+          return `<blockquote><p>${t}</p></blockquote>`;
+        case "ul":
+        case "ol": {
+          const lis = (s.items ?? []).map((i) => `<li>${escapeHtml(i)}</li>`).join("");
+          return `<${s.type}>${lis}</${s.type}>`;
+        }
+        case "table": {
+          const head = (s.headers ?? []).map((h) => `<th>${escapeHtml(h)}</th>`).join("");
+          const body = (s.rows ?? [])
+            .map((r) => `<tr>${r.map((c) => `<td>${escapeHtml(c)}</td>`).join("")}</tr>`)
+            .join("");
+          return `<table>${head ? `<thead><tr>${head}</tr></thead>` : ""}<tbody>${body}</tbody></table>`;
+        }
+        default:
+          return "";
+      }
+    })
+    .filter(Boolean)
+    .join("\n");
 }
 
 function escapeXml(s: string): string {
@@ -40,53 +82,18 @@ function cdata(s: string): string {
 }
 
 
-function unquote(s: string): string {
-  // Handle "..." with escaped quotes inside a TS/JS string literal
-  return s.replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\n/g, " ").trim();
-}
-
-/**
- * Regex-parses blogPosts.ts and returns each post's metadata.
- * Only reads fields we actually need for RSS.
- */
-function extractPosts(filePath: string): RssItem[] {
-  if (!fs.existsSync(filePath)) return [];
-  const src = fs.readFileSync(filePath, "utf-8");
-
-  // Split on `{` opening a post object — crude but works because each
-  // post is a top-level object literal starting with `slug:`.
-  const posts: RssItem[] = [];
-  const blockRe = /\{\s*slug:\s*"([^"]+)"[\s\S]*?(?=\n\s{2,4}\{\s*slug:|\n\s*\];)/g;
-  const matches = src.matchAll(blockRe);
-
-  for (const m of matches) {
-    const block = m[0];
-    const slug = m[1];
-    const title = block.match(/title:\s*"([^"]+)"/)?.[1];
-    const descRaw =
-      block.match(/description:\s*\n?\s*"((?:[^"\\]|\\.)*)"/)?.[1] ||
-      block.match(/description:\s*"((?:[^"\\]|\\.)*)"/)?.[1];
-    const date = block.match(/date:\s*"([^"]+)"/)?.[1];
-    const author = block.match(/author:\s*"([^"]+)"/)?.[1];
-    const category = block.match(/category:\s*"([^"]+)"/)?.[1];
-    const tagsBlock = block.match(/tags:\s*\[([\s\S]*?)\]/)?.[1];
-    const tags = tagsBlock
-      ? Array.from(tagsBlock.matchAll(/"([^"]+)"/g)).map((t) => t[1])
-      : [];
-
-    if (!title || !descRaw || !date) continue;
-
-    posts.push({
-      slug,
-      title: unquote(title),
-      description: unquote(descRaw),
-      date,
-      author: author ? unquote(author) : "WorldAML",
-      category: category ? unquote(category) : "Compliance",
-      tags,
-    });
-  }
-
+/** Reads every post from src/data/blogPosts.ts, oldest first. */
+export function extractPosts(): RssItem[] {
+  const posts: RssItem[] = blogPosts.map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    description: p.description,
+    date: p.date,
+    author: p.author || "WorldAML",
+    category: p.category || "Compliance",
+    tags: p.tags ?? [],
+    contentHtml: sectionsToHtml(p.content ?? []),
+  }));
   // Oldest first — drip release consumes backlog chronologically
   posts.sort((a, b) => a.date.localeCompare(b.date));
   return posts;
@@ -192,6 +199,9 @@ function buildRssXml(items: RssItem[]): string {
     <guid isPermaLink="true">${url}</guid>
     <pubDate>${toRfc822(it.date)}</pubDate>
     <description>${cdata(it.description)}</description>
+    <content:encoded>${cdata(
+      `${it.contentHtml}\n<p><a href="${url}">Read the full article on WorldAML</a></p>`
+    )}</content:encoded>
     <author>${FEED_AUTHOR_EMAIL} (${escapeXml(it.author)})</author>
     <dc:creator>${cdata(it.author)}</dc:creator>
 ${cats}
@@ -200,7 +210,7 @@ ${cats}
     .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel>
   <title>${escapeXml(FEED_TITLE)}</title>
   <link>${BASE_URL}/blog</link>
@@ -218,11 +228,13 @@ ${itemsXml}
 
 
 function generateRss(root: string): string {
-  const allPosts = extractPosts(path.join(root, "src/data/blogPosts.ts"));
+  const allPosts = extractPosts();
   const released = applyDripSchedule(root, allPosts);
   return buildRssXml(released);
 }
 
+
+export { buildRssXml };
 
 export function rssGenerator(): Plugin {
   let projectRoot = "";
