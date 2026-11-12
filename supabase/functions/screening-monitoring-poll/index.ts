@@ -1,6 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getProvider, ProviderError, providerErrorResponse, type MonitoringChange } from "../_shared/screening/index.ts";
+import { getProvider, ProviderError, providerErrorResponse, type MonitoringChange, type ScreeningProviderAdapter } from "../_shared/screening/index.ts";
 import { evaluateRiskAlerts, type MatchCounts } from "../_shared/screening/riskAlerts.ts";
 
 
@@ -34,7 +34,12 @@ Deno.serve(async (req) => {
   const date = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const monitors = await loadActiveMonitors(admin);
 
-  let provider;
+  if (monitors.length === 0) {
+    await resolveOperatorNotice(admin);
+    return json({ ok: true, date, monitors: 0, failed: 0, changes: 0, alerts: 0 });
+  }
+
+  let provider: ScreeningProviderAdapter;
   try {
     provider = getProvider();
   } catch (err) {

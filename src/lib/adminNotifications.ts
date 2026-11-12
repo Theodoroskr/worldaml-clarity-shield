@@ -75,6 +75,7 @@ export const EVENT_TYPES: EventTypeMeta[] = [
   { eventType: "business_enquiry", label: "New Business Enquiries", category: "business", navPath: "/admin/business", actionLabel: "View", defaults: { inApp: true, email: true } },
   { eventType: "report_failed", label: "Report Failed", category: "reports", navPath: "/admin/reports", actionLabel: "Retry", defaults: { inApp: true, email: true } },
   { eventType: "report_sent", label: "Report Sent Successfully", category: "reports", navPath: "/admin/reports", actionLabel: "View", informational: true, defaults: { inApp: false, email: false } },
+  { eventType: "screening_monitoring_failed", label: "Screening Monitoring Check Failed", category: "security", navPath: "/admin/screening-product", actionLabel: "Review", defaults: { inApp: true, email: true } },
   { eventType: "security_issue", label: "Security Issues", category: "security", navPath: "/admin/security", actionLabel: "Review", notDismissible: true, defaults: { inApp: true, email: true } },
 ];
 
