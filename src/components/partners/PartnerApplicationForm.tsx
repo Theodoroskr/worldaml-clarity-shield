@@ -75,7 +75,7 @@ const PartnerApplicationForm = () => {
           .invoke("notify-partner-application", { body: { application_id: inserted.id } })
           .catch((e) => console.error("notify-partner-application failed:", e));
       }
-      // Fire-and-forget CRM lead creation (Zoho: Form Type = Partner Request,
+      // Fire-and-forget group CRM lead creation (Form Type = Partner Request,
       // Topic = Partnership, plus lead-source & visit-summary attribution).
       const nameParts = form.contact_name.trim().split(/\s+/);
       supabase.functions

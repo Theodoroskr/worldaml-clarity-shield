@@ -27,7 +27,7 @@ export interface WebAttribution {
   visitor_score?: number;
 }
 
-// ── Visit summary tracking (feeds Zoho's Visit Summary fields) ──────────────
+// ── Visit summary tracking (stored with each submission's attribution) ───────
 const VISIT_KEY = "waml_visits_v1";
 const CHAT_KEY = "waml_chats_v1";
 
@@ -159,7 +159,7 @@ export function getWebAttribution(): WebAttribution {
     }
   } catch {}
 
-  // Visit summary (first/last visit, days visited) for Zoho's Visit Summary block.
+  // Visit summary (first/last visit, days visited) saved with the submission.
   try {
     const v = readVisits();
     if (v) {
