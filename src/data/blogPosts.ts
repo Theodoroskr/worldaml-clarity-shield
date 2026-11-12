@@ -2554,6 +2554,717 @@ export const blogPosts: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: "worldaml-suite-compliance-lifecycle-platform",
+    title: "One Platform for the Whole Compliance Lifecycle: Inside WorldAML Suite",
+    description:
+      "WorldAML Suite brings KYC/KYB, sanctions screening, ongoing monitoring, case management and regulatory reporting into a single multi-tenant platform. Here's how the pieces fit together.",
+    category: "Technology",
+    date: "2026-12-11",
+    readTime: 7,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["WorldAML Suite", "compliance platform", "KYC", "KYB", "sanctions screening", "transaction monitoring"],
+    heroImage: "https://worldaml.com/images/blog/product-01.jpg",
+    heroImageAlt: "WorldAML Suite compliance dashboard illustration",
+    relatedSlugs: ["how-to-choose-aml-screening-provider", "aml-compliance-checklist-2025", "reduce-false-positives-sanctions-screening"],
+    content: [
+      {
+        type: "intro",
+        text: "Most compliance teams don't suffer from a lack of tools — they suffer from too many disconnected ones. Screening in one system, cases in a spreadsheet, monitoring in an inbox, reports assembled by hand. WorldAML Suite was built to close those gaps: one platform that carries a customer from onboarding through ongoing monitoring to regulatory reporting, with a single audit trail underneath.",
+      },
+      { type: "h2", text: "What the Suite covers" },
+      {
+        type: "ul",
+        items: [
+          "KYC and KYB onboarding with document verification and identity checks",
+          "Sanctions, PEP and adverse-media screening against 1,900+ global lists",
+          "Ongoing monitoring that re-checks monitored customers daily and raises alerts on change",
+          "Transaction monitoring with 46 baseline rules provisioned for your regulator",
+          "Case management with an immutable audit trail for every decision",
+          "Regulatory report generation for FinCEN, FINTRAC and MOKAS formats",
+        ],
+      },
+      { type: "h2", text: "Built for organisations, not just users" },
+      {
+        type: "p",
+        text: "The Suite is multi-tenant by design. Every organisation gets its own isolated workspace, its own team list and its own audit log. Access is managed per module, so a screening analyst, a transaction-monitoring reviewer and an admin each see exactly what their role requires — and nothing more.",
+      },
+      { type: "h2", text: "A single audit trail" },
+      {
+        type: "p",
+        text: "Every screening decision, case action and monitoring event is mirrored into one immutable audit log per company. When a regulator or internal auditor asks who did what and when, the answer is a query away — not a week of reconciling exports from five systems.",
+      },
+      {
+        type: "callout",
+        text: "See the Suite in action: request a walkthrough at /contact-sales and we'll map the modules to your regulator's requirements.",
+      },
+    ],
+  },
+  {
+    slug: "ongoing-sanctions-monitoring-daily-alerts",
+    title: "Why One-Off Screening Isn't Enough: The Case for Ongoing Monitoring",
+    description:
+      "A customer who is clean today can appear on a sanctions list tomorrow. Ongoing monitoring re-checks your screened customers daily and alerts you the moment something changes.",
+    category: "Sanctions",
+    date: "2026-12-15",
+    readTime: 6,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["ongoing monitoring", "sanctions", "PEP screening", "adverse media", "alerts"],
+    heroImage: "https://worldaml.com/images/blog/product-02.jpg",
+    heroImageAlt: "Global ongoing sanctions monitoring illustration",
+    relatedSlugs: ["sanctions-screening-best-practices", "reduce-false-positives-sanctions-screening", "adverse-media-screening-guide"],
+    content: [
+      {
+        type: "intro",
+        text: "Sanctions lists change constantly. OFAC, the EU, the UN and the UK update their designations throughout the year, and a customer who passed screening at onboarding can become a sanctioned party overnight. Screening once at account opening satisfies the moment — but not the obligation. Regulators expect ongoing vigilance across the whole customer relationship.",
+      },
+      { type: "h2", text: "How ongoing monitoring works in WorldAML" },
+      {
+        type: "p",
+        text: "When you enable monitoring on a screened person or company, WorldAML keeps that search active with the screening data provider. Every day, the platform checks each monitored search for differences — new sanctions hits, new PEP designations, new adverse media — rather than re-screening from scratch. Only genuine changes surface.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Daily difference checks per monitored customer, not bulk re-screening",
+          "New matches create monitoring alerts and mark the case for review",
+          "Match counts refresh automatically so dashboards stay current",
+          "If a daily check ever fails, operators are notified — failures never pass silently",
+        ],
+      },
+      { type: "h2", text: "Alerts that reach a human" },
+      {
+        type: "p",
+        text: "A monitoring alert is only useful if someone acts on it. Each alert links straight into the case, showing what changed and when. Risk-based alert rules let you set thresholds so high-risk changes stand out from routine list updates, and the audit log records every acknowledgement and decision.",
+      },
+      {
+        type: "callout",
+        text: "Turn on monitoring for your existing screening cases from the Screening console — it takes one click per customer and runs daily from then on.",
+      },
+    ],
+  },
+  {
+    slug: "name-matching-sanctions-screening-explained",
+    title: "How Name Matching Actually Works in Sanctions Screening",
+    description:
+      "Exact matching misses 'Mohammed' spelled five ways; loose matching floods you with false positives. Here's how WorldAML scores name similarity and why the threshold matters.",
+    category: "Sanctions",
+    date: "2026-12-18",
+    readTime: 7,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["name matching", "fuzzy matching", "Jaro-Winkler", "false positives", "sanctions screening"],
+    heroImage: "https://worldaml.com/images/blog/product-03.jpg",
+    heroImageAlt: "Name matching score comparison illustration",
+    relatedSlugs: ["reduce-false-positives-sanctions-screening", "sanctions-screening-best-practices", "ongoing-sanctions-monitoring-daily-alerts"],
+    content: [
+      {
+        type: "intro",
+        text: "Sanctions screening lives or dies on name matching. Match too strictly and you miss 'Mohamed', 'Muhammad' and 'Mohammed' as the same person. Match too loosely and every 'John Smith' in your book becomes a review task. The craft is in the scoring — and in knowing what your threshold actually does.",
+      },
+      { type: "h2", text: "Similarity scoring, not guesswork" },
+      {
+        type: "p",
+        text: "WorldAML computes its own name-similarity score using the Jaro-Winkler algorithm, which weights matches toward the start of a name — where transliteration variants tend to agree — and penalises differences proportionally. Every potential hit carries a numeric score, so analysts can see why a record matched instead of trusting a black box.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Each match shows its similarity score and the basis for the match",
+          "Provider match types are mapped to consistent categories across lists",
+          "Colour-coded match basis helps analysts triage at a glance",
+          "A debug mode exposes the scoring detail when you need to defend a decision",
+        ],
+      },
+      { type: "h2", text: "Why the threshold is a policy decision" },
+      {
+        type: "p",
+        text: "A 0.70 threshold catches common spelling variants while excluding most unrelated names; raising it reduces noise but increases the chance of missing a true match. Your threshold should be set in your screening policy, justified by your risk assessment, and applied consistently — examiners ask about exactly this.",
+      },
+      {
+        type: "callout",
+        text: "Try the matching engine yourself: the free sanctions quick check at /sanctions-check shows live similarity scores on sample data.",
+      },
+    ],
+  },
+  {
+    slug: "mrz-document-check-icao-9303",
+    title: "MRZ Document Checks: Verifying Passports the Deterministic Way",
+    description:
+      "The machine-readable zone on a passport encodes identity data with built-in check digits. WorldAML's MRZ Document Check validates it against the ICAO 9303 standard — no AI guesswork involved.",
+    category: "KYC & KYB",
+    date: "2026-12-22",
+    readTime: 6,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["MRZ", "ICAO 9303", "document verification", "passport check", "KYC"],
+    heroImage: "https://worldaml.com/images/blog/product-04.jpg",
+    heroImageAlt: "Passport MRZ scan verification illustration",
+    relatedSlugs: ["kyc-vs-kyb-differences", "aml-compliance-checklist-2025", "edd-vs-sdd-enhanced-simplified-due-diligence"],
+    content: [
+      {
+        type: "intro",
+        text: "The two or three lines of characters at the bottom of a passport page — the machine-readable zone, or MRZ — are not just for airport gates. They encode the holder's name, document number, nationality, date of birth and expiry, each protected by check digits defined in the ICAO 9303 standard. That structure makes the MRZ one of the most reliably verifiable parts of an identity document.",
+      },
+      { type: "h2", text: "Deterministic validation, not AI opinion" },
+      {
+        type: "p",
+        text: "WorldAML's MRZ Document Check is decided entirely by a deterministic ICAO 9303 parser. The OCR step only transcribes the lines; validity is computed from the standard itself — format, field lengths, date logic and check-digit arithmetic. A document passes or fails because the numbers add up, not because a model thinks it looks right. That distinction matters when you have to explain a decision to an auditor.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Check-digit verification for document number, birth date and expiry",
+          "Expiry and date-consistency validation built into the parse",
+          "Raw MRZ lines are encrypted at rest; only masked copies are shown",
+          "Every check is recorded with an audit-trail entry",
+        ],
+      },
+      { type: "h2", text: "Where it fits in onboarding" },
+      {
+        type: "p",
+        text: "MRZ verification works best as one layer among several: combine it with liveness-backed identity verification, sanctions screening and risk scoring for a defensible onboarding file. It is fast, cheap and catches a class of document fraud that visual inspection routinely misses.",
+      },
+      {
+        type: "callout",
+        text: "MRZ Document Check is available inside WorldAML Suite. Ask for a demonstration at /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "kyb-enterprise-screening-business-verification",
+    title: "KYB and Enterprise Screening: Verifying Businesses, Not Just People",
+    description:
+      "Corporate customers hide risk in ownership structures, directors and shell layers. Enterprise screening checks the company, its officers and its beneficial owners against sanctions, PEP and adverse-media data.",
+    category: "KYC & KYB",
+    date: "2026-12-29",
+    readTime: 7,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["KYB", "business verification", "UBO", "enterprise screening", "corporate due diligence"],
+    heroImage: "https://worldaml.com/images/blog/product-05.jpg",
+    heroImageAlt: "Enterprise network screening illustration",
+    relatedSlugs: ["kyc-vs-kyb-differences", "edd-vs-sdd-enhanced-simplified-due-diligence", "aml-compliance-checklist-2025"],
+    content: [
+      {
+        type: "intro",
+        text: "Onboarding a company is not one check — it is a network of checks. The entity itself can be sanctioned, but so can its directors, its shareholders and the ultimate beneficial owners hiding two layers up. Enterprise screening (KYB) exists because criminals learned long ago that a clean company name is easy to rent.",
+      },
+      { type: "h2", text: "What a proper KYB check covers" },
+      {
+        type: "ul",
+        items: [
+          "The legal entity: name variants, registration details, status and jurisdiction",
+          "Directors and officers: sanctions, PEP status and adverse media",
+          "Beneficial owners at the 25% threshold (or lower where your regulator requires)",
+          "Linked entities where ownership chains cross borders",
+        ],
+      },
+      { type: "h2", text: "Screening the whole structure at once" },
+      {
+        type: "p",
+        text: "WorldAML's enterprise screening lets you run the company and its related parties through the same screening engine used for individuals — the same 1,900+ lists, the same similarity scoring, the same ongoing monitoring. Each party gets its own case and audit trail, so a hit on a director doesn't get lost inside the company's file.",
+      },
+      { type: "h2", text: "Monitoring the structure over time" },
+      {
+        type: "p",
+        text: "Ownership changes. Directors resign. A clean UBO can be designated next year. With monitoring enabled on each party, daily difference checks catch changes at any node of the structure and raise alerts on the ones that matter — without re-running the whole KYB file by hand.",
+      },
+      {
+        type: "callout",
+        text: "Screening companies at volume? Talk to us about enterprise screening plans at /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "worldid-identity-verification-kyc",
+    title: "WorldID: Identity Verification That Fits Into Your Onboarding Flow",
+    description:
+      "WorldID brings document verification, liveness and identity checks into WorldAML's KYC flow, with a manual-review fallback so no applicant is ever stuck in a dead end.",
+    category: "KYC & KYB",
+    date: "2027-01-01",
+    readTime: 6,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["WorldID", "identity verification", "KYC", "liveness", "onboarding"],
+    heroImage: "https://worldaml.com/images/blog/product-06.jpg",
+    heroImageAlt: "Digital identity verification illustration",
+    relatedSlugs: ["mrz-document-check-icao-9303", "kyc-vs-kyb-differences", "aml-compliance-checklist-2025"],
+    content: [
+      {
+        type: "intro",
+        text: "Identity verification is where onboarding either flows or fails. Ask for too little and you onboard fraud; ask for too much and legitimate customers abandon. WorldID, WorldAML's identity verification capability, is designed around a simple principle: automate the clear cases, route the doubtful ones to a human, and never leave an applicant in limbo.",
+      },
+      { type: "h2", text: "What WorldID verifies" },
+      {
+        type: "ul",
+        items: [
+          "Government-issued identity documents, captured and validated in-session",
+          "Liveness and face-match checks to bind the document to the presenter",
+          "Data consistency between the document, the application and screening results",
+        ],
+      },
+      { type: "h2", text: "The manual-check fallback" },
+      {
+        type: "p",
+        text: "Automated verification sometimes can't reach a verdict — a worn document, poor lighting, an uncommon issuing country. Instead of a hard rejection, WorldID falls back to a MANUAL_CHECK state that routes the application to your review queue with all captured evidence attached. The applicant gets a decision; your team keeps control.",
+      },
+      { type: "h2", text: "One flow, one file" },
+      {
+        type: "p",
+        text: "Because WorldID sits inside the same platform as screening and risk scoring, the identity evidence, the screening results and the final decision all land in one customer file with one audit trail. No re-keying between vendors, no screenshots in shared drives.",
+      },
+      {
+        type: "callout",
+        text: "See a WorldID verification end to end — book a demo at /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "screening-api-integration-guide",
+    title: "Screening as an API: Embedding Compliance Checks in Your Own Product",
+    description:
+      "WorldAML's API lets you run sanctions, PEP and adverse-media checks from inside your own onboarding flow — results back in the same request cycle, no portal copy-paste.",
+    category: "Technology",
+    date: "2027-01-05",
+    readTime: 7,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["API", "screening API", "integration", "developers", "automation"],
+    heroImage: "https://worldaml.com/images/blog/product-07.jpg",
+    heroImageAlt: "API integration pipeline illustration",
+    relatedSlugs: ["worldaml-suite-compliance-lifecycle-platform", "name-matching-sanctions-screening-explained", "how-to-choose-aml-screening-provider"],
+    content: [
+      {
+        type: "intro",
+        text: "If your onboarding lives in your own product, your compliance checks should too. Copy-pasting names into a screening portal doesn't scale, doesn't audit well, and breaks the user journey. WorldAML exposes its screening engine over an API so checks happen where the customer is — inside your flow.",
+      },
+      { type: "h2", text: "What you can do through the API" },
+      {
+        type: "ul",
+        items: [
+          "Run sanctions, PEP and adverse-media searches programmatically at onboarding",
+          "Receive structured match results with similarity scores and match basis",
+          "Enable ongoing monitoring on a search so changes raise alerts later",
+          "Pull results back into your own case tools or data warehouse",
+        ],
+      },
+      { type: "h2", text: "Same engine, same data" },
+      {
+        type: "p",
+        text: "The API is not a stripped-down second product. It runs on the same 1,900+ list coverage and the same name-matching scoring as the Screening console, so a check run by your code and a check run by an analyst produce comparable, explainable results.",
+      },
+      { type: "h2", text: "Built for regulated teams" },
+      {
+        type: "p",
+        text: "API access is authenticated and scoped per organisation, and every check still writes to the audit trail. Your developers get a clean integration; your compliance officer keeps the evidence. API documentation is available at /api-docs.",
+      },
+      {
+        type: "callout",
+        text: "Planning an integration? Tell us your volumes and use case at /contact-sales and we'll scope the right plan.",
+      },
+    ],
+  },
+  {
+    slug: "risk-alerts-threshold-rules",
+    title: "Risk Alerts That Matter: Threshold Rules Instead of Inbox Noise",
+    description:
+      "Alert fatigue is a compliance risk in itself. WorldAML's risk alert rules let you set thresholds on monitored entities so significant changes stand out from routine list updates.",
+    category: "Risk Assessment",
+    date: "2027-01-08",
+    readTime: 6,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["risk alerts", "alert rules", "monitoring", "risk levels", "alert fatigue"],
+    heroImage: "https://worldaml.com/images/blog/product-08.jpg",
+    heroImageAlt: "Risk alert notification system illustration",
+    relatedSlugs: ["ongoing-sanctions-monitoring-daily-alerts", "risk-based-approach-aml", "reduce-false-positives-sanctions-screening"],
+    content: [
+      {
+        type: "intro",
+        text: "Every compliance team knows the pattern: monitoring generates so many low-value notifications that the important ones get lost. Alert fatigue isn't just annoying — it's how real risk changes get missed. The fix is not fewer checks; it's smarter thresholds on what reaches a human.",
+      },
+      { type: "h2", text: "Risk levels on monitored entities" },
+      {
+        type: "p",
+        text: "In WorldAML, monitored people and companies carry risk levels, and alert rules let you define which changes should escalate. A new adverse-media hit on a low-risk supplier might queue quietly; a new sanctions match on a high-risk customer should interrupt someone's day. Threshold rules encode that judgement once, instead of relying on every analyst to make it in the moment.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Set alert thresholds by risk level and change type",
+          "New matches, removed matches and score changes are distinguished",
+          "Alerts open directly into the entity detail with full context",
+          "Every alert action is written to the audit trail",
+        ],
+      },
+      { type: "h2", text: "Tuning without fear" },
+      {
+        type: "p",
+        text: "Because the underlying daily checks keep running regardless, tightening an alert rule never means checking less — it means interrupting less. The data is all there in the case; the rule only decides what demands immediate attention. That makes it safe to tune thresholds as your team and risk appetite evolve.",
+      },
+      {
+        type: "callout",
+        text: "Risk alert rules are part of WorldAML Screening's monitoring capability. See them configured live at /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "case-management-audit-trail-compliance",
+    title: "Cases and Audit Trails: The Evidence Layer of Your Compliance Programme",
+    description:
+      "When a regulator asks 'who decided this and why', the answer must already exist. WorldAML's case management and immutable audit log make every screening decision traceable.",
+    category: "AML Compliance",
+    date: "2027-01-12",
+    readTime: 6,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["case management", "audit trail", "compliance evidence", "governance"],
+    heroImage: "https://worldaml.com/images/blog/product-09.jpg",
+    heroImageAlt: "Case management and audit trail illustration",
+    relatedSlugs: ["aml-compliance-checklist-2025", "worldaml-suite-compliance-lifecycle-platform", "mlro-responsibilities-obligations"],
+    content: [
+      {
+        type: "intro",
+        text: "Examinations rarely fail on whether you screened — they fail on whether you can prove it. Who ran the check, what came back, who reviewed the match, why it was dismissed or escalated: if that story lives in inboxes and memory, it doesn't exist as far as a regulator is concerned.",
+      },
+      { type: "h2", text: "Every decision inside a case" },
+      {
+        type: "p",
+        text: "In WorldAML, screening results, monitoring alerts and review decisions all live in cases. A case carries the match detail, the similarity scores, the analyst's notes and the final disposition — kept together so the reasoning is preserved, not just the outcome.",
+      },
+      { type: "h2", text: "One immutable audit log per company" },
+      {
+        type: "ul",
+        items: [
+          "Screening events, case actions and team changes are mirrored into a single audit log",
+          "Entries are append-only: history cannot be edited after the fact",
+          "The audit feed is readable inside the platform for reviews and examinations",
+          "Sensitive identity fields are encrypted, with access to full values logged",
+        ],
+      },
+      { type: "h2", text: "Governance without the spreadsheet tax" },
+      {
+        type: "p",
+        text: "Because the evidence is captured as work happens, management information stops being a monthly assembly exercise. Case volumes, disposition rates and outstanding reviews are visible in the platform, and the underlying trail is always there when someone asks the hard questions.",
+      },
+      {
+        type: "callout",
+        text: "See the case workflow and audit feed in a live walkthrough: /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "transaction-monitoring-baseline-rules",
+    title: "Transaction Monitoring Without the Blank Page: 46 Baseline Rules to Start From",
+    description:
+      "Building a transaction monitoring rule set from scratch takes months. WorldAML provisions 46 baseline rules mapped to your regulator, then lets you tune thresholds to your risk profile.",
+    category: "AML Compliance",
+    date: "2027-01-15",
+    readTime: 7,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["transaction monitoring", "AML rules", "red flags", "monitoring hub"],
+    heroImage: "https://worldaml.com/images/blog/product-10.jpg",
+    heroImageAlt: "Transaction monitoring rule engine illustration",
+    relatedSlugs: ["transaction-monitoring-red-flags", "aml-compliance-checklist-2025", "worldaml-suite-compliance-lifecycle-platform"],
+    content: [
+      {
+        type: "intro",
+        text: "The hardest part of transaction monitoring is not the technology — it's deciding what to look for. Structuring, rapid movement of funds, round-amount patterns, high-risk corridor exposure: every regulator's guidance implies dozens of scenarios, and writing them all from a blank page is where monitoring projects stall.",
+      },
+      { type: "h2", text: "A rule set that starts full, not empty" },
+      {
+        type: "p",
+        text: "WorldAML's monitoring hub provisions 46 baseline rules automatically, mapped to your regulator's expectations. The rules cover the classic typologies — threshold avoidance, velocity spikes, dormancy-then-activity, geographic risk — and each one can be tuned: thresholds, lookback windows and severity are all adjustable to your business.",
+      },
+      {
+        type: "ul",
+        items: [
+          "46 baseline rules provisioned per regulator at setup",
+          "Historical transactions at or above €10,000 are evaluated by the Suite's engine",
+          "Rule hits feed cases with the underlying transactions attached",
+          "Thresholds and parameters are tunable per rule as your risk profile evolves",
+        ],
+      },
+      { type: "h2", text: "From rule hit to report" },
+      {
+        type: "p",
+        text: "A rule hit is the start of a process, not the end. Hits open into cases for review, and where suspicion is confirmed, the reporting workflow generates regulator-format outputs — FinCEN, FINTRAC and MOKAS among them — so the path from detection to filing stays inside one system.",
+      },
+      {
+        type: "callout",
+        text: "Ask us which baseline rule set applies to your licence: /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "regulatory-reporting-automation-fincen-fintrac-mokas",
+    title: "Regulatory Reporting Without the Copy-Paste: FinCEN, FINTRAC and MOKAS Exports",
+    description:
+      "Suspicious activity reports are high-stakes documents assembled under time pressure. WorldAML generates regulator-format reports from the case data you already have.",
+    category: "Regulatory Updates",
+    date: "2027-01-19",
+    readTime: 6,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["SAR", "STR", "FinCEN", "FINTRAC", "MOKAS", "regulatory reporting"],
+    heroImage: "https://worldaml.com/images/blog/product-11.jpg",
+    heroImageAlt: "Regulatory report generation illustration",
+    relatedSlugs: ["transaction-monitoring-baseline-rules", "case-management-audit-trail-compliance", "mlro-responsibilities-obligations"],
+    content: [
+      {
+        type: "intro",
+        text: "Filing a suspicious activity report is a deadline-driven, high-consequence task — and in too many firms it is still assembled by hand: transaction data from one system, customer details from another, narrative drafted in a document, then re-keyed into the regulator's format. Every copy-paste is a chance for error in the one document that must be perfect.",
+      },
+      { type: "h2", text: "Reports generated from the case" },
+      {
+        type: "p",
+        text: "WorldAML generates regulatory reports directly from case data. The customer details, the transactions that triggered review, the screening history and the analyst's findings are already in the platform — the reporting step assembles them into the format your regulator expects rather than asking you to re-type them.",
+      },
+      {
+        type: "ul",
+        items: [
+          "FinCEN-format outputs for US-facing obligations",
+          "FINTRAC-format outputs for Canadian reporting",
+          "MOKAS-format outputs for Cyprus-registered entities",
+          "Report drafts stay linked to the underlying case and audit trail",
+        ],
+      },
+      { type: "h2", text: "The MLRO keeps the pen" },
+      {
+        type: "p",
+        text: "Automation assembles; it doesn't decide. The MLRO reviews, edits and approves every report before it goes anywhere — the platform's job is to make sure that review starts from complete, accurate data instead of a scavenger hunt.",
+      },
+      {
+        type: "callout",
+        text: "If your reporting process still involves re-keying, see the alternative at /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "sanctions-data-coverage-1900-lists",
+    title: "What '1,900+ Global Lists' Actually Means for Your Screening",
+    description:
+      "List coverage is the foundation of sanctions screening. Here's what's behind WorldAML's 1,900+ list figure and why breadth and freshness both matter.",
+    category: "Sanctions",
+    date: "2027-01-22",
+    readTime: 6,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["sanctions lists", "data coverage", "PEP data", "adverse media", "screening data"],
+    heroImage: "https://worldaml.com/images/blog/product-12.jpg",
+    heroImageAlt: "Global sanctions data coverage illustration",
+    relatedSlugs: ["sanctions-screening-best-practices", "ongoing-sanctions-monitoring-daily-alerts", "name-matching-sanctions-screening-explained"],
+    content: [
+      {
+        type: "intro",
+        text: "Every screening vendor quotes a list count, and the number is easy to tune out. But coverage is the one input your screening programme cannot compensate for: a matching engine, however good, cannot find a name that isn't in the data. So what sits behind WorldAML's 1,900+ global lists?",
+      },
+      { type: "h2", text: "The major regimes, plus the long tail" },
+      {
+        type: "p",
+        text: "Coverage starts with the regimes every regulated firm must screen — OFAC, the EU consolidated list, the UN Security Council, the UK sanctions list — and extends into the long tail: national and regional lists, law-enforcement and regulatory enforcement sources, PEP databases and adverse-media feeds. The long tail is where single-source screening tools quietly fail.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Global sanctions regimes: OFAC, EU, UN, UK and national lists",
+          "PEP data across jurisdictions, including family and close associates",
+          "Adverse media from structured news sources",
+          "List updates flow into ongoing monitoring, so monitored customers are re-checked as data changes",
+        ],
+      },
+      { type: "h2", text: "Freshness is half the battle" },
+      {
+        type: "p",
+        text: "A list count says nothing about update lag. WorldAML's monitoring checks each active search for differences daily, so a designation published today surfaces as an alert — not at your next periodic re-screen. Breadth gets the name into the data; freshness gets it in front of you in time to act.",
+      },
+      {
+        type: "callout",
+        text: "Questions about coverage for a specific jurisdiction or list? Ask at /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "four-eyes-review-escalation-workflow",
+    title: "Four-Eyes Review: Why High-Risk Decisions Deserve a Second Signature",
+    description:
+      "Some decisions are too important for one person. WorldAML's Escalation & Four-Eyes Review module routes high-risk dispositions to a second approver before they take effect.",
+    category: "AML Compliance",
+    date: "2027-01-26",
+    readTime: 6,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["four-eyes principle", "escalation", "approval workflow", "governance"],
+    heroImage: "https://worldaml.com/images/blog/product-13.jpg",
+    heroImageAlt: "Four-eyes approval workflow illustration",
+    relatedSlugs: ["case-management-audit-trail-compliance", "risk-alerts-threshold-rules", "mlro-responsibilities-obligations"],
+    content: [
+      {
+        type: "intro",
+        text: "The four-eyes principle is one of the oldest controls in finance: significant decisions should be made by two people, not one. In compliance, it protects everyone — the analyst from sole responsibility for a hard call, the firm from a single point of failure, and the customer from a hasty disposition.",
+      },
+      { type: "h2", text: "Escalation built into the workflow" },
+      {
+        type: "p",
+        text: "WorldAML's Escalation & Four-Eyes Review module makes the second pair of eyes structural rather than aspirational. Cases that meet your escalation criteria — high-risk matches, PEP confirmations, borderline dismissals — route to a senior reviewer before the disposition takes effect. The first reviewer's work and reasoning travel with the case.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Define which case types or risk levels require a second approval",
+          "Escalated cases show the full evidence and the first reviewer's rationale",
+          "Both decisions are recorded in the immutable audit trail",
+          "Available as an add-on module at €149/month on top of your screening plan",
+        ],
+      },
+      { type: "h2", text: "What examiners look for" },
+      {
+        type: "p",
+        text: "Regulators increasingly ask not just whether high-risk decisions were reviewed, but whether the review was independent and documented. A four-eyes workflow with a tamper-evident trail answers both questions with evidence rather than policy prose.",
+      },
+      {
+        type: "callout",
+        text: "Add Escalation & Four-Eyes Review to your plan from the Suite, or ask us at /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "composite-risk-scoring-engine-explained",
+    title: "One Number, Five Dimensions: How Composite Risk Scoring Works",
+    description:
+      "WorldAML's risk scoring engine combines five weighted dimensions into a single 0–100 score, so onboarding and review decisions start from a consistent, explainable baseline.",
+    category: "Risk Assessment",
+    date: "2027-01-29",
+    readTime: 6,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["risk scoring", "risk assessment", "customer risk rating", "RBA"],
+    heroImage: "https://worldaml.com/images/blog/product-14.jpg",
+    heroImageAlt: "Composite risk scoring gauge illustration",
+    relatedSlugs: ["risk-based-approach-aml", "risk-alerts-threshold-rules", "aml-compliance-checklist-2025"],
+    content: [
+      {
+        type: "intro",
+        text: "The risk-based approach sounds simple until you have to apply it consistently across thousands of customers. 'High risk' cannot mean one thing to the analyst who joined last week and another to the reviewer of five years. A composite risk score turns judgement into a repeatable calculation — and makes the calculation visible.",
+      },
+      { type: "h2", text: "Five weighted dimensions, one score" },
+      {
+        type: "p",
+        text: "WorldAML's scoring engine produces a composite score from 0 to 100, built from five weighted dimensions of customer risk — covering factors such as who the customer is, where they operate, what they do and how they transact. Weights reflect how much each dimension should drive the overall rating, and the component scores stay visible so the total is explainable, not oracular.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Composite score on a 0–100 scale across five weighted dimensions",
+          "Component-level breakdown so reviewers see what drives the rating",
+          "Scores feed risk levels, alert thresholds and review prioritisation",
+          "Consistent baseline for onboarding decisions and periodic reviews",
+        ],
+      },
+      { type: "h2", text: "A score is a starting point, not a verdict" },
+      {
+        type: "p",
+        text: "The score standardises the first pass; humans still make the decisions. What it changes is consistency: two analysts looking at the same customer start from the same number and the same breakdown, and deviations from it are conscious, documented choices.",
+      },
+      {
+        type: "callout",
+        text: "See the scoring breakdown on real example profiles in a demo: /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "worldaml-academy-aml-training-certificates",
+    title: "Training the Team Is Part of the Programme: Inside WorldAML Academy",
+    description:
+      "Regulators expect trained staff, not just good software. WorldAML Academy offers free and specialist AML courses with verifiable, CPD-accredited certificates.",
+    category: "AML Compliance",
+    date: "2027-02-02",
+    readTime: 6,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["AML training", "Academy", "certification", "CPD", "compliance training"],
+    heroImage: "https://worldaml.com/images/blog/product-15.jpg",
+    heroImageAlt: "WorldAML Academy online training illustration",
+    relatedSlugs: ["aml-certifications-compared", "how-to-become-aml-analyst", "mlro-responsibilities-obligations"],
+    content: [
+      {
+        type: "intro",
+        text: "Every AML framework says the same thing in different words: your programme is only as strong as the people running it. Training obligations appear in FATF's recommendations, in EU directives and in national rulebooks — and 'we bought good software' is not an answer to 'how are your staff trained?'",
+      },
+      { type: "h2", text: "Courses built for working professionals" },
+      {
+        type: "p",
+        text: "WorldAML Academy's courses are designed around real compliance work: 15–20 minute modules with case studies, progress tracking, and assessments that test application rather than recall. The AML Fundamentals course is free; specialist courses on topics like KYC and sanctions are available at €29–€49, with bundle discounts for teams.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Free AML Fundamentals course to get started",
+          "Specialist paid courses at €29–€49 with bundle discounts",
+          "Pass mark of 80% on assessments",
+          "Verifiable PDF certificates with CPD accreditation and verification tokens",
+          "Member levels and specialisation badges earned from real completions",
+        ],
+      },
+      { type: "h2", text: "Certificates you can verify" },
+      {
+        type: "p",
+        text: "Each certificate carries a verification token, so an employer, auditor or regulator can confirm it is genuine — training evidence that stands up in a file review, not just a line on a CV.",
+      },
+      {
+        type: "callout",
+        text: "Start the free AML Fundamentals course today at /academy.",
+      },
+    ],
+  },
+  {
+    slug: "free-sanctions-quick-check-tool",
+    title: "Try Screening Before You Buy: The Free Sanctions Quick Check",
+    description:
+      "WorldAML's free sanctions quick check lets you run a name through the matching engine and see live similarity scores — a hands-on way to evaluate screening before committing.",
+    category: "Sanctions",
+    date: "2027-02-05",
+    readTime: 5,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Product",
+    tags: ["free sanctions check", "sanctions screening", "quick check", "screening tool"],
+    heroImage: "https://worldaml.com/images/blog/product-16.jpg",
+    heroImageAlt: "Free sanctions quick check illustration",
+    relatedSlugs: ["name-matching-sanctions-screening-explained", "sanctions-data-coverage-1900-lists", "how-to-choose-aml-screening-provider"],
+    content: [
+      {
+        type: "intro",
+        text: "Choosing a screening tool from a brochure is hard — every vendor claims accurate matching and broad coverage. The better test is hands-on: run a name, see what comes back, and judge the quality of the matches yourself. That's what WorldAML's free sanctions quick check is for.",
+      },
+      { type: "h2", text: "What the quick check shows you" },
+      {
+        type: "p",
+        text: "Enter a name and the quick check runs it through the same Jaro-Winkler matching engine used in the full product, returning matches with their similarity scores. You see not just whether a name matched, but how strongly — the transparency that matters when you later have to justify a threshold to an examiner.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Free to use, no account required",
+          "Live similarity scores on every match",
+          "Runs on a sample dataset — it demonstrates the engine, not the full 1,900+ list coverage",
+          "Search quotas keep the tool fair for everyone",
+        ],
+      },
+      { type: "h2", text: "From quick check to full screening" },
+      {
+        type: "p",
+        text: "The quick check is deliberately a demonstration: production screening adds the complete list coverage, case management, ongoing monitoring with daily alerts, and the audit trail your programme needs. If the quick check convinces you the matching is sound, the full platform is where it becomes a compliance control.",
+      },
+      {
+        type: "callout",
+        text: "Run your first check at /sanctions-check — then talk to us about full coverage at /contact-sales.",
+      },
+    ],
+  },
 ];
 
 /** Live posts only, newest first. */
