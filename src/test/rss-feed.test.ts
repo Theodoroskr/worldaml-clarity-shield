@@ -16,4 +16,18 @@ describe("RSS feed", () => {
     const plain = xml.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
     expect(plain).toContain(lastPara.text!);
   });
+
+  it("attaches the hero image to items that have one", () => {
+    const xml = buildRssXml(extractPosts().reverse());
+    const withImage = blogPosts.filter((p) => p.heroImage);
+    expect(withImage.length).toBeGreaterThan(0);
+    const enclosures = xml.match(/<enclosure url="https:\/\/worldaml\.com\/images\/blog\//g) ?? [];
+    const media = xml.match(/<media:content url="https:\/\/worldaml\.com\/images\/blog\//g) ?? [];
+    expect(enclosures).toHaveLength(withImage.length);
+    expect(media).toHaveLength(withImage.length);
+    for (const p of withImage) {
+      expect(xml).toContain(`<enclosure url="${p.heroImage}" type="image/jpeg" />`);
+      expect(xml).toContain(`<img src="${p.heroImage}"`);
+    }
+  });
 });

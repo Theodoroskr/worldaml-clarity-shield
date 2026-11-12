@@ -7,8 +7,8 @@ import { generateSitemap } from "../../plugins/generate-sitemap";
 const NEW_BATCH = blogPosts.filter((p) => p.date >= "2026-11-12");
 
 describe("twice-weekly article schedule", () => {
-  it("has the 8-article batch released on Tuesdays and Fridays", () => {
-    expect(NEW_BATCH).toHaveLength(8);
+  it("has the 24-article batch released on Tuesdays and Fridays", () => {
+    expect(NEW_BATCH).toHaveLength(24);
     for (const p of NEW_BATCH) {
       const day = new Date(`${p.date}T00:00:00Z`).getUTCDay();
       expect([2, 5]).toContain(day); // Tue = 2, Fri = 5
@@ -27,7 +27,7 @@ describe("twice-weekly article schedule", () => {
     expect(slugs).not.toContain("how-to-choose-aml-screening-provider");
     const feed = applyReleaseSchedule("", extractPosts(), before).map((p) => p.slug);
     expect(feed).not.toContain("how-to-choose-aml-screening-provider");
-    expect(feed).toHaveLength(blogPosts.length - 8);
+    expect(feed).toHaveLength(blogPosts.length - 24);
 
     const after = new Date("2026-11-17T09:00:00Z");
     const feedLater = applyReleaseSchedule("", extractPosts(), after).map((p) => p.slug);
