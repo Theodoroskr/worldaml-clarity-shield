@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend";
 import { normaliseCode, recordReferral, resolvePartnerByCode } from "../_shared/referral.ts";
+import { buildIcgLeadPayload, forwardLeadToIcg } from "../_shared/icgLeadForward.ts";
 
 
 const corsHeaders = {
@@ -326,6 +327,14 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Copy of the lead for the Infocredit Group CRM (sent after Zoho below).
+    const icgPayload = buildIcgLeadPayload({
+      form_type, first_name, last_name, email, phone, company, job_title,
+      country, industry, region, account_type, message,
+      product: Array.isArray(products) && products.length ? formatProducts(products) : null,
+      metadata: enrichedMetadata,
+    });
 
     // Create a Lead in Zoho CRM via the connector gateway (non-blocking)
     try {
@@ -930,7 +939,7 @@ Deno.serve(async (req) => {
         // mappings against the CRM layout.
         if (dryRun) {
           return new Response(
-            JSON.stringify({ success: true, dry_run: true, lead_record: leadRecord }),
+            JSON.stringify({ success: true, dry_run: true, lead_record: leadRecord, icg_payload: icgPayload }),
             { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
           );
         }
@@ -1070,6 +1079,9 @@ Deno.serve(async (req) => {
     } catch (zohoErr) {
       console.error("Zoho CRM lead sync failed (non-blocking):", zohoErr);
     }
+
+    // Forward to the Infocredit Group CRM (non-blocking; never fails the form).
+    if (!dryRun) await forwardLeadToIcg(icgPayload);
 
     try {
       const resendApiKey = Deno.env.get("RESEND_API_KEY");
