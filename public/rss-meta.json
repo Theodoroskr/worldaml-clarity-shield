@@ -1,7 +1,11 @@
 {
-  "anchor": "2026-11-12T05:17:30.348Z",
-  "totalArticles": 18,
+  "anchor": "2026-11-12T05:20:12.452Z",
+  "totalArticles": 26,
   "releasedCount": 18,
-  "upcomingCount": 0,
-  "nextRelease": null
+  "upcomingCount": 8,
+  "nextRelease": {
+    "date": "2026-11-13T00:00:00.000Z",
+    "title": "How to Choose an AML Screening Provider: 12 Questions to Ask Before You Sign",
+    "slug": "how-to-choose-aml-screening-provider"
+  }
 }
