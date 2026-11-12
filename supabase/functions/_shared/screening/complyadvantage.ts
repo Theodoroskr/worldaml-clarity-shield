@@ -291,24 +291,15 @@ export class ComplyAdvantageAdapter implements ScreeningProviderAdapter {
     });
   }
 
-  async retrieveMonitoringChanges(since: string): Promise<MonitoringChange[]> {
-    const body = await this.request(`/users/updates?from=${encodeURIComponent(since)}`);
-    const content = (body?.content as Record<string, unknown>) ?? {};
-    const items = (content?.data as Array<Record<string, unknown>>) ?? [];
-    return items.map((item) => {
-      const type = String(item?.update_type ?? "profile_updated");
-      return {
-        provider_monitor_id: String(item?.search_id ?? ""),
-        change_type: type,
-        change_description: describeChange(type),
-        details: { summary: item?.summary ?? null },
-        detected_at: String(item?.created_at ?? new Date().toISOString()),
-      };
-    });
+  async retrieveMonitorDifferences(providerSearchId: string, date: string): Promise<MonitoringChange | null> {
+    const body = await this.request(
+      `/searches/${encodeURIComponent(providerSearchId)}/monitor/differences?date=${encodeURIComponent(date)}`,
+    );
+    return monitorDifferencesToChange(providerSearchId, date, body?.content);
   }
 
   async acknowledgeMonitoringChange(providerSearchId: string): Promise<void> {
-    await this.request(`/searches/${encodeURIComponent(providerSearchId)}/monitors/acknowledge`, {
+    await this.request(`/searches/${encodeURIComponent(providerSearchId)}/monitor/acknowledge`, {
       method: "POST",
       body: JSON.stringify({}),
     });
@@ -484,6 +475,56 @@ function attr(
     match_value: matchValue,
     assessment: compare(subjectValue, matchValue),
     sort_order: order,
+  };
+}
+
+/**
+ * Collapses one monitored search's daily differences into a single change, so
+ * each monitored entity gets at most one alert per day.
+ */
+export function monitorDifferencesToChange(
+  providerSearchId: string,
+  date: string,
+  content: unknown,
+): MonitoringChange | null {
+  const items = (Array.isArray(content) ? content : []) as Array<Record<string, unknown>>;
+  if (!items.length) return null;
+
+  const entities = items.map((i) => {
+    const changes = (i?.changes as Record<string, Record<string, unknown[]>>) ?? {};
+    return {
+      action: String(i?.action ?? "updated").toLowerCase(),
+      name: String(i?.name ?? ""),
+      entity_id: String(i?.entity_id ?? ""),
+      listing_types: ((i?.listing_types as string[]) ?? []).map(String),
+      added_types: ((changes?.listing_types?.added as string[]) ?? []).map(String),
+    };
+  });
+
+  const has = (pred: (e: (typeof entities)[number]) => boolean) => entities.some(pred);
+  const types = (e: (typeof entities)[number]) => [...e.listing_types, ...e.added_types].map(normaliseCategory);
+  const isNew = (e: (typeof entities)[number]) => e.action === "added";
+  const isUpd = (e: (typeof entities)[number]) => e.action === "updated";
+
+  let type = "profile_updated";
+  if (has((e) => isNew(e) && types(e).includes("sanctions"))) type = "new_sanction";
+  else if (has((e) => isUpd(e) && e.added_types.map(normaliseCategory).includes("sanctions"))) type = "new_sanction";
+  else if (has((e) => isNew(e) && types(e).includes("pep_rca"))) type = "new_pep";
+  else if (has((e) => isNew(e) && types(e).includes("adverse_media"))) type = "new_media";
+  else if (has((e) => isUpd(e) && types(e).includes("sanctions"))) type = "sanction_updated";
+  else if (has((e) => isUpd(e) && types(e).includes("pep_rca"))) type = "pep_updated";
+  else if (entities.every((e) => e.action === "removed")) type = "match_removed";
+
+  const count = (a: string) => entities.filter((e) => e.action === a).length;
+  return {
+    provider_monitor_id: providerSearchId,
+    change_type: type,
+    change_description: describeChange(type),
+    details: {
+      summary: `${count("added")} new, ${count("updated")} updated, ${count("removed")} removed`,
+      entities,
+    },
+    detected_at: new Date(`${date}T00:00:00Z`).toISOString(),
   };
 }
 

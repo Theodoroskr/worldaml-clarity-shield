@@ -180,7 +180,12 @@ export interface ScreeningProviderAdapter {
   ): Promise<void>;
   startMonitoring(providerSearchId: string): Promise<string>;
   stopMonitoring(providerSearchId: string): Promise<void>;
-  retrieveMonitoringChanges(since: string): Promise<MonitoringChange[]>;
+  /**
+   * Changes the provider detected on one monitored search on a given UTC day
+   * (yyyy-mm-dd). Returns null when nothing changed. There is no account-wide
+   * change feed, so callers iterate their own active monitors.
+   */
+  retrieveMonitorDifferences(providerSearchId: string, date: string): Promise<MonitoringChange | null>;
   acknowledgeMonitoringChange(providerSearchId: string): Promise<void>;
   addProviderComment(providerSearchId: string, comment: string): Promise<void>;
 }
