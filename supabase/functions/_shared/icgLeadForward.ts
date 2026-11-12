@@ -129,3 +129,24 @@ export async function forwardLeadToIcg(payload: Record<string, unknown>): Promis
   }
   return false;
 }
+
+/**
+ * Side-effect-free key check: posts an empty body, which the receiver rejects
+ * as invalid (400) when the key is accepted, or 401 when it is not.
+ */
+export async function checkIcgKey(): Promise<"accepted" | "rejected" | "missing" | "unreachable"> {
+  const key = (globalThis as any).Deno?.env.get("ICG_LEAD_WEBHOOK_KEY");
+  if (!key) return "missing";
+  try {
+    const res = await fetch(ICG_LEADS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-lead-api-key": key },
+      body: "{}",
+      signal: AbortSignal.timeout(8000),
+    });
+    await res.text().catch(() => "");
+    return res.status === 401 ? "rejected" : res.status === 400 ? "accepted" : "unreachable";
+  } catch {
+    return "unreachable";
+  }
+}
