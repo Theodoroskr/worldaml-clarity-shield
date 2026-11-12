@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createClient } from "@supabase/supabase-js";
-
-const SUPABASE_URL = "https://uxjjxnnyrjkhcggptihx.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4amp4bm55cmpraGNnZ3B0aWh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMTE5MzIsImV4cCI6MjA4NTU4NzkzMn0.19w0NamKWVZHENxcfXxVNgmhywd3PQUKdKaO3bh_WrQ";
+import { publicClient as supabase } from "./helpers/academyTestClient";
 
 const MIN_QUIZ_QUESTIONS = 9;
 const MIN_LEARNING_OUTCOMES = 3;
@@ -11,7 +7,21 @@ const MIN_PAID_DURATION_MINUTES = 20;
 const MIN_MODULES_ANY = 1;
 const MIN_MODULES_PAID = 2;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/**
+ * Module counts come from the public get_academy_module_counts lookup (the
+ * same one the Academy listing uses), because module content itself is only
+ * readable by learners with course access.
+ */
+async function moduleCounts() {
+  const { data, error } = await supabase.rpc("get_academy_module_counts");
+  expect(error).toBeNull();
+  expect(data).toBeTruthy();
+  const counts = new Map<string, number>();
+  for (const row of (data ?? []) as Array<{ course_id: string; module_count: number }>) {
+    counts.set(row.course_id, Number(row.module_count));
+  }
+  return counts;
+}
 
 describe("Academy paid-credential standard", () => {
   it("every published course has learning_outcomes populated", async () => {
@@ -93,16 +103,7 @@ describe("Academy paid-credential standard", () => {
     expect(coursesError).toBeNull();
     expect(courses).toBeTruthy();
 
-    const { data: modules, error: modulesError } = await supabase
-      .from("academy_modules")
-      .select("course_id");
-
-    expect(modulesError).toBeNull();
-
-    const counts = new Map<string, number>();
-    for (const m of modules ?? []) {
-      counts.set(m.course_id, (counts.get(m.course_id) ?? 0) + 1);
-    }
+    const counts = await moduleCounts();
 
     const offenders = (courses ?? []).filter(
       (c) => (counts.get(c.id) ?? 0) < MIN_MODULES_ANY,
@@ -126,16 +127,7 @@ describe("Academy paid-credential standard", () => {
     expect(coursesError).toBeNull();
     expect(courses).toBeTruthy();
 
-    const { data: modules, error: modulesError } = await supabase
-      .from("academy_modules")
-      .select("course_id");
-
-    expect(modulesError).toBeNull();
-
-    const counts = new Map<string, number>();
-    for (const m of modules ?? []) {
-      counts.set(m.course_id, (counts.get(m.course_id) ?? 0) + 1);
-    }
+    const counts = await moduleCounts();
 
     const offenders = (courses ?? []).filter(
       (c) => (counts.get(c.id) ?? 0) < MIN_MODULES_PAID,

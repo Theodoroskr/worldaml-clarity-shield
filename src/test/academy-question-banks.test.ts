@@ -1,11 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { createClient } from "@supabase/supabase-js";
+import {
+  findAdminAccessToken,
+  signedInClient,
+} from "./helpers/academyTestClient";
 
-const SUPABASE_URL = "https://uxjjxnnyrjkhcggptihx.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4amp4bm55cmpraGNnZ3B0aWh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMTE5MzIsImV4cCI6MjA4NTU4NzkzMn0.19w0NamKWVZHENxcfXxVNgmhywd3PQUKdKaO3bh_WrQ";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/**
+ * The answer-key audit is admin-only. Provide an admin session through
+ * ACADEMY_ADMIN_ACCESS_TOKEN or `lovable auth-session --json --user <admin>`;
+ * without one these checks are skipped rather than reporting empty banks.
+ */
+const adminToken = findAdminAccessToken();
+const supabase = adminToken ? signedInClient(adminToken) : null;
 
 const REQUIRED_COUNT = 30;
 
@@ -127,15 +132,18 @@ type AuditRow = {
   correct_index: number;
 };
 
-describe("Foundational course question banks", () => {
+describe.skipIf(!supabase)("Foundational course question banks", () => {
   for (const slug of Object.keys(EXPECTED_CORRECT)) {
     describe(slug, () => {
       it(`has exactly ${REQUIRED_COUNT} questions and correct_index points to the ✅ option`, async () => {
-        const { data, error } = await supabase.rpc(
+        const { data, error } = await supabase!.rpc(
           "academy_question_bank_audit",
         );
 
-        expect(error).toBeNull();
+        expect(
+          error,
+          "academy_question_bank_audit refused the session - sign the tests in as an admin",
+        ).toBeNull();
         expect(data).toBeTruthy();
 
         const rows = ((data ?? []) as AuditRow[]).filter(
