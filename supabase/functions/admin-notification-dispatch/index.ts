@@ -23,6 +23,7 @@ const EVENT_META: Record<string, { label: string; category: string; email: boole
   business_enquiry: { label: "New Business Enquiry", category: "Business", email: true },
   report_failed: { label: "Scheduled Report Failed", category: "Reports", email: true },
   security_issue: { label: "Security Issue", category: "Security", email: true },
+  screening_monitoring_failed: { label: "Screening Monitoring Check Failed", category: "Security", email: true },
 };
 
 const ROLE_CATEGORIES: Record<string, string[]> = {
