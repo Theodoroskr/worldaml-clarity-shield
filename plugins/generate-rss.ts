@@ -165,6 +165,13 @@ function buildRssXml(items: RssItem[]): string {
         .filter(Boolean)
         .map((c) => `    <category>${escapeXml(c)}</category>`)
         .join("\n");
+      const imgHtml = it.heroImage
+        ? `<p><img src="${escapeXml(it.heroImage)}" alt="${escapeXml(it.heroImageAlt ?? it.title)}" /></p>\n`
+        : "";
+      const imgXml = it.heroImage
+        ? `\n    <enclosure url="${escapeXml(it.heroImage)}" type="image/jpeg" />` +
+          `\n    <media:content url="${escapeXml(it.heroImage)}" medium="image" />`
+        : "";
       return `  <item>
     <title>${escapeXml(it.title)}</title>
     <link>${url}</link>
@@ -172,8 +179,8 @@ function buildRssXml(items: RssItem[]): string {
     <pubDate>${toRfc822(it.date)}</pubDate>
     <description>${cdata(it.description)}</description>
     <content:encoded>${cdata(
-      `${it.contentHtml}\n<p><a href="${url}">Read the full article on WorldAML</a></p>`
-    )}</content:encoded>
+      `${imgHtml}${it.contentHtml}\n<p><a href="${url}">Read the full article on WorldAML</a></p>`
+    )}</content:encoded>${imgXml}
     <author>${FEED_AUTHOR_EMAIL} (${escapeXml(it.author)})</author>
     <dc:creator>${cdata(it.author)}</dc:creator>
 ${cats}
@@ -182,7 +189,7 @@ ${cats}
     .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:media="http://search.yahoo.com/mrss/">
 <channel>
   <title>${escapeXml(FEED_TITLE)}</title>
   <link>${BASE_URL}/blog</link>
