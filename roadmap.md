@@ -33,5 +33,5 @@
 
 ## Blog & feed (11 Nov 2026)
 - [x] Full article text in the RSS feed (for Make auto-posting)
-- [ ] New articles twice a week (waiting: owner choice of how articles are created)
+- [x] 8 new articles scheduled Tue/Fri, 13 Nov – 8 Dec 2026 (next batch needed before 8 Dec)
 - [ ] Soft 404 fix: unknown addresses return the homepage head with 200
