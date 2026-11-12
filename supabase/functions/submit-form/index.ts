@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend";
 import { normaliseCode, recordReferral, resolvePartnerByCode } from "../_shared/referral.ts";
-import { buildIcgLeadPayload, forwardLeadToIcg } from "../_shared/icgLeadForward.ts";
+import { buildIcgLeadPayload, checkIcgKey, forwardLeadToIcg } from "../_shared/icgLeadForward.ts";
 
 
 const corsHeaders = {
@@ -939,7 +939,7 @@ Deno.serve(async (req) => {
         // mappings against the CRM layout.
         if (dryRun) {
           return new Response(
-            JSON.stringify({ success: true, dry_run: true, lead_record: leadRecord, icg_payload: icgPayload }),
+            JSON.stringify({ success: true, dry_run: true, lead_record: leadRecord, icg_payload: icgPayload, icg_key: await checkIcgKey() }),
             { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
           );
         }
