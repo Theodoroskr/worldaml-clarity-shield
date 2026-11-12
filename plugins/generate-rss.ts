@@ -26,6 +26,9 @@ interface RssItem {
   tags: string[];
   /** Full article body as HTML, for <content:encoded>. */
   contentHtml: string;
+  /** Absolute https URL of the post's hero image, if any. */
+  heroImage?: string;
+  heroImageAlt?: string;
 }
 
 function escapeHtml(s: string): string {
@@ -93,6 +96,8 @@ export function extractPosts(): RssItem[] {
     category: p.category || "Compliance",
     tags: p.tags ?? [],
     contentHtml: sectionsToHtml(p.content ?? []),
+    heroImage: p.heroImage,
+    heroImageAlt: p.heroImageAlt ?? p.title,
   }));
   // Oldest first — drip release consumes backlog chronologically
   posts.sort((a, b) => a.date.localeCompare(b.date));
