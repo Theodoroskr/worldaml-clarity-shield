@@ -29,6 +29,15 @@ export interface BlogSection {
   rows?: string[][];
 }
 
+/**
+ * A post goes live on its `date` (UTC calendar day). Future-dated posts stay
+ * hidden from the blog, the feed and the Google page list until that day, so a
+ * batch of articles can be written ahead and released on a schedule.
+ */
+export function isPostPublished(post: Pick<BlogPost, "date">, now: Date = new Date()): boolean {
+  return post.date <= now.toISOString().slice(0, 10);
+}
+
 export const blogCategories = [
   "All",
   "AML Compliance",
@@ -1960,3 +1969,10 @@ export const blogPosts: BlogPost[] = [
     ],
   },
 ];
+
+/** Live posts only, newest first. */
+export function getPublishedPosts(now: Date = new Date()): BlogPost[] {
+  return blogPosts
+    .filter((p) => isPostPublished(p, now))
+    .sort((a, b) => b.date.localeCompare(a.date));
+}

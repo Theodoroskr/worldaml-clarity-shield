@@ -5,17 +5,18 @@ import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
-import { blogPosts, blogCategories } from "@/data/blogPosts";
+import { getPublishedPosts, blogCategories } from "@/data/blogPosts";
 import { cn } from "@/lib/utils";
 
 const Blog = () => {
   const [activeCategory, setActiveCategory] = useState("All");
 
+  const blogPosts = useMemo(() => getPublishedPosts(), []);
   const filtered = useMemo(() =>
     activeCategory === "All"
       ? blogPosts
       : blogPosts.filter((p) => p.category === activeCategory),
-    [activeCategory]
+    [activeCategory, blogPosts]
   );
 
   const [featured, ...rest] = filtered;

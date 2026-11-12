@@ -5,7 +5,7 @@ import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
-import { blogPosts, type BlogSection } from "@/data/blogPosts";
+import { blogPosts, isPostPublished, type BlogSection } from "@/data/blogPosts";
 import { cn } from "@/lib/utils";
 
 const SectionRenderer = ({ section }: { section: BlogSection }) => {
@@ -96,12 +96,15 @@ const SectionRenderer = ({ section }: { section: BlogSection }) => {
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
-  const post = useMemo(() => blogPosts.find((p) => p.slug === slug), [slug]);
+  const post = useMemo(
+    () => blogPosts.find((p) => p.slug === slug && isPostPublished(p)),
+    [slug]
+  );
 
   if (!post) return <Navigate to="/blog" replace />;
 
   const related = blogPosts.filter(
-    (p) => post.relatedSlugs?.includes(p.slug)
+    (p) => post.relatedSlugs?.includes(p.slug) && isPostPublished(p)
   );
 
   const structuredData = {

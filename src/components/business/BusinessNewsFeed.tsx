@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useRSSFeeds } from "@/hooks/useRSSFeeds";
-import { blogPosts } from "@/data/blogPosts";
+import { getPublishedPosts } from "@/data/blogPosts";
 
 const fmt = (d: string) =>
   new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
@@ -13,9 +13,7 @@ const fmt = (d: string) =>
 export function BusinessNewsFeed() {
   const { items, isLoading, isLive } = useRSSFeeds();
   const news = items.slice(0, 5);
-  const insights = [...blogPosts]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 4);
+  const insights = getPublishedPosts().slice(0, 4);
 
   return (
     <section className="grid lg:grid-cols-2 gap-4">
