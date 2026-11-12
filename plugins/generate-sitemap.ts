@@ -16,6 +16,7 @@ const BASE_URL = "https://worldaml.com";
 // course a visitor can start or buy (a test keeps them in step with the
 // pricing map), so each listed course URL also has its own title.
 import { PUBLIC_ACADEMY_COURSE_SLUGS } from "../src/data/academyCourseSeo";
+import { getPublishedPosts } from "../src/data/blogPosts";
 
 const academyCourseSlugs = (): string[] => [...PUBLIC_ACADEMY_COURSE_SLUGS];
 
@@ -187,9 +188,8 @@ ${urls}
 export function generateSitemap(root: string): string {
   const entries: SitemapEntry[] = [...STATIC_ROUTES];
 
-  // Dynamic: blog posts → /blog/:slug
-  const blogSlugs = extractSlugs(path.join(root, "src/data/blogPosts.ts"));
-  for (const slug of blogSlugs) {
+  // Dynamic: blog posts → /blog/:slug (only posts whose release date has arrived)
+  for (const { slug } of getPublishedPosts()) {
     entries.push({ path: `/blog/${slug}`, changefreq: "monthly", priority: 0.7 });
   }
 

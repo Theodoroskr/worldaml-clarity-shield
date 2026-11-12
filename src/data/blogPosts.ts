@@ -29,6 +29,15 @@ export interface BlogSection {
   rows?: string[][];
 }
 
+/**
+ * A post goes live on its `date` (UTC calendar day). Future-dated posts stay
+ * hidden from the blog, the feed and the Google page list until that day, so a
+ * batch of articles can be written ahead and released on a schedule.
+ */
+export function isPostPublished(post: Pick<BlogPost, "date">, now: Date = new Date()): boolean {
+  return post.date <= now.toISOString().slice(0, 10);
+}
+
 export const blogCategories = [
   "All",
   "AML Compliance",
@@ -1959,4 +1968,597 @@ export const blogPosts: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: "how-to-choose-aml-screening-provider",
+    title: "How to Choose an AML Screening Provider: 12 Questions to Ask Before You Sign",
+    description:
+      "A buyer's guide to sanctions, PEP and adverse media screening vendors: the 12 questions that reveal data coverage, false-positive rates, audit evidence, integration effort and total cost.",
+    category: "Sanctions",
+    date: "2026-11-13",
+    readTime: 9,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Compliance Research",
+    tags: ["AML screening", "vendor selection", "sanctions screening", "PEP screening", "RFP", "AML software"],
+    relatedSlugs: ["sanctions-screening-best-practices", "worldcompliance-vs-world-check", "pep-screening-guide"],
+    content: [
+      {
+        type: "intro",
+        text: "Most AML screening tools look the same in a demo: a search box, a list of matches and a risk score. The differences that matter — how complete the data is, how many false alerts your team will clear every day, and whether you can prove to a regulator what happened to an alert eight months ago — only show up once you are live. These 12 questions help you find them before you sign.",
+      },
+      { type: "h2", text: "Scope: what must the tool actually cover?" },
+      {
+        type: "p",
+        text: "Start with your obligations, not the vendor's feature list. Write down the jurisdictions you operate in, the customer types you onboard (individuals, companies, beneficial owners, counterparties) and the points at which you must screen: onboarding, ongoing monitoring and payments.",
+      },
+      {
+        type: "ol",
+        items: [
+          "Which sanctions, PEP and watchlists are covered — by name? Ask for the source list, not a headline count. 'Global coverage' should include the domestic lists of every market you operate in, not only OFAC, the EU, the UN and the UK.",
+          "How quickly are list changes reflected? Ask for the typical time between an authority publishing an update and the change being searchable, and what happens to customers you have already screened.",
+          "Does screening reach beneficial owners, directors and connected parties, or only the name you type in? Ownership-based sanctions risk sits in the structure, not just the customer record.",
+        ],
+      },
+      { type: "h2", text: "Data quality: where does it come from?" },
+      {
+        type: "ol",
+        items: [
+          "Is the data collected in-house, licensed from a third party, or scraped? Each model is valid, but you need to know who is accountable for accuracy.",
+          "What identifiers does each record carry? Dates of birth, nationalities, passport numbers and company registration numbers are what let your team discount a false match quickly.",
+          "How are PEPs defined and kept current? Ask how relatives and close associates are captured and how often PEP profiles are reviewed.",
+        ],
+      },
+      { type: "h2", text: "Matching: how many false alerts will you clear?" },
+      {
+        type: "p",
+        text: "False positives are the hidden cost of screening. A tool tuned too loosely buries analysts in alerts; one tuned too tightly misses a sanctioned name with two letters changed — exactly the test regulators like to run.",
+      },
+      {
+        type: "ol",
+        items: [
+          "Will the vendor run a sample of your own customer names through the system before you buy? A false-positive rate measured on the vendor's demo data tells you very little.",
+          "Can you see why each match was returned — which part of the name matched, and whether date of birth or nationality agreed? Explainable matching speeds up review and makes tuning defensible.",
+          "How does the engine handle transliteration, name order and non-Latin scripts? Shared-token collisions on Arabic, Chinese and Slavic names are the most common source of noise.",
+        ],
+      },
+      { type: "h2", text: "Evidence, integration and cost" },
+      {
+        type: "ol",
+        items: [
+          "Can every decision be reconstructed later? You need the list version used, every match returned, who cleared it, when and why — kept for at least five years and exportable for an audit.",
+          "How will it connect to your onboarding and payment flows? Ask for API documentation, webhook support, batch re-screening and realistic implementation timelines.",
+          "What is the full annual cost? Include per-search or per-entity fees, monitoring charges, seat licences, set-up fees and the price of adding a jurisdiction later.",
+        ],
+      },
+      {
+        type: "table",
+        headers: ["Area", "Red flag in a vendor answer"],
+        rows: [
+          ["Coverage", "A list count with no named sources"],
+          ["Updates", "'Daily' with no answer on how existing customers are re-screened"],
+          ["Matching", "Refuses to test on your own data"],
+          ["Evidence", "Match history is overwritten when lists change"],
+          ["Cost", "Pricing only available after a long sales process"],
+        ],
+      },
+      { type: "h2", text: "Run a short pilot before committing" },
+      {
+        type: "p",
+        text: "The most reliable way to compare providers is a parallel run: screen the same few thousand historical customers through each shortlisted tool and compare alert volumes, true matches found and the time your analysts spend per alert. Two to four weeks is usually enough.",
+      },
+      {
+        type: "callout",
+        text: "WorldAML Suite screens against 1,900+ global lists, shows why each match was returned and keeps a full decision history for audits. See the sources we cover at /resources/sanctions-lists or request a pilot at /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "eu-aml-package-amla-2027-guide",
+    title: "The EU AML Package and AMLA: What Changes Before 10 July 2027",
+    description:
+      "What the EU Anti-Money Laundering Regulation, the sixth directive and the new AMLA authority mean for obliged entities — key dates, new rules and a readiness checklist for 2027.",
+    category: "Regulatory Updates",
+    date: "2026-11-17",
+    readTime: 10,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Compliance Research",
+    tags: ["AMLA", "AMLR", "AMLD6", "EU AML package", "single rulebook", "EU regulation"],
+    relatedSlugs: ["aml-compliance-checklist-2025", "beneficial-ownership-guide", "risk-based-approach-aml"],
+    content: [
+      {
+        type: "intro",
+        text: "For the first time, the EU will have one set of anti-money laundering rules that applies directly in every Member State. The EU AML package — a Regulation (AMLR), a sixth Directive (AMLD6) and the Regulation creating the Anti-Money Laundering Authority (AMLA) — applies from 10 July 2027. With fewer than eight months to go, here is what changes and what firms should be doing now.",
+      },
+      { type: "h2", text: "The three parts of the package" },
+      {
+        type: "table",
+        headers: ["Instrument", "What it does"],
+        rows: [
+          ["AML Regulation (AMLR)", "The single rulebook: customer due diligence, beneficial ownership, reporting and internal controls, directly applicable without national transposition"],
+          ["Sixth AML Directive (AMLD6)", "Rules for national supervisors, financial intelligence units and registers, transposed into national law"],
+          ["AMLA Regulation", "Creates the EU Authority for Anti-Money Laundering and Countering the Financing of Terrorism, based in Frankfurt"],
+        ],
+      },
+      { type: "h2", text: "What AMLA does — and when" },
+      {
+        type: "p",
+        text: "AMLA began operating in summer 2025 and took over the European Banking Authority's AML mandates in January 2026. It is writing the technical standards that fill in the detail of the single rulebook, coordinating national supervisors and supporting cooperation between financial intelligence units.",
+      },
+      {
+        type: "p",
+        text: "From 2028, AMLA will directly supervise up to 40 of the highest-risk financial institutions or groups. Firms operating in at least six Member States are eligible, and the first selection round takes place in 2027 based on each group's residual risk profile. Everyone else stays with their national supervisor, but under the same rulebook.",
+      },
+      { type: "h2", text: "Key changes for obliged entities" },
+      {
+        type: "ul",
+        items: [
+          "One rulebook: national gold-plating of due diligence rules is largely replaced by directly applicable EU requirements, which helps firms operating across borders.",
+          "Targeted financial sanctions: firms must assess and control the risk of sanctions evasion, not only money laundering and terrorist financing.",
+          "Beneficial ownership: the 25% ownership threshold is harmonised and ownership and control structures must be understood in more depth, with more detailed register data.",
+          "Cash limit: an EU-wide cap of €10,000 on cash payments for goods and services, with Member States free to set a lower limit.",
+          "New obliged entities: crypto-asset service providers are fully in scope, and top-tier professional football clubs and agents follow later in the transition.",
+          "Ongoing due diligence: customer information must be kept up to date on a risk basis, with higher-risk customers reviewed more often.",
+        ],
+      },
+      { type: "h2", text: "A readiness checklist for 2027" },
+      {
+        type: "ol",
+        items: [
+          "Map your current policies against the AMLR and record every gap — especially where your national rules differed from the new EU standard.",
+          "Add sanctions-evasion risk to your business-wide risk assessment and show how your controls address it.",
+          "Review beneficial ownership procedures for complex and multi-layered structures, and plan how you will report discrepancies to central registers.",
+          "Check that customer files can be refreshed on a risk-based schedule, and estimate the remediation volume for files that fall short.",
+          "Follow AMLA's consultations on draft technical standards; final texts will set the detail for due diligence, risk assessment and supervision.",
+          "If you operate in six or more Member States, prepare for the data requests national supervisors use to assess eligibility for direct supervision.",
+        ],
+      },
+      {
+        type: "callout",
+        text: "Our EU AML Training Course covers the AMLR, AMLD6 and AMLA in depth — see /academy/aml-europe. For teams preparing systems, WorldAML Suite combines screening, monitoring and case management with a full audit trail: /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "how-to-become-aml-analyst",
+    title: "How to Become an AML Analyst: Skills, Certifications and Career Path",
+    description:
+      "What AML analysts do, the skills employers look for, which certifications help, and how a career can progress from KYC analyst to MLRO — with free ways to get started.",
+    category: "AML Compliance",
+    date: "2026-11-20",
+    readTime: 8,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Compliance Research",
+    tags: ["AML careers", "AML analyst", "KYC analyst", "AML certification", "MLRO", "compliance jobs"],
+    relatedSlugs: ["mlro-responsibilities-obligations", "transaction-monitoring-red-flags", "kyc-vs-kyb-differences"],
+    content: [
+      {
+        type: "intro",
+        text: "Anti-money laundering is one of the few areas of finance where demand for people keeps growing regardless of the economic cycle. Banks, payment firms, crypto exchanges, gaming operators, accountants and law firms all need people who can spot suspicious activity and document their decisions. Here is what the job involves and how to get into it.",
+      },
+      { type: "h2", text: "What an AML analyst does day to day" },
+      {
+        type: "ul",
+        items: [
+          "Reviews new customers: checks identity documents, company structures and beneficial owners (KYC and KYB).",
+          "Clears screening alerts: decides whether a sanctions or PEP match is the same person or a false positive, and records why.",
+          "Investigates transaction monitoring alerts: looks at account activity, source of funds and customer behaviour to decide whether something is unusual.",
+          "Escalates suspicions: writes clear internal reports so the MLRO can decide whether to file a suspicious activity report.",
+          "Supports periodic reviews and remediation projects when customer files need to be brought up to date.",
+        ],
+      },
+      { type: "h2", text: "The skills employers look for" },
+      {
+        type: "table",
+        headers: ["Skill", "Why it matters"],
+        rows: [
+          ["Attention to detail", "Most alerts are cleared or escalated on small inconsistencies — a date, an address, an ownership percentage"],
+          ["Clear writing", "Every decision must be documented so that an auditor can understand it months later"],
+          ["Investigative curiosity", "Good analysts ask why money moved, not only whether a rule was triggered"],
+          ["Regulatory knowledge", "You need to know what the law requires: due diligence levels, reporting duties, record keeping"],
+          ["Data confidence", "Spreadsheets, case management tools and basic data analysis are part of daily work"],
+        ],
+      },
+      { type: "h2", text: "Do you need a degree or certification?" },
+      {
+        type: "p",
+        text: "Many analysts start without a specialist degree; law, finance, criminology and languages backgrounds are all common. What helps most is showing that you understand the fundamentals before your first interview. An entry-level certificate gives you the vocabulary — risk-based approach, CDD and EDD, typologies, SARs — and a credential you can list on your CV.",
+      },
+      {
+        type: "p",
+        text: "Experienced professionals often add a recognised industry qualification later, such as ACAMS's CAMS or one of the International Compliance Association's AML certificates and diplomas. These carry fees and study time, so most people take them once they are already working in compliance, often with employer support.",
+      },
+      { type: "h2", text: "A typical career path" },
+      {
+        type: "ol",
+        items: [
+          "KYC or onboarding analyst — learning documents, due diligence and screening.",
+          "Transaction monitoring or EDD analyst — investigating alerts and high-risk customers.",
+          "Senior analyst or investigator — complex cases, quality checks, mentoring.",
+          "Team lead or compliance manager — owning processes, metrics and training.",
+          "Deputy MLRO or MLRO — personal regulatory responsibility for the firm's AML framework.",
+        ],
+      },
+      { type: "h2", text: "How to stand out when applying" },
+      {
+        type: "ul",
+        items: [
+          "Complete a free fundamentals course and add the certificate link to your CV and LinkedIn profile.",
+          "Learn one sector well — payments, crypto, gaming or banking — and the typologies that come with it.",
+          "Practise writing a short case summary: facts, red flags, what you checked and your recommendation.",
+          "Follow regulatory news from FATF and your national regulator so you can talk about current issues.",
+        ],
+      },
+      {
+        type: "callout",
+        text: "Start with WorldAML Academy's free AML Fundamentals course: pass the final assessment with 80% or more to earn a verifiable, CPD-accredited certificate you can share with employers. Begin at /academy/aml-fundamentals.",
+      },
+    ],
+  },
+  {
+    slug: "aml-compliance-fintech-payment-institutions",
+    title: "AML Compliance for Fintechs and Payment Institutions: A Practical Guide",
+    description:
+      "How payment institutions, e-money firms and fintechs can build an AML programme that scales: risk assessment, digital onboarding, real-time screening, transaction monitoring and governance.",
+    category: "AML Compliance",
+    date: "2026-11-24",
+    readTime: 9,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Compliance Research",
+    tags: ["fintech AML", "payment institutions", "e-money", "transaction monitoring", "digital onboarding", "EMI"],
+    relatedSlugs: ["psd2-open-banking-aml-obligations", "transaction-monitoring-red-flags", "aml-compliance-checklist-2025"],
+    content: [
+      {
+        type: "intro",
+        text: "Fintechs grow fast, onboard customers remotely and move money in seconds. Those same strengths are what criminals look for. Supervisors across Europe, the UK and the US have repeatedly found that controls at fast-growing payment and e-money firms did not keep pace with customer numbers. This guide sets out the core of an AML programme that can scale with the business.",
+      },
+      { type: "h2", text: "1. Start with an honest risk assessment" },
+      {
+        type: "p",
+        text: "Your business-wide risk assessment should reflect how your product can be abused, not a generic template. Consider customer types, countries you serve, delivery channels, and product features such as instant payouts, card issuing, cross-border transfers or crypto on-ramps.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Which features let money move fastest, or to the most places, with the least friction?",
+          "Where do you rely on partners — banks, card schemes, agents — and who performs which checks?",
+          "Which customer segments are growing fastest, and has the risk assessment caught up with them?",
+        ],
+      },
+      { type: "h2", text: "2. Digital onboarding that is fast and defensible" },
+      {
+        type: "p",
+        text: "Remote onboarding is accepted by regulators when it is reliable and documented. Combine document verification, liveness or biometric checks, and data checks against independent sources. For business customers, verify the company, its directors and its beneficial owners before the account goes live.",
+      },
+      {
+        type: "callout",
+        text: "Speed is not a defence. If growth targets lead you to open accounts before checks are complete, document the risk decision, the limits applied and the deadline for completing verification.",
+      },
+      { type: "h2", text: "3. Screening at onboarding and on every payment" },
+      {
+        type: "p",
+        text: "Payment firms need two kinds of screening: customer screening against sanctions and PEP lists at onboarding and whenever lists change, and payment screening of counterparties and payment details in real time. Missed sanctions matches are among the most serious failures a payment firm can have, because a payment that has left cannot easily be recalled.",
+      },
+      { type: "h2", text: "4. Transaction monitoring tuned to your product" },
+      {
+        type: "ul",
+        items: [
+          "Rapid movement of funds in and out of an account with no economic purpose",
+          "Many small incoming payments from unrelated senders — a sign of money mule activity",
+          "Activity that does not match the expected turnover declared at onboarding",
+          "Sudden changes in device, location or payout destination",
+          "Payments to or from high-risk jurisdictions without a clear business reason",
+        ],
+      },
+      {
+        type: "p",
+        text: "Start with rules that reflect your risk assessment, measure how many alerts each rule produces and how many lead to escalation, and retune regularly. Document every tuning decision — supervisors will ask why a threshold was set where it is.",
+      },
+      { type: "h2", text: "5. Governance that keeps pace with growth" },
+      {
+        type: "ol",
+        items: [
+          "Appoint an MLRO with real authority, resources and a direct line to the board.",
+          "Report AML metrics to the board: alert backlogs, overdue reviews, SAR volumes and onboarding exceptions.",
+          "Plan compliance headcount and tooling as part of every growth forecast, not after a backlog appears.",
+          "Train staff on the typologies specific to your product, and keep records of who completed what.",
+          "Commission independent testing of the AML framework at least annually or after major product changes.",
+        ],
+      },
+      {
+        type: "callout",
+        text: "WorldAML Suite brings onboarding checks, screening, transaction monitoring and case management into one workspace with a single audit trail. Talk to us about a pilot at /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "reduce-false-positives-sanctions-screening",
+    title: "How to Reduce False Positives in Sanctions Screening Without Missing Real Matches",
+    description:
+      "Practical ways to cut false positive sanctions and PEP alerts: better customer data, secondary identifiers, smarter name matching, risk-based thresholds and documented tuning.",
+    category: "Sanctions",
+    date: "2026-11-27",
+    readTime: 8,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Compliance Research",
+    tags: ["false positives", "sanctions screening", "name matching", "fuzzy matching", "PEP screening", "alert tuning"],
+    relatedSlugs: ["sanctions-screening-best-practices", "pep-screening-guide", "how-to-choose-aml-screening-provider"],
+    content: [
+      {
+        type: "intro",
+        text: "In many screening programmes, the overwhelming majority of alerts turn out to be false positives. Each one costs analyst time, delays onboarding and, at scale, makes it more likely that a real match is cleared in a hurry. The goal is not fewer alerts at any price — it is fewer alerts without missing the sanctioned name with two letters changed.",
+      },
+      { type: "h2", text: "Why false positives happen" },
+      {
+        type: "ul",
+        items: [
+          "Common names: thousands of customers share names with listed individuals.",
+          "Missing data: without a date of birth or nationality, the engine can only compare names.",
+          "Transliteration: one Arabic, Cyrillic or Chinese name can be written in many Latin spellings.",
+          "Loose thresholds: fuzzy matching set very low to be safe returns matches on single shared words.",
+          "Over-broad lists: screening every customer against every list, regardless of relevance.",
+        ],
+      },
+      { type: "h2", text: "1. Fix the data you screen" },
+      {
+        type: "p",
+        text: "The cheapest improvement is usually upstream. Collect full names, dates of birth, nationalities and, for companies, registration numbers and countries at onboarding — and send them to the screening engine. Clean obvious errors such as titles in name fields, swapped first and last names, and placeholder dates.",
+      },
+      { type: "h2", text: "2. Use secondary identifiers to discount matches" },
+      {
+        type: "p",
+        text: "A name match where the date of birth is 30 years apart, or the nationality differs and the list entry has a passport number that does not match, can usually be discounted quickly. Configure your tool to show which identifiers agree and which conflict, so analysts decide on evidence rather than on a single score.",
+      },
+      { type: "h2", text: "3. Tune name matching — carefully" },
+      {
+        type: "table",
+        headers: ["Technique", "Effect", "Watch out for"],
+        rows: [
+          ["Name normalisation", "Treats accents, punctuation and word order consistently", "Over-normalising distinct names"],
+          ["Transliteration variants", "Matches different spellings of the same name", "Variant lists that are too broad"],
+          ["Risk-based thresholds", "Stricter matching for high-risk customers and payments", "Undocumented differences between segments"],
+          ["Stop-word handling", "Ignores common company words like 'Ltd' or 'Trading'", "Removing words that are part of a listed name"],
+        ],
+      },
+      {
+        type: "callout",
+        text: "Always test a tuning change against known variations of listed names before it goes live. A change that cuts alerts by half but misses a sanctioned name with one letter changed is a regulatory finding waiting to happen.",
+      },
+      { type: "h2", text: "4. Handle repeat alerts with care" },
+      {
+        type: "p",
+        text: "When the same customer keeps matching the same list entry, a reviewed and documented 'good guy' decision stops the alert from returning on every re-screen. Set a review date for each one, and make sure the suppression lifts automatically if either the customer data or the list entry changes.",
+      },
+      { type: "h2", text: "5. Measure, document and repeat" },
+      {
+        type: "ol",
+        items: [
+          "Track alert volume, false-positive rate and average handling time by list and customer segment.",
+          "Sample cleared alerts regularly to check that decisions were correct and well documented.",
+          "Run above- and below-the-line testing when thresholds change, and keep the results.",
+          "Record who approved each tuning change and why — auditors and supervisors will ask.",
+        ],
+      },
+      {
+        type: "callout",
+        text: "WorldAML Suite shows the basis of every match — name, date of birth, nationality — and records each analyst decision for audit. Learn the fundamentals in our free Sanctions Screening course at /academy/sanctions-screening-essentials, or talk to us at /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "uk-eccta-failure-to-prevent-fraud-companies-house-id",
+    title: "UK Economic Crime Act: Failure to Prevent Fraud and Companies House ID Checks Explained",
+    description:
+      "What the UK's Economic Crime and Corporate Transparency Act means now: the failure to prevent fraud offence in force since September 2025 and mandatory identity verification for directors and PSCs.",
+    category: "Regulatory Updates",
+    date: "2026-12-01",
+    readTime: 8,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Compliance Research",
+    tags: ["ECCTA", "failure to prevent fraud", "Companies House", "identity verification", "UK regulation", "PSC"],
+    relatedSlugs: ["beneficial-ownership-guide", "kyc-vs-kyb-differences", "eu-aml-package-amla-2027-guide"],
+    content: [
+      {
+        type: "intro",
+        text: "The Economic Crime and Corporate Transparency Act 2023 (ECCTA) is reshaping how UK companies prevent fraud and how the UK company register works. Two of its biggest changes are now live: a corporate offence of failure to prevent fraud, and mandatory identity verification for company directors and people with significant control (PSCs). Both matter for compliance teams — whether you are the company in scope or the firm relying on the register for due diligence.",
+      },
+      { type: "h2", text: "The failure to prevent fraud offence" },
+      {
+        type: "p",
+        text: "Since 1 September 2025, a large organisation can be criminally liable if an employee, agent, subsidiary or other associated person commits a specified fraud offence intending to benefit the organisation. Prosecutors do not need to show that senior managers ordered or knew about the fraud.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Who is in scope: large incorporated bodies, subsidiaries and partnerships, including incorporated charities — broadly those meeting two of three tests: more than 250 employees, more than £36 million turnover, more than £18 million in total assets.",
+          "Examples of conduct: dishonest sales practices, hiding important information from customers or investors, and dishonest practices in financial markets.",
+          "The defence: having reasonable fraud prevention procedures in place at the time of the fraud.",
+        ],
+      },
+      { type: "h2", text: "What reasonable procedures look like" },
+      {
+        type: "p",
+        text: "Government guidance follows six principles familiar from the Bribery Act. Use them to structure your fraud prevention framework and the evidence behind it.",
+      },
+      {
+        type: "table",
+        headers: ["Principle", "In practice"],
+        rows: [
+          ["Top-level commitment", "Board ownership, clear tone from the top, named accountable executives"],
+          ["Risk assessment", "A documented, regularly updated assessment of where associated persons could commit fraud for your benefit"],
+          ["Proportionate procedures", "Controls matched to the risks identified, not generic policies"],
+          ["Due diligence", "Checks on the people and partners who act on your behalf"],
+          ["Communication and training", "Staff understand the policy and how to speak up"],
+          ["Monitoring and review", "Testing whether controls work and improving them"],
+        ],
+      },
+      { type: "h2", text: "Companies House identity verification" },
+      {
+        type: "p",
+        text: "Identity verification became a legal requirement on 18 November 2025. New directors must verify before they can be appointed, and existing directors and PSCs were given a 12-month transition, generally tied to their next confirmation statement or an appointed date. Verification can be done directly with Companies House through GOV.UK One Login, or through an Authorised Corporate Service Provider.",
+      },
+      {
+        type: "p",
+        text: "With the transition window now closed, the register shows whether each director and PSC has verified. That is useful information for KYB — but it does not replace your own due diligence.",
+      },
+      { type: "h2", text: "What this means for compliance teams" },
+      {
+        type: "ol",
+        items: [
+          "If your organisation is in scope of the fraud offence, make sure the fraud risk assessment exists, is current, and covers agents, introducers and subsidiaries.",
+          "Add verification status from the Companies House register to your KYB checks for UK companies, and treat unverified directors or PSCs as a reason to ask questions.",
+          "Keep verifying beneficial ownership independently: register data is self-declared and a verified identity does not prove the ownership structure is complete.",
+          "Report discrepancies between what customers tell you and what the register shows, where your regime requires it.",
+        ],
+      },
+      {
+        type: "callout",
+        text: "WorldAML Suite helps teams run KYB checks, screen directors and owners, and keep a full audit trail of each review. Learn more at /contact-sales, or take our UK AML Training Course at /academy/aml-uk.",
+      },
+    ],
+  },
+  {
+    slug: "aml-obligations-accountants-lawyers-tcsps",
+    title: "AML Obligations for Accountants, Lawyers and Trust and Company Service Providers",
+    description:
+      "A practical guide to AML duties for accountants, lawyers, notaries and trust and company service providers: when the rules apply, due diligence, red flags, reporting and tipping off.",
+    category: "AML Compliance",
+    date: "2026-12-04",
+    readTime: 9,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Compliance Research",
+    tags: ["DNFBP", "accountants AML", "lawyers AML", "TCSP", "professional services", "FATF Recommendation 22"],
+    relatedSlugs: ["beneficial-ownership-guide", "edd-vs-sdd-enhanced-simplified-due-diligence", "aml-real-estate-property-transactions"],
+    content: [
+      {
+        type: "intro",
+        text: "Criminals rarely need a bank's help alone to launder money — they need companies set up, trusts formed, property bought and funds moved through client accounts. That is why international standards treat accountants, lawyers, notaries and trust and company service providers (TCSPs) as gatekeepers with their own AML obligations. Supervisors continue to find weak risk assessments and poor beneficial ownership checks across these sectors.",
+      },
+      { type: "h2", text: "When do the rules apply?" },
+      {
+        type: "p",
+        text: "Under FATF Recommendation 22, which most national regimes follow, lawyers, notaries, other independent legal professionals and accountants are covered when they prepare for or carry out certain transactions for clients. TCSPs are covered for the corporate and trust services they provide.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Buying and selling real estate or businesses",
+          "Managing client money, securities or other assets",
+          "Managing bank, savings or securities accounts",
+          "Organising contributions for creating, operating or managing companies",
+          "Creating, operating or managing legal persons or arrangements, such as companies and trusts",
+          "Acting as, or arranging for someone to act as, a director, nominee shareholder or trustee, or providing a registered office",
+        ],
+      },
+      { type: "h2", text: "Core obligations" },
+      {
+        type: "table",
+        headers: ["Obligation", "What it means in practice"],
+        rows: [
+          ["Firm-wide risk assessment", "A written assessment of how your services, clients and locations expose you to money laundering"],
+          ["Client due diligence", "Identify and verify the client and beneficial owners, and understand the purpose of the work"],
+          ["Enhanced due diligence", "Extra checks for PEPs, high-risk countries and complex or unusual structures"],
+          ["Ongoing monitoring", "Keep client information current and watch for activity that no longer fits"],
+          ["Reporting", "Report suspicions to your financial intelligence unit through your nominated officer"],
+          ["Records and training", "Keep due diligence and transaction records, typically for at least five years, and train staff"],
+        ],
+      },
+      { type: "h2", text: "Red flags specific to professional services" },
+      {
+        type: "ul",
+        items: [
+          "A client asks to use your client account to pass funds through without a related legal or accounting service.",
+          "Complex ownership chains or offshore entities with no clear commercial reason.",
+          "Reluctance to explain the source of funds or source of wealth, or explanations that change.",
+          "Unusual urgency, or willingness to pay well above normal fees for speed.",
+          "Instructions that are changed at the last minute to send money to a different party.",
+          "Nominee directors or shareholders where the real controller is hard to identify.",
+        ],
+      },
+      { type: "h2", text: "Legal privilege and tipping off" },
+      {
+        type: "p",
+        text: "Many regimes recognise legal professional privilege, which can affect when a lawyer must report. The boundaries are narrow and vary by country, so firms need clear internal guidance and access to their nominated officer. Separately, telling a client — even indirectly — that a report has been made or is being considered can be a criminal offence. Train fee earners on how to pause work without tipping off.",
+      },
+      { type: "h2", text: "Making it workable for smaller firms" },
+      {
+        type: "ol",
+        items: [
+          "Use a standard client risk form for every new matter, so risk scoring is consistent.",
+          "Screen clients and beneficial owners against sanctions and PEP lists at onboarding and when lists change.",
+          "Keep a simple log of reviews, decisions and the reasons behind them.",
+          "Refresh client files on a risk-based schedule rather than only when a new matter opens.",
+        ],
+      },
+      {
+        type: "callout",
+        text: "WorldAML Suite gives professional firms sanctions and PEP screening, beneficial ownership checks and an audit-ready record of every decision. Explore the WorldAML Academy at /academy or contact us at /contact-sales.",
+      },
+    ],
+  },
+  {
+    slug: "aml-certifications-compared",
+    title: "AML Certifications Compared: Which One Is Right for Your Career?",
+    description:
+      "A plain comparison of AML certifications — free entry-level certificates, ICA qualifications, ACAMS's CAMS and specialist credentials — and how to choose based on your role and experience.",
+    category: "AML Compliance",
+    date: "2026-12-08",
+    readTime: 7,
+    author: "WorldAML Compliance Team",
+    authorTitle: "Compliance Research",
+    tags: ["AML certification", "CAMS", "ICA", "free AML certification", "CPD", "AML training"],
+    relatedSlugs: ["how-to-become-aml-analyst", "mlro-responsibilities-obligations", "aml-compliance-checklist-2025"],
+    content: [
+      {
+        type: "intro",
+        text: "Search for 'AML certification' and you will find everything from free online certificates to qualifications that take months of study. They serve different purposes. The right choice depends on where you are in your career, what your employer expects and how much time and money you can invest.",
+      },
+      { type: "h2", text: "The main types of AML certification" },
+      {
+        type: "table",
+        headers: ["Type", "Best for", "Typical commitment"],
+        rows: [
+          ["Free or low-cost online certificates", "Newcomers, career changers, staff who need awareness training", "A few hours; online assessment"],
+          ["ICA certificates and diplomas", "People building a UK or international compliance career", "Weeks to months of structured study and assessment"],
+          ["ACAMS CAMS", "Experienced professionals wanting a widely recognised global credential", "Eligibility requirements, self-study and a proctored exam"],
+          ["Specialist credentials", "Analysts focusing on sanctions, fraud or financial crime investigations", "Varies by issuer"],
+        ],
+      },
+      { type: "h2", text: "Entry-level certificates" },
+      {
+        type: "p",
+        text: "If you are new to compliance, start with a course that teaches the fundamentals: what money laundering is, the risk-based approach, customer due diligence, sanctions, red flags and reporting. Look for a final assessment with a real pass mark, a certificate employers can verify online, and CPD hours you can log.",
+      },
+      { type: "h2", text: "ICA qualifications" },
+      {
+        type: "p",
+        text: "The International Compliance Association offers a ladder of AML qualifications, from introductory certificates to advanced certificates and diplomas. They are well known in the UK and in many international financial centres and suit people who want structured, assessed learning over several months.",
+      },
+      { type: "h2", text: "ACAMS CAMS" },
+      {
+        type: "p",
+        text: "The Certified Anti-Money Laundering Specialist (CAMS) credential from ACAMS is one of the most recognised AML qualifications worldwide, particularly in banking and in the US. It requires meeting eligibility criteria, preparing for a substantial exam and maintaining the credential over time. Many candidates take it after a few years in the field, often with employer funding.",
+      },
+      { type: "h2", text: "How to choose" },
+      {
+        type: "ol",
+        items: [
+          "Check job adverts for the roles you want — they show which credentials employers in your market actually ask for.",
+          "Start with fundamentals before paying for an advanced qualification; it makes the advanced material far easier.",
+          "Ask your employer about funding and study leave; many support recognised qualifications.",
+          "Pick a specialism once you know your direction — sanctions, transaction monitoring, investigations or governance.",
+          "Keep a CPD log: certificates and hours earned show ongoing development at interviews and appraisals.",
+        ],
+      },
+      {
+        type: "callout",
+        text: "WorldAML Academy's AML Fundamentals course is free: pass the assessment with 80% or more to earn a verifiable, CPD-accredited certificate. Specialist courses on KYC, sanctions and more are available when you're ready. Start at /academy.",
+      },
+    ],
+  },
 ];
+
+/** Live posts only, newest first. */
+export function getPublishedPosts(now: Date = new Date()): BlogPost[] {
+  return blogPosts
+    .filter((p) => isPostPublished(p, now))
+    .sort((a, b) => b.date.localeCompare(a.date));
+}

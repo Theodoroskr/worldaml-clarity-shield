@@ -391,72 +391,7 @@
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://worldaml.com/blog/aml-compliance-checklist-2025</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/kyc-vs-kyb-differences</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/sanctions-screening-best-practices</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/risk-based-approach-aml</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/beneficial-ownership-guide</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/pep-screening-guide</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/aml-compliance-crypto-vasp</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/igaming-aml-obligations</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/mlro-responsibilities-obligations</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/edd-vs-sdd-enhanced-simplified-due-diligence</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/fatf-travel-rule-explained</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/transaction-monitoring-red-flags</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/adverse-media-screening-guide</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://worldaml.com/blog/fatca-crs-reporting-guide</loc>
+    <loc>https://worldaml.com/blog/worldcompliance-vs-world-check</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -476,7 +411,72 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://worldaml.com/blog/worldcompliance-vs-world-check</loc>
+    <loc>https://worldaml.com/blog/fatf-travel-rule-explained</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/aml-compliance-crypto-vasp</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/igaming-aml-obligations</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/aml-compliance-checklist-2025</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/mlro-responsibilities-obligations</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/transaction-monitoring-red-flags</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/kyc-vs-kyb-differences</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/edd-vs-sdd-enhanced-simplified-due-diligence</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/sanctions-screening-best-practices</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/adverse-media-screening-guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/risk-based-approach-aml</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/fatca-crs-reporting-guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/beneficial-ownership-guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://worldaml.com/blog/pep-screening-guide</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

@@ -7,7 +7,7 @@
 import { Plugin } from "vite";
 import fs from "fs";
 import path from "path";
-import { blogPosts, type BlogSection } from "../src/data/blogPosts";
+import { blogPosts, isPostPublished, type BlogSection } from "../src/data/blogPosts";
 
 const BASE_URL = "https://worldaml.com";
 const FEED_TITLE = "WorldAML Insights";
@@ -118,68 +118,35 @@ export interface RssMeta {
 }
 
 /**
- * Drip-release schedule: one post per day starting from an anchor date.
- * Anchor is persisted in public/.rss-anchor.json so the schedule is stable
- * across rebuilds. Only posts whose release date <= now appear in the feed.
+ * Release schedule: each post goes live on its own `date` (see isPostPublished
+ * in src/data/blogPosts.ts). New articles are dated Tuesdays and Fridays.
+ * Writes public/rss-meta.json for the /rss page.
  */
-function applyDripSchedule(root: string, posts: RssItem[]): RssItem[] {
-  const anchorPath = path.join(root, "public/.rss-anchor.json");
-  let anchorIso: string;
-  try {
-    anchorIso = JSON.parse(fs.readFileSync(anchorPath, "utf-8")).anchor;
-    if (!anchorIso || isNaN(new Date(anchorIso).getTime())) throw new Error();
-  } catch {
-    // Anchor at start of today (UTC)
-    const now = new Date();
-    const anchor = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    anchorIso = anchor.toISOString();
-    try {
-      fs.writeFileSync(anchorPath, JSON.stringify({ anchor: anchorIso }, null, 2), "utf-8");
-      console.log(`[rss] Initialised drip anchor at ${anchorIso}`);
-    } catch (e) {
-      console.warn(`[rss] Could not persist anchor:`, e);
-    }
-  }
-
-  const anchor = new Date(anchorIso).getTime();
-  const now = Date.now();
-  const DAY = 24 * 60 * 60 * 1000;
-
-  const released: RssItem[] = [];
-  let nextUpcoming: { index: number; releaseAt: number } | null = null;
-
-  posts.forEach((p, i) => {
-    const releaseAt = anchor + i * DAY;
-    if (releaseAt <= now) {
-      released.push({ ...p, date: new Date(releaseAt).toISOString() });
-    } else if (!nextUpcoming) {
-      nextUpcoming = { index: i, releaseAt };
-    }
-  });
+export function applyReleaseSchedule(root: string, posts: RssItem[], now: Date = new Date()): RssItem[] {
+  const released = posts.filter((p) => isPostPublished(p, now));
+  const upcoming = posts.filter((p) => !isPostPublished(p, now));
+  const next = upcoming[0];
 
   const meta: RssMeta = {
-    anchor: anchorIso,
+    anchor: now.toISOString(),
     totalArticles: posts.length,
     releasedCount: released.length,
-    upcomingCount: posts.length - released.length,
-    nextRelease: nextUpcoming
-      ? {
-          date: new Date((nextUpcoming as { index: number; releaseAt: number }).releaseAt).toISOString(),
-          title: posts[(nextUpcoming as { index: number; releaseAt: number }).index].title,
-          slug: posts[(nextUpcoming as { index: number; releaseAt: number }).index].slug,
-        }
+    upcomingCount: upcoming.length,
+    nextRelease: next
+      ? { date: new Date(`${next.date}T00:00:00Z`).toISOString(), title: next.title, slug: next.slug }
       : null,
   };
 
-  try {
-    fs.writeFileSync(path.join(root, "public/rss-meta.json"), JSON.stringify(meta, null, 2), "utf-8");
-  } catch (e) {
-    console.warn(`[rss] Could not persist meta:`, e);
+  if (root) {
+    try {
+      fs.writeFileSync(path.join(root, "public/rss-meta.json"), JSON.stringify(meta, null, 2), "utf-8");
+    } catch (e) {
+      console.warn(`[rss] Could not persist meta:`, e);
+    }
   }
 
   // Newest release first in the feed
-  released.reverse();
-  return released;
+  return [...released].reverse();
 }
 
 function buildRssXml(items: RssItem[]): string {
@@ -229,7 +196,7 @@ ${itemsXml}
 
 function generateRss(root: string): string {
   const allPosts = extractPosts();
-  const released = applyDripSchedule(root, allPosts);
+  const released = applyReleaseSchedule(root, allPosts);
   return buildRssXml(released);
 }
 

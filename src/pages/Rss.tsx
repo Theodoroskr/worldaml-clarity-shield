@@ -137,7 +137,7 @@ const RssPage = () => {
                       </div>
                     </div>
                     <p className="text-caption text-text-tertiary mt-3">
-                      {meta.releasedCount} of {meta.totalArticles} articles released so far. New articles appear roughly once a day.
+                      {meta.releasedCount} of {meta.totalArticles} articles released so far. New articles are published twice a week, on Tuesdays and Fridays.
                     </p>
                   </div>
                 ) : (
