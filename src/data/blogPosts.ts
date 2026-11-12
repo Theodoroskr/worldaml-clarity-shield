@@ -2113,7 +2113,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         type: "callout",
-        text: "Our free AML Fundamentals course covers the risk-based approach and due diligence principles behind the new rulebook — start at /academy. For teams preparing systems, WorldAML Suite combines screening, monitoring and case management with a full audit trail: /contact-sales.",
+        text: "Our EU AML Training Course covers the AMLR, AMLD6 and AMLA in depth — see /academy/aml-europe. For teams preparing systems, WorldAML Suite combines screening, monitoring and case management with a full audit trail: /contact-sales.",
       },
     ],
   },
@@ -2339,7 +2339,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         type: "callout",
-        text: "WorldAML Suite shows the basis of every match — name, date of birth, nationality — and records each analyst decision for audit. Try a quick name check at /sanctions-check or talk to us at /contact-sales.",
+        text: "WorldAML Suite shows the basis of every match — name, date of birth, nationality — and records each analyst decision for audit. Learn the fundamentals in our free Sanctions Screening course at /academy/sanctions-screening-essentials, or talk to us at /contact-sales.",
       },
     ],
   },
@@ -2411,7 +2411,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         type: "callout",
-        text: "WorldAML Suite helps teams run KYB checks, screen directors and owners, and keep a full audit trail of each review. Learn more at /contact-sales, or brush up on due diligence in our Academy at /academy.",
+        text: "WorldAML Suite helps teams run KYB checks, screen directors and owners, and keep a full audit trail of each review. Learn more at /contact-sales, or take our UK AML Training Course at /academy/aml-uk.",
       },
     ],
   },
